@@ -33,8 +33,8 @@ const Example = ({ example }) => {
   const [js, setJs] = useState();
 
   useEffect(() => {
-    import(`../../examples/${example.files.js}`);
-    import(`../../examples/${example.files.html}`).then((h) => {
+    import(`../examples/${example.files.js}`);
+    import(`../examples/${example.files.html}`).then((h) => {
       setHtml(h.default)
     });
 

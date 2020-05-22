@@ -1,8 +1,8 @@
 import TileLayer from 'ol/layer/Tile';
 import OSMSource from 'ol/source/OSM';
 import View from 'ol/View';
-import Map from '../map/ol/Map.js';
-import Layer from '../layers/ol/Layer.js';
+import Map from '../../map/ol/Map';
+import Layer from '../../layers/ol/Layer';
 import 'ol/ol.css';
 
 const map = new Map({

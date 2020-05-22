@@ -42,7 +42,7 @@ if (process.env.REACT_APP_LIB_MODE) {
       jest(),
       copy({
         patterns: [
-          { from: './src/examples', to: './examples' },
+          { from: './src/doc/examples', to: './examples' },
         ],
       }),
     ],
