@@ -1,0 +1,11 @@
+toc:
+  - name: Maps
+    children:
+    - Map
+    - name: Layers
+      description: |
+        Layer types of `mobility-toolbox-js`.
+      children:
+      - Layer
+      - MapboxLayer
+      - WMSLayer
