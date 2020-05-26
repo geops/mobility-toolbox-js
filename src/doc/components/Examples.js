@@ -9,14 +9,17 @@ import EXAMPLES from '../examples';
 const useStyles = makeStyles({
   root: {
   },
-  navigation: {
-    background: '#d8e3ea',
-    padding: 20,
-    height: '100%',
-  },
   filterField: {
     width: '100%',
     marginBottom: 15,
+  },
+  navigation: {
+    background: '#e3e9ec',
+    padding: 20,
+    height: '100%',
+    lineHeight: '150%',
+  },
+  examleListItem: {
   },
 });
 
@@ -37,7 +40,6 @@ export default () => {
 
   return (
     <Grid container className={classes.root} spacing={3}>
-      <Grid item xs={12} />
       <Grid item xs={3}>
         <div className={classes.navigation}>
           <TextField
@@ -47,12 +49,9 @@ export default () => {
             onChange={(e) => setFilter(e.target.value)}
           />
           {exampleList.map((ex) => (
-            <Link
-              to={`/examples/${example.key}`}
-              key={ex.key}
-            >
-              {ex.name}
-            </Link>
+            <div key={ex.key}>
+              <Link to={`/examples/${ex.key}`} key={ex.key}>{ex.name}</Link>
+            </div>
           ))}
         </div>
       </Grid>

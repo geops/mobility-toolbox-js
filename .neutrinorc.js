@@ -3,13 +3,19 @@ const react = require('@neutrinojs/react');
 const library = require('@neutrinojs/library');
 const jest = require('@neutrinojs/jest');
 const copy = require('@neutrinojs/copy');
+const path = require('path');
+
+
+        // context: join(neutrino.options.source, 'static'),
+        // from: '**/*',
+        // to: basename(neutrino.options.output)
 
 if (process.env.REACT_APP_LIB_MODE) {
   module.exports = {
     options: {
       root: __dirname,
       mains: {
-        index: 'index',
+        index: './index.js',
       },
     },
     use: [
@@ -34,6 +40,7 @@ if (process.env.REACT_APP_LIB_MODE) {
             rules: {
               'react/jsx-filename-extension': 'Off',
               'react/no-danger': 'Off',
+              'max-len': ['error', { 'ignoreComments': true }],
             },
           },
         },
@@ -42,7 +49,18 @@ if (process.env.REACT_APP_LIB_MODE) {
       jest(),
       copy({
         patterns: [
-          { from: './src/doc/examples', to: './examples' },
+          {
+            from: path.join(__dirname, 'doc'),
+            to: path.join(__dirname, 'build/doc'),
+          },
+          {
+            from: path.join(__dirname, 'src/doc/documentation_style.css'),
+            to: path.join(__dirname, 'build/doc/assets/style.css'),
+          },
+          {
+            from: path.join(__dirname, 'src/doc/examples'),
+            to: path.join(__dirname, 'build/examples'),
+          },
         ],
       }),
     ],

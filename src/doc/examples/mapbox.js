@@ -7,7 +7,7 @@ import 'ol/ol.css';
 
 export default () => {
   const map = new Map({
-    target: 'map',
+    target: 'mapbox',
     view: new View({
       center: [0, 0],
       zoom: 1,

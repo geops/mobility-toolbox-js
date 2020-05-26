@@ -6,10 +6,10 @@
   "module": "src/index.js",
   "scripts": {
     "build": "REACT_APP_LIB_MODE=1  webpack --mode production",
-    "build:doc": "webpack --mode production",
+    "build:doc": "documentation build src/index.js --format html -o doc && webpack --mode production",
     "test": "jest",
     "lint": "eslint --cache --format codeframe --ext mjs,js src test",
-    "start": "webpack-dev-server --mode development --open"
+    "start": "yarn build:doc && webpack-dev-server --mode development --open"
   },
   "devDependencies": {
     "@neutrinojs/airbnb": "^9.1.0",
@@ -24,8 +24,6 @@
     "jest": "^25",
     "jsdoc": "^3.6.4",
     "neutrino": "^9.1.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.11.0"
@@ -36,7 +34,9 @@
     "mapbox-gl": "^1.10.1",
     "ol": "^6.3.1",
     "prop-types": "^15.7.2",
+    "query-string": "^6.12.1",
     "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-syntax-highlighter": "^12.2.1"
   }

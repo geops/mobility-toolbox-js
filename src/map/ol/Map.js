@@ -19,7 +19,7 @@ class Map extends olMap {
     });
 
     this.mobilityLayers = options.layers || [];
-    this.mobilityLayers.forEach((l) => l.init(this));
+    this.mobilityLayers.forEach((l) => l.setMap(this));
   }
 
   /**

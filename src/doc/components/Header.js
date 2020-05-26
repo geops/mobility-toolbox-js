@@ -1,7 +1,7 @@
 import React from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import { makeStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import Logo from '../img/logo.svg';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
       color: theme.colors.secondary,
       borderBottom: `4px solid ${theme.colors.secondary}`,
     },
+    '& .active': {
+      fontWeight: 'bold',
+    },
   },
 }));
 
@@ -34,10 +37,10 @@ const Header = () => {
   return (
     <>
       <AppBar position="static" className={classes.appBar} color="transparent">
-        <img className={classes.logo} src={Logo} />
+        <img className={classes.logo} src={Logo} alt="Logo" />
         <div className={classes.links}>
-          <Link to="/api">API</Link>
-          <Link to="/examples">Examples</Link>
+          <NavLink to="/api">API</NavLink>
+          <NavLink to="/examples">Examples</NavLink>
         </div>
       </AppBar>
     </>

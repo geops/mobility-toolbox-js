@@ -56,9 +56,6 @@ export default class Layer extends Observable {
   setMap(map) {
     this.terminate();
     this.map = map;
-    if (!this.map || !this.olLayer) {
-
-    }
   }
 
   /**

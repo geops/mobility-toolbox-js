@@ -1,5 +1,9 @@
 import React from 'react';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import {
+  createMuiTheme,
+  ThemeProvider,
+  makeStyles,
+} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import Header from './components/Header';
@@ -17,10 +21,9 @@ const theme = createMuiTheme({
     MuiTypography: {
       h1: {
         fontSize: 36,
+        marginTop: 15,
         marginBottom: 15,
       },
-    },
-    MuiGrid: {
     },
     MuiAppBar: {
       root: {
@@ -35,20 +38,33 @@ const theme = createMuiTheme({
   },
 });
 
-const App = () => (
-  <ThemeProvider theme={theme}>
-    <Router>
-      <Header />
-      <Container maxWidth="lg">
+const useStyles = makeStyles({
+  content: {
+    flexGrow: 1,
+    overflowY: 'scroll',
+  },
+});
+
+const App = () => {
+  const classes = useStyles();
+  return (
+    <ThemeProvider theme={theme}>
+      <Router>
+        <Header />
         <Route path="/examples/:exampleKey?">
-          <Examples />
+          <div className={classes.content}>
+            <Container maxWidth="lg">
+              <Examples />
+            </Container>
+          </div>
         </Route>
+
         <Route exact path="/api">
           <Documentation />
         </Route>
-      </Container>
-    </Router>
-  </ThemeProvider>
-);
+      </Router>
+    </ThemeProvider>
+  );
+};
 
 export default App;
