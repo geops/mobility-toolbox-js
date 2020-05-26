@@ -5,11 +5,12 @@ import {
   makeStyles,
 } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Header from './components/Header';
 import Examples from './components/Examples';
 import Documentation from './components/Documentation';
 
+import 'typeface-lato';
 import './App.css';
 
 const theme = createMuiTheme({
@@ -51,6 +52,10 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <Router>
         <Header />
+
+        <Route exact path="/">
+          <Redirect to="/examples" />
+        </Route>
         <Route path="/examples/:exampleKey?">
           <div className={classes.content}>
             <Container maxWidth="lg">

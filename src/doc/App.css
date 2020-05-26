@@ -1,7 +1,8 @@
 body {
   margin: 0;
-  font-family: Arial;
+  font-family: Lato, Arial;
   overflow: hidden;
+  color: #4b4b4b;
 }
 
 body, html, #root {

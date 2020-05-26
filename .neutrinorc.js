@@ -5,11 +5,6 @@ const jest = require('@neutrinojs/jest');
 const copy = require('@neutrinojs/copy');
 const path = require('path');
 
-
-        // context: join(neutrino.options.source, 'static'),
-        // from: '**/*',
-        // to: basename(neutrino.options.output)
-
 if (process.env.REACT_APP_LIB_MODE) {
   module.exports = {
     options: {
@@ -45,7 +40,12 @@ if (process.env.REACT_APP_LIB_MODE) {
           },
         },
       }),
-      react(),
+      react({
+        html: {
+          title: 'mobility-toolbox-js',
+          favicon: 'src/doc/img/favicon.png',
+        },
+      }),
       jest(),
       copy({
         patterns: [
