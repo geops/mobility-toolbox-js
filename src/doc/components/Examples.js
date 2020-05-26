@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import { Link, useParams } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 import Example from './Example';
 import EXAMPLES from '../examples';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
   },
   filterField: {
@@ -17,11 +17,14 @@ const useStyles = makeStyles({
     background: '#e3e9ec',
     padding: 20,
     height: '100%',
-    lineHeight: '150%',
+    lineHeight: '200%',
   },
-  examleListItem: {
+  exampleLink: {
+    '&.active': {
+      color: theme.colors.primary,
+    },
   },
-});
+}));
 
 const filterExamples = (str, examples) => {
   const qry = str.toLowerCase();
@@ -50,7 +53,12 @@ export default () => {
           />
           {exampleList.map((ex) => (
             <div key={ex.key}>
-              <Link to={`/examples/${ex.key}`} key={ex.key}>{ex.name}</Link>
+              <NavLink
+                className={classes.exampleLink}
+                to={`/examples/${ex.key}`}
+              >
+                {ex.name}
+              </NavLink>
             </div>
           ))}
         </div>
