@@ -36,6 +36,7 @@ if (process.env.REACT_APP_LIB_MODE) {
               'react/jsx-filename-extension': 'Off',
               'react/no-danger': 'Off',
               'max-len': ['error', { 'ignoreComments': true }],
+              'no-new': 'Off',
             },
           },
         },
