@@ -114,8 +114,8 @@ export default class MapboxLayer extends Layer {
    * Initialize the layer and listen to feature clicks.
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
-  init(map) {
-    super.init(map);
+  setMap(map) {
+    super.setMap(map);
 
     // Options the last render run did happen. If something changes
     // we have to render again

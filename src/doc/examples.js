@@ -26,4 +26,13 @@ export default [
       js: 'mapbox.js',
     },
   },
+  {
+    name: 'MapboxStyle layer',
+    key: 'mapboxstyle',
+    description: 'Displaying a mapbox style layer on an OpenLayers map.',
+    files: {
+      html: 'mapboxstyle.html',
+      js: 'mapboxstyle.js',
+    },
+  },
 ];

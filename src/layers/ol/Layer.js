@@ -1,4 +1,5 @@
 import Observable, { unByKey } from 'ol/Observable';
+import { v4 as uuid } from 'uuid';
 
 /**
  * A class representing a layer to display on BasicMap with a name and
@@ -29,9 +30,9 @@ export default class Layer extends Observable {
     isQueryable,
   }) {
     super();
-    this.name = name;
+    this.name = name || uuid();
     this.olLayer = olLayer;
-    this.key = key || name.toLowerCase();
+    this.key = key || this.name.toLowerCase();
     this.isBaseLayer = isBaseLayer;
     this.children = children || [];
     this.visible = visible === undefined ? true : visible;
@@ -42,6 +43,7 @@ export default class Layer extends Observable {
     // Custom property for duck typing since `instanceof` is not working
     // when the instance was created on different bundles.
     this.isReactSpatialLayer = true;
+    this.olListenersKeys = [];
 
     if (this.olLayer) {
       this.olLayer.setVisible(this.visible);

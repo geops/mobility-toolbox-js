@@ -15,7 +15,6 @@ export default () => {
   });
 
   const layer = new Layer({
-    name: 'Demo Layer',
     olLayer: new TileLayer({
       source: new OSMSource(),
     }),
