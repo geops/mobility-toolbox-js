@@ -89,8 +89,8 @@ class TrackerLayer extends Layer {
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html Map}
    * @private
    */
-  setMap(map) {
-    super.setMap(map);
+  init(map) {
+    super.init(map);
     if (!this.map) {
       return;
     }

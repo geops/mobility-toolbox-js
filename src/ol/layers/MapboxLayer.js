@@ -131,7 +131,6 @@ export default class MapboxLayer extends Layer {
       return;
     }
 
-    console.log(this.map && this.map.getTargetElement(), this.mbMap);
     this.format = new GeoJSON({
       featureProjection: this.map.getView().getProjection(),
     });
