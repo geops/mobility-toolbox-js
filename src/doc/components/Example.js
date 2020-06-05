@@ -4,6 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import CodeSandboxButton from './CodeSandboxButton';
 
 const useStyles = makeStyles({
   example: {
@@ -16,6 +17,15 @@ const useStyles = makeStyles({
     padding: '10px 0 5px 15px',
   },
 });
+// const makeId = (length) => {
+//   let result = '';
+//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+//   const charactersLength = characters.length;
+//   for (let i = 0; i < length; i += 1) {
+//     result += characters.charAt(Math.floor(Math.random() * charactersLength));
+//   }
+//   return result;
+// };
 
 const Example = ({ example }) => {
   const classes = useStyles();
@@ -29,8 +39,10 @@ const Example = ({ example }) => {
       // Load the new html
       setHtml(h.default);
     });
-
-    import(`../examples/${example.files.js}`).then((module) => {
+    // console.log(makeId(3).toLowerCase());
+    // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
+    // We use to avoid cache and re-execute the code of the module.
+    import(`../examples/${example.files.js}?`).then((module) => {
       module.default();
     });
 
@@ -46,6 +58,7 @@ const Example = ({ example }) => {
     <div className={classes.root}>
       <Typography variant="h1">{example.name}</Typography>
       <Typography>{example.description}</Typography>
+      <CodeSandboxButton html={html} js={js} />
 
       <Paper className={classes.code}>
         <div

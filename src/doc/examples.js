@@ -27,7 +27,7 @@ export default [
     },
   },
   {
-    name: 'MapboxStyle layer',
+    name: 'Mapbox Style layer',
     key: 'mapboxstyle',
     description: 'Displaying a mapbox style layer on an OpenLayers map.',
     files: {

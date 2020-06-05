@@ -6,6 +6,7 @@
   "dependencies": {
     "@material-ui/core": "^4.9.14",
     "@material-ui/styles": "^4.9.14",
+    "codesandbox": "^2.1.14",
     "mapbox-gl": "^1.10.1",
     "neutrino-preset-prettier-eslint": "^0.0.7",
     "ol": "^6.3.1",
