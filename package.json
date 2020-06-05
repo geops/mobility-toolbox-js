@@ -56,10 +56,12 @@
     "webpack-dev-server": "^3.11.0"
   },
   "scripts": {
-    "build": "REACT_APP_LIB_MODE=1  webpack --mode production",
+    "build": "yarn lib",
     "doc": "documentation build src/index.js --format html -o doc && webpack --mode production",
     "doc:dev": "documentation build src/index.js --format html -o doc && webpack --mode development",
     "format": "prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix",
+    "lib": "REACT_APP_LIB_MODE=1  webpack --mode production",
+    "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "start:dev": "yarn doc:dev && webpack-dev-server --mode development --open",

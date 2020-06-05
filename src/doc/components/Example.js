@@ -17,17 +17,6 @@ const useStyles = makeStyles({
   },
 });
 
-const propTypes = {
-  example: PropTypes.shape({
-    name: PropTypes.string,
-    description: PropTypes.string,
-    files: PropTypes.shape({
-      js: PropTypes.string,
-      html: PropTypes.string,
-    }),
-  }).isRequired,
-};
-
 const Example = ({ example }) => {
   const classes = useStyles();
   const [html, setHtml] = useState();
@@ -35,21 +24,23 @@ const Example = ({ example }) => {
 
   useEffect(() => {
     import(`../examples/${example.files.html}`).then((h) => {
+      // Clean the html loaded by the previous example
+      setHtml(null);
+      // Load the new html
       setHtml(h.default);
+    });
+
+    import(`../examples/${example.files.js}`).then((module) => {
+      module.default();
     });
 
     fetch(`/build/examples/${example.files.js}`)
       .then((res) => res.text())
-      .then((jsCode) => setJs(jsCode));
+      .then((jsCode) => {
+        // Replace relative import by library import
+        setJs(jsCode.replace(/'\.\.\/\.\.\/ol/g, "'mobility-toolbox/ol"));
+      });
   }, [example]);
-
-  useEffect(() => {
-    // We want to load the js only when the html is loaded.
-    if (html) {
-      import(`../examples/${example.files.js}`).then(() => {});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [html]);
 
   return (
     <div className={classes.root}>
@@ -77,5 +68,15 @@ const Example = ({ example }) => {
   );
 };
 
-Example.propTypes = propTypes;
-export default Example;
+Example.propTypes = {
+  example: PropTypes.shape({
+    name: PropTypes.string,
+    description: PropTypes.string,
+    files: PropTypes.shape({
+      js: PropTypes.string,
+      html: PropTypes.string,
+    }),
+  }).isRequired,
+};
+
+export default React.memo(Example);

@@ -1,6 +1,6 @@
 import OLMap from 'ol/Map';
 import OLLayer from 'ol/layer/Layer';
-import Layer from '../../layers/ol/Layer';
+import Layer from './layers/Layer';
 
 /**
  * An OpenLayers for handling {@link Layer|Layers}.

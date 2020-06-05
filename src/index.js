@@ -1,16 +1,14 @@
-import Map from './map/ol/Map';
-import olLayer from './layers/ol/Layer';
-import olWMSLayer from './layers/ol/WMSLayer';
-import olMapboxLayer from './layers/ol/MapboxLayer';
+import Map from './ol/Map';
+import olLayer from './ol/layers/Layer';
+import olWMSLayer from './ol/layers/WMSLayer';
+import olMapboxLayer from './ol/layers/MapboxLayer';
 
 const exports = {
   Map,
   layers: {
-    ol: {
-      Layer: olLayer,
-      WMSLayer: olWMSLayer,
-      MapboxLayer: olMapboxLayer,
-    },
+    Layer: olLayer,
+    WMSLayer: olWMSLayer,
+    MapboxLayer: olMapboxLayer,
   },
 };
 
