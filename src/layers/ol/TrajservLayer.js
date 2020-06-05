@@ -3,9 +3,7 @@ import Feature from 'ol/Feature';
 import { transform as transformCoords } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
 import { Point, MultiPoint, LineString } from 'ol/geom';
-import {
-  Style, Fill, Stroke, Circle,
-} from 'ol/style';
+import { Style, Fill, Stroke, Circle } from 'ol/style';
 import TrackerLayer from './TrackerLayer';
 import { getDateString, getUTCTimeString } from './timeUtils';
 import {
@@ -152,22 +150,20 @@ class TrajservLayer extends TrackerLayer {
     }
 
     if (regexLine) {
-      const regexLineList = typeof regexLine === 'string'
-        ? [regexLine]
-        : regexLine;
-      const lineFilter = (t) => regexLineList
-        .some((tr) => new RegExp(tr, 'i').test(t.name));
+      const regexLineList =
+        typeof regexLine === 'string' ? [regexLine] : regexLine;
+      const lineFilter = (t) =>
+        regexLineList.some((tr) => new RegExp(tr, 'i').test(t.name));
       filterList.push(lineFilter);
     }
 
     if (line) {
       const lineFiltersList = typeof line === 'string' ? line.split(',') : line;
-      const lineList = lineFiltersList.map(
-        (l) => l.replace(/\s+/g, '').toUpperCase(),
+      const lineList = lineFiltersList.map((l) =>
+        l.replace(/\s+/g, '').toUpperCase(),
       );
-      const lineFilter = (l) => lineList.some(
-        (filter) => filter === l.name.toUpperCase(),
-      );
+      const lineFilter = (l) =>
+        lineList.some((filter) => filter === l.name.toUpperCase());
       filterList.push(lineFilter);
     }
 
@@ -183,9 +179,8 @@ class TrajservLayer extends TrackerLayer {
 
     if (operator) {
       const operatorList = typeof operator === 'string' ? [operator] : operator;
-      const operatorFilter = (t) => operatorList.some(
-        (op) => new RegExp(op, 'i').test(t.operator),
-      );
+      const operatorFilter = (t) =>
+        operatorList.some((op) => new RegExp(op, 'i').test(t.operator));
       filterList.push(operatorFilter);
     }
 
@@ -204,9 +199,8 @@ class TrajservLayer extends TrackerLayer {
 
     this.options = options;
     this.url = options.url || 'https://api.geops.io/tracker/v1';
-    this.showVehicleTraj = options.showVehicleTraj !== undefined
-      ? options.showVehicleTraj
-      : true;
+    this.showVehicleTraj =
+      options.showVehicleTraj !== undefined ? options.showVehicleTraj : true;
     this.apiKey = options.apiKey;
     this.delayDisplay = options.delayDisplay || 300000;
     this.requestIntervalSeconds = 3;
@@ -505,15 +499,15 @@ class TrajservLayer extends TrackerLayer {
     let diff = true;
 
     if (
-      this.later
-      && now.getTime() > this.later.getTime() - 3000 * this.speed
+      this.later &&
+      now.getTime() > this.later.getTime() - 3000 * this.speed
     ) {
       diff = false;
     }
     if (
-      !this.later
-      || !diff
-      || this.later.getTime() - now.getTime() > intervalMs
+      !this.later ||
+      !diff ||
+      this.later.getTime() - now.getTime() > intervalMs
     ) {
       const later = new Date(now.getTime() + intervalMs);
       this.later = later;
@@ -626,9 +620,7 @@ class TrajservLayer extends TrackerLayer {
    * @private
    */
   style(props) {
-    const {
-      type, name, id, color, textColor, delay, cancelled,
-    } = props;
+    const { type, name, id, color, textColor, delay, cancelled } = props;
     const z = Math.min(Math.floor(this.currentZoom || 1), 16);
     const hover = this.tracker.hoverVehicleId === id;
     const selected = this.selectedVehicleId === id;
@@ -695,9 +687,8 @@ class TrajservLayer extends TrackerLayer {
 
       const markerSize = radius * 2;
       if (radius > 10) {
-        const shortname = type === 'Rail' && name.length > 3
-          ? name.substring(0, 2)
-          : name;
+        const shortname =
+          type === 'Rail' && name.length > 3 ? name.substring(0, 2) : name;
         const fontSize = Math.max(radius, 10);
         const textSize = getTextSize(ctx, markerSize, shortname, fontSize);
 

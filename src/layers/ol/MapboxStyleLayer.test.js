@@ -2,8 +2,8 @@ import 'jest-canvas-mock';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import mapboxgl from 'mapbox-gl';
-import TrafimageMapboxLayer from '../TrafimageMapboxLayer';
-import MapboxStyleLayer from '.';
+import MapboxLayer from './MapboxLayer';
+import MapboxStyleLayer from './MapboxStyleLayer';
 
 let source;
 let layer;
@@ -15,7 +15,7 @@ const styleLayer = {
 
 describe('MapboxStyleLayer', () => {
   beforeEach(() => {
-    source = new TrafimageMapboxLayer({
+    source = new MapboxLayer({
       name: 'Layer',
     });
     layer = new MapboxStyleLayer({

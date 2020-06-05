@@ -1,11 +1,13 @@
 body {
   margin: 0;
-  font-family: Lato, Arial;
+  font-family: Lato, Arial, sans-serif;
   overflow: hidden;
   color: #4b4b4b;
 }
 
-body, html, #root {
+body,
+html,
+#root {
   height: 100%;
 }
 

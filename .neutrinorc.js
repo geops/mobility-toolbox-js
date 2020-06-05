@@ -3,6 +3,7 @@ const react = require('@neutrinojs/react');
 const library = require('@neutrinojs/library');
 const jest = require('@neutrinojs/jest');
 const copy = require('@neutrinojs/copy');
+const prettierEslint = require('neutrino-preset-prettier-eslint');
 const path = require('path');
 
 if (process.env.REACT_APP_LIB_MODE) {
@@ -29,18 +30,6 @@ if (process.env.REACT_APP_LIB_MODE) {
       },
     },
     use: [
-      airbnb({
-        eslint: {
-          baseConfig: {
-            rules: {
-              'react/jsx-filename-extension': 'Off',
-              'react/no-danger': 'Off',
-              'max-len': ['error', { 'ignoreComments': true }],
-              'no-new': 'Off',
-            },
-          },
-        },
-      }),
       react({
         html: {
           title: 'mobility-toolbox-js',

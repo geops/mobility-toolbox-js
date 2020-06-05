@@ -58,9 +58,8 @@ class TrackerLayer extends Layer {
      * Activate/deactivate pointer hover effect.
      * @private
      */
-    this.isHoverActive = options.isHoverActive !== undefined
-      ? options.isHoverActive
-      : true;
+    this.isHoverActive =
+      options.isHoverActive !== undefined ? options.isHoverActive : true;
 
     /**
      * Callback function when a user click on a vehicle.
@@ -139,8 +138,8 @@ class TrackerLayer extends Layer {
     this.currTime = newTime;
     this.lastUpdateTime = new Date();
     if (
-      !this.map.getView().getInteracting()
-      && !this.map.getView().getAnimating()
+      !this.map.getView().getInteracting() &&
+      !this.map.getView().getAnimating()
     ) {
       this.tracker.renderTrajectories(this.currTime);
     }
@@ -186,8 +185,8 @@ class TrackerLayer extends Layer {
       }),
       this.map.on('postrender', () => {
         if (
-          this.map.getView().getInteracting()
-          || this.map.getView().getAnimating()
+          this.map.getView().getInteracting() ||
+          this.map.getView().getAnimating()
         ) {
           this.tracker.renderTrajectories(this.currTime);
         }
@@ -240,8 +239,9 @@ class TrackerLayer extends Layer {
   startUpdateTime() {
     this.stopUpdateTime();
     this.updateTime = setInterval(() => {
-      const newTime = this.currTime.getTime()
-        + (new Date() - this.lastUpdateTime) * this.speed;
+      const newTime =
+        this.currTime.getTime() +
+        (new Date() - this.lastUpdateTime) * this.speed;
       this.setCurrTime(newTime);
     }, this.getRefreshTimeInMs());
   }
@@ -268,8 +268,8 @@ class TrackerLayer extends Layer {
     const vehicles = [];
     for (let i = 0; i < trajectories.length; i += 1) {
       if (
-        trajectories[i].coordinate
-        && containsCoordinate(ext, trajectories[i].coordinate)
+        trajectories[i].coordinate &&
+        containsCoordinate(ext, trajectories[i].coordinate)
       ) {
         vehicles.push(trajectories[i]);
       }

@@ -13,7 +13,8 @@ export default () => {
   });
 
   const layer = new MapboxLayer({
-    url: 'https://maps.geops.io/styles/travic/style.json?key=5cc87b12d7c5370001c1d6551c10432b24d74f74bcd3b7d88a5b7eab',
+    url:
+      'https://maps.geops.io/styles/travic/style.json?key=5cc87b12d7c5370001c1d6551c10432b24d74f74bcd3b7d88a5b7eab',
   });
 
   map.addLayer(layer);

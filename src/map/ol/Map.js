@@ -1,4 +1,6 @@
-import olMap from 'ol/Map';
+import OLMap from 'ol/Map';
+import OLLayer from 'ol/layer/Layer';
+import Layer from '../../layers/ol/Layer';
 
 /**
  * An OpenLayers for handling {@link Layer|Layers}.
@@ -11,14 +13,17 @@ import olMap from 'ol/Map';
  * @param {Object} options Map options.
  * @param {Array.Layer} [options.layers] List of {@link Layer|Layers}.
  */
-class Map extends olMap {
+class Map extends OLMap {
   constructor(options = {}) {
     super({
       ...options,
-      layers: options.layers ? options.layers.map((l) => l.olLayer) : undefined,
+      layers: (options.layers || []).map((l) =>
+        l instanceof OLLayer ? l : l.olLayer,
+      ),
     });
 
-    this.mobilityLayers = options.layers || [];
+    this.mobilityLayers =
+      (options.layers || []).filter((l) => l instanceof Layer) || [];
     this.mobilityLayers.forEach((l) => l.setMap(this));
   }
 

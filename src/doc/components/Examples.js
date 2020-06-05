@@ -7,8 +7,7 @@ import Example from './Example';
 import EXAMPLES from '../examples';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-  },
+  root: {},
   filterField: {
     width: '100%',
     marginBottom: 15,
@@ -28,10 +27,11 @@ const useStyles = makeStyles((theme) => ({
 
 const filterExamples = (str, examples) => {
   const qry = str.toLowerCase();
-  return examples.filter((ex) => (
-    `${ex.name}`.toLowerCase().includes(qry)
-    || (ex.tags || []).find((tag) => tag.toLowerCase().includes(qry))
-  ));
+  return examples.filter(
+    (ex) =>
+      `${ex.name}`.toLowerCase().includes(qry) ||
+      (ex.tags || []).find((tag) => tag.toLowerCase().includes(qry)),
+  );
 };
 
 export default () => {

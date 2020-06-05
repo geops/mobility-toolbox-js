@@ -12,11 +12,12 @@ export const getDateString = (now) => {
 
 // Get the UTC time string of Date object.
 // ex: 09:05:01.123
-export const getUTCTimeString = (date) => ([
-  date.getUTCHours(),
-  date.getUTCMinutes(),
-  `${date.getUTCSeconds()}.${date.getUTCMilliseconds()}`,
-].join(':'));
+export const getUTCTimeString = (date) =>
+  [
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    `${date.getUTCSeconds()}.${date.getUTCMilliseconds()}`,
+  ].join(':');
 
 // Returns a string representation of a number, with a zero if the number is lower than 10.
 export const pad = (integer) => (integer < 10 ? `0${integer}` : integer);

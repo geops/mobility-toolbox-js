@@ -64,9 +64,9 @@ export default class MapboxLayer extends Layer {
         }
 
         if (
-          this.renderState.zoom !== viewState.zoom
-          || this.renderState.center[0] !== viewState.center[0]
-          || this.renderState.center[1] !== viewState.center[1]
+          this.renderState.zoom !== viewState.zoom ||
+          this.renderState.center[0] !== viewState.center[0] ||
+          this.renderState.center[1] !== viewState.center[1]
         ) {
           this.mbMap.jumpTo({
             center: toLonLat(viewState.center),
@@ -201,10 +201,10 @@ export default class MapboxLayer extends Layer {
   getFeatureInfoAtCoordinate(coordinate, options) {
     // Ignore the getFeatureInfo until the mapbox map is loaded
     if (
-      !options
-      || !this.format
-      || !this.mbMap
-      || !this.mbMap.isStyleLoaded()
+      !options ||
+      !this.format ||
+      !this.mbMap ||
+      !this.mbMap.isStyleLoaded()
     ) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }

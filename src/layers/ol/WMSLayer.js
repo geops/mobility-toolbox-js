@@ -64,7 +64,8 @@ class WMSLayer extends Layer {
           features: [],
           coordinate,
           layer: this,
-        }));
+        }),
+      );
   }
 
   /**
@@ -98,7 +99,9 @@ class WMSLayer extends Layer {
         return;
       }
 
-      this.getFeatureInfoAtCoordinate(e.coordinate).then((data) => this.callClickCallbacks(data.features, data.layer, data.coordinate));
+      this.getFeatureInfoAtCoordinate(e.coordinate).then((data) =>
+        this.callClickCallbacks(data.features, data.layer, data.coordinate),
+      );
     });
   }
 

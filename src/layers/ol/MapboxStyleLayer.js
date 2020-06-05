@@ -18,7 +18,6 @@ const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
       const styleLayer = style.layers[i];
       if (filterFunc(styleLayer)) {
         if (mbMap.getLayer(styleLayer.id)) {
-          console.log(styleLayer.id);
           mbMap.setLayoutProperty(styleLayer.id, 'visibility', visibilityValue);
         }
       }
@@ -72,6 +71,9 @@ class MapboxStyleLayer extends Layer {
   }
 
   setMap(map) {
+    if (!this.mapboxLayer.map) {
+      super.init(this.mapboxLayer);
+    }
     super.setMap(map);
 
     if (!this.map) {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import TileLayer from 'ol/layer/Tile';
 import OSMSource from 'ol/source/OSM';
 import View from 'ol/View';
@@ -18,7 +19,7 @@ export default () => {
     apiKey: '5cc87b12d7c5370001c1d6556afe39038efb48709f6b5af1adf48bce',
   });
 
-  new Map({
+  const map = new Map({
     layers: [osmLayer, trackerLayer],
     target: 'tracker',
     view: new View({

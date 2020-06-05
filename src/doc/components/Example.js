@@ -20,6 +20,7 @@ const useStyles = makeStyles({
 const propTypes = {
   example: PropTypes.shape({
     name: PropTypes.string,
+    description: PropTypes.string,
     files: PropTypes.shape({
       js: PropTypes.string,
       html: PropTypes.string,
@@ -34,10 +35,10 @@ const Example = ({ example }) => {
 
   useEffect(() => {
     import(`../examples/${example.files.html}`).then((h) => {
-      setHtml(h.default)
+      setHtml(h.default);
     });
 
-    import(`../examples/${example.files.js}`).then(m => {
+    import(`../examples/${example.files.js}`).then((m) => {
       m.default();
     });
 
@@ -54,24 +55,19 @@ const Example = ({ example }) => {
       <Paper className={classes.code}>
         <div
           className={classes.example}
+          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </Paper>
       <Paper className={classes.code}>
-        <Typography className={classes.fileName}>
-          {example.files.js}
-        </Typography>
-        <SyntaxHighlighter language="javascript">
-          {js}
-        </SyntaxHighlighter>
+        <Typography className={classes.fileName}>{example.files.js}</Typography>
+        <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
       </Paper>
       <Paper>
         <Typography className={classes.fileName}>
           {example.files.html}
         </Typography>
-        <SyntaxHighlighter language="html">
-          {html}
-        </SyntaxHighlighter>
+        <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
       </Paper>
     </div>
   );

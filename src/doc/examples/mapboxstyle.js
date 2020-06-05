@@ -18,45 +18,42 @@ export default () => {
     }),
   });
 
-  const url = 'https://maps.geops.io/styles/travic/style.json?key=5cc87b12d7c5370001c1d6551c10432b24d74f74bcd3b7d88a5b7eab';
+  const url =
+    'https://maps.geops.io/styles/travic/style.json?key=5cc87b12d7c5370001c1d6551c10432b24d74f74bcd3b7d88a5b7eab';
 
-  const layer = new MapboxLayer({
-    url,
-  });
   const withoutLabels = new MapboxStyleLayer({
-    mapboxLayer: layer,
+    mapboxLayer: new MapboxLayer({ url }),
     visible: false,
-    styleLayersFilter: ({ layout }) => (!!layout['text-field']),
+    styleLayersFilter: ({ layout }) => !!layout['text-field'],
   });
 
-  const layer2 = new MapboxLayer({
-    url,
-  });
   const labels = new MapboxStyleLayer({
-    mapboxLayer: layer2,
+    mapboxLayer: new MapboxLayer({ url }),
     visible: false,
-    styleLayersFilter: ({ layout }) => (!layout['text-field']),  
+    styleLayersFilter: ({ layout }) => !layout['text-field'],
   });
 
   const vectorLayer = new Layer({
     olLayer: new VectorLayer({
       source: new VectorSource({
         features: [
-          new Feature(new Polygon([[
-            [-1e7, -1e7],
-            [-1e7, 1e7],
-            [1e7, 1e7],
-            [1e7, -1e7],
-            [-1e7, -1e7]],
-          ])),
+          new Feature(
+            new Polygon([
+              [
+                [-1e7, -1e7],
+                [-1e7, 1e7],
+                [1e7, 1e7],
+                [1e7, -1e7],
+                [-1e7, -1e7],
+              ],
+            ]),
+          ),
         ],
       }),
     }),
   });
 
-  map.addLayer(layer);
   map.addLayer(withoutLabels);
   map.addLayer(vectorLayer);
-  map.addLayer(layer2);
   map.addLayer(labels);
 };
