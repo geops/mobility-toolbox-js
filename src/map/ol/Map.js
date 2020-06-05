@@ -32,11 +32,15 @@ class Map extends OLMap {
    * @param {Layer} The {@link Layer} to add.
    */
   addLayer(layer) {
+    layer.setMap(this);
+
     if (layer.olLayer) {
       super.addLayer(layer.olLayer);
     }
-    layer.setMap(this);
-    this.mobilityLayers.push(layer);
+
+    if (layer instanceof Layer) {
+      this.mobilityLayers.push(layer);
+    }
   }
 
   /**

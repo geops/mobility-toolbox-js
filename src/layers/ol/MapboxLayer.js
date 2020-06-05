@@ -63,6 +63,7 @@ export default class MapboxLayer extends Layer {
           this.renderState.rotation = rotation;
         }
 
+        console.log(this.renderState, viewState);
         if (
           this.renderState.zoom !== viewState.zoom ||
           this.renderState.center[0] !== viewState.center[0] ||
@@ -131,6 +132,7 @@ export default class MapboxLayer extends Layer {
       return;
     }
 
+    console.log(this.map && this.map.getTargetElement(), this.mbMap);
     this.format = new GeoJSON({
       featureProjection: this.map.getView().getProjection(),
     });

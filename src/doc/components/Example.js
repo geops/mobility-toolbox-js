@@ -38,14 +38,18 @@ const Example = ({ example }) => {
       setHtml(h.default);
     });
 
-    import(`../examples/${example.files.js}`).then((m) => {
-      m.default();
-    });
-
     fetch(`/build/examples/${example.files.js}`)
       .then((res) => res.text())
       .then((jsCode) => setJs(jsCode));
   }, [example]);
+
+  useEffect(() => {
+    // We want to load the js only when the html is loaded.
+    if (html) {
+      import(`../examples/${example.files.js}`).then(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [html]);
 
   return (
     <div className={classes.root}>

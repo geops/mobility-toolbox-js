@@ -52,14 +52,13 @@ class MapboxStyleLayer extends Layer {
     this.addStyleLayers = this.addStyleLayers.bind(this);
     this.onLoad = this.onLoad.bind(this);
     if (options.filters) {
-      this.addDynamicFilters =
-        typeof options.filters === 'function'
-          ? () => {
-              this.setFilter(options.filters(this));
-            }
-          : () => {
-              this.setFilter(options.filters);
-            };
+      this.addDynamicFilters = () => {
+        this.setFilter(
+          typeof options.filters === 'function'
+            ? options.filters(this)
+            : options.filters,
+        );
+      };
     }
 
     if (!this.styleLayersFilter && this.styleLayers) {
@@ -72,7 +71,8 @@ class MapboxStyleLayer extends Layer {
 
   setMap(map) {
     if (!this.mapboxLayer.map) {
-      super.init(this.mapboxLayer);
+      this.mapboxLayer.setMap(map);
+      this.olLayer = this.mapboxLayer.olLayer;
     }
     super.setMap(map);
 
