@@ -24,7 +24,7 @@ class Map extends OLMap {
 
     this.mobilityLayers =
       (options.layers || []).filter((l) => l instanceof Layer) || [];
-    this.mobilityLayers.forEach((l) => l.setMap(this));
+    this.mobilityLayers.forEach((l) => l.init(this));
   }
 
   /**
@@ -32,7 +32,7 @@ class Map extends OLMap {
    * @param {Layer} The {@link Layer} to add.
    */
   addLayer(layer) {
-    layer.setMap(this);
+    layer.init(this);
 
     if (layer.olLayer) {
       super.addLayer(layer.olLayer);

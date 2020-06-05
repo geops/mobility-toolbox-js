@@ -213,8 +213,8 @@ class TrajservLayer extends TrackerLayer {
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map)
    * @private
    */
-  setMap(map) {
-    super.setMap(map);
+  init(map) {
+    super.init(map);
 
     if (!this.map) {
       return;

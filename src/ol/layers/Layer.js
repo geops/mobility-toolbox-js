@@ -55,7 +55,7 @@ export default class Layer extends Observable {
    * @private
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
-  setMap(map) {
+  init(map) {
     this.terminate();
     this.map = map;
   }

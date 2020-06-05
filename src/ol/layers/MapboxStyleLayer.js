@@ -69,12 +69,12 @@ class MapboxStyleLayer extends Layer {
     }
   }
 
-  setMap(map) {
+  init(map) {
     if (!this.mapboxLayer.map) {
-      this.mapboxLayer.setMap(map);
+      this.mapboxLayer.init(map);
       this.olLayer = this.mapboxLayer.olLayer;
     }
-    super.setMap(map);
+    super.init(map);
 
     if (!this.map) {
       return;
