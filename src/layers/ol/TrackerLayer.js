@@ -1,5 +1,4 @@
-import OLVectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
+import OLLayer from 'ol/layer/Layer';
 import { unByKey } from 'ol/Observable';
 import { buffer, containsCoordinate } from 'ol/extent';
 import Layer from './Layer';
@@ -17,12 +16,17 @@ import { timeSteps } from './trackerConfig';
  */
 class TrackerLayer extends Layer {
   constructor(options = {}) {
+    const olLayer = new OLLayer({
+      render: () => {
+        if (this.tracker && this.tracker.canvas) {
+          this.tracker.renderTrajectories(this.currTime);
+          return this.tracker.canvas;
+        }
+        return null;
+      },
+    });
     super({
-      name: 'Tracker',
-      olLayer: new OLVectorLayer({
-        zIndex: 5,
-        source: new VectorSource(),
-      }),
+      olLayer,
       ...options,
     });
 
@@ -182,14 +186,6 @@ class TrackerLayer extends Layer {
         const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate);
         this.map.getTargetElement().style.cursor = vehicle ? 'pointer' : 'auto';
         this.tracker.setHoverVehicleId(vehicle && vehicle.id);
-      }),
-      this.map.on('postrender', () => {
-        if (
-          this.map.getView().getInteracting() ||
-          this.map.getView().getAnimating()
-        ) {
-          this.tracker.renderTrajectories(this.currTime);
-        }
       }),
     ];
   }

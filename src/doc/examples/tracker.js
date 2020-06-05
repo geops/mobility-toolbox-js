@@ -15,15 +15,16 @@ const map = new Map({
   }),
 });
 
-const osmLayer = new Layer({
+const osm = new Layer({
   olLayer: new TileLayer({
     source: new OSMSource(),
   }),
 });
 
-const trackerLayer = new TrajservLayer({
+const tracker = new TrajservLayer({
+  url: 'https://api.geops.io/tracker/v1',
   apiKey: '5cc87b12d7c5370001c1d6556afe39038efb48709f6b5af1adf48bce',
 });
 
-map.addLayer(osmLayer);
-map.addLayer(trackerLayer);
+map.addLayer(osm);
+map.addLayer(tracker);

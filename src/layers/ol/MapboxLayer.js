@@ -31,13 +31,13 @@ const getCopyrightFromSources = (mbMap) => {
  */
 export default class MapboxLayer extends Layer {
   constructor(options = {}) {
-    const mbLayer = new OLLayer({
+    const olLayer = new OLLayer({
       render: (frameState) => {
         let changed = false;
         const canvas = this.mbMap.getCanvas();
         const { viewState } = frameState;
 
-        const visible = mbLayer.getVisible();
+        const visible = this.olLayer.getVisible();
         if (this.renderState.visible !== visible) {
           canvas.style.display = visible ? 'block' : 'none';
           this.renderState.visible = visible;
@@ -47,7 +47,7 @@ export default class MapboxLayer extends Layer {
         // Without you don't see others ol layers on top.
         canvas.style.position = 'absolute';
 
-        const opacity = mbLayer.getOpacity();
+        const opacity = this.olLayer.getOpacity();
         if (this.renderState.opacity !== opacity) {
           canvas.style.opacity = opacity;
           this.renderState.opacity = opacity;
@@ -63,7 +63,6 @@ export default class MapboxLayer extends Layer {
           this.renderState.rotation = rotation;
         }
 
-        console.log(this.renderState, viewState);
         if (
           this.renderState.zoom !== viewState.zoom ||
           this.renderState.center[0] !== viewState.center[0] ||
@@ -105,7 +104,7 @@ export default class MapboxLayer extends Layer {
 
     super({
       ...options,
-      olLayer: mbLayer,
+      olLayer,
     });
     this.options = options;
     this.styleUrl = options.url;

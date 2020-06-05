@@ -41,7 +41,6 @@ export default class Tracker {
       // Update the size of the canvas accordingly to the map' size.
       this.map.once('rendercomplete', () => {
         [this.canvas.width, this.canvas.height] = this.map.getSize();
-        this.map.getTargetElement().appendChild(this.canvas);
       }),
       this.map.on('change:size', () => {
         [this.canvas.width, this.canvas.height] = this.map.getSize();

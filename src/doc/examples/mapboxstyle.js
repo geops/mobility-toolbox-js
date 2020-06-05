@@ -31,7 +31,7 @@ const labels = new MapboxStyleLayer({
   styleLayersFilter: ({ layout }) => !layout['text-field'],
 });
 
-const vectorLayer = new Layer({
+const polygon = new Layer({
   olLayer: new VectorLayer({
     source: new VectorSource({
       features: [
@@ -52,5 +52,5 @@ const vectorLayer = new Layer({
 });
 
 map.addLayer(withoutLabels);
-map.addLayer(vectorLayer);
+map.addLayer(polygon);
 map.addLayer(labels);
