@@ -58,7 +58,14 @@ const Example = ({ example }) => {
       .then((res) => res.text())
       .then((jsCode) => {
         // Replace relative import by library import
-        setJs(jsCode.replace(/'\.\.\/\.\.\/ol/g, "'mobility-toolbox/ol"));
+        setJs(
+          jsCode
+            .replace(/'\.\.\/\.\.\/ol/g)
+            .replace('export default () => {\n', '')
+            .replace(/^};\n$/gm, '')
+            .replace(/^ {2}/gm, ''),
+          "'mobility-toolbox/ol",
+        );
       });
   }, [example]);
 
