@@ -7,14 +7,22 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import CodeSandboxButton from './CodeSandboxButton';
 
 const useStyles = makeStyles({
-  example: {
+  htmlContainer: {
     height: 500,
   },
-  code: {
+  paper: {
+    position: 'relative',
     margin: '20px 0',
   },
   fileName: {
     padding: '10px 0 5px 15px',
+  },
+  editButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    paddingTop: 5,
+    paddingRight: 10,
   },
 });
 // const makeId = (length) => {
@@ -28,7 +36,7 @@ const useStyles = makeStyles({
 // };
 
 const Example = ({ example }) => {
-  const classes = useStyles();
+  const { editButton, root, paper, htmlContainer, fileName } = useStyles();
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
 
@@ -55,27 +63,26 @@ const Example = ({ example }) => {
   }, [example]);
 
   return (
-    <div className={classes.root}>
+    <div className={root}>
       <Typography variant="h1">{example.name}</Typography>
       <Typography>{example.description}</Typography>
-      <CodeSandboxButton html={html} js={js} />
 
-      <Paper className={classes.code}>
+      <Paper className={paper}>
         <div
-          className={classes.example}
+          className={htmlContainer}
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </Paper>
-      <Paper className={classes.code}>
-        <Typography className={classes.fileName}>{example.files.js}</Typography>
+      <Paper className={paper}>
+        <Typography className={fileName}>{example.files.js}</Typography>
         <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
+        <CodeSandboxButton className={editButton} html={html} js={js} />
       </Paper>
-      <Paper>
-        <Typography className={classes.fileName}>
-          {example.files.html}
-        </Typography>
+      <Paper className={paper}>
+        <Typography className={fileName}>{example.files.html}</Typography>
         <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+        <CodeSandboxButton className={editButton} html={html} js={js} />
       </Paper>
     </div>
   );
