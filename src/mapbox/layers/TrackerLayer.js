@@ -1,5 +1,5 @@
-import OLLayer from 'ol/layer/Layer';
 import { unByKey } from 'ol/Observable';
+import { toLonLat, fromLonLat } from 'ol/proj';
 import { buffer, containsCoordinate } from 'ol/extent';
 import Layer from './Layer';
 import Tracker from '../../common/Tracker';
@@ -16,21 +16,7 @@ import { timeSteps } from '../../common/trackerConfig';
  */
 class TrackerLayer extends Layer {
   constructor(options = {}) {
-    const olLayer = new OLLayer({
-      render: (frameState) => {
-        if (this.tracker && this.tracker.canvas) {
-          this.tracker.renderTrajectories(
-            this.currTime,
-            frameState.size,
-            frameState.viewState.resolution,
-          );
-          return this.tracker.canvas;
-        }
-        return null;
-      },
-    });
     super({
-      olLayer,
       ...options,
     });
 
@@ -99,8 +85,15 @@ class TrackerLayer extends Layer {
       return;
     }
 
+    const { width, height } = map.getCanvas();
     this.tracker = new Tracker({
-      getPixelFromCoordinate: this.map.getPixelFromCoordinate.bind(this.map),
+      width,
+      height,
+      getPixelFromCoordinate: (coord) => {
+        const [lng, lat] = toLonLat(coord);
+        const { x, y } = this.map.project({ lng, lat });
+        return [x, y];
+      },
     });
     this.tracker.setStyle((props, r) => this.style(props, r));
 
@@ -132,7 +125,7 @@ class TrackerLayer extends Layer {
    * @private
    */
   getRefreshTimeInMs() {
-    const z = this.map.getView().getZoom();
+    const z = this.map.getZoom();
     const roundedZoom = Math.round(z);
     const timeStep = timeSteps[roundedZoom] || 25;
     const nextTick = Math.max(25, timeStep / this.speed);
@@ -148,13 +141,15 @@ class TrackerLayer extends Layer {
     this.currTime = newTime;
     this.lastUpdateTime = new Date();
     if (
-      !this.map.getView().getInteracting() &&
-      !this.map.getView().getAnimating()
+      !this.map.isMoving() &&
+      !this.map.isRotating() &&
+      !this.map.isZooming()
     ) {
+      const canvas = this.map.getCanvas();
       this.tracker.renderTrajectories(
         this.currTime,
-        this.map.getSize(),
-        this.map.getView().getResolution(),
+        [canvas.width, canvas.height],
+        100,
       );
     }
   }
@@ -176,29 +171,37 @@ class TrackerLayer extends Layer {
   start() {
     this.stop();
     this.tracker.setVisible(true);
+    const canvas = this.map.getCanvas();
     this.tracker.renderTrajectories(
       this.currTime,
-      this.map.getSize(),
-      this.map.getView().getResolution(),
+      [canvas.width, canvas.height],
+      100,
     );
     this.startUpdateTime();
-    this.currentZoom = this.map.getView().getZoom();
+    this.currentZoom = this.map.getZoom();
 
     this.olEventsKeys = [
       this.map.on('moveend', () => {
-        const z = this.map.getView().getZoom();
+        const z = this.map.getZoom();
 
         if (z !== this.currentZoom) {
           this.currentZoom = z;
           this.startUpdateTime();
         }
       }),
-      this.map.on('pointermove', (evt) => {
-        if (this.map.getView().getInteracting() || !this.isHoverActive) {
+      this.map.on('mousemove', (evt) => {
+        if (
+          this.map.isMoving() ||
+          this.map.isRotating() ||
+          this.map.isZooming() ||
+          !this.isHoverActive
+        ) {
           return;
         }
-        const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate);
-        this.map.getTargetElement().style.cursor = vehicle ? 'pointer' : 'auto';
+        const [vehicle] = this.getVehiclesAtCoordinate(
+          fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
+        );
+        this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
         this.tracker.setHoverVehicleId(vehicle && vehicle.id);
       }),
     ];
@@ -272,7 +275,7 @@ class TrackerLayer extends Layer {
    * @private
    */
   getVehiclesAtCoordinate(coordinate) {
-    const res = this.map.getView().getResolution();
+    const res = 100;
     const ext = buffer([...coordinate, ...coordinate], 10 * res);
     const trajectories = this.tracker.getTrajectories();
     const vehicles = [];

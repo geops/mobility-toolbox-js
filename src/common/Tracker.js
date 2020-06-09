@@ -1,25 +1,25 @@
 import { unByKey } from 'ol/Observable';
 
 /**
- * Tracker for OpenLayers.
+ * Tracker. This class draw trajectories on a canvas.
  * @class
- * @param {ol.map} map (https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html)
  * @param {Object} options
  */
 export default class Tracker {
-  constructor(map, options) {
+  constructor(options) {
     const opts = {
       interpolate: true,
       ...options,
     };
-
-    this.map = map;
     this.trajectories = [];
     this.interpolate = !!opts.interpolate;
+    this.getPixelFromCoordinate = opts.getPixelFromCoordinate;
     this.hoverVehicleId = null;
 
     // we draw directly on the canvas since openlayers is too slow.
     this.canvas = opts.canvas || document.createElement('canvas');
+    this.canvas.width = opts.width;
+    this.canvas.height = opts.height;
     this.canvas.setAttribute(
       'style',
       [
@@ -34,18 +34,6 @@ export default class Tracker {
       ].join(';'),
     );
     this.canvasContext = this.canvas.getContext('2d');
-
-    // Array of ol events key. We don't use a class property to be sure
-    // it's not overwritten by a descendant of this class.
-    this.olEventsKeys = [
-      // Update the size of the canvas accordingly to the map' size.
-      this.map.once('rendercomplete', () => {
-        [this.canvas.width, this.canvas.height] = this.map.getSize();
-      }),
-      this.map.on('change:size', () => {
-        [this.canvas.width, this.canvas.height] = this.map.getSize();
-      }),
-    ];
   }
 
   /**
@@ -126,9 +114,15 @@ export default class Tracker {
    * @param {Date} currTime
    * @private
    */
-  renderTrajectories(currTime = Date.now()) {
+  renderTrajectories(currTime = Date.now(), [width, height], resolution) {
     this.clear();
-    const res = this.map.getView().getResolution();
+    if (
+      width &&
+      height &&
+      (this.canvas.width !== width || this.canvas.height !== height)
+    ) {
+      [this.canvas.width, this.canvas.height] = [width, height];
+    }
     let hoverVehicleImg;
     let hoverVehiclePx;
 
@@ -203,14 +197,14 @@ export default class Tracker {
       if (coord) {
         // We set the rotation of the trajectory (used by tralis).
         this.trajectories[i].coordinate = coord;
-        const px = this.map.getPixelFromCoordinate(coord);
+        const px = this.getPixelFromCoordinate(coord);
 
         if (!px) {
           // eslint-disable-next-line no-continue
           continue;
         }
 
-        const vehicleImg = this.style(traj, res);
+        const vehicleImg = this.style(traj, resolution);
         if (this.hoverVehicleId !== traj.id) {
           this.canvasContext.drawImage(
             vehicleImg,

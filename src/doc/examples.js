@@ -9,12 +9,21 @@ export default [
     },
   },
   {
-    name: 'Live tracker',
+    name: 'Live tracker with OpenLayers',
     key: 'live-tracker',
-    description: 'Show moving trans in a map.',
+    description: 'Show moving trains in a map.',
     files: {
       html: 'tracker.html',
       js: 'tracker.js',
+    },
+  },
+  {
+    name: 'Live tracker with Mapbox',
+    key: 'mapboxtracker',
+    description: 'Show moving trains in a Mapbox map.',
+    files: {
+      html: 'mapboxtracker.html',
+      js: 'mapboxtracker.js',
     },
   },
   {

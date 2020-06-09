@@ -1,9 +1,6 @@
 import qs from 'query-string';
-import Feature from 'ol/Feature';
-import { transform as transformCoords } from 'ol/proj';
+import { fromLonLat } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
-import { Point, MultiPoint, LineString } from 'ol/geom';
-import { Style, Fill, Stroke, Circle } from 'ol/style';
 import TrackerLayer from './TrackerLayer';
 import { getDateString, getUTCTimeString } from '../../common/timeUtils';
 import {
@@ -100,6 +97,8 @@ class TrajservLayer extends TrackerLayer {
     this.requestIntervalSeconds = 3;
     this.useDelayStyle = options.useDelayStyle || false;
     this.delayOutlineColor = options.delayOutlineColor || '#000000';
+    this.width = options.width;
+    this.height = options.height;
     this.api = new TrajservAPI({ url: options.url, apiKey: options.apiKey });
   }
 
@@ -125,6 +124,10 @@ class TrajservLayer extends TrackerLayer {
         return a.delay < b.delay ? 1 : -1;
       });
     }
+
+    const { width, height } = map.getCanvas();
+    this.tracker.canvas.width = width;
+    this.tracker.canvas.height = height;
   }
 
   addTrackerFilters() {
@@ -158,42 +161,56 @@ class TrajservLayer extends TrackerLayer {
 
     super.start(this.map);
     this.startUpdateTrajectories();
-    this.olEventsKeys = [
-      ...this.olEventsKeys,
-      this.map.on('singleclick', (e) => {
-        if (!this.clickCallbacks.length) {
-          return;
-        }
+    // this.olEventsKeys = [
+    //   ...this.olEventsKeys,
+    //   this.map.on('mouseclick', (e) => {
+    //     if (!this.clickCallbacks.length) {
+    //       return;
+    //     }
 
-        const [vehicle] = this.getVehiclesAtCoordinate(e.coordinate);
-        const features = [];
+    //     const [vehicle] = this.getVehiclesAtCoordinate(e.coordinate);
+    //     const features = [];
 
-        if (vehicle) {
-          const geom = vehicle.coordinate
-            ? new Point(vehicle.coordinate)
-            : null;
-          features.push(new Feature({ geometry: geom, ...vehicle }));
+    //     if (vehicle) {
+    //       const geom = vehicle.coordinate
+    //         ? new Point(vehicle.coordinate)
+    //         : null;
+    //       features.push(new Feature({ geometry: geom, ...vehicle }));
 
-          if (features.length) {
-            this.selectedVehicleId = features[0].get('id');
-            this.journeyId = features[0].get('journeyIdentifier');
-            this.updateTrajectoryStations(this.selectedVehicleId).then((r) => {
-              this.clickCallbacks.forEach((c) => c(r, this, e));
-            });
-          }
-        } else {
-          this.selectedVehicleId = null;
-          this.olLayer.getSource().clear();
-          this.clickCallbacks.forEach((c) => c(null, this, e));
-        }
-      }),
-      this.map.on('moveend', () => {
-        this.updateTrajectories();
-        if (this.selectedVehicleId && this.journeyId) {
-          this.highlightTrajectory();
-        }
-      }),
-    ];
+    //       if (features.length) {
+    //         this.selectedVehicleId = features[0].get('id');
+    //         this.journeyId = features[0].get('journeyIdentifier');
+    //         this.updateTrajectoryStations(this.selectedVehicleId).then((r) => {
+    //           this.clickCallbacks.forEach((c) => c(r, this, e));
+    //         });
+    //       }
+    //     } else {
+    //       this.selectedVehicleId = null;
+    //       this.olLayer.getSource().clear();
+    //       this.clickCallbacks.forEach((c) => c(null, this, e));
+    //     }
+    //   }),
+    const getCoordinates = () => {
+      const bounds = this.map.getBounds().toArray();
+      return [
+        [bounds[0][0], bounds[1][1]],
+        [...bounds[1]],
+        [bounds[1][0], bounds[0][1]],
+        [...bounds[0]],
+      ];
+    };
+    this.map.on('move', () => {
+      this.map.getSource('canvas-source').setCoordinates(getCoordinates());
+      const { width, height } = this.map.getCanvas();
+      this.tracker.renderTrajectories(this.currTime, [width, height], 100);
+    });
+    this.map.on('moveend', () => {
+      this.updateTrajectories();
+      if (this.selectedVehicleId && this.journeyId) {
+        this.highlightTrajectory();
+      }
+    });
+    // ];
   }
 
   stop() {
@@ -210,61 +227,62 @@ class TrajservLayer extends TrackerLayer {
    * @param {string} color The color of the line.
    * @private
    */
+  // eslint-disable-next-line no-unused-vars,class-methods-use-this
   drawFullTrajectory(stationsCoords, lineGeometry, color) {
+    // eslint-disable-next-line no-console
+    console.log('to be implemented');
     // Don't allow white lines, use red instead.
-    const vehiculeColor = /#ffffff/i.test(color) ? '#ff0000' : color;
-    const vectorSource = this.olLayer.getSource();
-    vectorSource.clear();
-
-    if (stationsCoords) {
-      const geometry = new MultiPoint(stationsCoords);
-      const aboveStationsFeature = new Feature(geometry);
-      aboveStationsFeature.setStyle(
-        new Style({
-          zIndex: 1,
-          image: new Circle({
-            radius: 5,
-            fill: new Fill({
-              color: '#000000',
-            }),
-          }),
-        }),
-      );
-      const belowStationsFeature = new Feature(geometry);
-      belowStationsFeature.setStyle(
-        new Style({
-          zIndex: 4,
-          image: new Circle({
-            radius: 4,
-            fill: new Fill({
-              color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
-            }),
-          }),
-        }),
-      );
-      vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
-    }
-
-    const lineFeat = new Feature({
-      geometry: lineGeometry,
-    });
-    lineFeat.setStyle([
-      new Style({
-        zIndex: 2,
-        stroke: new Stroke({
-          color: '#000000',
-          width: 6,
-        }),
-      }),
-      new Style({
-        zIndex: 3,
-        stroke: new Stroke({
-          color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
-          width: 4,
-        }),
-      }),
-    ]);
-    vectorSource.addFeature(lineFeat);
+    // const vehiculeColor = /#ffffff/i.test(color) ? '#ff0000' : color;
+    // const vectorSource = this.olLayer.getSource();
+    // vectorSource.clear();
+    // if (stationsCoords) {
+    //   const geometry = new MultiPoint(stationsCoords);
+    //   const aboveStationsFeature = new Feature(geometry);
+    //   aboveStationsFeature.setStyle(
+    //     new Style({
+    //       zIndex: 1,
+    //       image: new Circle({
+    //         radius: 5,
+    //         fill: new Fill({
+    //           color: '#000000',
+    //         }),
+    //       }),
+    //     }),
+    //   );
+    //   const belowStationsFeature = new Feature(geometry);
+    //   belowStationsFeature.setStyle(
+    //     new Style({
+    //       zIndex: 4,
+    //       image: new Circle({
+    //         radius: 4,
+    //         fill: new Fill({
+    //           color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
+    //         }),
+    //       }),
+    //     }),
+    //   );
+    //   vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
+    // }
+    // const lineFeat = new Feature({
+    //   geometry: lineGeometry,
+    // });
+    // lineFeat.setStyle([
+    //   new Style({
+    //     zIndex: 2,
+    //     stroke: new Stroke({
+    //       color: '#000000',
+    //       width: 6,
+    //     }),
+    //   }),
+    //   new Style({
+    //     zIndex: 3,
+    //     stroke: new Stroke({
+    //       color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
+    //       width: 4,
+    //     }),
+    //   }),
+    // ]);
+    // vectorSource.addFeature(lineFeat);
   }
 
   abortFetchTrajectories() {
@@ -286,9 +304,7 @@ class TrajservLayer extends TrackerLayer {
     return this.api.fetchTrajectoryStations(params).then((trajStations) => {
       this.stationsCoords = [];
       trajStations.stations.forEach((station) => {
-        this.stationsCoords.push(
-          transformCoords(station.coordinates, 'EPSG:4326', 'EPSG:3857'),
-        );
+        this.stationsCoords.push(fromLonLat(station.coordinates));
       });
 
       this.highlightTrajectory();
@@ -296,42 +312,32 @@ class TrajservLayer extends TrackerLayer {
     });
   }
 
+  // eslint-disable-next-line class-methods-use-this
   highlightTrajectory() {
-    this.api
-      .fetchTrajectoryById({
-        id: this.journeyId,
-        time: getUTCTimeString(new Date()),
-      })
-      .then((traj) => {
-        const { p: multiLine, t, c } = traj;
-        const lineCoords = [];
-        multiLine.forEach((line) => {
-          line.forEach((point) => {
-            lineCoords.push([point.x, point.y]);
-          });
-        });
-
-        this.drawFullTrajectory(
-          this.stationsCoords,
-          new LineString(lineCoords),
-          c ? `#${c}` : getBgColor(t),
-        );
-      })
-      .catch(() => {
-        this.olLayer.getSource().clear();
-      });
-  }
-
-  /**
-   * Fetch trajectory information with a trajectory ID
-   * @param {number} journeyId The gtfs ID of the trajectory.
-   * @private
-   */
-  getTrajectoryById(journeyId) {
-    return this.fetchTrajectoryById({
-      id: journeyId,
-      time: getUTCTimeString(new Date()),
-    });
+    // eslint-disable-next-line no-console
+    console.log('TO BE IMPLEMENTED');
+    // this.api
+    // .fetchTrajectoryById({
+    //   id: this.journeyId,
+    //   time: getUTCTimeString(new Date()),
+    // })
+    //   .then((traj) => {
+    //     const { p: multiLine, t, c } = traj;
+    //     const lineCoords = [];
+    //     multiLine.forEach((line) => {
+    //       line.forEach((point) => {
+    //         lineCoords.push([point.x, point.y]);
+    //       });
+    //     });
+    //     this.drawFullTrajectory(
+    //       this.stationsCoords,
+    //       new LineString(lineCoords),
+    //       c ? `#${c}` : getBgColor(t),
+    //     );
+    //   })
+    //   .catch(() => {
+    //     this.olLayer.getSource().clear();
+    //   });
   }
 
   /**
@@ -341,7 +347,10 @@ class TrajservLayer extends TrackerLayer {
    * @private
    */
   getParams(extraParams = {}) {
-    const ext = this.map.getView().calculateExtent();
+    const bounds = this.map.getBounds().toArray();
+    const southWest = fromLonLat(bounds[0]);
+    const northEast = fromLonLat(bounds[1]);
+    const ext = [...southWest, ...northEast];
     const bbox = buffer(ext, getWidth(ext) / 10).join(',');
     const intervalMs = this.speed * 20000; // 20 seconds, arbitrary value, could be : (this.requestIntervalSeconds + 1) * 1000;
     const now = this.currTime;
@@ -374,8 +383,8 @@ class TrajservLayer extends TrackerLayer {
       cd: 1,
       nm: 1,
       fl: 1,
-      s: this.map.getView().getZoom() < 10 ? 1 : 0,
-      z: this.map.getView().getZoom(),
+      s: this.map.getZoom() < 10 ? 1 : 0,
+      z: this.map.getZoom(),
       // toff: this.currTime.getTime() / 1000,
     };
 

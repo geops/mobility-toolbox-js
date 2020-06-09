@@ -58,8 +58,13 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
 };
 
 CodeSandboxButton.propTypes = {
-  html: PropTypes.string.isRequired,
-  js: PropTypes.string.isRequired,
+  html: PropTypes.string,
+  js: PropTypes.string,
+};
+
+CodeSandboxButton.defaultProps = {
+  html: null,
+  js: null,
 };
 
 export default React.memo(CodeSandboxButton);
