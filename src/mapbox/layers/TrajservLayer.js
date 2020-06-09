@@ -13,6 +13,16 @@ import {
 } from '../../common/trackerConfig';
 import TrajservAPI from '../../api/TrajservAPI';
 
+const getCoordinates = (map) => {
+  const bounds = map.getBounds().toArray();
+  return [
+    [bounds[0][0], bounds[1][1]],
+    [...bounds[1]],
+    [bounds[1][0], bounds[0][1]],
+    [...bounds[0]],
+  ];
+};
+
 /**
  * Responsible for loading tracker data from Trajserv.
  * @class
@@ -128,6 +138,26 @@ class TrajservLayer extends TrackerLayer {
     const { width, height } = map.getCanvas();
     this.tracker.canvas.width = width;
     this.tracker.canvas.height = height;
+
+    map.addSource('canvas-source', {
+      type: 'canvas',
+      canvas: this.tracker.canvas,
+      coordinates: getCoordinates(map),
+      // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
+      animate: true,
+    });
+    map.addLayer(
+      {
+        id: 'canvas-layer',
+        type: 'raster',
+        source: 'canvas-source',
+        paint: {
+          'raster-opacity': 1,
+          'raster-fade-duration': 0,
+        },
+      },
+      'waterway-name',
+    );
   }
 
   addTrackerFilters() {
@@ -190,17 +220,10 @@ class TrajservLayer extends TrackerLayer {
     //       this.clickCallbacks.forEach((c) => c(null, this, e));
     //     }
     //   }),
-    const getCoordinates = () => {
-      const bounds = this.map.getBounds().toArray();
-      return [
-        [bounds[0][0], bounds[1][1]],
-        [...bounds[1]],
-        [bounds[1][0], bounds[0][1]],
-        [...bounds[0]],
-      ];
-    };
     this.map.on('move', () => {
-      this.map.getSource('canvas-source').setCoordinates(getCoordinates());
+      this.map
+        .getSource('canvas-source')
+        .setCoordinates(getCoordinates(this.map));
       const { width, height } = this.map.getCanvas();
       this.tracker.renderTrajectories(this.currTime, [width, height], 100);
     });
