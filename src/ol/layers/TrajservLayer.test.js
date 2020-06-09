@@ -1,4 +1,3 @@
-import 'jest-canvas-mock';
 import TrajservLayer from './TrajservLayer';
 
 let layer;

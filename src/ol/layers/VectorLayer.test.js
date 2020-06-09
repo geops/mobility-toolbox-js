@@ -1,10 +1,9 @@
-import 'jest-canvas-mock';
 import OLVectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import Map from 'ol/Map';
 import View from 'ol/View';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
+import Map from '../Map';
 import VectorLayer from './VectorLayer';
 
 const feature1 = new Feature({
@@ -54,13 +53,6 @@ describe('VectorLayer', () => {
     const spy = jest.spyOn(layer, 'terminate');
     layer.init();
     expect(spy).toHaveBeenCalledTimes(1);
-  });
-
-  test('should add the layer on initialization.', () => {
-    const spy = jest.spyOn(map, 'addLayer');
-    layer.init(map);
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(olLayer);
   });
 
   test('should call getFeatureInfoAtCoordinate on click then the callback', async () => {

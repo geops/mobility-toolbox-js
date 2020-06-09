@@ -44,10 +44,10 @@ class Map extends OLMap {
   }
 
   /**
-   * Returns a list of layers.
+   * Returns a list of mobility layers.
    * @returns {Layer} {@link Layer}.
    */
-  getLayers() {
+  getMobilityLayers() {
     return this.mobilityLayers;
   }
 
@@ -57,9 +57,13 @@ class Map extends OLMap {
    * @returns The removed layer (or undefined if the layer was not found).
    */
   removeLayer(layer) {
-    this.mobilityLayers = this.mobilityLayers.filter((l) => l !== layer);
-    layer.terminate();
-    return super.removeLayer(layer);
+    if (layer instanceof Layer) {
+      layer.terminate();
+      this.mobilityLayers = this.mobilityLayers.filter((l) => l !== layer);
+    }
+    if (layer.olLayer) {
+      super.removeLayer(layer);
+    }
   }
 }
 

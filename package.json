@@ -1,9 +1,11 @@
 {
   "name": "mobility-toolbox-js",
+  "license": "MIT",
   "version": "1.0.0",
   "main": "build/index.js",
   "module": "src/index.js",
   "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.10.1",
     "@material-ui/core": "^4.9.14",
     "@material-ui/styles": "^4.9.14",
     "codesandbox": "^2.1.14",
@@ -27,6 +29,7 @@
     "@neutrinojs/library": "^9.1.0",
     "@neutrinojs/react": "^9.1.0",
     "cypress": "^4.8.0",
+    "deepmerge": "^4.2.2",
     "documentation": "^13.0.0",
     "eslint": "^7.1.0",
     "eslint-config-airbnb": "^18.0.1",
@@ -58,15 +61,19 @@
   },
   "scripts": {
     "build": "yarn lib",
+    "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
     "doc": "documentation build src/index.js --format html -o doc && webpack --mode production",
     "doc:dev": "documentation build src/index.js --format html -o doc && webpack --mode development",
     "format": "prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix",
     "lib": "REACT_APP_LIB_MODE=1  webpack --mode production",
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
-    "start": "yarn doc && webpack-dev-server --mode development --open",
+    "start": "yarn doc && webpack-dev-server --mode production --open",
     "start:dev": "yarn doc:dev && webpack-dev-server --mode development --open",
-    "test": "jest"
+    "test": "REACT_APP_LIB_MODE=1 jest --env=jsdom --transformIgnorePatterns \"/node_modules/(?!(ol)/).*/\"",
+    "test:watch": "yarn test --watchAll"
   },
   "eslintConfig": {
     "env": {
@@ -113,7 +120,6 @@
       "pre-commit": "CI=true lint-staged   "
     }
   },
-  "license": "MIT",
   "lint-staged": {
     "(src|__mocks__)/**/*.js": [
       "eslint --fix",
@@ -122,7 +128,7 @@
       "yarn test --bail --findRelatedTests"
     ],
     "package.json": [
-      "fixpack --sortToTop name --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
+      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
     ],
     "src/**/*.{css,scss}": [
       "stylelint --fix"

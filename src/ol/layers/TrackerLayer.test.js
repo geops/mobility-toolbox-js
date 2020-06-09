@@ -1,4 +1,3 @@
-import 'jest-canvas-mock';
 import TrackerLayer from './TrackerLayer';
 
 let layer;

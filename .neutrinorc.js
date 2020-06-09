@@ -3,7 +3,7 @@ const react = require('@neutrinojs/react');
 const library = require('@neutrinojs/library');
 const jest = require('@neutrinojs/jest');
 const copy = require('@neutrinojs/copy');
-const prettierEslint = require('neutrino-preset-prettier-eslint');
+const merge = require('deepmerge');
 const path = require('path');
 
 if (process.env.REACT_APP_LIB_MODE) {
@@ -16,9 +16,31 @@ if (process.env.REACT_APP_LIB_MODE) {
     },
     use: [
       library({
-        name: 'mobility-toolbox-js'
+        name: 'mobility-toolbox-js',
       }),
-      jest(),
+      jest({
+        testRegex: 'src/.*.test.js$',
+        coveragePathIgnorePatterns: ['src/doc/'],
+        coverageReporters: ['text', 'html'],
+        snapshotSerializers: ['jest-serializer-html'],
+        setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+      }),
+      (neutrino) => {
+        if (process.env.NODE_ENV === 'test') {
+          neutrino.config.module
+            .rule('compile')
+            .use('babel')
+            .tap((options) =>
+              merge(options, {
+                env: {
+                  test: {
+                    plugins: ['@babel/plugin-transform-runtime'], // async/await
+                  },
+                },
+              }),
+            );
+        }
+      },
     ],
   };
 } else {

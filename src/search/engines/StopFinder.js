@@ -1,4 +1,3 @@
-import React from 'react';
 import Engine from './Engine';
 import { StopsAPI } from '../../api';
 
@@ -15,7 +14,7 @@ class StopFinder extends Engine {
   }
 
   render(item) {
-    return <div>{item.properties.name}</div>;
+    return item.properties.name;
   }
 
   static value(item) {

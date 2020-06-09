@@ -1,27 +1,26 @@
-import 'jest-canvas-mock';
-import OLMap from 'ol/Map';
 import OLView from 'ol/View';
 import ImageLayer from 'ol/layer/Image';
 import ImageWMS from 'ol/source/ImageWMS';
 import fetch from 'jest-fetch-mock';
 import qs from 'query-string';
+import Map from '../Map';
 import WMSLayer from './WMSLayer';
 
-const layer = new WMSLayer({
-  name: 'WMSTestLayer',
-  olLayer: new ImageLayer({
-    source: new ImageWMS({
-      url: 'dummy',
-      params: { LAYERS: 'layers' },
-    }),
-  }),
-});
-
-const map = new OLMap({ view: new OLView({ resolution: 5 }) });
-layer.init(map);
-
 describe('WMSLayer', () => {
+  let map;
+  let layer;
   beforeEach(() => {
+    map = new Map({ view: new OLView({ resolution: 5 }) });
+
+    layer = new WMSLayer({
+      olLayer: new ImageLayer({
+        source: new ImageWMS({
+          url: 'dummy',
+          params: { LAYERS: 'layers' },
+        }),
+      }),
+    });
+    map.addLayer(layer);
     fetch.mockResponseOnce(JSON.stringify({ features: [] }));
     global.fetch = fetch;
   });
@@ -34,13 +33,6 @@ describe('WMSLayer', () => {
     const spy = jest.spyOn(layer, 'terminate');
     layer.init();
     expect(spy).toHaveBeenCalledTimes(1);
-  });
-
-  test('should add the layer on initialization.', () => {
-    const spy = jest.spyOn(map, 'addLayer');
-    layer.init(map);
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(layer.olLayer);
   });
 
   test('should return a promise resolving features.', async () => {
