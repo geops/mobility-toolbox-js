@@ -10,7 +10,6 @@ class Engine {
   }
 
   getItems() {
-    console.log(this.items);
     return this.collapsed ? this.items.slice(0, 2) : this.items;
   }
 
