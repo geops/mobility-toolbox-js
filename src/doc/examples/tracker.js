@@ -21,7 +21,7 @@ export default () => {
 
   const tracker = new TrajservLayer({
     url: 'https://api.geops.io/tracker/v1',
-    apiKey: '5cc87b12d7c5370001c1d6556afe39038efb48709f6b5af1adf48bce',
+    apiKey: window.apiKey,
   });
 
   map.addLayer(osm);

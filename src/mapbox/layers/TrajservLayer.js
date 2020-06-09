@@ -117,7 +117,7 @@ class TrajservLayer extends TrackerLayer {
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map)
    * @private
    */
-  init(map) {
+  init(map, beforeLayerId) {
     super.init(map);
 
     if (!this.map) {
@@ -156,7 +156,7 @@ class TrajservLayer extends TrackerLayer {
           'raster-fade-duration': 0,
         },
       },
-      'waterway-name',
+      beforeLayerId,
     );
   }
 

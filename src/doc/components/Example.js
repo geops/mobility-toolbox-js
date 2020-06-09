@@ -60,11 +60,10 @@ const Example = ({ example }) => {
         // Replace relative import by library import
         setJs(
           jsCode
-            .replace(/'\.\.\/\.\.\/ol/g)
+            .replace(/'\.\.\/\.\.\//gm, 'mobility-toolbox-js/')
             .replace('export default () => {\n', '')
             .replace(/^};\n$/gm, '')
             .replace(/^ {2}/gm, ''),
-          "'mobility-toolbox/ol",
         );
       });
   }, [example]);

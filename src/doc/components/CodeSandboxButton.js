@@ -24,6 +24,8 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
           module: 'src/index.js',
           dependencies: {
             ol: '^6.3.1',
+            'mapbox-gl': '^1.10.1',
+            'mobility-toolbox-js': '@beta',
           },
         },
       },

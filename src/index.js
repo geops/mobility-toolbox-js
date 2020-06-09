@@ -4,8 +4,8 @@ import olWMSLayer from './ol/layers/WMSLayer';
 import olMapboxLayer from './ol/layers/MapboxLayer';
 
 const exports = {
-  Map,
-  layers: {
+  ol: {
+    Map,
     Layer: olLayer,
     WMSLayer: olWMSLayer,
     MapboxLayer: olMapboxLayer,

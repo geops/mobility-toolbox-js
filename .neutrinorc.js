@@ -11,7 +11,10 @@ if (process.env.REACT_APP_LIB_MODE) {
     options: {
       root: __dirname,
       mains: {
-        index: './index.js',
+        api: './api/index.js',
+        ol: './ol/index.js',
+        mapbox: './mapbox/index.js',
+        search: './search/index.js',
       },
     },
     use: [
