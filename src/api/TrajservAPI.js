@@ -27,7 +27,7 @@ class TrajservAPI {
    * @private
    */
   fetch(url, params = {}, config) {
-    const urlParams = { ...params, apiKey: this.apiKey };
+    const urlParams = { ...params, key: this.apiKey };
     return fetch(`${url}?${qs.stringify(urlParams)}`, config);
   }
 

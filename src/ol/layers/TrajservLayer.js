@@ -323,18 +323,6 @@ class TrajservLayer extends TrackerLayer {
   }
 
   /**
-   * Fetch trajectory information with a trajectory ID
-   * @param {number} journeyId The gtfs ID of the trajectory.
-   * @private
-   */
-  getTrajectoryById(journeyId) {
-    return this.fetchTrajectoryById({
-      id: journeyId,
-      time: getUTCTimeString(new Date()),
-    });
-  }
-
-  /**
    * Returns the URL Parameters
    * @param {Object} extraParams
    * @returns {Object}

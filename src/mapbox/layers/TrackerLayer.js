@@ -1,5 +1,5 @@
 import { unByKey } from 'ol/Observable';
-import { toLonLat, fromLonLat } from 'ol/proj';
+import { toLonLat } from 'ol/proj';
 import { buffer, containsCoordinate } from 'ol/extent';
 import Layer from './Layer';
 import Tracker from '../../common/Tracker';
@@ -189,21 +189,21 @@ class TrackerLayer extends Layer {
           this.startUpdateTime();
         }
       }),
-      this.map.on('mousemove', (evt) => {
-        if (
-          this.map.isMoving() ||
-          this.map.isRotating() ||
-          this.map.isZooming() ||
-          !this.isHoverActive
-        ) {
-          return;
-        }
-        const [vehicle] = this.getVehiclesAtCoordinate(
-          fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
-        );
-        this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
-        this.tracker.setHoverVehicleId(vehicle && vehicle.id);
-      }),
+      // this.map.on('mousemove', (evt) => {
+      // if (
+      //   this.map.isMoving() ||
+      //   this.map.isRotating() ||
+      //   this.map.isZooming() ||
+      //   !this.isHoverActive
+      // ) {
+      //   return;
+      // }
+      // const [vehicle] = this.getVehiclesAtCoordinate(
+      //   fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
+      // );
+      // this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
+      // this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+      // }),
     ];
   }
 
