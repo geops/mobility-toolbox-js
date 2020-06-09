@@ -14,7 +14,7 @@ import {
   getTextColor,
   getTextSize,
 } from '../../common/trackerConfig';
-import TrajservAPI from '../../api/TrajservAPI';
+import { TrajservAPI } from '../../api';
 
 /**
  * Responsible for loading tracker data from Trajserv.

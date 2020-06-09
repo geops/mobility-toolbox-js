@@ -3,20 +3,9 @@ import {
   translateTrajCollResponse,
   translateTrajStationsResp,
 } from './TrajservAPIUtils';
+import { handleError, readJsonResponse } from '../APIUtils';
 
 class TrajservAPI {
-  /**
-   * Display log message on error.
-   * @private
-   */
-  static handleError(reqType, err) {
-    if (err.name === 'AbortError') {
-      return;
-    }
-    // eslint-disable-next-line no-console
-    console.warn(`Fetch ${reqType} request failed: `, err);
-  }
-
   constructor(options = {}) {
     this.url = options.url || 'https://api.geops.io/tracker/v1';
     this.apiKey = options.apiKey;
@@ -28,7 +17,9 @@ class TrajservAPI {
    */
   fetch(url, params = {}, config) {
     const urlParams = { ...params, key: this.apiKey };
-    return fetch(`${url}?${qs.stringify(urlParams)}`, config);
+    return fetch(`${url}?${qs.stringify(urlParams)}`, config).then(
+      readJsonResponse,
+    );
   }
 
   /**
@@ -39,17 +30,9 @@ class TrajservAPI {
   fetchTrajectoryById(params, abortController = {}) {
     return this.fetch(`${this.url}/trajectorybyid`, params, {
       signal: abortController.signal,
-    })
-      .then((res) => {
-        try {
-          return res.json();
-        } catch (err) {
-          throw new Error(err);
-        }
-      })
-      .catch((err) => {
-        TrajservAPI.handleError('trajectorybyid', err);
-      });
+    }).catch((err) => {
+      handleError('trajectorybyid', err);
+    });
   }
 
   /**
@@ -61,7 +44,6 @@ class TrajservAPI {
     return this.fetch(`${this.url}/trajectory_collection`, params, {
       signal: abortController.signal,
     })
-      .then((data) => data.json())
       .then((data) => {
         if (!data) {
           return [];
@@ -69,7 +51,7 @@ class TrajservAPI {
         return translateTrajCollResponse(data.features);
       })
       .catch((err) => {
-        TrajservAPI.handleError('trajectory_collection', err);
+        handleError('trajectory_collection', err);
       });
   }
 
@@ -82,18 +64,11 @@ class TrajservAPI {
     return this.fetch(`${this.url}/trajstations`, params, {
       signal: abortController.signal,
     })
-      .then((response) => {
-        try {
-          return response.json();
-        } catch (err) {
-          throw new Error(err);
-        }
-      })
       .then((data) => {
         return translateTrajStationsResp(data);
       })
       .catch((err) => {
-        TrajservAPI.handleError('trajstations', err);
+        handleError('trajstations', err);
       });
   }
 }

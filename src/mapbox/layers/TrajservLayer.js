@@ -11,7 +11,7 @@ import {
   getTextColor,
   getTextSize,
 } from '../../common/trackerConfig';
-import TrajservAPI from '../../api/TrajservAPI';
+import { TrajservAPI } from '../../api';
 
 const getCoordinates = (map) => {
   const bounds = map.getBounds().toArray();

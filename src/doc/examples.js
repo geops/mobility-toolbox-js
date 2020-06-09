@@ -11,7 +11,7 @@ export default [
   {
     name: 'Live tracker with OpenLayers',
     key: 'live-tracker',
-    description: 'Show moving trains in a map.',
+    description: 'Show moving trains in a OpenLayers map.',
     files: {
       html: 'tracker.html',
       js: 'tracker.js',
@@ -29,7 +29,7 @@ export default [
   {
     name: 'Mapbox layer',
     key: 'mapbox',
-    description: 'Displaying a mapbox layer on an OpenLayers map.',
+    description: 'Display a Mapbox layer on an OpenLayers map.',
     files: {
       html: 'mapbox.html',
       js: 'mapbox.js',
@@ -38,10 +38,19 @@ export default [
   {
     name: 'Mapbox Style layer',
     key: 'mapboxstyle',
-    description: 'Displaying a mapbox style layer on an OpenLayers map.',
+    description: 'Display a mapbox style layer on an OpenLayers map.',
     files: {
       html: 'mapboxstyle.html',
       js: 'mapboxstyle.js',
+    },
+  },
+  {
+    name: 'Search',
+    key: 'search',
+    description: 'Display results of Stops service.',
+    files: {
+      html: 'search.html',
+      js: 'search.js',
     },
   },
 ];
