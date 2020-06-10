@@ -1,5 +1,8 @@
-// Get a Date object as date string .
-// ex: 2019 09 01
+/**
+ * Get a Date object as date string .
+ * ex: 2019 09 01
+ * @private
+ */
 export const getDateString = (now) => {
   const n = now || new Date();
   let month = (n.getMonth() + 1).toString();
@@ -10,8 +13,11 @@ export const getDateString = (now) => {
   return [now.getFullYear(), month, day].join('');
 };
 
-// Get the UTC time string of Date object.
-// ex: 09:05:01.123
+/**
+ * Get the UTC time string of Date object.
+ * ex: 09:05:01.123
+ * @private
+ */
 export const getUTCTimeString = (date) =>
   [
     date.getUTCHours(),
@@ -19,12 +25,16 @@ export const getUTCTimeString = (date) =>
     `${date.getUTCSeconds()}.${date.getUTCMilliseconds()}`,
   ].join(':');
 
-// Returns a string representation of a number, with a zero if the number is lower than 10.
+/**
+ * Returns a string representation of a number, with a zero if the number is lower than 10.
+ * @private
+ */
 export const pad = (integer) => (integer < 10 ? `0${integer}` : integer);
 
 /**
  * Returns a 'hh:mm' string from a time in ms.
  * @param {Number} timeInMs Time in milliseconds.
+ * @private
  */
 export const getHoursAndMinutes = (timeInMs) => {
   if (!timeInMs || timeInMs <= 0) {
@@ -37,6 +47,7 @@ export const getHoursAndMinutes = (timeInMs) => {
 /**
  * Returns a string representing a delay.
  * @param {Number} timeInMs Delay time in milliseconds.
+ * @private
  */
 export const getDelayString = (timeInMs) => {
   const h = Math.floor(timeInMs / 3600000);

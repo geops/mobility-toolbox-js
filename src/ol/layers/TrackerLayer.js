@@ -13,6 +13,7 @@ import { timeSteps } from '../../common/trackerConfig';
  * @param {Object} options
  * @param {boolean} options.useDelayStyle Set the delay style.
  * @param {string} options.onClick Callback function on feature click.
+ * @private
  */
 class TrackerLayer extends Layer {
   constructor(options = {}) {

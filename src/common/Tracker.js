@@ -4,6 +4,7 @@ import { unByKey } from 'ol/Observable';
  * Tracker. This class draw trajectories on a canvas.
  * @class
  * @param {Object} options
+ * @private
  */
 export default class Tracker {
   constructor(options) {

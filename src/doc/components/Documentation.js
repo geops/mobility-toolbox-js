@@ -20,11 +20,7 @@ const Documentation = () => {
 
   return (
     <div className={classes.root}>
-      <iframe
-        title="API Documenation"
-        src="/build/doc"
-        className={classes.iframe}
-      />
+      <iframe title="API Documenation" src="/doc" className={classes.iframe} />
     </div>
   );
 };

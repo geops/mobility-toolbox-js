@@ -3,8 +3,12 @@ import {
   translateTrajCollResponse,
   translateTrajStationsResp,
 } from './TrajservAPIUtils';
-import { handleError, readJsonResponse } from '../APIUtils';
+import { handleError, readJsonResponse } from '../utils';
 
+/**
+ * Access to Trajserv api.
+ * @class
+ */
 class TrajservAPI {
   constructor(options = {}) {
     this.url = options.url || 'https://api.geops.io/tracker/v1';

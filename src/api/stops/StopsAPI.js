@@ -1,6 +1,10 @@
 import qs from 'query-string';
-import { handleError, readJsonResponse } from '../APIUtils';
+import { handleError, readJsonResponse } from '../utils';
 
+/**
+ * Access to Stops api.
+ * @class
+ */
 class StopsAPI {
   constructor(options = {}) {
     this.url = options.url || 'https://api.geops.io/stops/v1/';

@@ -1,7 +1,9 @@
+// To make redirect works properly on netlify it's important that the key
+// are differents from the name of js and html files.
 export default [
   {
     name: 'Simple map',
-    key: 'map',
+    key: 'ol-map',
     description: 'A simple map example.',
     files: {
       html: 'map.html',
@@ -10,7 +12,7 @@ export default [
   },
   {
     name: 'Live tracker with OpenLayers',
-    key: 'live-tracker',
+    key: 'ol-tracker',
     description: 'Show moving trains in a OpenLayers map.',
     files: {
       html: 'tracker.html',
@@ -19,7 +21,7 @@ export default [
   },
   {
     name: 'Live tracker with Mapbox',
-    key: 'mapboxtracker',
+    key: 'mapbox-tracker',
     description: 'Show moving trains in a Mapbox map.',
     files: {
       html: 'mapboxtracker.html',
@@ -28,7 +30,7 @@ export default [
   },
   {
     name: 'Mapbox layer',
-    key: 'mapbox',
+    key: 'mapbox-layer',
     description: 'Display a Mapbox layer on an OpenLayers map.',
     files: {
       html: 'mapbox.html',
@@ -37,7 +39,7 @@ export default [
   },
   {
     name: 'Mapbox Style layer',
-    key: 'mapboxstyle',
+    key: 'mapbox-style-layer',
     description: 'Display a mapbox style layer on an OpenLayers map.',
     files: {
       html: 'mapboxstyle.html',
@@ -46,7 +48,7 @@ export default [
   },
   {
     name: 'Search',
-    key: 'search',
+    key: 'basic-search',
     description: 'Display results of Stops service.',
     files: {
       html: 'search.html',
