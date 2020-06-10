@@ -1,7 +1,7 @@
 import qs from 'query-string';
 import { fromLonLat } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
-import { LineString } from 'ol/geom';
+// import { LineString } from 'ol/geom';
 import TrackerLayer from './TrackerLayer';
 import { getDateString, getUTCTimeString } from '../../common/timeUtils';
 import {
@@ -355,20 +355,20 @@ class TrajservLayer extends TrackerLayer {
         id: journeyId,
         time: getUTCTimeString(new Date()),
       })
-      .then((traj) => {
-        const { p: multiLine, t, c } = traj;
-        const lineCoords = [];
-        multiLine.forEach((line) => {
-          line.forEach((point) => {
-            lineCoords.push([point.x, point.y]);
-          });
-        });
-        // this.drawFullTrajectory(
-        //   this.stationsCoords,
-        //   new LineString(lineCoords),
-        //   c ? `#${c}` : getBgColor(t),
-        // );
-      })
+      // .then((traj) => {
+      // const { p: multiLine, t, c } = traj;
+      // const lineCoords = [];
+      // multiLine.forEach((line) => {
+      //   line.forEach((point) => {
+      //     lineCoords.push([point.x, point.y]);
+      //   });
+      // });
+      // this.drawFullTrajectory(
+      //   this.stationsCoords,
+      //   new LineString(lineCoords),
+      //   c ? `#${c}` : getBgColor(t),
+      // );
+      // })
       .catch(() => {
         this.map.removeLayer('highlight-trajectory');
       });
