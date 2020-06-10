@@ -119,7 +119,6 @@ class TrajservLayer extends TrackerLayer {
    */
   init(map, beforeLayerId) {
     super.init(map);
-
     if (!this.map) {
       return;
     }
