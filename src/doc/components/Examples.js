@@ -49,7 +49,6 @@ export default () => {
   const example = EXAMPLES.find((e) => e.key === exampleKey) || EXAMPLES[0];
   const [filter, setFilter] = useState('');
   const exampleList = filter ? filterExamples(filter, EXAMPLES) : EXAMPLES;
-
   return (
     <Grid container className={classes.root} spacing={3}>
       <Grid item xs={3}>

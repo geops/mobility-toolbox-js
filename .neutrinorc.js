@@ -77,6 +77,10 @@ if (process.env.REACT_APP_LIB_MODE) {
             from: path.join(__dirname, 'src/doc/examples'),
             to: path.join(__dirname, 'build/examples'),
           },
+          {
+            from: path.join(__dirname, 'src/doc/_redirects'),
+            to: path.join(__dirname, 'build/'),
+          },
         ],
       }),
     ],

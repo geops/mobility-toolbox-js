@@ -54,13 +54,13 @@ const Example = ({ example }) => {
       module.default();
     });
 
-    fetch(`/build/examples/${example.files.js}`)
+    fetch(`../examples/${example.files.js}`)
       .then((res) => res.text())
       .then((jsCode) => {
         // Replace relative import by library import
         setJs(
           jsCode
-            .replace(/'\.\.\/\.\.\//gm, 'mobility-toolbox-js/')
+            .replace(/'\.\.\/\.\.\//gm, "'mobility-toolbox-js/")
             .replace('export default () => {\n', '')
             .replace(/^};\n$/gm, '')
             .replace(/^ {2}/gm, ''),

@@ -54,7 +54,7 @@ const App = () => {
         <Header />
 
         <Route exact path="/">
-          <Redirect to="/examples" />
+          <Redirect to="/examples/map" />
         </Route>
         <Route path="/examples/:exampleKey?">
           <div className={classes.content}>
