@@ -1,9 +1,10 @@
 import { unByKey } from 'ol/Observable';
-import { toLonLat } from 'ol/proj';
+import { toLonLat, fromLonLat } from 'ol/proj';
 import { buffer, containsCoordinate } from 'ol/extent';
 import Layer from './Layer';
 import Tracker from '../../common/Tracker';
 import { timeSteps } from '../../common/trackerConfig';
+import { getResolution } from '../utils';
 
 /**
  * Responsible for loading tracker data.
@@ -189,21 +190,22 @@ class TrackerLayer extends Layer {
           this.startUpdateTime();
         }
       }),
-      // this.map.on('mousemove', (evt) => {
-      // if (
-      //   this.map.isMoving() ||
-      //   this.map.isRotating() ||
-      //   this.map.isZooming() ||
-      //   !this.isHoverActive
-      // ) {
-      //   return;
-      // }
-      // const [vehicle] = this.getVehiclesAtCoordinate(
-      //   fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
-      // );
-      // this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
-      // this.tracker.setHoverVehicleId(vehicle && vehicle.id);
-      // }),
+      this.map.on('mousemove', (evt) => {
+        if (
+          this.map.isMoving() ||
+          this.map.isRotating() ||
+          this.map.isZooming() ||
+          !this.isHoverActive
+        ) {
+          this.map.getContainer().style.cursor = 'auto';
+          return;
+        }
+        const [vehicle] = this.getVehiclesAtCoordinate(
+          fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
+        );
+        this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
+        this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+      }),
     ];
   }
 
@@ -275,8 +277,8 @@ class TrackerLayer extends Layer {
    * @private
    */
   getVehiclesAtCoordinate(coordinate) {
-    const res = 100;
-    const ext = buffer([...coordinate, ...coordinate], 10 * res);
+    const resolution = getResolution(this.map);
+    const ext = buffer([...coordinate, ...coordinate], 10 * resolution);
     const trajectories = this.tracker.getTrajectories();
     const vehicles = [];
     for (let i = 0; i < trajectories.length; i += 1) {

@@ -17,6 +17,10 @@ export default () => {
     apiKey: window.apiKey,
   });
 
+  tracker.onClick((vehicle) => {
+    console.log(vehicle);
+  });
+
   map.on('load', () => {
     tracker.init(map, 'waterway-name');
   });

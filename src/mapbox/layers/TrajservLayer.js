@@ -1,6 +1,7 @@
 import qs from 'query-string';
 import { fromLonLat } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
+import { LineString } from 'ol/geom';
 import TrackerLayer from './TrackerLayer';
 import { getDateString, getUTCTimeString } from '../../common/timeUtils';
 import {
@@ -12,16 +13,7 @@ import {
   getTextSize,
 } from '../../common/trackerConfig';
 import { TrajservAPI } from '../../api';
-
-const getCoordinates = (map) => {
-  const bounds = map.getBounds().toArray();
-  return [
-    [bounds[0][0], bounds[1][1]],
-    [...bounds[1]],
-    [bounds[1][0], bounds[0][1]],
-    [...bounds[0]],
-  ];
-};
+import { getSourceCoordinates } from '../utils';
 
 /**
  * Responsible for loading tracker data from Trajserv.
@@ -110,6 +102,9 @@ class TrajservLayer extends TrackerLayer {
     this.width = options.width;
     this.height = options.height;
     this.api = new TrajservAPI({ url: options.url, apiKey: options.apiKey });
+    this.onMapClick = this.onMapClick.bind(this);
+    this.onMove = this.onMove.bind(this);
+    this.onMoveEnd = this.onMoveEnd.bind(this);
   }
 
   /**
@@ -141,7 +136,7 @@ class TrajservLayer extends TrackerLayer {
     map.addSource('canvas-source', {
       type: 'canvas',
       canvas: this.tracker.canvas,
-      coordinates: getCoordinates(map),
+      coordinates: getSourceCoordinates(map),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
     });
@@ -190,56 +185,74 @@ class TrajservLayer extends TrackerLayer {
 
     super.start(this.map);
     this.startUpdateTrajectories();
-    // this.olEventsKeys = [
-    //   ...this.olEventsKeys,
-    //   this.map.on('mouseclick', (e) => {
-    //     if (!this.clickCallbacks.length) {
-    //       return;
-    //     }
 
-    //     const [vehicle] = this.getVehiclesAtCoordinate(e.coordinate);
-    //     const features = [];
-
-    //     if (vehicle) {
-    //       const geom = vehicle.coordinate
-    //         ? new Point(vehicle.coordinate)
-    //         : null;
-    //       features.push(new Feature({ geometry: geom, ...vehicle }));
-
-    //       if (features.length) {
-    //         this.selectedVehicleId = features[0].get('id');
-    //         this.journeyId = features[0].get('journeyIdentifier');
-    //         this.updateTrajectoryStations(this.selectedVehicleId).then((r) => {
-    //           this.clickCallbacks.forEach((c) => c(r, this, e));
-    //         });
-    //       }
-    //     } else {
-    //       this.selectedVehicleId = null;
-    //       this.olLayer.getSource().clear();
-    //       this.clickCallbacks.forEach((c) => c(null, this, e));
-    //     }
-    //   }),
-    this.map.on('move', () => {
-      this.map
-        .getSource('canvas-source')
-        .setCoordinates(getCoordinates(this.map));
-      const { width, height } = this.map.getCanvas();
-      this.tracker.renderTrajectories(this.currTime, [width, height], 100);
-    });
-    this.map.on('moveend', () => {
-      this.updateTrajectories();
-      if (this.selectedVehicleId && this.journeyId) {
-        this.highlightTrajectory();
-      }
-    });
-    // ];
+    this.map.on('click', this.onMapClick);
+    this.map.on('move', this.onMove);
+    this.map.on('moveend', this.onMoveEnd);
   }
 
   stop() {
     this.journeyId = null;
     this.stopUpdateTrajectories();
     this.abortFetchTrajectories();
+    if (this.map) {
+      this.map.off('click', this.onClick);
+      this.map.off('move', this.onMove);
+      this.map.off('moveend', this.onMoveEnd);
+    }
     super.stop();
+  }
+
+  /**
+   * Callback on 'move' event.
+   * @private
+   */
+  onMove() {
+    this.map
+      .getSource('canvas-source')
+      .setCoordinates(getSourceCoordinates(this.map));
+    const { width, height } = this.map.getCanvas();
+    this.tracker.renderTrajectories(this.currTime, [width, height], 100);
+  }
+
+  /**
+   * Callback on 'moveend' event.
+   * @private
+   */
+  onMoveEnd() {
+    this.updateTrajectories();
+    if (this.selectedVehicleId && this.journeyId) {
+      this.highlightTrajectory();
+    }
+  }
+
+  /**
+   * Callback on 'mouseclick' event.
+   * @private
+   */
+  onMapClick(evt) {
+    if (!this.clickCallbacks.length) {
+      return;
+    }
+
+    const [vehicle] = this.getVehiclesAtCoordinate(
+      fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
+    );
+
+    if (vehicle) {
+      this.selectedVehicleId = vehicle.id;
+      this.journeyId = vehicle.journeyIdentifier;
+      this.updateTrajectoryStations(this.selectedVehicleId).then(
+        (vehicleWithStations) => {
+          this.clickCallbacks.forEach((callback) =>
+            callback(vehicleWithStations, this, evt),
+          );
+        },
+      );
+    } else {
+      this.selectedVehicleId = null;
+      this.clickCallbacks.forEach((callback) => callback(null, this, evt));
+    }
   }
 
   /**
@@ -328,38 +341,37 @@ class TrajservLayer extends TrackerLayer {
       trajStations.stations.forEach((station) => {
         this.stationsCoords.push(fromLonLat(station.coordinates));
       });
-
-      this.highlightTrajectory();
       return trajStations;
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  highlightTrajectory() {
-    // eslint-disable-next-line no-console
-    console.log('TO BE IMPLEMENTED');
-    // this.api
-    // .fetchTrajectoryById({
-    //   id: this.journeyId,
-    //   time: getUTCTimeString(new Date()),
-    // })
-    //   .then((traj) => {
-    //     const { p: multiLine, t, c } = traj;
-    //     const lineCoords = [];
-    //     multiLine.forEach((line) => {
-    //       line.forEach((point) => {
-    //         lineCoords.push([point.x, point.y]);
-    //       });
-    //     });
-    //     this.drawFullTrajectory(
-    //       this.stationsCoords,
-    //       new LineString(lineCoords),
-    //       c ? `#${c}` : getBgColor(t),
-    //     );
-    //   })
-    //   .catch(() => {
-    //     this.olLayer.getSource().clear();
-    //   });
+  /**
+   * Highlight the trajectory of journey.
+   * @param {String} journeyId The id of the journey.
+   */
+  highlightTrajectory(journeyId) {
+    this.api
+      .fetchTrajectoryById({
+        id: journeyId,
+        time: getUTCTimeString(new Date()),
+      })
+      .then((traj) => {
+        const { p: multiLine, t, c } = traj;
+        const lineCoords = [];
+        multiLine.forEach((line) => {
+          line.forEach((point) => {
+            lineCoords.push([point.x, point.y]);
+          });
+        });
+        // this.drawFullTrajectory(
+        //   this.stationsCoords,
+        //   new LineString(lineCoords),
+        //   c ? `#${c}` : getBgColor(t),
+        // );
+      })
+      .catch(() => {
+        this.map.removeLayer('highlight-trajectory');
+      });
   }
 
   /**
