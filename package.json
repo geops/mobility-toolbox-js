@@ -1,9 +1,18 @@
 {
   "name": "mobility-toolbox-js",
   "license": "MIT",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "main": "build/index.js",
   "module": "src/index.js",
+  "files": [
+    "build",
+    "src/index.js",
+    "src/api",
+    "src/ol",
+    "src/mapbox",
+    "src/search",
+    "src/common"
+  ],
   "dependencies": {
     "@material-ui/core": "^4.9.14",
     "@material-ui/styles": "^4.9.14",
@@ -117,14 +126,6 @@
       }
     }
   },
-  "files": [
-    "build",
-    "src/index.js",
-    "src/api",
-    "src/mapbox",
-    "src/search",
-    "src/common"
-  ],
   "husky": {
     "hooks": {
       "post-checkout": "yarn install --frozen-lockfile",
@@ -141,7 +142,7 @@
       "yarn test --bail --findRelatedTests"
     ],
     "package.json": [
-      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
+      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
     ],
     "src/**/*.{css,scss}": [
       "stylelint --fix"
