@@ -1,0 +1,14 @@
+toc:
+  - name: openlayers
+  - Map
+  - Layer
+  - WMSLayer
+  - MapboxLayer
+  - MapboxStyleLayer
+  - TrajservLayer
+  - name: mapbox
+    children:
+  - MapboxTrajservLayer
+  - name: api
+  - StopsAPI
+  - TrajservAPI

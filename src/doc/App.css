@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  font-family: Lato, Arial, sans-serif;
+  overflow: hidden;
+  color: #4b4b4b;
+}
+
+body,
+html,
+#root {
+  height: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  text-decoration: none;
+  color: initial;
+}
