@@ -5,6 +5,8 @@ import Layer from './Layer';
 /**
  * A class representing WMS layer to display on BasicMap
  * @class
+ * @example
+ * import { WMSLayer } from 'mobility-toolbox-js/ol';
  * @inheritDoc
  * @param {Object} [options]
  */

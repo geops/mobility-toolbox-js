@@ -8,7 +8,7 @@ import { getResolution } from '../utils';
 
 /**
  * Responsible for loading tracker data.
- * Extented from Layer {@link https://react-spatial.geops.de/docjs.html react-spatial/layers/Layer}
+ * Extended from Layer {@link https://react-spatial.geops.de/docjs.html react-spatial/layers/Layer}
  * @class
  * @inheritDoc
  * @param {Object} options

@@ -7,9 +7,11 @@ import Layer from './layers/Layer';
  * This class extends the OpenLayers class
  * {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html|ol/Map}.
  *
- * [mtb-js-example: map-example]
+ * @example
+ * import { Map } from 'mobility-toolbox-js/ol';
  *
  * @class
+ * @namespace
  * @param {Object} options Map options.
  * @param {Array.Layer} [options.layers] List of {@link Layer|Layers}.
  */

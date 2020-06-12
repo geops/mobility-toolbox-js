@@ -1,11 +1,14 @@
 toc:
-  - name: Maps
+  - name: openlayers
+  - Map
+  - Layer
+  - WMSLayer
+  - MapboxLayer
+  - MapboxStyleLayer
+  - TrajservLayer
+  - name: mapbox
     children:
-    - Map
-    - name: Layers
-      description: |
-        Layer types of `mobility-toolbox-js`.
-      children:
-      - Layer
-      - MapboxLayer
-      - WMSLayer
+  - MapboxTrajservLayer
+  - name: api
+  - StopsAPI
+  - TrajservAPI

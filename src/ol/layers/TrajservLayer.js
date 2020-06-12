@@ -19,9 +19,11 @@ import { TrajservAPI } from '../../api';
 /**
  * Responsible for loading tracker data from Trajserv.
  * @class
+ * @example
+ * import { TrajservLayer } from 'mobility-toolbox-js/ol';
  * @inheritDoc
  * @param {Object} [options] Layer options.
- * @param {string} [url = https://api.geops.io/tracker] Tracker url.
+ * @param {string} [options.url = https://api.geops.io/tracker] Tracker url.
  * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
  * @param {number} options.delayDisplay delay from which the time is always display on the feature (in milliseconds).
  * @param {Array.<string>|string} options.regexPublishedLineName Regex filter for line name. This filter has a higher prio over publishedLineName.

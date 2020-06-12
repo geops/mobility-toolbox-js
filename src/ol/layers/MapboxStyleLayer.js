@@ -26,14 +26,12 @@ const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
 };
 
 /**
- * Layer for visualizing information about stations (default) or airports.
- * The popup contains links to station plans, station coordinates
- * and links to timetable, services, shopping, handicap information.
- *
- * <img src="img/layers/NetzkartePointLayer/layer.png" alt="Layer preview" title="Layer preview">
- *
- * Extends {@link https://react-spatial.geops.de/docjs.html#mapboxlayer geops-spatial/layers/MapboxLayer}
+ * Layer for visualizing a specific set of layer from a MapboxLayer.
  * @class
+ *
+ * @example
+ * import { MapboxStyleLayer } from 'mobility-toolbox-js/ol';
+ *
  * @param {Object} [options] Layer options.
  * @inheritdoc
  */

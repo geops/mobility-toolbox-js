@@ -48,6 +48,7 @@ const useStyles = makeStyles({
 
 const App = () => {
   const classes = useStyles();
+
   return (
     <ThemeProvider theme={theme}>
       <Router>

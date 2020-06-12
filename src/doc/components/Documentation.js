@@ -20,9 +20,9 @@ const Documentation = () => {
 
   return (
     <div className={classes.root}>
-      <iframe title="API Documenation" src="doc" className={classes.iframe} />
+      <iframe title="API documentation" src="doc" className={classes.iframe} />
     </div>
   );
 };
 
-export default Documentation;
+export default React.memo(Documentation);

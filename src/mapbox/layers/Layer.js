@@ -15,6 +15,7 @@ import { v4 as uuid } from 'uuid';
  * @param {string} [options.copyright=undefined] Copyright-Statement.
  * @param {Object} [options.properties={}] Application-specific layer properties.
  * @param {boolean} [options.isQueryable=undefined] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
+ * @private
  */
 
 export default class Layer extends Observable {
