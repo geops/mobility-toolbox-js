@@ -20,7 +20,7 @@ import { TrajservAPI } from '../../api';
  * Responsible for loading tracker data from Trajserv.
  * @class
  * @example
- * import { TrajservLayer } from 'mobility-toolbox-js/ol';
+ * import { TrajservLayer } from 'mobility-toolbox-js/src/ol';
  * @inheritDoc
  * @param {Object} [options] Layer options.
  * @param {string} [options.url = https://api.geops.io/tracker] Tracker url.

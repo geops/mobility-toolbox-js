@@ -17,9 +17,9 @@ import { getSourceCoordinates } from '../utils';
 
 /**
  * Responsible for loading tracker data from Trajserv.
- * @class MapboxTrajservLayer
+ * @class
  * @example
- * import { MapboxTrajservLayer } from 'mobility-toolbox-js/mapbox';
+ * import { MapboxTrajservLayer } from 'mobility-toolbox-js/src/mapbox';
  * @inheritDoc
  * @param {Object} [options] Layer options.
  * @param {string} [options.url = https://api.geops.io/tracker] Tracker url.
@@ -30,7 +30,7 @@ import { getSourceCoordinates } from '../utils';
  * @param {Array.<string>|string} options.tripNumber Filter by trip number, bus in zurich: '2068', list of buses in Zurich: '2068,3003,3451,3953'
  * @param {Array.<string>|string} options.operator Filter by operator, string: 'sbb', list: '(vbz\|zsg)'
  */
-class TrajservLayer extends TrackerLayer {
+class MapboxTrajservLayer extends TrackerLayer {
   /**
    * Create a filter based on train and operator
    * @param {string} line
@@ -111,8 +111,8 @@ class TrajservLayer extends TrackerLayer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map)
-   * @private
+   * @param {mapboxgl.map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
+   * @param {String} beforeLayerId .
    */
   init(map, beforeLayerId) {
     super.init(map);
@@ -159,13 +159,13 @@ class TrajservLayer extends TrackerLayer {
   addTrackerFilters() {
     // Setting filters from the permalink.
     const parameters = qs.parse(window.location.search.toLowerCase());
-    const lineParam = parameters[TrajservLayer.LINE_FILTER];
-    const routeParam = parameters[TrajservLayer.ROUTE_FILTER];
-    const opParam = parameters[TrajservLayer.OPERATOR_FILTER];
+    const lineParam = parameters[MapboxTrajservLayer.LINE_FILTER];
+    const routeParam = parameters[MapboxTrajservLayer.ROUTE_FILTER];
+    const opParam = parameters[MapboxTrajservLayer.OPERATOR_FILTER];
     const { regexPublishedLineName } = this.options;
 
     if (lineParam || routeParam || opParam || regexPublishedLineName) {
-      this.filterFc = TrajservLayer.createFilter(
+      this.filterFc = MapboxTrajservLayer.createFilter(
         lineParam ? lineParam.split(',') : undefined,
         routeParam ? routeParam.split(',') : undefined,
         opParam ? opParam.split(',') : undefined,
@@ -568,8 +568,8 @@ class TrajservLayer extends TrackerLayer {
   }
 }
 
-TrajservLayer.LINE_FILTER = 'publishedlinename';
-TrajservLayer.ROUTE_FILTER = 'tripnumber';
-TrajservLayer.OPERATOR_FILTER = 'operator';
+MapboxTrajservLayer.LINE_FILTER = 'publishedlinename';
+MapboxTrajservLayer.ROUTE_FILTER = 'tripnumber';
+MapboxTrajservLayer.OPERATOR_FILTER = 'operator';
 
-export default TrajservLayer;
+export default MapboxTrajservLayer;

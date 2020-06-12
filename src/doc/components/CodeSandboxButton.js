@@ -11,22 +11,40 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
   const dataSB = {
     files: {
       'index.html': {
-        content: html,
+        content: `${html}<script src="index.js"></script>`,
       },
-      'main.js': {
-        content: js,
+      'index.js': {
+        content: js // eslint-disable-next-line no-template-curly-in-string
+          .replace('${window.apiKey}', window.apiKey)
+          .replace('window.apiKey', `'${window.apiKey}'`),
       },
       'package.json': {
         content: {
-          name: 'mobility-toolbox-js',
+          name: 'vanilla',
           version: '1.0.0',
-          main: 'build/index.js',
-          module: 'src/index.js',
-          dependencies: {
-            ol: '^6.3.1',
-            'mapbox-gl': '^1.10.1',
-            'mobility-toolbox-js': '@beta',
+          description: 'Mobility example starter project',
+          main: 'index.html',
+          scripts: {
+            start: 'parcel index.html --open',
+            build: 'parcel build index.html',
           },
+          dependencies: {
+            'mapbox-gl': '1.11.0',
+            'mobility-toolbox-js': 'beta',
+            ol: '6.3.1',
+            'query-string': '6.13.1',
+          },
+          devDependencies: {
+            '@babel/core': '7.2.0',
+            'parcel-bundler': '^1.6.1',
+          },
+          keywords: [
+            'javascript',
+            'starter',
+            'mobility-toolbox-js',
+            'mobility',
+            'toolbox',
+          ],
         },
       },
     },

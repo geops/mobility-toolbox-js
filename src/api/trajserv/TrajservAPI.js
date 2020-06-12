@@ -9,7 +9,7 @@ import { handleError, readJsonResponse } from '../utils';
  * Access to Trajserv api.
  * @class
  * @example
- * import { TrajservAPI } from 'mobility-toolbox-js/api';
+ * import { TrajservAPI } from 'mobility-toolbox-js/src/api';
  */
 class TrajservAPI {
   constructor(options = {}) {

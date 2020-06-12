@@ -5,7 +5,7 @@ import { handleError, readJsonResponse } from '../utils';
  * Access to Stops api.
  * @class
  * @example
- * import { StopsAPI } from 'mobility-toolbox-js/api';
+ * import { StopsAPI } from 'mobility-toolbox-js/src/api';
  */
 class StopsAPI {
   constructor(options = {}) {

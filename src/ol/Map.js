@@ -8,7 +8,7 @@ import Layer from './layers/Layer';
  * {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html|ol/Map}.
  *
  * @example
- * import { Map } from 'mobility-toolbox-js/ol';
+ * import { Map } from 'mobility-toolbox-js/src/ol';
  *
  * @class
  * @namespace

@@ -30,7 +30,7 @@ const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
  * @class
  *
  * @example
- * import { MapboxStyleLayer } from 'mobility-toolbox-js/ol';
+ * import { MapboxStyleLayer } from 'mobility-toolbox-js/src/ol';
  *
  * @param {Object} [options] Layer options.
  * @inheritdoc

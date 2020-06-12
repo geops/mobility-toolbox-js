@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid';
  * an {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html ol/Layer} and further options
  * @class
  * @example
- * import { Layer } from 'mobility-toolbox-js/ol';
+ * import { Layer } from 'mobility-toolbox-js/src/ol';
  * @param {Object} options
  * @param {string} options.name Layer name (required).
  * @param {ol.layer} options.olLayer The {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html ol/Layer} (required).
