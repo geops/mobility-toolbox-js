@@ -1,7 +1,7 @@
 {
   "name": "mobility-toolbox-js",
   "license": "MIT",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "main": "build/index.js",
   "module": "src/index.js",
   "dependencies": {
@@ -117,6 +117,14 @@
       }
     }
   },
+  "files": [
+    "build",
+    "src/index.js",
+    "src/api",
+    "src/mapbox",
+    "src/search",
+    "src/common"
+  ],
   "husky": {
     "hooks": {
       "post-checkout": "yarn install --frozen-lockfile",
