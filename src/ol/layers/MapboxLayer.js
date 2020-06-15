@@ -111,7 +111,7 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
-   * Initialize the layer and listen to feature clicks.
+   * @inheritdoc
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
   init(map) {
@@ -165,8 +165,8 @@ export default class MapboxLayer extends Layer {
 
     this.mbMap.once('load', () => {
       this.loaded = true;
-      if (!this.getCopyright()) {
-        this.setCopyright(getCopyrightFromSources(this.mbMap));
+      if (!this.copyright) {
+        this.copyright = getCopyrightFromSources(this.mbMap);
       }
       this.dispatchEvent({
         type: 'load',

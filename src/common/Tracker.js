@@ -51,7 +51,7 @@ export default class Tracker {
    * Define the trajectories.
    * @param {array<ol.feature>} trajectories
    */
-  setTrajectories(trajectories) {
+  setTrajectories(trajectories = []) {
     if (this.sort) {
       trajectories.sort(this.sort);
     }
@@ -127,7 +127,7 @@ export default class Tracker {
     let hoverVehicleImg;
     let hoverVehiclePx;
 
-    for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
+    for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
       const traj = this.trajectories[i];
 
       // We simplify the traj object
