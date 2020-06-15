@@ -86,8 +86,10 @@ class TrackerLayer extends TrackerMixin(CommonLayer) {
    */
   stop() {
     super.stop();
-    this.map.off('moveend', this.onMapMoveEnd);
-    this.map.off('mousemove', this.onMapMouseMove);
+    if (this.map) {
+      this.map.off('moveend', this.onMapMoveEnd);
+      this.map.off('mousemove', this.onMapMouseMove);
+    }
   }
 
   /**

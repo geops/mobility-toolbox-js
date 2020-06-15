@@ -37,7 +37,7 @@ export default class MapboxLayer extends Layer {
         const canvas = this.mbMap.getCanvas();
         const { viewState } = frameState;
 
-        const visible = this.olLayer.getVisible();
+        const { visible } = this.olLayer;
         if (this.renderState.visible !== visible) {
           canvas.style.display = visible ? 'block' : 'none';
           this.renderState.visible = visible;

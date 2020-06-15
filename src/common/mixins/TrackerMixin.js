@@ -68,7 +68,7 @@ export default (Base) =>
       }
 
       this.visibilityRef = this.on('change:visible', (evt) => {
-        if (evt.target.getVisible()) {
+        if (evt.target.visible) {
           this.start();
         } else {
           this.stop();
