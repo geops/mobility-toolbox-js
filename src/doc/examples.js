@@ -29,6 +29,15 @@ export default [
     },
   },
   {
+    name: 'Tralis tracker with OpenLayers',
+    key: 'mapbox-tralis',
+    description: 'Show moving tramway in an OpenLayers map.',
+    files: {
+      html: 'tralis.html',
+      js: 'tralis.js',
+    },
+  },
+  {
     name: 'Mapbox layer',
     key: 'mapbox-layer',
     description: 'Display a Mapbox layer on an OpenLayers map.',
