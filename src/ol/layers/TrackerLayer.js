@@ -277,7 +277,7 @@ class TrackerLayer extends Layer {
     const ext = buffer([...coordinate, ...coordinate], 10 * res);
     const trajectories = this.tracker.getTrajectories();
     const vehicles = [];
-    for (let i = 0; i < trajectories.length; i += 1) {
+    for (let i = 0; i < (this.trajectories || []).length; i += 1) {
       if (
         trajectories[i].coordinate &&
         containsCoordinate(ext, trajectories[i].coordinate)
