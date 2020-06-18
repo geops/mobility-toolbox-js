@@ -77,50 +77,10 @@ const handleClose = (setAnchor, setMenuOpen) => {
   setAnchor(null);
 };
 
-const collapsedMenu = (classes, anchorEl, setAnchor, menuOpen, setMenuOpen) => {
-  return (
-    <div className={classes.buttonCollapse}>
-      <IconButton onClick={(e) => handleMenu(e, setAnchor, setMenuOpen)}>
-        <MenuIcon />
-      </IconButton>
-      <Menu
-        id="menu-appbar"
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        open={menuOpen}
-        onClose={() => handleClose(setAnchor, setMenuOpen)}
-      >
-        <MenuItem onClick={() => setMenuOpen(false)}>
-          <NavLink to="/api">API</NavLink>
-        </MenuItem>
-        <MenuItem onClick={() => setMenuOpen(false)}>
-          <NavLink to="/examples">Examples</NavLink>
-        </MenuItem>
-        <MenuItem onClick={() => setMenuOpen(false)}>
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://github.com/geops/mobility-toolbox-js"
-          >
-            Code
-          </a>
-        </MenuItem>
-      </Menu>
-    </div>
-  );
-};
-
 const Header = () => {
   const classes = useStyles();
   const [anchorEl, setAnchor] = useState(null);
-  const [open, setMenuOpen] = useState(null);
+  const [open, setMenuOpen] = useState(false);
   return (
     <>
       <AppBar position="static" className={classes.appBar} color="transparent">
@@ -129,7 +89,41 @@ const Header = () => {
           <div className={classes.title}>mobility-toolbox-js</div>
         </div>
 
-        {collapsedMenu(classes, anchorEl, setAnchor, open, setMenuOpen)}
+        <div className={classes.buttonCollapse}>
+          <IconButton onClick={(e) => handleMenu(e, setAnchor, setMenuOpen)}>
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={open}
+            onClose={() => handleClose(setAnchor, setMenuOpen)}
+          >
+            <MenuItem onClick={() => setMenuOpen(false)}>
+              <NavLink to="/api">API</NavLink>
+            </MenuItem>
+            <MenuItem onClick={() => setMenuOpen(false)}>
+              <NavLink to="/examples">Examples</NavLink>
+            </MenuItem>
+            <MenuItem onClick={() => setMenuOpen(false)}>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://github.com/geops/mobility-toolbox-js"
+              >
+                Code
+              </a>
+            </MenuItem>
+          </Menu>
+        </div>
 
         <div className={classes.links}>
           <NavLink to="/api">API</NavLink>
