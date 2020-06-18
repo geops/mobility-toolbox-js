@@ -152,7 +152,7 @@ class TrackerLayer extends Layer {
       this.tracker.renderTrajectories(
         this.currTime,
         [canvas.width, canvas.height],
-        100,
+        getResolution(this.map),
       );
     }
   }
@@ -178,7 +178,7 @@ class TrackerLayer extends Layer {
     this.tracker.renderTrajectories(
       this.currTime,
       [canvas.width, canvas.height],
-      100,
+      getResolution(this.map),
     );
     this.startUpdateTime();
     this.currentZoom = this.map.getZoom();
@@ -283,7 +283,7 @@ class TrackerLayer extends Layer {
     const ext = buffer([...coordinate, ...coordinate], 10 * resolution);
     const trajectories = this.tracker.getTrajectories();
     const vehicles = [];
-    for (let i = 0; i < (this.trajectories || []).length; i += 1) {
+    for (let i = 0; i < trajectories.length; i += 1) {
       if (
         trajectories[i].coordinate &&
         containsCoordinate(ext, trajectories[i].coordinate)
