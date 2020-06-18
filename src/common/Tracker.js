@@ -64,7 +64,7 @@ export default class Tracker {
    * @returns {array<trajectory>} trajectories
    */
   getTrajectories() {
-    return this.trajectories;
+    return this.trajectories || [];
   }
 
   /**
@@ -99,7 +99,10 @@ export default class Tracker {
    * @private
    */
   setHoverVehicleId(id) {
-    this.hoverVehicleId = id;
+    if (id !== this.hoverVehicleId) {
+      this.hoverVehicleId = id;
+      this.renderTrajectories();
+    }
   }
 
   /**
@@ -115,8 +118,9 @@ export default class Tracker {
    * @param {Date} currTime
    * @private
    */
-  renderTrajectories(currTime = Date.now(), [width, height], resolution) {
+  renderTrajectories(currTime = Date.now(), size = [], resolution) {
     this.clear();
+    const [width, height] = size;
     if (
       width &&
       height &&
@@ -124,6 +128,7 @@ export default class Tracker {
     ) {
       [this.canvas.width, this.canvas.height] = [width, height];
     }
+    this.currResolution = resolution || this.currResolution;
     let hoverVehicleImg;
     let hoverVehiclePx;
 
@@ -205,7 +210,7 @@ export default class Tracker {
           continue;
         }
 
-        const vehicleImg = this.style(traj, resolution);
+        const vehicleImg = this.style(traj, this.currResolution);
         if (this.hoverVehicleId !== traj.id) {
           this.canvasContext.drawImage(
             vehicleImg,
