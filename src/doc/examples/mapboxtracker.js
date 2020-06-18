@@ -16,9 +16,9 @@ export default () => {
     apiKey: window.apiKey,
   });
 
-  tracker.onClick((vehicle) => {
+  tracker.onClick((vehicles) => {
     // eslint-disable-next-line no-console
-    console.log(vehicle);
+    console.log(vehicles);
   });
 
   map.on('load', () => {

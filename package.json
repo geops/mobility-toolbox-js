@@ -72,7 +72,7 @@
     "worker-loader": "^2.0.0"
   },
   "scripts": {
-    "apidoc": "documentation build src/ol/index.js src/mapbox/index.js --config documentation.yml --format html -o doc",
+    "apidoc": "documentation build src/ol/index.js src/mapbox/index.js --config documentation.yml --format json -o doc.json",
     "build": "yarn lib",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",

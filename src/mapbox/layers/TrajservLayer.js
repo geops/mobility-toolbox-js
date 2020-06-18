@@ -150,6 +150,7 @@ class MapboxTrajservLayer extends TrackerLayer {
         paint: {
           'raster-opacity': 1,
           'raster-fade-duration': 0,
+          'raster-resampling': 'nearest', // important otherwise it looks blurry
         },
       },
       beforeLayerId,
@@ -226,7 +227,8 @@ class MapboxTrajservLayer extends TrackerLayer {
    * @private
    */
   onMoveEnd() {
-    this.updateTrajectories();
+    this.onMove();
+    // this.updateTrajectories();
     if (this.selectedVehicleId && this.journeyId) {
       this.highlightTrajectory();
     }

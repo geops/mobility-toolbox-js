@@ -211,7 +211,7 @@ class TrackerLayer extends Layer {
     this.getVehicleAtCoordinateWorker.onmessage = (e) => {
       const [vehicle] = e.data;
       // eslint-disable-next-line no-console
-      console.log(vehicle);
+      // console.log(e.data);
       this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
       this.tracker.setHoverVehicleId(vehicle && vehicle.id);
     };
