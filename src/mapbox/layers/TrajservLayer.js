@@ -150,6 +150,7 @@ class MapboxTrajservLayer extends TrackerLayer {
         paint: {
           'raster-opacity': 1,
           'raster-fade-duration': 0,
+          'raster-resampling': 'nearest', // important otherwise it looks blurry
         },
       },
       beforeLayerId,
