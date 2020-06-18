@@ -165,12 +165,12 @@ class MapboxTrajservLayer extends TrackerLayer {
     const { regexPublishedLineName } = this.options;
 
     if (lineParam || routeParam || opParam || regexPublishedLineName) {
-      this.filterFc = MapboxTrajservLayer.createFilter(
-        lineParam ? lineParam.split(',') : undefined,
-        routeParam ? routeParam.split(',') : undefined,
-        opParam ? opParam.split(',') : undefined,
-        regexPublishedLineName,
-      );
+      // this.filterFc = MapboxTrajservLayer.createFilter(
+      //   lineParam ? lineParam.split(',') : undefined,
+      //   routeParam ? routeParam.split(',') : undefined,
+      //   opParam ? opParam.split(',') : undefined,
+      //   regexPublishedLineName,
+      // );
     } else {
       this.filterFc = null;
     }

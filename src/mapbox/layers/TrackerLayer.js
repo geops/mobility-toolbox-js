@@ -1,10 +1,10 @@
 import { unByKey } from 'ol/Observable';
 import { toLonLat, fromLonLat } from 'ol/proj';
-import { buffer, containsCoordinate } from 'ol/extent';
 import Layer from './Layer';
 import Tracker from '../../common/Tracker';
 import { timeSteps } from '../../common/trackerConfig';
 import { getResolution } from '../utils';
+import GetVehicleAtCoordinateW from '../../common/workers/getVehicleAtCoordinate.worker';
 
 /**
  * Responsible for loading tracker data.
@@ -86,6 +86,7 @@ class TrackerLayer extends Layer {
     if (!this.map) {
       return;
     }
+    this.getVehicleAtCoordinateWorker = new GetVehicleAtCoordinateW();
 
     const { width, height } = map.getCanvas();
     this.tracker = new Tracker({
@@ -202,13 +203,18 @@ class TrackerLayer extends Layer {
           this.map.getContainer().style.cursor = 'auto';
           return;
         }
-        const [vehicle] = this.getVehiclesAtCoordinate(
+        this.getVehiclesAtCoordinate(
           fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
         );
-        this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
-        this.tracker.setHoverVehicleId(vehicle && vehicle.id);
       }),
     ];
+    this.getVehicleAtCoordinateWorker.onmessage = (e) => {
+      const [vehicle] = e.data;
+      // eslint-disable-next-line no-console
+      console.log(vehicle);
+      this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
+      this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+    };
   }
 
   /**
@@ -279,20 +285,13 @@ class TrackerLayer extends Layer {
    * @private
    */
   getVehiclesAtCoordinate(coordinate) {
-    const resolution = getResolution(this.map);
-    const ext = buffer([...coordinate, ...coordinate], 10 * resolution);
-    const trajectories = this.tracker.getTrajectories();
-    const vehicles = [];
-    for (let i = 0; i < (this.trajectories || []).length; i += 1) {
-      if (
-        trajectories[i].coordinate &&
-        containsCoordinate(ext, trajectories[i].coordinate)
-      ) {
-        vehicles.push(trajectories[i]);
-      }
-    }
+    const res = getResolution(this.map);
 
-    return vehicles;
+    // const ext = buffer([...coordinate, ...coordinate], 10 * res);
+    const trajectories = this.tracker.getTrajectories();
+    this.getVehicleAtCoordinateWorker.postMessage(
+      JSON.stringify([trajectories, coordinate, res]),
+    );
   }
 
   /**

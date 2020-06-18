@@ -1,9 +1,9 @@
 import OLLayer from 'ol/layer/Layer';
 import { unByKey } from 'ol/Observable';
-import { buffer, containsCoordinate } from 'ol/extent';
 import Layer from './Layer';
 import Tracker from '../../common/Tracker';
 import { timeSteps } from '../../common/trackerConfig';
+import GetVehicleAtCoordinateW from '../../common/workers/getVehicleAtCoordinate.worker';
 
 /**
  * Responsible for loading tracker data.
@@ -99,6 +99,7 @@ class TrackerLayer extends Layer {
     if (!this.map) {
       return;
     }
+    this.getVehicleAtCoordinateWorker = new GetVehicleAtCoordinateW();
 
     this.tracker = new Tracker({
       getPixelFromCoordinate: this.map.getPixelFromCoordinate.bind(this.map),
@@ -198,11 +199,20 @@ class TrackerLayer extends Layer {
         if (this.map.getView().getInteracting() || !this.isHoverActive) {
           return;
         }
+        this.getVehiclesAtCoordinate(evt.coordinate);
         const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate);
         this.map.getTargetElement().style.cursor = vehicle ? 'pointer' : 'auto';
         this.tracker.setHoverVehicleId(vehicle && vehicle.id);
       }),
     ];
+
+    this.getVehicleAtCoordinateWorker.onmessage = (e) => {
+      const [vehicle] = e.data;
+      // eslint-disable-next-line no-console
+      console.log(vehicle);
+      this.map.getTargetElement().style.cursor = vehicle ? 'pointer' : 'auto';
+      this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+    };
   }
 
   /**
@@ -274,19 +284,21 @@ class TrackerLayer extends Layer {
    */
   getVehiclesAtCoordinate(coordinate) {
     const res = this.map.getView().getResolution();
-    const ext = buffer([...coordinate, ...coordinate], 10 * res);
     const trajectories = this.tracker.getTrajectories();
-    const vehicles = [];
-    for (let i = 0; i < (this.trajectories || []).length; i += 1) {
-      if (
-        trajectories[i].coordinate &&
-        containsCoordinate(ext, trajectories[i].coordinate)
-      ) {
-        vehicles.push(trajectories[i]);
-      }
-    }
+    this.getVehicleAtCoordinateWorker.postMessage(
+      JSON.stringify([trajectories, coordinate, res]),
+    );
+    // const vehicles = [];
+    // for (let i = 0; i < (trajectories || []).length; i += 1) {
+    //   if (
+    //     trajectories[i].coordinate &&
+    //     containsCoordinate(ext, trajectories[i].coordinate)
+    //   ) {
+    //     vehicles.push(trajectories[i]);
+    //   }
+    // }
 
-    return vehicles;
+    // return vehicles;
   }
 
   /**
