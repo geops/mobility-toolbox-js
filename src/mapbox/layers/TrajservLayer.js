@@ -13,7 +13,7 @@ import {
   getTextSize,
 } from '../../common/trackerConfig';
 import { TrajservAPI } from '../../api';
-import { getSourceCoordinates } from '../utils';
+import { getSourceCoordinates, getResolution } from '../utils';
 
 /**
  * Responsible for loading tracker data from Trajserv.
@@ -214,7 +214,11 @@ class MapboxTrajservLayer extends TrackerLayer {
       .getSource('canvas-source')
       .setCoordinates(getSourceCoordinates(this.map));
     const { width, height } = this.map.getCanvas();
-    this.tracker.renderTrajectories(this.currTime, [width, height], 100);
+    this.tracker.renderTrajectories(
+      this.currTime,
+      [width, height],
+      getResolution(this.map),
+    );
   }
 
   /**

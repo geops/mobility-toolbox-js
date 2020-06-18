@@ -153,7 +153,7 @@ class TrackerLayer extends Layer {
       this.tracker.renderTrajectories(
         this.currTime,
         [canvas.width, canvas.height],
-        100,
+        getResolution(this.map),
       );
     }
   }
@@ -179,7 +179,7 @@ class TrackerLayer extends Layer {
     this.tracker.renderTrajectories(
       this.currTime,
       [canvas.width, canvas.height],
-      100,
+      getResolution(this.map),
     );
     this.startUpdateTime();
     this.currentZoom = this.map.getZoom();
