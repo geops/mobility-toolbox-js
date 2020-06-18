@@ -4,22 +4,23 @@ import { v4 as uuid } from 'uuid';
 /**
  * A class representing a layer to display on BasicMap with a name and
  * an {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html ol/Layer} and further options
- * @class
  * @example
  * import { Layer } from 'mobility-toolbox-js/src/ol';
- * @param {Object} options
- * @param {string} options.name Layer name (required).
- * @param {ol.layer} options.olLayer The {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html ol/Layer} (required).
- * @param {string} [options.key=undefined] Layer key, will use options.name.toLowerCase() if not specified.
- * @param {boolean} [options.isBaseLayer=undefined] If true this layer is a baseLayer.
- * @param {Array<ol.layer>} [options.children=[]] Sublayers.
- * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
- * @param {string} [options.copyright=undefined] Copyright-Statement.
- * @param {Object} [options.properties={}] Application-specific layer properties.
- * @param {boolean} [options.isQueryable=undefined] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
  */
-
-export default class Layer extends Observable {
+class Layer extends Observable {
+  /**
+   * Create a Layer
+   * @param {Object} options
+   * @param {string} options.name Layer name (required).
+   * @param {ol.layer} options.olLayer The {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html ol/Layer} (required).
+   * @param {string} [options.key=undefined] Layer key, will use options.name.toLowerCase() if not specified.
+   * @param {boolean} [options.isBaseLayer=undefined] If true this layer is a baseLayer.
+   * @param {Array<ol.layer>} [options.children=[]] Sublayers.
+   * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
+   * @param {string} [options.copyright=undefined] Copyright-Statement.
+   * @param {Object} [options.properties={}] Application-specific layer properties.
+   * @param {boolean} [options.isQueryable=undefined] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
+   */
   constructor({
     name,
     olLayer,
@@ -54,7 +55,6 @@ export default class Layer extends Observable {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @private
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
   init(map) {
@@ -64,7 +64,6 @@ export default class Layer extends Observable {
 
   /**
    * Terminate what was initialized in init function. Remove layer, events...
-   * @private
    */
   terminate() {
     unByKey(this.olListenersKeys);
@@ -265,3 +264,4 @@ export default class Layer extends Observable {
     });
   }
 }
+export default Layer;

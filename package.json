@@ -41,6 +41,9 @@
     "cypress": "^4.8.0",
     "deepmerge": "^4.2.2",
     "documentation": "^13.0.0",
+    "esdoc": "^1.1.0",
+    "esdoc-ecmascript-proposal-plugin": "^1.0.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.1.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-prettier": "^6.5.0",
@@ -71,7 +74,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "scripts": {
-    "apidoc": "documentation build src/ol/index.js src/mapbox/index.js --config documentation.yml --format html -o doc",
+    "apidoc": "esdoc",
     "build": "yarn lib",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",

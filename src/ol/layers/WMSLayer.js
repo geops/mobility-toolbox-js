@@ -1,16 +1,16 @@
 import GeoJSON from 'ol/format/GeoJSON';
 import { unByKey } from 'ol/Observable';
-import Layer from './Layer';
+import OLLayer from './Layer';
 
 /**
- * A class representing WMS layer to display on BasicMap
  * @class
- * @example
- * import { WMSLayer } from 'mobility-toolbox-js/src/ol';
- * @inheritDoc
- * @param {Object} [options]
+ * @augments Layer
+ * @extends baba
  */
-class WMSLayer extends Layer {
+class WMSLayer extends OLLayer {
+  /**
+   * @inheritdoc
+   */
   constructor(options = {}) {
     super(options);
 

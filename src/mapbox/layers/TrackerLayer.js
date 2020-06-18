@@ -8,13 +8,15 @@ import { getResolution } from '../utils';
 
 /**
  * Responsible for loading tracker data.
- * Extended from Layer {@link https://react-spatial.geops.de/docjs.html react-spatial/layers/Layer}
+ *
+ * @example
+ * import { TrackerLayer } from 'mobility-toolbox-js/src/mapbox';
+ *
  * @class
- * @inheritDoc
+ *
  * @param {Object} options
  * @param {boolean} options.useDelayStyle Set the delay style.
  * @param {string} options.onClick Callback function on feature click.
- * @private
  */
 class TrackerLayer extends Layer {
   constructor(options = {}) {
