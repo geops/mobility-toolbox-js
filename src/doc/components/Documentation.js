@@ -6,10 +6,10 @@ const useStyles = makeStyles({
     display: 'flex',
     flexGrow: 1,
     justifyContent: 'center',
+    height: '100%',
   },
   iframe: {
     flexGrow: 1,
-    maxWidth: 1250,
     overflowY: 'visible',
     border: 0,
   },
@@ -22,7 +22,7 @@ const Documentation = () => {
     <div className={classes.root}>
       <iframe
         title="API documentation"
-        src="apidoc/"
+        src="apidoc/identifiers.html"
         className={classes.iframe}
       />
     </div>

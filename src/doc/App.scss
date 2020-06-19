@@ -19,4 +19,8 @@ html,
 a {
   text-decoration: none;
   color: initial;
+
+  &:hover {
+    color: '#76b833';
+  }
 }

@@ -9,9 +9,10 @@ import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Header from './components/Header';
 import Examples from './components/Examples';
 import Documentation from './components/Documentation';
+import Home from './components/Home';
 
 import 'typeface-lato';
-import './App.css';
+import './App.scss';
 
 const theme = createMuiTheme({
   colors: {
@@ -54,20 +55,29 @@ const App = () => {
       <Router>
         <Header />
 
-        <Route exact path="/">
-          <Redirect to="/examples/map" />
-        </Route>
-        <Route path="/examples/:exampleKey?">
-          <div className={classes.content}>
-            <Container maxWidth="lg">
+        <div className={classes.content}>
+          <Container
+            maxWidth="lg"
+            disableGutters
+            style={{ position: 'relative', height: '100%' }}
+          >
+            <Route exact path="/">
+              <Redirect to="/home" />
+            </Route>
+            <Route exact path="/examples">
+              <Redirect to="/examples/map" />
+            </Route>
+            <Route path="/examples/:exampleKey?">
               <Examples />
-            </Container>
-          </div>
-        </Route>
-
-        <Route exact path="/api">
-          <Documentation />
-        </Route>
+            </Route>
+            <Route exact path="/home">
+              <Home />
+            </Route>
+            <Route exact path="/api">
+              <Documentation />
+            </Route>
+          </Container>
+        </div>
       </Router>
     </ThemeProvider>
   );

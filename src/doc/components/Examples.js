@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import Select from '@material-ui/core/Select';
@@ -11,10 +10,12 @@ import Example from './Example';
 import EXAMPLES from '../examples';
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
   filterField: {
     width: '100%',
     marginBottom: 15,
+  },
+  example: {
+    padding: 20,
   },
   navigation: {
     background: '#e3e9ec',
@@ -28,16 +29,10 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   exampleMenu: {
-    position: 'sticky',
-    display: 'flex',
-    alignItems: 'center',
-    height: 80,
-    zIndex: 5,
-    background: 'white',
-    top: 0,
+    marginBottom: 20,
+    lineHeight: '15px',
   },
   select: {
-    minWidth: 250,
     height: 50,
   },
 }));
@@ -69,39 +64,44 @@ export default () => {
   return (
     <>
       <Hidden smUp>
-        <Container className={classes.exampleMenu}>
-          <Select
-            className={classes.select}
-            variant="outlined"
-            value={example.key}
-            MenuProps={{
-              anchorOrigin: {
-                vertical: 'bottom',
-                horizontal: 'left',
-              },
-              transformOrigin: {
-                vertical: 'top',
-                horizontal: 'left',
-              },
-              getContentAnchorEl: null,
-            }}
-          >
-            {exampleList.map((ex) => (
-              <MenuItem key={ex.key} value={ex.key}>
-                <NavLink
-                  className={classes.exampleLink}
-                  to={`/examples/${ex.key}`}
-                >
-                  {ex.name}
-                </NavLink>
-              </MenuItem>
-            ))}
-          </Select>
-        </Container>
-        {example && <Example example={example} />}
+        <Grid container>
+          <Grid item xs={12} className={classes.navigation}>
+            <Select
+              className={classes.select}
+              variant="outlined"
+              value={example.key}
+              fullWidth
+              MenuProps={{
+                anchorOrigin: {
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                },
+                transformOrigin: {
+                  vertical: 'top',
+                  horizontal: 'left',
+                },
+                getContentAnchorEl: null,
+              }}
+            >
+              {exampleList.map((ex) => (
+                <MenuItem key={ex.key} value={ex.key}>
+                  <NavLink
+                    className={classes.exampleLink}
+                    to={`/examples/${ex.key}`}
+                  >
+                    {ex.name}
+                  </NavLink>
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
+          <Grid item xs={12} className={classes.example}>
+            {example && <Example example={example} />}
+          </Grid>
+        </Grid>
       </Hidden>
       <Hidden only="xs">
-        <Grid container className={classes.root} spacing={3}>
+        <Grid container>
           <Grid item xs={3} className={classes.navigation}>
             <div>
               <TextField
@@ -111,7 +111,7 @@ export default () => {
                 onChange={(e) => setFilter(e.target.value)}
               />
               {exampleList.map((ex) => (
-                <div key={ex.key}>
+                <div key={ex.key} className={classes.exampleMenu}>
                   <NavLink
                     className={classes.exampleLink}
                     to={`/examples/${ex.key}`}
@@ -122,7 +122,7 @@ export default () => {
               ))}
             </div>
           </Grid>
-          <Grid item xs={9}>
+          <Grid item xs={9} className={classes.example}>
             {example && <Example example={example} />}
           </Grid>
         </Grid>

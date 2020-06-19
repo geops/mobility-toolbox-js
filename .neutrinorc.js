@@ -3,6 +3,7 @@ const react = require('@neutrinojs/react');
 const library = require('@neutrinojs/library');
 const jest = require('@neutrinojs/jest');
 const copy = require('@neutrinojs/copy');
+const styles = require('@neutrinojs/style-loader');
 const merge = require('deepmerge');
 const path = require('path');
 
@@ -60,6 +61,26 @@ if (process.env.REACT_APP_LIB_MODE) {
         html: {
           title: 'mobility-toolbox-js',
           favicon: 'src/doc/img/favicon.png',
+        },
+        style: {
+          // Override the default file extension of `.css` if needed
+          test: /\.(css|sass|scss)$/,
+          modulesTest: /\.module\.(css|sass|scss)$/,
+          loaders: [
+            // Define loaders as objects. Note: loaders must be specified in reverse order.
+            // ie: for the loaders below the actual execution order would be:
+            // input file -> sass-loader -> postcss-loader -> css-loader -> style-loader/mini-css-extract-plugin
+            {
+              loader: 'postcss-loader',
+              options: {
+                plugins: [require('autoprefixer')],
+              },
+            },
+            {
+              loader: 'sass-loader',
+              useId: 'sass',
+            },
+          ],
         },
       }),
       jest(),

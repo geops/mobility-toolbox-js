@@ -1,12 +1,19 @@
 /* search box */
 .search-box {
-  position: absolute;
+  /* position: absolute;
   top: 10px;
-  right: 50px;
+  right: 50px; */
   padding-right: 8px;
   padding-bottom: 10px;
   line-height: normal;
   font-size: 12px;
+
+  /* Geops */
+  width: 210px;
+  background: white;
+  padding: 6px;
+  height: 28px;
+  margin-top: 10px;
 }
 
 .search-box img {
@@ -25,6 +32,9 @@
   border: 1px #0af;
   border-style: none none solid none;
   vertical-align: bottom;
+
+  /* Geops */
+  width: 100%;
 }
 
 .search-input-edge {
@@ -47,6 +57,15 @@
   box-shadow: 1px 1px 4px rgb(0,0,0);
   white-space: nowrap;
   overflow-y: scroll;
+
+  /* Geops */
+  max-height: 300px;
+  min-width: 200px;
+  max-width: 500px;
+  width: auto;
+  margin-left: 0px;
+  height: auto;
+
 }
 
 .search-result-import-path {
@@ -75,7 +94,7 @@
 .search-box.active .search-input {
   visibility: visible;
   transition: width 0.2s ease-out;
-  width: 300px;
+  /* Geops width: 300px; */
 }
 
 .search-box.active .search-input-edge {
