@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "@material-ui/core": "^4.9.14",
+    "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.9.14",
     "codesandbox": "^2.1.14",
     "mapbox-gl": "^1.10.1",
@@ -22,6 +23,7 @@
     "prop-types": "^15.7.2",
     "query-string": "^6.13.0",
     "react": "^16.13.1",
+    "react-app-polyfill": "^1.0.6",
     "react-dom": "^16.13.1",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
@@ -43,6 +45,7 @@
     "documentation": "^13.0.0",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
+    "esdoc-publish-html-plugin": "^1.1.2",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.1.0",
     "eslint-config-airbnb": "^18.0.1",
@@ -91,6 +94,19 @@
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "test": "REACT_APP_LIB_MODE=1 jest --env=jsdom --transformIgnorePatterns \"/node_modules/(?!(ol)/).*/\"",
     "test:watch": "yarn test --watchAll"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
+      "last 1 ie version"
+    ]
   },
   "eslintConfig": {
     "env": {

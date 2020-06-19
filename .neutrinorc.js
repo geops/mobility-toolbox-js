@@ -66,13 +66,13 @@ if (process.env.REACT_APP_LIB_MODE) {
       copy({
         patterns: [
           {
-            from: path.join(__dirname, 'doc'),
-            to: path.join(__dirname, 'build/doc'),
+            from: path.join(__dirname, 'apidocdoc'),
+            to: path.join(__dirname, 'build/apidoc'),
           },
-          {
-            from: path.join(__dirname, 'src/doc/documentation_style.css'),
-            to: path.join(__dirname, 'build/doc/assets/style.css'),
-          },
+          // {
+          //   from: path.join(__dirname, 'src/doc/documentation_style.css'),
+          //   to: path.join(__dirname, 'build/doc/assets/style.css'),
+          // },
           {
             from: path.join(__dirname, 'src/doc/examples'),
             to: path.join(__dirname, 'build/examples'),

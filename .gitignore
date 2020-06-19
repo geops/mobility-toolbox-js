@@ -120,4 +120,4 @@ dist
 build
 
 # esdoc build directory
-doc
+apidoc
