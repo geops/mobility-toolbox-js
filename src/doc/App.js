@@ -43,8 +43,9 @@ const theme = createMuiTheme({
 const useStyles = makeStyles({
   content: {
     flexGrow: 1,
-    overflowY: 'scroll',
+    overflowY: 'auto',
   },
+  container: { position: 'relative', height: '100%' },
 });
 
 const App = () => {
@@ -56,27 +57,29 @@ const App = () => {
         <Header />
 
         <div className={classes.content}>
-          <Container
-            maxWidth="lg"
-            disableGutters
-            style={{ position: 'relative', height: '100%' }}
-          >
-            <Route exact path="/">
-              <Redirect to="/home" />
-            </Route>
-            <Route exact path="/examples">
-              <Redirect to="/examples/map" />
-            </Route>
-            <Route path="/examples/:exampleKey?">
+          <Route exact path="/">
+            <Redirect to="/home" />
+          </Route>
+          <Route exact path="/examples">
+            <Redirect to="/examples/map" />
+          </Route>
+          <Route path="/examples/:exampleKey?">
+            <Container
+              maxWidth="lg"
+              disableGutters
+              className={classes.container}
+            >
               <Examples />
-            </Route>
-            <Route exact path="/home">
+            </Container>
+          </Route>
+          <Route exact path="/home">
+            <Container maxWidth="lg" className={classes.container}>
               <Home />
-            </Route>
-            <Route exact path="/api">
-              <Documentation />
-            </Route>
-          </Container>
+            </Container>
+          </Route>
+          <Route exact path="/api">
+            <Documentation />
+          </Route>
         </div>
       </Router>
     </ThemeProvider>
