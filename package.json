@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "@material-ui/core": "^4.9.14",
+    "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.9.14",
     "codesandbox": "^2.1.14",
     "mapbox-gl": "^1.10.1",
@@ -22,7 +23,9 @@
     "prop-types": "^15.7.2",
     "query-string": "^6.13.0",
     "react": "^16.13.1",
+    "react-app-polyfill": "^1.0.6",
     "react-dom": "^16.13.1",
+    "react-markdown": "^4.3.1",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-syntax-highlighter": "^12.2.1",
@@ -41,6 +44,10 @@
     "cypress": "^4.8.0",
     "deepmerge": "^4.2.2",
     "documentation": "^13.0.0",
+    "esdoc": "^1.1.0",
+    "esdoc-ecmascript-proposal-plugin": "^1.0.0",
+    "esdoc-publish-html-plugin": "^1.1.2",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.1.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-prettier": "^6.5.0",
@@ -59,7 +66,10 @@
     "jsdoc": "^3.6.4",
     "lint-staged": "^10.2.9",
     "neutrino": "^9.1.0",
+    "node-sass": "^4.14.1",
+    "postcss-loader": "^3.0.0",
     "prettier": "^2.0.5",
+    "sass-loader": "^8.0.2",
     "sort-json": "^2.0.0",
     "start-server-and-test": "^1.11.0",
     "stylelint": "^13.6.0",
@@ -71,7 +81,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "scripts": {
-    "apidoc": "documentation build src/ol/index.js src/mapbox/index.js --config documentation.yml --format html -o doc",
+    "apidoc": "esdoc",
     "build": "yarn lib",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
@@ -88,6 +98,19 @@
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "test": "REACT_APP_LIB_MODE=1 jest --env=jsdom --transformIgnorePatterns \"/node_modules/(?!(ol)/).*/\"",
     "test:watch": "yarn test --watchAll"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
+      "last 1 ie version"
+    ]
   },
   "eslintConfig": {
     "env": {

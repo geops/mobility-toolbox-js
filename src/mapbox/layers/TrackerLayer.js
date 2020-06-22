@@ -5,11 +5,15 @@ import { getResolution } from '../utils';
 
 /**
  * Responsible for loading tracker data.
+ *
+ * @example
+ * import { TrackerLayer } from 'mobility-toolbox-js/src/mapbox';
+ *
+ * @class
+ *
  * @param {Object} options
  * @param {boolean} options.useDelayStyle Set the delay style.
  * @param {string} options.onClick Callback function on feature click.
- * @class
- * @private
  */
 class TrackerLayer extends TrackerMixin(CommonLayer) {
   constructor(options = {}) {

@@ -16,7 +16,7 @@ import CommonLayer from '../../common/layers/Layer';
  * @param {boolean} [options.isQueryable=false] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
  * @extends CommonLayer
  */
-export default class Layer extends CommonLayer {
+class Layer extends CommonLayer {
   constructor(options) {
     super(options);
     if (this.olLayer) {
@@ -35,16 +35,25 @@ export default class Layer extends CommonLayer {
   }
 
   /**
+<<<<<<< HEAD
    * @param {Map} map A OpenLayers [Map](https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html).
    * @private
+=======
+   * Initialize the layer and listen to feature clicks.
+   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+>>>>>>> olivier/esdoc
    */
   init(map) {
     super.init(map);
   }
 
   /**
+<<<<<<< HEAD
    * Unlisten potential listeners.
    * @private
+=======
+   * Terminate what was initialized in init function. Remove layer, events...
+>>>>>>> olivier/esdoc
    */
   terminate() {
     unByKey(this.olListenersKeys);
@@ -80,3 +89,4 @@ export default class Layer extends CommonLayer {
     );
   }
 }
+export default Layer;

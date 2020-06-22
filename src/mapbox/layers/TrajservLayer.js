@@ -17,18 +17,11 @@ import { getSourceCoordinates, getResolution } from '../utils';
 
 /**
  * Responsible for loading tracker data from Trajserv.
- * @class
+ *
  * @example
  * import { MapboxTrajservLayer } from 'mobility-toolbox-js/src/mapbox';
- * @inheritDoc
- * @param {Object} [options] Layer options.
- * @param {string} [options.url = https://api.geops.io/tracker] Tracker url.
- * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
- * @param {number} options.delayDisplay delay from which the time is always display on the feature (in milliseconds).
- * @param {Array.<string>|string} options.regexPublishedLineName Regex filter for line name. This filter has a higher prio over publishedLineName.
- * @param {Array.<string>|string} options.publishedLineName Filter by line name, string: 'ICE',  list: 's1,s2,s9,s10,s15'
- * @param {Array.<string>|string} options.tripNumber Filter by trip number, bus in zurich: '2068', list of buses in Zurich: '2068,3003,3451,3953'
- * @param {Array.<string>|string} options.operator Filter by operator, string: 'sbb', list: '(vbz\|zsg)'
+ *
+ * @class
  */
 class MapboxTrajservLayer extends TrackerLayer {
   /**
