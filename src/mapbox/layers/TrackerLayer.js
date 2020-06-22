@@ -38,9 +38,10 @@ class TrackerLayer extends TrackerMixin(CommonLayer) {
       width,
       height,
       getPixelFromCoordinate: (coord) => {
+        const pixelRatio = window.devicePixelRatio || 1;
         const [lng, lat] = toLonLat(coord);
         const { x, y } = this.map.project({ lng, lat });
-        return [x, y];
+        return [x * pixelRatio, y * pixelRatio];
       },
     });
   }
