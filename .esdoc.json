@@ -4,7 +4,12 @@
   "includes": ["\\.js$"],
   "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
   "plugins": [
-    { "name": "esdoc-standard-plugin", "option": { "all": true } },
+    {
+      "name": "esdoc-standard-plugin",
+      "option": {
+        "accessor": { "access": ["public", "protected"], "autoPrivate": false }
+      }
+    },
     { "name": "esdoc-ecmascript-proposal-plugin", "option": { "all": true } },
     {
       "name": "esdoc-publish-html-plugin",
