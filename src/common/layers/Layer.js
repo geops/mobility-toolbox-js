@@ -4,17 +4,37 @@ import { v4 as uuid } from 'uuid';
 /**
  * A class representing a layer to display on map.
  *
- * @param {Object} options
- * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
- * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
- * @param {string} [options.copyright=undefined] Copyright-Statement.
- * @param {Array<Layer>} [options.children=[]] Sublayers.
- * @param {Object} [options.properties={}] Application-specific layer properties.
- * @param {boolean} [options.visible=true] If true this layer is visible on the map.
- * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
- * @param {boolean} [options.isQueryable=false] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
+ * @example
+ *
+ * const layer = new Layer({
+ *   name: 'myLayer',
+ * });
+ *
+ * @dynamic {string} name - Name of the layer
+ * @dynamic {string} key - Identifier of the layer. Must be unique.
+ * @dynamic {boolean} isBaseLayer - Define if the layer is a base layer. Read-only.
+ * @dynamic {boolean} isQueryable - Define if the layer can be queried. Read-only.
+ * @dynamic {boolean} isReactSpatialLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
+ * @dynamic {Layer[]} children - List of children.
+ * @dynamic {string} copyright - Copyright.
+ * @dynamic {boolean} visible - Define if the layer is visible or not.
+ * @dynamic {Object} properties - Custom properties.
+ * @dynamic {ol/Map~Map} map - The map where the layer is displayed.
  */
 export default class Layer extends Observable {
+  /**
+   * Constructor
+   *
+   * @param {Object} options
+   * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
+   * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
+   * @param {string} [options.copyright=undefined] Copyright-Statement.
+   * @param {Array<Layer>} [options.children=[]] Sublayers.
+   * @param {Object} [options.properties={}] Application-specific layer properties.
+   * @param {boolean} [options.visible=true] If true this layer is visible on the map.
+   * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
+   * @param {boolean} [options.isQueryable=false] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
+   */
   constructor(options) {
     super();
     this.defineProperties(options);
@@ -82,10 +102,8 @@ export default class Layer extends Observable {
       map: {
         writable: true,
       },
-
       /**
        * Callback function when a user click on a vehicle.
-       * @private
        */
       clickCallbacks: {
         value: [],
@@ -100,6 +118,7 @@ export default class Layer extends Observable {
    */
   init(map) {
     this.terminate();
+    /** @ignore */
     this.map = map;
   }
 
@@ -153,6 +172,7 @@ export default class Layer extends Observable {
       return;
     }
 
+    /** @ignore */
     this.visible = visible;
 
     this.dispatchEvent({
