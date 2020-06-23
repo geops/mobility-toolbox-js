@@ -90,10 +90,10 @@ if (process.env.REACT_APP_LIB_MODE) {
             from: path.join(__dirname, 'apidoc'),
             to: path.join(__dirname, 'build/apidoc'),
           },
-          // {
-          //   from: path.join(__dirname, 'src/doc/documentation_style.css'),
-          //   to: path.join(__dirname, 'build/doc/assets/style.css'),
-          // },
+          {
+            from: path.join(__dirname, 'README.md'),
+            to: path.join(__dirname, 'build/README.md'),
+          },
           {
             from: path.join(__dirname, 'src/doc/examples'),
             to: path.join(__dirname, 'build/examples'),
