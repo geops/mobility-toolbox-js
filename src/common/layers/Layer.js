@@ -19,7 +19,7 @@ import { v4 as uuid } from 'uuid';
  * @dynamic {string} copyright - Copyright.
  * @dynamic {boolean} visible - Define if the layer is visible or not.
  * @dynamic {Object} properties - Custom properties.
- * @dynamic {ol/Map~Map} map - The map where the layer is displayed.
+ * @dynamic {ol/Map~Map|mapbox.Map} map - The map where the layer is displayed.
  */
 export default class Layer extends Observable {
   /**

@@ -19,6 +19,8 @@ function supportDynamic(tag) {
       const name = matched[2];
       const desc = matched[3].trim();
 
+      console.log(type);
+      console.log(type.split('|'));
       results.push({
         kind: 'member',
         name,
@@ -28,7 +30,7 @@ function supportDynamic(tag) {
         access: 'public',
         description: desc,
         lineNumber: tag.lineNumber,
-        type: { types: [type] },
+        type: { types: [...type.split('|')] },
       });
     }
   }
@@ -89,46 +91,12 @@ class Plugin {
             access: 'public',
             description: desc,
             lineNumber: doc.lineNumber,
-            type: { types: [type] },
+            type: { types: [...type.split('|')] },
             __docId__: 395,
           });
         }
       }
     }
-    console.log(ev.data.docs.length, reactPropsDocs);
-    ev.data.docs = ev.data.docs;
-
-    this._reactPropsDocs = reactPropsDocs;
-  }
-
-  onHandleContent(ev) {
-    // const { content } = ev.data;
-    // const { fileName } = ev.data;
-    // // only html
-    // if (path.extname(fileName) !== '.html') return;
-    // // find target doc
-    // const doc = this._reactPropsDocs.find((doc) => {
-    //   const regexp = new RegExp(`${doc.fileName}$`);
-    //   if (fileName.match(regexp)) return true;
-    // });
-    // console.log('###################### find doc', doc);
-    // if (!doc) return;
-    // console.log('###################### Create doc');
-    // // create esdoc properties from react props
-    // // const properties = [doc];
-    // const properties = doc.reactProps.map((reactProp) => {
-    //   const { typeText, paramName, paramDesc } = ParamParser.parseParamValue(
-    //     reactProp.tagValue,
-    //   );
-    //   return ParamParser.parseParam(typeText, paramName, paramDesc);
-    // });
-    // // hack: create html
-    // const docBuilder = DocBuilder.createDefaultBuilder();
-    // const { html } = docBuilder._buildProperties(properties, 'React Props:');
-    // // append html
-    // const $ = cheerio.load(content);
-    // $('.self-detail.detail').append(html);
-    // ev.data.content = $.html();
   }
 }
 
