@@ -1,21 +1,15 @@
 import { toLonLat, fromLonLat } from 'ol/proj';
-import CommonLayer from '../../common/layers/Layer';
-import TrackerMixin from '../../common/mixins/TrackerMixin';
+import Layer from '../../common/layers/Layer';
+import mixin from '../../common/mixins/TrackerLayerMixin';
 import { getResolution } from '../utils';
 
 /**
  * Responsible for loading tracker data.
  *
- * @example
- * import { TrackerLayer } from 'mobility-toolbox-js/src/mapbox';
- *
- * @class
- *
- * @param {Object} options
- * @param {boolean} options.useDelayStyle Set the delay style.
- * @param {string} options.onClick Callback function on feature click.
+ * @extends {Layer}
+ * @implements {TrackerLayerInterface}
  */
-class TrackerLayer extends TrackerMixin(CommonLayer) {
+class TrackerLayer extends mixin(Layer) {
   constructor(options = {}) {
     super({
       ...options,
@@ -27,18 +21,15 @@ class TrackerLayer extends TrackerMixin(CommonLayer) {
 
   /**
    * Initialize the layer.
-   * @param {mapboxgl.map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
-   * @private
+   * @param {mapboxgl.Map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
    */
   init(map) {
-    super.init(map);
-
-    if (!this.map) {
+    if (!map) {
       return;
     }
-
     const { width, height } = map.getCanvas();
-    super.initTracker({
+
+    super.init(map, {
       width,
       height,
       getPixelFromCoordinate: (coord) => {
@@ -67,7 +58,6 @@ class TrackerLayer extends TrackerMixin(CommonLayer) {
   /**
    * Start updating vehicles position.
    * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
-   * @private
    */
   start() {
     this.currentZoom = this.map.getZoom();
@@ -117,7 +107,7 @@ class TrackerLayer extends TrackerMixin(CommonLayer) {
 
     if (z !== this.currentZoom) {
       this.currentZoom = z;
-      this.startUpdateTime(z);
+      this.start(null, z);
     }
   }
 

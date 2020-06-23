@@ -19,11 +19,11 @@ import { getSourceCoordinates, getResolution } from '../utils';
  * Responsible for loading tracker data from Trajserv.
  *
  * @example
- * import { MapboxTrajservLayer } from 'mobility-toolbox-js/src/mapbox';
+ * import { TrajservLayer } from 'mobility-toolbox-js/src/mapbox';
  *
  * @class
  */
-class MapboxTrajservLayer extends TrackerLayer {
+class TrajservLayer extends TrackerLayer {
   /**
    * Create a filter based on train and operator
    * @param {string} line
@@ -115,13 +115,13 @@ class MapboxTrajservLayer extends TrackerLayer {
 
     // Sort the trajectories.
     if (this.sortFc) {
-      this.setSort(this.sortFc);
+      this.sort = this.sortFc;
     } else if (this.useDelayStyle) {
       // Automatic sorting depending on delay, higher delay on top.
-      this.setSort((a, b) => {
+      this.sort = (a, b) => {
         if (a.delay === null) return 1;
         return a.delay < b.delay ? 1 : -1;
-      });
+      };
     }
 
     const { width, height } = map.getCanvas();
@@ -153,23 +153,21 @@ class MapboxTrajservLayer extends TrackerLayer {
   addTrackerFilters() {
     // Setting filters from the permalink.
     const parameters = qs.parse(window.location.search.toLowerCase());
-    const lineParam = parameters[MapboxTrajservLayer.LINE_FILTER];
-    const routeParam = parameters[MapboxTrajservLayer.ROUTE_FILTER];
-    const opParam = parameters[MapboxTrajservLayer.OPERATOR_FILTER];
+    const lineParam = parameters[TrajservLayer.LINE_FILTER];
+    const routeParam = parameters[TrajservLayer.ROUTE_FILTER];
+    const opParam = parameters[TrajservLayer.OPERATOR_FILTER];
     const { regexPublishedLineName } = this.options;
 
     if (lineParam || routeParam || opParam || regexPublishedLineName) {
-      this.filterFc = MapboxTrajservLayer.createFilter(
+      this.filter = TrajservLayer.createFilter(
         lineParam ? lineParam.split(',') : undefined,
         routeParam ? routeParam.split(',') : undefined,
         opParam ? opParam.split(',') : undefined,
         regexPublishedLineName,
       );
     } else {
-      this.filterFc = null;
+      this.filter = null;
     }
-
-    this.setFilter(this.filterFc);
   }
 
   start() {
@@ -478,7 +476,7 @@ class MapboxTrajservLayer extends TrackerLayer {
    * @param {Object} props Properties
    * @private
    */
-  style(props) {
+  defaultStyle(props) {
     const { type, name, id, color, textColor, delay, cancelled } = props;
     const z = Math.min(Math.floor(this.currentZoom || 1), 16);
     const hover = this.tracker.hoverVehicleId === id;
@@ -566,8 +564,8 @@ class MapboxTrajservLayer extends TrackerLayer {
   }
 }
 
-MapboxTrajservLayer.LINE_FILTER = 'publishedlinename';
-MapboxTrajservLayer.ROUTE_FILTER = 'tripnumber';
-MapboxTrajservLayer.OPERATOR_FILTER = 'operator';
+TrajservLayer.LINE_FILTER = 'publishedlinename';
+TrajservLayer.ROUTE_FILTER = 'tripnumber';
+TrajservLayer.OPERATOR_FILTER = 'operator';
 
-export default MapboxTrajservLayer;
+export default TrajservLayer;

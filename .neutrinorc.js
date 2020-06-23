@@ -87,7 +87,7 @@ if (process.env.REACT_APP_LIB_MODE) {
       copy({
         patterns: [
           {
-            from: path.join(__dirname, 'apidocdoc'),
+            from: path.join(__dirname, 'apidoc'),
             to: path.join(__dirname, 'build/apidoc'),
           },
           // {

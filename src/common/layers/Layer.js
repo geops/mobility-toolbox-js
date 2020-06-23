@@ -14,11 +14,16 @@ import { v4 as uuid } from 'uuid';
  * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
  * @param {boolean} [options.isQueryable=false] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
  */
-export default class CommonLayer extends Observable {
+export default class Layer extends Observable {
   constructor(options) {
     super();
-
     this.defineProperties(options);
+
+    // Add click callback
+    const { onClick } = options;
+    if (onClick) {
+      this.onClick(onClick);
+    }
   }
 
   /**
@@ -76,6 +81,14 @@ export default class CommonLayer extends Observable {
       },
       map: {
         writable: true,
+      },
+
+      /**
+       * Callback function when a user click on a vehicle.
+       * @private
+       */
+      clickCallbacks: {
+        value: [],
       },
     });
   }
@@ -226,5 +239,36 @@ export default class CommonLayer extends Observable {
       features: [],
       coordinate: null,
     });
+  }
+
+  /**
+   * Listens to click events on the layer.
+   * @param {function} callback Callback function, called with the clicked
+   *   features,
+   *   the layer instance and the click event.
+   */
+  onClick(callback) {
+    if (typeof callback === 'function') {
+      if (!this.clickCallbacks.includes(callback)) {
+        this.clickCallbacks.push(callback);
+      }
+    } else {
+      throw new Error('callback must be of type function.');
+    }
+  }
+
+  /**
+   * Unlistens to click events on the layer.
+   * @param {function} callback Callback function, called with the clicked
+   *   features,
+   *   the layer instance and the click event.
+   */
+  unClick(callback) {
+    if (typeof callback === 'function') {
+      const idx = this.clickCallbacks.indexOf(callback);
+      if (idx >= -1) {
+        this.clickCallbacks.splice(idx, 1);
+      }
+    }
   }
 }

@@ -5857,6 +5857,11 @@ es-to-primitive@^1.2.1:
     is-date-object "^1.0.1"
     is-symbol "^1.0.2"
 
+es6-mixin@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/es6-mixin/-/es6-mixin-0.3.0.tgz#caab262a5c1200821fe5b43f9e0132f869f66e8b"
+  integrity sha1-yqsmKlwSAIIf5bQ/ngEy+Gn2bos=
+
 es6-promise@^4.0.3:
   version "4.2.8"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"

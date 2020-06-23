@@ -119,13 +119,13 @@ class TrajservLayer extends TrackerLayer {
 
     // Sort the trajectories.
     if (this.sortFc) {
-      this.setSort(this.sortFc);
+      this.sort = this.sortFc;
     } else if (this.useDelayStyle) {
       // Automatic sorting depending on delay, higher delay on top.
-      this.setSort((a, b) => {
+      this.sort = (a, b) => {
         if (a.delay === null) return 1;
         return a.delay < b.delay ? 1 : -1;
-      });
+      };
     }
   }
 
@@ -138,17 +138,15 @@ class TrajservLayer extends TrackerLayer {
     const { regexPublishedLineName } = this.options;
 
     if (lineParam || routeParam || opParam || regexPublishedLineName) {
-      this.filterFc = TrajservLayer.createFilter(
+      this.filter = TrajservLayer.createFilter(
         lineParam ? lineParam.split(',') : undefined,
         routeParam ? routeParam.split(',') : undefined,
         opParam ? opParam.split(',') : undefined,
         regexPublishedLineName,
       );
     } else {
-      this.filterFc = null;
+      this.filter = null;
     }
-
-    this.setFilter(this.filterFc);
   }
 
   start() {

@@ -14,13 +14,6 @@ class WMSLayer extends OLLayer {
   constructor(options = {}) {
     super(options);
 
-    // Array of click callbacks
-    this.clickCallbacks = [];
-
-    // Add click callback
-    if (options.onClick) {
-      this.onClick(options.onClick);
-    }
     this.format = new GeoJSON();
   }
 

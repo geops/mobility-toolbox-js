@@ -1,17 +1,17 @@
 import OLLayer from 'ol/layer/Layer';
 import { unByKey } from 'ol/Observable';
-import TrackerMixin from '../../common/mixins/TrackerMixin';
+import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
 
 /**
  * Responsible for loading tracker data.
  * @param {Object} options
  * @param {boolean} options.useDelayStyle Set the delay style.
- * @param {string} options.onClick Callback function on feature click.
  * @class
- * @private
+ * @extends {Layer}
+ * @implements {TrackerLayerInterface}
  */
-class TrackerLayer extends TrackerMixin(Layer) {
+class TrackerLayer extends mixin(Layer) {
   constructor(options = {}) {
     const olLayer = new OLLayer({
       render: (frameState) => {
@@ -41,13 +41,11 @@ class TrackerLayer extends TrackerMixin(Layer) {
    * @private
    */
   init(map) {
-    super.init(map);
-
-    if (!this.map) {
+    if (!map) {
       return;
     }
 
-    super.initTracker({
+    super.init(map, {
       getPixelFromCoordinate: map.getPixelFromCoordinate.bind(map),
     });
   }
@@ -58,12 +56,7 @@ class TrackerLayer extends TrackerMixin(Layer) {
    */
   setCurrTime(time) {
     const view = this.map.getView();
-    super.setCurrTime(
-      time,
-      this.map.getSize(),
-      view.getResolution(),
-      !view.getInteracting() && !view.getAnimating(),
-    );
+    super.setCurrTime(time, this.map.getSize(), view.getResolution());
   }
 
   /**
@@ -86,7 +79,7 @@ class TrackerLayer extends TrackerMixin(Layer) {
 
         if (z !== this.currentZoom) {
           this.currentZoom = z;
-          this.startUpdateTime();
+          this.startUpdateTime(z);
         }
       }),
       this.map.on('pointermove', (evt) => {
