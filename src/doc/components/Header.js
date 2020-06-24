@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import { List, ListItem, Collapse } from '@material-ui/core';
+import { List, ListItem, Collapse, Tabs, Tab } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
@@ -9,6 +9,10 @@ import { NavLink } from 'react-router-dom';
 import Logo from '../img/logo.svg';
 
 const useStyles = makeStyles((theme) => ({
+  colors: {
+    primary: theme.colors.primary,
+    secondary: theme.colors.secondary,
+  },
   appBar: {
     [theme.breakpoints.down('sm')]: {
       padding: '0 20px',
@@ -63,27 +67,50 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   buttonCollapse: {
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       display: 'none',
     },
     boxShadow: 'none',
   },
   menuList: {
     borderBottom: `2px solid ${theme.colors.primary}`,
+    boxShadow:
+      '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
     backgroundColor: 'white',
     zIndex: 1100,
-    // height: '100px',
+    '& .active': {
+      fontWeight: 'bold',
+      color: theme.colors.secondary,
+    },
   },
   menuListItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
+  tabs: {
+    [theme.breakpoints.down('sm')]: {
+      display: 'none',
+    },
+    '& .active': {
+      fontWeight: 'bold',
+      color: theme.colors.secondary,
+    },
+  },
 }));
 
 const Header = () => {
   const classes = useStyles();
   const [open, setMenuOpen] = useState(false);
+  const path = window.location.pathname.split('/')[1];
+  const [value, setValue] = useState(
+    /^examples|api$/.test(path) ? path : 'examples',
+  );
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   return (
     <>
       <AppBar position="static" className={classes.appBar} color="transparent">
@@ -98,38 +125,58 @@ const Header = () => {
           </IconButton>
         </div>
 
-        <div className={classes.links}>
-          <NavLink to="/api">API</NavLink>
-          <NavLink to="/examples">Examples</NavLink>
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
+        <Tabs
+          className={classes.tabs}
+          value={value}
+          onChange={handleChange}
+          variant="fullWidth"
+        >
+          <Tab value="api" component={NavLink} to="/api" label="API" />
+          <Tab
+            value="examples"
+            component={NavLink}
+            to="/examples"
+            label="Examples"
+          />
+          <Tab
+            value="code"
+            component="a"
             href="https://github.com/geops/mobility-toolbox-js"
-          >
-            Code
-          </a>
-        </div>
+            label="Code"
+          />
+        </Tabs>
       </AppBar>
 
-      <Collapse in={open}>
-        <List className={classes.menuList}>
-          <ListItem button className={classes.menuListItem}>
-            <NavLink to="/api">API</NavLink>
-          </ListItem>
-          <ListItem button className={classes.menuListItem}>
-            <NavLink to="/examples">Examples</NavLink>
-          </ListItem>
-          <ListItem button className={classes.menuListItem}>
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
+      <div>
+        <Collapse in={open}>
+          <List className={classes.menuList}>
+            <ListItem
+              button
+              className={classes.menuListItem}
+              component={NavLink}
+              to="/api"
+            >
+              API
+            </ListItem>
+            <ListItem
+              button
+              className={classes.menuListItem}
+              component={NavLink}
+              to="/examples"
+            >
+              Examples
+            </ListItem>
+            <ListItem
+              button
+              className={classes.menuListItem}
+              component="a"
               href="https://github.com/geops/mobility-toolbox-js"
             >
               Code
-            </a>
-          </ListItem>
-        </List>
-      </Collapse>
+            </ListItem>
+          </List>
+        </Collapse>
+      </div>
     </>
   );
 };

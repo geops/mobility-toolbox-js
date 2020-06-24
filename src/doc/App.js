@@ -36,20 +36,17 @@ const theme = createMuiTheme({
       },
       colorPrimary: {},
     },
-    // MuiCollapse: {
-    //   root: {
-    //     backgroundColor: 'green',
-    //   },
-    //   container: {
-    //     minHeight: '10px',
-    //   },
-    //   hidden: {
-    //     height: 0,
-    //   },
-    //   entered: {
-    //     height: '200px',
-    //   },
-    // },
+    MuiTabs: {
+      root: {
+        height: '100%',
+      },
+      flexContainer: {
+        height: '100%',
+      },
+      indicator: {
+        backgroundColor: '#76b833',
+      },
+    },
   },
 });
 
