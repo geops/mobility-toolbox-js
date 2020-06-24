@@ -3,6 +3,8 @@ import { transform as transformCoords } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
 import { Point, MultiPoint, LineString } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
+import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
 import TrackerLayer from './TrackerLayer';
 import { getUTCTimeString } from '../../common/timeUtils';
 import { getBgColor } from '../../common/trackerConfig';
@@ -26,6 +28,33 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  * @implements {TrajservLayerInterface}
  */
 class TrajservLayer extends mixin(TrackerLayer) {
+  constructor(options) {
+    super(options);
+    Object.defineProperties(this, {
+      vectorLayer: {
+        value: new VectorLayer({
+          source: new VectorSource({ features: [] }),
+        }),
+      },
+    });
+  }
+
+  init(map) {
+    if (!map) {
+      return;
+    }
+
+    map.addLayer(this.vectorLayer);
+    super.init(map);
+  }
+
+  terminate() {
+    if (this.map) {
+      this.map.removeLayer(this.vectorLayer);
+    }
+    super.terminate();
+  }
+
   start() {
     if (!this.map) {
       return;
@@ -78,7 +107,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
       }
     } else {
       this.selectedVehicleId = null;
-      this.olLayer.getSource().clear();
+      this.vectorLayer.getSource().clear();
       this.clickCallbacks.forEach((callback) => callback(null, this, evt));
     }
   }
@@ -93,7 +122,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   drawFullTrajectory(stationsCoords, lineGeometry, color) {
     // Don't allow white lines, use red instead.
     const vehiculeColor = /#ffffff/i.test(color) ? '#ff0000' : color;
-    const vectorSource = this.olLayer.getSource();
+    const vectorSource = this.vectorLayer.getSource();
     vectorSource.clear();
 
     if (stationsCoords) {
@@ -168,10 +197,12 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   highlightTrajectory() {
     this.api
-      .fetchTrajectoryById({
-        id: this.journeyId,
-        time: getUTCTimeString(new Date()),
-      })
+      .fetchTrajectoryById(
+        this.getParams({
+          id: this.journeyId,
+          time: getUTCTimeString(new Date()),
+        }),
+      )
       .then((traj) => {
         const { p: multiLine, t, c } = traj;
         const lineCoords = [];
@@ -188,7 +219,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
         );
       })
       .catch(() => {
-        this.olLayer.getSource().clear();
+        this.vectorLayer.getSource().clear();
       });
   }
 

@@ -32,8 +32,9 @@ class TrajservLayer extends mixin(TrackerLayer) {
   }
 
   /**
-   * Initialize the layer and listen to feature clicks.
-   * @param {mapboxgl.map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
+   * Add the mapbox layer and source to the map.
+   *
+   * @param {mapboxgl.Map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
    * @param {String} beforeLayerId .
    */
   init(map, beforeLayerId) {
@@ -47,26 +48,40 @@ class TrajservLayer extends mixin(TrackerLayer) {
     this.tracker.canvas.width = width;
     this.tracker.canvas.height = height;
 
-    map.addSource('canvas-source', {
+    const source = {
       type: 'canvas',
       canvas: this.tracker.canvas,
       coordinates: getSourceCoordinates(map),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
-    });
-    map.addLayer(
-      {
-        id: 'canvas-layer',
-        type: 'raster',
-        source: 'canvas-source',
-        paint: {
-          'raster-opacity': 1,
-          'raster-fade-duration': 0,
-          'raster-resampling': 'nearest', // important otherwise it looks blurry
-        },
+    };
+
+    const layer = {
+      id: this.key,
+      type: 'raster',
+      source: this.key,
+      paint: {
+        'raster-opacity': 1,
+        'raster-fade-duration': 0,
+        'raster-resampling': 'nearest', // important otherwise it looks blurry
       },
-      beforeLayerId,
-    );
+    };
+
+    map.addSource(this.key, source);
+    map.addLayer(layer, beforeLayerId);
+  }
+
+  /**
+   * Remove the mapbox layer and the mapbox source.
+   *
+   * @overide
+   */
+  terminate() {
+    if (this.map) {
+      this.map.removeSource(this.key);
+      this.map.removeLayer(this.key);
+    }
+    super.terminate();
   }
 
   start() {
