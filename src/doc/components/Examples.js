@@ -33,6 +33,8 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     height: 80,
     background: 'white',
+    zIndex: 1000,
+    top: 0,
   },
   select: {
     minWidth: 250,
