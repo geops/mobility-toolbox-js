@@ -9,10 +9,6 @@ import { NavLink } from 'react-router-dom';
 import Logo from '../img/logo.svg';
 
 const useStyles = makeStyles((theme) => ({
-  colors: {
-    primary: theme.colors.primary,
-    secondary: theme.colors.secondary,
-  },
   appBar: {
     [theme.breakpoints.down('sm')]: {
       padding: '0 20px',
