@@ -171,6 +171,8 @@ const Header = () => {
               className={classes.menuListItem}
               component="a"
               href="https://github.com/geops/mobility-toolbox-js"
+              target="_blank"
+              rel="noopener"
             >
               Code
             </ListItem>

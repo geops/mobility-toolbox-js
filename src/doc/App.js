@@ -7,6 +7,7 @@ import {
 import Container from '@material-ui/core/Container';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Examples from './components/Examples';
 import Documentation from './components/Documentation';
 
@@ -64,7 +65,6 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <Router>
         <Header />
-
         <Route exact path="/">
           <Redirect to="/examples/map" />
         </Route>
@@ -75,10 +75,10 @@ const App = () => {
             </Container>
           </div>
         </Route>
-
         <Route exact path="/api">
           <Documentation />
         </Route>
+        <Footer />
       </Router>
     </ThemeProvider>
   );
