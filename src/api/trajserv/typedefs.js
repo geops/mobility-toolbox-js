@@ -37,7 +37,7 @@
  * @property {string} bicyclesAllowed
  * @property {string} realTime
  * @property {string} feedsId
- * @property {OperatingInformations} operatingInformations:,
+ * @property {OperatingInformations} operatingInformations
  * @property {string} operator
  * @property {string} operatorUrl
  * @property {string} operatorTimeZone
