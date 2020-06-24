@@ -7,9 +7,6 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import CodeSandboxButton from './CodeSandboxButton';
 
 const useStyles = makeStyles({
-  root: {
-    marginTop: 40,
-  },
   htmlContainer: {
     height: 500,
   },
