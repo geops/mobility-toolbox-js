@@ -8,20 +8,20 @@ import { timeSteps } from '../trackerConfig';
 /**
  * TrackerLayerInterface.
  *
- * @dynamic {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
- * @dynamic {boolean} isHoverActive - Activate/deactivate pointer hover effect.
- * @dynamic {Function} style - Style of the vehicle.
- * @dynamic {FilterFunction} filter - Time speed.
- * @dynamic {Function} sort - Set the filter for tracker features.
+ * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
+ * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
+ * @classproperty {function} style - Style of the vehicle.
+ * @classproperty {FilterFunction} filter - Time speed.
+ * @classproperty {function} sort - Set the filter for tracker features.
  */
 export class TrackerLayerInterface {
   /**
    * Initalize the Tracker.
    * @param map
    * @param {Object} options
-   * @param {Number} [options.width] Canvas's width.
-   * @param {Number} [options.height] Canvas's height.
-   * @param {Function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
+   * @param {number} [options.width] Canvas's width.
+   * @param {number} [options.height] Canvas's height.
+   * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
    */
   // eslint-disable-next-line no-unused-vars
   init(map, options) {}
@@ -34,9 +34,9 @@ export class TrackerLayerInterface {
   /**
    * Start the clock.
    *
-   * @param {Array<Number>} size Map's size: [width, height].
-   * @param {Number} zoom Map's zoom level.
-   * @param {Number} resolution Map's resolution.
+   * @param {Array<number>} size Map's size: [width, height].
+   * @param {number} zoom Map's zoom level.
+   * @param {number} resolution Map's resolution.
    */
   // eslint-disable-next-line no-unused-vars
   start(size, zoom, resolution) {}
@@ -60,7 +60,7 @@ export class TrackerLayerInterface {
 
   /**
    * Get vehicle.
-   * @param {Function} filterFc A function use to filter results.
+   * @param {function} filterFc A function use to filter results.
    */
   // eslint-disable-next-line no-unused-vars
   getVehicle(filterFc) {}
@@ -175,7 +175,7 @@ const TrackerLayerMixin = (Base) =>
      * @param {Object} options
      * @param {Number} [options.width] Canvas's width.
      * @param {Number} [options.height] Canvas's height.
-     * @param {Function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
+     * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
      */
     init(map, options) {
       super.init(map);
@@ -259,17 +259,18 @@ const TrackerLayerMixin = (Base) =>
 
     /**
      * Get vehicle.
-     * @param {Function} filterFc A function use to filter results.
+     * @param {function} filterFc A function use to filter results.
      */
     getVehicle(filterFc) {
       return this.tracker.getTrajectories().filter(filterFc);
     }
 
     /**
-     * Returns the vehicle which are at the given coordinates.
-     * Returns null when no vehicle is located at the given coordinates.
-     * @param {ol.coordinate} coordinate
-     * @returns {ol.feature | null} Vehicle feature
+     * Returns an array of vehicles located at the given coordinates and resolution.
+     *
+     * @param {number[2]} coordinate
+     * @param {number[2]} resolution
+     * @returns {Object[]} Array of vehicle.
      */
     getVehiclesAtCoordinate(coordinate, resolution = 1) {
       const ext = buffer([...coordinate, ...coordinate], 10 * resolution);

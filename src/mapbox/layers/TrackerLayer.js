@@ -15,13 +15,17 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
-    this.onMapMoveEnd = this.onMapMoveEnd.bind(this);
+    /** @ignores */
+    this.onMapZoomEnd = this.onMapZoomEnd.bind(this);
+    /** @ignores */
     this.onMapMouseMove = this.onMapMouseMove.bind(this);
   }
 
   /**
    * Initialize the layer.
-   * @param {mapboxgl.Map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
+   *
+   * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
+   * @override
    */
   init(map) {
     if (!map) {
@@ -43,7 +47,8 @@ class TrackerLayer extends mixin(Layer) {
 
   /**
    * Set the current time, it triggers a rendering of the trajectories.
-   * @param {dateString | value} time
+   *
+   * @param {Date} time  The current time.
    */
   setCurrTime(time) {
     const canvas = this.map.getCanvas();
@@ -57,18 +62,21 @@ class TrackerLayer extends mixin(Layer) {
 
   /**
    * Start updating vehicles position.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   *
+   * @listens {mapboxgl.map.event:zoomend} Listen to zoom end event, see {TrackerLayer#onMapZoomEnd}.
+   * @listens {mapboxgl.map.event:mousemove} Listen to mousemove end, see {TrackerLayer#onMapMoveEnd}.
+   * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
+   * @override
    */
   start() {
-    this.currentZoom = this.map.getZoom();
     const canvas = this.map.getCanvas();
     super.start(
       [canvas.width, canvas.height],
-      this.currentZoom,
+      this.map.getZoom(),
       getResolution(this.map),
     );
 
-    this.map.on('moveend', this.onMapMoveEnd);
+    this.map.on('zoomend', this.onMapMoveEnd);
 
     if (this.isHoverActive) {
       this.map.on('mousemove', this.onMapMouseMove);
@@ -76,23 +84,24 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Stop updating vehicles position.
-   * @private
+   * Stop updating vehicles position, and unlisten events.
+   *
+   * @override
    */
   stop() {
     super.stop();
     if (this.map) {
-      this.map.off('moveend', this.onMapMoveEnd);
+      this.map.off('zoomend', this.onMapZoomEnd);
       this.map.off('mousemove', this.onMapMouseMove);
     }
   }
 
   /**
-   * Returns the vehicle which are at the given coordinates.
-   * Returns null when no vehicle is located at the given coordinates.
-   * @param {ol.coordinate} coordinate
-   * @returns {ol.feature | null} Vehicle feature
-   * @private
+   * Returns an array of vehicles located at the given coordinate.
+   *
+   * @param {number[2]} coordinate
+   * @returns {Object[]} Array of vehicle.
+   * @override
    */
   getVehiclesAtCoordinate(coordinate) {
     const resolution = getResolution(this.map);
@@ -100,18 +109,18 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
+   * On zoomend we adjust the time interval of the update of vehicles positions.
+   *
    * @private
    */
-  onMapMoveEnd() {
-    const z = this.map.getZoom();
-
-    if (z !== this.currentZoom) {
-      this.currentZoom = z;
-      this.start(null, z);
-    }
+  onMapZoomEnd() {
+    this.startUpdateTime(this.map.getZoom());
   }
 
   /**
+   * On mousemove, we detect if a vehicle is heovered then updates the cursor's style.
+   *
+   * @param {mapboxgl.mapmouseevent} evt Map's mousemove event.
    * @private
    */
   onMapMouseMove(evt) {

@@ -10,16 +10,16 @@ import { v4 as uuid } from 'uuid';
  *   name: 'myLayer',
  * });
  *
- * @dynamic {string} name - Name of the layer
- * @dynamic {string} key - Identifier of the layer. Must be unique.
- * @dynamic {boolean} isBaseLayer - Define if the layer is a base layer. Read-only.
- * @dynamic {boolean} isQueryable - Define if the layer can be queried. Read-only.
- * @dynamic {boolean} isReactSpatialLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
- * @dynamic {Layer[]} children - List of children.
- * @dynamic {string} copyright - Copyright.
- * @dynamic {boolean} visible - Define if the layer is visible or not.
- * @dynamic {Object} properties - Custom properties.
- * @dynamic {ol/Map~Map|mapbox.Map} map - The map where the layer is displayed.
+ * @classproperty {string} name - Name of the layer
+ * @classproperty {string} key - Identifier of the layer. Must be unique.
+ * @classproperty {boolean} isBaseLayer - Define if the layer is a base layer. Read-only.
+ * @classproperty {boolean} isQueryable - Define if the layer can be queried. Read-only.
+ * @classproperty {boolean} isReactSpatialLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
+ * @classproperty {Layer[]} children - List of children.
+ * @classproperty {string} copyright - Copyright.
+ * @classproperty {boolean} visible - Define if the layer is visible or not.
+ * @classproperty {Object} properties - Custom properties.
+ * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
  */
 export default class Layer extends Observable {
   /**
@@ -49,7 +49,7 @@ export default class Layer extends Observable {
   /**
    * Define layer's properties.
    *
-   * @private
+   * @ignore
    */
   defineProperties({
     name,
@@ -114,7 +114,7 @@ export default class Layer extends Observable {
   /**
    * Initialize the layer with the map passed in parameters.
    *
-   * @private
+   * @param {ol/Map~Map|mapboxgl.Map} map A map.
    */
   init(map) {
     this.terminate();
@@ -124,8 +124,6 @@ export default class Layer extends Observable {
 
   /**
    * Terminate what was initialized in init function. Remove layer, events...
-   *
-   * @private
    */
   // eslint-disable-next-line class-methods-use-this
   terminate() {}
@@ -187,7 +185,7 @@ export default class Layer extends Observable {
   /**
    * Returns an array with visible child layers
    *
-   * @returns {Array<ol.layer>} Visible children
+   * @returns {Layer[]} Visible children
    */
   getVisibleChildren() {
     return this.children.filter((child) => child.visible);
@@ -197,7 +195,6 @@ export default class Layer extends Observable {
    * Checks whether the layer has child layers with visible set to True
    *
    * @returns {boolean} True if the layer has visible child layers
-   * @private
    */
   hasVisibleChildren() {
     return !!this.hasChildren(true);
@@ -216,7 +213,7 @@ export default class Layer extends Observable {
   /**
    * Add a child layer
    *
-   * @param {ol.layer} layer Child layer
+   * @param {Layer} layer Add a child layer
    */
   addChild(layer) {
     this.children.unshift(layer);
@@ -229,7 +226,7 @@ export default class Layer extends Observable {
   /**
    * Removes a child layer by layer name
    *
-   * @param {string} name Layer name
+   * @param {string} name Layer's name
    */
   removeChild(name) {
     for (let i = 0; i < this.children.length; i += 1) {
@@ -247,8 +244,8 @@ export default class Layer extends Observable {
   /**
    * Request feature information for a given coordinate.
    *
-   * @param {ol.Coordinate} coordinate Coordinate to request the information at.
-   * @returns {Promise<Object>} Promise with features, layer and coordinate
+   * @param {number[2]} coordinate Coordinate to request the information at.
+   * @returns {Promise<{layer:Layer, features:Object[], coordinate:number[]}>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    */
   getFeatureInfoAtCoordinate() {
