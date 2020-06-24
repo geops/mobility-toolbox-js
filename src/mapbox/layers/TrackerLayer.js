@@ -63,8 +63,8 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Start updating vehicles position.
    *
-   * @listens {mapboxgl.map.event:zoomend} Listen to zoom end event, see {TrackerLayer#onMapZoomEnd}.
-   * @listens {mapboxgl.map.event:mousemove} Listen to mousemove end, see {TrackerLayer#onMapMoveEnd}.
+   * @listens {mapboxgl.map.event:zoomend} Listen to zoom end event, see {@link TrackerLayer#onMapZoomEnd}.
+   * @listens {mapboxgl.map.event:mousemove} Listen to mousemove end, see {@link TrackerLayer#onMapMoveEnd}.
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
    * @override
    */

@@ -16,12 +16,18 @@ import { TrajservAPI } from '../../api';
 import { getSourceCoordinates, getResolution } from '../utils';
 
 /**
- * Responsible for loading tracker data from Trajserv.
+ * Responsible for loading tracker data from Realtime service.
  *
  * @example
  * import { TrajservLayer } from 'mobility-toolbox-js/src/mapbox';
  *
- * @class
+ * const layer = new TrajservLayer({
+ *   url: 'https://api.geops.io/tracker/v1',
+ *   apiKey: [yourApiKey],
+ * });
+ *
+ * @see https://mobility-toolbox-js.geops.de/api/class/src/api/trajserv/TrajservAPI.js~TrajservAPI.html
+ * @see https://mobility-toolbox-js.geops.de/examples/mapbox-tracker
  */
 class TrajservLayer extends TrackerLayer {
   /**
