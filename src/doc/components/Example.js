@@ -46,7 +46,6 @@ const Example = ({ example }) => {
       // Load the new html
       setHtml(h.default);
     });
-    // console.log(makeId(3).toLowerCase());
     // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
     // We use to avoid cache and re-execute the code of the module.
     import(`../examples/${example.files.js}?`).then((module) => {

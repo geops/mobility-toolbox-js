@@ -76,7 +76,7 @@ class TrackerLayer extends mixin(Layer) {
       getResolution(this.map),
     );
 
-    this.map.on('zoomend', this.onMapMoveEnd);
+    this.map.on('zoomend', this.onMapZoomEnd);
 
     if (this.isHoverActive) {
       this.map.on('mousemove', this.onMapMouseMove);

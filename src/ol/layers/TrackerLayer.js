@@ -65,8 +65,6 @@ class TrackerLayer extends mixin(Layer) {
    * @private
    */
   start() {
-    this.currentZoom = this.map.getView().getZoom();
-
     super.start(
       this.map.getSize(),
       this.currentZoom,
