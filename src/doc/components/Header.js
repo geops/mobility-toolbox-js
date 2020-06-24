@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import { Menu, MenuItem } from '@material-ui/core';
+import { List, ListItem, Collapse } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core/styles';
 import { NavLink } from 'react-router-dom';
 import Logo from '../img/logo.svg';
@@ -58,6 +59,7 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .active': {
       fontWeight: 'bold',
+      color: theme.colors.secondary,
     },
   },
   buttonCollapse: {
@@ -66,20 +68,21 @@ const useStyles = makeStyles((theme) => ({
     },
     boxShadow: 'none',
   },
+  menuList: {
+    borderBottom: `2px solid ${theme.colors.primary}`,
+    backgroundColor: 'white',
+    zIndex: 1100,
+    // height: '100px',
+  },
+  menuListItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
 }));
-
-const handleMenu = (event, setAnchor, setMenuOpen) => {
-  setMenuOpen(true);
-  setAnchor(event.currentTarget);
-};
-const handleClose = (setAnchor, setMenuOpen) => {
-  setMenuOpen(false);
-  setAnchor(null);
-};
 
 const Header = () => {
   const classes = useStyles();
-  const [anchorEl, setAnchor] = useState(null);
   const [open, setMenuOpen] = useState(false);
   return (
     <>
@@ -90,39 +93,9 @@ const Header = () => {
         </div>
 
         <div className={classes.buttonCollapse}>
-          <IconButton onClick={(e) => handleMenu(e, setAnchor, setMenuOpen)}>
-            <MenuIcon />
+          <IconButton onClick={() => setMenuOpen(!open)}>
+            {open ? <CloseIcon /> : <MenuIcon />}
           </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={open}
-            onClose={() => handleClose(setAnchor, setMenuOpen)}
-          >
-            <MenuItem onClick={() => setMenuOpen(false)}>
-              <NavLink to="/api">API</NavLink>
-            </MenuItem>
-            <MenuItem onClick={() => setMenuOpen(false)}>
-              <NavLink to="/examples">Examples</NavLink>
-            </MenuItem>
-            <MenuItem onClick={() => setMenuOpen(false)}>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://github.com/geops/mobility-toolbox-js"
-              >
-                Code
-              </a>
-            </MenuItem>
-          </Menu>
         </div>
 
         <div className={classes.links}>
@@ -137,6 +110,26 @@ const Header = () => {
           </a>
         </div>
       </AppBar>
+
+      <Collapse in={open}>
+        <List className={classes.menuList}>
+          <ListItem button className={classes.menuListItem}>
+            <NavLink to="/api">API</NavLink>
+          </ListItem>
+          <ListItem button className={classes.menuListItem}>
+            <NavLink to="/examples">Examples</NavLink>
+          </ListItem>
+          <ListItem button className={classes.menuListItem}>
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href="https://github.com/geops/mobility-toolbox-js"
+            >
+              Code
+            </a>
+          </ListItem>
+        </List>
+      </Collapse>
     </>
   );
 };

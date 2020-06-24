@@ -32,9 +32,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     height: 80,
-    zIndex: 5,
     background: 'white',
-    top: 0,
   },
   select: {
     minWidth: 250,
