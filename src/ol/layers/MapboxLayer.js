@@ -112,7 +112,7 @@ export default class MapboxLayer extends Layer {
 
   /**
    * @inheritdoc
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
   init(map) {
     super.init(map);

@@ -37,7 +37,7 @@ class TrackerLayer extends mixin(Layer) {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html Map}
+   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html Map}
    * @private
    */
   init(map) {
@@ -61,7 +61,7 @@ class TrackerLayer extends mixin(Layer) {
 
   /**
    * Trackerlayer is started
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    * @private
    */
   start() {

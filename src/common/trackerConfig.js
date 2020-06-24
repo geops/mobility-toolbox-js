@@ -11,6 +11,9 @@ const trackerRadiusMapping = {
   9: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 9, 12.5, 14, 15, 15, 15, 15],
 };
 
+/**
+ * @ignore
+ */
 export const types = [
   'Tram',
   'Subway / Metro / S-Bahn',
@@ -24,6 +27,9 @@ export const types = [
   'Rail', // New endpoint use Rail instead of Train.
 ];
 
+/**
+ * @ignore
+ */
 export const bgColors = [
   '#ffb400',
   '#ff5400',
@@ -37,6 +43,9 @@ export const bgColors = [
   '#ff8080',
 ];
 
+/**
+ * @ignore
+ */
 export const textColors = [
   '#000000',
   '#ffffff',
@@ -50,6 +59,9 @@ export const textColors = [
   '#000000',
 ];
 
+/**
+ * @ignore
+ */
 export const timeSteps = [
   100000,
   50000,
@@ -74,6 +86,9 @@ export const timeSteps = [
   50,
 ];
 
+/**
+ * @ignore
+ */
 const getTypeIndex = (type) => {
   if (typeof type === 'string') {
     const matched = types.find((t) => new RegExp(type).test(t));
@@ -82,6 +97,9 @@ const getTypeIndex = (type) => {
   return type;
 };
 
+/**
+ * @ignore
+ */
 export const getRadius = (type = 0, zoom) => {
   try {
     const typeIdx = getTypeIndex(type);
@@ -91,6 +109,9 @@ export const getRadius = (type = 0, zoom) => {
   }
 };
 
+/**
+ * @ignore
+ */
 export const getBgColor = (type = 0) => {
   try {
     const typeIdx = getTypeIndex(type);
@@ -100,6 +121,9 @@ export const getBgColor = (type = 0) => {
   }
 };
 
+/**
+ * @ignore
+ */
 export const getTextColor = (type = 0) => {
   try {
     const typeIdx = getTypeIndex(type);
@@ -109,6 +133,9 @@ export const getTextColor = (type = 0) => {
   }
 };
 
+/**
+ * @ignore
+ */
 export const getTextSize = (ctx, markerSize, text, fontSize) => {
   ctx.font = `bold ${fontSize}px Arial`;
   let newText = ctx.measureText(text);
@@ -126,6 +153,9 @@ export const getTextSize = (ctx, markerSize, text, fontSize) => {
   return fontSize;
 };
 
+/**
+ * @ignore
+ */
 export const getDelayColor = (delayInMs, cancelled) => {
   if (cancelled) {
     return '#ff0000';
@@ -148,6 +178,9 @@ export const getDelayColor = (delayInMs, cancelled) => {
   return '#00a00c'; // green { r: 0, g: 160, b: 12, s: '0,160,12' };
 };
 
+/**
+ * @ignore
+ */
 export const getDelayText = (delayInMs, cancelled) => {
   if (cancelled) {
     return String.fromCharCode(10006);
