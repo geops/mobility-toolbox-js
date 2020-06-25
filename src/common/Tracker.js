@@ -79,7 +79,7 @@ export default class Tracker {
 
   /**
    * Set the filter for tracker features.
-   * @param {Function} filter Filter function.
+   * @param {function} filter Filter function.
    */
   setFilter(filter) {
     this.filter = filter;
@@ -87,7 +87,7 @@ export default class Tracker {
 
   /**
    * Set the sort for tracker features.
-   * @param {Function} sort Sort function.
+   * @param {function} sort Sort function.
    */
   setSort(sort) {
     this.sort = sort;
@@ -107,7 +107,7 @@ export default class Tracker {
 
   /**
    * Set the tracker style.
-   * @param {Function} s OpenLayers style function.
+   * @param {function} s OpenLayers style function.
    */
   setStyle(s) {
     this.style = s;

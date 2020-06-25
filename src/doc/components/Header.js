@@ -50,10 +50,10 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       marginLeft: 10,
       marginBottom: 4,
-      transition: 'all .3s ease',
     },
     '& a:hover': {
       color: theme.colors.secondary,
+      marginBottom: 0,
       borderBottom: `4px solid ${theme.colors.secondary}`,
     },
     '& .active': {
@@ -126,6 +126,7 @@ const Header = () => {
         </div>
 
         <div className={classes.links}>
+          <NavLink to="/home">Home</NavLink>
           <NavLink to="/api">API</NavLink>
           <NavLink to="/examples">Examples</NavLink>
           <a

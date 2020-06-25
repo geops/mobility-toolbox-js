@@ -1,26 +1,19 @@
 import GeoJSON from 'ol/format/GeoJSON';
 import { unByKey } from 'ol/Observable';
-import Layer from './Layer';
+import OLLayer from './Layer';
 
 /**
- * A class representing WMS layer to display on BasicMap
  * @class
- * @example
- * import { WMSLayer } from 'mobility-toolbox-js/src/ol';
- * @inheritDoc
- * @param {Object} [options]
+ * @augments Layer
+ * @extends baba
  */
-class WMSLayer extends Layer {
+class WMSLayer extends OLLayer {
+  /**
+   * @inheritdoc
+   */
   constructor(options = {}) {
     super(options);
 
-    // Array of click callbacks
-    this.clickCallbacks = [];
-
-    // Add click callback
-    if (options.onClick) {
-      this.onClick(options.onClick);
-    }
     this.format = new GeoJSON();
   }
 
@@ -86,7 +79,7 @@ class WMSLayer extends Layer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
   init(map) {
     super.init(map);

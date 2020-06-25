@@ -34,7 +34,11 @@ class Map extends OLMap {
    * @param {Layer} The {@link Layer} to add.
    */
   addLayer(layer) {
-    layer.init(this);
+    if (!layer.init) {
+      super.addLayer(layer);
+    } else {
+      layer.init(this);
+    }
 
     if (layer.olLayer) {
       super.addLayer(layer.olLayer);

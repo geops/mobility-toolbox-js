@@ -3,7 +3,7 @@ import { LineString } from 'ol/geom';
 /**
  * Translate the response date object into a readable object.
  * @returns {array<Date>}
- * @private
+ * @ignore
  */
 const translateDates = (dates) => {
   const newDates = [];
@@ -113,7 +113,7 @@ export const translateTrajStationsResp = (data) => {
 /**
  * Translate the trajectory_collection response into a js usable object.
  * @returns {Array} returns an array of trajectories.
- * @private
+ * @ignore
  */
 export const translateTrajCollResponse = (features) => {
   const trajectories = [];

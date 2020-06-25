@@ -1,3 +1,5 @@
+import Map from 'ol/Map';
+import View from 'ol/View';
 import TrackerLayer from './TrackerLayer';
 
 let layer;
@@ -18,7 +20,14 @@ describe('VectorLayer', () => {
 
   test('should called terminate on initalization.', () => {
     const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    layer.init(
+      new Map({
+        view: new View({
+          center: [831634, 5933959],
+          zoom: 9,
+        }),
+      }),
+    );
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
