@@ -41,11 +41,8 @@ const theme = createMuiTheme({
 });
 
 const useStyles = makeStyles({
-  content: {
-    flexGrow: 1,
-    overflowY: 'auto',
-  },
-  container: { position: 'relative', height: '100%' },
+  content: {},
+  container: { position: 'relative' },
 });
 
 const App = () => {
@@ -77,8 +74,10 @@ const App = () => {
               <Home />
             </Container>
           </Route>
-          <Route exact path="/api">
-            <Documentation />
+          <Route path="/api/:path*">
+            <Container maxWidth="lg" className={classes.container}>
+              <Documentation />
+            </Container>
           </Route>
         </div>
       </Router>

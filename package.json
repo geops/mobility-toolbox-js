@@ -30,6 +30,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-syntax-highlighter": "^12.2.1",
+    "react-transition-group": "^4.4.1",
     "typeface-lato": "^0.0.75",
     "uuid": "^8.1.0"
   },

@@ -18,7 +18,10 @@
     { "name": "./esdoc/plugins/externals-plugin/Plugin.js" },
     {
       "name": "./esdoc/plugins/external-link-plugin/Plugin.js",
-      "option": { "target": "_parent" }
+      "option": { "target": "_blank" }
+    },
+    {
+      "name": "./esdoc/plugins/internal-link-plugin/Plugin.js"
     }
   ]
 }
