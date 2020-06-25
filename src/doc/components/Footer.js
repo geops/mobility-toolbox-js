@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
   logo: {
     [theme.breakpoints.down('sm')]: {
       padding: 15,
+      marginBottom: 15,
     },
     padding: 5,
     width: 100,
@@ -44,8 +45,7 @@ const useStyles = makeStyles((theme) => ({
     height: 50,
   },
   icon: {
-    width: 45,
-    padding: 0,
+    padding: 12,
   },
 }));
 
