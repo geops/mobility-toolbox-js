@@ -16,7 +16,7 @@ import './App.css';
 
 const theme = createMuiTheme({
   colors: {
-    primary: '#61849c',
+    primary: '#6987a1',
     secondary: '#76b833',
   },
   overrides: {
@@ -33,7 +33,7 @@ const theme = createMuiTheme({
         justifyContent: 'space-between',
         flexDirection: 'row',
         minHeight: 100,
-        borderBottom: '2px solid #61849c',
+        borderBottom: '2px solid #6987a1',
       },
       colorPrimary: {},
     },
@@ -46,6 +46,11 @@ const theme = createMuiTheme({
       },
       indicator: {
         backgroundColor: '#76b833',
+      },
+    },
+    MuiIconButton: {
+      root: {
+        color: '#6987a1',
       },
     },
   },

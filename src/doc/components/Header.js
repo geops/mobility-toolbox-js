@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
-import { List, ListItem, Collapse, Tabs, Tab } from '@material-ui/core';
+import {
+  List,
+  ListItem,
+  Collapse,
+  Tabs,
+  Tab,
+  Hidden,
+  Divider,
+} from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
@@ -18,49 +26,24 @@ const useStyles = makeStyles((theme) => ({
     padding: '0 70px',
   },
   brand: {
-    [theme.breakpoints.down('xs')]: {
-      display: 'block',
-    },
     display: 'flex',
     alignItems: 'center',
   },
   logo: {
     [theme.breakpoints.down('xs')]: {
-      width: 120,
+      width: 80,
     },
     width: 145,
   },
   title: {
     [theme.breakpoints.down('xs')]: {
-      fontSize: 18,
-      marginLeft: 0,
+      fontSize: 15,
+      marginLeft: 10,
+      marginBottom: 2,
     },
     fontSize: 22,
     fontWeight: 500,
     marginLeft: 15,
-  },
-  links: {
-    [theme.breakpoints.down('xs')]: {
-      display: 'none',
-    },
-    display: 'flex',
-    marginBottom: 2,
-    '& a': {
-      height: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      marginLeft: 10,
-      marginBottom: 4,
-      transition: 'all .3s ease',
-    },
-    '& a:hover': {
-      color: theme.colors.secondary,
-      borderBottom: `4px solid ${theme.colors.secondary}`,
-    },
-    '& .active': {
-      fontWeight: 'bold',
-      color: theme.colors.secondary,
-    },
   },
   buttonCollapse: {
     [theme.breakpoints.up('md')]: {
@@ -69,7 +52,6 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: 'none',
   },
   menuList: {
-    borderBottom: `2px solid ${theme.colors.primary}`,
     boxShadow:
       '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
     backgroundColor: 'white',
@@ -78,11 +60,14 @@ const useStyles = makeStyles((theme) => ({
       fontWeight: 'bold',
       color: theme.colors.secondary,
     },
+    padding: 0,
   },
   menuListItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
+    height: 60,
   },
   tabs: {
     [theme.breakpoints.down('sm')]: {
@@ -143,38 +128,42 @@ const Header = () => {
         </Tabs>
       </AppBar>
 
-      <div>
-        <Collapse in={open}>
-          <List className={classes.menuList}>
-            <ListItem
-              button
-              className={classes.menuListItem}
-              component={NavLink}
-              to="/api"
-            >
-              API
-            </ListItem>
-            <ListItem
-              button
-              className={classes.menuListItem}
-              component={NavLink}
-              to="/examples"
-            >
-              Examples
-            </ListItem>
-            <ListItem
-              button
-              className={classes.menuListItem}
-              component="a"
-              href="https://github.com/geops/mobility-toolbox-js"
-              target="_blank"
-              rel="noopener"
-            >
-              Code
-            </ListItem>
-          </List>
-        </Collapse>
-      </div>
+      <Hidden mdUp>
+        <div>
+          <Collapse in={open}>
+            <List className={classes.menuList}>
+              <ListItem
+                button
+                className={classes.menuListItem}
+                component={NavLink}
+                to="/api"
+              >
+                API
+              </ListItem>
+              <Divider />
+              <ListItem
+                button
+                className={classes.menuListItem}
+                component={NavLink}
+                to="/examples"
+              >
+                Examples
+              </ListItem>
+              <Divider />
+              <ListItem
+                button
+                className={classes.menuListItem}
+                component="a"
+                href="https://github.com/geops/mobility-toolbox-js"
+                target="_blank"
+                rel="noopener"
+              >
+                Code
+              </ListItem>
+            </List>
+          </Collapse>
+        </div>
+      </Hidden>
     </>
   );
 };
