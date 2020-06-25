@@ -1,6 +1,6 @@
 /**
  * Display log message on error.
- * @private
+ * @ignore
  */
 export const handleError = (reqType, err) => {
   if (err.name === 'AbortError') {
@@ -13,7 +13,7 @@ export const handleError = (reqType, err) => {
 /**
  * Read json response.
  * @throws Error if parsing failed.
- * @private
+ * @ignore
  */
 export const readJsonResponse = (response) => {
   try {

@@ -54,11 +54,11 @@ const useStyles = makeStyles((theme) => ({
   menuList: {
     boxShadow: '0px 10px 15px #35353520',
     backgroundColor: 'white',
-    zIndex: 1100,
     '& .active': {
       fontWeight: 'bold',
       color: theme.colors.secondary,
     },
+    zIndex: 1200,
     padding: 0,
   },
   menuListItem: {
@@ -84,7 +84,7 @@ const Header = () => {
   const [open, setMenuOpen] = useState(false);
   const path = window.location.pathname.split('/')[1];
   const [value, setValue] = useState(
-    /^examples|api$/.test(path) ? path : 'examples',
+    /^home|examples|api$/.test(path) ? path : 'examples',
   );
 
   const handleChange = (event, newValue) => {
@@ -111,6 +111,7 @@ const Header = () => {
           onChange={handleChange}
           variant="fullWidth"
         >
+          <Tab value="home" component={NavLink} to="/home" label="Home" />
           <Tab value="api" component={NavLink} to="/api" label="API" />
           <Tab
             value="examples"
@@ -131,6 +132,16 @@ const Header = () => {
         <div>
           <Collapse in={open}>
             <List className={classes.menuList}>
+              <ListItem
+                button
+                className={classes.menuListItem}
+                component={NavLink}
+                onClick={() => setMenuOpen(false)}
+                to="/home"
+              >
+                Home
+              </ListItem>
+              <Divider />
               <ListItem
                 button
                 className={classes.menuListItem}

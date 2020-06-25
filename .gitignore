@@ -118,3 +118,6 @@ dist
 
 # Neutrino build directory
 build
+
+# esdoc build directory
+apidoc

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import Select from '@material-ui/core/Select';
@@ -8,7 +7,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { NavLink, useParams } from 'react-router-dom';
 import Example from './Example';
-import Footer from './Footer';
 import EXAMPLES from '../examples';
 
 const useStyles = makeStyles((theme) => ({
@@ -19,6 +17,9 @@ const useStyles = makeStyles((theme) => ({
   filterField: {
     width: '100%',
     marginBottom: 15,
+  },
+  example: {
+    padding: 20,
   },
   navigation: {
     background: '#e3e9ec',
@@ -31,18 +32,7 @@ const useStyles = makeStyles((theme) => ({
       color: theme.colors.primary,
     },
   },
-  exampleMenu: {
-    position: 'sticky',
-    display: 'flex',
-    alignItems: 'center',
-    height: 100,
-    background: 'white',
-    zIndex: 1000,
-    top: 0,
-    paddingTop: 20,
-  },
   select: {
-    minWidth: 250,
     height: 50,
   },
 }));
@@ -73,13 +63,14 @@ export default () => {
   const exampleList = filter ? filterExamples(filter, EXAMPLES) : EXAMPLES;
   return (
     <>
-      <Container maxWidth="lg">
-        <Hidden smUp>
-          <Container className={classes.exampleMenu}>
+      <Hidden smUp>
+        <Grid container>
+          <Grid item xs={12} className={classes.navigation}>
             <Select
               className={classes.select}
               variant="outlined"
               value={example.key}
+              fullWidth
               MenuProps={{
                 anchorOrigin: {
                   vertical: 'bottom',
@@ -103,38 +94,39 @@ export default () => {
                 </MenuItem>
               ))}
             </Select>
-          </Container>
-          {example && <Example example={example} />}
-        </Hidden>
-        <Hidden only="xs">
-          <Grid container className={classes.root} spacing={3}>
-            <Grid item xs={3} className={classes.navigation}>
-              <div>
-                <TextField
-                  className={classes.filterField}
-                  placeholder="Filter"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                />
-                {exampleList.map((ex) => (
-                  <div key={ex.key}>
-                    <NavLink
-                      className={classes.exampleLink}
-                      to={`/examples/${ex.key}`}
-                    >
-                      {ex.name}
-                    </NavLink>
-                  </div>
-                ))}
-              </div>
-            </Grid>
-            <Grid item xs={9}>
-              {example && <Example example={example} />}
-            </Grid>
           </Grid>
-        </Hidden>
-      </Container>
-      <Footer />
+          <Grid item xs={12} className={classes.example}>
+            {example && <Example example={example} />}
+          </Grid>
+        </Grid>
+      </Hidden>
+      <Hidden only="xs">
+        <Grid container>
+          <Grid item xs={3} className={classes.navigation}>
+            <div>
+              <TextField
+                className={classes.filterField}
+                placeholder="Filter"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+              {exampleList.map((ex) => (
+                <div key={ex.key}>
+                  <NavLink
+                    className={classes.exampleLink}
+                    to={`/examples/${ex.key}`}
+                  >
+                    {ex.name}
+                  </NavLink>
+                </div>
+              ))}
+            </div>
+          </Grid>
+          <Grid item xs={9} className={classes.example}>
+            {example && <Example example={example} />}
+          </Grid>
+        </Grid>
+      </Hidden>
     </>
   );
 };

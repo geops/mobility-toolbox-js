@@ -37,7 +37,7 @@ export default class MapboxLayer extends Layer {
         const canvas = this.mbMap.getCanvas();
         const { viewState } = frameState;
 
-        const visible = this.olLayer.getVisible();
+        const { visible } = this.olLayer;
         if (this.renderState.visible !== visible) {
           canvas.style.display = visible ? 'block' : 'none';
           this.renderState.visible = visible;
@@ -111,8 +111,8 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
-   * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @inheritdoc
+   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
   init(map) {
     super.init(map);
@@ -165,8 +165,8 @@ export default class MapboxLayer extends Layer {
 
     this.mbMap.once('load', () => {
       this.loaded = true;
-      if (!this.getCopyright()) {
-        this.setCopyright(getCopyrightFromSources(this.mbMap));
+      if (!this.copyright) {
+        this.copyright = getCopyrightFromSources(this.mbMap);
       }
       this.dispatchEvent({
         type: 'load',

@@ -28,7 +28,7 @@ describe('Map', () => {
     expect(spy).toHaveBeenCalledTimes(1);
     map.removeLayer(layer);
     expect(spy).toHaveBeenCalledTimes(2);
-    expect(layer.getVisible()).toBe(true);
+    expect(layer.visible).toBe(true);
     expect(map.getLayers().getLength()).toBe(1);
   });
 });

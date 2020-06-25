@@ -4,13 +4,16 @@ import {
   ThemeProvider,
   makeStyles,
 } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Header from './components/Header';
 import Examples from './components/Examples';
 import Documentation from './components/Documentation';
+import Footer from './components/Footer';
+import Home from './components/Home';
 
 import 'typeface-lato';
-import './App.css';
+import './App.scss';
 
 const theme = createMuiTheme({
   colors: {
@@ -62,7 +65,12 @@ const theme = createMuiTheme({
 const useStyles = makeStyles({
   content: {
     flexGrow: 1,
-    overflowY: 'scroll',
+    overflowY: 'auto',
+    marginBottom: 80,
+  },
+  container: {
+    position: 'relative',
+    height: '100%',
   },
 });
 
@@ -73,17 +81,42 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <Router>
         <Header />
-        <Route exact path="/">
-          <Redirect to="/examples/ol-map" />
-        </Route>
-        <Route path="/examples/:exampleKey?">
-          <div className={classes.content}>
-            <Examples />
-          </div>
-        </Route>
-        <Route exact path="/api">
-          <Documentation />
-        </Route>
+        <div className={classes.content}>
+          <Route exact path="/">
+            <Redirect to="/home" />
+          </Route>
+          <Route exact path="/examples">
+            <Redirect to="/examples/ol-map" />
+          </Route>
+          <Route path="/examples/:exampleKey?">
+            <Container
+              maxWidth="lg"
+              disableGutters
+              className={classes.container}
+            >
+              <Examples />
+            </Container>
+          </Route>
+          <Route exact path="/home">
+            <Container
+              maxWidth="lg"
+              disableGutters
+              className={classes.container}
+            >
+              <Home />
+            </Container>
+          </Route>
+          <Route exact path="/api">
+            <Container
+              maxWidth="lg"
+              disableGutters
+              className={classes.container}
+            >
+              <Documentation />
+            </Container>
+          </Route>
+        </div>
+        <Footer />
       </Router>
     </ThemeProvider>
   );

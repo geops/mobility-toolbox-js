@@ -18,6 +18,10 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: 'space-between',
       alignItems: 'center',
     },
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: '#0B4457',
     padding: '0 70px',
     display: 'flex',
@@ -45,14 +49,16 @@ const useStyles = makeStyles((theme) => ({
     height: 50,
   },
   icon: {
-    padding: 12,
+    width: 20,
+    height: 20,
+    padding: 10,
   },
 }));
 
-const Header = () => {
+const Footer = () => {
   const classes = useStyles();
   return (
-    <div className={classes.footer}>
+    <footer className={classes.footer}>
       <div className={classes.brand}>
         <img className={classes.logo} src={FooterLogo} alt="Logo" />
       </div>
@@ -98,8 +104,8 @@ const Header = () => {
           <img className={classes.svg} src={XingIcon} alt="xing" />
         </IconButton>
       </div>
-    </div>
+    </footer>
   );
 };
 
-export default Header;
+export default Footer;

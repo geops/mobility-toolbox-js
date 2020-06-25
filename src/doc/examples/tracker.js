@@ -24,6 +24,11 @@ export default () => {
     apiKey: window.apiKey,
   });
 
+  tracker.onClick((vehicle) => {
+    // eslint-disable-next-line no-console
+    console.log(vehicle);
+  });
+
   map.addLayer(osm);
   map.addLayer(tracker);
 };

@@ -14,14 +14,6 @@ class VectorLayer extends Layer {
     super(options);
 
     this.hitTolerance = options.hitTolerance || 5;
-
-    // Array of click callbacks
-    this.clickCallbacks = [];
-
-    // Add click callback
-    if (options.onClick) {
-      this.onClick(options.onClick);
-    }
   }
 
   /**
@@ -65,7 +57,7 @@ class VectorLayer extends Layer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
   init(map) {
     super.init(map);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
+import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import CodeSandboxButton from './CodeSandboxButton';
@@ -39,7 +38,7 @@ const useStyles = makeStyles({
 // };
 
 const Example = ({ example }) => {
-  const { editButton, root, paper, htmlContainer, fileName } = useStyles();
+  const { editButton, paper, htmlContainer, fileName } = useStyles();
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
 
@@ -50,7 +49,6 @@ const Example = ({ example }) => {
       // Load the new html
       setHtml(h.default);
     });
-    // console.log(makeId(3).toLowerCase());
     // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
     // We use to avoid cache and re-execute the code of the module.
     import(`../examples/${example.files.js}?`).then((module) => {
@@ -72,28 +70,35 @@ const Example = ({ example }) => {
   }, [example]);
 
   return (
-    <div className={root}>
-      <Typography variant="h1">{example.name}</Typography>
-      <Typography>{example.description}</Typography>
-
-      <Paper className={paper}>
-        <div
-          className={htmlContainer}
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      </Paper>
-      <Paper className={paper}>
-        <Typography className={fileName}>{example.files.js}</Typography>
-        <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-        <CodeSandboxButton className={editButton} html={html} js={js} />
-      </Paper>
-      <Paper className={paper}>
-        <Typography className={fileName}>{example.files.html}</Typography>
-        <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-        <CodeSandboxButton className={editButton} html={html} js={js} />
-      </Paper>
-    </div>
+    <Grid container direction="column" spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h1">{example.name}</Typography>
+        <Typography>{example.description}</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Paper className={paper}>
+          <div
+            className={htmlContainer}
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </Paper>
+      </Grid>
+      <Grid item xs={12}>
+        <Paper className={paper}>
+          <Typography className={fileName}>{example.files.js}</Typography>
+          <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
+          <CodeSandboxButton className={editButton} html={html} js={js} />
+        </Paper>
+      </Grid>
+      <Grid item xs={12}>
+        <Paper className={paper}>
+          <Typography className={fileName}>{example.files.html}</Typography>
+          <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+          <CodeSandboxButton className={editButton} html={html} js={js} />
+        </Paper>
+      </Grid>
+    </Grid>
   );
 };
 
