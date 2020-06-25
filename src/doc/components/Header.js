@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     padding: '0 70px',
+    boxShadow: '0px 10px 15px #35353520',
   },
   brand: {
     display: 'flex',
