@@ -1,5 +1,5 @@
 {
-  "source": "./src/mapbox/layers",
+  "source": "./src",
   "destination": "./apidoc",
   "includes": ["\\.js$"],
   "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
@@ -16,6 +16,9 @@
     },
     { "name": "./esdoc/plugins/dynamic-property-plugin/Plugin.js" },
     { "name": "./esdoc/plugins/externals-plugin/Plugin.js" },
-    { "name": "./esdoc/plugins/target-blank-plugin/Plugin.js" }
+    {
+      "name": "./esdoc/plugins/external-link-plugin/Plugin.js",
+      "option": { "target": "_parent" }
+    }
   ]
 }

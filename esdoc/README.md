@@ -27,7 +27,7 @@ Custom plugins:
 
 - `./plugins/dynamic-property-plugin`: adds new tag `@classproperty`.
 - `./plugins/externals-plugin`: adds custom external definitons.
-- `./plugins/target-blank-plugin`: adds a `target="_blank"` attribute to `<a>` tag generated for externals.
+- `./plugins/external-link-plugin`: adds a `target="[option.target]"` attribute to `<a>` tag generates for externals.
 
 To create a plugin have a look to this useful [blog](https://medium.com/trabe/understanding-esdoc-plugins-d9ee9095d98b).
 
