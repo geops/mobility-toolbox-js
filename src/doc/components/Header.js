@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
   },
   logo: {
     [theme.breakpoints.down('xs')]: {
-      width: 80,
+      width: 100,
     },
     width: 145,
   },
@@ -39,7 +39,6 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('xs')]: {
       fontSize: 15,
       marginLeft: 10,
-      marginBottom: 2,
     },
     fontSize: 22,
     fontWeight: 500,
@@ -52,8 +51,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: 'none',
   },
   menuList: {
-    boxShadow:
-      '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
+    boxShadow: '0px 10px 15px #35353520',
     backgroundColor: 'white',
     zIndex: 1100,
     '& .active': {
@@ -136,6 +134,7 @@ const Header = () => {
                 button
                 className={classes.menuListItem}
                 component={NavLink}
+                onClick={() => setMenuOpen(false)}
                 to="/api"
               >
                 API
@@ -145,6 +144,7 @@ const Header = () => {
                 button
                 className={classes.menuListItem}
                 component={NavLink}
+                onClick={() => setMenuOpen(false)}
                 to="/examples"
               >
                 Examples

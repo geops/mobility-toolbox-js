@@ -4,10 +4,8 @@ import {
   ThemeProvider,
   makeStyles,
 } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import Header from './components/Header';
-import Footer from './components/Footer';
 import Examples from './components/Examples';
 import Documentation from './components/Documentation';
 
@@ -18,6 +16,11 @@ const theme = createMuiTheme({
   colors: {
     primary: '#6987a1',
     secondary: '#76b833',
+  },
+  props: {
+    MuiButtonBase: {
+      disableRipple: true,
+    },
   },
   overrides: {
     MuiTypography: {
@@ -71,19 +74,16 @@ const App = () => {
       <Router>
         <Header />
         <Route exact path="/">
-          <Redirect to="/examples/map" />
+          <Redirect to="/examples/ol-map" />
         </Route>
         <Route path="/examples/:exampleKey?">
           <div className={classes.content}>
-            <Container maxWidth="lg">
-              <Examples />
-            </Container>
+            <Examples />
           </div>
         </Route>
         <Route exact path="/api">
           <Documentation />
         </Route>
-        <Footer />
       </Router>
     </ThemeProvider>
   );

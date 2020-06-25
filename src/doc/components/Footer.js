@@ -1,48 +1,51 @@
 import React from 'react';
-import TwitterIcon from '@material-ui/icons/Twitter';
-import FacebookIcon from '@material-ui/icons/Facebook';
-import GitHubIcon from '@material-ui/icons/GitHub';
-import LinkedInIcon from '@material-ui/icons/LinkedIn';
 import { IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import FooterLogo from '../img/footer_logo.svg';
+import TwitterIcon from '../img/twitter.svg';
+import FacebookIcon from '../img/facebook.svg';
+import LinkedInIcon from '../img/linkedin.svg';
+import GitHubIcon from '../img/github.svg';
+import XingIcon from '../img/xing.svg';
 
 const useStyles = makeStyles((theme) => ({
   footer: {
     [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column',
       padding: '0 10px',
+    },
+    [theme.breakpoints.up('md')]: {
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
     backgroundColor: '#0B4457',
     padding: '0 70px',
-    maxHeight: 80,
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    minHeight: 70,
+    zIndex: 1100,
   },
   brand: {
     flexGrow: 1,
   },
   logo: {
+    [theme.breakpoints.down('sm')]: {
+      padding: '5px 15px',
+    },
     padding: 5,
-    height: 15,
+    width: 100,
   },
   links: {
+    [theme.breakpoints.up('md')]: {
+      justifyContent: 'flex-end',
+    },
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     flexGrow: 1,
+    height: 50,
   },
   icon: {
-    [theme.breakpoints.down('xs')]: {
-      padding: 8,
-    },
-    padding: 10,
-  },
-  svg: {
-    [theme.breakpoints.down('xs')]: {
-      width: 15,
-      height: 15,
-    },
-    fill: 'white',
+    width: 45,
+    padding: 0,
   },
 }));
 
@@ -60,7 +63,7 @@ const Header = () => {
           target="_blank"
           rel="noopener"
         >
-          <TwitterIcon className={classes.svg} />
+          <img className={classes.svg} src={TwitterIcon} alt="twitter" />
         </IconButton>
         <IconButton
           className={classes.icon}
@@ -68,7 +71,7 @@ const Header = () => {
           target="_blank"
           rel="noopener"
         >
-          <FacebookIcon className={classes.svg} />
+          <img className={classes.svg} src={FacebookIcon} alt="facebook" />
         </IconButton>
         <IconButton
           className={classes.icon}
@@ -76,7 +79,7 @@ const Header = () => {
           target="_blank"
           rel="noopener"
         >
-          <GitHubIcon className={classes.svg} />
+          <img className={classes.svg} src={GitHubIcon} alt="github" />
         </IconButton>
         <IconButton
           className={classes.icon}
@@ -84,7 +87,15 @@ const Header = () => {
           target="_blank"
           rel="noopener"
         >
-          <LinkedInIcon className={classes.svg} />
+          <img className={classes.svg} src={LinkedInIcon} alt="linkedin" />
+        </IconButton>
+        <IconButton
+          className={classes.icon}
+          href="https://www.xing.com/companies/geops"
+          target="_blank"
+          rel="noopener"
+        >
+          <img className={classes.svg} src={XingIcon} alt="xing" />
         </IconButton>
       </div>
     </div>
