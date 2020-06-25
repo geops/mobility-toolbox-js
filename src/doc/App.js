@@ -66,7 +66,7 @@ const useStyles = makeStyles({
   content: {
     flexGrow: 1,
     overflowY: 'auto',
-    marginBottom: 80,
+    paddingBottom: '155px',
   },
   container: {
     position: 'relative',

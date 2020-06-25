@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     padding: '0 70px',
     boxShadow: '0px 10px 15px #35353520',
+    background: 'white',
   },
   brand: {
     display: 'flex',
@@ -77,6 +78,14 @@ const useStyles = makeStyles((theme) => ({
       color: theme.colors.secondary,
     },
   },
+  collapse: {
+    position: 'sticky',
+    top: 100,
+    left: 'auto',
+    right: 0,
+    background: 'white',
+    zIndex: 1100,
+  },
 }));
 
 const Header = () => {
@@ -93,7 +102,7 @@ const Header = () => {
 
   return (
     <>
-      <AppBar position="static" className={classes.appBar} color="transparent">
+      <AppBar position="sticky" className={classes.appBar} color="transparent">
         <div className={classes.brand}>
           <img className={classes.logo} src={Logo} alt="Logo" />
           <div className={classes.title}>mobility-toolbox-js</div>
@@ -129,7 +138,7 @@ const Header = () => {
       </AppBar>
 
       <Hidden mdUp>
-        <div>
+        <div className={classes.collapse}>
           <Collapse in={open}>
             <List className={classes.menuList}>
               <ListItem

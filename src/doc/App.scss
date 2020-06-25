@@ -1,19 +1,8 @@
 body {
   margin: 0;
   font-family: Lato, Arial, sans-serif;
-  overflow: hidden;
   color: #353535;
-}
-
-body,
-html,
-#root {
-  height: 100%;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
+  position: relative;
 }
 
 a {
