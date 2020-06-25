@@ -1,6 +1,9 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-underscore-dangle */
-// This plugin is inspired by esdoc-external-webapi-plugin, see https://github.com/esdoc/esdoc-plugins/tree/master/esdoc-external-webapi-plugin
+/**
+ * This plugin creates custom buildin externals definitions so they don't appear in the sidebar of the doc.
+ * This plugin is inspired by esdoc-external-webapi-plugin, see https://github.com/esdoc/esdoc-plugins/tree/master/esdoc-external-webapi-plugin
+ */
 const fs = require('fs-extra');
 const path = require('path');
 
