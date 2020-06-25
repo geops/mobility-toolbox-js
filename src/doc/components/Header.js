@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '0 70px',
     boxShadow: '0px 10px 15px #35353520',
     background: 'white',
+    height: '100px',
   },
   brand: {
     display: 'flex',
