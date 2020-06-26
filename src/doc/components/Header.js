@@ -83,7 +83,7 @@ const Header = () => {
   const [open, setMenuOpen] = useState(false);
   return (
     <>
-      <AppBar position="sticky" className={classes.appBar} color="transparent">
+      <AppBar position="sticky" className={classes.appBar} color="white">
         <div className={classes.brand}>
           <img className={classes.logo} src={Logo} alt="Logo" />
           <div className={classes.title}>mobility-toolbox-js</div>

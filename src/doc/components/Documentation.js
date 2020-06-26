@@ -56,10 +56,10 @@ const Documentation = () => {
               event.preventDefault();
 
               // Points in the url drives react-router crazy.
-              const nextLocation = event.target.href
-                .replace(/\./g, '%20') // Replace dots by encoded spaces.
-                .replace(/apidoc/, 'api'); // Replace apidoc by api.
-              window.location.href = nextLocation;
+              const nextLocation = event.target
+                .getAttribute('href')
+                .replace(/\./g, '%20'); // Replace dots by encoded spaces.
+              window.location.href = `/api/${nextLocation}`;
 
               // If we are on the same page, the iframe is not reloaded so we have to scroll manually.
               // Scroll the window if there is a hash.
