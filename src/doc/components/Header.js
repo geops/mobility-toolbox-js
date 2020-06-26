@@ -15,6 +15,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     padding: '0 70px',
+    backgroundColor: 'white',
   },
   brand: {
     [theme.breakpoints.down('xs')]: {
@@ -83,7 +84,7 @@ const Header = () => {
   const [open, setMenuOpen] = useState(false);
   return (
     <>
-      <AppBar position="sticky" className={classes.appBar} color="white">
+      <AppBar position="sticky" className={classes.appBar}>
         <div className={classes.brand}>
           <img className={classes.logo} src={Logo} alt="Logo" />
           <div className={classes.title}>mobility-toolbox-js</div>

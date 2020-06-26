@@ -1,20 +1,19 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-param-reassign */
-/* eslint-disable class-methods-use-this */
 /**
  * This plugin adds a target="[MyTarget]" attribute to <a> tag generates for externals.
  */
 class Plugin {
-  onHandleConfig(ev) {
-    this._option = ev.data.option || {
+  onHandleConfig(evt) {
+    this.options = evt.data.option || {
       target: '_blank',
     };
   }
 
-  onHandleContent(ev) {
-    ev.data.content = ev.data.content.replace(
+  onHandleContent(evt) {
+    const { target } = this.options;
+    // eslint-disable-next-line no-param-reassign
+    evt.data.content = evt.data.content.replace(
       /<a href="http/g,
-      `<a target="${this._option.target}" href="http`,
+      `<a target="${target}" href="http`,
     );
   }
 }

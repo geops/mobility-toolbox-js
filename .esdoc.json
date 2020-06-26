@@ -1,5 +1,5 @@
 {
-  "source": "./src",
+  "source": "./src/mapbox/layers",
   "destination": "./apidoc",
   "includes": ["\\.js$"],
   "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
@@ -21,7 +21,10 @@
       "option": { "target": "_blank" }
     },
     {
-      "name": "./esdoc/plugins/internal-link-plugin/Plugin.js"
+      "name": "./esdoc/plugins/internal-link-plugin/Plugin.js",
+      "option": {
+        "useWithReactRouter": true
+      }
     }
   ]
 }
