@@ -1,5 +1,5 @@
 {
-  "source": "./src/mapbox/layers",
+  "source": "./src",
   "destination": "./apidoc",
   "includes": ["\\.js$"],
   "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
