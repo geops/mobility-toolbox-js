@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
       fontSize: 15,
       marginLeft: 10,
     },
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 500,
     marginLeft: 15,
   },
