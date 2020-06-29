@@ -10,6 +10,10 @@ import Example from './Example';
 import EXAMPLES from '../examples';
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    padding: 12,
+  },
   filterField: {
     width: '100%',
     marginBottom: 15,
@@ -27,10 +31,6 @@ const useStyles = makeStyles((theme) => ({
     '&.active': {
       color: theme.colors.primary,
     },
-  },
-  exampleMenu: {
-    marginBottom: 20,
-    lineHeight: '15px',
   },
   select: {
     height: 50,
@@ -111,7 +111,7 @@ export default () => {
                 onChange={(e) => setFilter(e.target.value)}
               />
               {exampleList.map((ex) => (
-                <div key={ex.key} className={classes.exampleMenu}>
+                <div key={ex.key}>
                   <NavLink
                     className={classes.exampleLink}
                     to={`/examples/${ex.key}`}
