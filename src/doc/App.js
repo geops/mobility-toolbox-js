@@ -75,10 +75,10 @@ const useStyles = makeStyles({
     overflowY: 'auto',
     paddingBottom: '200px',
   },
-  container: {
-    position: 'relative',
-    height: '100%',
-  },
+  // container: {
+  //   position: 'relative',
+  //   height: '100%',
+  // },
 });
 
 const App = () => {
@@ -88,7 +88,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <Router>
         <Header />
-        <div className={classes.content}>
+        <Container maxWidth="lg" className={classes.content}>
           <Route exact path="/">
             <Redirect to="/home" />
           </Route>
@@ -96,29 +96,15 @@ const App = () => {
             <Redirect to="/examples/ol-map" />
           </Route>
           <Route path="/examples/:exampleKey?">
-            <Container
-              maxWidth="lg"
-              disableGutters
-              className={classes.container}
-            >
-              <Examples />
-            </Container>
+            <Examples />
           </Route>
           <Route exact path="/home">
-            <Container
-              maxWidth="lg"
-              disableGutters
-              className={classes.container}
-            >
-              <Home />
-            </Container>
+            <Home />
           </Route>
           <Route path="/api/:path*">
-            <Container maxWidth="lg" className={classes.container}>
-              <Documentation />
-            </Container>
+            <Documentation />
           </Route>
-        </div>
+        </Container>
         <Footer />
       </Router>
     </ThemeProvider>
