@@ -8,47 +8,35 @@ import LinkedInIcon from '../img/linkedin.svg';
 import GitHubIcon from '../img/github.svg';
 import XingIcon from '../img/xing.svg';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   footer: {
-    [theme.breakpoints.down('xs')]: {
-      flexDirection: 'column',
-      minHeight: 180,
-    },
-    [theme.breakpoints.up('sm')]: {
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#0B4457',
     padding: '0 30px',
-    display: 'flex',
     minHeight: 100,
     zIndex: 1100,
   },
   brand: {
-    [theme.breakpoints.down('xs')]: {
-      margin: '30px 0 15px',
-    },
-    flexGrow: 1,
+    display: 'flex',
+    alignItems: 'center',
+    margin: '25px 0 15px',
+    minWidth: 200,
   },
   logo: {
     padding: 10,
     width: 80,
   },
   links: {
-    [theme.breakpoints.up('sm')]: {
-      justifyContent: 'flex-end',
-    },
-    [theme.breakpoints.down('xs')]: {
-      margin: '20px 0 15px',
-    },
     display: 'flex',
-    justifyContent: 'flex-start',
     alignItems: 'center',
-    flexGrow: 1,
+    margin: '25px 0 15px',
     height: 50,
   },
   icon: {
