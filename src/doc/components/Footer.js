@@ -23,21 +23,17 @@ const useStyles = makeStyles(() => ({
     minHeight: 100,
     zIndex: 1100,
   },
-  brand: {
+  footerElement: {
     display: 'flex',
     alignItems: 'center',
     margin: '25px 0 15px',
+  },
+  brand: {
     minWidth: 200,
   },
   logo: {
     padding: 10,
     width: 80,
-  },
-  links: {
-    display: 'flex',
-    alignItems: 'center',
-    margin: '25px 0 15px',
-    height: 50,
   },
   icon: {
     padding: 10,
@@ -52,10 +48,10 @@ const Footer = () => {
   const classes = useStyles();
   return (
     <footer className={classes.footer}>
-      <div className={classes.brand}>
+      <div className={`${classes.footerElement} ${classes.brand}`}>
         <img className={classes.logo} src={FooterLogo} alt="Logo" />
       </div>
-      <div className={classes.links}>
+      <div className={`${classes.footerElement}`}>
         <IconButton
           className={classes.icon}
           href="https://twitter.com/geops?lang=en"

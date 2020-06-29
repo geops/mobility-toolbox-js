@@ -57,6 +57,11 @@ const theme = createMuiTheme({
     MuiTab: {
       root: {
         textTransform: 'unset',
+        '@media (min-width: 600px)': {
+          minWidth: 'unset',
+        },
+        width: 100,
+        fontFamily: 'Lato, Arial, sans-serif',
       },
     },
     MuiIconButton: {
