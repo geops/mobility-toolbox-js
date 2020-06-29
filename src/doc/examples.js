@@ -46,13 +46,4 @@ export default [
       js: 'mapboxstyle.js',
     },
   },
-  {
-    name: 'Search',
-    key: 'basic-search',
-    description: 'Display results of Stops service.',
-    files: {
-      html: 'search.html',
-      js: 'search.js',
-    },
-  },
 ];
