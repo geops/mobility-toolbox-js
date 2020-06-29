@@ -75,10 +75,6 @@ const useStyles = makeStyles({
     overflowY: 'auto',
     paddingBottom: '200px',
   },
-  // container: {
-  //   position: 'relative',
-  //   height: '100%',
-  // },
 });
 
 const App = () => {
