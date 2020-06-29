@@ -8,6 +8,7 @@ import {
   Tab,
   Hidden,
   Divider,
+  Typography,
 } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -36,14 +37,14 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('xs')]: {
       width: 100,
     },
-    width: 145,
+    width: 120,
   },
   title: {
     [theme.breakpoints.down('xs')]: {
       fontSize: 15,
       marginLeft: 10,
     },
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 500,
     marginLeft: 15,
   },
@@ -94,7 +95,7 @@ const Header = () => {
   const [open, setMenuOpen] = useState(false);
   const path = window.location.pathname.split('/')[1];
   const [value, setValue] = useState(
-    /^home|examples|api$/.test(path) ? path : 'examples',
+    /^home|examples|api$/.test(path) ? path : 'home',
   );
 
   const handleChange = (event, newValue) => {
@@ -106,7 +107,7 @@ const Header = () => {
       <AppBar position="sticky" className={classes.appBar} color="transparent">
         <div className={classes.brand}>
           <img className={classes.logo} src={Logo} alt="Logo" />
-          <div className={classes.title}>mobility-toolbox-js</div>
+          <Typography className={classes.title}>mobility-toolbox-js</Typography>
         </div>
 
         <div className={classes.buttonCollapse}>

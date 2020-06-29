@@ -8,48 +8,32 @@ import LinkedInIcon from '../img/linkedin.svg';
 import GitHubIcon from '../img/github.svg';
 import XingIcon from '../img/xing.svg';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   footer: {
-    [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column',
-      minHeight: 180,
-    },
-    [theme.breakpoints.up('md')]: {
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#0B4457',
     padding: '0 30px',
-    display: 'flex',
     minHeight: 100,
     zIndex: 1100,
   },
+  footerElement: {
+    display: 'flex',
+    alignItems: 'center',
+    margin: '25px 0 15px',
+  },
   brand: {
-    [theme.breakpoints.down('sm')]: {
-      margin: '30px 0 15px',
-    },
-    flexGrow: 1,
+    minWidth: 200,
   },
   logo: {
     padding: 10,
     width: 80,
-  },
-  links: {
-    [theme.breakpoints.up('md')]: {
-      justifyContent: 'flex-end',
-    },
-    [theme.breakpoints.down('sm')]: {
-      margin: '20px 0 15px',
-    },
-    display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    flexGrow: 1,
-    height: 50,
   },
   icon: {
     padding: 10,
@@ -64,10 +48,10 @@ const Footer = () => {
   const classes = useStyles();
   return (
     <footer className={classes.footer}>
-      <div className={classes.brand}>
+      <div className={`${classes.footerElement} ${classes.brand}`}>
         <img className={classes.logo} src={FooterLogo} alt="Logo" />
       </div>
-      <div className={classes.links}>
+      <div className={`${classes.footerElement}`}>
         <IconButton
           className={classes.icon}
           href="https://twitter.com/geops?lang=en"
