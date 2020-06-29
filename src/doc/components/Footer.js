@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
   footer: {
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column',
-      padding: '0 10px',
+      minHeight: 180,
     },
     [theme.breakpoints.up('md')]: {
       justifyContent: 'space-between',
@@ -23,35 +23,40 @@ const useStyles = makeStyles((theme) => ({
     left: 0,
     right: 0,
     backgroundColor: '#0B4457',
-    padding: '0 70px',
+    padding: '0 30px',
     display: 'flex',
-    minHeight: 70,
+    minHeight: 100,
     zIndex: 1100,
   },
   brand: {
+    [theme.breakpoints.down('sm')]: {
+      margin: '40px 0 20px',
+    },
     flexGrow: 1,
   },
   logo: {
-    [theme.breakpoints.down('sm')]: {
-      padding: 15,
-      marginBottom: 15,
-    },
-    padding: 5,
-    width: 100,
+    padding: 10,
+    width: 80,
   },
   links: {
     [theme.breakpoints.up('md')]: {
       justifyContent: 'flex-end',
     },
+    [theme.breakpoints.down('sm')]: {
+      margin: '20px 0 20px',
+    },
     display: 'flex',
     justifyContent: 'flex-start',
+    alignItems: 'center',
     flexGrow: 1,
     height: 50,
   },
   icon: {
+    padding: 10,
+  },
+  svg: {
     width: 20,
     height: 20,
-    padding: 10,
   },
 }));
 
