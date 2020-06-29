@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
   },
   brand: {
     [theme.breakpoints.down('sm')]: {
-      margin: '40px 0 20px',
+      margin: '30px 0 15px',
     },
     flexGrow: 1,
   },
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: 'flex-end',
     },
     [theme.breakpoints.down('sm')]: {
-      margin: '20px 0 20px',
+      margin: '20px 0 15px',
     },
     display: 'flex',
     justifyContent: 'flex-start',
