@@ -10,11 +10,11 @@ import XingIcon from '../img/xing.svg';
 
 const useStyles = makeStyles((theme) => ({
   footer: {
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('xs')]: {
       flexDirection: 'column',
       minHeight: 180,
     },
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up('sm')]: {
       justifyContent: 'space-between',
       alignItems: 'center',
     },
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1100,
   },
   brand: {
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('xs')]: {
       margin: '30px 0 15px',
     },
     flexGrow: 1,
@@ -39,10 +39,10 @@ const useStyles = makeStyles((theme) => ({
     width: 80,
   },
   links: {
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up('sm')]: {
       justifyContent: 'flex-end',
     },
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('xs')]: {
       margin: '20px 0 15px',
     },
     display: 'flex',

@@ -94,7 +94,7 @@ const Header = () => {
   const [open, setMenuOpen] = useState(false);
   const path = window.location.pathname.split('/')[1];
   const [value, setValue] = useState(
-    /^home|examples|api$/.test(path) ? path : 'examples',
+    /^home|examples|api$/.test(path) ? path : 'home',
   );
 
   const handleChange = (event, newValue) => {
