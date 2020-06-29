@@ -54,6 +54,11 @@ const theme = createMuiTheme({
         backgroundColor: '#76b833',
       },
     },
+    MuiTab: {
+      root: {
+        textTransform: 'unset',
+      },
+    },
     MuiIconButton: {
       root: {
         color: '#6987a1',
