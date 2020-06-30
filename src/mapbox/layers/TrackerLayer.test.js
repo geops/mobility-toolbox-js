@@ -34,7 +34,7 @@ describe('TrackerLayer', () => {
     layer.init(
       new mapboxgl.Map({
         container: document.getElementById('map'),
-        style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
+        style: `path/to/style`,
         center: toLonLat([831634, 5933959]),
         zoom: 9,
       }),
