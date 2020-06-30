@@ -1,5 +1,5 @@
 {
-  "source": "./src/",
+  "source": "./src",
   "destination": "./apidoc",
   "includes": ["\\.js$"],
   "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
@@ -14,6 +14,17 @@
         "template": "./esdoc/template"
       }
     },
-    { "name": "./esdoc/plugins/dynamic-property-plugin/Plugin.js" }
+    { "name": "./esdoc/plugins/dynamic-property-plugin/Plugin.js" },
+    { "name": "./esdoc/plugins/externals-plugin/Plugin.js" },
+    {
+      "name": "./esdoc/plugins/external-link-plugin/Plugin.js",
+      "option": { "target": "_blank" }
+    },
+    {
+      "name": "./esdoc/plugins/internal-link-plugin/Plugin.js",
+      "option": {
+        "useWithReactRouter": true
+      }
+    }
   ]
 }

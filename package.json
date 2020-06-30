@@ -19,6 +19,7 @@
     "@material-ui/styles": "^4.9.14",
     "codesandbox": "^2.1.14",
     "es6-mixin": "^0.3.0",
+    "lodash": "^4.17.15",
     "mapbox-gl": "^1.10.1",
     "ol": "^6.3.1",
     "prop-types": "^15.7.2",

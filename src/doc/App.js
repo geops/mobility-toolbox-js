@@ -41,7 +41,9 @@ const theme = createMuiTheme({
         minHeight: 100,
         borderBottom: '2px solid #6987a1',
       },
-      colorPrimary: {},
+      colorPrimary: {
+        color: '#353535',
+      },
     },
     MuiTabs: {
       root: {
@@ -78,10 +80,6 @@ const useStyles = makeStyles({
     overflowY: 'auto',
     paddingBottom: '200px',
   },
-  container: {
-    position: 'relative',
-    height: '100%',
-  },
 });
 
 const App = () => {
@@ -91,7 +89,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <Router>
         <Header />
-        <div className={classes.content}>
+        <Container maxWidth="lg" className={classes.content}>
           <Route exact path="/">
             <Redirect to="/home" />
           </Route>
@@ -99,33 +97,15 @@ const App = () => {
             <Redirect to="/examples/ol-map" />
           </Route>
           <Route path="/examples/:exampleKey?">
-            <Container
-              maxWidth="lg"
-              disableGutters
-              className={classes.container}
-            >
-              <Examples />
-            </Container>
+            <Examples />
           </Route>
           <Route exact path="/home">
-            <Container
-              maxWidth="lg"
-              disableGutters
-              className={classes.container}
-            >
-              <Home />
-            </Container>
+            <Home />
           </Route>
-          <Route exact path="/api">
-            <Container
-              maxWidth="lg"
-              disableGutters
-              className={classes.container}
-            >
-              <Documentation />
-            </Container>
+          <Route path="/api/:path*">
+            <Documentation />
           </Route>
-        </div>
+        </Container>
         <Footer />
       </Router>
     </ThemeProvider>
