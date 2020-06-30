@@ -3,7 +3,7 @@ import TrajservLayer from './TrajservLayer';
 let layer;
 let onClick;
 
-describe('VectorLayer', () => {
+describe('TrajservLayer', () => {
   beforeEach(() => {
     onClick = jest.fn();
     layer = new TrajservLayer({

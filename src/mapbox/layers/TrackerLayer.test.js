@@ -5,7 +5,7 @@ import TrackerLayer from './TrackerLayer';
 let layer;
 let onClick;
 
-describe('VectorLayer', () => {
+describe('TrackerLayer', () => {
   beforeEach(() => {
     onClick = jest.fn();
     layer = new TrackerLayer({
