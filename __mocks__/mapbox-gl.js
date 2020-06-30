@@ -2,7 +2,21 @@
 class Map {
   isStyleLoaded() {}
 
-  getCanvas() {}
+  getBounds() {
+    return {
+      toArray: () => [1, 2],
+    };
+  }
+
+  getCanvas() {
+    return {
+      height: '100px',
+      width: '100px',
+      setAttribute: () => {},
+    };
+  }
+
+  getZoom() {}
 
   once() {}
 
