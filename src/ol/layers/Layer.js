@@ -67,16 +67,20 @@ class Layer extends LayerCommon {
     if (visible === this.visible) {
       return;
     }
+
+    this.visible = visible;
+
     if (this.olLayer) {
       this.olLayer.setVisible(this.visible);
     }
 
-    super.setVisible(
-      visible,
+    this.dispatchEvent({
+      type: 'change:visible',
+      target: this,
       stopPropagationDown,
       stopPropagationUp,
       stopPropagationSiblings,
-    );
+    });
   }
 }
 export default Layer;
