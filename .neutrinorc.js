@@ -29,6 +29,7 @@ if (process.env.REACT_APP_LIB_MODE) {
         coverageReporters: ['text', 'html'],
         snapshotSerializers: ['jest-serializer-html'],
         setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+        globalSetup: './global-setup.js',
       }),
       (neutrino) => {
         if (process.env.NODE_ENV === 'test') {

@@ -12,12 +12,12 @@ describe('timeUtils', () => {
 
   test('getUTCTimeString should be correct.', () => {
     expect(getUTCTimeString(new Date(2020, 5, 30, 11, 5, 1, 123))).toBe(
-      '9:5:1.123',
+      '11:5:1.123',
     );
   });
 
   test('getHoursAndMinutes should be correct.', () => {
-    expect(getHoursAndMinutes(123456)).toBe('01:02');
+    expect(getHoursAndMinutes(123456)).toBe('00:02');
   });
 
   test('getDelayString should be correct.', () => {
