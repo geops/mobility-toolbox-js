@@ -6,7 +6,7 @@
 @import url(./test.css); */
 @import url(./identifiers.css);
 /* @import url(./github.css); */
-/* @import url(./search.css); */
+@import url(./search.css);
 
 .esdoc * {
   margin: 0;
@@ -116,8 +116,8 @@
   font-size: 13px;
 }
 
-.esdoc .import-path pre.prettyprint,
-.esdoc .import-path pre.prettyprint code {
+.esdoc .import-path pre,
+.esdoc .import-path pre code {
   margin: 0;
   padding: 0;
   border: none;
@@ -161,19 +161,19 @@
 } */
 
 .esdoc .navigation {
-  position: fixed;
+  /* position: fixed;
   top: 0;
-  left: 0;
-  box-sizing: border-box;
-  width: 250px;
+  left: 0; */
+  /* box-sizing: border-box; */
+  width: 100%;
   height: 100%;
-  margin-top: 40px;
+  /* margin-top: 40px;
   padding-top: 40px;
   padding-left: 15px;
   padding-bottom: 2em;
-  margin-top:1em;
-  overflow-x: scroll;
-  box-shadow: rgba(255, 255, 255, 1) -1px 0 0 inset;
+  margin-top:1em; */
+  overflow-x: auto;
+  /* box-shadow: rgba(255, 255, 255, 1) -1px 0 0 inset; */
   border-right: 1px solid #ddd;
 }
 
@@ -188,7 +188,7 @@
 }
 
 .esdoc .navigation li a {
-  color: #666;
+  color: #353535;
 }
 
 .esdoc .navigation .nav-dir-path {
@@ -256,9 +256,9 @@
 }
 
 .esdoc .content {
-  margin-top: 40px;
+  /* margin-top: 40px;
   margin-left: 250px;
-  padding: 10px 50px 10px 20px;
+  padding: 10px 50px 10px 20px; */
 }
 
 .esdoc .header-notice {
@@ -383,7 +383,7 @@
 }
 
 .esdoc table.params {
-  width: 100%;
+  width: calc(100% - 10px);
   margin: 10px 0;
   border-spacing: 0;
   border: 0;
@@ -409,7 +409,7 @@
 }
 
 .esdoc .content .detail > h3 {
-  color: black;
+  color: #353535;
   background-color: #f0f0f0;
 }
 

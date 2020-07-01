@@ -18,14 +18,14 @@ import DetailDocs from './DetailDocs';
  */
 const DetailHTML = ({ doc, kind, title, isStatic = true }) => {
   const accessDocs = _findAccessDocs(doc, kind, isStatic);
-  return accessDocs.map((accessDoc) => {
+  return accessDocs.map((accessDoc, idx) => {
     const docs = accessDoc[1];
     if (!docs.length) return null;
 
     let prefix = '';
     if (docs[0].static) prefix = 'Static ';
     const _title = `${prefix}${accessDoc[0]} ${title}`;
-    return <DetailDocs key={title} docs={docs} title={_title} />;
+    return <DetailDocs key={idx} docs={docs} title={_title} />;
   });
 };
 export default React.memo(DetailHTML);

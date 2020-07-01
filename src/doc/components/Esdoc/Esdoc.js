@@ -1,54 +1,52 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import docss from './index.json';
-import ClassDocBuilder from './ClassDocBuilder';
-import {
-  _resolveExtendsChain,
-  _resolveNecessary,
-  _resolveIgnore,
-  _resolveLink,
-} from './DocBuilderUtils';
+import Grid from '@material-ui/core/Grid';
+import Hidden from '@material-ui/core/Hidden';
+import EsdocContent from './EsdocContent';
+import EsdocNavigation from './EsdocNavigation';
+import SearchDoc from './SearchDoc';
 import './css/style.css';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex',
-    flexGrow: 1,
-    justifyContent: 'center',
-    height: '100%',
     width: '100%',
   },
-});
-
-// Preprocess the index.json content.
-// https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js
-let docs = _resolveExtendsChain(docss);
-docs = _resolveNecessary(docs);
-docs = _resolveIgnore(docs);
-docs = _resolveLink(docs);
+  navigation: {
+    padding: theme.spacing(1),
+  },
+  content: {
+    padding: theme.spacing(1),
+  },
+}));
 
 const Esdoc = ({ path }) => {
   const classes = useStyles();
-  let doc;
-  if (path) {
-    const [longName, hash] = path.replace('class/', '').split('#');
-    doc = docs.find((item) => {
-      const [docLongName, docHash] = item.longname.split('#');
-      const reg = new RegExp(docLongName);
-      if (reg.test(path) && item.kind === 'class') {
-        return item;
-      }
-      return null;
-    });
+
+  if (!path) {
+    return null;
   }
 
   return (
     <div className={`esdoc ${classes.root}`}>
-      <div className="content">
-        <ClassDocBuilder doc={doc} />
-      </div>
+      <Hidden smUp>
+        <Grid container>
+          <Grid item xs={12} className={classes.content}>
+            <EsdocContent path={path} />
+          </Grid>
+        </Grid>
+      </Hidden>
+      <Hidden only="xs">
+        <Grid container>
+          <Grid item xs={3} className={classes.navigation}>
+            <SearchDoc />
+            <EsdocNavigation />
+          </Grid>
+          <Grid item xs={9} className={classes.content}>
+            <EsdocContent path={path} />
+          </Grid>
+        </Grid>
+      </Hidden>
     </div>
   );
 };

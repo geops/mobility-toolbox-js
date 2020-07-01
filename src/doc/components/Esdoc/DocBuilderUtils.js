@@ -1,9 +1,11 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-underscore-dangle */
+import React from 'react';
 import { taffy } from 'taffydb';
 import docss from './index.json';
 
 export const _data = taffy(docss);
+let searchIndex;
 
 /**
  * find doc objects that is ordered.
@@ -570,3 +572,97 @@ export function parseExample(example) {
 
   return { body, caption };
 }
+
+/**
+ * escape URL hash.
+ * @param {string} hash - URL hash for HTML a tag and id tag
+ * @returns {string} escaped URL hash
+ */
+export const escapeURLHash = (hash) => {
+  return hash
+    .toLowerCase()
+    .replace(/[~!@#$%^&*()_+=\[\]\\{}|;':"<>?,.\/ ]/g, '-');
+};
+
+/**
+ * Search index of identifier builder class.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/SearchIndexBuilder.js#L7
+ */
+export const _getSearchIndex = () => {
+  if (searchIndex) {
+    return searchIndex;
+  }
+
+  searchIndex = [];
+  const docs = _find({});
+
+  for (const doc of docs) {
+    if (doc.kind === 'index') continue;
+    if (doc.kind.indexOf('manual') === 0) continue;
+
+    let indexText;
+    let url;
+    let displayText;
+
+    if (doc.importPath) {
+      displayText = (
+        <>
+          <span>{doc.name}</span>{' '}
+          <span class="search-result-import-path">{doc.importPath}</span>
+        </>
+      );
+      indexText = `${doc.importPath}~${doc.name}`.toLowerCase();
+      url = _getURL(doc);
+    } else if (doc.kind === 'test') {
+      displayText = doc.testFullDescription;
+      indexText = [
+        ...(doc.testTargets || []),
+        ...(doc._custom_test_targets || []),
+      ]
+        .join(' ')
+        .toLowerCase();
+      const filePath = doc.longname.split('~')[0];
+      const fileDoc = _find({ kind: 'testFile', name: filePath })[0];
+      url = `${_getURL(fileDoc)}#lineNumber${doc.lineNumber}`;
+    } else if (doc.kind === 'external') {
+      displayText = doc.longname;
+      indexText = displayText.toLowerCase();
+      url = doc.externalLink;
+    } else if (doc.kind === 'file' || doc.kind === 'testFile') {
+      displayText = doc.name;
+      indexText = displayText.toLowerCase();
+      url = _getURL(doc);
+    } else if (doc.kind === 'packageJSON') {
+      continue;
+    } else {
+      displayText = doc.longname;
+      indexText = displayText.toLowerCase();
+      url = _getURL(doc);
+    }
+
+    let kind = doc.kind;
+    /* eslint-disable default-case */
+    switch (kind) {
+      case 'constructor':
+        kind = 'method';
+        break;
+      case 'get':
+      case 'set':
+        kind = 'member';
+        break;
+    }
+
+    searchIndex.push([indexText, url, displayText, kind]);
+  }
+
+  searchIndex.sort((a, b) => {
+    if (a[2] === b[2]) {
+      return 0;
+    } else if (a[2] < b[2]) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+  return searchIndex;
+};

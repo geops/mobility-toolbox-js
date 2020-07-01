@@ -21,7 +21,7 @@ const Documentation = () => {
   const classes = useStyles();
   const match = useRouteMatch();
   const { hash } = useLocation();
-  const [path, setPath] = useState('identifiers.html');
+  const [path, setPath] = useState('identifiers%20html');
 
   useEffect(() => {
     const matchPath = match.params.path;

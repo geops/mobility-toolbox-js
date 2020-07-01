@@ -4,8 +4,8 @@
   /* position: absolute;
   top: 10px;
   right: 50px; */
-  padding-right: 8px;
-  padding-bottom: 10px;
+  position: relative;
+  margin: 10px;
   line-height: normal;
   font-size: 12px;
 
@@ -13,7 +13,7 @@
   width: 210px;
   background: white;
   padding: 6px;
-  height: 28px;
+  height: 50px;
   margin-top: 10px;
 }
 
@@ -22,33 +22,8 @@
   vertical-align: top;
 }
 
-.search-input {
-  display: inline;
-  visibility: hidden;
-  width: 0;
-  padding: 2px;
-  height: 1.5em;
-  outline: none;
-  background: transparent;
-  border: 1px #0af;
-  border-style: none none solid none;
-  vertical-align: bottom;
-
-  /* Geops */
-  width: 100%;
-}
-
-.search-input-edge {
-  display: none;
-  width: 1px;
-  height: 5px;
-  background-color: #0af;
-  vertical-align: bottom;
-}
-
-.search-result {
+.esdoc .search-result {
   position: absolute;
-  display: none;
   height: 600px;
   width: 100%;
   padding: 0;
@@ -69,12 +44,12 @@
 
 }
 
-.search-result-import-path {
+.esdoc .search-result-import-path {
   color: #aaa;
   font-size: 12px;
 }
 
-.search-result li {
+.esdoc .search-result li {
   list-style: none;
   padding: 2px 4px;
 }

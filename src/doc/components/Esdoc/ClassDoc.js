@@ -23,9 +23,13 @@ const useStyles = makeStyles({
 });
 
 /**
- * React implementation of https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/ClassDocBuilder.js
+ * build class output.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/ClassDocBuilder.js#L30
+ * @param {DocObject} doc - class doc object.
+ * @returns {IceCap} built output.
+ * @private
  */
-const ClassDocBuilder = ({ doc }) => {
+const ClassDoc = ({ doc }) => {
   const classes = useStyles();
   if (!doc) {
     return null;
@@ -238,4 +242,4 @@ const ClassDocBuilder = ({ doc }) => {
   );
 };
 
-export default React.memo(ClassDocBuilder);
+export default React.memo(ClassDoc);
