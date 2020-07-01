@@ -83,10 +83,6 @@ if (process.env.REACT_APP_LIB_MODE) {
       copy({
         patterns: [
           {
-            from: path.join(__dirname, 'apidoc'),
-            to: path.join(__dirname, 'build/apidoc'),
-          },
-          {
             from: path.join(__dirname, 'README.md'),
             to: path.join(__dirname, 'build/README.md'),
           },
