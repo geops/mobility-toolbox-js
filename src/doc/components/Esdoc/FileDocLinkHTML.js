@@ -8,6 +8,22 @@ import { _find, _getURL } from './DocBuilderUtils';
 const FileDocLinkHTML = ({ doc, text }) => {
   if (!doc) return null;
 
+  if (text === 'source' && doc.memberof) {
+    return (
+      <span>
+        <a
+          target="_blank"
+          rel="noreferrer"
+          href={`https://github.com/geops/mobility-toolbox-js/blob/master/${
+            doc.memberof.split('~')[0]
+          }#L${doc.lineNumber}`}
+        >
+          {text}
+        </a>
+      </span>
+    );
+  }
+
   let fileDoc;
   if (doc.kind === 'file' || doc.kind === 'testFile') {
     fileDoc = doc;
