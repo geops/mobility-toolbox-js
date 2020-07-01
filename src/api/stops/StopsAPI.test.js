@@ -8,10 +8,7 @@ describe('StopsAPI', () => {
     global.fetch = fetch;
     fetch.resetMocks();
 
-    api = new StopsAPI({
-      url: 'https://api.geops.io/stops/v1/',
-      apiKey: 'apiKey',
-    });
+    api = new StopsAPI({ apiKey: 'apiKey' });
   });
 
   test('search on success.', () => {
