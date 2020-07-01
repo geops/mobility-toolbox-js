@@ -20,6 +20,18 @@ describe('Layer', () => {
     expect(layer.visible).toBe(false);
   });
 
+  test('should be invisible if set.', () => {
+    const layer = new Layer({ name: 'Layer', olLayer });
+    layer.setVisible(false);
+    expect(layer.visible).toBe(false);
+  });
+
+  test('should visibility stay unchanged', () => {
+    const layer = new Layer({ name: 'Layer', visible: false, olLayer });
+    layer.setVisible(false);
+    expect(layer.visible).toBe(false);
+  });
+
   test('should return its name.', () => {
     const layer = new Layer({ name: 'Layer', visible: false, olLayer });
     expect(layer.name).toEqual('Layer');
