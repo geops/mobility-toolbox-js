@@ -58,6 +58,20 @@ describe('StopsAPI', () => {
             ]);
           });
       });
+
+      test('reject error', () => {
+        fetch.mockRejectOnce(new Error('Fake error message'));
+
+        return api
+          .search({
+            q: 'Bern',
+          })
+          .then(() => {
+            expect(consoleOutput).toEqual([
+              ['Fetch search request failed: ', 'Error: Fake error message'],
+            ]);
+          });
+      });
     });
   });
 });
