@@ -95,6 +95,7 @@ export default class Layer extends Observable {
       },
       visible: {
         value: visible === undefined ? true : visible,
+        writable: true,
       },
       properties: {
         value: properties || {},
