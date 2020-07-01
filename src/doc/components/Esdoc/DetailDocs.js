@@ -5,7 +5,7 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-underscore-dangle */
 import React from 'react';
-import SyntaxHighlighter from 'react-syntax-highlighter';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import Markdown from 'react-markdown';
 import { parseExample } from './DocBuilderUtils';
 import SignatureHTML from './SignatureHTML';
@@ -89,13 +89,9 @@ const DetailDocs = ({ docs, title }) => {
             </h3>
             {doc.export && doc.importPath && doc.importStyle && (
               <div data-ice="importPath" className="import-path">
-                <pre className="prettyprint">
-                  <code data-ice="importPathCode">
-                    {`import ${doc.importStyle} from '`}
-                    <FileDocLinkHTML doc={doc} text={doc.importPath} />
-                    ';
-                  </code>
-                </pre>
+                <SyntaxHighlighter language="js">
+                  {`import ${doc.importStyle} from '${doc.importPath}';`}
+                </SyntaxHighlighter>
               </div>
             )}
             {/* TODO
@@ -239,11 +235,9 @@ const DetailDocs = ({ docs, title }) => {
                             {parsed.caption}
                           </div>
                         )}
-                        {/* <pre className="prettyprint source-code"> */}
                         <SyntaxHighlighter language="js">
                           {parsed.body}
                         </SyntaxHighlighter>
-                        {/* </pre> */}
                       </React.Fragment>
                     );
                   })}
