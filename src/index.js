@@ -4,6 +4,7 @@ import {
   WMSLayer as olWMSLayer,
   MapboxLayer as olMapboxLayer,
   TrajservLayer as olTrajservLayer,
+  VectorLayer as olVectorLayer,
 } from './ol';
 import { TrajservLayer as mbTrajservLayer } from './mapbox';
 
@@ -17,6 +18,7 @@ const exports = {
     WMSLayer: olWMSLayer,
     MapboxLayer: olMapboxLayer,
     TrajservLayer: olTrajservLayer,
+    VectorLayer: olVectorLayer,
   },
 };
 
