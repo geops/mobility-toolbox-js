@@ -31,9 +31,10 @@ List of functionalities not implemented because we don't use it :
 - Decorators
 - TODO
 
-Improvments:
+## Improvments
 
 - Pass the index.json content as a parameter.
 - Configure the replacement of '.' by '%20' in url to make it work with react-router.
 - Configure the base url, currently /api/ is append to all links except source links.
 - Configure the github url, currently github.com/mobility-toolbox-js/... is append to all sources links.
+- Create an esdoc plugin to generate only the index.json file, it should be easy using [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin) code.
