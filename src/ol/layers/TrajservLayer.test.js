@@ -6,6 +6,7 @@ import fetchTrajectoriesResponse from '../../../data/fetchTrajectories.json';
 
 let layer;
 let onClick;
+let olMap;
 
 describe('TrajservLayer', () => {
   beforeEach(() => {
@@ -15,6 +16,13 @@ describe('TrajservLayer', () => {
     onClick = jest.fn();
     layer = new TrajservLayer({
       onClick,
+    });
+
+    olMap = new Map({
+      view: new View({
+        center: [831634, 5933959],
+        zoom: 9,
+      }),
     });
   });
 
@@ -28,14 +36,7 @@ describe('TrajservLayer', () => {
 
     fetch.mockResponseOnce(JSON.stringify(fetchTrajectoriesResponse));
 
-    layer.init(
-      new Map({
-        view: new View({
-          center: [831634, 5933959],
-          zoom: 9,
-        }),
-      }),
-    );
+    layer.init(olMap);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -59,5 +60,29 @@ describe('TrajservLayer', () => {
     layer.unClick(foo);
     expect(layer.clickCallbacks[1]).toBe(bar);
     expect(layer.clickCallbacks.length).toBe(2);
+  });
+
+  test('map events should be called', () => {
+    const spy = jest.spyOn(layer, 'onMapClick');
+    const spy2 = jest.spyOn(layer, 'onMoveEnd');
+
+    // Mock response for the following calls
+    fetch.mockResponse(JSON.stringify(fetchTrajectoriesResponse));
+
+    // init uses mockResponse
+    layer.init(olMap);
+
+    // Start uses mockResponse
+    layer.start();
+
+    const coordinate = [1, 2];
+    const evt = { type: 'singleclick', olMap, coordinate };
+    olMap.dispatchEvent(evt);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // dispatchEvent uses mockResponse
+    const evt2 = { type: 'moveend', olMap };
+    olMap.dispatchEvent(evt2);
+    expect(spy2).toHaveBeenCalledTimes(1);
   });
 });
