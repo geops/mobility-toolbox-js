@@ -41,3 +41,5 @@ List of functionalities not implemented because we don't use it :
 - Configure the github url, currently github.com/mobility-toolbox-js/... is append to all sources links.
 - Create an esdoc plugin to generate only the index.json file, it should be easy using [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin) code.
 - Convert css to scss.
+- Reactivate all eslint rules.
+- Reactivate all stylelint rules.
