@@ -109,7 +109,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * @private
    */
   onMove() {
-    this.map.getSource('canvas-source').coordinates = getSourceCoordinates(
+    this.map.getSource(this.key).coordinates = getSourceCoordinates(
       this.map,
     );
 
