@@ -5,6 +5,8 @@ This folder contains an implementation of the rendering of [esdoc-publish-html-p
 Every components in this folder is an implementation of a `_buildXXX` function in [Builder folder of the plugin](https://github.com/esdoc/esdoc-plugins/tree/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder)
 In the documentation of the component you can find the link to the function it implements.
 
+The original css from [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin) is used. See `./css` folder.
+
 ## How does it work
 
 The [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin) creates an `index.json` in `apidoc/index.json` when we run `yarn apidoc`.
@@ -38,3 +40,4 @@ List of functionalities not implemented because we don't use it :
 - Configure the base url, currently /api/ is append to all links except source links.
 - Configure the github url, currently github.com/mobility-toolbox-js/... is append to all sources links.
 - Create an esdoc plugin to generate only the index.json file, it should be easy using [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin) code.
+- Convert css to scss.
