@@ -9,22 +9,9 @@
     },
     { "name": "esdoc-ecmascript-proposal-plugin", "option": { "all": true } },
     {
-      "name": "esdoc-publish-html-plugin",
-      "option": {
-        "template": "./esdoc/template"
-      }
+      "name": "esdoc-publish-html-plugin"
     },
     { "name": "./esdoc/plugins/dynamic-property-plugin/Plugin.js" },
-    { "name": "./esdoc/plugins/externals-plugin/Plugin.js" },
-    {
-      "name": "./esdoc/plugins/external-link-plugin/Plugin.js",
-      "option": { "target": "_blank" }
-    },
-    {
-      "name": "./esdoc/plugins/internal-link-plugin/Plugin.js",
-      "option": {
-        "useWithReactRouter": true
-      }
-    }
+    { "name": "./esdoc/plugins/externals-plugin/Plugin.js" }
   ]
 }

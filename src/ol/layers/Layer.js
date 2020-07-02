@@ -67,9 +67,6 @@ class Layer extends LayerCommon {
     if (visible === this.visible) {
       return;
     }
-    if (this.olLayer) {
-      this.olLayer.setVisible(this.visible);
-    }
 
     super.setVisible(
       visible,
@@ -77,6 +74,10 @@ class Layer extends LayerCommon {
       stopPropagationUp,
       stopPropagationSiblings,
     );
+
+    if (this.olLayer) {
+      this.olLayer.setVisible(this.visible);
+    }
   }
 }
 export default Layer;

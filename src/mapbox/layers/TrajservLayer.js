@@ -17,8 +17,8 @@ import { getSourceCoordinates, getResolution } from '../utils';
  *   apiKey: [yourApiKey],
  * });
  *
- * @see https://mobility-toolbox-js.geops.de/api/class/src/api/trajserv/TrajservAPI.js~TrajservAPI.html
- * @see https://mobility-toolbox-js.geops.de/examples/mapbox-tracker
+ * @see <a href="/api/class/src/api/trajserv/TrajservAPI%20js~TrajservAPI%20html">TrajservAPI</a>
+ * @see <a href="/examples/mapbox-tracker">Mapbox tracker example</a>
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
@@ -35,8 +35,9 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * Add the mapbox layer and source to the map.
    *
    * @param {mapboxgl.Map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
-   * @param {String} beforeLayerId .
+   * @param {String} beforeLayerId
    */
+
   init(map, beforeLayerId) {
     if (!map) {
       return;
@@ -194,7 +195,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Draw the trajectory as a line with points for each stop.
    * @param {Array} stationsCoords Array of station coordinates.
-   * @param {<LineString|MultiLineString} lineGeometry A LineString or a MultiLineString.
+   * @param {ol/geom/LineString~LineString|ol/geom/MultiLineString~MultiLineString} lineGeometry A LineString or a MultiLineString.
    * @param {string} color The color of the line.
    * @private
    */

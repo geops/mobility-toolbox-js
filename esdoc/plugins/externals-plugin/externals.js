@@ -8,6 +8,9 @@
  * @external {ol/geom/LineString~LineString} https://openlayers.org/en/latest/apidoc/module-ol_geom_LineString-LineString.html
  */
 /**
+ * @external {ol/geom/MultiLineString~MultiLineString} https://openlayers.org/en/latest/apidoc/module-ol_geom_MultiLineString-MultiLineString.html
+ */
+/**
  * @external {mapboxgl.Map} https://docs.mapbox.com/mapbox-gl-js/api/map/
  */
 /**
