@@ -4,6 +4,8 @@ import React from 'react';
 import Markdown from 'react-markdown';
 import DocLinkHTML from './DocLinkHTML';
 import SignatureHTML from './SignatureHTML';
+import ExperimentalHTML from './ExperimentalHTML';
+import DeprecatedHTML from './DeprecatedHTML';
 
 /**
  * build summary output html by docs.
@@ -89,9 +91,12 @@ const SummaryDoc = ({
                   </p>
                 </div>
                 <div>
-                  {/* TODO
-                <div className="deprecated" data-ice="deprecated" />
-                <div className="experimental" data-ice="experimental" /> */}
+                  <div className="deprecated" data-ice="deprecated">
+                    <DeprecatedHTML doc={doc} />
+                  </div>
+                  <div className="experimental" data-ice="experimental">
+                    <ExperimentalHTML doc={doc} />
+                  </div>
 
                   <div data-ice="description">
                     <Markdown source={doc.description} />

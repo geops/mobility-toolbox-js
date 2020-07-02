@@ -5,7 +5,7 @@ import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import EsdocContent from './EsdocContent';
 import EsdocNavigation from './EsdocNavigation';
-import SearchDoc from './SearchDoc';
+import EsdocSearch from './EsdocSearch';
 import './css/style.css';
 
 const useStyles = makeStyles((theme) => ({
@@ -39,7 +39,7 @@ const Esdoc = ({ path }) => {
       <Hidden only="xs">
         <Grid container>
           <Grid item xs={3} className={classes.navigation}>
-            <SearchDoc />
+            <EsdocSearch />
             <EsdocNavigation />
           </Grid>
           <Grid item xs={9} className={classes.content}>

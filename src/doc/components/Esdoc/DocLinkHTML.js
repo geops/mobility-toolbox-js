@@ -5,6 +5,14 @@ import React from 'react';
 
 import { _findByName, _getURL } from './DocBuilderUtils';
 
+/**
+ * build html link to file page.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L592
+ * @param {DocObject} doc - target doc object.
+ * @param {string} text - link text.
+ * @returns {string} html of link.
+ * @private
+ */
 const DocLinkHTML = ({ longname, text = null, inner = false, kind = null }) => {
   if (!longname) return '';
 

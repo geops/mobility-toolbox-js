@@ -13,6 +13,8 @@ import InheritedSummaryHTML from './InheritedSummaryHTML';
 import DocsLinkHTML from './DocsLinkHTML';
 import SummaryHTML from './SummaryHTML';
 import DetailHTML from './DetailHTML';
+import ExperimentalHTML from './ExperimentalHTML';
+import DeprecatedHTML from './DeprecatedHTML';
 import { parseExample } from './DocBuilderUtils';
 
 const useStyles = makeStyles({
@@ -122,12 +124,12 @@ const ClassDoc = ({ doc }) => {
               />
             </div>
           )}
-        {/* TODO
-        <div className="deprecated" data-ice="deprecated" />
-        </div> */}
-        {/* TODO
-        <div className="experimental" data-ice="experimental" />
-        </div> */}
+        <div className="deprecated" data-ice="deprecated">
+          <DeprecatedHTML doc={doc} />
+        </div>
+        <div className="experimental" data-ice="experimental">
+          <ExperimentalHTML doc={doc} />
+        </div>
         <div className="description">
           <Markdown source={doc.description} />
         </div>

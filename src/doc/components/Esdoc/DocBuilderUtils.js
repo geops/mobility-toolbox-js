@@ -4,11 +4,20 @@ import React from 'react';
 import { taffy } from 'taffydb';
 import docss from './index.json';
 
+/**
+ * Load the config into a in memory db.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Plugin.js#L33
+ */
 export const _data = taffy(docss);
+
+/**
+ * Index used for the search.
+ */
 let searchIndex;
 
 /**
  * find doc objects that is ordered.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L117
  * @param {string} order - doc objects order(``column asec`` or ``column desc``).
  * @param {...Object} cond - condition objects
  * @returns {DocObject[]} found doc objects.
@@ -25,6 +34,7 @@ export const _orderedFind = (order, ...cond) => {
 
 /**
  * find doc object.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L36
  * @param {...Object} cond - find condition.
  * @returns {DocObject[]} found doc objects.
  * @private
@@ -35,6 +45,7 @@ export const _find = (...cond) => {
 
 /**
  * find all identifiers with kind grouping.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L46
  * @returns {{class: DocObject[], interface: DocObject[], function: DocObject[], variable: DocObject[], typedef: DocObject[], external: DocObject[]}} found doc objects.
  * @private
  */
@@ -52,6 +63,7 @@ export const _findAllIdentifiersKindGrouping = () => {
 
 /**
  * fuzzy find doc object by name.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L63
  * - equal with longname
  * - equal with name
  * - include in longname
@@ -103,8 +115,10 @@ export const _findByName = (name, kind = null) => {
 
   return [];
 };
+
 /**
  * get file name of output html page.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L555
  * @param {DocObject} doc - target doc object.
  * @returns {string} file name.
  * @private
@@ -143,6 +157,7 @@ const _getOutputFileName = (doc) => {
 
 /**
  * gat url of output html page.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L533
  * @param {DocObject} doc - target doc object.
  * @returns {string} url of output html. it is relative path from output root dir.
  * @private
@@ -175,6 +190,7 @@ export const _getURL = (doc) => {
 
 /**
  * resolve class extends chain.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js#L146
  * add following special property.
  * - ``_custom_extends_chain``: ancestor class chain.
  * - ``_custom_direct_subclasses``: class list that direct extends target doc.
@@ -314,6 +330,7 @@ export const _resolveExtendsChain = (docs) => {
 
 /**
  * resolve ignore property.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js#L43
  * remove docs that has ignore property.
  * @private
  */
@@ -334,6 +351,7 @@ export const _resolveIgnore = (docs) => {
 
 /**
  * resolve @link as html link.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js#L89
  * @private
  * @todo resolve all ``description`` property.
  */
@@ -412,6 +430,7 @@ export const _resolveLink = (docs) => {
 
 /**
  * resolve necessary identifier.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js#L277
  *
  * ```javascript
  * class Foo {}
@@ -452,6 +471,7 @@ export const _resolveNecessary = (docs) => {
 
 /**
  * find doc object for each access.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L226
  * @param {DocObject} doc - parent doc object.
  * @param {string} kind - kind property condition.
  * @param {boolean} isStatic - static property condition
@@ -501,6 +521,7 @@ export const _findAccessDocs = (doc, kind, isStatic = true) => {
 /**
  * shorten description.
  * e.g. ``this is JavaScript. this is Java.`` => ``this is JavaScript.``.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/util.js#L4
  *
  * @param {DocObject} doc - target doc object.
  * @param {boolean} [asMarkdown=false] - is true, test as markdown and convert to html.
@@ -554,6 +575,7 @@ export function shorten(doc, asMarkdown = false) {
 /**
  * parse ``@example`` value.
  * ``@example`` value can have ``<caption>`` tag.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/util.js#L127
  *
  * @param {string} example - target example value.
  * @returns {{body: string, caption: string}} parsed example value.
@@ -575,6 +597,7 @@ export function parseExample(example) {
 
 /**
  * escape URL hash.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/util.js#L149
  * @param {string} hash - URL hash for HTML a tag and id tag
  * @returns {string} escaped URL hash
  */
@@ -585,7 +608,7 @@ export const escapeURLHash = (hash) => {
 };
 
 /**
- * Search index of identifier builder class.
+ * Create search index of identifier builder class.
  * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/SearchIndexBuilder.js#L7
  */
 export const _getSearchIndex = () => {

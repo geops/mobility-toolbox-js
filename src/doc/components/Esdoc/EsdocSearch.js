@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SearchDoc = () => {
+const EsdocSearch = () => {
   const searchIndex = _getSearchIndex();
   const classes = useStyles();
   const [filter, setFilter] = useState('');
@@ -69,4 +69,4 @@ const SearchDoc = () => {
     </div>
   );
 };
-export default SearchDoc;
+export default EsdocSearch;

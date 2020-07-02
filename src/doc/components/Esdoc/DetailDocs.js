@@ -16,6 +16,8 @@ import Properties from './Properties';
 import TypeDocLinkHTML from './TypeDocLinkHTML';
 import DocLinkHTML from './DocLinkHTML';
 import DocsLinkHTML from './DocsLinkHTML';
+import ExperimentalHTML from './ExperimentalHTML';
+import DeprecatedHTML from './DeprecatedHTML';
 
 /**
  * build detail output html by docs.
@@ -94,9 +96,12 @@ const DetailDocs = ({ docs, title }) => {
                 </SyntaxHighlighter>
               </div>
             )}
-            {/* TODO
-        <div className="deprecated" data-ice="deprecated" />
-        <div className="experimental" data-ice="experimental" /> */}
+            <div className="deprecated" data-ice="deprecated">
+              <DeprecatedHTML doc={doc} />
+            </div>
+            <div className="experimental" data-ice="experimental">
+              <ExperimentalHTML doc={doc} />
+            </div>
             <div data-ice="description">
               {doc.description || <OverrideMethodDescription doc={doc} />}
             </div>
