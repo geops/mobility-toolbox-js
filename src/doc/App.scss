@@ -1,8 +1,13 @@
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: Lato, Arial, sans-serif;
   color: #353535;
   position: relative;
+  min-height: 100%;
 }
 
 a {
