@@ -12,18 +12,18 @@ import EXAMPLES from '../examples';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
-    padding: 12,
+    padding: theme.spacing(2),
   },
   filterField: {
     width: '100%',
-    marginBottom: 15,
+    marginBottom: theme.spacing(2),
   },
   example: {
-    padding: 20,
+    padding: theme.spacing(2),
   },
   navigation: {
     background: '#e3e9ec',
-    padding: 20,
+    padding: theme.spacing(2),
     lineHeight: '200%',
   },
   exampleLink: {

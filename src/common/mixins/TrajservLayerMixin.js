@@ -69,7 +69,7 @@ export class TrajservLayerInterface {
 
   /**
    * Returns the URL parameters.
-   * @param {Object} extraParams
+   * @param {Object} extraParams Extra parameters
    * @returns {Object}
    * @private
    */

@@ -21,8 +21,9 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *   apiKey: [yourApiKey],
  * });
  *
- * @see https://mobility-toolbox-js.geops.de/api/class/src/api/trajserv/TrajservAPI.js~TrajservAPI.html
- * @see https://mobility-toolbox-js.geops.de/examples/ol-tracker
+ *
+ * @see <a href="/api/class/src/api/trajserv/TrajservAPI%20js~TrajservAPI%20html">TrajservAPI</a>
+ * @see <a href="/examples/ol-tracker">OL tracker example</a>
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
