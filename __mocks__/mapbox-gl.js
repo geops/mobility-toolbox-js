@@ -1,10 +1,17 @@
 /* eslint-disable class-methods-use-this */
 class Map {
+  addLayer() {}
+
+  addSource() {}
+
   isStyleLoaded() {}
 
   getBounds() {
     return {
-      toArray: () => [1, 2],
+      toArray: () => [
+        [1, 2],
+        [1, 2],
+      ],
     };
   }
 
