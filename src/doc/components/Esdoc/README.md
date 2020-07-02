@@ -25,7 +25,7 @@ Only 4 components must be used directly:
 
 ## TODO
 
-List of functionnalities not implemented because we don't use it :
+List of functionalities not implemented because we don't use it :
 
 - Tests
 - Decorators
@@ -33,7 +33,7 @@ List of functionnalities not implemented because we don't use it :
 
 Improvments:
 
-- Pass the index.json as a parameter.
+- Pass the index.json content as a parameter.
 - Configure the replacement of '.' by '%20' in url to make it work with react-router.
 - Configure the base url, currently /api/ is append to all links except source links.
 - Configure the github url, currently github.com/mobility-toolbox-js/... is append to all sources links.
