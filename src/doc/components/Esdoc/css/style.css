@@ -116,8 +116,8 @@
   font-size: 13px;
 }
 
-.esdoc .import-path pre,
-.esdoc .import-path pre code {
+.esdoc .import-path pre.prettyprint,
+.esdoc .import-path pre.prettyprint code {
   margin: 0;
   padding: 0;
   border: none;
@@ -161,19 +161,19 @@
 } */
 
 .esdoc .navigation {
-  /* position: fixed;
+  position: fixed;
   top: 0;
-  left: 0; */
-  /* box-sizing: border-box; */
-  width: 100%;
+  left: 0;
+  box-sizing: border-box;
+  width: 250px;
   height: 100%;
-  /* margin-top: 40px;
+  margin-top: 40px;
   padding-top: 40px;
   padding-left: 15px;
   padding-bottom: 2em;
-  margin-top:1em; */
-  overflow-x: auto;
-  /* box-shadow: rgba(255, 255, 255, 1) -1px 0 0 inset; */
+  margin-top:1em;
+  overflow-x: scroll;
+  box-shadow: rgba(255, 255, 255, 1) -1px 0 0 inset;
   border-right: 1px solid #ddd;
 }
 
@@ -188,7 +188,7 @@
 }
 
 .esdoc .navigation li a {
-  color: #353535;
+  color: #666;
 }
 
 .esdoc .navigation .nav-dir-path {
@@ -256,9 +256,9 @@
 }
 
 .esdoc .content {
-  /* margin-top: 40px;
+  margin-top: 40px;
   margin-left: 250px;
-  padding: 10px 50px 10px 20px; */
+  padding: 10px 50px 10px 20px;
 }
 
 .esdoc .header-notice {
@@ -362,6 +362,10 @@
   padding-left: 2px;
 }
 
+.esdoc .inherited-summary thead a {
+  color: white;
+}
+
 .esdoc .inherited-summary .summary tbody {
   display: none;
 }
@@ -383,7 +387,7 @@
 }
 
 .esdoc table.params {
-  width: calc(100% - 10px);
+  width: 100%;
   margin: 10px 0;
   border-spacing: 0;
   border: 0;
@@ -409,7 +413,7 @@
 }
 
 .esdoc .content .detail > h3 {
-  color: #353535;
+  color: black;
   background-color: #f0f0f0;
 }
 
@@ -602,9 +606,4 @@
 
 .esdoc .inner-link-active a {
   color: inherit;
-}
-
-.esdoc .hide-no-content h2:first-child:nth-last-child(1),
-  .esdoc .hide-no-content h4:first-child:nth-last-child(1) {
-  display: none;
 }
