@@ -110,6 +110,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
    */
   onMove() {
     this.map.getSource(this.key).setCoordinates(getSourceCoordinates(this.map));
+
     const { width, height } = this.map.getCanvas();
     this.tracker.renderTrajectories(
       this.currTime,
