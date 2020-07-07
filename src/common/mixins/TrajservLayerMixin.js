@@ -123,7 +123,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
      * @param {string} regexLine
      * @private
      */
-    static createFilter(line, trip, operator, regexLine) {
+    createFilter(line, trip, operator, regexLine) {
       const filterList = [];
 
       if (!line && !trip && !operator && !regexLine) {
@@ -249,7 +249,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const opParam = parameters[OPERATOR_FILTER];
 
       if (lineParam || routeParam || opParam || this.regexPublishedLineName) {
-        this.filter = TrajservLayerMixin.createFilter(
+        this.filter = this.createFilter(
           lineParam ? lineParam.split(',') : undefined,
           routeParam ? routeParam.split(',') : undefined,
           opParam ? opParam.split(',') : undefined,
