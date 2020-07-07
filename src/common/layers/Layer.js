@@ -1,4 +1,5 @@
-import Observable from 'ol/Observable';
+import Observable, { unByKey } from 'ol/Observable';
+
 import { v4 as uuid } from 'uuid';
 
 /**
@@ -118,13 +119,29 @@ export default class Layer extends Observable {
     this.terminate();
     /** @ignore */
     this.map = map;
+    if (!this.map || !this.olLayer) {
+      return;
+    }
+
+    this.olListenersKeys.push(
+      this.map.getLayers().on('remove', (evt) => {
+        if (evt.element === this.olLayer) {
+          this.terminate();
+        }
+      }),
+    );
   }
 
   /**
    * Terminate what was initialized in init function. Remove layer, events...
    */
   // eslint-disable-next-line class-methods-use-this
-  terminate() {}
+  terminate() {
+    unByKey(this.olListenersKeys);
+    if (this.map && this.olLayer) {
+      this.map.removeLayer(this.olLayer);
+    }
+  }
 
   /**
    * Get a layer property.
