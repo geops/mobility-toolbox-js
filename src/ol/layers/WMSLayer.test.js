@@ -49,4 +49,19 @@ describe('WMSLayer', () => {
     expect(data.coordinate).toEqual([50, 50]);
     expect(data.layer).toBeInstanceOf(WMSLayer);
   });
+
+  test('#onClick', () => {
+    const f = () => {};
+    layer.onClick(f);
+    expect(layer.clickCallbacks[0]).toBe(f);
+    expect(layer.clickCallbacks.length).toBe(1);
+    layer.onClick(f);
+    expect(layer.clickCallbacks.length).toBe(2);
+  });
+
+  test('should onClick throw error.', () => {
+    expect(() => {
+      layer.onClick('not of type function');
+    }).toThrow(Error);
+  });
 });
