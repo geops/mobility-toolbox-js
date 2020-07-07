@@ -1,7 +1,7 @@
 {
   "name": "mobility-toolbox-js",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2-beta-1",
   "main": "build/index.js",
   "module": "src/index.js",
   "files": [
