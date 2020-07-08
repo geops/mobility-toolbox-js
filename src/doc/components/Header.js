@@ -105,10 +105,14 @@ const Header = () => {
   return (
     <>
       <AppBar position="sticky" className={classes.appBar}>
-        <div className={classes.brand}>
-          <img className={classes.logo} src={Logo} alt="Logo" />
-          <Typography className={classes.title}>mobility-toolbox-js</Typography>
-        </div>
+        <NavLink to="/">
+          <div className={classes.brand}>
+            <img className={classes.logo} src={Logo} alt="Logo" />
+            <Typography className={classes.title}>
+              mobility-toolbox-js
+            </Typography>
+          </div>
+        </NavLink>
 
         <div className={classes.buttonCollapse}>
           <IconButton onClick={() => setMenuOpen(!open)}>
