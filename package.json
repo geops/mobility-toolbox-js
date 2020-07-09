@@ -36,6 +36,12 @@
     "typeface-lato": "^0.0.75",
     "uuid": "^8.1.0"
   },
+  "peerDependencies": {
+    "mapbox-gl": "^1.10.1",
+    "ol": "^6.3.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "7.10.1",
     "@neutrinojs/airbnb": "9.1.0",
