@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { useRouteMatch, useLocation } from 'react-router';
+import Esdoc from './Esdoc/Esdoc';
 
 const useStyles = makeStyles({
   root: {
@@ -10,21 +12,27 @@ const useStyles = makeStyles({
   },
   iframe: {
     flexGrow: 1,
-    overflowY: 'visible',
     border: 0,
+    overflow: 'hidden',
   },
 });
 
 const Documentation = () => {
   const classes = useStyles();
+  const match = useRouteMatch();
+  const { hash } = useLocation();
+  const [path, setPath] = useState('identifiers%20html');
+
+  useEffect(() => {
+    const matchPath = match.params.path;
+    if (matchPath) {
+      setPath(matchPath.replace(/ /g, '.') + hash);
+    }
+  }, [match, hash]);
 
   return (
     <div className={classes.root}>
-      <iframe
-        title="API documentation"
-        src="apidoc/identifiers.html"
-        className={classes.iframe}
-      />
+      <Esdoc path={path} />
     </div>
   );
 };

@@ -69,7 +69,7 @@ export class TrajservLayerInterface {
 
   /**
    * Returns the URL parameters.
-   * @param {Object} extraParams
+   * @param {Object} extraParams Extra parameters
    * @returns {Object}
    * @private
    */
@@ -108,66 +108,6 @@ const ROUTE_FILTER = 'tripnumber';
 const OPERATOR_FILTER = 'operator';
 
 /**
- * Create a filter based on train and operator
- * @param {string} line
- * @param {string} route
- * @param {string} operator
- * @param {string} regexLine
- * @private
- */
-const createFilter = (line, trip, operator, regexLine) => {
-  const filterList = [];
-
-  if (!line && !trip && !operator && !regexLine) {
-    return null;
-  }
-
-  if (regexLine) {
-    const regexLineList =
-      typeof regexLine === 'string' ? [regexLine] : regexLine;
-    const lineFilter = (t) =>
-      regexLineList.some((tr) => new RegExp(tr, 'i').test(t.name));
-    filterList.push(lineFilter);
-  }
-
-  if (line) {
-    const lineFiltersList = typeof line === 'string' ? line.split(',') : line;
-    const lineList = lineFiltersList.map((l) =>
-      l.replace(/\s+/g, '').toUpperCase(),
-    );
-    const lineFilter = (l) =>
-      lineList.some((filter) => filter === l.name.toUpperCase());
-    filterList.push(lineFilter);
-  }
-
-  if (trip) {
-    const tripFilters = typeof trip === 'string' ? trip.split(',') : trip;
-    const tripList = tripFilters.map((rt) => parseInt(rt, 10));
-    const tripFilter = (t) => {
-      const tripId = parseInt(t.routeIdentifier.split('.')[0], 10);
-      return tripList.some((tr) => tr === tripId);
-    };
-    filterList.push(tripFilter);
-  }
-
-  if (operator) {
-    const operatorList = typeof operator === 'string' ? [operator] : operator;
-    const operatorFilter = (t) =>
-      operatorList.some((op) => new RegExp(op, 'i').test(t.operator));
-    filterList.push(operatorFilter);
-  }
-
-  return (t) => {
-    for (let i = 0; i < filterList.length; i += 1) {
-      if (!filterList[i](t)) {
-        return false;
-      }
-    }
-    return true;
-  };
-};
-
-/**
  * Mixin for TrajservLayerInterface.
  *
  * @param {TrackerLayer} TrackerLayer A {TrackerLayer} class to extend with {TrajservLayerInterface} functionnalities.
@@ -175,6 +115,68 @@ const createFilter = (line, trip, operator, regexLine) => {
  */
 const TrajservLayerMixin = (TrackerLayer) =>
   class extends TrackerLayer {
+    /**
+     * Create a filter based on train and operator
+     * @param {string} line
+     * @param {string} route
+     * @param {string} operator
+     * @param {string} regexLine
+     * @private
+     */
+    static createFilter(line, trip, operator, regexLine) {
+      const filterList = [];
+
+      if (!line && !trip && !operator && !regexLine) {
+        return null;
+      }
+
+      if (regexLine) {
+        const regexLineList =
+          typeof regexLine === 'string' ? [regexLine] : regexLine;
+        const lineFilter = (t) =>
+          regexLineList.some((tr) => new RegExp(tr, 'i').test(t.name));
+        filterList.push(lineFilter);
+      }
+
+      if (line) {
+        const lineFiltersList =
+          typeof line === 'string' ? line.split(',') : line;
+        const lineList = lineFiltersList.map((l) =>
+          l.replace(/\s+/g, '').toUpperCase(),
+        );
+        const lineFilter = (l) =>
+          lineList.some((filter) => filter === l.name.toUpperCase());
+        filterList.push(lineFilter);
+      }
+
+      if (trip) {
+        const tripFilters = typeof trip === 'string' ? trip.split(',') : trip;
+        const tripList = tripFilters.map((rt) => parseInt(rt, 10));
+        const tripFilter = (t) => {
+          const tripId = parseInt(t.routeIdentifier.split('.')[0], 10);
+          return tripList.some((tr) => tr === tripId);
+        };
+        filterList.push(tripFilter);
+      }
+
+      if (operator) {
+        const operatorList =
+          typeof operator === 'string' ? [operator] : operator;
+        const operatorFilter = (t) =>
+          operatorList.some((op) => new RegExp(op, 'i').test(t.operator));
+        filterList.push(operatorFilter);
+      }
+
+      return (t) => {
+        for (let i = 0; i < filterList.length; i += 1) {
+          if (!filterList[i](t)) {
+            return false;
+          }
+        }
+        return true;
+      };
+    }
+
     defineProperties(options) {
       super.defineProperties(options);
       Object.defineProperties(this, {
@@ -247,7 +249,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const opParam = parameters[OPERATOR_FILTER];
 
       if (lineParam || routeParam || opParam || this.regexPublishedLineName) {
-        this.filter = createFilter(
+        this.filter = TrajservLayerMixin.createFilter(
           lineParam ? lineParam.split(',') : undefined,
           routeParam ? routeParam.split(',') : undefined,
           opParam ? opParam.split(',') : undefined,

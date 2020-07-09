@@ -1,5 +1,5 @@
 {
-  "source": "./src/",
+  "source": "./src",
   "destination": "./apidoc",
   "includes": ["\\.js$"],
   "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
@@ -9,11 +9,9 @@
     },
     { "name": "esdoc-ecmascript-proposal-plugin", "option": { "all": true } },
     {
-      "name": "esdoc-publish-html-plugin",
-      "option": {
-        "template": "./esdoc/template"
-      }
+      "name": "esdoc-publish-html-plugin"
     },
-    { "name": "./esdoc/plugins/dynamic-property-plugin/Plugin.js" }
+    { "name": "./esdoc/plugins/dynamic-property-plugin/Plugin.js" },
+    { "name": "./esdoc/plugins/externals-plugin/Plugin.js" }
   ]
 }

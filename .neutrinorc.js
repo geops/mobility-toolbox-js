@@ -13,10 +13,6 @@ if (process.env.REACT_APP_LIB_MODE) {
       root: __dirname,
       mains: {
         index: './index.js',
-        api: './api/index.js',
-        ol: './ol/index.js',
-        mapbox: './mapbox/index.js',
-        search: './search/index.js',
       },
     },
     use: [
@@ -87,10 +83,6 @@ if (process.env.REACT_APP_LIB_MODE) {
       jest(),
       copy({
         patterns: [
-          {
-            from: path.join(__dirname, 'apidoc'),
-            to: path.join(__dirname, 'build/apidoc'),
-          },
           {
             from: path.join(__dirname, 'README.md'),
             to: path.join(__dirname, 'build/README.md'),

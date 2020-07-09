@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { useParams } from 'react-router-dom';
 import CodeSandboxButton from './CodeSandboxButton';
+import EXAMPLES from '../examples';
 
 const useStyles = makeStyles({
+  root: {
+    padding: 12,
+  },
   htmlContainer: {
     height: 500,
   },
@@ -24,18 +28,11 @@ const useStyles = makeStyles({
     paddingRight: 10,
   },
 });
-// const makeId = (length) => {
-//   let result = '';
-//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-//   const charactersLength = characters.length;
-//   for (let i = 0; i < length; i += 1) {
-//     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-//   }
-//   return result;
-// };
 
-const Example = ({ example }) => {
+const Example = () => {
   const { editButton, paper, htmlContainer, fileName } = useStyles();
+  const { exampleKey } = useParams((params) => params);
+  const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
 
@@ -97,17 +94,6 @@ const Example = ({ example }) => {
       </Grid>
     </Grid>
   );
-};
-
-Example.propTypes = {
-  example: PropTypes.shape({
-    name: PropTypes.string,
-    description: PropTypes.string,
-    files: PropTypes.shape({
-      js: PropTypes.string,
-      html: PropTypes.string,
-    }),
-  }).isRequired,
 };
 
 export default React.memo(Example);
