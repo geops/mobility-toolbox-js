@@ -7,7 +7,7 @@ export default () => {
     target: 'map',
     view: new View({
       center: [831634, 5933959],
-      zoom: 9,
+      zoom: 13,
     }),
   });
 

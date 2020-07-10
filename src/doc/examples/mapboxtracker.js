@@ -8,7 +8,7 @@ export default () => {
     container: 'map',
     style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
     center: toLonLat([831634, 5933959]),
-    zoom: 9,
+    zoom: 12,
   });
 
   const tracker = new TrajservLayer({
