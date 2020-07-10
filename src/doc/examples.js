@@ -20,7 +20,7 @@ export default [
   {
     name: 'Live tracker with OpenLayers',
     key: 'ol-tracker',
-    description: 'Show moving trains in a OpenLayers map.',
+    description: 'Show moving trains in an OpenLayers map.',
     img: liveTrackerOLImg,
     files: {
       html: 'tracker.html',
