@@ -13,6 +13,7 @@ export default class Tracker {
       ...options,
     };
     this.trajectories = [];
+    this.renderedTrajectories = [];
     this.interpolate = !!opts.interpolate;
     this.getPixelFromCoordinate = opts.getPixelFromCoordinate;
     this.hoverVehicleId = null;
@@ -65,6 +66,15 @@ export default class Tracker {
    */
   getTrajectories() {
     return this.trajectories || [];
+  }
+
+  /**
+   * Return rendered trajectories.
+   * Use this to avoid race conditions while rendering.
+   * @returns {array<trajectory>} trajectories
+   */
+  getRenderedTrajectories() {
+    return this.renderedTrajectories;
   }
 
   /**
@@ -209,6 +219,8 @@ export default class Tracker {
           // eslint-disable-next-line no-continue
           continue;
         }
+        // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
+        this.trajectories[i].rendered = true;
 
         const vehicleImg = this.style(traj, this.currResolution);
         if (this.hoverVehicleId !== traj.id) {
@@ -231,6 +243,7 @@ export default class Tracker {
         hoverVehiclePx[1] - hoverVehicleImg.height / 2,
       );
     }
+    this.renderedTrajectories = this.trajectories.filter((t) => t.rendered);
   }
 
   /**
@@ -239,6 +252,7 @@ export default class Tracker {
    */
   destroy() {
     unByKey(this.olEventsKeys);
+    this.renderedTrajectories = [];
     this.clear();
   }
 }
