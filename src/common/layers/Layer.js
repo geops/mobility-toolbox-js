@@ -125,11 +125,7 @@ export default class Layer extends Observable {
    * Terminate what was initialized in init function. Remove layer, events...
    */
   // eslint-disable-next-line class-methods-use-this
-  terminate() {
-    if (this.map && this.olLayer) {
-      this.map.removeLayer(this.olLayer);
-    }
-  }
+  terminate() {}
 
   /**
    * Get a layer property.
