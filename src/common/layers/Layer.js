@@ -1,4 +1,4 @@
-import Observable, { unByKey } from 'ol/Observable';
+import Observable from 'ol/Observable';
 
 import { v4 as uuid } from 'uuid';
 
@@ -34,7 +34,7 @@ export default class Layer extends Observable {
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is visible on the map.
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
-   * @param {boolean} [options.isQueryable=undefined] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
+   * @param {boolean} [options.isQueryable=false] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
    */
   constructor(options) {
     super();
@@ -75,7 +75,7 @@ export default class Layer extends Observable {
         value: !!isBaseLayer,
       },
       isQueryable: {
-        value: isQueryable !== false,
+        value: !!isQueryable,
         writable: true,
       },
       // Custom property for duck typing since `instanceof` is not working
@@ -119,17 +119,6 @@ export default class Layer extends Observable {
     this.terminate();
     /** @ignore */
     this.map = map;
-    if (!this.map || !this.olLayer) {
-      return;
-    }
-
-    this.olListenersKeys.push(
-      this.map.getLayers().on('remove', (evt) => {
-        if (evt.element === this.olLayer) {
-          this.terminate();
-        }
-      }),
-    );
   }
 
   /**
@@ -137,7 +126,6 @@ export default class Layer extends Observable {
    */
   // eslint-disable-next-line class-methods-use-this
   terminate() {
-    unByKey(this.olListenersKeys);
     if (this.map && this.olLayer) {
       this.map.removeLayer(this.olLayer);
     }
