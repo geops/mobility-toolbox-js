@@ -119,5 +119,6 @@ dist
 # Neutrino build directory
 build
 
-# esdoc build directory
+# esdoc files
 apidoc
+src/doc/components/Esdoc/index.json
