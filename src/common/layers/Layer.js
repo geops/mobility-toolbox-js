@@ -1,5 +1,4 @@
 import Observable from 'ol/Observable';
-
 import { v4 as uuid } from 'uuid';
 
 /**
