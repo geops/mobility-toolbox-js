@@ -45,7 +45,7 @@ export default () => {
       source: new VectorSource({
         features: [
           new Feature({
-            name: 'Reactangle',
+            name: 'Rectangle',
             geometry: new Polygon([
               [
                 [950693, 6003968],
