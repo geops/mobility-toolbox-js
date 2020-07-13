@@ -42,6 +42,38 @@ if (process.env.REACT_APP_LIB_MODE) {
             );
         }
       },
+      copy({
+        patterns: [
+          {
+            from: path.join(__dirname, 'README.md'),
+            to: path.join(__dirname, 'build/README.md'),
+          },
+          {
+            from: path.join(__dirname, 'src/api'),
+            to: path.join(__dirname, 'build/api'),
+          },
+          {
+            from: path.join(__dirname, 'src/common'),
+            to: path.join(__dirname, 'build/common'),
+          },
+          {
+            from: path.join(__dirname, 'src/ol'),
+            to: path.join(__dirname, 'build/ol'),
+          },
+          {
+            from: path.join(__dirname, 'src/mapbox'),
+            to: path.join(__dirname, 'build/mapbox'),
+          },
+          {
+            from: path.join(__dirname, 'package.json'),
+            to: path.join(__dirname, 'build/package.json'),
+          },
+          {
+            from: path.join(__dirname, 'src/index.js'),
+            to: path.join(__dirname, 'build/module.js'),
+          },
+        ],
+      }),
     ],
   };
 } else {
