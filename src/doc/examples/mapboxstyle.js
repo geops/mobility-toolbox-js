@@ -2,8 +2,6 @@ import View from 'ol/View';
 import { Map, MapboxLayer, MapboxStyleLayer } from '../../ol';
 import 'ol/ol.css';
 
-import './mapboxstyle.css';
-
 export default () => {
   const map = new Map({
     target: 'map',
