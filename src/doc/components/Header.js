@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
   brand: {
     display: 'flex',
     alignItems: 'center',
+    fontSize: 22,
   },
   logo: {
     [theme.breakpoints.down('xs')]: {
@@ -44,7 +45,8 @@ const useStyles = makeStyles((theme) => ({
       fontSize: 15,
       marginLeft: 10,
     },
-    fontSize: 18,
+    fontSize: 22,
+    color: theme.palette.text.primary,
     fontWeight: 500,
     marginLeft: 15,
   },
@@ -105,10 +107,14 @@ const Header = () => {
   return (
     <>
       <AppBar position="sticky" className={classes.appBar}>
-        <div className={classes.brand}>
-          <img className={classes.logo} src={Logo} alt="Logo" />
-          <Typography className={classes.title}>mobility-toolbox-js</Typography>
-        </div>
+        <NavLink to="/">
+          <div className={classes.brand}>
+            <img className={classes.logo} src={Logo} alt="Logo" />
+            <Typography className={classes.title}>
+              mobility-toolbox-js
+            </Typography>
+          </div>
+        </NavLink>
 
         <div className={classes.buttonCollapse}>
           <IconButton onClick={() => setMenuOpen(!open)}>
