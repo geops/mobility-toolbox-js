@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import { unByKey } from 'ol/Observable';
 import Layer from './Layer';
 
 /**
@@ -67,6 +68,20 @@ class MapboxStyleLayer extends Layer {
     }
   }
 
+  /**
+   * Listens to click events on the layer.
+   * @param {function} callback Callback function, called with the clicked
+   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
+   *   the layer instance and the click coordinate.
+   */
+  onClick(callback) {
+    if (typeof callback === 'function') {
+      this.clickCallbacks.push(callback);
+    } else {
+      throw new Error('callback must be of type function.');
+    }
+  }
+
   init(map) {
     if (!this.mapboxLayer.map) {
       this.mapboxLayer.init(map);
@@ -125,6 +140,26 @@ class MapboxStyleLayer extends Layer {
       //     this.addDynamicFilters();
       //   }),
     );
+
+    // Listen to click events
+    this.singleClickRef = this.map.on('singleclick', (e) => {
+      if (!this.clickCallbacks.length) {
+        return;
+      }
+
+      this.getFeatureInfoAtCoordinate(e.coordinate)
+        .then((d) => this.callClickCallbacks(d.features, d.layer, d.coordinate))
+        .catch(() => this.callClickCallbacks([], this, e.coordinate));
+    });
+  }
+
+  /**
+   * Call click callbacks with given parameters.
+   * This is done in a separate function for being able to modify the response.
+   * @private
+   */
+  callClickCallbacks(features, layer, coordinate) {
+    this.clickCallbacks.forEach((c) => c(features, layer, coordinate));
   }
 
   terminate(map) {
@@ -138,6 +173,9 @@ class MapboxStyleLayer extends Layer {
       this.removeStyleLayers();
     }
     super.terminate(map);
+    if (this.singleClickRef) {
+      unByKey(this.singleClickRef);
+    }
   }
 
   addStyleLayers() {
