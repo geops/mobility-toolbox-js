@@ -57,4 +57,15 @@ export default [
       js: 'mapboxstyle.js',
     },
   },
+  {
+    name: 'Querying objects',
+    key: 'query-objects',
+    description:
+      'This example shows how to query objects in different kinds of layers.',
+    img: mapboxStyleImg, // TODO Eva Ersetzen
+    files: {
+      html: 'query-objects.html',
+      js: 'query-objects.js',
+    },
+  },
 ];
