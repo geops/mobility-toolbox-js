@@ -38,9 +38,7 @@
   },
   "peerDependencies": {
     "mapbox-gl": "^1.10.1",
-    "ol": "^6.3.1",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "ol": "^6.3.1"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "7.10.1",
