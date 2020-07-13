@@ -6,8 +6,6 @@ import View from 'ol/View';
 import { Map, MapboxLayer, MapboxStyleLayer, VectorLayer } from '../../ol';
 import 'ol/ol.css';
 
-import './query-objects.css';
-
 export default () => {
   const addText = (text) => {
     const element = document.getElementById('box');
