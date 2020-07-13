@@ -12,6 +12,12 @@ export default () => {
     element.innerHTML = text;
   };
 
+  const onClick = (features) => {
+    if (features.length) {
+      addText(features[0].get('name'));
+    }
+  };
+
   const map = new Map({
     target: 'map',
     view: new View({
@@ -31,14 +37,7 @@ export default () => {
     styleLayer: {
       id: 'poi_with_icons',
     },
-  });
-
-  map.on('singleclick', (e) => {
-    poiLayer.getFeatureInfoAtCoordinate(e.coordinate).then((d) => {
-      if (d.features.length) {
-        addText(d.features[0].get('name'));
-      }
-    });
+    onClick,
   });
 
   const vectorLayer = new VectorLayer({
@@ -60,12 +59,7 @@ export default () => {
         ],
       }),
     }),
-  });
-
-  vectorLayer.onClick((features) => {
-    if (features.length) {
-      addText(features[0].get('name'));
-    }
+    onClick,
   });
 
   map.addLayer(mapboxLayer);
