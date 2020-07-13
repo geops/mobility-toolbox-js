@@ -40,6 +40,18 @@ class Layer extends LayerCommon {
    */
   init(map) {
     super.init(map);
+
+    if (!this.map || !this.olLayer) {
+      return;
+    }
+
+    this.olListenersKeys.push(
+      this.map.getLayers().on('remove', (evt) => {
+        if (evt.element === this.olLayer) {
+          this.terminate();
+        }
+      }),
+    );
   }
 
   /**

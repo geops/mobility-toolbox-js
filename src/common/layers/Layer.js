@@ -75,6 +75,7 @@ export default class Layer extends Observable {
       },
       isQueryable: {
         value: !!isQueryable,
+        writable: true,
       },
       // Custom property for duck typing since `instanceof` is not working
       // when the instance was created on different bundles.
