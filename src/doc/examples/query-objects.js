@@ -8,7 +8,7 @@ import 'ol/ol.css';
 
 export default () => {
   const addText = (text) => {
-    const element = document.getElementById('box');
+    const element = document.getElementById('content');
     element.innerHTML = text;
   };
 
@@ -45,7 +45,7 @@ export default () => {
       source: new VectorSource({
         features: [
           new Feature({
-            name: 'reactangle',
+            name: 'Reactangle',
             geometry: new Polygon([
               [
                 [950693, 6003968],

@@ -1,16 +1,59 @@
 <style>
   div#box {
     width: 200px;
-    height: 100px;
+    height: 50px;
     position: absolute;
     z-index: 1;
     background-color: white;
     left: 10px;
     top: 100px;
     padding: 10px;
+
+    /* geops theme */
+    --geops-primary-green: #76B833;
+    --ms-secondary-white: #FFFFFF;
+    --unnamed-font-family-lato: Lato;
+    --unnamed-character-spacing-0: 0px;
+
+    background: var(--ms-secondary-white) 0% 0% no-repeat padding-box;
+    border-radius: 5px;
+    opacity: 1;
+  }
+
+  div#box .heading {
+    /* geops theme */
+    --unnamed-font-size-22: 22px;
+    --unnamed-line-spacing-27: 27px;
+    --unnamed-font-family-lato: Lato;
+    --unnamed-character-spacing-0: 0px;
+    --darkgray: #353535;
+
+    font: Bold var(--unnamed-font-size-22)/var(--unnamed-line-spacing-27) var(--unnamed-font-family-lato);
+    letter-spacing: var(--unnamed-character-spacing-0);
+    color: var(--darkgray);
+    text-align: left;
+    opacity: 1;
+  }
+
+  div#box #content {
+    /* geops theme */
+    --unnamed-font-size-18: 18px;
+    --unnamed-line-spacing-22: 22px;
+    --unnamed-font-family-lato: Lato;
+    --unnamed-character-spacing-0: 0px;
+    --darkgray: #353535;
+
+    font: Regular var(--unnamed-font-size-18)/var(--unnamed-line-spacing-22) var(--unnamed-font-family-lato);
+    letter-spacing: var(--unnamed-character-spacing-0);
+    color: var(--darkgray);
+    text-align: left;
+    opacity: 1;
   }
 </style>
 <div style="width: 100%; height: 100%; position: relative;">
-  <div id="box"></div>
+  <div id="box">
+    <div class="heading">Query result</div>
+    <div id="content">Click on a feature.</div>
+  </div>
   <div id="map" style="width: 100%; height: 100%;" tabIndex="0"></div>
 </div>
