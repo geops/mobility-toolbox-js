@@ -166,6 +166,13 @@ const TrackerLayerMixin = (Base) =>
           value: new Date(),
           writable: true,
         },
+
+        /**
+         * Keep track of which trajectories are currently drawn.
+         */
+        renderedTrajectories: {
+          get: () => this.tracker.renderedTrajectories,
+        },
       });
     }
 
