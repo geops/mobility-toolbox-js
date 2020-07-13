@@ -59,9 +59,6 @@ class Layer extends LayerCommon {
    */
   terminate() {
     unByKey(this.olListenersKeys);
-    if (this.map && this.olLayer) {
-      this.map.removeLayer(this.olLayer);
-    }
     super.terminate();
   }
 
