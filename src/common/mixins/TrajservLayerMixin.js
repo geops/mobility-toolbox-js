@@ -374,7 +374,10 @@ const TrajservLayerMixin = (TrackerLayer) =>
           this.abortController,
         )
         .then((trajectories) => {
-          this.tracker.setTrajectories(trajectories);
+          // Don't set trajectories when the user has aborted the request.
+          if (trajectories) {
+            this.tracker.setTrajectories(trajectories);
+          }
         });
     }
 

@@ -3,10 +3,13 @@
  * @ignore
  */
 export const handleError = (reqType, err) => {
-  if (err && err.name !== 'AbortError') {
-    // eslint-disable-next-line no-console
-    console.warn(`Fetch ${reqType} request failed: `, err);
+  if (err.name === 'AbortError') {
+    // Ignore AbortError.
+    return;
   }
+  // eslint-disable-next-line no-console
+  console.warn(`Fetch ${reqType} request failed: `, err);
+  // Propagate the error.
   throw new Error(err);
 };
 
