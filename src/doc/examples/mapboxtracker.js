@@ -1,4 +1,4 @@
-import { Map } from 'mapbox-gl/dist/mapbox-gl';
+import { Map } from 'mapbox-gl';
 import { toLonLat } from 'ol/proj';
 import { TrajservLayer } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
