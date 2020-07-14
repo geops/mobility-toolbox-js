@@ -18,9 +18,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: yarn install, build, and test
         run: |
+          echo '[]' > src/doc/components/Esdoc/index.json
           npm install -g yarn
           yarn install
-          yarn doc
           yarn lint
           yarn test
           yarn build
