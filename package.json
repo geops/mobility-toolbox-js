@@ -26,8 +26,8 @@
     "uuid": "^8.1.0"
   },
   "peerDependencies": {
-    "mapbox-gl": "^1.11.1",
-    "ol": "^6.3.1"
+    "mapbox-gl": "1.11.1",
+    "ol": "6.3.1"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "7.10.1",
@@ -62,10 +62,10 @@
     "jest-serializer-html": "7.0.0",
     "jsdoc": "3.6.4",
     "lint-staged": "10.2.9",
-    "mapbox-gl": "^1.11.1",
+    "mapbox-gl": "1.11.1",
     "neutrino": "9.1.0",
     "node-sass": "4.14.1",
-    "ol": "^6.3.1",
+    "ol": "6.3.1",
     "postcss-loader": "3.0.0",
     "prettier": "2.0.5",
     "sass-loader": "8.0.2",

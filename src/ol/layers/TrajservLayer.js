@@ -29,13 +29,16 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  * @implements {TrajservLayerInterface}
  */
 class TrajservLayer extends mixin(TrackerLayer) {
-  constructor(options) {
-    super(options);
+  defineProperties(options) {
+    super.defineProperties(options);
+    const vectorLayer = new VectorLayer({
+      source: new VectorSource({ features: [] }),
+    });
+    this.olLayer.getLayers().insertAt(0, vectorLayer);
+
     Object.defineProperties(this, {
       vectorLayer: {
-        value: new VectorLayer({
-          source: new VectorSource({ features: [] }),
-        }),
+        value: vectorLayer,
       },
     });
   }
