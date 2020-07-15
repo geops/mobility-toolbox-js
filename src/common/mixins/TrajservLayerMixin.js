@@ -108,6 +108,70 @@ const ROUTE_FILTER = 'tripnumber';
 const OPERATOR_FILTER = 'operator';
 
 /**
+ * Create a array of filter functions based on some parameters.
+ * @param {string} line
+ * @param {string} route
+ * @param {string} operator
+ * @param {string} regexLine
+ * @private
+ */
+const createFilters = (line, route, operator, regexLine) => {
+  const filterList = [];
+
+  if (!line && !route && !operator && !regexLine) {
+    return null;
+  }
+
+  if (regexLine) {
+    const regexLineList =
+      typeof regexLine === 'string' ? [regexLine] : regexLine;
+    const lineFilter = (t) =>
+      regexLineList.some((tr) => new RegExp(tr, 'i').test(t.name));
+    filterList.push(lineFilter);
+  }
+
+  if (line) {
+    const lineFiltersList = typeof line === 'string' ? line.split(',') : line;
+    const lineList = lineFiltersList.map((l) =>
+      l.replace(/\s+/g, '').toUpperCase(),
+    );
+    const lineFilter = (l) =>
+      lineList.some((filter) => filter === l.name.toUpperCase());
+    filterList.push(lineFilter);
+  }
+
+  if (route) {
+    const routes = typeof route === 'string' ? route.split(',') : route;
+    const routeList = routes.map((item) => parseInt(item, 10));
+    const routeFilter = (item) => {
+      const routeId = parseInt(item.routeIdentifier.split('.')[0], 10);
+      return routeList.some((id) => id === routeId);
+    };
+    filterList.push(routeFilter);
+  }
+
+  if (operator) {
+    const operatorList = typeof operator === 'string' ? [operator] : operator;
+    const operatorFilter = (t) =>
+      operatorList.some((op) => new RegExp(op, 'i').test(t.operator));
+    filterList.push(operatorFilter);
+  }
+
+  if (!filterList.length) {
+    return null;
+  }
+
+  return (t) => {
+    for (let i = 0; i < filterList.length; i += 1) {
+      if (!filterList[i](t)) {
+        return false;
+      }
+    }
+    return true;
+  };
+};
+
+/**
  * Mixin for TrajservLayerInterface.
  *
  * @param {TrackerLayer} TrackerLayer A {TrackerLayer} class to extend with {TrajservLayerInterface} functionnalities.
@@ -115,70 +179,14 @@ const OPERATOR_FILTER = 'operator';
  */
 const TrajservLayerMixin = (TrackerLayer) =>
   class extends TrackerLayer {
-    /**
-     * Create a filter based on train and operator
-     * @param {string} line
-     * @param {string} route
-     * @param {string} operator
-     * @param {string} regexLine
-     * @private
-     */
-    static createFilter(line, trip, operator, regexLine) {
-      const filterList = [];
-
-      if (!line && !trip && !operator && !regexLine) {
-        return null;
-      }
-
-      if (regexLine) {
-        const regexLineList =
-          typeof regexLine === 'string' ? [regexLine] : regexLine;
-        const lineFilter = (t) =>
-          regexLineList.some((tr) => new RegExp(tr, 'i').test(t.name));
-        filterList.push(lineFilter);
-      }
-
-      if (line) {
-        const lineFiltersList =
-          typeof line === 'string' ? line.split(',') : line;
-        const lineList = lineFiltersList.map((l) =>
-          l.replace(/\s+/g, '').toUpperCase(),
-        );
-        const lineFilter = (l) =>
-          lineList.some((filter) => filter === l.name.toUpperCase());
-        filterList.push(lineFilter);
-      }
-
-      if (trip) {
-        const tripFilters = typeof trip === 'string' ? trip.split(',') : trip;
-        const tripList = tripFilters.map((rt) => parseInt(rt, 10));
-        const tripFilter = (t) => {
-          const tripId = parseInt(t.routeIdentifier.split('.')[0], 10);
-          return tripList.some((tr) => tr === tripId);
-        };
-        filterList.push(tripFilter);
-      }
-
-      if (operator) {
-        const operatorList =
-          typeof operator === 'string' ? [operator] : operator;
-        const operatorFilter = (t) =>
-          operatorList.some((op) => new RegExp(op, 'i').test(t.operator));
-        filterList.push(operatorFilter);
-      }
-
-      return (t) => {
-        for (let i = 0; i < filterList.length; i += 1) {
-          if (!filterList[i](t)) {
-            return false;
-          }
-        }
-        return true;
-      };
-    }
-
     defineProperties(options) {
       super.defineProperties(options);
+      let {
+        regexPublishedLineName,
+        publishedLineName,
+        tripNumber,
+        operator,
+      } = options;
       Object.defineProperties(this, {
         showVehicleTraj: {
           value:
@@ -203,9 +211,41 @@ const TrajservLayerMixin = (TrackerLayer) =>
           value: 3,
           writable: true,
         },
+        publishedLineName: {
+          get: () => {
+            return publishedLineName;
+          },
+          set: (newPublishedLineName) => {
+            publishedLineName = newPublishedLineName;
+            this.updateFilters();
+          },
+        },
+        tripNumber: {
+          get: () => {
+            return tripNumber;
+          },
+          set: (newTripNumber) => {
+            tripNumber = newTripNumber;
+            this.updateFilters();
+          },
+        },
+        operator: {
+          get: () => {
+            return operator;
+          },
+          set: (newOperator) => {
+            operator = newOperator;
+            this.updateFilters();
+          },
+        },
         regexPublishedLineName: {
-          value: options.regexPublishedLineName,
-          writable: true,
+          get: () => {
+            return regexPublishedLineName;
+          },
+          set: (newRegex) => {
+            regexPublishedLineName = newRegex;
+            this.updateFilters();
+          },
         },
         api: {
           value: new TrajservAPI({ url: options.url, apiKey: options.apiKey }),
@@ -229,7 +269,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
     }
 
     start() {
-      this.addTrackerFilters();
+      this.updateFilters();
       super.start();
       this.startUpdateTrajectories();
     }
@@ -241,23 +281,16 @@ const TrajservLayerMixin = (TrackerLayer) =>
       super.stop();
     }
 
-    addTrackerFilters() {
-      // Setting filters from the permalink.
+    updateFilters() {
+      // Setting filters from the permalink if no values defined by the layer.
       const parameters = qs.parse(window.location.search.toLowerCase());
-      const lineParam = parameters[LINE_FILTER];
-      const routeParam = parameters[ROUTE_FILTER];
-      const opParam = parameters[OPERATOR_FILTER];
-
-      if (lineParam || routeParam || opParam || this.regexPublishedLineName) {
-        this.filter = TrajservLayerMixin.createFilter(
-          lineParam ? lineParam.split(',') : undefined,
-          routeParam ? routeParam.split(',') : undefined,
-          opParam ? opParam.split(',') : undefined,
-          this.regexPublishedLineName,
-        );
-      } else {
-        this.filter = null;
-      }
+      // filter is the property in TrackerLayerMixin.
+      this.filter = createFilters(
+        this.publishedLineName || parameters[LINE_FILTER],
+        this.tripNumber || parameters[ROUTE_FILTER],
+        this.operator || parameters[OPERATOR_FILTER],
+        this.regexPublishedLineName,
+      );
     }
 
     abortFetchTrajectories() {
@@ -341,7 +374,10 @@ const TrajservLayerMixin = (TrackerLayer) =>
           this.abortController,
         )
         .then((trajectories) => {
-          this.tracker.setTrajectories(trajectories);
+          // Don't set trajectories when the user has aborted the request.
+          if (trajectories) {
+            this.tracker.setTrajectories(trajectories);
+          }
         });
     }
 

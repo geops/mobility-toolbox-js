@@ -281,7 +281,9 @@ class TrajservLayer extends mixin(TrackerLayer) {
       // );
       // })
       .catch(() => {
-        this.map.removeLayer('highlight-trajectory');
+        if (this.map.getLayer('highlight-trajectory')) {
+          this.map.removeLayer('highlight-trajectory');
+        }
       });
   }
 }

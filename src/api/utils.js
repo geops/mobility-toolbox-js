@@ -1,13 +1,16 @@
 /**
- * Display log message on error.
+ * Display log message on error but not on AbortError.
  * @ignore
  */
 export const handleError = (reqType, err) => {
   if (err.name === 'AbortError') {
+    // Ignore AbortError.
     return;
   }
   // eslint-disable-next-line no-console
   console.warn(`Fetch ${reqType} request failed: `, err);
+  // Propagate the error.
+  throw new Error(err);
 };
 
 /**

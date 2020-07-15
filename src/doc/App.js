@@ -29,6 +29,14 @@ const theme = createMuiTheme({
       disableRipple: true,
     },
   },
+  typography: {
+    fontFamily: ['Lato', 'Arial'],
+  },
+  palette: {
+    text: {
+      primary: '#4b4b4b',
+    },
+  },
   overrides: {
     MuiTypography: {
       h1: {
