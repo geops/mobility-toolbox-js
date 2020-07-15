@@ -3,6 +3,7 @@ import liveTrackerOLImg from './img/examples/live_tracker_ol.jpg';
 import liveTrackerMBImg from './img/examples/live_tracker_mb.jpg';
 import mapboxImg from './img/examples/mapbox.jpg';
 import mapboxStyleImg from './img/examples/mapbox_style.jpg';
+import queryObjectsImg from './img/examples/query_objects.jpg';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -62,7 +63,7 @@ export default [
     key: 'query-objects',
     description:
       'This example shows how to query objects in different kinds of layers.',
-    img: mapboxStyleImg, // TODO Eva Ersetzen
+    img: queryObjectsImg,
     files: {
       html: 'query-objects.html',
       js: 'query-objects.js',
