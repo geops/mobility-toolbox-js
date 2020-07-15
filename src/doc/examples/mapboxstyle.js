@@ -29,6 +29,8 @@ export default () => {
   document.getElementById('toggle').addEventListener('click', (evt) => {
     poiLayer.setVisible(!poiLayer.visible);
     const { target } = evt;
-    target.innerHTML = `Set pois ${poiLayer.visible ? 'invisible' : 'visible'}`;
+    target.innerHTML = `Set service icons ${
+      poiLayer.visible ? 'invisible' : 'visible'
+    }`;
   });
 };
