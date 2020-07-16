@@ -23,7 +23,7 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *
  *
  * @see <a href="/api/class/src/api/trajserv/TrajservAPI%20js~TrajservAPI%20html">TrajservAPI</a>
- * @see <a href="/examples/ol-tracker">OL tracker example</a>
+ * @see <a href="/example/ol-tracker">OL tracker example</a>
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}

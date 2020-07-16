@@ -5,6 +5,12 @@
  * @external {ol/Map~Map} https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html
  */
 /**
+ * @external {ol.coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
+ */
+/**
+ * @external {ol.feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
+ */
+/**
  * @external {ol/geom/LineString~LineString} https://openlayers.org/en/latest/apidoc/module-ol_geom_LineString-LineString.html
  */
 /**
@@ -27,4 +33,10 @@
  */
 /**
  * @external {GeoJSONFeature} https://tools.ietf.org/html/rfc7946#section-3.2
+ */
+/**
+ * @external {canvas} https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
+ */
+/**
+ * @external {CanvasRenderingContext2D} https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
  */

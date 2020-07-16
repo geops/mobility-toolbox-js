@@ -229,6 +229,11 @@ const TrackerLayerMixin = (Base) =>
       this.startUpdateTime(zoom);
     }
 
+    /**
+     * Start the time.
+     * @private
+     * @param {number} zoom
+     */
     startUpdateTime(zoom) {
       this.updateTimeInterval = setInterval(() => {
         const newTime =
@@ -249,6 +254,10 @@ const TrackerLayerMixin = (Base) =>
       }
     }
 
+    /**
+     * Stop the time.
+     * @private
+     */
     stopUpdateTime() {
       clearInterval(this.updateTimeInterval);
     }
@@ -256,6 +265,8 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Set the current time, it triggers a rendering of the trajectories.
      * @param {dateString | value} time
+     * @param {Array<number>} size
+     * @param {number} resolution
      */
     setCurrTime(time, size, resolution) {
       const newTime = new Date(time);
@@ -267,6 +278,7 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Get vehicle.
      * @param {function} filterFc A function use to filter results.
+     * @returns {Array<Object>} Array of vehicle.
      */
     getVehicle(filterFc) {
       return this.tracker.getTrajectories().filter(filterFc);
@@ -298,6 +310,7 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Get the duration before the next update depending on zoom level.
      * @private
+     * @param {number} zoom
      */
     getRefreshTimeInMs(zoom) {
       const roundedZoom = Math.round(zoom);
