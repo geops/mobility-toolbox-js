@@ -37,6 +37,7 @@ const SummaryDoc = ({
       </thead>
       <tbody style={style}>
         {docs.map((doc, idx) => {
+          /*
           let staticc;
           if (['member', 'method', 'get', 'set'].includes(doc.kind)) {
             staticc = doc.static ? 'static' : '';
@@ -46,9 +47,12 @@ const SummaryDoc = ({
           if (['get', 'set'].includes(doc.kind)) {
             kind = doc.kind;
           }
+          */
           const kindKindIcon = doc.interface ? 'interface' : doc.kind;
           return (
             <tr data-ice="target" key={idx}>
+              {/* Hide the access (public) column */}
+              {/*
               <td>
                 <span className="access" data-ice="access">
                   {doc.access}
@@ -64,6 +68,7 @@ const SummaryDoc = ({
                 </span>
                 <span className="override" data-ice="override" />
               </td>
+              */}
               <td>
                 <div>
                   <p>

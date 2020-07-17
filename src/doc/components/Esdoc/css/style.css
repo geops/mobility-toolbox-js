@@ -332,24 +332,17 @@
 }
 
 .esdoc table.summary tbody td:nth-child(1) {
-  text-align: right;
-  white-space: nowrap;
-  min-width: 64px;
-  vertical-align: top;
-}
-
-.esdoc table.summary tbody td:nth-child(2) {
   width: 100%;
   border-right: none;
 }
 
-.esdoc table.summary tbody td:nth-child(3) {
+.esdoc table.summary tbody td:nth-child(2) {
   white-space: nowrap;
   border-left: none;
   vertical-align: top;
 }
 
-.esdoc table.summary td > div:nth-of-type(2) {
+.esdoc table.summary td > div:nth-of-type(1) {
   padding-top: 4px;
   padding-left: 15px;
 }
