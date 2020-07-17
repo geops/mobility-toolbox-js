@@ -401,6 +401,14 @@
   margin: 15px 0;
 }
 
+.esdoc .content .detail > .anchor-offset {
+  /* offset anchor to add offset on href click (due to the header height) */
+  display: block;
+  position: relative;
+  top: -100px;
+  visibility: hidden;
+}
+
 .esdoc .content .detail > h3 {
   color: #353535;
   background-color: #f0f0f0;

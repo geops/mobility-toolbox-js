@@ -43,7 +43,7 @@ const DocLinkHTML = ({ longname, text = null, inner = false, kind = null }) => {
   if (url) {
     return (
       <span>
-        <a href={`/api/${url.replace(/\./g, '%20')}`}>{text}</a>
+        <a href={`/api/${url.replace(/\./g, '%20')}-offset-anchor`}>{text}</a>
       </span>
     );
   }

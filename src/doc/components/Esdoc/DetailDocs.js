@@ -50,6 +50,10 @@ const DetailDocs = ({ docs, title }) => {
             key={`${scope}-${doc.kind}-${doc.name}`}
             id={`${scope}-${doc.kind}-${doc.name}`}
           >
+            <span
+              className="anchor-offset"
+              id={`${scope}-${doc.kind}-${doc.name}-offset-anchor`}
+            />
             <h3 data-ice="anchor">
               <span className="access" data-ice="access">
                 {doc.access}{' '}
