@@ -179,6 +179,11 @@ const createFilters = (line, route, operator, regexLine) => {
  */
 const TrajservLayerMixin = (TrackerLayer) =>
   class extends TrackerLayer {
+    /**
+     * Define layer's properties.
+     *
+     * @ignore
+     */
     defineProperties(options) {
       super.defineProperties(options);
       let {

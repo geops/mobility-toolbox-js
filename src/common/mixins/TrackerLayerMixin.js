@@ -41,6 +41,10 @@ export class TrackerLayerInterface {
   // eslint-disable-next-line no-unused-vars
   start(size, zoom, resolution) {}
 
+  /**
+   * Stop the time.
+   * @private
+   */
   // eslint-disable-next-line no-unused-vars
   startUpdateTime(zoom) {}
 
@@ -48,8 +52,6 @@ export class TrackerLayerInterface {
    * Stop the clock.
    */
   stop() {}
-
-  stopUpdateTime() {}
 
   /**
    * Set the current time, it triggers a rendering of the trajectories.
@@ -68,8 +70,8 @@ export class TrackerLayerInterface {
   /**
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
-   * @param {ol.coordinate} coordinate
-   * @returns {ol.feature | null} Vehicle feature
+   * @param {ol.Coordinate} coordinate
+   * @returns {ol.Feature | null} Vehicle feature
    */
   // eslint-disable-next-line no-unused-vars
   getVehiclesAtCoordinate(coordinate, resolution = 1) {}
@@ -100,6 +102,11 @@ export class TrackerLayerInterface {
  */
 const TrackerLayerMixin = (Base) =>
   class extends Base {
+    /**
+     * Define layer's properties.
+     *
+     * @ignore
+     */
     defineProperties(options) {
       const { isHoverActive, style, speed } = {
         isHoverActive: true,

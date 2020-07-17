@@ -27,8 +27,14 @@ const getCopyrightFromSources = (mbMap) => {
  * @class
  * @inheritDoc
  * @param {Object} [options]
+ * @implements {Layer}
  */
 export default class MapboxLayer extends Layer {
+  /**
+   * @param {Object} options
+   * @param {boolean} [options.preserveDrawingBuffer=false] If true able to export the canvas.
+   * @param {number} [options.fadeDuration=300] Duration of the fade effect in ms.
+   */
   constructor(options = {}) {
     const mbLayer = new OLLayer({
       render: (frameState) => {
@@ -121,7 +127,14 @@ export default class MapboxLayer extends Layer {
       ...options,
       olLayer: mbLayer,
     });
+
+    /** @ignore */
     this.options = options;
+
+    /**
+     * Url of the mapbox style.
+     * @type {string}
+     */
     this.styleUrl = options.url;
   }
 
@@ -136,6 +149,10 @@ export default class MapboxLayer extends Layer {
       return;
     }
 
+    /**
+     * The feature format.
+     * @type {ol/format/GeoJSON}
+     */
     this.format = new GeoJSON({
       featureProjection: this.map.getView().getProjection(),
     });
@@ -178,6 +195,10 @@ export default class MapboxLayer extends Layer {
     }
 
     try {
+      /**
+       * A mapbox map
+       * @type {mapboxgl.Map}
+       */
       this.mbMap = new mapboxgl.Map({
         style: this.styleUrl,
         attributionControl: false,
@@ -207,8 +228,16 @@ export default class MapboxLayer extends Layer {
     };
 
     this.mbMap.once('load', () => {
+      /**
+       * Is the map loaded.
+       * @type {boolean}
+       */
       this.loaded = true;
       if (!this.copyright) {
+        /**
+         * Copyright statement.
+         * @type {string}
+         */
         this.copyright = getCopyrightFromSources(this.mbMap);
       }
       this.dispatchEvent({

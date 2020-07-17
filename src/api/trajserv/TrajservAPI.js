@@ -20,6 +20,9 @@ import { handleError, readJsonResponse } from '../utils';
  * @classproperty {string} apiKey Api key to access the service.
  */
 class TrajservAPI {
+  /**
+   * @private
+   */
   constructor(options = {}) {
     /** @ignore */
     this.url = options.url || 'https://api.geops.io/tracker/v1';

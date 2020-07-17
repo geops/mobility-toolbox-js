@@ -88,7 +88,10 @@ class WMSLayer extends OLLayer {
       return;
     }
 
-    // Listen to click events
+    /**
+     * ol click events key, returned by map.on('singleclick')
+     * @type {EventsKey}
+     */
     this.singleClickRef = this.map.on('singleclick', (e) => {
       if (!this.clickCallbacks.length) {
         return;

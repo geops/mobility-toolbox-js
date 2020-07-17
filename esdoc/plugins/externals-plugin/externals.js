@@ -5,16 +5,26 @@
  * @external {ol/Map~Map} https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html
  */
 /**
- * @external {ol.coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
+ * @external {ol.Coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
  */
 /**
- * @external {ol.feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
+ * @external {ol.Feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
+ */
+/**
+ * @external {ol.Layer} https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html
  */
 /**
  * @external {ol/geom/LineString~LineString} https://openlayers.org/en/latest/apidoc/module-ol_geom_LineString-LineString.html
  */
 /**
  * @external {ol/geom/MultiLineString~MultiLineString} https://openlayers.org/en/latest/apidoc/module-ol_geom_MultiLineString-MultiLineString.html
+ */
+/**
+ * @external {ol/format/GeoJSON} https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
+ */
+
+/**
+ * @external {EventsKey} https://openlayers.org/en/latest/apidoc/module-ol_events.html#~EventsKey
  */
 /**
  * @external {mapboxgl.Map} https://docs.mapbox.com/mapbox-gl-js/api/map/
@@ -27,6 +37,12 @@
  */
 /**
  * @external {mapboxgl.mapmouseevent} https://docs.mapbox.com/mapbox-gl-js/api/events/#mapmouseevent
+ */
+/**
+ * @external {mapboxgl.styleLayer} https://docs.mapbox.com/help/glossary/layer/
+ */
+/**
+ * @external {mapboxgl.filter} https://docs.mapbox.com/help/glossary/filter/
  */
 /**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController

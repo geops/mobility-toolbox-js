@@ -5,7 +5,6 @@ import { v4 as uuid } from 'uuid';
  * A class representing a layer to display on map.
  *
  * @example
- *
  * const layer = new Layer({
  *   name: 'myLayer',
  * });

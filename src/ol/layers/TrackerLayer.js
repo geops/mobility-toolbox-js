@@ -38,7 +38,7 @@ class TrackerLayer extends mixin(Layer) {
 
     /**
      * Array of ol events key, returned by on() or once().
-     * @type {Array<key>}
+     * @type {Array<EventsKey>}
      */
     this.olEventsKeys = []; // Be careful to not override this value in child classe.
   }
@@ -117,7 +117,7 @@ class TrackerLayer extends mixin(Layer) {
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
    * @param {ol.coordinate} coordinate
-   * @returns {ol.feature | null} Vehicle feature
+   * @returns {ol.Feature | null} Vehicle feature
    * @private
    */
   getVehiclesAtCoordinate(coordinate) {

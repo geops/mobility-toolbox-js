@@ -14,7 +14,7 @@ import LayerCommon from '../../common/layers/Layer';
  * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
  * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
  * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
- * @extends LayerCommon
+ * @extends {Layer}
  */
 class Layer extends LayerCommon {
   constructor(options) {
@@ -24,6 +24,11 @@ class Layer extends LayerCommon {
     }
   }
 
+  /**
+   * Define layer's properties.
+   *
+   * @ignore
+   */
   defineProperties(options) {
     super.defineProperties(options);
     Object.defineProperties(this, {

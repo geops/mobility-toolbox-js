@@ -29,6 +29,11 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  * @implements {TrajservLayerInterface}
  */
 class TrajservLayer extends mixin(TrackerLayer) {
+  /**
+   * Define layer's properties.
+   *
+   * @ignore
+   */
   defineProperties(options) {
     super.defineProperties(options);
     const vectorLayer = new VectorLayer({
@@ -43,6 +48,11 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
+  /**
+   * Initialize the layer.
+   * @param {mapboxgl.Map} map the mapbox map.
+   * @override
+   */
   init(map) {
     if (!map) {
       return;
@@ -52,6 +62,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
     super.init(map);
   }
 
+  /**
+   * Terminate the layer.
+   * @override
+   */
   terminate() {
     if (this.map) {
       this.map.removeLayer(this.vectorLayer);
@@ -59,11 +73,19 @@ class TrajservLayer extends mixin(TrackerLayer) {
     super.terminate();
   }
 
+  /**
+   * Start the layer.
+   * @override
+   */
   start() {
     if (!this.map) {
       return;
     }
     super.start();
+    /**
+     * Array of ol events key, returned by on() or once().
+     * @type {Array<EventsKey>}
+     */
     this.olEventsKeys = [
       ...this.olEventsKeys,
       this.map.on('singleclick', this.onMapClick.bind(this)),
@@ -99,7 +121,12 @@ class TrajservLayer extends mixin(TrackerLayer) {
       features.push(new Feature({ geometry: geom, ...vehicle }));
 
       if (features.length) {
+        /**
+         * Id of the selected vehicle
+         * @type {string}
+         */
         this.selectedVehicleId = features[0].get('id');
+        /** @ignore */
         this.journeyId = features[0].get('journeyIdentifier');
         this.updateTrajectoryStations(this.selectedVehicleId).then(
           (trajStations) => {
@@ -187,6 +214,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
    */
   updateTrajectoryStations(trajId) {
     return super.updateTrajectoryStations(trajId).then((trajStations) => {
+      /**
+       * Array of station coordinates.
+       * @type {Array<ol.Coordinate>}
+       */
       this.stationsCoords = [];
       trajStations.stations.forEach((station) => {
         this.stationsCoords.push(
@@ -199,6 +230,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
+  /**
+   * Highlight the trajectory of journey.
+   * @private
+   */
   highlightTrajectory() {
     this.api
       .fetchTrajectoryById(

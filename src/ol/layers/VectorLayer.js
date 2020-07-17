@@ -8,11 +8,13 @@ import Layer from './Layer';
  * import { VectorLayer } from 'mobility-toolbox-js/src/ol';
  * @inheritDoc
  * @param {Object} [options]
+ * @param {number} [options.hitTolerance=5] Pixel value of the click hitTolerance of clicks.
  */
 class VectorLayer extends Layer {
   constructor(options = {}) {
     super(options);
 
+    /** @ignore */
     this.hitTolerance = options.hitTolerance || 5;
   }
 
@@ -66,7 +68,10 @@ class VectorLayer extends Layer {
       return;
     }
 
-    // Listen to click events
+    /**
+     * ol click events key, returned by map.on('singleclick')
+     * @type {EventsKey}
+     */
     this.singleClickRef = this.map.on('singleclick', (e) => {
       if (!this.clickCallbacks.length) {
         return;
