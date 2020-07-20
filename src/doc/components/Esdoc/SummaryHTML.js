@@ -35,7 +35,7 @@ const SummaryHTML = ({
         .map((longname) => _find({ longname })[0])
         .forEach((d) => {
           // Add inherited methods or members.
-          if (inherited) {
+          if (d && inherited) {
             const docVals = _find({
               memberof: d.longname,
               kind: [kind],
