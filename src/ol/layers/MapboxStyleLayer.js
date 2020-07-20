@@ -261,7 +261,7 @@ class MapboxStyleLayer extends Layer {
   }
 
   /**
-   * Set fitler that determines which features should be rendered in a style layer.
+   * Set filter that determines which features should be rendered in a style layer.
    * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.
    */
   setFilter(filter) {
