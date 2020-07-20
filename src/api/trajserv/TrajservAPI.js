@@ -9,7 +9,7 @@ import { handleError, readJsonResponse } from '../utils';
  * Access to the [Realtime service](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/).
  *
  * @example
- * import { TrajservAPI } from 'mobility-toolbox-js/src/api';
+ * import { TrajservAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new TrajservAPI({
  *   url: 'https://api.geops.io/tracker/v1',

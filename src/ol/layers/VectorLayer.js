@@ -5,7 +5,7 @@ import Layer from './Layer';
  * A class representing vector layer to display on BasicMap
  * @class
  * @example
- * import { VectorLayer } from 'mobility-toolbox-js/src/ol';
+ * import { VectorLayer } from 'mobility-toolbox-js/ol';
  * @inheritDoc
  * @param {Object} [options]
  */
