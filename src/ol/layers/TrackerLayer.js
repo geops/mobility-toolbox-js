@@ -1,4 +1,4 @@
-import OLLayer from 'ol/layer/Layer';
+import { Layer as OLLayer, Group } from 'ol/layer';
 import { unByKey } from 'ol/Observable';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
@@ -26,8 +26,10 @@ class TrackerLayer extends mixin(Layer) {
         return null;
       },
     });
+    // We use a group to be able to add custom vector layer in extended class.
+    // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
-      olLayer,
+      olLayer: new Group({ layers: [olLayer] }),
       ...options,
     });
 
