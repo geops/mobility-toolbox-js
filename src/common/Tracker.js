@@ -86,7 +86,7 @@ export default class Tracker {
 
   /**
    * Define the trajectories.
-   * @param {array<ol.Feature>} trajectories
+   * @param {array<ol.feature>} trajectories
    */
   setTrajectories(trajectories = []) {
     if (this.sort) {

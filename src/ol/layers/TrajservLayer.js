@@ -216,7 +216,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     return super.updateTrajectoryStations(trajId).then((trajStations) => {
       /**
        * Array of station coordinates.
-       * @type {Array<ol.Coordinate>}
+       * @type {Array<ol.coordinate>}
        */
       this.stationsCoords = [];
       trajStations.stations.forEach((station) => {

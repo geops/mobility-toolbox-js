@@ -5,10 +5,10 @@
  * @external {ol/Map~Map} https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html
  */
 /**
- * @external {ol.Coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
+ * @external {ol.coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
  */
 /**
- * @external {ol.Feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
+ * @external {ol.feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
  */
 /**
  * @external {ol.Layer} https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html

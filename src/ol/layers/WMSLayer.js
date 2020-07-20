@@ -19,7 +19,7 @@ class WMSLayer extends OLLayer {
 
   /**
    * Get features infos' Url.
-   * @param {ol.Coordinate} coord  {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate}
+   * @param {ol.coordinate} coord  {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate}
    * @returns {ol.Layer} {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer.html ol/Layer}
    */
   getFeatureInfoUrl(coord) {
@@ -39,7 +39,7 @@ class WMSLayer extends OLLayer {
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate} to request the information at.
+   * @param {ol.coordinate} coordinate {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate} to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    * eslint-disable-next-line class-methods-use-this

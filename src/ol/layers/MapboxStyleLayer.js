@@ -67,13 +67,13 @@ class MapboxStyleLayer extends Layer {
 
     /**
      * Array of features to highlight.
-     * @type {Array<ol.Feature>}
+     * @type {Array<ol.feature>}
      */
     this.highlightedFeatures = [];
 
     /**
      * Array of selected features.
-     * @type {Array<ol.Feature>}
+     * @type {Array<ol.feature>}
      */
     this.selectedFeatures = [];
 
@@ -230,7 +230,7 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate Coordinate to request the information at.
+   * @param {ol.coordinate} coordinate Coordinate to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    */
@@ -275,7 +275,7 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * Set if features are hovered or not.
-   * @param {Array<ol.Feature>} features
+   * @param {Array<ol.feature>} features
    * @param {boolean} state Is the feature hovered
    */
   setHoverState(features = [], state) {
@@ -306,7 +306,7 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * Select a list of features.
-   * @param {Array<ol.Feature>} [features=[]] Features to select.
+   * @param {Array<ol.feature>} [features=[]] Features to select.
    */
   select(features = []) {
     this.setHoverState(this.selectedFeatures, false);
@@ -316,7 +316,7 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * Highlight a list of features.
-   * @param {Array<ol.Feature>} [features=[]] Features to highlight.
+   * @param {Array<ol.feature>} [features=[]] Features to highlight.
    */
   highlight(features = []) {
     // Filter out selected features

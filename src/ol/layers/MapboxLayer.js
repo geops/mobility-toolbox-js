@@ -260,7 +260,7 @@ export default class MapboxLayer extends Layer {
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate Coordinate to request the information at.
+   * @param {ol.coordinate} coordinate Coordinate to request the information at.
    * @param {Object} options A mapbox {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html options object}.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
