@@ -115,7 +115,7 @@ class MapboxStyleLayer extends Layer {
       this.mapboxLayer.init(map);
       /**
        * openlayers Layer.
-       * @type {ol.Layer}
+       * @type {ol.layer}
        */
       this.olLayer = this.mapboxLayer.olLayer;
     }
