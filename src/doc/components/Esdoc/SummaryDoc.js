@@ -37,17 +37,6 @@ const SummaryDoc = ({
       </thead>
       <tbody style={style}>
         {docs.map((doc, idx) => {
-          /*
-          let staticc;
-          if (['member', 'method', 'get', 'set'].includes(doc.kind)) {
-            staticc = doc.static ? 'static' : '';
-          }
-
-          let kind;
-          if (['get', 'set'].includes(doc.kind)) {
-            kind = doc.kind;
-          }
-          */
           const kindKindIcon = doc.interface ? 'interface' : doc.kind;
           return (
             <tr data-ice="target" key={idx}>

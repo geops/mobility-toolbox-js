@@ -5,13 +5,13 @@
  * @external {ol/Map~Map} https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html
  */
 /**
- * @external {ol.coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
+ * @external {ol/coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
  */
 /**
- * @external {ol.feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
+ * @external {ol/Feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
  */
 /**
- * @external {ol.layer} https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html
+ * @external {ol/layer/Layer} https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html
  */
 /**
  * @external {ol/geom/LineString~LineString} https://openlayers.org/en/latest/apidoc/module-ol_geom_LineString-LineString.html
