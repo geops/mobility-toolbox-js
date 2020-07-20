@@ -13,7 +13,7 @@ import { _find } from './DocBuilderUtils';
  * @returns {string} html of inherited method/member from ancestor classes.
  * @private
  */
-const InheritedSummaryHTML = ({ doc }) => {
+const InheritedSummaryHTML = ({ doc, kind }) => {
   if (['class', 'interface'].indexOf(doc.kind) === -1) return '';
 
   const longnames = [
@@ -29,7 +29,7 @@ const InheritedSummaryHTML = ({ doc }) => {
 
     return (
       <React.Fragment key={idx}>
-        <InheritedSummaryDoc longname={longname} />
+        <InheritedSummaryDoc longname={longname} kind={kind} />
         {idx !== longnames.length - 1 ? '\n' : ''}
       </React.Fragment>
     );

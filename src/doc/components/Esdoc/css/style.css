@@ -57,7 +57,7 @@
 .esdoc h2 {
   margin-top: 24px;
   margin-bottom: 10px;
-  font-size: 20px;
+  font-size: 24px;
   border-bottom: solid 1px #ddd;
   font-weight: 300;
 }
@@ -344,7 +344,7 @@
 
 .esdoc table.summary td > div:nth-of-type(1) {
   padding-top: 4px;
-  padding-left: 15px;
+  /* padding-left: 15px; */
 }
 
 .esdoc table.summary td p {

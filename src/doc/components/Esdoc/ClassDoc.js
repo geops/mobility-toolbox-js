@@ -9,7 +9,6 @@ import MixinClassesHTML from './MixinClassesHTML';
 import ExtendsChainHTML from './ExtendsChainHTML';
 import DirectSubclassHTML from './DirectSubclassHTML';
 import IndirectSubclassHTML from './IndirectSubclassHTML';
-import InheritedSummaryHTML from './InheritedSummaryHTML';
 import DocsLinkHTML from './DocsLinkHTML';
 import SummaryHTML from './SummaryHTML';
 import DetailHTML from './DetailHTML';
@@ -205,19 +204,41 @@ const ClassDoc = ({ doc }) => {
       </div>
       <div data-ice="memberSummary" className="hide-no-content">
         <h2>Member Summary</h2>
-        <SummaryHTML doc={doc} kind="member" title="Members" isStatic={false} />
+        <SummaryHTML
+          doc={doc}
+          kind="member"
+          title="Members"
+          isStatic={false}
+          inherited
+        />
+        {/*
+        <div
+          className="inherited-summary hide-no-content"
+          data-ice="inheritedSummary"
+        >
+          <h2>Inherited Member Summary</h2>
+          <InheritedSummaryHTML doc={doc} kind="member" />
+        </div>
+        */}
       </div>
       <div data-ice="methodSummary" className="hide-no-content">
         <h2>Method Summary</h2>
-        <SummaryHTML doc={doc} kind="method" title="Methods" isStatic={false} />
-      </div>
-
-      <div
-        className="inherited-summary hide-no-content"
-        data-ice="inheritedSummary"
-      >
-        <h2>Inherited Summary</h2>
-        <InheritedSummaryHTML doc={doc} />
+        <SummaryHTML
+          doc={doc}
+          kind="method"
+          title="Methods"
+          isStatic={false}
+          inherited
+        />
+        {/*
+        <div
+          className="inherited-summary hide-no-content"
+          data-ice="inheritedSummary"
+        >
+          <h2>Inherited Member Summary</h2>
+          <InheritedSummaryHTML doc={doc} kind="method" />
+        </div>
+        */}
       </div>
 
       <div data-ice="staticMemberDetails">
