@@ -68,20 +68,6 @@ class MapboxStyleLayer extends Layer {
     }
   }
 
-  /**
-   * Listens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
-   *   the layer instance and the click coordinate.
-   */
-  onClick(callback) {
-    if (typeof callback === 'function') {
-      this.clickCallbacks.push(callback);
-    } else {
-      throw new Error('callback must be of type function.');
-    }
-  }
-
   init(map) {
     if (!this.mapboxLayer.map) {
       this.mapboxLayer.init(map);

@@ -17,20 +17,6 @@ class VectorLayer extends Layer {
   }
 
   /**
-   * Listens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
-   *   the layer instance and the click coordinate.
-   */
-  onClick(callback) {
-    if (typeof callback === 'function') {
-      this.clickCallbacks.push(callback);
-    } else {
-      throw new Error('callback must be of type function.');
-    }
-  }
-
-  /**
    * Request feature information for a given coordinate.
    * @param {ol.Coordinate} coordinate {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate} to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
