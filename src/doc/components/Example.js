@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import Typography from '@material-ui/core/Typography';
-import Paper from '@material-ui/core/Paper';
+import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { useParams } from 'react-router-dom';
 import CodeSandboxButton from './CodeSandboxButton';
+import EXAMPLES from '../examples';
 
 const useStyles = makeStyles({
+  root: {
+    padding: 12,
+  },
   htmlContainer: {
     height: 500,
   },
@@ -25,18 +28,11 @@ const useStyles = makeStyles({
     paddingRight: 10,
   },
 });
-// const makeId = (length) => {
-//   let result = '';
-//   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-//   const charactersLength = characters.length;
-//   for (let i = 0; i < length; i += 1) {
-//     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-//   }
-//   return result;
-// };
 
-const Example = ({ example }) => {
-  const { editButton, root, paper, htmlContainer, fileName } = useStyles();
+const Example = () => {
+  const { editButton, paper, htmlContainer, fileName } = useStyles();
+  const { exampleKey } = useParams((params) => params);
+  const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
 
@@ -47,7 +43,6 @@ const Example = ({ example }) => {
       // Load the new html
       setHtml(h.default);
     });
-    // console.log(makeId(3).toLowerCase());
     // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
     // We use to avoid cache and re-execute the code of the module.
     import(`../examples/${example.files.js}?`).then((module) => {
@@ -60,7 +55,7 @@ const Example = ({ example }) => {
         // Replace relative import by library import
         setJs(
           jsCode
-            .replace(/'\.\.\/\.\.\//gm, "'mobility-toolbox-js/src/")
+            .replace(/'\.\.\/\.\.\//gm, "'mobility-toolbox-js/")
             .replace('export default () => {\n', '')
             .replace(/^};\n$/gm, '')
             .replace(/^ {2}/gm, ''),
@@ -69,40 +64,36 @@ const Example = ({ example }) => {
   }, [example]);
 
   return (
-    <div className={root}>
-      <Typography variant="h1">{example.name}</Typography>
-      <Typography>{example.description}</Typography>
-
-      <Paper className={paper}>
-        <div
-          className={htmlContainer}
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      </Paper>
-      <Paper className={paper}>
-        <Typography className={fileName}>{example.files.js}</Typography>
-        <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-        <CodeSandboxButton className={editButton} html={html} js={js} />
-      </Paper>
-      <Paper className={paper}>
-        <Typography className={fileName}>{example.files.html}</Typography>
-        <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-        <CodeSandboxButton className={editButton} html={html} js={js} />
-      </Paper>
-    </div>
+    <Grid container direction="column" spacing={3}>
+      <Grid item xs={12}>
+        <Typography variant="h1">{example.name}</Typography>
+        <Typography>{example.description}</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Paper className={paper}>
+          <div
+            className={htmlContainer}
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </Paper>
+      </Grid>
+      <Grid item xs={12}>
+        <Paper className={paper}>
+          <Typography className={fileName}>{example.files.js}</Typography>
+          <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
+          <CodeSandboxButton className={editButton} html={html} js={js} />
+        </Paper>
+      </Grid>
+      <Grid item xs={12}>
+        <Paper className={paper}>
+          <Typography className={fileName}>{example.files.html}</Typography>
+          <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+          <CodeSandboxButton className={editButton} html={html} js={js} />
+        </Paper>
+      </Grid>
+    </Grid>
   );
-};
-
-Example.propTypes = {
-  example: PropTypes.shape({
-    name: PropTypes.string,
-    description: PropTypes.string,
-    files: PropTypes.shape({
-      js: PropTypes.string,
-      html: PropTypes.string,
-    }),
-  }).isRequired,
 };
 
 export default React.memo(Example);

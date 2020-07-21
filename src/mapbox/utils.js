@@ -3,7 +3,7 @@ import { getWidth, getHeight } from 'ol/extent';
 
 /**
  * Get the current resolution of a Mapbox map.
- * @param {mapbox.Map} map A map object.
+ * @param {mapboxgl.Map} map A map object.
  * @private
  */
 export const getResolution = (map) => {
@@ -17,7 +17,7 @@ export const getResolution = (map) => {
 
 /**
  * Get the canvas source coordinates of the current map's extent.
- * @param {mapbox.Map} map A map object.
+ * @param {mapboxgl.Map} map A map object.
  * @private
  */
 export const getSourceCoordinates = (map) => {

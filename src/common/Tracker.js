@@ -13,6 +13,7 @@ export default class Tracker {
       ...options,
     };
     this.trajectories = [];
+    this.renderedTrajectories = [];
     this.interpolate = !!opts.interpolate;
     this.getPixelFromCoordinate = opts.getPixelFromCoordinate;
     this.hoverVehicleId = null;
@@ -51,7 +52,7 @@ export default class Tracker {
    * Define the trajectories.
    * @param {array<ol.feature>} trajectories
    */
-  setTrajectories(trajectories) {
+  setTrajectories(trajectories = []) {
     if (this.sort) {
       trajectories.sort(this.sort);
     }
@@ -64,7 +65,16 @@ export default class Tracker {
    * @returns {array<trajectory>} trajectories
    */
   getTrajectories() {
-    return this.trajectories;
+    return this.trajectories || [];
+  }
+
+  /**
+   * Return rendered trajectories.
+   * Use this to avoid race conditions while rendering.
+   * @returns {array<trajectory>} trajectories
+   */
+  getRenderedTrajectories() {
+    return this.renderedTrajectories;
   }
 
   /**
@@ -79,7 +89,7 @@ export default class Tracker {
 
   /**
    * Set the filter for tracker features.
-   * @param {Function} filter Filter function.
+   * @param {function} filter Filter function.
    */
   setFilter(filter) {
     this.filter = filter;
@@ -87,7 +97,7 @@ export default class Tracker {
 
   /**
    * Set the sort for tracker features.
-   * @param {Function} sort Sort function.
+   * @param {function} sort Sort function.
    */
   setSort(sort) {
     this.sort = sort;
@@ -99,12 +109,15 @@ export default class Tracker {
    * @private
    */
   setHoverVehicleId(id) {
-    this.hoverVehicleId = id;
+    if (id !== this.hoverVehicleId) {
+      this.hoverVehicleId = id;
+      this.renderTrajectories();
+    }
   }
 
   /**
    * Set the tracker style.
-   * @param {Function} s OpenLayers style function.
+   * @param {function} s OpenLayers style function.
    */
   setStyle(s) {
     this.style = s;
@@ -115,8 +128,9 @@ export default class Tracker {
    * @param {Date} currTime
    * @private
    */
-  renderTrajectories(currTime = Date.now(), [width, height], resolution) {
+  renderTrajectories(currTime = Date.now(), size = [], resolution) {
     this.clear();
+    const [width, height] = size;
     if (
       width &&
       height &&
@@ -124,10 +138,11 @@ export default class Tracker {
     ) {
       [this.canvas.width, this.canvas.height] = [width, height];
     }
+    this.currResolution = resolution || this.currResolution;
     let hoverVehicleImg;
     let hoverVehiclePx;
 
-    for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
+    for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
       const traj = this.trajectories[i];
 
       // We simplify the traj object
@@ -204,8 +219,10 @@ export default class Tracker {
           // eslint-disable-next-line no-continue
           continue;
         }
+        // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
+        this.trajectories[i].rendered = true;
 
-        const vehicleImg = this.style(traj, resolution);
+        const vehicleImg = this.style(traj, this.currResolution);
         if (this.hoverVehicleId !== traj.id) {
           this.canvasContext.drawImage(
             vehicleImg,
@@ -226,6 +243,7 @@ export default class Tracker {
         hoverVehiclePx[1] - hoverVehicleImg.height / 2,
       );
     }
+    this.renderedTrajectories = this.trajectories.filter((t) => t.rendered);
   }
 
   /**
@@ -234,6 +252,7 @@ export default class Tracker {
    */
   destroy() {
     unByKey(this.olEventsKeys);
+    this.renderedTrajectories = [];
     this.clear();
   }
 }

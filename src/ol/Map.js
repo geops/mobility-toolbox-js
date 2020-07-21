@@ -8,7 +8,7 @@ import Layer from './layers/Layer';
  * {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html|ol/Map}.
  *
  * @example
- * import { Map } from 'mobility-toolbox-js/src/ol';
+ * import { Map } from 'mobility-toolbox-js/ol';
  *
  * @class
  * @namespace
@@ -34,7 +34,11 @@ class Map extends OLMap {
    * @param {Layer} The {@link Layer} to add.
    */
   addLayer(layer) {
-    layer.init(this);
+    if (!layer.init) {
+      super.addLayer(layer);
+    } else {
+      layer.init(this);
+    }
 
     if (layer.olLayer) {
       super.addLayer(layer.olLayer);

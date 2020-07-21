@@ -5,13 +5,17 @@ import {
   MapboxLayer as olMapboxLayer,
   TrajservLayer as olTrajservLayer,
   TralisLayer as olTralisLayer,
+  VectorLayer as olVectorLayer,
 } from './ol';
-import { MapboxTrajservLayer, MapboxTralisLayer } from './mapbox';
+import {
+  TrajservLayer as mbTrajservLayer,
+  TralisLayer as mbTralisLayer,
+} from './mapbox';
 
 const exports = {
   mapbox: {
-    MapboxTrajservLayer,
-    MapboxTralisLayer,
+    TrajservLayer: mbTrajservLayer,
+    TralisLayer: mbTralisLayer,
   },
   ol: {
     Map,
@@ -20,6 +24,7 @@ const exports = {
     MapboxLayer: olMapboxLayer,
     TrajservLayer: olTrajservLayer,
     TralisLayer: olTralisLayer,
+    VectorLayer: olVectorLayer,
   },
 };
 

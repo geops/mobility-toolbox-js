@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import { toLonLat } from 'ol/proj';
-import { unByKey } from 'ol/Observable';
 import mapboxgl from 'mapbox-gl';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -31,8 +30,13 @@ const getCopyrightFromSources = (mbMap) => {
  */
 export default class MapboxLayer extends Layer {
   constructor(options = {}) {
-    const olLayer = new OLLayer({
+    const mbLayer = new OLLayer({
       render: (frameState) => {
+        if (!this.mbMap) {
+          // eslint-disable-next-line no-console
+          console.warn("Mapbox map doesn't exist.");
+          return null;
+        }
         let changed = false;
         const canvas = this.mbMap.getCanvas();
         const { viewState } = frameState;
@@ -41,11 +45,10 @@ export default class MapboxLayer extends Layer {
         if (this.renderState.visible !== visible) {
           canvas.style.display = visible ? 'block' : 'none';
           this.renderState.visible = visible;
+          // Needed since mapbox-gl 1.9.0.
+          // Without you don't see others ol layers on top.
+          canvas.style.position = 'absolute';
         }
-
-        // Needed since mapbox-gl 1.9.0.
-        // Without you don't see others ol layers on top.
-        canvas.style.position = 'absolute';
 
         const opacity = this.olLayer.getOpacity();
         if (this.renderState.opacity !== opacity) {
@@ -55,8 +58,8 @@ export default class MapboxLayer extends Layer {
 
         // adjust view parameters in mapbox
         const { rotation } = viewState;
-        if (rotation && this.renderState.rotation !== rotation) {
-          this.mbMap.rotateTo((-rotation * 180) / Math.PI, {
+        if (this.renderState.rotation !== rotation) {
+          this.mbMap.rotateTo((-(rotation || 0) * 180) / Math.PI, {
             animate: false,
           });
           changed = true;
@@ -78,18 +81,30 @@ export default class MapboxLayer extends Layer {
           this.renderState.center = viewState.center;
         }
 
+        const size = this.map.getSize();
+        if (
+          this.renderState.size[0] !== size[0] ||
+          this.renderState.size[1] !== size[1]
+        ) {
+          changed = true;
+          this.renderState.size = size;
+        }
+
         // cancel the scheduled update & trigger synchronous redraw
         // see https://github.com/mapbox/mapbox-gl-js/issues/7893#issue-408992184
         // NOTE: THIS MIGHT BREAK WHEN UPDATING MAPBOX
-        if (this.mbMap && this.mbMap.style && this.mbMap.isStyleLoaded()) {
-          if (this.mbMap._frame) {
-            this.mbMap._frame.cancel();
-            this.mbMap._frame = null;
-          }
+        if (
+          this.mbMap &&
+          this.mbMap.style &&
+          this.mbMap.isStyleLoaded() &&
+          changed
+        ) {
           try {
-            if (changed) {
-              this.mbMap._render();
+            if (this.mbMap._frame) {
+              this.mbMap._frame.cancel();
+              this.mbMap._frame = null;
             }
+            this.mbMap._render();
           } catch (err) {
             // ignore render errors because it's probably related to
             // a render during an update of the style.
@@ -104,7 +119,7 @@ export default class MapboxLayer extends Layer {
 
     super({
       ...options,
-      olLayer,
+      olLayer: mbLayer,
     });
     this.options = options;
     this.styleUrl = options.url;
@@ -117,17 +132,7 @@ export default class MapboxLayer extends Layer {
   init(map) {
     super.init(map);
 
-    // Options the last render run did happen. If something changes
-    // we have to render again
-    this.renderState = {
-      center: [0, 0],
-      zoom: undefined,
-      rotation: undefined,
-      visible: undefined,
-      opacity: undefined,
-    };
-
-    if (!this.map || !this.map.getTargetElement() || this.mbMap) {
+    if (!this.map || this.mbMap) {
       return;
     }
 
@@ -135,38 +140,76 @@ export default class MapboxLayer extends Layer {
       featureProjection: this.map.getView().getProjection(),
     });
 
+    if (this.map.getTargetElement()) {
+      this.loadMbMap();
+    }
+
+    this.olListenersKeys.push(
+      this.map.on('change:target', () => {
+        this.loadMbMap();
+      }),
+    );
+
+    this.olListenersKeys.push(
+      this.map.on('change:size', () => {
+        try {
+          if (this.mbMap) {
+            this.mbMap.resize();
+          }
+        } catch (err) {
+          // ignore render errors
+          // eslint-disable-next-line no-console
+          console.warn(err);
+        }
+      }),
+    );
+  }
+
+  /**
+   * Create the mapbox map.
+   */
+  loadMbMap() {
     // If the map hasn't been resized, the center could be [NaN,NaN].
     // We set default good value for the mapbox map, to avoid the app crashes.
-    let [x, y] = map.getView().getCenter();
+    let [x, y] = this.map.getView().getCenter();
     if (!x || !y) {
       x = 0;
       y = 0;
     }
 
-    this.mbMap = new mapboxgl.Map({
-      style: this.styleUrl,
-      attributionControl: false,
-      boxZoom: false,
-      center: toLonLat([x, y]),
-      container: this.map.getTargetElement(),
-      doubleClickZoom: false,
-      dragPan: false,
-      dragRotate: false,
-      interactive: false,
-      keyboard: false,
-      pitchWithRotate: false,
-      scrollZoom: false,
-      touchZoomRotate: false,
-      fadeDuration:
-        'fadeDuration' in this.options ? this.options.fadeDuration : 300,
-      // Needs to be true to able to export the canvas, but could lead to performance issue on mobile.
-      preserveDrawingBuffer: this.options.preserveDrawingBuffer || false,
-    });
+    try {
+      this.mbMap = new mapboxgl.Map({
+        style: this.styleUrl,
+        attributionControl: false,
+        boxZoom: false,
+        center: toLonLat([x, y]),
+        container: this.map.getTargetElement(),
+        interactive: false,
+        fadeDuration:
+          'fadeDuration' in this.options ? this.options.fadeDuration : 300,
+        // Needs to be true to able to export the canvas, but could lead to performance issue on mobile.
+        preserveDrawingBuffer: this.options.preserveDrawingBuffer || false,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed creating mapbox map: ', err);
+    }
+
+    // Options the last render run did happen. If something changes
+    // we have to render again
+    this.renderState = {
+      center: [x, y],
+      zoom: null,
+      rotation: null,
+      visible: null,
+      opacity: null,
+      size: [0, 0],
+    };
 
     this.mbMap.once('load', () => {
       this.loaded = true;
-      if (!this.getCopyright()) {
-        this.setCopyright(getCopyrightFromSources(this.mbMap));
+      if (!this.copyright) {
+        this.copyright = getCopyrightFromSources(this.mbMap);
       }
       this.dispatchEvent({
         type: 'load',
@@ -174,20 +217,15 @@ export default class MapboxLayer extends Layer {
       });
     });
 
-    this.changeSizeRef = this.map.on('change:size', () => {
-      try {
-        this.mbMap.resize();
-      } catch (err) {
-        // ignore render errors
-        // eslint-disable-next-line no-console
-        console.warn(err);
-      }
-    });
-
     const mapboxCanvas = this.mbMap.getCanvas();
     if (mapboxCanvas) {
-      // Set default tabIndex to -1, so we can't access the canvas via Tab nav.
-      mapboxCanvas.setAttribute('tabindex', this.options.tabIndex || -1);
+      if (this.options.tabIndex) {
+        mapboxCanvas.setAttribute('tabindex', this.options.tabIndex);
+      } else {
+        // With a tabIndex='-1' the mouse events works but the map is not focused when we click on it
+        // so we remove completely the tabIndex attribute.
+        mapboxCanvas.removeAttribute('tabindex');
+      }
     }
   }
 
@@ -227,9 +265,6 @@ export default class MapboxLayer extends Layer {
    * Terminate what was initialized in init function. Remove layer, events...
    */
   terminate() {
-    if (this.changeSizeRef) {
-      unByKey(this.changeSizeRef);
-    }
     if (this.mbMap) {
       // Some asynchrone repaints are triggered even if the mbMap has been removed,
       // to avoid display of errors we set an empty function.

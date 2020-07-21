@@ -5,7 +5,7 @@ import Layer from './Layer';
  * A class representing vector layer to display on BasicMap
  * @class
  * @example
- * import { VectorLayer } from 'mobility-toolbox-js/src/ol';
+ * import { VectorLayer } from 'mobility-toolbox-js/ol';
  * @inheritDoc
  * @param {Object} [options]
  */
@@ -14,28 +14,6 @@ class VectorLayer extends Layer {
     super(options);
 
     this.hitTolerance = options.hitTolerance || 5;
-
-    // Array of click callbacks
-    this.clickCallbacks = [];
-
-    // Add click callback
-    if (options.onClick) {
-      this.onClick(options.onClick);
-    }
-  }
-
-  /**
-   * Listens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
-   *   the layer instance and the click coordinate.
-   */
-  onClick(callback) {
-    if (typeof callback === 'function') {
-      this.clickCallbacks.push(callback);
-    } else {
-      throw new Error('callback must be of type function.');
-    }
   }
 
   /**
@@ -65,7 +43,7 @@ class VectorLayer extends Layer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */
   init(map) {
     super.init(map);

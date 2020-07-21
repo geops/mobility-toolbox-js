@@ -1,0 +1,21 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Lato, Arial, sans-serif;
+  color: #353535;
+  position: relative;
+  min-height: 100%;
+  overflow-y: scroll;
+}
+
+a {
+  text-decoration: none;
+  color: initial;
+
+  &:hover {
+    color: '#76b833';
+  }
+}

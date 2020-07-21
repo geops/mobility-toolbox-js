@@ -7,6 +7,7 @@ import MapboxStyleLayer from './MapboxStyleLayer';
 let source;
 let layer;
 let map;
+let onClick;
 
 const styleLayer = {
   id: 'layer',
@@ -14,6 +15,7 @@ const styleLayer = {
 
 describe('MapboxStyleLayer', () => {
   beforeEach(() => {
+    onClick = jest.fn();
     source = new MapboxLayer({
       name: 'Layer',
     });
@@ -22,6 +24,7 @@ describe('MapboxStyleLayer', () => {
       visible: true,
       mapboxLayer: source,
       styleLayer,
+      onClick,
     });
     map = new Map({
       target: document.createElement('div'),
@@ -32,6 +35,7 @@ describe('MapboxStyleLayer', () => {
   test('should be instanced.', () => {
     expect(layer).toBeInstanceOf(MapboxStyleLayer);
     expect(layer.styleLayers[0]).toBe(styleLayer);
+    expect(layer.clickCallbacks[0]).toBe(onClick);
   });
 
   test('should not initalized mapbox map.', () => {
@@ -43,6 +47,12 @@ describe('MapboxStyleLayer', () => {
     source.init(map);
     layer.init(map);
     expect(layer.mapboxLayer.mbMap).toBeInstanceOf(mapboxgl.Map);
+  });
+
+  test('should add onClick callback.', () => {
+    const onClick2 = jest.fn();
+    layer.onClick(onClick2);
+    expect(layer.clickCallbacks[1]).toBe(onClick2);
   });
 
   test('should called terminate on initalization.', () => {
@@ -58,5 +68,16 @@ describe('MapboxStyleLayer', () => {
     expect(data.coordinate).toEqual([50, 50]);
     expect(data.features).toEqual([]);
     expect(data.layer).toBeInstanceOf(MapboxStyleLayer);
+  });
+
+  test('should call onClick callback', async () => {
+    const coordinate = [500, 500];
+    const features = [];
+    const evt = { type: 'singleclick', map, coordinate };
+    layer.init(map);
+    expect(onClick).toHaveBeenCalledTimes(0);
+    await map.dispatchEvent(evt);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
   });
 });

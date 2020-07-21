@@ -34,7 +34,7 @@ describe('VectorLayer', () => {
       olLayer,
       onClick,
     });
-    map = new Map({ view: new View({ resution: 5 }) });
+    map = new Map({ view: new View({ resolution: 5 }) });
   });
 
   test('should be instanced.', () => {

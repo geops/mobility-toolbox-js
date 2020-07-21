@@ -1,7 +1,5 @@
-import TileLayer from 'ol/layer/Tile';
-import OSMSource from 'ol/source/OSM';
 import View from 'ol/View';
-import { Map, Layer, TrajservLayer } from '../../ol';
+import { Map, TrajservLayer, MapboxLayer } from '../../ol';
 import 'ol/ol.css';
 
 export default () => {
@@ -9,14 +7,12 @@ export default () => {
     target: 'map',
     view: new View({
       center: [831634, 5933959],
-      zoom: 9,
+      zoom: 13,
     }),
   });
 
-  const osm = new Layer({
-    olLayer: new TileLayer({
-      source: new OSMSource(),
-    }),
+  const layer = new MapboxLayer({
+    url: `https://maps.geops.io/styles/base_bright_v1/style.json?key=${window.apiKey}`,
   });
 
   const tracker = new TrajservLayer({
@@ -24,6 +20,11 @@ export default () => {
     apiKey: window.apiKey,
   });
 
-  map.addLayer(osm);
+  tracker.onClick((vehicle) => {
+    // eslint-disable-next-line no-console
+    console.log(vehicle);
+  });
+
+  map.addLayer(layer);
   map.addLayer(tracker);
 };

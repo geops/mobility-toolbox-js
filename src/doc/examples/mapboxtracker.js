@@ -1,6 +1,6 @@
-import { Map } from 'mapbox-gl/dist/mapbox-gl-unminified';
+import { Map } from 'mapbox-gl';
 import { toLonLat } from 'ol/proj';
-import { MapboxTrajservLayer } from '../../mapbox';
+import { TrajservLayer } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default () => {
@@ -8,10 +8,10 @@ export default () => {
     container: 'map',
     style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
     center: toLonLat([831634, 5933959]),
-    zoom: 9,
+    zoom: 12,
   });
 
-  const tracker = new MapboxTrajservLayer({
+  const tracker = new TrajservLayer({
     url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
   });

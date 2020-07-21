@@ -5,3 +5,5 @@ export { default as MapboxLayer } from './layers/MapboxLayer';
 export { default as MapboxStyleLayer } from './layers/MapboxStyleLayer';
 export { default as TrajservLayer } from './layers/TrajservLayer';
 export { default as TralisLayer } from './layers/TralisLayer';
+export { default as TrackerLayer } from './layers/TrackerLayer';
+export { default as VectorLayer } from './layers/VectorLayer';

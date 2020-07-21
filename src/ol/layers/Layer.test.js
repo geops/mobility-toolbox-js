@@ -12,17 +12,17 @@ describe('Layer', () => {
 
   test('should be visible by default.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
-    expect(layer.getVisible()).toBe(true);
+    expect(layer.visible).toBe(true);
   });
 
   test('should be invisible if defined.', () => {
     const layer = new Layer({ name: 'Layer', visible: false, olLayer });
-    expect(layer.getVisible()).toBe(false);
+    expect(layer.visible).toBe(false);
   });
 
   test('should return its name.', () => {
     const layer = new Layer({ name: 'Layer', visible: false, olLayer });
-    expect(layer.getName()).toEqual('Layer');
+    expect(layer.name).toEqual('Layer');
   });
 
   test('should called terminate on initialization.', () => {
