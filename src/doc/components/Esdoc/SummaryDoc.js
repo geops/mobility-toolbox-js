@@ -108,22 +108,20 @@ const SummaryDoc = ({
                   </p>
                 </div>
               </td>
-              {doc.deprecated || doc.experimental || doc.description ? (
-                <td>
-                  <div>
-                    <div className="deprecated" data-ice="deprecated">
-                      <DeprecatedHTML doc={doc} />
-                    </div>
-                    <div className="experimental" data-ice="experimental">
-                      <ExperimentalHTML doc={doc} />
-                    </div>
-
-                    <div data-ice="description">
-                      <Markdown source={doc.description} />
-                    </div>
+              <td>
+                <div>
+                  <div className="deprecated" data-ice="deprecated">
+                    <DeprecatedHTML doc={doc} />
                   </div>
-                </td>
-              ) : null}
+                  <div className="experimental" data-ice="experimental">
+                    <ExperimentalHTML doc={doc} />
+                  </div>
+
+                  <div data-ice="description">
+                    <Markdown source={doc.description} />
+                  </div>
+                </div>
+              </td>
               {showInherited ? showInheritedHref(doc.memberof) : null}
               {doc.version || doc.since ? (
                 <td>
