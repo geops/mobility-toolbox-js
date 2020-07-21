@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-array-index-key */
-import React from 'react';
+import React, { useMemo } from 'react';
 import Markdown from 'react-markdown';
 import DocLinkHTML from './DocLinkHTML';
 import SignatureHTML from './SignatureHTML';
@@ -40,6 +40,11 @@ const SummaryDoc = ({
   memberof,
   style,
 }) => {
+  const showInherited = useMemo(() => {
+    if (docs.length === 0) return null;
+    return ['member', 'method'].includes(docs[0].kind);
+  }, [docs]);
+
   if (docs.length === 0) return null;
 
   return (
@@ -121,7 +126,9 @@ const SummaryDoc = ({
                     <Markdown source={doc.description} />
                   </div>
                   <div data-ice="inherited">
-                    {showInheritedHref(doc.memberof, memberof)}
+                    {showInherited
+                      ? showInheritedHref(doc.memberof, memberof)
+                      : null}
                   </div>
                 </div>
               </td>
