@@ -1,12 +1,22 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-array-index-key */
-import React from 'react';
+import React, { useMemo } from 'react';
 import Markdown from 'react-markdown';
 import DocLinkHTML from './DocLinkHTML';
 import SignatureHTML from './SignatureHTML';
 import ExperimentalHTML from './ExperimentalHTML';
 import DeprecatedHTML from './DeprecatedHTML';
 
+const showInheritedHref = (memberof) => {
+  const name = memberof.split('~');
+  return (
+    <td>
+      <a href={`/api/class/${memberof.replace('.', '%20')}%20html`}>
+        {name.length && name[1]}
+      </a>
+    </td>
+  );
+};
 /**
  * build summary output html by docs.
  * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocBuilder.js#L294
@@ -24,15 +34,21 @@ const SummaryDoc = ({
   kindIcon = false,
   style,
 }) => {
+  const showInherited = useMemo(() => {
+    if (docs.length === 0) return null;
+    return ['member', 'method'].includes(docs[0].kind);
+  }, [docs]);
+
   if (docs.length === 0) return null;
 
   return (
     <table className="summary" data-ice="summary">
       <thead>
         <tr>
-          <td data-ice="title" colSpan="3">
+          <td data-ice="title" colSpan="2">
             {title}
           </td>
+          {showInherited ? <td>Inherted from</td> : null}
         </tr>
       </thead>
       <tbody style={style}>
@@ -91,31 +107,38 @@ const SummaryDoc = ({
                     )}
                   </p>
                 </div>
-                <div>
-                  <div className="deprecated" data-ice="deprecated">
-                    <DeprecatedHTML doc={doc} />
-                  </div>
-                  <div className="experimental" data-ice="experimental">
-                    <ExperimentalHTML doc={doc} />
-                  </div>
+              </td>
+              {doc.deprecated || doc.experimental || doc.description ? (
+                <td>
+                  <div>
+                    <div className="deprecated" data-ice="deprecated">
+                      <DeprecatedHTML doc={doc} />
+                    </div>
+                    <div className="experimental" data-ice="experimental">
+                      <ExperimentalHTML doc={doc} />
+                    </div>
 
-                  <div data-ice="description">
-                    <Markdown source={doc.description} />
+                    <div data-ice="description">
+                      <Markdown source={doc.description} />
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td>
-                {doc.version && (
-                  <span className="version" data-ice="version">
-                    {doc.version}{' '}
-                  </span>
-                )}
-                {doc.since && (
-                  <span className="since" data-ice="since">
-                    {doc.since}{' '}
-                  </span>
-                )}
-              </td>
+                </td>
+              ) : null}
+              {showInherited ? showInheritedHref(doc.memberof) : null}
+              {doc.version || doc.since ? (
+                <td>
+                  {doc.version && (
+                    <span className="version" data-ice="version">
+                      {doc.version}{' '}
+                    </span>
+                  )}
+                  {doc.since && (
+                    <span className="since" data-ice="since">
+                      {doc.since}{' '}
+                    </span>
+                  )}
+                </td>
+              ) : null}
             </tr>
           );
         })}
