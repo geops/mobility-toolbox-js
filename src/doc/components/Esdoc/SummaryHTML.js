@@ -55,7 +55,21 @@ const SummaryHTML = ({
           }
         });
     }
-    return classDocs;
+
+    // Order alphabetically (by name) the members/methods.
+    return classDocs.map((cD) => {
+      /* eslint-disable no-param-reassign */
+      cD[1] = cD[1].sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+      return cD;
+    });
   }, [doc, kind, isStatic, inherited]);
 
   return (
@@ -67,7 +81,14 @@ const SummaryHTML = ({
         let prefix = '';
         if (docs[0].static) prefix = 'Static ';
         const _title = `${prefix}${accessDoc[0]} ${title}`;
-        return <SummaryDoc key={idx} docs={docs} title={_title} />;
+        return (
+          <SummaryDoc
+            key={idx}
+            docs={docs}
+            title={_title}
+            memberof={doc.memberof}
+          />
+        );
       })}
     </>
   );

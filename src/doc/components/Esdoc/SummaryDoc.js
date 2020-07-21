@@ -1,20 +1,24 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-array-index-key */
-import React, { useMemo } from 'react';
+import React from 'react';
 import Markdown from 'react-markdown';
 import DocLinkHTML from './DocLinkHTML';
 import SignatureHTML from './SignatureHTML';
 import ExperimentalHTML from './ExperimentalHTML';
 import DeprecatedHTML from './DeprecatedHTML';
 
-const showInheritedHref = (memberof) => {
+const showInheritedHref = (memberof, parentMemberOf) => {
   const name = memberof.split('~');
+  if (name[0] === parentMemberOf) {
+    return null;
+  }
   return (
-    <td>
+    <>
+      Inherited from:{' '}
       <a href={`/api/class/${memberof.replace('.', '%20')}%20html`}>
         {name.length && name[1]}
       </a>
-    </td>
+    </>
   );
 };
 /**
@@ -24,6 +28,7 @@ const showInheritedHref = (memberof) => {
  * @param {string} title - summary title.
  * @param {boolean} innerLink - if true, link in summary is inner link.
  * @param {boolean} kindIcon - use kind icon.
+ * @param {string} memberof - memberof of the parent doc.
  * @return {IceCap} summary output.
  * @protected
  */
@@ -32,13 +37,9 @@ const SummaryDoc = ({
   title,
   innerLink = false,
   kindIcon = false,
+  memberof,
   style,
 }) => {
-  const showInherited = useMemo(() => {
-    if (docs.length === 0) return null;
-    return ['member', 'method'].includes(docs[0].kind);
-  }, [docs]);
-
   if (docs.length === 0) return null;
 
   return (
@@ -48,7 +49,6 @@ const SummaryDoc = ({
           <td data-ice="title" colSpan="2">
             {title}
           </td>
-          {showInherited ? <td>Inherted from</td> : null}
         </tr>
       </thead>
       <tbody style={style}>
@@ -120,9 +120,11 @@ const SummaryDoc = ({
                   <div data-ice="description">
                     <Markdown source={doc.description} />
                   </div>
+                  <div data-ice="inherited">
+                    {showInheritedHref(doc.memberof, memberof)}
+                  </div>
                 </div>
               </td>
-              {showInherited ? showInheritedHref(doc.memberof) : null}
               {doc.version || doc.since ? (
                 <td>
                   {doc.version && (
