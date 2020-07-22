@@ -14,7 +14,7 @@ import {
  * @property {string} TOPOGRAPHIC "topographic"
  * @enum {TralisMode}
  */
-export const modes = {
+export const TralisModes = {
   RAW: 'raw',
   TOPOGRAPHIC: 'topographic',
   SCHEMATIC: 'schematic',
@@ -45,13 +45,14 @@ class TralisAPI {
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    */
   constructor(options = {}) {
-    const { url, apiKey } = options;
     let wsUrl = null;
     if (typeof options === 'string') {
       wsUrl = options;
+    } else {
+      wsUrl = options.url;
     }
-    if (apiKey) {
-      wsUrl = `${wsUrl || url}?key=${apiKey}`;
+    if (options.apiKey) {
+      wsUrl = `${wsUrl}?key=${options.apiKey}`;
     }
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
@@ -90,10 +91,13 @@ class TralisAPI {
    */
   unsubscribe(channel, suffix = '') {
     this.conn.unsubscribe(
-      `${channel}${getModeSuffix(modes.SCHEMATIC, modes)}${suffix}`,
+      `${channel}${getModeSuffix(TralisModes.SCHEMATIC, TralisModes)}${suffix}`,
     );
     this.conn.unsubscribe(
-      `${channel}${getModeSuffix(modes.TOPOGRAPHIC, modes)}${suffix}`,
+      `${channel}${getModeSuffix(
+        TralisModes.TOPOGRAPHIC,
+        TralisModes,
+      )}${suffix}`,
     );
   }
 
@@ -237,7 +241,7 @@ class TralisAPI {
    */
   getStation(uic, mode) {
     const params = {
-      channel: `station${getModeSuffix(mode, modes)}`,
+      channel: `station${getModeSuffix(mode, TralisModes)}`,
       args: uic,
     };
 
@@ -265,7 +269,7 @@ class TralisAPI {
       this.conn.setBbox(bbox);
     }
     const params = {
-      channel: `station${getModeSuffix(mode, modes)}`,
+      channel: `station${getModeSuffix(mode, TralisModes)}`,
     };
     window.clearTimeout(this.stationUpdateTimeout);
     return new Promise((resolve, reject) => {
@@ -297,7 +301,7 @@ class TralisAPI {
     if (bbox) {
       this.conn.setBbox(bbox);
     }
-    this.subscribe(`station${getModeSuffix(mode, modes)}`, (data) => {
+    this.subscribe(`station${getModeSuffix(mode, TralisModes)}`, (data) => {
       if (data.content) {
         onMessage(data.content);
       }
@@ -352,7 +356,7 @@ class TralisAPI {
    */
   subscribeTrajectory(mode, onMessage) {
     this.unsubscribeTrajectory();
-    this.subscribe(`trajectory${getModeSuffix(mode, modes)}`, onMessage);
+    this.subscribe(`trajectory${getModeSuffix(mode, TralisModes)}`, onMessage);
   }
 
   /**
@@ -370,7 +374,10 @@ class TralisAPI {
    */
   subscribeDeletedVehicles(mode, onMessage) {
     this.unsubscribeDeletedVehicles();
-    this.subscribe(`deleted_vehicles${getModeSuffix(mode, modes)}`, onMessage);
+    this.subscribe(
+      `deleted_vehicles${getModeSuffix(mode, TralisModes)}`,
+      onMessage,
+    );
   }
 
   /**
@@ -393,7 +400,7 @@ class TralisAPI {
       this.conn.setProjection(projection);
     }
     const params = {
-      channel: `full_trajectory${getModeSuffix(mode, modes)}_${id}`,
+      channel: `full_trajectory${getModeSuffix(mode, TralisModes)}_${id}`,
     };
 
     return new Promise((resolve) => {
@@ -431,7 +438,7 @@ class TralisAPI {
     // window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeFullTrajectory(id);
     this.subscribe(
-      `full_trajectory${getModeSuffix(mode, modes)}_${id}`,
+      `full_trajectory${getModeSuffix(mode, TralisModes)}_${id}`,
       (data) => {
         // eslint-disable-next-line no-console
         console.log('subscribe full_trajectory', data);
@@ -461,7 +468,7 @@ class TralisAPI {
    */
   getStopSequence(id, mode) {
     const params = {
-      channel: `stopsequence${getModeSuffix(mode, modes)}_${id}`,
+      channel: `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
     };
     return new Promise((resolve, reject) => {
       this.conn.get(
@@ -503,7 +510,7 @@ class TralisAPI {
     this.unsubscribeStopSequence(id);
 
     this.subscribe(
-      `stopsequence${getModeSuffix(mode, modes)}_${id}`,
+      `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
       (data) => {
         // Remove the delay from arrivalTime nad departureTime
         onMessage(cleanStopTime(data.content && data.content[0]));
