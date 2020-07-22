@@ -92,24 +92,23 @@ const SummaryDoc = ({
                     )}
                     <span data-ice="async">{doc.async ? 'async' : ''}</span>
                     <span data-ice="generator">{doc.generator ? '*' : ''}</span>
-                    {/* Custom return if 'constructor' */}
-                    {doc.kind === 'constructor' ? (
-                      `new ${doc.longname.match(/~([^)]+)#constructor/)[1]}()`
-                    ) : (
-                      <>
-                        <span className="code" data-ice="name">
-                          <DocLinkHTML
-                            longname={doc.longname}
-                            text={null}
-                            inner={innerLink}
-                            kind={doc.kind}
-                          />
-                        </span>
-                        <span className="code" data-ice="signature">
-                          <SignatureHTML doc={doc} />
-                        </span>
-                      </>
-                    )}
+                    <span className="code" data-ice="name">
+                      <DocLinkHTML
+                        longname={doc.longname}
+                        text={
+                          doc.kind === 'constructor'
+                            ? `new ${
+                                doc.longname.match(/~([^)]+)#constructor/)[1]
+                              }`
+                            : null
+                        }
+                        inner={innerLink}
+                        kind={doc.kind}
+                      />
+                    </span>
+                    <span className="code" data-ice="signature">
+                      <SignatureHTML doc={doc} />
+                    </span>
                   </p>
                 </div>
               </td>
