@@ -120,7 +120,7 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * On mousemove, we detect if a vehicle is heovered then updates the cursor's style.
    *
-   * @param {mapboxgl.mapmouseevent} evt Map's mousemove event.
+   * @param {mapboxgl.MapMouseEvent} evt Map's mousemove event.
    * @private
    */
   onMapMouseMove(evt) {

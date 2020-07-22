@@ -49,7 +49,7 @@ export default class Tracker {
     // we draw directly on the canvas since openlayers is too slow.
     /**
      * HTML <canvas> element.
-     * @type {canvas}
+     * @type {Canvas}
      */
     this.canvas = opts.canvas || document.createElement('canvas');
     this.canvas.width = opts.width;
@@ -86,7 +86,7 @@ export default class Tracker {
 
   /**
    * Define the trajectories.
-   * @param {array<ol/Feature>} trajectories
+   * @param {array<ol/Feature~Feature>} trajectories
    */
   setTrajectories(trajectories = []) {
     if (this.sort) {

@@ -84,7 +84,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     super.start();
     /**
      * Array of ol events key, returned by on() or once().
-     * @type {Array<EventsKey>}
+     * @type {Array<ol/events~EventsKey>}
      */
     this.olEventsKeys = [
       ...this.olEventsKeys,
@@ -216,7 +216,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     return super.updateTrajectoryStations(trajId).then((trajStations) => {
       /**
        * Array of station coordinates.
-       * @type {Array<ol/coordinate>}
+       * @type {Array<ol/coordinate~Coordinate>}
        */
       this.stationsCoords = [];
       trajStations.stations.forEach((station) => {
