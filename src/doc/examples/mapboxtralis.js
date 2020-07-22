@@ -1,6 +1,6 @@
 import { Map } from 'mapbox-gl/dist/mapbox-gl-unminified';
 import { toLonLat } from 'ol/proj';
-import { MapboxTralisLayer } from '../../mapbox';
+import { TralisLayer } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default () => {
@@ -11,7 +11,7 @@ export default () => {
     zoom: 9,
   });
 
-  const tracker = new MapboxTralisLayer({
+  const tracker = new TralisLayer({
     url: '',
     apiKey: '',
   });
