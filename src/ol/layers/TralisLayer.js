@@ -5,31 +5,34 @@ import { TralisAPI, modes } from '../../api';
 import getVehicleImage from '../../api/tralis/TralisStyle';
 
 /**
- * Responsible for loading live data from Realtime service.
- * @class
- * @inheritDoc
- * @param {Object} options Layer options.
- * @param {string} options.url Realtime service url.
- * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
- * @param {boolean} [options.debug=false] Display additional debug informations.
- * @param {TralisMode} [options.mode=TralisMode.TOPOGRAPHIC] Mode.
+ * Responsible for loading and display data from a Tralis service.
+ *
+ * @example
+ * import { TralisLayer } from 'mobility-toolbox-js/ol';
+ *
+ * const layer = new TralisLayer({
+ *   url: [yourUrl],
+ *   apiKey: [yourApiKey],
+ * });
+ *
+ *
+ * @see <a href="/api/class/src/api/tralis/TralisAPI%20js~TralisAPI%20html">TralisAPI</a>
+ *
+ * @extends {TrackerLayer}
  */
 class TralisLayer extends TrackerLayer {
+  /*
+   * Constructor
+   * @param {Object} options Layer options.
+   * @param {string} options.url Tralis service url.
+   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {boolean} [options.debug=false] Display additional debug informations.
+   * @param {TralisMode} [options.mode=TralisMode.TOPOGRAPHIC] - Mode.
+   */
   constructor(options = {}) {
-    let opt = options;
-    if (typeof opt === 'string') {
-      opt = {
-        url: options,
-      };
-    }
-    super({ ...opt });
-    this.url = opt.url;
-    this.apiKey = opt.apiKey;
-    if (this.url && opt.apiKey) {
-      this.url = `${this.url}?key=${opt.apiKey}`;
-    }
-    this.debug = opt.debug;
-    this.mode = opt.mode || modes.TOPOGRAPHIC;
+    super({ ...options });
+    this.debug = options.debug;
+    this.mode = options.mode || modes.TOPOGRAPHIC;
     this.useDynamicIconScale = this.mode === modes.SCHEMATIC;
     this.trajectories = [];
     this.format = new GeoJSON();
@@ -38,7 +41,7 @@ class TralisLayer extends TrackerLayer {
     this.refreshTimeInMs = 100 / 60;
     this.onMessage = this.onMessage.bind(this);
     this.onDeleteMessage = this.onDeleteMessage.bind(this);
-    this.api = new TralisAPI(this.url);
+    this.api = new TralisAPI(options);
   }
 
   /**
@@ -110,7 +113,7 @@ class TralisLayer extends TrackerLayer {
     this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
   }
 
-  style(props) {
+  defaultStyle(props) {
     const { id, line, rotation } = props;
     const hover = this.hoverVehicleId === id;
     const selected = this.selectedVehicleId === id;

@@ -6,31 +6,35 @@ import getVehicleImage from '../../api/tralis/TralisStyle';
 import { getSourceCoordinates, getResolution } from '../utils';
 
 /**
- * Responsible for loading live data from Realtime service.
- * @class
- * @inheritDoc
- * @param {Object} options Layer options.
- * @param {string} options.url Realtime service url.
- * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
- * @param {boolean} [options.debug=false] Display additional debug informations.
- * @param {TralisMode} [options.mode=TralisMode.TOPOGRAPHIC] Mode.
+ * Responsible for loading and display data from a Tralis service.
+ *
+ * @example
+ * import { TralisLayer } from 'mobility-toolbox-js/mapbox';
+ *
+ * const layer = new TralisLayer({
+ *   url: [yourUrl],
+ *   apiKey: [yourApiKey],
+ * });
+ *
+ *
+ * @see <a href="/api/class/src/api/tralis/TralisAPI%20js~TralisAPI%20html">TralisAPI</a>
+ *
+ * @extends {TrackerLayer}
  */
-class MapboxTralisLayer extends TrackerLayer {
+class TralisLayer extends TrackerLayer {
+  /*
+   * Constructor
+
+   * @param {Object} options Layer options.
+   * @param {string} options.url Tralis service url.
+   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {boolean} [options.debug=false] Display additional debug informations.
+   * @param {TralisMode} [options.mode=TralisMode.TOPOGRAPHIC] - Mode.
+   */
   constructor(options = {}) {
-    let opt = options;
-    if (typeof opt === 'string') {
-      opt = {
-        url: options,
-      };
-    }
-    super({ ...opt });
-    this.url = opt.url;
-    this.apiKey = opt.apiKey;
-    if (this.url && opt.apiKey) {
-      this.url = `${this.url}?key=${opt.apiKey}`;
-    }
-    this.debug = opt.debug;
-    this.mode = opt.mode || modes.TOPOGRAPHIC;
+    super({ ...options });
+    this.debug = options.debug;
+    this.mode = options.mode || modes.TOPOGRAPHIC;
     this.useDynamicIconScale = this.mode === modes.SCHEMATIC;
     this.trajectories = [];
     this.format = new GeoJSON();
@@ -40,7 +44,7 @@ class MapboxTralisLayer extends TrackerLayer {
     this.onZoomEnd = this.onZoomEnd.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onMoveEnd = this.onMoveEnd.bind(this);
-    this.api = new TralisAPI(this.url);
+    this.api = new TralisAPI(options);
     // These scales depends from the size specifed in the svgs.
     // For some reason the size must be specified in the svg (../img/lines) for firefox.
     this.dfltIconScale = 0.6;
@@ -135,7 +139,7 @@ class MapboxTralisLayer extends TrackerLayer {
     this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
   }
 
-  style(props) {
+  defaultStyle(props) {
     const { id, line, rotation } = props;
     const hover = this.hoverVehicleId === id;
     const selected = this.selectedVehicleId === id;
@@ -275,4 +279,4 @@ class MapboxTralisLayer extends TrackerLayer {
   }
 }
 
-export default MapboxTralisLayer;
+export default TralisLayer;
