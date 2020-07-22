@@ -1,5 +1,9 @@
 import WebSocketConnector from './WebSocketConnector';
-import { getModeSuffix, cleanStopTime, compareDepartures } from './utils';
+import {
+  getModeSuffix,
+  cleanStopTime,
+  compareDepartures,
+} from './TralisAPIUtils';
 
 /**
  * Enum for Tralis modes.
