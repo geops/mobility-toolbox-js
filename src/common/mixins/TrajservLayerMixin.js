@@ -2,9 +2,6 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 import qs from 'query-string';
-import { fromLonLat } from 'ol/proj';
-import { buffer, getWidth } from 'ol/extent';
-// import { LineString } from 'ol/geom';
 import { getDateString, getUTCTimeString } from '../timeUtils';
 import {
   getRadius,
@@ -248,7 +245,9 @@ const TrajservLayerMixin = (TrackerLayer) =>
           },
         },
         api: {
-          value: new TrajservAPI({ url: options.url, apiKey: options.apiKey }),
+          value:
+            options.api ||
+            new TrajservAPI({ url: options.url, apiKey: options.apiKey }),
         },
       });
     }
