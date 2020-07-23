@@ -1,4 +1,3 @@
-import 'abortcontroller-polyfill/dist/abortcontroller-polyfill-only';
 import GeoJSON from 'ol/format/GeoJSON';
 import { unByKey } from 'ol/Observable';
 import OLLayer from './Layer';
