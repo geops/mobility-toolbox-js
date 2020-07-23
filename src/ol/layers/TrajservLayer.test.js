@@ -2,7 +2,6 @@ import fetch from 'jest-fetch-mock';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TrajservLayer from './TrajservLayer';
-import fetchTrajectoriesResponse from '../../../data/fetchTrajectories.json';
 
 let layer;
 let onClick;
@@ -34,7 +33,7 @@ describe('TrajservLayer', () => {
   test('should called terminate on initalization.', () => {
     const spy = jest.spyOn(layer, 'terminate');
 
-    fetch.mockResponseOnce(JSON.stringify(fetchTrajectoriesResponse));
+    fetch.mockResponseOnce(JSON.stringify(global.fetchTrajectoriesResponse));
 
     layer.init(olMap);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -67,7 +66,7 @@ describe('TrajservLayer', () => {
     const spy2 = jest.spyOn(layer, 'onMoveEnd');
 
     // Mock response for the following calls
-    fetch.mockResponse(JSON.stringify(fetchTrajectoriesResponse));
+    fetch.mockResponse(JSON.stringify(global.fetchTrajectoriesResponse));
 
     // init uses mockResponse
     layer.init(olMap);

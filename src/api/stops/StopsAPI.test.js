@@ -1,6 +1,5 @@
 import fetch from 'jest-fetch-mock';
 import StopsAPI from './StopsAPI';
-import stopsSearchResponse from '../../../data/stopsSearch.json';
 
 let api;
 let consoleOutput;
@@ -15,7 +14,7 @@ describe('StopsAPI', () => {
 
   describe('#search', () => {
     test('should success', () => {
-      fetch.mockResponseOnce(JSON.stringify(stopsSearchResponse));
+      fetch.mockResponseOnce(JSON.stringify(global.stopsSearchResponse));
 
       return api
         .search({

@@ -1,8 +1,5 @@
 import fetch from 'jest-fetch-mock';
 import TrajservAPI from './TrajservAPI';
-import fetchTrajectoryByIdResponse from '../../../data/fetchTrajectoryById.json';
-import fetchTrajectoriesResponse from '../../../data/fetchTrajectories.json';
-import fetchTrajectoryStationsResponse from '../../../data/fetchTrajectoryStations.json';
 
 let api;
 
@@ -16,7 +13,9 @@ describe('TrajservAPI', () => {
 
   describe('#fetchTrajectoryById', () => {
     test('should success', () => {
-      fetch.mockResponseOnce(JSON.stringify(fetchTrajectoryByIdResponse));
+      fetch.mockResponseOnce(
+        JSON.stringify(global.fetchTrajectoryByIdResponse),
+      );
 
       return api
         .fetchTrajectoryById({
@@ -84,7 +83,7 @@ describe('TrajservAPI', () => {
 
   describe('#fetchTrajectories', () => {
     test('should success', () => {
-      fetch.mockResponseOnce(JSON.stringify(fetchTrajectoriesResponse));
+      fetch.mockResponseOnce(JSON.stringify(global.fetchTrajectoriesResponse));
 
       return api
         .fetchTrajectories({
@@ -151,7 +150,9 @@ describe('TrajservAPI', () => {
 
   describe('#fetchTrajectoryStations', () => {
     test('should success', () => {
-      fetch.mockResponseOnce(JSON.stringify(fetchTrajectoryStationsResponse));
+      fetch.mockResponseOnce(
+        JSON.stringify(global.fetchTrajectoryStationsResponse),
+      );
 
       return api
         .fetchTrajectoryStations({

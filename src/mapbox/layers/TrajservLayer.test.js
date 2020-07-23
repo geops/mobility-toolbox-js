@@ -2,7 +2,6 @@ import mapboxgl from 'mapbox-gl';
 import fetch from 'jest-fetch-mock';
 import { toLonLat } from 'ol/proj';
 import TrajservLayer from './TrajservLayer';
-import fetchTrajectoriesResponse from '../../../data/fetchTrajectories.json';
 
 let layer;
 let onClick;
@@ -26,7 +25,7 @@ describe('TrajservLayer', () => {
   test('should called terminate on initalization.', () => {
     const spy = jest.spyOn(layer, 'terminate');
 
-    fetch.mockResponseOnce(JSON.stringify(fetchTrajectoriesResponse));
+    fetch.mockResponseOnce(JSON.stringify(global.fetchTrajectoriesResponse));
 
     const mapElement = document.createElement('div');
     const { style } = mapElement;
