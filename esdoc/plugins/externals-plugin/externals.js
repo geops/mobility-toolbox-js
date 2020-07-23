@@ -8,10 +8,13 @@
  * @external {ol/coordinate~Coordinate} https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html#~Coordinate
  */
 /**
+ * @external {ol/layer/Layer~Layer} https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html
+ */
+/**
  * @external {ol/Feature~Feature} https://openlayers.org/en/latest/apidoc/module-ol_Feature-Feature.html
  */
 /**
- * @external {ol/layer/Layer~Layer} https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html
+ * @external {ol/geom/Point~Point} https://openlayers.org/en/latest/apidoc/module-ol_geom_Point-Point.html
  */
 /**
  * @external {ol/geom/LineString~LineString} https://openlayers.org/en/latest/apidoc/module-ol_geom_LineString-LineString.html
@@ -46,6 +49,9 @@
  */
 /**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
+ */
+/**
+ * @external {GeoJSONPoint} https://tools.ietf.org/html/rfc7946#section-3.1.2
  */
 /**
  * @external {GeoJSONFeature} https://tools.ietf.org/html/rfc7946#section-3.2

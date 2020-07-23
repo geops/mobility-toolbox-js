@@ -1,0 +1,24 @@
+{
+   "type":"FeatureCollection",
+   "features":[
+      {
+         "type":"Feature",
+         "properties":{
+            "ID":4150092
+         },
+         "geometry":{
+            "type":"LineString",
+            "coordinates":[
+               [
+                  1,
+                  2
+               ],
+               [
+                  3,
+                  4
+               ]
+            ]
+         }
+      }
+   ]
+}

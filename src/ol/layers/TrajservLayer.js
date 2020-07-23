@@ -14,7 +14,7 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  * Responsible for loading and display data from a Trajserv service.
  *
  * @example
- * import { TrajservLayer } from 'mobility-toolbox-js/src/mapbox';
+ * import { TrajservLayer } from 'mobility-toolbox-js/mapbox';
  *
  * const layer = new TrajservLayer({
  *   url: 'https://api.geops.io/tracker/v1',

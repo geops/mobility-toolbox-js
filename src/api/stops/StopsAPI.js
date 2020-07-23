@@ -5,7 +5,7 @@ import { handleError, readJsonResponse } from '../utils';
  * Access to the [Stops service](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
  *
  * @example
- * import { StopsAPI } from 'mobility-toolbox-js/src/api';
+ * import { StopsAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new StopsAPI({
  *   url: 'https://api.geops.io/stops/v1/',

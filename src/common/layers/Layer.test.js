@@ -43,4 +43,56 @@ describe('Layer', () => {
     layer.init();
     expect(spy).toHaveBeenCalledTimes(1);
   });
+
+  test('should properties correctly set and get.', () => {
+    const layer = new Layer({
+      name: 'Layer',
+      olLayer,
+      properties: {
+        abc: 'foo',
+      },
+    });
+    expect(layer).toBeInstanceOf(Layer);
+    expect(layer.get('abc')).toEqual('foo');
+
+    layer.set('abc', 'bar');
+    expect(layer.get('abc')).toEqual('bar');
+  });
+
+  test('should set children', () => {
+    const layer = new Layer({
+      name: 'foo',
+      children: [
+        new Layer({
+          name: 'bar',
+        }),
+        new Layer({
+          name: 'foobar',
+          visible: false,
+        }),
+      ],
+    });
+    expect(layer.getVisibleChildren().length).toBe(1);
+    expect(layer.hasVisibleChildren()).toBe(true);
+    expect(layer.hasChildren(false)).toBe(true);
+
+    layer.addChild(
+      new Layer({
+        name: 'bla',
+      }),
+    );
+
+    expect(layer.getVisibleChildren().length).toBe(2);
+
+    layer.removeChild('bla');
+
+    expect(layer.getVisibleChildren().length).toBe(1);
+  });
+
+  test('should onClick throw error.', () => {
+    const layer = new Layer({ name: 'Layer', olLayer });
+    expect(() => {
+      layer.onClick('not of type function');
+    }).toThrow(Error);
+  });
 });

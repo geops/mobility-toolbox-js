@@ -9,19 +9,20 @@ import { handleError, readJsonResponse } from '../utils';
  * Access to the [Realtime service](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/).
  *
  * @example
- * import { TrajservAPI } from 'mobility-toolbox-js/src/api';
+ * import { TrajservAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new TrajservAPI({
  *   url: 'https://api.geops.io/tracker/v1',
  *   apiKey: [yourApiKey]
  * });
- *
- * @classproperty {string} url Url of the service.
- * @classproperty {string} apiKey Api key to access the service.
  */
 class TrajservAPI {
   /**
-   * @private
+   * Constructor
+   *
+   * @param {Object} options Options.
+   * @param {string} [options.url='https://api.geops.io/tracker/v1'] Service url.
+   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    */
   constructor(options = {}) {
     /** @ignore */

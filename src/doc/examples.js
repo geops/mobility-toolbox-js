@@ -3,6 +3,7 @@ import liveTrackerOLImg from './img/examples/live_tracker_ol.jpg';
 import liveTrackerMBImg from './img/examples/live_tracker_mb.jpg';
 import mapboxImg from './img/examples/mapbox.jpg';
 import mapboxStyleImg from './img/examples/mapbox_style.jpg';
+import queryObjectsImg from './img/examples/query_objects.jpg';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -20,7 +21,7 @@ export default [
   {
     name: 'Live tracker with OpenLayers',
     key: 'ol-tracker',
-    description: 'Show moving trains in a OpenLayers map.',
+    description: 'Show moving trains in an OpenLayers map.',
     img: liveTrackerOLImg,
     files: {
       html: 'tracker.html',
@@ -37,6 +38,27 @@ export default [
       js: 'mapboxtracker.js',
     },
   },
+  // These examples are used for the dbug of TralisLayer don't remove them pls.
+  // {
+  //   name: 'Tralis tracker with OpenLayers',
+  //   key: 'ol-tralis',
+  //   description: 'Show moving tramway in an OpenLayers map.',
+  //   img: liveTrackerOLImg,
+  //   files: {
+  //     html: 'tralis.html',
+  //     js: 'tralis.js',
+  //   },
+  // },
+  // {
+  //   name: 'Tralis tracker with Mapbox',
+  //   key: 'mapbox-tralis',
+  //   description: 'Show moving tramway in an Mapbox map.',
+  //   img: liveTrackerOLImg,
+  //   files: {
+  //     html: 'mapboxtralis.html',
+  //     js: 'mapboxtralis.js',
+  //   },
+  // },
   {
     name: 'Mapbox layer',
     key: 'mapbox-layer',
@@ -55,6 +77,17 @@ export default [
     files: {
       html: 'mapboxstyle.html',
       js: 'mapboxstyle.js',
+    },
+  },
+  {
+    name: 'Querying objects',
+    key: 'query-objects',
+    description:
+      'This example shows how to query objects in different kinds of layers.',
+    img: queryObjectsImg,
+    files: {
+      html: 'query-objects.html',
+      js: 'query-objects.js',
     },
   },
 ];

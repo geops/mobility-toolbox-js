@@ -64,20 +64,6 @@ class WMSLayer extends OLLayer {
   }
 
   /**
-   * Listens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
-   *   the layer instance and the click event.
-   */
-  onClick(callback) {
-    if (typeof callback === 'function') {
-      this.clickCallbacks.push(callback);
-    } else {
-      throw new Error('callback must be of type function.');
-    }
-  }
-
-  /**
    * Initialize the layer and listen to feature clicks.
    * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
    */

@@ -34,7 +34,7 @@ describe('VectorLayer', () => {
       olLayer,
       onClick,
     });
-    map = new Map({ view: new View({ resution: 5 }) });
+    map = new Map({ view: new View({ resolution: 5 }) });
   });
 
   test('should be instanced.', () => {
@@ -47,6 +47,12 @@ describe('VectorLayer', () => {
     const onClick2 = jest.fn();
     layer.onClick(onClick2);
     expect(layer.clickCallbacks[1]).toBe(onClick2);
+  });
+
+  test('should onClick throw error.', () => {
+    expect(() => {
+      layer.onClick('not of type function');
+    }).toThrow(Error);
   });
 
   test('should called terminate on initalization.', () => {
