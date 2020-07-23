@@ -13,4 +13,5 @@
 - [ ] The title means something for a human being.
 - [ ] The title contains [WIP] if it's necessary.
 - [ ] Labels applied. if it's a release? a hotfix?
+- [ ] The new class' members & methods are well documented
 - [ ] Tests added.
