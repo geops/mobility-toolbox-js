@@ -35,18 +35,20 @@ const ClassDoc = ({ doc }) => {
   if (!doc) {
     return null;
   }
-  const { name, access, version, since, importPath, importStyle } = doc;
+  const { name, access, version, since } = doc;
 
   return (
     <div className={classes.root}>
       <div className="header-notice">
-        {doc.export && importPath && importStyle && (
+        {/*
+        doc.export && importPath && importStyle && (
           <div data-ice="importPath" className="import-path">
             <SyntaxHighlighter language="js">
               {`import ${importStyle} from '${importPath}';`}
             </SyntaxHighlighter>
           </div>
-        )}
+        )
+        */}
         <span>{access}</span>
         <span>{doc.interface ? ' interface' : ' class'}</span>
         {/* TODO
