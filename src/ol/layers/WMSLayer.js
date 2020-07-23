@@ -14,6 +14,7 @@ class WMSLayer extends OLLayer {
   constructor(options = {}) {
     super(options);
 
+    this.abortController = new AbortController();
     this.format = new GeoJSON();
   }
 
@@ -45,7 +46,10 @@ class WMSLayer extends OLLayer {
    * eslint-disable-next-line class-methods-use-this
    */
   getFeatureInfoAtCoordinate(coordinate) {
-    return fetch(this.getFeatureInfoUrl(coordinate))
+    this.abortController.abort();
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
+    return fetch(this.getFeatureInfoUrl(coordinate), { signal })
       .then((resp) => resp.json())
       .then((r) => r.features)
       .then((data) => ({
