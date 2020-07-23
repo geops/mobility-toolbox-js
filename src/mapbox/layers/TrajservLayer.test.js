@@ -1,33 +1,51 @@
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TrackerLayer from './TrackerLayer';
+import mapboxgl from 'mapbox-gl';
+import fetch from 'jest-fetch-mock';
+import { toLonLat } from 'ol/proj';
+import TrajservLayer from './TrajservLayer';
 
 let layer;
 let onClick;
 
-describe('TrackerLayer', () => {
+describe('TrajservLayer', () => {
   beforeEach(() => {
+    global.fetch = fetch;
+    fetch.resetMocks();
+
     onClick = jest.fn();
-    layer = new TrackerLayer({
+    layer = new TrajservLayer({
       onClick,
     });
   });
 
   test('should be instanced.', () => {
-    expect(layer).toBeInstanceOf(TrackerLayer);
+    expect(layer).toBeInstanceOf(TrajservLayer);
     expect(layer.clickCallbacks[0]).toBe(onClick);
   });
 
   test('should called terminate on initalization.', () => {
     const spy = jest.spyOn(layer, 'terminate');
+
+    fetch.mockResponseOnce(JSON.stringify(global.fetchTrajectoriesResponse));
+
+    const mapElement = document.createElement('div');
+    const { style } = mapElement;
+    style.position = 'absolute';
+    style.left = '0px';
+    style.top = '0px';
+    style.width = '400px';
+    style.height = '400px';
+    mapElement.setAttribute('id', 'map');
+    document.body.appendChild(mapElement);
+
     layer.init(
-      new Map({
-        view: new View({
-          center: [831634, 5933959],
-          zoom: 9,
-        }),
+      new mapboxgl.Map({
+        container: document.getElementById('map'),
+        style: `path/to/style`,
+        center: toLonLat([831634, 5933959]),
+        zoom: 9,
       }),
     );
+
     expect(spy).toHaveBeenCalledTimes(1);
   });
 

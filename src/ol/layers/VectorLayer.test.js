@@ -49,6 +49,12 @@ describe('VectorLayer', () => {
     expect(layer.clickCallbacks[1]).toBe(onClick2);
   });
 
+  test('should onClick throw error.', () => {
+    expect(() => {
+      layer.onClick('not of type function');
+    }).toThrow(Error);
+  });
+
   test('should called terminate on initalization.', () => {
     const spy = jest.spyOn(layer, 'terminate');
     layer.init();

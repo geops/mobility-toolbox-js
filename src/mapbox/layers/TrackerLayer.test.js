@@ -1,5 +1,5 @@
-import Map from 'ol/Map';
-import View from 'ol/View';
+import mapboxgl from 'mapbox-gl';
+import { toLonLat } from 'ol/proj';
 import TrackerLayer from './TrackerLayer';
 
 let layer;
@@ -20,14 +20,26 @@ describe('TrackerLayer', () => {
 
   test('should called terminate on initalization.', () => {
     const spy = jest.spyOn(layer, 'terminate');
+
+    const mapElement = document.createElement('div');
+    const { style } = mapElement;
+    style.position = 'absolute';
+    style.left = '0px';
+    style.top = '0px';
+    style.width = '400px';
+    style.height = '400px';
+    mapElement.setAttribute('id', 'map');
+    document.body.appendChild(mapElement);
+
     layer.init(
-      new Map({
-        view: new View({
-          center: [831634, 5933959],
-          zoom: 9,
-        }),
+      new mapboxgl.Map({
+        container: document.getElementById('map'),
+        style: `path/to/style`,
+        center: toLonLat([831634, 5933959]),
+        zoom: 9,
       }),
     );
+
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
