@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
   brand: {
     display: 'flex',
     alignItems: 'center',
+    fontSize: 22,
   },
   logo: {
     [theme.breakpoints.down('xs')]: {
@@ -44,7 +45,8 @@ const useStyles = makeStyles((theme) => ({
       fontSize: 15,
       marginLeft: 10,
     },
-    fontSize: 18,
+    fontSize: 22,
+    color: theme.palette.text.primary,
     fontWeight: 500,
     marginLeft: 15,
   },

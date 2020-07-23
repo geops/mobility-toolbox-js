@@ -58,8 +58,8 @@ export default class MapboxLayer extends Layer {
 
         // adjust view parameters in mapbox
         const { rotation } = viewState;
-        if (rotation && this.renderState.rotation !== rotation) {
-          this.mbMap.rotateTo((-rotation * 180) / Math.PI, {
+        if (this.renderState.rotation !== rotation) {
+          this.mbMap.rotateTo((-(rotation || 0) * 180) / Math.PI, {
             animate: false,
           });
           changed = true;
@@ -219,8 +219,13 @@ export default class MapboxLayer extends Layer {
 
     const mapboxCanvas = this.mbMap.getCanvas();
     if (mapboxCanvas) {
-      // Set default tabIndex to -1, so we can't access the canvas via Tab nav.
-      mapboxCanvas.setAttribute('tabindex', this.options.tabIndex || -1);
+      if (this.options.tabIndex) {
+        mapboxCanvas.setAttribute('tabindex', this.options.tabIndex);
+      } else {
+        // With a tabIndex='-1' the mouse events works but the map is not focused when we click on it
+        // so we remove completely the tabIndex attribute.
+        mapboxCanvas.removeAttribute('tabindex');
+      }
     }
   }
 

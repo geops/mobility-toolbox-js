@@ -55,7 +55,7 @@ const Example = () => {
         // Replace relative import by library import
         setJs(
           jsCode
-            .replace(/'\.\.\/\.\.\//gm, "'mobility-toolbox-js/src/")
+            .replace(/'\.\.\/\.\.\//gm, "'mobility-toolbox-js/")
             .replace('export default () => {\n', '')
             .replace(/^};\n$/gm, '')
             .replace(/^ {2}/gm, ''),

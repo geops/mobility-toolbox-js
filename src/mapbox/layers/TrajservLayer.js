@@ -10,7 +10,7 @@ import { getSourceCoordinates, getResolution } from '../utils';
  * Responsible for loading and display data from a Trajserv service.
  *
  * @example
- * import { TrajservLayer } from 'mobility-toolbox-js/src/mapbox';
+ * import { TrajservLayer } from 'mobility-toolbox-js/mapbox';
  *
  * const layer = new TrajservLayer({
  *   url: 'https://api.geops.io/tracker/v1',
@@ -281,7 +281,9 @@ class TrajservLayer extends mixin(TrackerLayer) {
       // );
       // })
       .catch(() => {
-        this.map.removeLayer('highlight-trajectory');
+        if (this.map.getLayer('highlight-trajectory')) {
+          this.map.removeLayer('highlight-trajectory');
+        }
       });
   }
 }

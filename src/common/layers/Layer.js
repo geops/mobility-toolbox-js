@@ -33,11 +33,11 @@ export default class Layer extends Observable {
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is visible on the map.
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
-   * @param {boolean} [options.isQueryable=false] If true feature information can be queried by the react-spatial LayerService. Default is undefined, but resulting to true if not strictly set to false.
+   * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
    */
   constructor(options) {
     super();
-    this.defineProperties(options);
+    this.defineProperties({ isQueryable: true, ...options });
 
     // Add click callback
     const { onClick } = options;
