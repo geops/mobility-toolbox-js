@@ -20,6 +20,7 @@ class Map {
       height: '100px',
       width: '100px',
       setAttribute: () => {},
+      removeAttribute: () => {},
     };
   }
 

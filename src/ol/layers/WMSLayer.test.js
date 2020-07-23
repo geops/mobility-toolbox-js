@@ -52,10 +52,13 @@ describe('WMSLayer', () => {
 
   test('#onClick', () => {
     const f = () => {};
+    const f2 = () => {};
     layer.onClick(f);
     expect(layer.clickCallbacks[0]).toBe(f);
     expect(layer.clickCallbacks.length).toBe(1);
     layer.onClick(f);
+    expect(layer.clickCallbacks.length).toBe(1);
+    layer.onClick(f2);
     expect(layer.clickCallbacks.length).toBe(2);
   });
 

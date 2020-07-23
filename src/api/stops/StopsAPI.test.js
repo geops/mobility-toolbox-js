@@ -47,7 +47,7 @@ describe('StopsAPI', () => {
           .search({
             q: 'Bern',
           })
-          .then(() => {
+          .catch(() => {
             expect(consoleOutput).toEqual([
               [
                 'Fetch search request failed: ',
@@ -64,7 +64,7 @@ describe('StopsAPI', () => {
           .search({
             q: 'Bern',
           })
-          .then(() => {
+          .catch(() => {
             expect(consoleOutput).toEqual([
               ['Fetch search request failed: ', 'Error: Fake error message'],
             ]);

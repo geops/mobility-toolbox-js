@@ -70,7 +70,7 @@ describe('TrajservAPI', () => {
           s: '0',
           z: '18.66059982835272',
         })
-        .then(() => {
+        .catch(() => {
           expect(consoleOutput).toEqual([
             [
               'Fetch trajectorybyid request failed: ',
@@ -137,7 +137,7 @@ describe('TrajservAPI', () => {
           s: '0',
           z: '18.66059982835272',
         })
-        .then(() => {
+        .catch(() => {
           expect(consoleOutput).toEqual([
             [
               'Fetch trajectory_collection request failed: ',
@@ -208,7 +208,7 @@ describe('TrajservAPI', () => {
           s: '0',
           z: '18.66059982835272',
         })
-        .then(() => {
+        .catch(() => {
           expect(consoleOutput).toEqual([
             [
               'Fetch trajstations request failed: ',
