@@ -25,7 +25,9 @@
 /**
  * @external {ol/format/GeoJSON} https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
  */
-
+/**
+ * @external {ol/MapEvent~MapEvent} https://openlayers.org/en/latest/apidoc/module-ol_MapEvent-MapEvent.html
+ */
 /**
  * @external {ol/events~EventsKey} https://openlayers.org/en/latest/apidoc/module-ol_events.html#~EventsKey
  */

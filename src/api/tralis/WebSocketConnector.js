@@ -1,5 +1,9 @@
 class WebSocketConnector {
   constructor(url) {
+    /**
+     * Array of subscriptions.
+     * @type {Array<subscription>}
+     */
     this.subscriptions = [];
     this.connect(url);
 
@@ -16,6 +20,7 @@ class WebSocketConnector {
    * @param {string} params.channel Channel name
    * @param {string} [params.args] Request arguments
    * @param {Number} [params.id] Request identifier
+   * @returns {string} request string
    * @private
    */
   static getRequestString(method, params) {
@@ -27,6 +32,7 @@ class WebSocketConnector {
 
   /**
    * (Re)connect the websocket.
+   * @param {string} url url to connect to
    * @private
    */
   connect(url) {
@@ -34,6 +40,7 @@ class WebSocketConnector {
       this.websocket.close();
     }
 
+    /** @ignore */
     this.websocket = new WebSocket(url);
 
     if (this.currentProj) {
@@ -51,12 +58,16 @@ class WebSocketConnector {
     // reconnect on close
     this.websocket.onclose = () => {
       window.clearTimeout(this.reconnectTimeout);
+      /** @ignore */
       this.reconnectTimeout = window.setTimeout(() => this.connect(), 100);
     };
   }
 
   /**
    * Sends a get request to the websocket.
+   * @param {Object} params Parameters for the websocket get request
+   * @param {function} cb callback on listen
+   * @param {function} errorCb Callback on error
    * @private
    */
   get(params, cb, errorCb) {
@@ -67,6 +78,7 @@ class WebSocketConnector {
 
   /**
    * Sends a message to the websocket.
+   * @param {message} message send to the websocket via @link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/send
    * @private
    */
   send(message) {
@@ -83,18 +95,28 @@ class WebSocketConnector {
 
   /**
    * Set the projection for websocket responses.
+   * @param {string} value projection value to be set
    * @private
    */
   setProjection(value) {
+    /**
+     * The projection for websocket responses
+     * @type {string}
+     */
     this.currentProj = value;
     this.send(`PROJECTION ${value}`);
   }
 
   /**
    * Set the BBOX for websocket responses.
+   *  @param {Array<Array<number>>} coordinates array of coordinates
    * @private
    */
   setBbox(coordinates) {
+    /**
+     * The BBOX for websocket responses
+     * @type {Array<Array<number>>}
+     */
     this.currentBbox = coordinates;
     this.send(`BBOX ${coordinates.join(' ')}`);
     this.subscriptions.forEach((s) => {
@@ -105,6 +127,10 @@ class WebSocketConnector {
   /**
    * Listen to websocket responses.
    * @private
+   * @param {Object} params Parameters for the websocket get request
+   * @param {function} cb callback on listen
+   * @param {function} errorCb Callback on error
+   * @returns {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
    */
   listen(params, cb, errorCb) {
     const onMessage = (e) => {
@@ -133,6 +159,10 @@ class WebSocketConnector {
   /**
    * Subscribe to a given channel.
    * @private
+   * @param {Object} params Parameters for the websocket get request
+   * @param {function} cb callback on listen
+   * @param {function} errorCb Callback on error
+   * @param {boolean} quiet if subscribe should be quiet
    */
   subscribe(params, cb, errorCb, quiet) {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
@@ -148,6 +178,7 @@ class WebSocketConnector {
 
   /**
    * Unsubscribe from a channel.
+   * @param {string} source source to unsubscribe from
    * @private
    */
   unsubscribe(source) {

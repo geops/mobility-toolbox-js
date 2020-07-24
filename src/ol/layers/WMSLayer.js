@@ -4,8 +4,8 @@ import OLLayer from './Layer';
 
 /**
  * @class
- * @augments Layer
- * @extends baba
+ * @inheritDoc
+ * @implements {Layer}
  */
 class WMSLayer extends OLLayer {
   /**
@@ -14,6 +14,7 @@ class WMSLayer extends OLLayer {
   constructor(options = {}) {
     super(options);
 
+    /** @ignore */
     this.format = new GeoJSON();
   }
 
@@ -76,6 +77,7 @@ class WMSLayer extends OLLayer {
 
     /**
      * ol click events key, returned by map.on('singleclick')
+     * @private
      * @type {ol/events~EventsKey}
      */
     this.singleClickRef = this.map.on('singleclick', (e) => {
@@ -92,6 +94,9 @@ class WMSLayer extends OLLayer {
   /**
    * Call click callbacks with given parameters.
    * This is done in a separate function for being able to modify the response.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {ol/layer/Layer~Layer} layer
+   * @param {ol/coordinate~Coordinate} coordinate
    * @private
    */
   callClickCallbacks(features, layer, coordinate) {

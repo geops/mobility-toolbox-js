@@ -1,5 +1,4 @@
 import { fromLonLat } from 'ol/proj';
-// import { LineString } from 'ol/geom';
 import { buffer, getWidth } from 'ol/extent';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TrajservLayerMixin';
@@ -132,6 +131,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   /**
    * Callback on 'mouseclick' event.
+   * @param {mapboxgl.MapMouseEvent} evt
    * @private
    */
   onMapClick(evt) {
@@ -144,10 +144,19 @@ class TrajservLayer extends mixin(TrackerLayer) {
     );
 
     if (vehicle) {
+      /**
+       * Id of the selected vehicle
+       * @type {string}
+       */
       this.selectedVehicleId = vehicle.id;
+      /** @ignore */
       this.journeyId = vehicle.journeyIdentifier;
       this.updateTrajectoryStations(this.selectedVehicleId).then(
         (vehicleWithStations) => {
+          /**
+           * Array of station coordinates.
+           * @type {Array<Array<number>>} Array of coordinates.
+           */
           this.stationsCoords = [];
           vehicleWithStations.stations.forEach((station) => {
             this.stationsCoords.push(fromLonLat(station.coordinates));
@@ -165,6 +174,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   /**
    * @override
+   * * Returns the URL parameters.
+   * @param {Object} extraParams Extra parameters
+   * @returns {Object}
+   * @private
    */
   getParams(extraParams = {}) {
     const bounds = this.map.getBounds().toArray();
@@ -182,9 +195,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
-  /**
-   * @override
-   */
+  /** @ignore */
   defaultStyle(props) {
     const zoom = this.map.getZoom();
     return super.defaultStyle(props, zoom);

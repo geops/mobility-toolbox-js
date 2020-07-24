@@ -31,7 +31,16 @@ const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
  * @class
  *
  * @example
- * import { MapboxStyleLayer } from 'mobility-toolbox-js/ol';
+ * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';
+ *
+ * const mapboxLayer = new MapboxLayer({
+ *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
+ * });
+ *
+ * const layer = new MapboxStyleLayer({
+ *   mapboxLayer: mapboxLayer,
+ *   styleLayersFilter: () => {},
+ * });
  *
  * @param {Object} [options] Layer options.
  * @inheritdoc
@@ -175,6 +184,10 @@ class MapboxStyleLayer extends Layer {
     );
 
     // Listen to click events
+    /** ol click events key, returned by map.on('singleclick')
+     * @type {ol/events~EventsKey}
+     * @private
+     */
     this.singleClickRef = this.map.on('singleclick', (e) => {
       if (!this.clickCallbacks.length) {
         return;
@@ -189,6 +202,9 @@ class MapboxStyleLayer extends Layer {
   /**
    * Call click callbacks with given parameters.
    * This is done in a separate function for being able to modify the response.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {ol/layer/Layer~Layer} layer
+   * @param {ol/coordinate~Coordinate} coordinate
    * @private
    */
   callClickCallbacks(features, layer, coordinate) {

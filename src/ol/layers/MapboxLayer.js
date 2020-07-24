@@ -24,6 +24,14 @@ const getCopyrightFromSources = (mbMap) => {
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
+ *
+ * @example
+ * import { MapboxLayer } from 'mobility-toolbox-js/ol';
+ *
+ * const layer = new MapboxLayer({
+ *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
+ * });
+ *
  * @class
  * @inheritDoc
  * @param {Object} [options]
@@ -140,7 +148,7 @@ export default class MapboxLayer extends Layer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map
    */
   init(map) {
     super.init(map);
@@ -218,6 +226,7 @@ export default class MapboxLayer extends Layer {
 
     // Options the last render run did happen. If something changes
     // we have to render again
+    /** @ignore */
     this.renderState = {
       center: [x, y],
       zoom: null,

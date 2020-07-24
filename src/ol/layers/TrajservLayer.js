@@ -106,6 +106,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   /**
    * Callback on 'singleclick' event.
+   * @param {ol/MapEvent~MapEvent} evt
    * @private
    */
   onMapClick(evt) {
@@ -210,6 +211,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Fetch stations information with a trajectory ID
    * @param {number} trajId The ID of the trajectory
+   * @returns {Promise<TrajStation[]>} A list of stations.
    * @private
    */
   updateTrajectoryStations(trajId) {
@@ -264,6 +266,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   /**
    * @override
+   * * Returns the URL parameters.
+   * @param {Object} extraParams Extra parameters
+   * @returns {Object}
+   * @private
    */
   getParams(extraParams = {}) {
     const ext = this.map.getView().calculateExtent();
@@ -278,6 +284,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
+  /** @ignore */
   defaultStyle(props) {
     const zoom = this.map.getView().getZoom();
     return super.defaultStyle(props, zoom);

@@ -24,7 +24,7 @@ const SummaryHTML = ({
   const accessDocs = useMemo(() => {
     const classDocs = _findAccessDocs(doc, kind, isStatic);
 
-    if (['class', 'interface'].indexOf(doc.kind) !== -1) {
+    if (doc && ['class', 'interface'].indexOf(doc.kind) !== -1) {
       const longnames = [
         ...(doc._custom_extends_chains || []),
         // ...doc.implements || [],
@@ -86,7 +86,7 @@ const SummaryHTML = ({
             key={idx}
             docs={docs}
             title={_title}
-            memberof={doc.memberof}
+            memberof={doc && doc.memberof}
           />
         );
       })}

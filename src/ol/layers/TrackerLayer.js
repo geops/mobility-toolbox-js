@@ -117,7 +117,7 @@ class TrackerLayer extends mixin(Layer) {
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
    * @param {ol/coordinate~Coordinate} coordinate
-   * @returns {ol/Feature~Feature | null} Vehicle feature
+   * @returns {ol/Feature~Feature} Vehicle feature.
    * @private
    */
   getVehiclesAtCoordinate(coordinate) {

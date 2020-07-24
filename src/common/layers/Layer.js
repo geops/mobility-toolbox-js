@@ -240,7 +240,7 @@ export default class Layer extends Observable {
   /**
    * Request feature information for a given coordinate.
    *
-   * @param {number[2]} coordinate Coordinate to request the information at.
+   * @param {Array<number>} coordinate Coordinate to request the information at.
    * @returns {Promise<{layer:Layer, features:Object[], coordinate:number[]}>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    */

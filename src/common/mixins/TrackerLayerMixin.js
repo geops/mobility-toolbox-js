@@ -17,7 +17,7 @@ import { timeSteps } from '../trackerConfig';
 export class TrackerLayerInterface {
   /**
    * Initalize the Tracker.
-   * @param map
+   * @param {ol/Map~Map} map
    * @param {Object} options
    * @param {number} [options.width] Canvas's width.
    * @param {number} [options.height] Canvas's height.
@@ -44,6 +44,7 @@ export class TrackerLayerInterface {
   /**
    * Stop the time.
    * @private
+   * @param {number} zoom
    */
   // eslint-disable-next-line no-unused-vars
   startUpdateTime(zoom) {}
@@ -70,8 +71,8 @@ export class TrackerLayerInterface {
   /**
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
-   * @param {ol/coordinate~Coordinate} coordinate
-   * @returns {ol/Feature~Feature | null} Vehicle feature
+   * @param {Array<number>} coordinate
+   * @returns {ol/Feature~Feature} Vehicle feature.
    */
   // eslint-disable-next-line no-unused-vars
   getVehiclesAtCoordinate(coordinate, resolution = 1) {}
@@ -79,6 +80,7 @@ export class TrackerLayerInterface {
   /**
    * Get the duration before the next update depending on zoom level.
    * @private
+   * @param {number} zoom
    */
   // eslint-disable-next-line no-unused-vars
   getRefreshTimeInMs(zoom) {}
@@ -185,7 +187,7 @@ const TrackerLayerMixin = (Base) =>
 
     /**
      * Initalize the Tracker.
-     * @param map
+     * @param {ol/Map~Map} map
      * @param {Object} options
      * @param {Number} [options.width] Canvas's width.
      * @param {Number} [options.height] Canvas's height.
@@ -294,8 +296,8 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Returns an array of vehicles located at the given coordinates and resolution.
      *
-     * @param {number[2]} coordinate
-     * @param {number[2]} resolution
+     * @param {Array<number>} coordinate
+     * @param {number} resolution
      * @returns {Object[]} Array of vehicle.
      */
     getVehiclesAtCoordinate(coordinate, resolution = 1) {

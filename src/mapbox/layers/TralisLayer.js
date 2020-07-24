@@ -34,7 +34,7 @@ class TralisLayer extends mixin(TrackerLayer) {
   /**
    * Add listeners from the Mapbox Map.
    *
-   * @param {mapboxgl.Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html Map}
+   * @param {mapboxgl.Map} map
    * @param {string} beforeId See {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html addLayer}  documentation,
    */
   init(map, beforeId) {
@@ -44,6 +44,7 @@ class TralisLayer extends mixin(TrackerLayer) {
       return;
     }
 
+    /** @ignore */
     this.iconScale = this.getIconScaleFromRes(getResolution(this.map));
     this.map.on('zoomend', this.onZoomEnd);
     this.map.on('move', this.onMove);
