@@ -24,11 +24,25 @@ const getCopyrightFromSources = (mbMap) => {
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
+ *
+ * @example
+ * import { MapboxLayer } from 'mobility-toolbox-js/ol';
+ *
+ * const layer = new MapboxLayer({
+ *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
+ * });
+ *
  * @class
  * @inheritDoc
  * @param {Object} [options]
+ * @implements {Layer}
  */
 export default class MapboxLayer extends Layer {
+  /**
+   * @param {Object} options
+   * @param {boolean} [options.preserveDrawingBuffer=false] If true able to export the canvas.
+   * @param {number} [options.fadeDuration=300] Duration of the fade effect in ms.
+   */
   constructor(options = {}) {
     const mbLayer = new OLLayer({
       render: (frameState) => {
@@ -121,13 +135,20 @@ export default class MapboxLayer extends Layer {
       ...options,
       olLayer: mbLayer,
     });
+
+    /** @ignore */
     this.options = options;
+
+    /**
+     * Url of the mapbox style.
+     * @type {string}
+     */
     this.styleUrl = options.url;
   }
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map
    */
   init(map) {
     super.init(map);
@@ -136,6 +157,10 @@ export default class MapboxLayer extends Layer {
       return;
     }
 
+    /**
+     * The feature format.
+     * @type {ol/format/GeoJSON}
+     */
     this.format = new GeoJSON({
       featureProjection: this.map.getView().getProjection(),
     });
@@ -178,6 +203,10 @@ export default class MapboxLayer extends Layer {
     }
 
     try {
+      /**
+       * A mapbox map
+       * @type {mapboxgl.Map}
+       */
       this.mbMap = new mapboxgl.Map({
         style: this.styleUrl,
         attributionControl: false,
@@ -197,6 +226,7 @@ export default class MapboxLayer extends Layer {
 
     // Options the last render run did happen. If something changes
     // we have to render again
+    /** @ignore */
     this.renderState = {
       center: [x, y],
       zoom: null,
@@ -207,8 +237,16 @@ export default class MapboxLayer extends Layer {
     };
 
     this.mbMap.once('load', () => {
+      /**
+       * Is the map loaded.
+       * @type {boolean}
+       */
       this.loaded = true;
       if (!this.copyright) {
+        /**
+         * Copyright statement.
+         * @type {string}
+         */
         this.copyright = getCopyrightFromSources(this.mbMap);
       }
       this.dispatchEvent({
@@ -231,7 +269,7 @@ export default class MapboxLayer extends Layer {
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate Coordinate to request the information at.
+   * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @param {Object} options A mapbox {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html options object}.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.

@@ -5,7 +5,7 @@ import LayerCommon from '../../common/layers/Layer';
  * A class representing a layer to display on an OpenLayers map.
  *
  * @param {Object} options
- * @param {ol/Layer} options.olLayer The {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html ol/Layer} (required).
+ * @param {ol/layer/Layer~Layer} options.olLayer The layer (required).
  * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
  * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
  * @param {string} [options.copyright=undefined] Copyright-Statement.
@@ -14,7 +14,7 @@ import LayerCommon from '../../common/layers/Layer';
  * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
  * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
  * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
- * @extends LayerCommon
+ * @extends {Layer}
  */
 class Layer extends LayerCommon {
   constructor(options) {
@@ -24,6 +24,11 @@ class Layer extends LayerCommon {
     }
   }
 
+  /**
+   * Define layer's properties.
+   *
+   * @ignore
+   */
   defineProperties(options) {
     super.defineProperties(options);
     Object.defineProperties(this, {
@@ -36,7 +41,7 @@ class Layer extends LayerCommon {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map
    */
   init(map) {
     super.init(map);

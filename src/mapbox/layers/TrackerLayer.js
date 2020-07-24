@@ -99,8 +99,8 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Returns an array of vehicles located at the given coordinate.
    *
-   * @param {number[2]} coordinate
-   * @returns {Object[]} Array of vehicle.
+   * @param {Array<number>} coordinate
+   * @returns {Array<ol/Feature~Feature>} Array of vehicle.
    * @override
    */
   getVehiclesAtCoordinate(coordinate) {
@@ -120,7 +120,7 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * On mousemove, we detect if a vehicle is heovered then updates the cursor's style.
    *
-   * @param {mapboxgl.mapmouseevent} evt Map's mousemove event.
+   * @param {mapboxgl.MapMouseEvent} evt Map's mousemove event.
    * @private
    */
   onMapMouseMove(evt) {

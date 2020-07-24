@@ -12,6 +12,9 @@ import Layer from './Layer';
  * @implements {TrackerLayerInterface}
  */
 class TrackerLayer extends mixin(Layer) {
+  /**
+   * @private
+   */
   constructor(options = {}) {
     const olLayer = new OLLayer({
       render: (frameState) => {
@@ -33,8 +36,11 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
-    // Array of ol events key. Be careful to not override this value in child classe.
-    this.olEventsKeys = [];
+    /**
+     * Array of ol events key, returned by on() or once().
+     * @type {Array<ol/events~EventsKey>}
+     */
+    this.olEventsKeys = []; // Be careful to not override this value in child classe.
   }
 
   /**
@@ -78,6 +84,10 @@ class TrackerLayer extends mixin(Layer) {
         const z = this.map.getView().getZoom();
 
         if (z !== this.currentZoom) {
+          /**
+           * Current value of the zoom.
+           * @type {number}
+           */
           this.currentZoom = z;
           this.startUpdateTime(z);
         }
@@ -94,7 +104,7 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Stop current layer,.
+   * Stop current layer.
    * @private
    */
   stop() {
@@ -106,8 +116,8 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
-   * @param {ol.coordinate} coordinate
-   * @returns {ol.feature | null} Vehicle feature
+   * @param {ol/coordinate~Coordinate} coordinate
+   * @returns {ol/Feature~Feature} Vehicle feature.
    * @private
    */
   getVehiclesAtCoordinate(coordinate) {

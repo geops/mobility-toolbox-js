@@ -4,8 +4,8 @@ import OLLayer from './Layer';
 
 /**
  * @class
- * @augments Layer
- * @extends baba
+ * @inheritDoc
+ * @implements {Layer}
  */
 class WMSLayer extends OLLayer {
   /**
@@ -14,14 +14,16 @@ class WMSLayer extends OLLayer {
   constructor(options = {}) {
     super(options);
 
+    /** @ignore */
     this.abortController = new AbortController();
+    /** @ignore */
     this.format = new GeoJSON();
   }
 
   /**
    * Get features infos' Url.
-   * @param {ol.Coordinate} coord  {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate}
-   * @returns {ol.Layer} {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer.html ol/Layer}
+   * @param {ol/coordinate~Coordinate} coord
+   * @returns {ol/layer/Layer~Layer}
    */
   getFeatureInfoUrl(coord) {
     const projection = this.map.getView().getProjection();
@@ -40,7 +42,7 @@ class WMSLayer extends OLLayer {
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate} to request the information at.
+   * @param {ol/coordinate~Coordinate} coordinate to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    * eslint-disable-next-line class-methods-use-this
@@ -78,7 +80,11 @@ class WMSLayer extends OLLayer {
       return;
     }
 
-    // Listen to click events
+    /**
+     * ol click events key, returned by map.on('singleclick')
+     * @private
+     * @type {ol/events~EventsKey}
+     */
     this.singleClickRef = this.map.on('singleclick', (e) => {
       if (!this.clickCallbacks.length) {
         return;
@@ -93,6 +99,9 @@ class WMSLayer extends OLLayer {
   /**
    * Call click callbacks with given parameters.
    * This is done in a separate function for being able to modify the response.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {ol/layer/Layer~Layer} layer
+   * @param {ol/coordinate~Coordinate} coordinate
    * @private
    */
   callClickCallbacks(features, layer, coordinate) {

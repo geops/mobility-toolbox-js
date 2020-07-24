@@ -8,18 +8,50 @@ import { POINT, LINE_STRING } from 'ol/geom/GeometryType';
  * @private
  */
 export default class Tracker {
+  /**
+   * @private
+   */
   constructor(options) {
     const opts = {
       interpolate: true,
       ...options,
     };
+
+    /**
+     * Array of trajectories.
+     * @type {Array<trajectory>}
+     */
     this.trajectories = [];
+
+    /**
+     * Array of trajectories that are currently drawn.
+     * @type {Array<key>}
+     */
     this.renderedTrajectories = [];
+
+    /**
+     * Array of ol events key, returned by on() or once().
+     * @type {Array<key>}
+     */
     this.interpolate = !!opts.interpolate;
+
+    /**
+     * Function to Convert coordinate to canvas pixel.
+     * @type {function}
+     */
     this.getPixelFromCoordinate = opts.getPixelFromCoordinate;
+
+    /**
+     * Id of the trajectory which is hovered.
+     * @type {string}
+     */
     this.hoverVehicleId = null;
 
     // we draw directly on the canvas since openlayers is too slow.
+    /**
+     * HTML <canvas> element.
+     * @type {Canvas}
+     */
     this.canvas = opts.canvas || document.createElement('canvas');
     this.canvas.width = opts.width;
     this.canvas.height = opts.height;
@@ -36,6 +68,10 @@ export default class Tracker {
         'margin-top: inherit', // for scrolling behavior.
       ].join(';'),
     );
+    /**
+     * 2d drawing context on the canvas.
+     * @type {CanvasRenderingContext2D}
+     */
     this.canvasContext = this.canvas.getContext('2d');
   }
 
@@ -51,7 +87,7 @@ export default class Tracker {
 
   /**
    * Define the trajectories.
-   * @param {array<ol.feature>} trajectories
+   * @param {array<ol/Feature~Feature>} trajectories
    */
   setTrajectories(trajectories = []) {
     if (this.sort) {
@@ -93,6 +129,10 @@ export default class Tracker {
    * @param {function} filter Filter function.
    */
   setFilter(filter) {
+    /**
+     * Current filter function.
+     * @type {function}
+     */
     this.filter = filter;
   }
 
@@ -101,6 +141,10 @@ export default class Tracker {
    * @param {function} sort Sort function.
    */
   setSort(sort) {
+    /**
+     * The sort function for tracker features.
+     * @type {function}
+     */
     this.sort = sort;
   }
 
@@ -121,6 +165,10 @@ export default class Tracker {
    * @param {function} s OpenLayers style function.
    */
   setStyle(s) {
+    /**
+     * Style function.
+     * @type {function}
+     */
     this.style = s;
   }
 
@@ -139,6 +187,10 @@ export default class Tracker {
     ) {
       [this.canvas.width, this.canvas.height] = [width, height];
     }
+    /**
+     * Current resolution.
+     * @type {number}
+     */
     this.currResolution = resolution || this.currResolution;
     let hoverVehicleImg;
     let hoverVehiclePx;
@@ -254,6 +306,7 @@ export default class Tracker {
         hoverVehiclePx[1] - hoverVehicleImg.height / 2,
       );
     }
+
     this.renderedTrajectories = this.trajectories.filter((t) => t.rendered);
   }
 

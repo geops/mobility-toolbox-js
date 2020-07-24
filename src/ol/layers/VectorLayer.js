@@ -8,17 +8,19 @@ import Layer from './Layer';
  * import { VectorLayer } from 'mobility-toolbox-js/ol';
  * @inheritDoc
  * @param {Object} [options]
+ * @param {number} [options.hitTolerance=5] Pixel value of the click hitTolerance of clicks.
  */
 class VectorLayer extends Layer {
   constructor(options = {}) {
     super(options);
 
+    /** @ignore */
     this.hitTolerance = options.hitTolerance || 5;
   }
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate} to request the information at.
+   * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    * eslint-disable-next-line class-methods-use-this
@@ -43,7 +45,7 @@ class VectorLayer extends Layer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map
    */
   init(map) {
     super.init(map);
@@ -52,7 +54,11 @@ class VectorLayer extends Layer {
       return;
     }
 
-    // Listen to click events
+    /**
+     * ol click events key, returned by map.on('singleclick')
+     * @type {ol/events~EventsKey}
+     * @private
+     */
     this.singleClickRef = this.map.on('singleclick', (e) => {
       if (!this.clickCallbacks.length) {
         return;
@@ -67,6 +73,9 @@ class VectorLayer extends Layer {
   /**
    * Call click callbacks with given parameters.
    * This is done in a separate function for being able to modify the response.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {ol/layer/Layer~Layer} layer
+   * @param {ol/coordinate~Coordinate} coordinate
    * @private
    */
   callClickCallbacks(features, layer, coordinate) {

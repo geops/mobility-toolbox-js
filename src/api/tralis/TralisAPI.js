@@ -106,6 +106,7 @@ class TralisAPI {
    *
    * @param {Object} depObject The object containing departures by id.
    * @param {boolean} [sortByMinArrivalTime=false] If true sort departures by arrival time.
+   * @returns {Array<departure>} Return departures array.
    * @private
    */
   filterDepartures(depObject, sortByMinArrivalTime = false) {
@@ -533,6 +534,7 @@ class TralisAPI {
 
   /**
    * Subscribe to healthcheck channel.
+   * @param {function} onMessage Callback when the subscribe to healthcheck channel succeeds.
    */
   subscribeHealthCheck(onMessage) {
     this.unsubscribeHealthCheck();

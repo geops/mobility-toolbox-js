@@ -37,7 +37,7 @@ export class TralisLayerInterface {
   /**
    * Subscribe to the Tralis service.
    *
-   * @param {ol/Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html Map}   *
+   * @param {ol/Map~Map} map
    */
   init(map) {}
 

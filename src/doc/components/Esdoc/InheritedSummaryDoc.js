@@ -11,7 +11,7 @@ import DocLinkHTML from './DocLinkHTML';
 /**
  * See InhertiedSummaryHTML component.
  */
-const InheritedSummaryDoc = ({ longname }) => {
+const InheritedSummaryDoc = ({ longname, kind }) => {
   const [open, setOpen] = useState('closed');
   const superDoc = _find({ longname })[0];
 
@@ -24,7 +24,7 @@ const InheritedSummaryDoc = ({ longname }) => {
 
   const targetDocs = _find({
     memberof: longname,
-    kind: ['member', 'method', 'get', 'set'],
+    kind: kind ? [kind] : ['member', 'method', 'get', 'set'],
   });
 
   targetDocs.sort((a, b) => {

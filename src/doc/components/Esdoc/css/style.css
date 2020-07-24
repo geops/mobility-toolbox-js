@@ -57,7 +57,7 @@
 .esdoc h2 {
   margin-top: 24px;
   margin-bottom: 10px;
-  font-size: 20px;
+  font-size: 24px;
   border-bottom: solid 1px #ddd;
   font-weight: 300;
 }
@@ -331,27 +331,15 @@
   padding: 4px 10px;
 }
 
-.esdoc table.summary tbody td:nth-child(1) {
-  text-align: right;
-  white-space: nowrap;
-  min-width: 64px;
-  vertical-align: top;
-}
-
 .esdoc table.summary tbody td:nth-child(2) {
-  width: 100%;
-  border-right: none;
-}
-
-.esdoc table.summary tbody td:nth-child(3) {
-  white-space: nowrap;
   border-left: none;
   vertical-align: top;
+  max-width: 450px;
 }
 
-.esdoc table.summary td > div:nth-of-type(2) {
+.esdoc table.summary td > div:nth-of-type(1) {
   padding-top: 4px;
-  padding-left: 15px;
+  /* padding-left: 15px; */
 }
 
 .esdoc table.summary td p {
@@ -393,6 +381,7 @@
 .esdoc table.params thead {
   background: #eee;
   color: #aaa;
+  font-size: 18px;
 }
 
 .esdoc table.params td {
@@ -406,6 +395,14 @@
 
 .esdoc .content .detail > * {
   margin: 15px 0;
+}
+
+.esdoc .content .detail > .anchor-offset {
+  /* offset anchor to add offset on href click (due to the header height) */
+  display: block;
+  position: relative;
+  top: -100px;
+  visibility: hidden;
 }
 
 .esdoc .content .detail > h3 {

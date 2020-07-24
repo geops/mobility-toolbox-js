@@ -23,12 +23,17 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *
  *
  * @see <a href="/api/class/src/api/trajserv/TrajservAPI%20js~TrajservAPI%20html">TrajservAPI</a>
- * @see <a href="/examples/ol-tracker">OL tracker example</a>
+ * @see <a href="/example/ol-tracker">OL tracker example</a>
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
  */
 class TrajservLayer extends mixin(TrackerLayer) {
+  /**
+   * Define layer's properties.
+   *
+   * @ignore
+   */
   defineProperties(options) {
     super.defineProperties(options);
     const vectorLayer = new VectorLayer({
@@ -43,6 +48,11 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
+  /**
+   * Initialize the layer.
+   * @param {mapboxgl.Map} map the mapbox map.
+   * @override
+   */
   init(map) {
     if (!map) {
       return;
@@ -52,6 +62,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
     super.init(map);
   }
 
+  /**
+   * Terminate the layer.
+   * @override
+   */
   terminate() {
     if (this.map) {
       this.map.removeLayer(this.vectorLayer);
@@ -59,11 +73,19 @@ class TrajservLayer extends mixin(TrackerLayer) {
     super.terminate();
   }
 
+  /**
+   * Start the layer.
+   * @override
+   */
   start() {
     if (!this.map) {
       return;
     }
     super.start();
+    /**
+     * Array of ol events key, returned by on() or once().
+     * @type {Array<ol/events~EventsKey>}
+     */
     this.olEventsKeys = [
       ...this.olEventsKeys,
       this.map.on('singleclick', this.onMapClick.bind(this)),
@@ -84,6 +106,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   /**
    * Callback on 'singleclick' event.
+   * @param {ol/MapEvent~MapEvent} evt
    * @private
    */
   onMapClick(evt) {
@@ -99,7 +122,12 @@ class TrajservLayer extends mixin(TrackerLayer) {
       features.push(new Feature({ geometry: geom, ...vehicle }));
 
       if (features.length) {
+        /**
+         * Id of the selected vehicle
+         * @type {string}
+         */
         this.selectedVehicleId = features[0].get('id');
+        /** @ignore */
         this.journeyId = features[0].get('journeyIdentifier');
         this.updateTrajectoryStations(this.selectedVehicleId).then(
           (trajStations) => {
@@ -119,7 +147,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Draw the trajectory as a line with points for each stop.
    * @param {Array} stationsCoords Array of station coordinates.
-   * @param {<LineString|MultiLineString} lineGeometry A LineString or a MultiLineString.
+   * @param {LineString|MultiLineString} lineGeometry A LineString or a MultiLineString.
    * @param {string} color The color of the line.
    * @private
    */
@@ -183,10 +211,15 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Fetch stations information with a trajectory ID
    * @param {number} trajId The ID of the trajectory
+   * @returns {Promise<TrajStation[]>} A list of stations.
    * @private
    */
   updateTrajectoryStations(trajId) {
     return super.updateTrajectoryStations(trajId).then((trajStations) => {
+      /**
+       * Array of station coordinates.
+       * @type {Array<ol/coordinate~Coordinate>}
+       */
       this.stationsCoords = [];
       trajStations.stations.forEach((station) => {
         this.stationsCoords.push(
@@ -199,6 +232,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
+  /**
+   * Highlight the trajectory of journey.
+   * @private
+   */
   highlightTrajectory() {
     this.api
       .fetchTrajectoryById(
@@ -229,6 +266,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   /**
    * @override
+   * * Returns the URL parameters.
+   * @param {Object} extraParams Extra parameters
+   * @returns {Object}
+   * @private
    */
   getParams(extraParams = {}) {
     const ext = this.map.getView().calculateExtent();
@@ -243,6 +284,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
+  /** @ignore */
   defaultStyle(props) {
     const zoom = this.map.getView().getZoom();
     return super.defaultStyle(props, zoom);

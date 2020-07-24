@@ -24,14 +24,15 @@ class Map extends OLMap {
       ),
     });
 
+    /** @ignore */
     this.mobilityLayers =
       (options.layers || []).filter((l) => l instanceof Layer) || [];
     this.mobilityLayers.forEach((l) => l.init(this));
   }
 
   /**
-   * Adds a {@link Layer} to the map.
-   * @param {Layer} The {@link Layer} to add.
+   * Adds a layer to the map.
+   * @param {Layer} layer the layer to add.
    */
   addLayer(layer) {
     if (!layer.init) {
@@ -51,7 +52,8 @@ class Map extends OLMap {
 
   /**
    * Returns a list of mobility layers.
-   * @returns {Layer} {@link Layer}.
+   * @returns {ol/layer/Layer~Layer}
+   * @ignores
    */
   getMobilityLayers() {
     return this.mobilityLayers;
@@ -59,8 +61,8 @@ class Map extends OLMap {
 
   /**
    * Removes a given layer from the map.
-   * @param {Layer} The {@link Layer} to remove.
-   * @returns The removed layer (or undefined if the layer was not found).
+   * @param {ol/layer/Layer~Layer} layer the layer to remove.
+   * @returns {ol/layer/Layer~Layer}
    */
   removeLayer(layer) {
     if (layer instanceof Layer) {
