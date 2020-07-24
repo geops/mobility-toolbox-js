@@ -1,4 +1,5 @@
 import { unByKey } from 'ol/Observable';
+import { POINT, LINE_STRING } from 'ol/geom/GeometryType';
 
 /**
  * Tracker. This class draw trajectories on a canvas.
@@ -229,32 +230,42 @@ export default class Tracker {
             end = null;
           }
         }
+        // The geometry can also be a Point
+        if (geometry.getType() === POINT) {
+          coord = geometry.getCoordinate();
+        } else if (geometry.getType() === LINE_STRING) {
+          if (start && end) {
+            // interpolate position inside the time interval.
+            timeFrac = this.interpolate
+              ? Math.min((now - start) / (end - start), 1)
+              : 0;
 
-        if (start && end) {
-          // interpolate position inside the time interval.
-          timeFrac = this.interpolate
-            ? Math.min((now - start) / (end - start), 1)
-            : 0;
+            const geomFrac = this.interpolate
+              ? timeFrac * (endFrac - startFrac) + startFrac
+              : 0;
 
-          const geomFrac = this.interpolate
-            ? timeFrac * (endFrac - startFrac) + startFrac
-            : 0;
+            coord = geometry.getCoordinateAt(geomFrac);
 
-          coord = geometry.getCoordinateAt(geomFrac);
+            // We set the rotation and the timeFraction of the trajectory (used by tralis).
+            this.trajectories[i].rotation = rotation;
+            this.trajectories[i].endFraction = timeFrac;
 
-          // We set the rotation and the timeFraction of the trajectory (used by tralis).
-          this.trajectories[i].rotation = rotation;
-          this.trajectories[i].endFraction = timeFrac;
-
-          // It happens that the now date was some ms before the first timeIntervals we have.
-        } else if (now < timeIntervals[0][0]) {
-          [[, , rotation]] = timeIntervals;
-          timeFrac = 0;
-          coord = geometry.getFirstCoordinate();
-        } else if (now > timeIntervals[timeIntervals.length - 1][0]) {
-          [, , rotation] = timeIntervals[timeIntervals.length - 1];
-          timeFrac = 1;
-          coord = geometry.getLastCoordinate();
+            // It happens that the now date was some ms before the first timeIntervals we have.
+          } else if (now < timeIntervals[0][0]) {
+            [[, , rotation]] = timeIntervals;
+            timeFrac = 0;
+            coord = geometry.getFirstCoordinate();
+          } else if (now > timeIntervals[timeIntervals.length - 1][0]) {
+            [, , rotation] = timeIntervals[timeIntervals.length - 1];
+            timeFrac = 1;
+            coord = geometry.getLastCoordinate();
+          }
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(
+            'This geometry type is not supported. Only Point or LineString are. Current geometry: ',
+            geometry,
+          );
         }
 
         // We set the rotation and the timeFraction of the trajectory (used by tralis).
