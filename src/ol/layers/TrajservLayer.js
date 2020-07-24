@@ -147,7 +147,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Draw the trajectory as a line with points for each stop.
    * @param {Array} stationsCoords Array of station coordinates.
-   * @param {<LineString|MultiLineString} lineGeometry A LineString or a MultiLineString.
+   * @param {LineString|MultiLineString} lineGeometry A LineString or a MultiLineString.
    * @param {string} color The color of the line.
    * @private
    */
