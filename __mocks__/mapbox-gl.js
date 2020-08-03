@@ -6,6 +6,8 @@ class Map {
 
   isStyleLoaded() {}
 
+  getLayer() {}
+
   getBounds() {
     return {
       toArray: () => [

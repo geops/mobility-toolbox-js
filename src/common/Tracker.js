@@ -1,5 +1,5 @@
 import { unByKey } from 'ol/Observable';
-import { POINT, LINE_STRING } from 'ol/geom/GeometryType';
+import GeomType from 'ol/geom/GeometryType';
 
 /**
  * Tracker. This class draw trajectories on a canvas.
@@ -231,9 +231,9 @@ export default class Tracker {
           }
         }
         // The geometry can also be a Point
-        if (geometry.getType() === POINT) {
+        if (geometry.getType() === GeomType.POINT) {
           coord = geometry.getCoordinate();
-        } else if (geometry.getType() === LINE_STRING) {
+        } else if (geometry.getType() === GeomType.LINE_STRING) {
           if (start && end) {
             // interpolate position inside the time interval.
             timeFrac = this.interpolate

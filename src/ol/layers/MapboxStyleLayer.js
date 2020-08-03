@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { unByKey } from 'ol/Observable';
 import Layer from './Layer';
 
 /**
@@ -7,9 +6,13 @@ import Layer from './Layer';
  * @private
  */
 const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
+  if (!mbMap) {
+    return;
+  }
+
   const style = mbMap.getStyle();
 
-  if (!mbMap || !style) {
+  if (!style) {
     return;
   }
 
@@ -162,41 +165,32 @@ class MapboxStyleLayer extends Layer {
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
       this.on('change:visible', ({ target: layer }) => {
-        if (this.isMbMapLoaded) {
-          // Once the map is loaded we can apply vsiiblity without waiting
-          // the style. Mapbox take care of the application of style changes.
-          applyLayoutVisibility(mbMap, layer.visible, this.styleLayersFilter);
-        }
+        // Once the map is loaded we can apply vsiiblity without waiting
+        // the style. Mapbox take care of the application of style changes.
+        applyLayoutVisibility(mbMap, layer.visible, this.styleLayersFilter);
       }),
     );
 
     this.olListenersKeys.push(
-      this.mapboxLayer.on('change:styleurl', () => {
-        this.addStyleLayers();
-        if (this.addDynamicFilters) {
-          this.addDynamicFilters();
-        }
+      this.mapboxLayer.on('load', () => {
+        this.onLoad();
       }),
-      // this.addDynamicFilters &&
-      //   this.map.on('moveend', () => {
-      //     this.addDynamicFilters();
-      //   }),
     );
 
     // Listen to click events
-    /** ol click events key, returned by map.on('singleclick')
-     * @type {ol/events~EventsKey}
-     * @private
-     */
-    this.singleClickRef = this.map.on('singleclick', (e) => {
-      if (!this.clickCallbacks.length) {
-        return;
-      }
+    this.olListenersKeys.push(
+      this.map.on('singleclick', (e) => {
+        if (!this.clickCallbacks.length) {
+          return;
+        }
 
-      this.getFeatureInfoAtCoordinate(e.coordinate)
-        .then((d) => this.callClickCallbacks(d.features, d.layer, d.coordinate))
-        .catch(() => this.callClickCallbacks([], this, e.coordinate));
-    });
+        this.getFeatureInfoAtCoordinate(e.coordinate)
+          .then((d) =>
+            this.callClickCallbacks(d.features, d.layer, d.coordinate),
+          )
+          .catch(() => this.callClickCallbacks([], this, e.coordinate));
+      }),
+    );
   }
 
   /**
@@ -223,18 +217,18 @@ class MapboxStyleLayer extends Layer {
     }
 
     mbMap.off('load', this.onLoad);
-    if (this.isMbMapLoaded) {
-      this.removeStyleLayers();
-    }
+    this.removeStyleLayers();
     super.terminate(map);
-    if (this.singleClickRef) {
-      unByKey(this.singleClickRef);
-    }
   }
 
   /** @ignore */
   addStyleLayers() {
     const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     this.styleLayers.forEach((styleLayer) => {
       const { id, source } = styleLayer;
       if (mbMap.getSource(source) && !mbMap.getLayer(id)) {
@@ -247,6 +241,11 @@ class MapboxStyleLayer extends Layer {
   /** @ignore */
   removeStyleLayers() {
     const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     this.styleLayers.forEach((styleLayer) => {
       if (mbMap.getLayer(styleLayer.id)) {
         mbMap.removeLayer(styleLayer.id);
@@ -254,13 +253,11 @@ class MapboxStyleLayer extends Layer {
     });
   }
 
-  /** @ignore */
+  /**
+   * On Mapbox map load callback function. Add style layers and dynaimc filters.
+   * @ignore
+   */
   onLoad() {
-    /**
-     * Define is the mapbox map is already loaded.
-     * @type {boolean}
-     */
-    this.isMbMapLoaded = true;
     this.addStyleLayers();
 
     if (this.addDynamicFilters) {
@@ -306,6 +303,11 @@ class MapboxStyleLayer extends Layer {
    */
   setFilter(filter) {
     const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     this.styleLayers.forEach(({ id }) => {
       if (mbMap.getLayer(id)) {
         mbMap.setFilter(id, filter);
@@ -319,6 +321,12 @@ class MapboxStyleLayer extends Layer {
    * @param {boolean} state Is the feature hovered
    */
   setHoverState(features = [], state) {
+    const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     const options = this.styleLayers[0];
     features.forEach((feature) => {
       if ((!options.source && !options['source-layer']) || !feature.getId()) {
@@ -333,7 +341,7 @@ class MapboxStyleLayer extends Layer {
         return;
       }
 
-      this.mapboxLayer.mbMap.setFeatureState(
+      mbMap.setFeatureState(
         {
           id: feature.getId(),
           source: options.source,
