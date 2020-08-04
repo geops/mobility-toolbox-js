@@ -269,7 +269,8 @@ export default class Tracker {
         }
 
         // We set the rotation and the timeFraction of the trajectory (used by tralis).
-        this.trajectories[i].rotation = rotation || 0;
+        // if rotation === null that seems there is no rotation available.
+        this.trajectories[i].rotation = rotation;
         this.trajectories[i].endFraction = timeFrac || 0;
       }
 
