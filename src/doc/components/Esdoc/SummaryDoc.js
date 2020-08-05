@@ -34,6 +34,7 @@ const showInheritedHref = (memberof, parentMemberOf) => {
  */
 const SummaryDoc = ({
   docs,
+  // eslint-disable-next-line no-unused-vars
   title,
   innerLink = false,
   kindIcon = false,
@@ -49,13 +50,13 @@ const SummaryDoc = ({
 
   return (
     <table className="summary" data-ice="summary">
-      <thead>
+      {/* <thead>
         <tr>
           <td data-ice="title" colSpan="2">
             {title}
           </td>
         </tr>
-      </thead>
+      </thead> */}
       <tbody style={style}>
         {docs.map((doc, idx) => {
           const kindKindIcon = doc.interface ? 'interface' : doc.kind;

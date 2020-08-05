@@ -1,3 +1,7 @@
+/**
+ * Class use to facilitate connection to a WebSocket
+ * @private
+ */
 class WebSocketConnector {
   constructor(url) {
     /**

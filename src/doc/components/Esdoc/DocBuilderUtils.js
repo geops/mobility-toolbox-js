@@ -511,8 +511,11 @@ export const _findAccessDocs = (doc, kind, isStatic = true) => {
   );
   const accessDocs = [
     ['Public', publicDocs],
-    ['Protected', protectedDocs],
-    ['Private', privateDocs],
+    // We don't want to display private and protected functions
+    // to keep the doc simple as possible. Feel free to uncomment
+    // the following line if you want them.
+    // ['Protected', protectedDocs],
+    // ['Private', privateDocs],
   ];
 
   return accessDocs;
