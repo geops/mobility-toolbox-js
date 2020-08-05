@@ -15,7 +15,12 @@ import DocLinkHTML from './DocLinkHTML';
  */
 const NavDoc = () => {
   const kinds = ['class', 'function', 'variable', 'typedef', 'external'];
-  const allDocs = _find({ kind: kinds }).filter((v) => !v.builtinExternal);
+
+  // we display only public doc and not externals, feel free to reactivate them if you want.
+  const allDocs = _find({ kind: kinds }).filter(
+    (v) => v.access === 'public' && !v.builtinExternal,
+  );
+
   const kindOrder = {
     class: 0,
     interface: 1,
@@ -42,6 +47,7 @@ const NavDoc = () => {
     return dirPathA > dirPathB ? 1 : -1;
   });
   let lastDirPath = '.';
+
   return (
     <div>
       <ul>

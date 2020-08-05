@@ -40,7 +40,11 @@ const SummaryHTML = ({
               memberof: classDoc.longname,
               kind: [kind],
               static: isStatic,
-            });
+            }).filter(
+              // We display only public classes
+              (v) => v.access === 'public' && !v.builtinExternal,
+            );
+
             if (docVals.length) {
               docVals.forEach((docV) => {
                 const idx = accessValues.indexOf(docV.access);
@@ -80,7 +84,9 @@ const SummaryHTML = ({
 
         let prefix = '';
         if (docs[0].static) prefix = 'Static ';
-        const _title = `${prefix}${accessDoc[0]} ${title}`;
+        const _title = `${prefix}${
+          accessDoc[0] === 'Public' ? '' : `${accessDoc[0]} `
+        }${title}`;
         return (
           <SummaryDoc
             key={idx}

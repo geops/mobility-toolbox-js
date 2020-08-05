@@ -27,14 +27,14 @@ export const TralisModes = {
  * import { TralisAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new TralisAPI({
- *   url: [yourUrl],
- *   apiKey: [yourApiKey]
+ *   url: "yourUrl",
+ *   apiKey: "yourApiKey"
  * });
  *
  * @example
  * import { TralisAPI } from 'mobility-toolbox-js/api';
  *
- * const api = new TralisAPI([yourUrl]);
+ * const api = new TralisAPI("yourUrl");
  */
 class TralisAPI {
   /**
