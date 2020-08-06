@@ -63,19 +63,24 @@ const SignatureHTML = ({ doc }) => {
   }
 
   let html = '';
+  const hasMoreThan1Param = callSignatures.length > 1;
   if (callSignatures.length) {
     html = (
       <>
-        {`(`}
+        (
         {callSignatures.map((comp, idx) => {
           return (
             <React.Fragment key={idx}>
-              {comp}
-              {idx !== callSignatures.length - 1 ? ', ' : ''}
+              {hasMoreThan1Param && <br />}
+              <span style={{ paddingLeft: hasMoreThan1Param ? 20 : 0 }}>
+                {comp}
+                {idx !== callSignatures.length - 1 ? ', ' : ''}
+              </span>
+              {hasMoreThan1Param && idx === callSignatures.length - 1 && <br />}
             </React.Fragment>
           );
         })}
-        {`)`}
+        )
       </>
     );
   } else if (['function', 'method', 'constructor'].includes(doc.kind)) {
