@@ -86,9 +86,11 @@ const IdentifiersDoc = ({ docs }) => {
           const dirPathLabel = dirPath === '.' ? '' : dirPath;
           return (
             <div key={dirPathLabel} data-ice="dirSummaryWrap">
-              <h2 data-ice="dirPath" id={escapeURLHash(dirPath)}>
-                {dirPathLabel}
-              </h2>
+              {dirPathLabel && (
+                <h2 data-ice="dirPath" id={escapeURLHash(dirPath)}>
+                  {dirPathLabel}
+                </h2>
+              )}
               <div data-ice="dirSummary">
                 <SummaryDoc
                   docs={newDirDocs}
