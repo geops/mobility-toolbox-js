@@ -36,7 +36,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * @param {mapboxgl.Map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
    * @param {String} beforeLayerId
    */
-
   init(map, beforeLayerId) {
     if (!map) {
       return;
@@ -74,7 +73,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Remove the mapbox layer and the mapbox source.
    *
-   * @overide
+   * @override
    */
   terminate() {
     if (this.map) {

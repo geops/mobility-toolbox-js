@@ -32,13 +32,12 @@ const getCopyrightFromSources = (mbMap) => {
  *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
  * });
  *
- * @class
- * @inheritDoc
- * @param {Object} [options]
- * @implements {Layer}
+ * @extends {Layer}
  */
 export default class MapboxLayer extends Layer {
   /**
+   * Constructor.
+   *
    * @param {Object} options
    * @param {boolean} [options.preserveDrawingBuffer=false] If true able to export the canvas.
    * @param {number} [options.fadeDuration=300] Duration of the fade effect in ms.
@@ -142,6 +141,7 @@ export default class MapboxLayer extends Layer {
     /**
      * Url of the mapbox style.
      * @type {string}
+     * @private
      */
     this.styleUrl = options.url;
   }
@@ -192,6 +192,7 @@ export default class MapboxLayer extends Layer {
 
   /**
    * Create the mapbox map.
+   * @private
    */
   loadMbMap() {
     // If the map hasn't been resized, the center could be [NaN,NaN].

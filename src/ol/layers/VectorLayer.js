@@ -2,15 +2,17 @@ import { unByKey } from 'ol/Observable';
 import Layer from './Layer';
 
 /**
- * A class representing vector layer to display on BasicMap
- * @class
- * @example
- * import { VectorLayer } from 'mobility-toolbox-js/ol';
- * @inheritDoc
- * @param {Object} [options]
- * @param {number} [options.hitTolerance=5] Pixel value of the click hitTolerance of clicks.
+ * A class use to display vector data.
+ *
+ * @extends {Layer}
  */
 class VectorLayer extends Layer {
+  /**
+   * Constructor.
+   *
+   * @param {Object} [options]
+   * @param {number} [options.hitTolerance=5] Pixel value of the click hitTolerance of clicks.
+   */
   constructor(options = {}) {
     super(options);
 

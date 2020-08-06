@@ -19,8 +19,6 @@ import { TralisAPI, TralisModes } from '../../api';
 
 /**
  * TralisLayerInterface.
- *
- * @extends {TrackerLayerInterface}
  */
 export class TralisLayerInterface {
   /*
