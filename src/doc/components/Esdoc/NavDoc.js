@@ -14,12 +14,10 @@ import DocLinkHTML from './DocLinkHTML';
  * @private
  */
 const NavDoc = () => {
-  const kinds = ['class', 'function', 'variable', 'typedef', 'external'];
+  const kinds = ['class', 'function', 'variable']; // , 'typedef', 'external'];
 
   // we display only public doc and not externals, feel free to reactivate them if you want.
-  const allDocs = _find({ kind: kinds }).filter(
-    (v) => v.access === 'public' && !v.builtinExternal,
-  );
+  const allDocs = _find({ kind: kinds }).filter((v) => v.access === 'public');
 
   const kindOrder = {
     class: 0,
@@ -29,6 +27,22 @@ const NavDoc = () => {
     typedef: 4,
     external: 5,
   };
+
+  // Add a typedef doc to have a link to main type def page
+  allDocs.push({
+    access: 'public',
+    description: null,
+    export: false,
+    importPath: 'mobility-toolbox-js/src/index.js',
+    importStyle: 'typedef',
+    kind: 'typedef',
+    lineNumber: 1,
+    longname: 'typedefs',
+    memberof: 'src/index.js',
+    name: 'typedefs',
+    static: true,
+    undocument: true,
+  });
 
   // see: IdentifiersDocBuilder#_buildIdentifierDoc
   allDocs.sort((a, b) => {

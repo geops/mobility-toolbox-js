@@ -21,6 +21,14 @@ const DocLinkHTML = ({ longname, text = null, inner = false, kind = null }) => {
   const doc = _findByName(longname, kind)[0];
 
   if (!doc) {
+    // Special links to typedefs main page
+    if (longname === 'typedefs') {
+      return (
+        <span>
+          <a href="/api/typedef/index%20html">{text || longname}</a>
+        </span>
+      );
+    }
     // if longname is HTML tag, not escape.
     if (longname.indexOf('<') === 0) {
       return <span dangerouslySetInnerHTML={{ __html: longname }} />;
