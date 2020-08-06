@@ -74,7 +74,9 @@ const DetailDocs = ({ docs, title }) => {
               <span data-ice="async">{doc.async ? 'async ' : ''}</span>
               <span data-ice="generator">{doc.generator ? '* ' : ''}</span>
               <span className="code" data-ice="name">
-                {doc.name}
+                {doc.kind === 'constructor'
+                  ? `new ${doc.longname.match(/~([^)]+)#constructor/)[1]}`
+                  : doc.name}
               </span>
               <span className="code" data-ice="signature">
                 <SignatureHTML doc={doc} />
