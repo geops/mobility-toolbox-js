@@ -91,7 +91,7 @@ const NavDoc = () => {
                   className="nav-dir-path"
                   href={`/api/identifiers%20html#${escapeURLHash(dirPath)}`}
                 >
-                  {dirPath}
+                  {dirPath || 'api'}
                 </a>
               )}
               <span data-ice="kind" className={kindClass}>

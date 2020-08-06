@@ -87,7 +87,7 @@ const IdentifiersDoc = ({ docs }) => {
           return (
             <div key={dirPathLabel} data-ice="dirSummaryWrap">
               <h2 data-ice="dirPath" id={escapeURLHash(dirPath)}>
-                {dirPathLabel || 'api/'}
+                {dirPathLabel || '/'}
               </h2>
               <div data-ice="dirSummary">
                 <SummaryDoc
