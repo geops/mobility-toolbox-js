@@ -50,6 +50,7 @@
     "eslint": "7.6.0",
     "eslint-config-airbnb": "18.1.0",
     "eslint-config-prettier": "6.11.0",
+    "eslint-import-resolver-webpack": "^0.12.2",
     "eslint-plugin-cypress": "2.11.1",
     "eslint-plugin-import": "2.20.2",
     "eslint-plugin-jsx-a11y": "6.2.3",
@@ -147,6 +148,7 @@
       "prettier/prettier": "error"
     },
     "settings": {
+      "import/resolver": "webpack",
       "react": {
         "version": "detect"
       }

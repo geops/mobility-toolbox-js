@@ -2,7 +2,7 @@ import React from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
-import { geopsTheme, Header, Footer } from '@geops/geops-ui/lib';
+import { geopsTheme, Header, Footer } from '@geops/geops-ui';
 import Examples from './components/Examples';
 import Example from './components/Example';
 import Documentation from './components/Documentation';
