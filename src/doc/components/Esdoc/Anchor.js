@@ -36,7 +36,7 @@ const Anchor = ({ path, children, ...other }) => {
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...other}
       >
-        {children}Internal
+        {children}
       </Scrollchor>
     );
   }
