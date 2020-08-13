@@ -2,8 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getParameters } from 'codesandbox/lib/api/define';
 import { Button, SvgIcon } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles({
+  button: {
+    padding: '5px 15px',
+  },
+});
 
 const CodeSandboxButton = ({ html, js, ...props }) => {
+  const classes = useStyles();
+
   if (!html || !js) {
     return null;
   }
@@ -61,7 +70,7 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
       <input type="hidden" name="parameters" value={dataSBStr} />
       <Button
         type="submit"
-        variant="outlined"
+        className={classes.button}
         startIcon={
           <SvgIcon fontSize="large">
             <path
