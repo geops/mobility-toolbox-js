@@ -24,8 +24,8 @@ class Map extends OLMap {
   /**
    * Constructor.
    *
-   * @param {Object} options Map options.
-   * @param {Array<Layer|ol/layer/Layer~Layer>} [options.layers] Array of mobility layers.
+   * @param {Object} options See [ol/Map~Map](https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html) options documentation.
+   * @param {Array<Layer|ol/layer/Layer~Layer>} [options.layers] Array of layers.
    */
   constructor(options = {}) {
     super({
