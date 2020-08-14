@@ -146,7 +146,7 @@ class MapboxStyleLayer extends Layer {
     if (!this.mapboxLayer.map) {
       this.mapboxLayer.init(map);
       /**
-       * openlayers Layer.
+       * An OpenLayers Layer.
        * @type {ol/layer/Layer~Layer}
        * @private
        */

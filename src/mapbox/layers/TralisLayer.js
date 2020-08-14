@@ -35,7 +35,7 @@ class TralisLayer extends mixin(TrackerLayer) {
    * Add listeners from the Mapbox Map.
    *
    * @param {mapboxgl.Map} map
-   * @param {string} beforeId See {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html addLayer}  documentation,
+   * @param {string} beforeId See [mapboxgl.Map#addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) beforeId documentation.
    */
   init(map, beforeId) {
     super.init(map);

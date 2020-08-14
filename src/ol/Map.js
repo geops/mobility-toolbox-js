@@ -3,19 +3,20 @@ import OLLayer from 'ol/layer/Layer';
 import Layer from './layers/Layer';
 
 /**
- * An OpenLayers for handling {@link Layer|Layers}.
- * This class extends the OpenLayers class
- * {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html|ol/Map}.
+ * An OpenLayers map for handling mobility layer.
  *
  * @example
  * import { Map } from 'mobility-toolbox-js/ol';
  *
- * @class
- * @namespace
- * @param {Object} options Map options.
- * @param {Array.Layer} [options.layers] List of {@link Layer|Layers}.
+ * @extends {ol/Map~Map}
  */
 class Map extends OLMap {
+  /**
+   * Constructor.
+   *
+   * @param {Object} options Map options.
+   * @param {Array<Layer|ol/layer/Layer~Layer>} [options.layers] Array of mobility layers.
+   */
   constructor(options = {}) {
     super({
       ...options,
@@ -27,50 +28,52 @@ class Map extends OLMap {
     /** @ignore */
     this.mobilityLayers =
       (options.layers || []).filter((l) => l instanceof Layer) || [];
-    this.mobilityLayers.forEach((l) => l.init(this));
   }
 
   /**
    * Adds a layer to the map.
-   * @param {Layer} layer the layer to add.
+   * @param {Layer|ol/layer/Layer~Layer} layer The layer to add.
    */
   addLayer(layer) {
     if (!layer.init) {
+      // layer is an OpenLayer layer
       super.addLayer(layer);
     } else {
+      // layer is an mobility layer
       layer.init(this);
-    }
 
-    if (layer.olLayer) {
-      super.addLayer(layer.olLayer);
-    }
+      if (layer.olLayer) {
+        super.addLayer(layer.olLayer);
+      }
 
-    if (layer instanceof Layer) {
-      this.mobilityLayers.push(layer);
+      if (layer instanceof Layer) {
+        this.mobilityLayers.push(layer);
+      }
     }
   }
 
   /**
    * Returns a list of mobility layers.
-   * @returns {ol/layer/Layer~Layer}
-   * @ignores
+   *
+   * @returns {Layer[]}
    */
   getMobilityLayers() {
     return this.mobilityLayers;
   }
 
   /**
-   * Removes a given layer from the map.
-   * @param {ol/layer/Layer~Layer} layer the layer to remove.
-   * @returns {ol/layer/Layer~Layer}
+   * Removes a given mobility layer from the map.
+   * @param {Layer|ol/layer/Layer~Layer} layer The layer to remove.
    */
   removeLayer(layer) {
-    if (layer instanceof Layer) {
+    if (!layer.terminate) {
+      super.removeLayer(layer);
+    } else {
       layer.terminate();
       this.mobilityLayers = this.mobilityLayers.filter((l) => l !== layer);
-    }
-    if (layer.olLayer) {
-      super.removeLayer(layer);
+      if (layer.olLayer) {
+        super.removeLayer(layer);
+      }
     }
   }
 }

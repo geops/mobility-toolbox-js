@@ -82,7 +82,7 @@ class WebSocketConnector {
 
   /**
    * Sends a message to the websocket.
-   * @param {message} message send to the websocket via @link https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/send
+   * @param {message} message Message to send.
    * @private
    */
   send(message) {

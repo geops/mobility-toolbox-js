@@ -33,10 +33,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Add the mapbox layer and source to the map.
    *
-   * @param {mapboxgl.Map} map A Mapbox [Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
-   * @param {String} beforeLayerId
+   * @param {mapboxgl.Map} map A Mapbox map.
+   * @param {String} beforeId See [mapboxgl.Map#addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.
    */
-  init(map, beforeLayerId) {
+  init(map, beforeId) {
     if (!map) {
       return;
     }
@@ -67,7 +67,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     };
 
     map.addSource(this.key, source);
-    map.addLayer(layer, beforeLayerId);
+    map.addLayer(layer, beforeId);
   }
 
   /**
