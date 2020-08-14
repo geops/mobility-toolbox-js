@@ -1650,10 +1650,10 @@
   resolved "https://registry.yarnpkg.com/@emotion/hash/-/hash-0.8.0.tgz#bbbff68978fefdbe68ccb533bc8cbe1d1afb5413"
   integrity sha512-kBJtf7PH6aWwZ6fka3zQ0p6SBYzx4fl1LoZXE2RrnYST9Xljm7WfKJrU4g/Xr3Beg72MLrp1AWNUmuYJTL7Cow==
 
-"@geops/geops-ui@^0.1.2-beta.2":
-  version "0.1.2-beta.2"
-  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.1.2-beta.2.tgz#fede9618b5bff6003ccc0095c36f71829328fbd2"
-  integrity sha512-0khNHamgPowrXWwhECDYkB9KmICACqpPRs79ttO1KTwykdCNDVk+icKvZV4DNsUn/1OIS1jR9+7Ybu1qy8dD3g==
+"@geops/geops-ui@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.1.2.tgz#2eb8a828a270c790d0a666f1710dfc8c1736b0f4"
+  integrity sha512-mDJTfbekv4Q0RZsCd943VEyLfBlj6NiMSYpU53ZE4P1uaYH9E5WIkeBpXPA1p5jsm3bQsLzi6VJFeJD2UOH2LA==
   dependencies:
     "@material-ui/core" "^4.11.0"
     "@material-ui/icons" "^4.9.1"
