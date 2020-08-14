@@ -2,7 +2,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/no-danger */
 import React from 'react';
-
+import Anchor from './Anchor';
 import { _findByName, _getURL } from './DocBuilderUtils';
 
 /**
@@ -43,7 +43,9 @@ const DocLinkHTML = ({ longname, text = null, inner = false, kind = null }) => {
   if (url) {
     return (
       <span>
-        <a href={`/api/${url.replace(/\./g, '%20')}-offset-anchor`}>{text}</a>
+        <Anchor path={`/api/${url.replace(/\./g, '%20')}-offset-anchor`}>
+          {text}
+        </Anchor>
       </span>
     );
   }
