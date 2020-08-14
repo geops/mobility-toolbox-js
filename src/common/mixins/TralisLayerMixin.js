@@ -83,6 +83,7 @@ export class TralisLayerInterface {
  *
  * @param {TrackerLayer} TrackerLayer A {TrackerLayer} class to extend with {TrajservLayerInterface} functionnalities.
  * @return {Class}  A class that implements {TralisLayerInterface} class and extends Base;
+ * @private
  */
 const TralisLayerMixin = (TrackerLayer) =>
   class extends TrackerLayer {

@@ -101,6 +101,7 @@ export class TrackerLayerInterface {
  *
  * @param {Class} Base  A class to extend with {TrackerLayerInterface} functionnalities.
  * @return {Class}  A class that implements <TrackerLayerInterface> class and extends Base;
+ * @private
  */
 const TrackerLayerMixin = (Base) =>
   class extends Base {
