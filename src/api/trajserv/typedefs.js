@@ -23,7 +23,7 @@
  */
 
 /**
- * @typedef {Object} TrajStation
+ * @typedef {Object} TrajectoryStation
  * @property {string} id
  * @property {string} destination
  * @property {string} backgroundColor

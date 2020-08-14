@@ -211,7 +211,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Fetch stations information with a trajectory ID
    * @param {number} trajId The ID of the trajectory
-   * @returns {Promise<TrajStation[]>} A list of stations.
+   * @returns {Promise<TrajectoryStation[]>} A list of stations.
    * @private
    */
   updateTrajectoryStations(trajId) {

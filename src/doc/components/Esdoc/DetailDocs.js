@@ -55,9 +55,11 @@ const DetailDocs = ({ docs, title }) => {
               id={`${scope}-${doc.kind}-${doc.name}-offset-anchor`}
             />
             <h3 data-ice="anchor">
-              <span className="access" data-ice="access">
-                {doc.access}{' '}
-              </span>
+              {doc.access !== 'public' && (
+                <span className="access" data-ice="access">
+                  {doc.access}{' '}
+                </span>
+              )}
               {['member', 'method', 'get', 'set'].includes(doc.kind) && (
                 <span data-ice="static">{doc.static ? 'static ' : ''}</span>
               )}
@@ -72,7 +74,9 @@ const DetailDocs = ({ docs, title }) => {
               <span data-ice="async">{doc.async ? 'async ' : ''}</span>
               <span data-ice="generator">{doc.generator ? '* ' : ''}</span>
               <span className="code" data-ice="name">
-                {doc.name}
+                {doc.kind === 'constructor'
+                  ? `new ${doc.longname.match(/~([^)]+)#constructor/)[1]}`
+                  : doc.name}
               </span>
               <span className="code" data-ice="signature">
                 <SignatureHTML doc={doc} />

@@ -174,7 +174,9 @@ export default class Tracker {
 
   /**
    * Draw all the trajectories available to the canvas.
-   * @param {Date} currTime
+   * @param {Date} currTime The date to render.
+   * @param {number[2]} size Size ([width, height]) of the canvas to render.
+   * @param {number} resolution Which resolution of the map to render.
    * @private
    */
   renderTrajectories(currTime = Date.now(), size = [], resolution) {

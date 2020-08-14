@@ -173,6 +173,7 @@ const createFilters = (line, route, operator, regexLine) => {
  *
  * @param {TrackerLayer} TrackerLayer A {TrackerLayer} class to extend with {TrajservLayerInterface} functionnalities.
  * @return {Class}  A class that implements {TrajservLayerInterface} class and extends Base;
+ * @private
  */
 const TrajservLayerMixin = (TrackerLayer) =>
   class extends TrackerLayer {

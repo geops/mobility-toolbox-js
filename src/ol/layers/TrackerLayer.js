@@ -5,14 +5,16 @@ import Layer from './Layer';
 
 /**
  * Responsible for loading tracker data.
- * @param {Object} options
- * @param {boolean} options.useDelayStyle Set the delay style.
- * @class
+ *
  * @extends {Layer}
  * @implements {TrackerLayerInterface}
  */
 class TrackerLayer extends mixin(Layer) {
   /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {boolean} options.useDelayStyle Set the delay style.
    * @private
    */
   constructor(options = {}) {
@@ -39,13 +41,14 @@ class TrackerLayer extends mixin(Layer) {
     /**
      * Array of ol events key, returned by on() or once().
      * @type {Array<ol/events~EventsKey>}
+     * @private
      */
     this.olEventsKeys = []; // Be careful to not override this value in child classe.
   }
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html Map}
+   * @param {ol/Map~Map} map A OpenLayers map.
    * @private
    */
   init(map) {
@@ -68,8 +71,7 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Trackerlayer is started
-   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * Trackerlayer is started.
    * @private
    */
   start() {

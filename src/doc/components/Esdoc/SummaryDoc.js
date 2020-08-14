@@ -34,6 +34,7 @@ const showInheritedHref = (memberof, parentMemberOf) => {
  */
 const SummaryDoc = ({
   docs,
+  // eslint-disable-next-line no-unused-vars
   title,
   innerLink = false,
   kindIcon = false,
@@ -49,20 +50,22 @@ const SummaryDoc = ({
 
   return (
     <table className="summary" data-ice="summary">
-      <thead>
+      {/* <thead>
         <tr>
           <td data-ice="title" colSpan="2">
             {title}
           </td>
         </tr>
-      </thead>
+      </thead> */}
       <tbody style={style}>
-        {docs.map((doc, idx) => {
-          const kindKindIcon = doc.interface ? 'interface' : doc.kind;
-          return (
-            <tr data-ice="target" key={idx}>
-              {/* Hide the access (public) column */}
-              {/*
+        {docs
+          .filter((doc) => doc.access === 'public')
+          .map((doc, idx) => {
+            const kindKindIcon = doc.interface ? 'interface' : doc.kind;
+            return (
+              <tr data-ice="target" key={idx}>
+                {/* Hide the access (public) column */}
+                {/*
               <td>
                 <span className="access" data-ice="access">
                   {doc.access}
@@ -79,75 +82,77 @@ const SummaryDoc = ({
                 <span className="override" data-ice="override" />
               </td>
               */}
-              <td>
-                <div>
-                  <p>
-                    {kindIcon && (
-                      <span
-                        data-ice="kind-icon"
-                        className={`kind-${kindKindIcon}`}
-                      >
-                        {kindKindIcon.charAt(0).toUpperCase()}
+                <td>
+                  <div>
+                    <p>
+                      {kindIcon && (
+                        <span
+                          data-ice="kind-icon"
+                          className={`kind-${kindKindIcon}`}
+                        >
+                          {kindKindIcon.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                      <span data-ice="async">{doc.async ? 'async' : ''}</span>
+                      <span data-ice="generator">
+                        {doc.generator ? '*' : ''}
+                      </span>
+                      <span className="code" data-ice="name">
+                        <DocLinkHTML
+                          longname={doc.longname}
+                          text={
+                            doc.kind === 'constructor'
+                              ? `new ${
+                                  doc.longname.match(/~([^)]+)#constructor/)[1]
+                                }`
+                              : null
+                          }
+                          inner={innerLink}
+                          kind={doc.kind}
+                        />
+                      </span>
+                      <span className="code" data-ice="signature">
+                        <SignatureHTML doc={doc} />
+                      </span>
+                    </p>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <div className="deprecated" data-ice="deprecated">
+                      <DeprecatedHTML doc={doc} />
+                    </div>
+                    <div className="experimental" data-ice="experimental">
+                      <ExperimentalHTML doc={doc} />
+                    </div>
+
+                    <div data-ice="description">
+                      <Markdown source={doc.description} />
+                    </div>
+                    <div data-ice="inherited">
+                      {showInherited
+                        ? showInheritedHref(doc.memberof, memberof)
+                        : null}
+                    </div>
+                  </div>
+                </td>
+                {doc.version || doc.since ? (
+                  <td>
+                    {doc.version && (
+                      <span className="version" data-ice="version">
+                        {doc.version}{' '}
                       </span>
                     )}
-                    <span data-ice="async">{doc.async ? 'async' : ''}</span>
-                    <span data-ice="generator">{doc.generator ? '*' : ''}</span>
-                    <span className="code" data-ice="name">
-                      <DocLinkHTML
-                        longname={doc.longname}
-                        text={
-                          doc.kind === 'constructor'
-                            ? `new ${
-                                doc.longname.match(/~([^)]+)#constructor/)[1]
-                              }`
-                            : null
-                        }
-                        inner={innerLink}
-                        kind={doc.kind}
-                      />
-                    </span>
-                    <span className="code" data-ice="signature">
-                      <SignatureHTML doc={doc} />
-                    </span>
-                  </p>
-                </div>
-              </td>
-              <td>
-                <div>
-                  <div className="deprecated" data-ice="deprecated">
-                    <DeprecatedHTML doc={doc} />
-                  </div>
-                  <div className="experimental" data-ice="experimental">
-                    <ExperimentalHTML doc={doc} />
-                  </div>
-
-                  <div data-ice="description">
-                    <Markdown source={doc.description} />
-                  </div>
-                  <div data-ice="inherited">
-                    {showInherited
-                      ? showInheritedHref(doc.memberof, memberof)
-                      : null}
-                  </div>
-                </div>
-              </td>
-              {doc.version || doc.since ? (
-                <td>
-                  {doc.version && (
-                    <span className="version" data-ice="version">
-                      {doc.version}{' '}
-                    </span>
-                  )}
-                  {doc.since && (
-                    <span className="since" data-ice="since">
-                      {doc.since}{' '}
-                    </span>
-                  )}
-                </td>
-              ) : null}
-            </tr>
-          );
-        })}
+                    {doc.since && (
+                      <span className="since" data-ice="since">
+                        {doc.since}{' '}
+                      </span>
+                    )}
+                  </td>
+                ) : null}
+              </tr>
+            );
+          })}
       </tbody>
     </table>
   );

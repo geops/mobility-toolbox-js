@@ -32,13 +32,12 @@ const getCopyrightFromSources = (mbMap) => {
  *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
  * });
  *
- * @class
- * @inheritDoc
- * @param {Object} [options]
- * @implements {Layer}
+ * @extends {Layer}
  */
 export default class MapboxLayer extends Layer {
   /**
+   * Constructor.
+   *
    * @param {Object} options
    * @param {boolean} [options.preserveDrawingBuffer=false] If true able to export the canvas.
    * @param {number} [options.fadeDuration=300] Duration of the fade effect in ms.
@@ -142,6 +141,7 @@ export default class MapboxLayer extends Layer {
     /**
      * Url of the mapbox style.
      * @type {string}
+     * @private
      */
     this.styleUrl = options.url;
   }
@@ -192,6 +192,7 @@ export default class MapboxLayer extends Layer {
 
   /**
    * Create the mapbox map.
+   * @private
    */
   loadMbMap() {
     // If the map hasn't been resized, the center could be [NaN,NaN].
@@ -270,7 +271,7 @@ export default class MapboxLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
-   * @param {Object} options A mapbox {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html options object}.
+   * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    */
@@ -286,7 +287,7 @@ export default class MapboxLayer extends Layer {
     }
 
     const pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
-    // At this point we get GeoJSON Mapbox feature, we transform it to an Openlayers
+    // At this point we get GeoJSON Mapbox feature, we transform it to an OpenLayers
     // feature to be consistent with other layers.
     const features = this.mbMap
       .queryRenderedFeatures(pixel, options)

@@ -24,7 +24,9 @@ const DetailHTML = ({ doc, kind, title, isStatic = true }) => {
 
     let prefix = '';
     if (docs[0].static) prefix = 'Static ';
-    const _title = `${prefix}${accessDoc[0]} ${title}`;
+    const _title = `${prefix}${
+      accessDoc[0] === 'Public' ? '' : `${accessDoc[0]} `
+    }${title}`;
     return <DetailDocs key={idx} docs={docs} title={_title} />;
   });
 };

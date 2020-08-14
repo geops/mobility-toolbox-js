@@ -27,14 +27,14 @@ export const TralisModes = {
  * import { TralisAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new TralisAPI({
- *   url: [yourUrl],
- *   apiKey: [yourApiKey]
+ *   url: "yourUrl",
+ *   apiKey: "yourApiKey"
  * });
  *
  * @example
  * import { TralisAPI } from 'mobility-toolbox-js/api';
  *
- * const api = new TralisAPI([yourUrl]);
+ * const api = new TralisAPI("yourUrl");
  */
 class TralisAPI {
   /**
@@ -205,8 +205,6 @@ class TralisAPI {
 
   /**
    * Unsubscribe from current departures channel.
-   *
-   * @param {function} onMessage Function called on each message of the channel.
    */
   unsubscribeDepartures() {
     if (this.subscribedStationUic) {
@@ -432,7 +430,7 @@ class TralisAPI {
   /**
    * Subscribe to full_trajectory channel of a given vehicle.
    *
-   * @param {number} vehicle A vehicle id.
+   * @param {number} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
    */
   subscribeFullTrajectory(id, mode) {
@@ -463,7 +461,7 @@ class TralisAPI {
   /**
    * Get the list of stops for this vehicle.
    *
-   * @param {number} vehicle A vehicle id.
+   * @param {number} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<StopSequence>} Returns a stop sequence object.
    */
@@ -488,7 +486,7 @@ class TralisAPI {
   /**
    * Get a list of stops for a list of vehicles.
    *
-   * @param {number[]} vehicles List of vehicles ids.
+   * @param {number[]} ids List of vehicles ids.
    * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<StopSequence[]>} Return an array of stop sequences.
    */
@@ -502,7 +500,7 @@ class TralisAPI {
   /**
    * Subscribe to stopsequence channel of a given vehicle.
    *
-   * @param {number} vehicle A vehicle id.
+   * @param {number} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
    * @param {function(stopSequence: StopSequence)} onMessage Function called on each message of the channel.
    */

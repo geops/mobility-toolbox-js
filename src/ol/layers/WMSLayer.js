@@ -1,13 +1,13 @@
 import GeoJSON from 'ol/format/GeoJSON';
 import { unByKey } from 'ol/Observable';
-import OLLayer from './Layer';
+import Layer from './Layer';
 
 /**
- * @class
- * @inheritDoc
- * @implements {Layer}
+ * Class use to display a WMS layer.
+ *
+ * @extends {Layer}
  */
-class WMSLayer extends OLLayer {
+class WMSLayer extends Layer {
   /**
    * @inheritdoc
    */
@@ -71,7 +71,7 @@ class WMSLayer extends OLLayer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map An OpenLayers map.
    */
   init(map) {
     super.init(map);

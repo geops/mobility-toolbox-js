@@ -16,20 +16,31 @@ import { escapeURLHash } from './DocBuilderUtils';
 const IdentifiersDoc = ({ docs }) => {
   // traverse docs and create Map<dirPath, doc[]>
   const dirDocs = new Map();
-  const kinds = [
-    'class',
-    'interface',
-    'function',
-    'variable',
-    'typedef',
-    'external',
-  ];
+  const kinds = ['class', 'interface', 'function', 'variable'];
+  //   'typedef',
+  //   'external',
+  // ];
+  const filteredDocs = docs.filter((doc) => {
+    return kinds.includes(doc.kind) && !doc.ignore && doc.access === 'public';
+  });
 
-  for (const doc of docs) {
-    if (!kinds.includes(doc.kind)) continue;
-    if (doc.builtinExternal) continue;
-    if (doc.ignore) continue;
+  // Add a typedef doc to have a link to main type def page
+  filteredDocs.push({
+    access: 'public',
+    description: null,
+    export: false,
+    importPath: 'mobility-toolbox-js/src/index.js',
+    importStyle: 'typedef',
+    kind: 'typedef',
+    lineNumber: 1,
+    longname: 'typedefs',
+    memberof: 'src/index.js',
+    name: 'typedefs',
+    static: true,
+    undocument: true,
+  });
 
+  for (const doc of filteredDocs) {
     const filePath = doc.memberof.replace(/^.*?[/]/, '');
     const dirPath = path.dirname(filePath);
     if (!dirDocs.has(dirPath)) dirDocs.set(dirPath, []);
@@ -57,19 +68,26 @@ const IdentifiersDoc = ({ docs }) => {
 
           // see: DocBuilder#_buildNavDoc
           newDirDocs.sort((a, b) => {
+            const filePathA = a.longname.split('~')[0];
+            const filePathB = b.longname.split('~')[0];
+            const dirPathA = path.dirname(filePathA);
+            const dirPathB = path.dirname(filePathB);
             const kindA = a.interface ? 'interface' : a.kind;
             const kindB = b.interface ? 'interface' : b.kind;
-            if (kindA === kindB) {
-              return a.longname > b.longname ? 1 : -1;
+            if (dirPathA === dirPathB) {
+              if (kindA === kindB) {
+                return a.longname > b.longname ? 1 : -1;
+              }
+              return kindOrder[kindA] > kindOrder[kindB] ? 1 : -1;
             }
-            return kindOrder[kindA] > kindOrder[kindB] ? 1 : -1;
+            return dirPathA > dirPathB ? 1 : -1;
           });
 
           const dirPathLabel = dirPath === '.' ? '' : dirPath;
           return (
             <div key={dirPathLabel} data-ice="dirSummaryWrap">
               <h2 data-ice="dirPath" id={escapeURLHash(dirPath)}>
-                {dirPathLabel}
+                {dirPathLabel || '/'}
               </h2>
               <div data-ice="dirSummary">
                 <SummaryDoc

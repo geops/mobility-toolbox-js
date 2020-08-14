@@ -64,3 +64,18 @@
 /**
  * @external {CanvasRenderingContext2D} https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
  */
+/**
+ * @external {GetTrajectoriesParams} https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajectories
+ */
+/**
+ * @external {GetTrajectoryByIdParams} https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajectorybyid
+ */
+/**
+ * @external {TrajservTrajectory} https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#model-single_trajectory
+ */
+/**
+ * @external {GetTrajectoryStationsParams} https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajstations
+ */
+/**
+ * @external {StopsSearchParams} https://developer.geops.io/apis/5dcbd702a256d90001cf1361/#/default/get_
+ */

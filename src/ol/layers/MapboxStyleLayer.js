@@ -31,7 +31,6 @@ const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
 
 /**
  * Layer for visualizing a specific set of layer from a MapboxLayer.
- * @class
  *
  * @example
  * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';
@@ -45,10 +44,16 @@ const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
  *   styleLayersFilter: () => {},
  * });
  *
- * @param {Object} [options] Layer options.
- * @inheritdoc
+ * @extends {Layer}
  */
 class MapboxStyleLayer extends Layer {
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.   *
+   * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.
+   */
   constructor(options = {}) {
     super(options);
     /** @ignore */
@@ -57,50 +62,64 @@ class MapboxStyleLayer extends Layer {
     /**
      * MapboxLayer provided for the style Layer.
      * @type {MapboxLayer}
+     * @private
      */
     this.mapboxLayer = options.mapboxLayer;
 
     /**
      * Function to filter features to be displayed.
      * @type {function}
+     * @private
      */
     this.styleLayersFilter = options.styleLayersFilter;
 
     /**
      * Function to filter features for getFeatureInfoAtCoordinate method.
      * @type {function}
+     * @private
      */
     this.featureInfoFilter = options.featureInfoFilter || ((obj) => obj);
 
     /**
      * Function to query the rendered features.
      * @type {function}
+     * @private
      */
     this.queryRenderedLayersFilter = options.queryRenderedLayersFilter;
 
     /**
      * Array of features to highlight.
      * @type {Array<ol/Feature~Feature>}
+     * @private
      */
     this.highlightedFeatures = [];
 
     /**
      * Array of selected features.
      * @type {Array<ol/Feature~Feature>}
+     * @private
      */
     this.selectedFeatures = [];
 
     /**
-     * Array of mapbox style layers.
+     * Array of mapbox style layers to add.
      * @type {Array<mapboxgl.styleLayer>}
+     * @private
      */
     this.styleLayers =
       (options.styleLayer ? [options.styleLayer] : options.styleLayers) || [];
 
+    /**
+     * @private
+     */
     this.addStyleLayers = this.addStyleLayers.bind(this);
+
+    /**
+     * @private
+     */
     this.onLoad = this.onLoad.bind(this);
     if (options.filters) {
-      /** @ignore */
+      /** @private */
       this.addDynamicFilters = () => {
         this.setFilter(
           typeof options.filters === 'function'
@@ -127,8 +146,9 @@ class MapboxStyleLayer extends Layer {
     if (!this.mapboxLayer.map) {
       this.mapboxLayer.init(map);
       /**
-       * openlayers Layer.
+       * An OpenLayers Layer.
        * @type {ol/layer/Layer~Layer}
+       * @private
        */
       this.olLayer = this.mapboxLayer.olLayer;
     }
@@ -319,6 +339,7 @@ class MapboxStyleLayer extends Layer {
    * Set if features are hovered or not.
    * @param {Array<ol/Feature~Feature>} features
    * @param {boolean} state Is the feature hovered
+   * @private
    */
   setHoverState(features = [], state) {
     const { mbMap } = this.mapboxLayer;
@@ -355,6 +376,7 @@ class MapboxStyleLayer extends Layer {
   /**
    * Select a list of features.
    * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.
+   * @private
    */
   select(features = []) {
     this.setHoverState(this.selectedFeatures, false);
@@ -365,6 +387,7 @@ class MapboxStyleLayer extends Layer {
   /**
    * Highlight a list of features.
    * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.
+   * @private
    */
   highlight(features = []) {
     // Filter out selected features
