@@ -62,7 +62,7 @@ class Map extends OLMap {
   }
 
   /**
-   * Removes a given mobility layer from the map.
+   * Removes a given layer from the map.
    * @param {Layer|ol/layer/Layer~Layer} layer The layer to remove.
    */
   removeLayer(layer) {
