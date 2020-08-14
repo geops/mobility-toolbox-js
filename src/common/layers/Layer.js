@@ -239,10 +239,9 @@ export default class Layer extends Observable {
 
   /**
    * Request feature information for a given coordinate.
+   * This function must be implemented by inheriting layers.
    *
-   * @param {Array<number>} coordinate Coordinate to request the information at.
-   * @returns {Promise<{layer:Layer, features:Object[], coordinate:number[]}>} Promise with features, layer and coordinate
-   *  or null if no feature was hit.
+   * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[0], coordinate: null}}>} An empty response.
    */
   getFeatureInfoAtCoordinate() {
     // This layer returns no feature info.

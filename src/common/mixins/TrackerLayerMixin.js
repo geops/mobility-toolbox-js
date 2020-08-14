@@ -56,7 +56,10 @@ export class TrackerLayerInterface {
 
   /**
    * Set the current time, it triggers a rendering of the trajectories.
-   * @param {dateString | value} time
+   *
+   * @param {Date} time The date to render.
+   * @param {number[2]} size Size of the canvas to render.
+   * @param {number} resolution Map's resolution to render.
    */
   // eslint-disable-next-line no-unused-vars
   setCurrTime(time, size, resolution) {}
@@ -71,8 +74,10 @@ export class TrackerLayerInterface {
   /**
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
-   * @param {Array<number>} coordinate
-   * @returns {ol/Feature~Feature} Vehicle feature.
+   *
+   * @param {number[2]} coordinate A coordinate ([x,y]).
+   * @param {number=1} resolution The resolution of the map.
+   * @returns {Object[]} A list of vehicles.
    */
   // eslint-disable-next-line no-unused-vars
   getVehiclesAtCoordinate(coordinate, resolution = 1) {}

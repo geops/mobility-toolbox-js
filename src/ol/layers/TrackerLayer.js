@@ -71,8 +71,7 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Trackerlayer is started
-   * @param {ol/Map~Map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * Trackerlayer is started.
    * @private
    */
   start() {
