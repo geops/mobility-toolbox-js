@@ -8,6 +8,16 @@ import Layer from './layers/Layer';
  * @example
  * import { Map } from 'mobility-toolbox-js/ol';
  *
+ * const map = new Map({
+ *   target: 'map',
+ *   view: new View({
+ *     center: [0, 0],
+ *     zoom: 1,
+ *  }),
+ * });
+ *
+ * @see <a href="/examples/ol-map">Map example</a>
+ *
  * @extends {ol/Map~Map}
  */
 class Map extends OLMap {

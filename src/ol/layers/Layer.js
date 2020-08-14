@@ -4,6 +4,15 @@ import LayerCommon from '../../common/layers/Layer';
 /**
  * A class representing a layer to display on an OpenLayers map.
  *
+ * @example
+ * import { Layer } from 'mobility-toolbox-js/ol';
+ *
+ * const layer = new Layer({
+ *   olLayer: ...,
+ * });
+ *
+ * @see <a href="/examples/ol-map">Map example</a>
+ *
  * @extends {Layer}
  */
 class Layer extends LayerCommon {
