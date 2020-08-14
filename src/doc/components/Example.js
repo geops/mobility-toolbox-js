@@ -66,7 +66,9 @@ const Example = () => {
   return (
     <Grid container direction="column" spacing={3}>
       <Grid item xs={12}>
-        <Typography variant="h1">{example.name}</Typography>
+        <Typography variant="h1" className="headline">
+          {example.name}
+        </Typography>
         <Typography>{example.description}</Typography>
       </Grid>
       <Grid item xs={12}>

@@ -1,15 +1,38 @@
 import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardMedia from '@material-ui/core/CardMedia';
+import MuiCard from '@material-ui/core/Card';
+import MuiCardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
+import MuiCardActions from '@material-ui/core/CardActions';
+import Box from '@material-ui/core/Box';
+import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import { NavLink } from 'react-router-dom';
 import EXAMPLES from '../examples';
+
+const Card = withStyles({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    '&:hover': {
+      boxShadow: '10px 10px 19px -13px rgba(0,0,0,0.3)',
+    },
+  },
+})(MuiCard);
+
+const CardMedia = withStyles({
+  root: {
+    paddingTop: '56.25%',
+  },
+})(MuiCardMedia);
+
+const CardActions = withStyles({
+  root: {
+    justifyContent: 'flex-end',
+  },
+})(MuiCardActions);
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,6 +51,15 @@ const useStyles = makeStyles((theme) => ({
     '&.active': {
       color: theme.colors.primary,
     },
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height: '100%',
+  },
+  header: {
+    marginBottom: 40,
   },
 }));
 
@@ -59,6 +91,9 @@ export default () => {
     <>
       <Grid container spacing={3}>
         <Grid item xs={12} className={classes.filterField}>
+          <Typography variant="h1" className={classes.header}>
+            Examples
+          </Typography>
           <TextField
             placeholder="Filter"
             value={filter}
@@ -89,11 +124,17 @@ export default () => {
                 onBlur={() => setRaisedExample(null)}
               >
                 <CardMedia image={ex.img} />
-                <CardHeader title={ex.name} />
-                <CardContent>{ex.description}</CardContent>
-                <CardActions className={classes.cardActions}>
-                  <Button className={classes.cardActionsButton}>Show...</Button>
-                </CardActions>
+                <Box className={classes.container}>
+                  <CardContent>
+                    <Typography variant="h3">{ex.name}</Typography>
+                    <Typography>{ex.description}</Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button className={classes.cardActionsButton}>
+                      Show...
+                    </Button>
+                  </CardActions>
+                </Box>
               </Card>
             </NavLink>
           </Grid>

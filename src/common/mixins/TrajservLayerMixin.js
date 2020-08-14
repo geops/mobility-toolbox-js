@@ -454,10 +454,8 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
         const markerSize = radius * 2;
         if (radius > 10) {
-          const shortname =
-            type === 'Rail' && name.length > 3 ? name.substring(0, 2) : name;
           const fontSize = Math.max(radius, 10);
-          const textSize = getTextSize(ctx, markerSize, shortname, fontSize);
+          const textSize = getTextSize(ctx, markerSize, name, fontSize);
 
           ctx.textBaseline = 'middle';
           ctx.textAlign = 'center';
@@ -465,7 +463,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
             ? textColor || getTextColor(type)
             : '#000000';
           ctx.font = `bold ${textSize}px Arial`;
-          ctx.fillText(shortname, origin, origin);
+          ctx.fillText(name, origin, origin);
         }
         this.styleCache[key] = canvas;
       }

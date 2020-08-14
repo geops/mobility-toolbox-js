@@ -1,123 +1,15 @@
 import React from 'react';
-import {
-  createMuiTheme,
-  ThemeProvider,
-  makeStyles,
-} from '@material-ui/core/styles';
+import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
-import Header from './components/Header';
+import { geopsTheme, Header, Footer } from '@geops/geops-ui';
 import Examples from './components/Examples';
 import Example from './components/Example';
 import Documentation from './components/Documentation';
-import Footer from './components/Footer';
 import Home from './components/Home';
 
 import 'typeface-lato';
 import './App.scss';
-
-const colors = {
-  primary: '#6987a1',
-  secondary: '#76b833',
-  secondaryHover: '#4f7c1c',
-};
-
-const theme = createMuiTheme({
-  colors,
-  props: {
-    MuiButtonBase: {
-      disableRipple: true,
-    },
-  },
-  typography: {
-    fontFamily: ['Lato', 'Arial'],
-  },
-  palette: {
-    text: {
-      primary: '#4b4b4b',
-    },
-  },
-  overrides: {
-    MuiTypography: {
-      h1: {
-        fontSize: 36,
-        marginTop: 15,
-        marginBottom: 15,
-      },
-    },
-    MuiAppBar: {
-      root: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        minHeight: 100,
-        borderBottom: '2px solid #6987a1',
-      },
-      colorPrimary: {
-        color: '#353535',
-      },
-    },
-    MuiCard: {
-      root: {
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100%',
-      },
-    },
-    MuiCardMedia: {
-      root: {
-        paddingTop: '56.25%',
-      },
-    },
-    MuiCardActions: {
-      root: {
-        justifyContent: 'flex-end',
-        paddingBottom: 0,
-        paddingRight: 0,
-      },
-    },
-    MuiTabs: {
-      root: {
-        height: '100%',
-      },
-      flexContainer: {
-        height: '100%',
-      },
-      indicator: {
-        backgroundColor: '#76b833',
-      },
-    },
-    MuiTab: {
-      root: {
-        textTransform: 'unset',
-        '@media (min-width: 600px)': {
-          minWidth: 'unset',
-        },
-        width: 100,
-        fontFamily: 'Lato, Arial, sans-serif',
-      },
-    },
-    MuiIconButton: {
-      root: {
-        color: '#6987a1',
-      },
-    },
-    MuiButton: {
-      root: {
-        padding: '10px, 25px',
-        backgroundColor: colors.secondary,
-        color: 'white',
-        textTransform: 'none',
-
-        '&:hover': {
-          transition: '0.3s ease',
-          backgroundColor: colors.secondaryHover,
-        },
-      },
-    },
-  },
-});
 
 const useStyles = makeStyles({
   content: {
@@ -128,13 +20,43 @@ const useStyles = makeStyles({
   },
 });
 
+const tabs = [
+  {
+    label: 'Home',
+    to: '/home',
+  },
+  {
+    label: 'API',
+    to: '/api',
+  },
+  {
+    label: 'Examples',
+    to: '/examples',
+  },
+  {
+    label: 'Code',
+    href: 'https://github.com/geops/mobility-toolbox-js',
+  },
+];
+
+const links = [
+  {
+    label: 'Privacy Policy',
+    href: 'https://geops.ch/datenschutz',
+  },
+  {
+    label: 'Imprint',
+    href: 'https://geops.ch/impressum',
+  },
+];
+
 const App = () => {
   const classes = useStyles();
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={geopsTheme}>
       <Router>
-        <Header />
+        <Header tabs={tabs} />
         <Container maxWidth="lg" className={classes.content}>
           <Route exact path="/">
             <Redirect to="/home" />
@@ -152,7 +74,7 @@ const App = () => {
             <Documentation />
           </Route>
         </Container>
-        <Footer />
+        <Footer links={links} />
       </Router>
     </ThemeProvider>
   );

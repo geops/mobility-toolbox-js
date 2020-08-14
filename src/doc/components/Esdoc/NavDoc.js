@@ -4,6 +4,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
 import path from 'path';
+import Anchor from './Anchor';
 import { _find, escapeURLHash } from './DocBuilderUtils';
 import DocLinkHTML from './DocLinkHTML';
 
@@ -86,13 +87,13 @@ const NavDoc = () => {
           return (
             <li data-ice="doc" key={doc.longname}>
               {displayDir && (
-                <a
+                <Anchor
                   data-ice="dirPath"
                   className="nav-dir-path"
-                  href={`/api/identifiers%20html#${escapeURLHash(dirPath)}`}
+                  path={`/api/identifiers%20html#${escapeURLHash(dirPath)}`}
                 >
                   {dirPath || 'api'}
-                </a>
+                </Anchor>
               )}
               <span data-ice="kind" className={kindClass}>
                 {kindText}
