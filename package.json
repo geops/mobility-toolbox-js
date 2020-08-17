@@ -5,7 +5,7 @@
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
-    "@geops/geops-ui": "^0.1.1",
+    "@geops/geops-ui": "^0.1.2",
     "@material-ui/core": "^4.9.14",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.9.14",
