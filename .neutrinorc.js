@@ -89,7 +89,7 @@ if (process.env.REACT_APP_LIB_MODE) {
       react({
         html: {
           title: 'mobility-toolbox-js',
-          favicon: 'src/doc/img/favicon.png',
+          favicon: 'src/doc/img/favico.ico',
         },
         style: {
           // Override the default file extension of `.css` if needed
