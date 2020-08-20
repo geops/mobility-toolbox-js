@@ -56,7 +56,7 @@ const App = () => {
   return (
     <ThemeProvider theme={geopsTheme}>
       <Router>
-        <Header tabs={tabs} />
+        <Header title="mobility-toolbox-js" tabs={tabs} />
         <Container maxWidth="lg" className={classes.content}>
           <Route exact path="/">
             <Redirect to="/home" />
