@@ -18,6 +18,17 @@ if (process.env.REACT_APP_LIB_MODE) {
     use: [
       library({
         name: 'mobility-toolbox-js',
+        targets: {
+          browsers: [
+            'last 2 Chrome versions',
+            'last 2 Firefox versions',
+            'last 2 Edge versions',
+            'last 2 Opera versions',
+            'last 2 Safari versions',
+            'last 2 iOS versions',
+            'ie 11'
+          ]
+        },
       }),
       jest({
         testRegex: 'src/.*.test.js$',
@@ -90,6 +101,17 @@ if (process.env.REACT_APP_LIB_MODE) {
         html: {
           title: 'mobility-toolbox-js',
           favicon: 'src/doc/img/favico.ico',
+        },
+        targets: {
+          browsers: [
+            'last 2 Chrome versions',
+            'last 2 Firefox versions',
+            'last 2 Edge versions',
+            'last 2 Opera versions',
+            'last 2 Safari versions',
+            'last 2 iOS versions',
+            'ie 11'
+          ]
         },
         style: {
           // Override the default file extension of `.css` if needed
