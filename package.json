@@ -32,7 +32,7 @@
     "ol": "6.3.1"
   },
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "7.11.0",
+    "@babel/plugin-transform-runtime": "7.11.5",
     "@neutrinojs/airbnb": "9.1.0",
     "@neutrinojs/airbnb-base": "9.1.0",
     "@neutrinojs/copy": "9.1.0",
