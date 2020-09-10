@@ -293,7 +293,7 @@ export default class MapboxLayer extends Layer {
       .queryRenderedFeatures(pixel, options)
       .map((feature) => {
         if (feature.properties.cluster) {
-          const clusterSource = this.mbMap.getSource(feature.layer.id);
+          const clusterSource = this.mbMap.getSource(feature.layer.source);
           const clusterId = feature.properties.cluster_id;
           const pointCount = feature.properties.point_count;
           const clusterFeats = clusterSource.getClusterLeaves(
