@@ -291,7 +291,29 @@ export default class MapboxLayer extends Layer {
     // feature to be consistent with other layers.
     const features = this.mbMap
       .queryRenderedFeatures(pixel, options)
-      .map((feature) => this.format.readFeature(feature));
+      .map((feature) => {
+        if (feature.properties.cluster) {
+          const clusterSource = this.mbMap.getSource(feature.layer.id);
+          const clusterId = feature.properties.cluster_id;
+          const pointCount = feature.properties.point_count;
+          const clusterFeats = clusterSource.getClusterLeaves(
+            clusterId,
+            pointCount,
+            0,
+            (error, clusterFeatures) => {
+              // Print cluster leaves in the console
+              // eslint-disable-next-line no-console
+              console.log('Cluster leaves:', error, clusterFeatures);
+            },
+          );
+          // eslint-disable-next-line no-console
+          console.log('clusterFeats', clusterFeats);
+          return clusterFeats;
+          // return this.format.readFeature(feature);
+        }
+        return this.format.readFeature(feature);
+      })
+      .flat();
 
     return Promise.resolve({
       layer: this,
