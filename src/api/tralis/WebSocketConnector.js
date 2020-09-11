@@ -63,7 +63,7 @@ class WebSocketConnector {
     this.websocket.onclose = () => {
       window.clearTimeout(this.reconnectTimeout);
       /** @ignore */
-      this.reconnectTimeout = window.setTimeout(() => this.connect(), 100);
+      this.reconnectTimeout = window.setTimeout(() => this.connect(url), 100);
     };
   }
 
