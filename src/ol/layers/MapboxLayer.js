@@ -275,7 +275,7 @@ export default class MapboxLayer extends Layer {
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    */
-  getFeatureInfoAtCoordinate(coordinate, options) {
+  async getFeatureInfoAtCoordinate(coordinate, options) {
     // Ignore the getFeatureInfo until the mapbox map is loaded
     if (
       !options ||
@@ -289,32 +289,47 @@ export default class MapboxLayer extends Layer {
     const pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
     // At this point we get GeoJSON Mapbox feature, we transform it to an OpenLayers
     // feature to be consistent with other layers.
-    const features = this.mbMap
-      .queryRenderedFeatures(pixel, options)
-      .map((feature) => {
+    const renderedFeats = this.mbMap.queryRenderedFeatures(pixel, options);
+    const features = [];
+
+    const returnFeat = (feat, clusterSource) => {
+      const clusterId = feat.properties.cluster_id;
+      const pointCount = feat.properties.point_count;
+
+      return new Promise((resolve) => {
+        clusterSource.getClusterLeaves(
+          clusterId,
+          pointCount,
+          0,
+          (error, clusterFeatures) => {
+            if (!error) {
+              resolve(clusterFeatures);
+            } else {
+              // eslint-disable-next-line no-console
+              console.warn('Cluster leaves:', error);
+            }
+          },
+        );
+      });
+    };
+
+    const readFeats = async () => {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const feature of renderedFeats) {
         if (feature.properties.cluster) {
           const clusterSource = this.mbMap.getSource(feature.layer.source);
-          const clusterId = feature.properties.cluster_id;
-          const pointCount = feature.properties.point_count;
-          const clusterFeats = clusterSource.getClusterLeaves(
-            clusterId,
-            pointCount,
-            0,
-            (error, clusterFeatures) => {
-              // Print cluster leaves in the console
-              // eslint-disable-next-line no-console
-              console.log('Cluster leaves:', error, clusterFeatures);
-            },
-          );
-          // eslint-disable-next-line no-console
-          console.log('clusterFeats', clusterFeats);
-          return clusterFeats;
-          // return this.format.readFeature(feature);
+          // eslint-disable-next-line no-await-in-loop
+          const clusterFeatures = await returnFeat(feature, clusterSource);
+          clusterFeatures.forEach((cF) => {
+            features.push(this.format.readFeature(cF));
+          });
+        } else {
+          features.push(this.format.readFeature(feature));
         }
-        return this.format.readFeature(feature);
-      })
-      .flat();
+      }
+    };
 
+    await readFeats();
     return Promise.resolve({
       layer: this,
       features,
