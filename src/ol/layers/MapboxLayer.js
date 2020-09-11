@@ -292,7 +292,7 @@ export default class MapboxLayer extends Layer {
     const renderedFeats = this.mbMap.queryRenderedFeatures(pixel, options);
     const features = [];
 
-    const returnFeat = (feat, clusterSource) => {
+    const getClusterFeatures = (feat, clusterSource) => {
       const clusterId = feat.properties.cluster_id;
       const pointCount = feat.properties.point_count;
 
@@ -319,7 +319,10 @@ export default class MapboxLayer extends Layer {
         if (feature.properties.cluster) {
           const clusterSource = this.mbMap.getSource(feature.layer.source);
           // eslint-disable-next-line no-await-in-loop
-          const clusterFeatures = await returnFeat(feature, clusterSource);
+          const clusterFeatures = await getClusterFeatures(
+            feature,
+            clusterSource,
+          );
           clusterFeatures.forEach((cF) => {
             features.push(this.format.readFeature(cF));
           });
@@ -330,8 +333,6 @@ export default class MapboxLayer extends Layer {
     };
 
     await readFeats();
-    // eslint-disable-next-line no-console
-    console.log('features', features);
     return Promise.resolve({
       layer: this,
       features,
