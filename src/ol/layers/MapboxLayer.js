@@ -330,6 +330,8 @@ export default class MapboxLayer extends Layer {
     };
 
     await readFeats();
+    // eslint-disable-next-line no-console
+    console.log('features', features);
     return Promise.resolve({
       layer: this,
       features,
