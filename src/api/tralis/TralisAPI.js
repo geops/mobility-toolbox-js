@@ -334,7 +334,7 @@ class TralisAPI {
         }
 
         onMessage(
-          Object.keys(this.extraGeoms.map((key) => this.extraGeoms[key])),
+          Object.keys(this.extraGeoms).map((key) => this.extraGeoms[key]),
         );
       }
     });
