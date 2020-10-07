@@ -12,7 +12,5 @@ The tools in this library have been inspired by many projects realized for publi
 * Get [precise geographic courses](https://geops.github.io/geops-routing-demo/) for all modes of transport.
 * Generate beautiful maps for public transport, mobility and logistics
 
-## Getting started
-Install running `yarn add mobility-toolbox-js`.
-
-Check our examples and the API Documentation.
+## Documentation and examples 
+Visit https://mobility-toolbox-js.geops.de
