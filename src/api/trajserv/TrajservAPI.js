@@ -23,14 +23,12 @@ class TrajservAPI {
    * @param {Object} options Options.
    * @param {string} [options.url='https://api.geops.io/tracker/v1'] Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
-   * @param {string} options.apiKeyName Access key name for [geOps services](https://developer.geops.io/)
    */
   constructor(options = {}) {
     /** @ignore */
     this.url = options.url || 'https://api.geops.io/tracker/v1';
     /** @ignore */
     this.apiKey = options.apiKey;
-    this.apiKeyName = options.apiKeyName;
   }
 
   /**
@@ -38,7 +36,7 @@ class TrajservAPI {
    * @ignore
    */
   fetch(url, params = {}, config) {
-    const urlParams = { ...params, [this.apiKeyName || 'key']: this.apiKey };
+    const urlParams = { ...params, key: this.apiKey };
     return fetch(`${url}?${qs.stringify(urlParams)}`, config).then(
       readJsonResponse,
     );
