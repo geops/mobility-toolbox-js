@@ -32,6 +32,11 @@ const tracker = new TrajservLayer({
   url: 'https://api.geops.io/tracker/v1',
   apiKey: window.apiKey,
 });
+
+map.on('load', () => {
+  // add tracker before layer 'waterway-name'
+  tracker.init(map, 'waterway-name');
+});
 `;
 
 function Home() {
