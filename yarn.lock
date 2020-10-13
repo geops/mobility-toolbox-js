@@ -1650,10 +1650,10 @@
   resolved "https://registry.yarnpkg.com/@emotion/hash/-/hash-0.8.0.tgz#bbbff68978fefdbe68ccb533bc8cbe1d1afb5413"
   integrity sha512-kBJtf7PH6aWwZ6fka3zQ0p6SBYzx4fl1LoZXE2RrnYST9Xljm7WfKJrU4g/Xr3Beg72MLrp1AWNUmuYJTL7Cow==
 
-"@geops/geops-ui@^0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.1.3.tgz#0147e9345edb59798a3915221ebd3e5d9eaee0f0"
-  integrity sha512-zclM/DCODY4hbzmQpT/ZTyBxkAa165vCA7+7ejGlyCVEfDSAQBngZBtFa/TL1EGAc5ivsGDEtNDetciYFcYHqg==
+"@geops/geops-ui@^0.1.4-beta.1":
+  version "0.1.4-beta.1"
+  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.1.4-beta.1.tgz#cf8f2915afbcb5d0eb92a63282281b75ddd44a0e"
+  integrity sha512-NaqlKlWCSMATEwshOYqy0Sf6TZ0U9RXanetNAQ32ifvX9gORobb4QrqJd8Mflj+n9IBY9yOcMkP1feq4TY3GsQ==
   dependencies:
     "@material-ui/core" "^4.11.0"
     "@material-ui/icons" "^4.9.1"
@@ -1667,6 +1667,7 @@
     react-router-dom "^5.2.0"
     react-scripts "3.4.1"
     typeface-lato "^0.0.75"
+    uuid "^8.3.1"
 
 "@hapi/address@2.x.x", "@hapi/address@^2.1.2":
   version "2.1.4"
@@ -18068,6 +18069,11 @@ uuid@^8.1.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.2.0.tgz#cb10dd6b118e2dada7d0cd9730ba7417c93d920e"
   integrity sha512-CYpGiFTUrmI6OBMkAdjSDM0k5h8SkkiTP4WAjQgDgNB1S3Ou9VBEvr6q0Kv2H1mMk7IWfxYGpMH5sd5AvcIV2Q==
+
+uuid@^8.3.1:
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.1.tgz#2ba2e6ca000da60fce5a196954ab241131e05a31"
+  integrity sha512-FOmRr+FmWEIG8uhZv6C2bTgEVXsHk08kE7mPlrBbEe+c3r9pjceVPgupIfNIhc4yx55H69OXANrUaSuu9eInKg==
 
 v8-compile-cache@2.0.3:
   version "2.0.3"
