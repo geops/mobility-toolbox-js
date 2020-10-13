@@ -42,25 +42,26 @@ const Example = () => {
       setHtml(null);
       // Load the new html
       setHtml(h.default);
-    });
-    // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
-    // We use to avoid cache and re-execute the code of the module.
-    import(`../examples/${example.files.js}?`).then((module) => {
-      module.default();
-    });
 
-    fetch(`../examples/${example.files.js}`)
-      .then((res) => res.text())
-      .then((jsCode) => {
-        // Replace relative import by library import
-        setJs(
-          jsCode
-            .replace(/'\.\.\/\.\.\//gm, "'mobility-toolbox-js/")
-            .replace('export default () => {\n', '')
-            .replace(/^};\n$/gm, '')
-            .replace(/^ {2}/gm, ''),
-        );
+      // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
+      // We use to avoid cache and re-execute the code of the module.
+      import(`../examples/${example.files.js}?`).then((module) => {
+        module.default();
+
+        fetch(`../examples/${example.files.js}`)
+          .then((res) => res.text())
+          .then((jsCode) => {
+            // Replace relative import by library import
+            setJs(
+              jsCode
+                .replace(/'\.\.\/\.\.\//gm, "'mobility-toolbox-js/")
+                .replace('export default () => {\n', '')
+                .replace(/^};\n$/gm, '')
+                .replace(/^ {2}/gm, ''),
+            );
+          });
       });
+    });
   }, [example]);
 
   return (
