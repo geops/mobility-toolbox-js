@@ -40,6 +40,7 @@ const Example = () => {
     import(`../examples/${example.files.html}`).then((h) => {
       // Clean the html loaded by the previous example
       setHtml(null);
+      setJs(null);
       // Load the new html
       setHtml(h.default);
     });
