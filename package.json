@@ -159,12 +159,9 @@
     ".": "./index.js",
     "./module": "./module.js",
     "./api": "./api/index.js",
-    "./common": "./common/Tracker.js",
-    "./common/layers": "./common/layers/layer.js",
-    "./common/mixins": "./common/mixins/*.js",
+    "./common": "./common/*.js",
     "./mapbox": "./mapbox/index.js",
-    "./ol": "./ol/index.js",
-    "./ol/Map": "./ol/Map.js"
+    "./ol": "./ol/index.js"
   },
   "husky": {
     "hooks": {
