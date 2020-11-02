@@ -105,6 +105,6 @@ describe('Layer', () => {
     expect(layer.get('copyright')).toEqual(undefined);
 
     layer.set('copyright', '&copy; OSM Contributors');
-    expect(layer.get('copyright')).toEqual('&copy; OSM Contributors');
+    expect(layer.copyright).toEqual('&copy; OSM Contributors');
   });
 });
