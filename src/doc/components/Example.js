@@ -33,8 +33,8 @@ const Example = () => {
   const { editButton, paper, htmlContainer, fileName } = useStyles();
   const { exampleKey } = useParams((params) => params);
   const example = EXAMPLES.find((e) => e.key === exampleKey);
-  const [html, setHtml] = useState();
-  const [js, setJs] = useState();
+  const [html, setHtml] = useState('');
+  const [js, setJs] = useState('');
 
   useEffect(() => {
     import(`../examples/${example.files.html}`).then((h) => {
@@ -84,14 +84,16 @@ const Example = () => {
       <Grid item xs={12}>
         <Paper className={paper}>
           <Typography className={fileName}>{example.files.js}</Typography>
-          <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
+          <SyntaxHighlighter language="javascript">
+            {js || ''}
+          </SyntaxHighlighter>
           <CodeSandboxButton className={editButton} html={html} js={js} />
         </Paper>
       </Grid>
       <Grid item xs={12}>
         <Paper className={paper}>
           <Typography className={fileName}>{example.files.html}</Typography>
-          <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+          <SyntaxHighlighter language="html">{html || ''}</SyntaxHighlighter>
           <CodeSandboxButton className={editButton} html={html} js={js} />
         </Paper>
       </Grid>

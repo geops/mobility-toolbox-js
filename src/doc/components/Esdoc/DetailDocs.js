@@ -249,7 +249,7 @@ const DetailDocs = ({ docs, title }) => {
                           </div>
                         )}
                         <SyntaxHighlighter language="js">
-                          {parsed.body}
+                          {parsed.body || ''}
                         </SyntaxHighlighter>
                       </React.Fragment>
                     );

@@ -124,7 +124,9 @@ if (process.env.REACT_APP_LIB_MODE) {
             {
               loader: 'postcss-loader',
               options: {
-                plugins: [require('autoprefixer')],
+                postcssOptions: {
+                  plugins: [require('autoprefixer')],
+                }
               },
             },
             {

@@ -163,7 +163,7 @@ const ClassDoc = ({ doc }) => {
                     )}
                     {/* <pre className="prettyprint source-code"> */}
                     <SyntaxHighlighter language="js">
-                      {parsed.body}
+                      {parsed.body || ''}
                     </SyntaxHighlighter>
                     {/* </pre> */}
                   </React.Fragment>
