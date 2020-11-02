@@ -249,9 +249,6 @@ export default class MapboxLayer extends Layer {
          * @type {string}
          */
         this.copyright = getCopyrightFromSources(this.mbMap);
-        this.dispatchEvent({
-          type: 'change:copyright',
-        });
       }
       this.dispatchEvent({
         type: 'load',
