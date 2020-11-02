@@ -104,7 +104,7 @@ describe('Layer', () => {
     expect(layer).toBeInstanceOf(Layer);
     expect(layer.copyright).toEqual(undefined);
 
-    layer.set('copyright', '&copy; OSM Contributors');
+    layer.copyright = '&copy; OSM Contributors';
     expect(layer.copyright).toEqual('&copy; OSM Contributors');
   });
 });
