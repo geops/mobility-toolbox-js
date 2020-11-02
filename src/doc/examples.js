@@ -90,4 +90,14 @@ export default [
       js: 'query-objects.js',
     },
   },
+  {
+    name: 'Search',
+    key: 'search',
+    description: 'This example shows how to search for a location.',
+    img: queryObjectsImg,
+    files: {
+      html: 'search.html',
+      js: 'search.js',
+    },
+  },
 ];

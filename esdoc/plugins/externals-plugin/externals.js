@@ -59,6 +59,9 @@
  * @external {GeoJSONFeature} https://tools.ietf.org/html/rfc7946#section-3.2
  */
 /**
+ * @external {GeoJSONFeatureCollection} https://tools.ietf.org/html/rfc7946#section-3.3
+ */
+/**
  * @external {Canvas} https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
  */
 /**

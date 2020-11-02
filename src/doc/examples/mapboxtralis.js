@@ -1,5 +1,4 @@
-import { Map } from 'mapbox-gl/dist/mapbox-gl-unminified';
-import { toLonLat } from 'ol/proj';
+import { Map } from 'mapbox-gl';
 import { TralisLayer } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -7,7 +6,7 @@ export default () => {
   const map = new Map({
     container: 'map',
     style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
-    center: toLonLat([1282278, 6128615]),
+    center: [7.47, 46.95],
     zoom: 9,
   });
 
