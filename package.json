@@ -1,7 +1,8 @@
 {
   "name": "mobility-toolbox-js",
   "license": "MIT",
-  "version": "1.1.9",
+  "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
+  "version": "1.1.10",
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
@@ -154,6 +155,14 @@
       }
     }
   },
+  "exports": {
+    ".": "./index.js",
+    "./module": "./module.js",
+    "./api": "./api/index.js",
+    "./common": "./common/*.js",
+    "./mapbox": "./mapbox/index.js",
+    "./ol": "./ol/index.js"
+  },
   "husky": {
     "hooks": {
       "post-checkout": "yarn install --frozen-lockfile",
@@ -162,6 +171,10 @@
       "pre-commit": "CI=true lint-staged   "
     }
   },
+  "keywords": [
+    "mobility",
+    "toolbox"
+  ],
   "lint-staged": {
     "(src|__mocks__)/**/*.js": [
       "eslint --fix",
@@ -179,6 +192,10 @@
   "prettier": {
     "trailingComma": "all",
     "singleQuote": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/geops/mobility-toolbox-js"
   },
   "stylelint": {
     "plugins": [
