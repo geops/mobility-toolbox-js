@@ -95,4 +95,26 @@ describe('Layer', () => {
       layer.onClick('not of type function');
     }).toThrow(Error);
   });
+
+  test('should initialize copyright property.', () => {
+    const layer = new Layer({
+      name: 'Layer',
+      olLayer,
+      copyright: '&copy: copyright',
+    });
+
+    expect(layer.copyright).toEqual('&copy: copyright');
+  });
+
+  test('should set and get copyright property.', () => {
+    const layer = new Layer({
+      name: 'Layer',
+      olLayer,
+    });
+    expect(layer).toBeInstanceOf(Layer);
+    expect(layer.copyright).toEqual(undefined);
+
+    layer.copyright = '&copy; OSM Contributors';
+    expect(layer.copyright).toEqual('&copy; OSM Contributors');
+  });
 });

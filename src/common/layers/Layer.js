@@ -85,8 +85,12 @@ export default class Layer extends Observable {
         writable: true,
       },
       copyright: {
-        value: copyright,
-        writable: true,
+        get: () => {
+          return this.get('copyright') || copyright;
+        },
+        set: (newCopyright) => {
+          return this.set('copyright', newCopyright);
+        },
       },
       visible: {
         value: visible === undefined ? true : visible,
