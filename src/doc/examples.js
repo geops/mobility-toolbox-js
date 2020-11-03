@@ -93,7 +93,7 @@ export default [
   {
     name: 'Search',
     key: 'search',
-    description: 'This example shows how to search for a location.',
+    description: 'Use the StopsAPI for finding public transport stops.',
     img: queryObjectsImg,
     files: {
       html: 'search.html',
