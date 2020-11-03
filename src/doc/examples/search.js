@@ -1,5 +1,4 @@
 import { StopsAPI } from '../../api';
-import 'ol/ol.css';
 
 export default () => {
   const api = new StopsAPI({
