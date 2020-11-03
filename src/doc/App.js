@@ -39,17 +39,6 @@ const tabs = [
   },
 ];
 
-const links = [
-  {
-    label: 'Privacy Policy',
-    href: 'https://geops.ch/datenschutz',
-  },
-  {
-    label: 'Imprint',
-    href: 'https://geops.ch/impressum',
-  },
-];
-
 const App = () => {
   const classes = useStyles();
 
@@ -74,7 +63,7 @@ const App = () => {
             <Documentation />
           </Route>
         </Container>
-        <Footer links={links} />
+        <Footer />
       </Router>
     </ThemeProvider>
   );
