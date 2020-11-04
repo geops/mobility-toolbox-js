@@ -93,7 +93,8 @@ export default [
   {
     name: 'Search',
     key: 'search',
-    description: 'Use the StopsAPI for finding public transport stops.',
+    description: `Use the StopsAPI for finding public transport stops.
+      A click on a search result opens the location in our live tracker.`,
     img: queryObjectsImg,
     files: {
       html: 'search.html',

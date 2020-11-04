@@ -14,27 +14,25 @@ input {
 
 #results {
   display: flex;
-  justify-content: center;
-  font-size: 30pt;
   flex-wrap: wrap;
-  padding: 10px;
-  flex: 1;
 }
 
-@media(max-width: 800px) {
-  #results {
-    font-size: 15pt;
-  }
-}
-
-#results div {
+#results a {
+  display: block;
+  border: 1px solid #ddd;
+  padding: 5px 10px;
   margin: 10px;
-  display: flex;
-  align-items: center;
 }
+
 </style>
 
 <div id="main">
-  <input type="text" placeholder="Search for locations..." id="search" name="search" autocomplete="off">
+  <input
+    type="text"
+    placeholder="Search for a stop..."
+    id="search"
+    name="search"
+    autocomplete="off"
+  />
   <div id="results" />
 </div>

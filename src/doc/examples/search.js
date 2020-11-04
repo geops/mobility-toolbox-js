@@ -1,3 +1,4 @@
+import { transform } from 'ol/proj';
 import { StopsAPI } from '../../api';
 
 export default () => {
@@ -11,13 +12,12 @@ export default () => {
     api.search({ limit: 30, q: evt.target.value }).then((data) => {
       resultDiv.innerHTML = '';
 
-      data.features.forEach(({ properties }) => {
-        const span = document.createElement('div');
-        // eslint-disable-next-line
-        span.style.color = `#${(((1 << 24) * Math.random()) | 0).toString(16)}`;
-        span.style.fontSize = `${100 * (1 - properties.rank)}%`;
-        span.innerText = properties.name;
-        resultDiv.appendChild(span);
+      data.features.forEach(({ properties, geometry }) => {
+        const a = document.createElement('a');
+        const coord = transform(geometry.coordinates, 'EPSG:4326', 'EPSG:3857');
+        a.href = `https://tracker.geops.de?x=${coord[0]}&y=${coord[1]}`;
+        a.innerText = `${properties.name} → `;
+        resultDiv.appendChild(a);
       });
     });
   };
