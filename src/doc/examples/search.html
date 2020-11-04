@@ -1,15 +1,16 @@
 <style>
 input {
-  padding: 10px;
   margin: 10px;
+  width: 300px;
+  padding: 10px;
 }
 
 #main {
-  display: flex;
-  height: 100%;
-  width: 100%;
-  flex-direction: column;
   overflow: hidden;
+}
+
+#main p {
+  margin: 10px;
 }
 
 #results {
@@ -34,5 +35,10 @@ input {
     name="search"
     autocomplete="off"
   />
-  <div id="results" />
+  <div id="results">
+    <p>
+      Enter a search term to display the results.
+      Click on the result to show the location in our live tracker.
+    </p>
+  </div>
 </div>
