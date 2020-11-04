@@ -4,6 +4,7 @@ import liveTrackerMBImg from './img/examples/live_tracker_mb.jpg';
 import mapboxImg from './img/examples/mapbox.jpg';
 import mapboxStyleImg from './img/examples/mapbox_style.jpg';
 import queryObjectsImg from './img/examples/query_objects.jpg';
+import stopsImg from './img/examples/stops.jpg';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -94,7 +95,7 @@ export default [
     name: 'Search',
     key: 'search',
     description: 'Use the StopsAPI for finding public transport stops.',
-    img: queryObjectsImg,
+    img: stopsImg,
     files: {
       html: 'search.html',
       js: 'search.js',
