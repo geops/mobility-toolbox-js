@@ -35,7 +35,7 @@ export default () => {
     visible: true,
     mapboxLayer,
     styleLayer: {
-      id: 'poi_with_icons-lvl',
+      id: 'poi_with_icons',
     },
     onClick,
   });
