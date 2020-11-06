@@ -11,7 +11,7 @@ export default () => {
     }),
   });
 
-  const url = `https://maps.geops.io/styles/base_bright_v1/style.json?key=${window.apiKey}`;
+  const url = `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`;
   const mapboxLayer = new MapboxLayer({ url });
 
   const poiLayer = new MapboxStyleLayer({

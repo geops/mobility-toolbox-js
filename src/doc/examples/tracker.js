@@ -12,7 +12,7 @@ export default () => {
   });
 
   const layer = new MapboxLayer({
-    url: `https://maps.geops.io/styles/base_bright_v1/style.json?key=${window.apiKey}`,
+    url: `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`,
   });
 
   const tracker = new TrajservLayer({
