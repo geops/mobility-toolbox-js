@@ -51,7 +51,7 @@ const Example = () => {
       setHtml(h.default);
 
       // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
-      // We use to avoid cache and re-execute the code of the module.
+      // We use this to avoid cache and re-execute the code of the module.
       import(`../examples/${example.files.js}?`).then((module) => {
         module.default();
 
