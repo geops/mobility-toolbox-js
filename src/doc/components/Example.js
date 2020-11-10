@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -12,6 +12,8 @@ const useStyles = makeStyles((theme) => ({
   },
   htmlContainer: {
     height: 500,
+  },
+  noPointer: {
     // Remove pointer events for mobile devices on load
     [theme.breakpoints.down('xs')]: {
       pointerEvents: 'none',
@@ -34,12 +36,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Example = () => {
-  const { editButton, paper, htmlContainer, fileName } = useStyles();
+  const classes = useStyles();
   const { exampleKey } = useParams((params) => params);
   const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
-  const mapContainerRef = useRef(null);
+  const [isNavigable, setIsNavigable] = useState(false);
 
   useEffect(() => {
     import(`../examples/${example.files.html}`).then((h) => {
@@ -78,33 +80,40 @@ const Example = () => {
         <Typography>{example.description}</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Paper
-          className={paper}
-          onClick={() => {
-            // Activate map interactions on tap for mobile devices
-            mapContainerRef.current.style.pointerEvents = 'auto';
-          }}
-        >
+        <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
           <div
-            ref={mapContainerRef}
-            className={htmlContainer}
+            className={`${classes.htmlContainer} ${
+              isNavigable ? '' : classes.noPointer
+            }`}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: html }}
           />
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
-          <Typography className={fileName}>{example.files.js}</Typography>
+        <Paper className={classes.paper}>
+          <Typography className={classes.fileName}>
+            {example.files.js}
+          </Typography>
           <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-          <CodeSandboxButton className={editButton} html={html} js={js} />
+          <CodeSandboxButton
+            className={classes.editButton}
+            html={html}
+            js={js}
+          />
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
-          <Typography className={fileName}>{example.files.html}</Typography>
+        <Paper className={classes.paper}>
+          <Typography className={classes.fileName}>
+            {example.files.html}
+          </Typography>
           <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-          <CodeSandboxButton className={editButton} html={html} js={js} />
+          <CodeSandboxButton
+            className={classes.editButton}
+            html={html}
+            js={js}
+          />
         </Paper>
       </Grid>
     </Grid>
