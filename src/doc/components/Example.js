@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Example = () => {
-  const { editButton, paper, htmlContainer, fileName } = useStyles();
+  const classes = useStyles();
   const { exampleKey } = useParams((params) => params);
   const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
@@ -79,7 +79,7 @@ const Example = () => {
       </Grid>
       <Grid item xs={12}>
         <Paper
-          className={paper}
+          className={classes.paper}
           onClick={() => {
             // Activate map interactions on tap for mobile devices
             mapContainerRef.current.style.pointerEvents = 'auto';
@@ -87,24 +87,36 @@ const Example = () => {
         >
           <div
             ref={mapContainerRef}
-            className={htmlContainer}
+            className={classes.htmlContainer}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: html }}
           />
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
-          <Typography className={fileName}>{example.files.js}</Typography>
+        <Paper className={classes.paper}>
+          <Typography className={classes.fileName}>
+            {example.files.js}
+          </Typography>
           <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-          <CodeSandboxButton className={editButton} html={html} js={js} />
+          <CodeSandboxButton
+            className={classes.editButton}
+            html={html}
+            js={js}
+          />
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
-          <Typography className={fileName}>{example.files.html}</Typography>
+        <Paper className={classes.paper}>
+          <Typography className={classes.fileName}>
+            {example.files.html}
+          </Typography>
           <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-          <CodeSandboxButton className={editButton} html={html} js={js} />
+          <CodeSandboxButton
+            className={classes.editButton}
+            html={html}
+            js={js}
+          />
         </Paper>
       </Grid>
     </Grid>
