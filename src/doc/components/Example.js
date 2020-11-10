@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -12,6 +12,8 @@ const useStyles = makeStyles((theme) => ({
   },
   htmlContainer: {
     height: 500,
+  },
+  noPointer: {
     // Remove pointer events for mobile devices on load
     [theme.breakpoints.down('xs')]: {
       pointerEvents: 'none',
@@ -39,7 +41,7 @@ const Example = () => {
   const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
-  const mapContainerRef = useRef(null);
+  const [isNavigable, setIsNavigable] = useState(false);
 
   useEffect(() => {
     import(`../examples/${example.files.html}`).then((h) => {
@@ -78,16 +80,11 @@ const Example = () => {
         <Typography>{example.description}</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Paper
-          className={classes.paper}
-          onClick={() => {
-            // Activate map interactions on tap for mobile devices
-            mapContainerRef.current.style.pointerEvents = 'auto';
-          }}
-        >
+        <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
           <div
-            ref={mapContainerRef}
-            className={classes.htmlContainer}
+            className={`${classes.htmlContainer} ${
+              isNavigable ? '' : classes.noPointer
+            }`}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: html }}
           />
