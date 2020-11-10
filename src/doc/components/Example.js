@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -6,12 +6,16 @@ import { useParams } from 'react-router-dom';
 import CodeSandboxButton from './CodeSandboxButton';
 import EXAMPLES from '../examples';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     padding: 12,
   },
   htmlContainer: {
     height: 500,
+    // Remove pointer events for mobile devices on load
+    [theme.breakpoints.down('xs')]: {
+      pointerEvents: 'none',
+    },
   },
   paper: {
     position: 'relative',
@@ -27,7 +31,7 @@ const useStyles = makeStyles({
     paddingTop: 5,
     paddingRight: 10,
   },
-});
+}));
 
 const Example = () => {
   const { editButton, paper, htmlContainer, fileName } = useStyles();
@@ -35,6 +39,7 @@ const Example = () => {
   const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
+  const mapContainerRef = useRef(null);
 
   useEffect(() => {
     import(`../examples/${example.files.html}`).then((h) => {
@@ -73,8 +78,15 @@ const Example = () => {
         <Typography>{example.description}</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
+        <Paper
+          className={paper}
+          onClick={() => {
+            // Activate map interactions on tap for mobile devices
+            mapContainerRef.current.style.pointerEvents = 'auto';
+          }}
+        >
           <div
+            ref={mapContainerRef}
             className={htmlContainer}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: html }}
