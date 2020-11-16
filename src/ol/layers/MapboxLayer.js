@@ -4,23 +4,7 @@ import mapboxgl from 'mapbox-gl';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-
-const getCopyrightFromSources = (mbMap) => {
-  let copyrights = [];
-  const regex = /<[^>]*>[^>]*<\/[^>]*>/g;
-  // Trick from Mapbox AttributionControl to know if the source is used.
-  const { sourceCaches } = mbMap.style;
-  Object.entries(sourceCaches).forEach(([, sourceCache]) => {
-    if (sourceCache.used) {
-      copyrights = copyrights.concat(
-        regex.exec(sourceCache.getSource().attribution),
-      );
-    }
-  });
-  return Array.from(
-    new Set(copyrights.filter((copyright) => !!copyright)),
-  ).join(', ');
-};
+import CopyrightUtils from '../../common/CopyrightUtils';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -243,12 +227,12 @@ export default class MapboxLayer extends Layer {
        * @type {boolean}
        */
       this.loaded = true;
-      if (!this.copyright) {
+      if (!this.copyrights) {
         /**
          * Copyright statement.
          * @type {string}
          */
-        this.copyright = getCopyrightFromSources(this.mbMap);
+        this.copyrights = CopyrightUtils.getMapCopyrights(this.mbMap);
       }
       this.dispatchEvent({
         type: 'load',

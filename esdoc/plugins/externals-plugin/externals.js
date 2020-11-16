@@ -35,6 +35,9 @@
  * @external {mapboxgl.Map} https://docs.mapbox.com/mapbox-gl-js/api/map/
  */
 /**
+ * @external {mapboxgl.Layer} https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/
+ */
+/**
  * @external {mapboxgl.map.event:mousemove} https://docs.mapbox.com/mapbox-gl-js/api/map/#map.event:mousemove
  */
 /**

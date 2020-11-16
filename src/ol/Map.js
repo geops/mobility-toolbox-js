@@ -1,6 +1,8 @@
 import OLMap from 'ol/Map';
 import OLLayer from 'ol/layer/Layer';
 import Layer from './layers/Layer';
+import MapboxLayer from './layers/MapboxLayer';
+import mixin from '../common/mixins/MapMixin';
 
 /**
  * An OpenLayers map for handling mobility layer.
@@ -20,7 +22,7 @@ import Layer from './layers/Layer';
  *
  * @extends {ol/Map~Map}
  */
-class Map extends OLMap {
+class Map extends mixin(OLMap) {
   /**
    * Constructor.
    *
@@ -45,20 +47,24 @@ class Map extends OLMap {
    * @param {Layer|ol/layer/Layer~Layer} layer The layer to add.
    */
   addLayer(layer) {
-    if (!layer.init) {
-      // layer is an OpenLayer layer
-      super.addLayer(layer);
-    } else {
+    if (layer instanceof Layer) {
       // layer is an mobility layer
       layer.init(this);
+      this.mobilityLayers.push(layer);
+      this.updateCopyrights();
 
       if (layer.olLayer) {
         super.addLayer(layer.olLayer);
       }
 
-      if (layer instanceof Layer) {
-        this.mobilityLayers.push(layer);
+      if (layer instanceof MapboxLayer) {
+        layer.on('load', () => {
+          this.updateCopyrights();
+        });
       }
+    } else {
+      // layer is an OpenLayer layer
+      super.addLayer(layer);
     }
   }
 

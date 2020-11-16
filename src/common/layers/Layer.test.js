@@ -96,14 +96,14 @@ describe('Layer', () => {
     }).toThrow(Error);
   });
 
-  test('should initialize copyright property.', () => {
+  test('should initialize copyrights property.', () => {
     const layer = new Layer({
       name: 'Layer',
       olLayer,
-      copyright: '&copy: copyright',
+      copyrights: ['&copy: copyright', 'another copyright'],
     });
 
-    expect(layer.copyright).toEqual('&copy: copyright');
+    expect(layer.copyrights[0]).toEqual('&copy: copyright');
   });
 
   test('should set and get copyright property.', () => {
