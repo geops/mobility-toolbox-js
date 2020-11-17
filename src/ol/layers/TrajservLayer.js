@@ -132,7 +132,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
         this.updateTrajectoryStations(this.selectedVehicleId).then(
           (trajStations) => {
             this.clickCallbacks.forEach((callback) =>
-              callback(trajStations, this, evt),
+              callback(trajStations, vehicle, this, evt),
             );
           },
         );

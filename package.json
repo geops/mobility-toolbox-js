@@ -12,13 +12,12 @@
     "@material-ui/styles": "^4.9.14",
     "codesandbox": "^2.1.16",
     "es6-mixin": "^0.3.0",
-    "lodash": "^4.17.15",
     "path": "^0.12.7",
     "prop-types": "^15.7.2",
     "query-string": "^6.13.0",
-    "react": "^16.13.1",
+    "react": "^16",
     "react-app-polyfill": "^1.0.6",
-    "react-dom": "^16.13.1",
+    "react-dom": "^16",
     "react-markdown": "^4.3.1",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
@@ -29,8 +28,10 @@
     "uuid": "^8.1.0"
   },
   "peerDependencies": {
-    "mapbox-gl": "1.11.1",
-    "ol": "6.3.1"
+    "mapbox-gl": "^1",
+    "ol": "6",
+    "react": "^16",
+    "react-dom": "^16"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "7.12.1",
@@ -66,10 +67,10 @@
     "jest-serializer-html": "7.0.0",
     "jsdoc": "3.6.4",
     "lint-staged": "10.2.9",
-    "mapbox-gl": "1.11.1",
+    "mapbox-gl": "1.12.0",
     "neutrino": "9.1.0",
     "node-sass": "4.14.1",
-    "ol": "6.3.1",
+    "ol": "6.4.3",
     "postcss-loader": "3.0.0",
     "prettier": "2.0.5",
     "sass-loader": "8.0.2",
@@ -101,7 +102,7 @@
     "publish:public": "yarn version && git push origin HEAD && yarn build && cd build && yarn publish",
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "start:examples": "webpack-dev-server --mode development --open",
-    "test": "REACT_APP_LIB_MODE=1 jest --env=jsdom --transformIgnorePatterns \"/node_modules/(?!(ol)/).*/\"",
+    "test": "REACT_APP_LIB_MODE=1 jest --env=jsdom --transformIgnorePatterns \"/node_modules/(?!(ol|ol-mapbox-style)/).*/\"",
     "test:watch": "yarn test --watchAll"
   },
   "browserslist": {
