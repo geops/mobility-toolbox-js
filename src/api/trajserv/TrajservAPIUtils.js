@@ -25,6 +25,7 @@ const translateDates = (dates) => {
  * @private
  */
 export const translateTrajStationsResp = (data) => {
+  console.log(data);
   const {
     id,
     hs: destination,
@@ -39,6 +40,7 @@ export const translateTrajStationsResp = (data) => {
     c: bgColor,
     tc: datacolor,
     a: { n: operator, u: operatorUrl, tz: operatorTimeZone },
+    f: { n: publisher, u: publisherUrl, tz: publisherTimeZone },
     tt: {
       n: dateNotOperatingDays,
       p: dateAdditionalOperatingDays,
@@ -107,6 +109,9 @@ export const translateTrajStationsResp = (data) => {
     operator,
     operatorUrl,
     operatorTimeZone,
+    publisher,
+    publisherUrl,
+    publisherTimeZone,
   };
 };
 
@@ -123,14 +128,23 @@ export const translateTrajCollResponse = (features) => {
     const {
       ID: id,
       ProductIdentifier: type,
-      JourneyIdentifier: journeyIdentifier,
       PublishedLineName: name,
       RouteIdentifier: routeIdentifier,
+      DirectionText: directionText,
       Operator: operator,
-      TimeIntervals: timeIntervals,
+      OperatorURL: operatorUrl,
+      Publisher: publisher,
+      PublisherURL: publisherUrl,
+      License: license,
+      LicenseUrl: licenseUrl,
+      LicenseNote: licenseNote,
       Color: color,
-      TextColor: textColor,
+      JourneyIdentifier: journeyIdentifier,
+      RealtimeAvailable: realtimeAvailable,
+      DayOfOperation: dayOfOperation,
       Delay: delay,
+      TimeIntervals: timeIntervals,
+      TextColor: textColor,
       Cancelled: cancelled,
     } = traj.properties;
 
@@ -138,13 +152,22 @@ export const translateTrajCollResponse = (features) => {
       id,
       type,
       name,
+      routeIdentifier,
+      directionText,
+      operator,
+      operatorUrl,
+      publisher,
+      publisherUrl,
+      license,
+      licenseUrl,
+      licenseNote,
+      journeyIdentifier,
+      realtimeAvailable,
+      dayOfOperation,
+      delay,
+      timeIntervals,
       color: color && `#${color}`,
       textColor: textColor && `#${textColor}`,
-      delay,
-      operator,
-      journeyIdentifier,
-      routeIdentifier,
-      timeIntervals,
       geometry,
       cancelled,
     });
