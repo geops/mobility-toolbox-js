@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const pjson = require('../package.json');
 
 const { peerDependencies } = pjson;
