@@ -25,7 +25,6 @@ const translateDates = (dates) => {
  * @private
  */
 export const translateTrajStationsResp = (data) => {
-  console.log(data);
   const {
     id,
     hs: destination,
