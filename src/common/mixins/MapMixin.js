@@ -6,7 +6,7 @@
 
 import { Map as MBMap } from 'mapbox-gl';
 import MapboxLayer from '../../ol/layers/MapboxLayer';
-import CopyrightUtils from '../CopyrightUtils';
+import getMapCopyrights from '../getMapCopyrights';
 
 /**
  * MapInterface.
@@ -41,7 +41,7 @@ const MapMixin = (Base) =>
       // add copyrights from mapbox map
       if (this instanceof MBMap) {
         target = this.getContainer();
-        copyrights = CopyrightUtils.getMapCopyrights(this);
+        copyrights = getMapCopyrights(this);
       } else {
         target = this.getTargetElement();
       }
