@@ -156,7 +156,6 @@ export default class Tracker {
   setHoverVehicleId(id) {
     if (id !== this.hoverVehicleId) {
       this.hoverVehicleId = id;
-      this.renderTrajectories();
     }
   }
 
