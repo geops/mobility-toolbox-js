@@ -4,7 +4,7 @@ Toolbox for JavaScript applications in the domains of mobility and logistics.
 The tools in this library have been inspired by many projects realized for public transport agencies, mobility providers and logistics companies.
 
 [![npm](https://img.shields.io/npm/v/mobility-toolbox-js.svg?style=flat-square)](https://www.npmjs.com/package/mobility-toolbox-js)
-[![Build](https://github.com/geops/mobility-toolbox-js/workflows/Build/badge.svg)
+![Build](https://github.com/geops/mobility-toolbox-js/workflows/Build/badge.svg)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/b368ab18-9dbf-416c-91f6-a82076b02c10/deploy-status)](https://app.netlify.com/sites/mobility-toolbox-js/deploys)
 
 ## Main Features
