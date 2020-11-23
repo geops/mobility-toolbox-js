@@ -15,8 +15,7 @@ const codeHtmlPage = `
 `;
 
 const codeMapObject = `
-import { Map } from 'mapbox-gl';
-import { TrajservLayer } from 'mobility-toolbox-js/mapbox';
+import { Map, TrajservLayer } from 'mobility-toolbox-js/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const map = new Map({

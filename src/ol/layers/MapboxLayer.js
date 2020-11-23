@@ -4,7 +4,7 @@ import mapboxgl from 'mapbox-gl';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-import getMapCopyrights from '../../common/getMapCopyrights';
+import getMapboxMapCopyrights from '../../common/getMapboxMapCopyrights';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -232,7 +232,7 @@ export default class MapboxLayer extends Layer {
          * Copyright statement.
          * @type {string}
          */
-        this.copyrights = getMapCopyrights(this.mbMap);
+        this.copyrights = getMapboxMapCopyrights(this.mbMap);
       }
       this.dispatchEvent({
         type: 'load',
