@@ -1,20 +1,27 @@
-import CommonCopyrightControl from '../../common/controls/Copyright';
+import { unByKey } from 'ol/Observable';
+import CommonControl from '../../common/controls/Control';
+import mixin from '../../common/controls/mixins/Copyright';
 import getMapboxMapCopyrights from '../../common/getMapboxMapCopyrights';
 
-class CopyrightControl extends CommonCopyrightControl {
-  activate(map) {
-    super.activate(map, map.getContainer());
-    map.on('styledata', this.renderCopyrights.bind(this));
+class CopyrightControl extends mixin(CommonControl) {
+  activate() {
+    super.activate();
+    this.addCopyrightContainer(this.map.getContainer());
+
+    this.map.on('change:layers', this.renderCopyrights.bind(this));
+    this.map.on('change:mobilityLayers', this.renderCopyrights.bind(this));
+    this.map.once('load', () => this.renderCopyrights());
   }
 
   getCopyrights() {
-    return super
-      .getCopyrights()
-      .concat(getMapboxMapCopyrights(this.map));
+    return super.getCopyrights().concat(getMapboxMapCopyrights(this.map));
   }
 
   deactivate() {
-    this.map.off('styledata', this.renderCopyrights);
+    this.removeCopyrightContainer();
+    this.map.off('change:layers', this.renderCopyrights);
+    this.map.off('change:mobilityLayers', this.renderCopyrights);
+    unByKey(this.layerChangeKey);
   }
 }
 

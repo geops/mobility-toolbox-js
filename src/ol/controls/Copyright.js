@@ -1,10 +1,25 @@
-import CommonCopyrightControl from '../../common/controls/Copyright';
+import MapboxLayer from '../layers/MapboxLayer';
+import CommonControl from '../../common/controls/Control';
+import mixin from '../../common/controls/mixins/Copyright';
 
-class Copyright extends CommonCopyrightControl {
-  activate(map) {
-    super.activate(map, map.getTargetElement());
+class Copyright extends mixin(CommonControl) {
+  onLayerChange() {
     this.renderCopyrights();
-    map.on('change:layerGroup', () => this.renderCopyrights());
+
+    this.map.getMobilityLayers().forEach((l) => {
+      if (l instanceof MapboxLayer) {
+        l.mbMap.once('load', () => {
+          this.renderCopyrights();
+        });
+      }
+    });
+  }
+
+  activate() {
+    super.activate();
+    this.addCopyrightContainer(this.map.getTargetElement());
+    this.map.on('change:layers', this.onLayerChange.bind(this));
+    this.map.on('change:mobilityLayers', this.onLayerChange.bind(this));
   }
 
   getCopyrights() {
@@ -17,6 +32,13 @@ class Copyright extends CommonCopyrightControl {
     });
 
     return copyrights;
+  }
+
+  deactivate() {
+    super.deactivate();
+    this.removeCopyrightContainer();
+    this.map.un('change:layers', this.onLayerChange);
+    this.map.un('change:mobilityLayers', this.onLayerChange);
   }
 }
 

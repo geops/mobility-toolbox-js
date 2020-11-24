@@ -43,7 +43,7 @@ class Map extends mixin(OLMap) {
     this.mobilityLayers =
       (options.layers || []).filter((l) => l instanceof Layer) || [];
 
-    this.addMobilityControl(new CopyrightControl());
+    this.addMobilityControl(new CopyrightControl(this));
   }
 
   /**
@@ -59,6 +59,10 @@ class Map extends mixin(OLMap) {
       if (layer.olLayer) {
         super.addLayer(layer.olLayer);
       }
+      this.dispatchEvent({
+        type: 'change:mobilityLayers',
+        target: this,
+      });
     } else {
       // layer is an OpenLayer layer
       super.addLayer(layer);

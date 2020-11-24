@@ -1,5 +1,4 @@
 import { Map as MBMap } from 'mapbox-gl';
-import Observable from 'ol/Observable';
 import Layer from '../common/layers/Layer';
 import CopyrightControl from './controls/Copyright';
 import mixin from '../common/mixins/MapMixin';
@@ -23,7 +22,7 @@ class Map extends mixin(MBMap) {
     /** @ignore */
     this.mobilityLayers = [];
 
-    this.addMobilityControl(new CopyrightControl());
+    this.addMobilityControl(new CopyrightControl(this));
   }
 
   /**
@@ -34,7 +33,7 @@ class Map extends mixin(MBMap) {
   addLayer(layer, beforeId) {
     if (layer instanceof Layer) {
       this.mobilityLayers.push(layer);
-      this.dispatchEvent('change:mobilityLayer');
+      this.fire('change:mobilityLayers');
 
       if (this.isStyleLoaded()) {
         layer.init(this, beforeId);
@@ -70,7 +69,5 @@ class Map extends mixin(MBMap) {
     }
   }
 }
-
-Object.assign(Map.prototype, Observable);
 
 export default Map;
