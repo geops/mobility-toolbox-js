@@ -3,7 +3,7 @@ import OLLayer from 'ol/layer/Layer';
 import { defaults as defaultControls } from 'ol/control';
 import Layer from './layers/Layer';
 import mixin from '../common/mixins/MapMixin';
-import CopyrightControl from './controls/Copyright';
+// import CopyrightControl from './controls/Copyright';
 
 /**
  * An OpenLayers map for handling mobility layer.
@@ -43,7 +43,7 @@ class Map extends mixin(OLMap) {
     this.mobilityLayers =
       (options.layers || []).filter((l) => l instanceof Layer) || [];
 
-    this.addMobilityControl(new CopyrightControl(this));
+    // this.addMobilityControl(new CopyrightControl(this));
   }
 
   /**

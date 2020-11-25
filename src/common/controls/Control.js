@@ -14,6 +14,7 @@ class Control extends Observable {
   constructor(map, options = {}) {
     super();
     this.map = map;
+    this.targetElement = options.targetElement || this.map.getTargetElement();
 
     /** @ignore */
     this.options = {

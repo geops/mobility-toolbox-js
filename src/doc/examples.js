@@ -90,4 +90,14 @@ export default [
       js: 'query-objects.js',
     },
   },
+  {
+    name: 'Copyright',
+    key: 'ol-copyright',
+    description: 'This example shows how to use the Copyright component.',
+    // img: queryObjectsImg,
+    files: {
+      html: 'ol-copyright.html',
+      js: 'ol-copyright.js',
+    },
+  },
 ];
