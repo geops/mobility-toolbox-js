@@ -1,6 +1,7 @@
 const CopyrightMixin = (Base) =>
   class extends Base {
-    addCopyrightContainer() {
+    addCopyrightContainer(target) {
+      this.target = this.target || target;
       this.copyrightElement = document.createElement('div');
       this.copyrightElement.id = 'mb-copyright';
 
@@ -13,7 +14,7 @@ const CopyrightMixin = (Base) =>
         backgroundColor: 'rgba(255, 255, 255, 0.5)',
       });
 
-      this.targetElement.appendChild(this.copyrightElement);
+      this.target.appendChild(this.copyrightElement);
       this.renderCopyrights();
     }
 
@@ -38,7 +39,7 @@ const CopyrightMixin = (Base) =>
 
     removeCopyrightContainer() {
       super.deactivate();
-      this.targetElement.removeChild(this.copyrightElement);
+      this.target.removeChild(this.copyrightElement);
     }
   };
 
