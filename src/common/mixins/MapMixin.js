@@ -43,6 +43,13 @@ const MapMixin = (Base) =>
       this.mobilityControls.push(control);
       control.activate(this);
     }
+
+    removeMobilityControl(control) {
+      control.deactivate(this);
+      this.mobilityControls = this.mobilityControls.filter(
+        (c) => c !== control,
+      );
+    }
   };
 
 export default MapMixin;
