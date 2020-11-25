@@ -24,30 +24,8 @@ class Control extends Observable {
     this.active = options.active;
 
     if (this.options.active) {
-      this.activate();
+      this.active = true;
     }
-  }
-
-  /**
-   * Activate the control.
-   */
-  activate() {
-    this.active = true;
-  }
-
-  /**
-   * Deactivate the control.
-   */
-  deactivate() {
-    this.active = false;
-  }
-
-  /**
-   * Get te control's active state.
-   * @returns {boolean} Active state.
-   */
-  getActive() {
-    return this.active;
   }
 }
 
