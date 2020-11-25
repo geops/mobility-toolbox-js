@@ -1,6 +1,6 @@
 import { Map as MBMap } from 'mapbox-gl';
 import Layer from '../common/layers/Layer';
-// import CopyrightControl from './controls/Copyright';
+import CopyrightControl from './controls/Copyright';
 import mixin from '../common/mixins/MapMixin';
 
 /**
@@ -22,7 +22,7 @@ class Map extends mixin(MBMap) {
     /** @ignore */
     this.mobilityLayers = [];
 
-    // this.addMobilityControl(new CopyrightControl(this));
+    this.addMobilityControl(new CopyrightControl(this));
   }
 
   /**

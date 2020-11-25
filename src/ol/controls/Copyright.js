@@ -3,6 +3,10 @@ import CommonControl from '../../common/controls/Control';
 import mixin from '../../common/controls/mixins/Copyright';
 
 class Copyright extends mixin(CommonControl) {
+  constructor(map, options = {}) {
+    super(map, options);
+  }
+
   onLayerChange() {
     this.renderCopyrights();
 
@@ -17,7 +21,7 @@ class Copyright extends mixin(CommonControl) {
 
   activate() {
     super.activate();
-    this.addCopyrightContainer();
+    this.addCopyrightContainer(this.map.getTargetElement());
     this.map.on('change:layers', this.onLayerChange.bind(this));
     this.map.on('change:mobilityLayers', this.onLayerChange.bind(this));
   }

@@ -4,6 +4,10 @@ import mixin from '../../common/controls/mixins/Copyright';
 import getMapboxMapCopyrights from '../../common/getMapboxMapCopyrights';
 
 class CopyrightControl extends mixin(CommonControl) {
+  constructor(map, options = {}) {
+    super(map, options);
+  }
+
   activate() {
     super.activate();
     this.addCopyrightContainer(this.map.getContainer());

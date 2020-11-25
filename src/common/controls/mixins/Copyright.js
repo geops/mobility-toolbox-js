@@ -1,7 +1,17 @@
+/* eslint-disable no-useless-constructor */
 const CopyrightMixin = (Base) =>
   class extends Base {
+    /**
+     * Constructor
+     * @param {Object} [options] Control options.
+     * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
+     */
+    constructor(map, options = {}) {
+      super(map, options);
+    }
+
     addCopyrightContainer(target) {
-      this.target = this.target || target;
+      this.target = this.options.targetElement || target;
       this.copyrightElement = document.createElement('div');
       this.copyrightElement.id = 'mb-copyright';
 
