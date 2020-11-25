@@ -10,6 +10,7 @@ class Control extends Observable {
    * @param {ol/Map~Map|mapboxgl.Map} map Control's map.
    * @param {Object} [options] Control options.
    * @param {boolean} [options.active = true] Whether the control is active.
+   * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
    */
   constructor(map, options = {}) {
     super();
