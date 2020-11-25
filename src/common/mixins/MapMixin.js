@@ -26,6 +26,18 @@ export class MapInterface {
    * @returns {Layer[]}
    */
   getMobilityLayers() {}
+
+  /**
+   * Add a mobility Control to the map.
+   * @param {Control} control control to add
+   */
+  addMobilityControl(control) {}
+
+  /**
+   * Remove a mobility Control to the map.
+   * @param {Control} control control to remove
+   */
+  removeMobilityControl(control) {}
 }
 
 /**
