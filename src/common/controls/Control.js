@@ -9,13 +9,9 @@ class Control extends Observable {
    *
    * @param {Object} [options] Control options.
    * @param {boolean} [options.active = true] Whether the control is active.
-   * @param {function} [options.renderCopyrights = (copyrights) => copyrights.join(' | ')] Callback function to render copyrights.
    */
   constructor(options = {}) {
     super(options);
-    this.renderCopyrights = options.renderCopyrights
-      ? options.renderCopyrights
-      : (copyrights) => copyrights.join(' | ');
 
     /** @ignore */
     this.options = options;

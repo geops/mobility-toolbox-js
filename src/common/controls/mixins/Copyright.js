@@ -40,9 +40,9 @@ const CopyrightMixin = (Base) =>
       return [...new Set(copyrights.filter((c) => c.trim()))];
     }
 
-    renderAllCopyrights() {
+    renderCopyrights() {
       const copyrights = this.getCopyrights();
-      this.copyrightElement.innerHTML = this.renderCopyrights(copyrights);
+      this.copyrightElement.innerHTML = copyrights.join(' | ');
     }
 
     removeCopyrightContainer() {
