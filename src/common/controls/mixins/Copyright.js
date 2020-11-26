@@ -6,8 +6,8 @@ const CopyrightMixin = (Base) =>
      * @param {Object} [options] Control options.
      * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
      */
-    constructor(map, options = {}) {
-      super(map, options);
+    constructor(options = {}) {
+      super(options);
     }
 
     addCopyrightContainer(target) {
@@ -25,7 +25,6 @@ const CopyrightMixin = (Base) =>
       });
 
       this.target.appendChild(this.copyrightElement);
-      this.renderCopyrights();
     }
 
     getCopyrights() {

@@ -4,21 +4,19 @@ import CopyrightControl from '../../ol/controls/Copyright';
 import 'ol/ol.css';
 
 export default () => {
+  // Define a custom copyright
+  const customCopyrightControl = new CopyrightControl({
+    targetElement: document.getElementById('copyright'),
+  });
+
   const map = new Map({
     target: 'map',
-    // mobilityControls: [customCopyrightControl],
+    mobilityControls: [customCopyrightControl],
     view: new View({
       center: [950690.34, 6003962.67],
       zoom: 15,
     }),
   });
-
-  // define a custom copyright
-  const customCopyrightControl = new CopyrightControl(map, {
-    targetElement: document.getElementById('copyright'),
-  });
-
-  map.addMobilityControl(customCopyrightControl);
 
   const url = `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`;
   const mapboxLayer = new MapboxLayer({ url });

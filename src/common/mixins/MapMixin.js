@@ -18,6 +18,8 @@ export class MapInterface {
    * Constructor.
    *
    * @param {Object} options Map options
+   * @param {Object} options Map options
+   * @param {Array<Control>} [options.mobilityControls] Custom controls of the map.
    */
   constructor(options = {}) {}
 
@@ -37,6 +39,11 @@ const MapMixin = (Base) =>
     constructor(options = {}) {
       super(options);
       this.mobilityControls = [];
+      if (options.mobilityControls) {
+        options.mobilityControls.forEach((control) => {
+          this.addMobilityControl(control);
+        });
+      }
     }
 
     addMobilityControl(control) {

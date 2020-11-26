@@ -4,11 +4,12 @@ import mixin from '../../common/controls/mixins/Copyright';
 import getMapboxMapCopyrights from '../../common/getMapboxMapCopyrights';
 
 class CopyrightControl extends mixin(CommonControl) {
-  constructor(map, options = {}) {
-    super(map, options);
+  constructor(options = {}) {
+    super(options);
   }
 
-  activate() {
+  activate(map) {
+    this.map = map;
     this.active = true;
     this.addCopyrightContainer(this.map.getContainer());
 
@@ -22,6 +23,7 @@ class CopyrightControl extends mixin(CommonControl) {
   }
 
   deactivate() {
+    this.map = null;
     this.removeCopyrightContainer();
     this.map.off('change:layers', this.renderCopyrights);
     this.map.off('change:mobilityLayers', this.renderCopyrights);
