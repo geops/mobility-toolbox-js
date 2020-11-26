@@ -1,3 +1,27 @@
-<div id="map" style="width: 100%; height: 100%;"></div>
-<div id="button"></div>
-<div id="copyright"></div>
+<style>
+  button#button {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    right: 10px;
+    width: 150px;
+    background-color: #76B833;
+    border: none;
+    border-radius: 5px;
+    font: Bold 14px/24px Lato, Arial, sans-serif;
+    color: #FFFFFF;
+  }
+
+  button#button:hover {
+    box-shadow: 0px 5px 16px #35353573;
+  }
+
+  #copyright > #mb-copyright{
+    font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
+  }
+</style>
+<div style="width: 100%; height: 100%; position: relative;">
+  <button id="button" type="button">Remove copyright</button>
+  <div id="map" style="width: 100%; height: 100%;"></div>
+  <div id="copyright"></div>
+</div>
