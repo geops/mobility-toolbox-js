@@ -35,8 +35,7 @@ class Copyright extends mixin(CommonControl) {
         copyrights = copyrights.concat(l.copyrights);
       }
     });
-
-    return copyrights;
+    return [...new Set(copyrights.filter((c) => c.trim()))];
   }
 
   deactivate() {
