@@ -7,7 +7,7 @@ export default () => {
   // Define a custom copyright
   const customCopyrightControl = new CopyrightControl({
     targetElement: document.getElementById('copyright'),
-    renderCopyrights: (copyrights) => copyrights.join(', '),
+    // renderCopyrights: (copyrights) => copyrights.join(', '),
   });
 
   const map = new Map({
@@ -26,6 +26,6 @@ export default () => {
 
   // Add example button to remove the copyright Control from the map.
   document.getElementById('button').addEventListener('click', () => {
-    map.removeMobilityControl(customCopyrightControl);
+    // map.removeMobilityControl(customCopyrightControl);
   });
 };
