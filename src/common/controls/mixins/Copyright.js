@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-constructor */
 const CopyrightMixin = (Base) =>
   class extends Base {
     /**
