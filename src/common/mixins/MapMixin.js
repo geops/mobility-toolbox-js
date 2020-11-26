@@ -26,6 +26,18 @@ export class MapInterface {
    * @returns {Layer[]}
    */
   getMobilityLayers() {}
+
+  /**
+   * Add a mobility Control to the map.
+   * @param {Control} control control to add
+   */
+  addMobilityControl(control) {}
+
+  /**
+   * Remove a mobility Control to the map.
+   * @param {Control} control control to remove
+   */
+  removeMobilityControl(control) {}
 }
 
 /**
@@ -42,6 +54,13 @@ const MapMixin = (Base) =>
     addMobilityControl(control) {
       this.mobilityControls.push(control);
       control.activate(this);
+    }
+
+    removeMobilityControl(control) {
+      control.deactivate(this);
+      this.mobilityControls = this.mobilityControls.filter(
+        (c) => c !== control,
+      );
     }
   };
 
