@@ -15,7 +15,7 @@ const CopyrightMixin = (Base) =>
       });
 
       this.target.appendChild(this.copyrightElement);
-      this.renderAllCopyrights();
+      this.render();
     }
 
     getCopyrights() {
@@ -32,7 +32,7 @@ const CopyrightMixin = (Base) =>
       return [...new Set(copyrights.filter((c) => c.trim()))];
     }
 
-    renderAllCopyrights() {
+    render() {
       const copyrights = this.getCopyrights();
       this.copyrightElement.innerHTML = this.renderCopyrights(copyrights);
     }

@@ -4,12 +4,12 @@ import mixin from '../../common/controls/mixins/Copyright';
 
 class Copyright extends mixin(CommonControl) {
   onLayerChange() {
-    this.renderAllCopyrights();
+    this.render();
 
     this.map.getMobilityLayers().forEach((l) => {
       if (l instanceof MapboxLayer) {
         l.mbMap.once('load', () => {
-          this.renderAllCopyrights();
+          this.render();
         });
       }
     });

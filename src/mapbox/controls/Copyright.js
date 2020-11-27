@@ -8,9 +8,9 @@ class CopyrightControl extends mixin(CommonControl) {
     super.activate();
     this.addCopyrightContainer(this.map.getContainer());
 
-    this.map.on('change:layers', this.renderAllCopyrights.bind(this));
-    this.map.on('change:mobilityLayers', this.renderAllCopyrights.bind(this));
-    this.map.once('load', () => this.renderAllCopyrights());
+    this.map.on('change:layers', this.render.bind(this));
+    this.map.on('change:mobilityLayers', this.render.bind(this));
+    this.map.once('load', () => this.render());
   }
 
   getCopyrights() {
@@ -19,8 +19,8 @@ class CopyrightControl extends mixin(CommonControl) {
 
   deactivate() {
     this.removeCopyrightContainer();
-    this.map.off('change:layers', this.renderAllCopyrights);
-    this.map.off('change:mobilityLayers', this.renderAllCopyrights);
+    this.map.off('change:layers', this.render);
+    this.map.off('change:mobilityLayers', this.render);
     unByKey(this.layerChangeKey);
   }
 }
