@@ -21,18 +21,24 @@ class Control extends Observable {
    *
    * @ignore
    */
-  defineProperties({ map, active, options }) {
+  defineProperties(opts) {
+    let { active } = opts;
     Object.defineProperties(this, {
       active: {
-        value: active,
-        writable: true,
+        get: () => {
+          return active;
+        },
+        set: (newActiveVal) => {
+          active = newActiveVal;
+        },
+        configurable: true,
       },
       options: {
-        value: options || {},
+        value: opts.options || {},
         writable: true,
       },
       map: {
-        value: map,
+        value: opts.map,
         writable: true,
       },
     });

@@ -3,6 +3,31 @@ import CommonControl from '../../common/controls/Control';
 import mixin from '../../common/controls/mixins/Copyright';
 
 class Copyright extends mixin(CommonControl) {
+  defineProperties(opts) {
+    super.defineProperties(opts);
+    let { active } = opts;
+    Object.defineProperties(this, {
+      active: {
+        get: () => {
+          return active;
+        },
+        set: (newActiveVal) => {
+          active = newActiveVal;
+          if (newActiveVal) {
+            this.addCopyrightContainer(this.map.getTargetElement());
+            this.map.on('change:layers', this.onLayerChange.bind(this));
+            this.map.on('change:mobilityLayers', this.onLayerChange.bind(this));
+          } else {
+            this.removeCopyrightContainer();
+            this.map.un('change:layers', this.onLayerChange);
+            this.map.un('change:mobilityLayers', this.onLayerChange);
+          }
+        },
+        configurable: true,
+      },
+    });
+  }
+
   onLayerChange() {
     this.renderCopyrights();
 
@@ -15,13 +40,6 @@ class Copyright extends mixin(CommonControl) {
     });
   }
 
-  activate() {
-    this.active = true;
-    this.addCopyrightContainer(this.map.getTargetElement());
-    this.map.on('change:layers', this.onLayerChange.bind(this));
-    this.map.on('change:mobilityLayers', this.onLayerChange.bind(this));
-  }
-
   getCopyrights() {
     let copyrights = super.getCopyrights();
 
@@ -32,13 +50,6 @@ class Copyright extends mixin(CommonControl) {
     });
 
     return copyrights;
-  }
-
-  deactivate() {
-    this.active = false;
-    this.removeCopyrightContainer();
-    this.map.un('change:layers', this.onLayerChange);
-    this.map.un('change:mobilityLayers', this.onLayerChange);
   }
 }
 
