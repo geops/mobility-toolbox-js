@@ -1,11 +1,9 @@
-/* eslint-disable no-useless-constructor */
+/**
+ * @param {Object} [options] Control options.
+ * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
+ */
 const CopyrightMixin = (Base) =>
   class extends Base {
-    /**
-     * Constructor
-     * @param {Object} [options] Control options.
-     * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
-     */
     constructor(options = {}) {
       super(options);
     }
