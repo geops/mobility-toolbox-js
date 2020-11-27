@@ -193,7 +193,9 @@ export default class MapboxLayer extends Layer {
           this.loadMbMap();
         }),
       );
+      return;
     }
+
     if (!this.visible) {
       // On next change of visibility we load the map
       this.olListenersKeys.push(
@@ -201,6 +203,7 @@ export default class MapboxLayer extends Layer {
           this.loadMbMap();
         }),
       );
+      return;
     }
 
     // If the map hasn't been resized, the center could be [NaN,NaN].
