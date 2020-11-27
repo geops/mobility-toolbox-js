@@ -34,8 +34,8 @@ export class MapInterface {
   addMobilityControl(control) {}
 
   /**
-   * Remove a mobility Control to the map.
-   * @param {Control} control control to remove
+   * Remove a mobility control from the map.
+   * @param {Control} control Control to remove
    */
   removeMobilityControl(control) {}
 }
