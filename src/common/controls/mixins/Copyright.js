@@ -1,5 +1,18 @@
+/**
+ * @param {ol/Map~Map|mapboxgl.Map} map Copyright's map.
+ * @param {Object} [options] Copyright options.
+ * @param {boolean} [options.active = true] Whether the copyright is active.
+ * @param {function} [options.renderCopyrights = (copyrights) => copyrights.join(' | ')] Callback function to render copyrights.
+ */
 const CopyrightMixin = (Base) =>
   class extends Base {
+    constructor(map, options = {}) {
+      super(map, options);
+      this.renderCopyrights = options.renderCopyrights
+        ? options.renderCopyrights
+        : (copyrights) => copyrights.join(' | ');
+    }
+
     addCopyrightContainer(target) {
       this.target = target;
       this.copyrightElement = document.createElement('div');
