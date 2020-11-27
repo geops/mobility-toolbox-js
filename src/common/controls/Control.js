@@ -24,7 +24,7 @@ class Control extends Observable {
   defineProperties({ map, active, options }) {
     Object.defineProperties(this, {
       active: {
-        value: active || true,
+        value: active,
         writable: true,
       },
       options: {
