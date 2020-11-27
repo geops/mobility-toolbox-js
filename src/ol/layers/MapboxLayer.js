@@ -156,7 +156,11 @@ export default class MapboxLayer extends Layer {
     if (!this.map || this.mbMap) {
       return;
     }
-
+    if (this.olLayer) {
+      this.map.on('postrender', () => {
+        this.olLayer.setVisible(this.visible);
+      });
+    }
     /**
      * The feature format.
      * @type {ol/format/GeoJSON}
@@ -165,8 +169,15 @@ export default class MapboxLayer extends Layer {
       featureProjection: this.map.getView().getProjection(),
     });
 
-    if (this.map.getTargetElement()) {
+    if (this.map.getTargetElement() && this.visible) {
       this.loadMbMap();
+    } else if (!this.visible) {
+      // On next change of visibility we load the map
+      this.olListenersKeys.push(
+        this.once('change:visible', () => {
+          this.loadMbMap();
+        }),
+      );
     }
 
     this.olListenersKeys.push(

@@ -20,10 +20,28 @@ export const handleError = (reqType, err) => {
  */
 export const readJsonResponse = (response) => {
   try {
-    return response.json();
+    return response.json().then((data) => {
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      return data;
+    });
   } catch (err) {
     throw new Error(err);
   }
 };
 
-export default { handleError, readJsonResponse };
+/**
+ * Remove undefined values of an object.
+ * @ignore
+ */
+export const cleanParams = (obj) => {
+  const clone = { ...obj };
+  Object.keys(obj).forEach(
+    (key) =>
+      (clone[key] === undefined || clone[key] === null) && delete clone[key],
+  );
+  return clone;
+};
+
+export default { handleError, readJsonResponse, cleanParams };

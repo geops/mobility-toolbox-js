@@ -30,6 +30,12 @@ class Layer extends LayerCommon {
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
    * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
    */
+  constructor(options) {
+    super(options);
+    if (this.olLayer) {
+      this.olLayer.setVisible(this.visible);
+    }
+  }
 
   /**
    * Define layer's properties.
@@ -55,12 +61,6 @@ class Layer extends LayerCommon {
 
     if (!this.map || !this.olLayer) {
       return;
-    }
-
-    if (this.olLayer) {
-      this.map.on('postrender', () => {
-        this.olLayer.setVisible(this.visible);
-      });
     }
 
     this.olListenersKeys.push(
