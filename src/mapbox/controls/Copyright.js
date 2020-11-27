@@ -5,7 +5,7 @@ import getMapboxMapCopyrights from '../../common/getMapboxMapCopyrights';
 
 class CopyrightControl extends mixin(CommonControl) {
   activate() {
-    super.activate();
+    this.active = true;
     this.addCopyrightContainer(this.map.getContainer());
 
     this.map.on('change:layers', this.renderCopyrights.bind(this));

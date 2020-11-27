@@ -16,7 +16,7 @@ class Copyright extends mixin(CommonControl) {
   }
 
   activate() {
-    super.activate();
+    this.active = true;
     this.addCopyrightContainer(this.map.getTargetElement());
     this.map.on('change:layers', this.onLayerChange.bind(this));
     this.map.on('change:mobilityLayers', this.onLayerChange.bind(this));
@@ -35,7 +35,7 @@ class Copyright extends mixin(CommonControl) {
   }
 
   deactivate() {
-    super.deactivate();
+    this.active = false;
     this.removeCopyrightContainer();
     this.map.un('change:layers', this.onLayerChange);
     this.map.un('change:mobilityLayers', this.onLayerChange);
