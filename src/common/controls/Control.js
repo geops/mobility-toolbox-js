@@ -33,6 +33,7 @@ class Control extends Observable {
       },
       map: {
         value: map,
+        writable: true,
       },
     });
   }
