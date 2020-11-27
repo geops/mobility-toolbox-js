@@ -1,5 +1,5 @@
 import qs from 'query-string';
-import { handleError, readJsonResponse } from '../utils';
+import { handleError, readJsonResponse, cleanParams } from '../utils';
 
 /**
  * Access to the [Stops service](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
@@ -27,9 +27,9 @@ class StopsAPI {
    * Append the apiKey before sending the request.
    * @ignore
    */
-  fetch(url, params = {}, config) {
-    const urlParams = { ...params, key: this.apiKey };
-    return fetch(`${url}?${qs.stringify(urlParams)}`, config).then(
+  fetch(params = {}, config) {
+    const urlParams = cleanParams({ ...params, key: this.apiKey });
+    return fetch(`${this.url}?${qs.stringify(urlParams)}`, config).then(
       readJsonResponse,
     );
   }
@@ -42,7 +42,7 @@ class StopsAPI {
    * @returns {Promise<GeoJSONFeature[]>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
   search(params, abortController = {}) {
-    return this.fetch(this.url, params, {
+    return this.fetch(params, {
       signal: abortController.signal,
     })
       .then((featureCollection) => featureCollection.features)

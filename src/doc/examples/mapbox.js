@@ -14,6 +14,5 @@ export default () => {
   const layer = new MapboxLayer({
     url: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
   });
-
   map.addLayer(layer);
 };
