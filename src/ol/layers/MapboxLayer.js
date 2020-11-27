@@ -170,16 +170,7 @@ export default class MapboxLayer extends Layer {
     });
 
     if (this.map.getTargetElement()) {
-      if (this.visible) {
-        this.loadMbMap();
-      } else {
-        // On next change of visibility we load the map
-        this.olListenersKeys.push(
-          this.once('change:visible', () => {
-            this.loadMbMap();
-          }),
-        );
-      }
+      this.loadMbMap();
     }
 
     this.olListenersKeys.push(
@@ -208,6 +199,15 @@ export default class MapboxLayer extends Layer {
    * @private
    */
   loadMbMap() {
+    if (!this.visible) {
+      // On next change of visibility we load the map
+      this.olListenersKeys.push(
+        this.once('change:visible', () => {
+          this.loadMbMap();
+        }),
+      );
+    }
+
     // If the map hasn't been resized, the center could be [NaN,NaN].
     // We set default good value for the mapbox map, to avoid the app crashes.
     let [x, y] = this.map.getView().getCenter();
