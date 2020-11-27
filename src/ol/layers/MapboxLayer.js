@@ -187,12 +187,13 @@ export default class MapboxLayer extends Layer {
    * @private
    */
   loadMbMap() {
+    this.olListenersKeys.push(
+      this.map.on('change:target', () => {
+        this.loadMbMap();
+      }),
+    );
+
     if (!this.map.getTargetElement()) {
-      this.olListenersKeys.push(
-        this.map.on('change:target', () => {
-          this.loadMbMap();
-        }),
-      );
       return;
     }
 
