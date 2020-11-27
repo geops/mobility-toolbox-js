@@ -10,7 +10,7 @@ export const handleError = (reqType, err) => {
   // eslint-disable-next-line no-console
   console.warn(`Fetch ${reqType} request failed: `, err);
   // Propagate the error.
-  throw new Error(err);
+  throw err;
 };
 
 /**
@@ -27,7 +27,7 @@ export const readJsonResponse = (response) => {
       return data;
     });
   } catch (err) {
-    throw new Error(err);
+    return Promise.reject(new Error(err));
   }
 };
 
