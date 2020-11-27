@@ -24,7 +24,7 @@ class Map extends mixin(MBMap) {
 
     // Add default CopyrightControl if no custom one provided
     if (!options.mobilityControls) {
-      this.addMobilityControl(new CopyrightControl(this));
+      this.addMobilityControl(new CopyrightControl());
     }
   }
 

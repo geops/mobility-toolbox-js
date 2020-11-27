@@ -45,7 +45,7 @@ class Map extends mixin(OLMap) {
 
     // Add default CopyrightControl if no custom one provided
     if (!options.mobilityControls) {
-      this.addMobilityControl(new CopyrightControl(this));
+      this.addMobilityControl(new CopyrightControl());
     }
   }
 
