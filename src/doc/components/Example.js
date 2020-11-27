@@ -6,12 +6,18 @@ import { useParams } from 'react-router-dom';
 import CodeSandboxButton from './CodeSandboxButton';
 import EXAMPLES from '../examples';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     padding: 12,
   },
   htmlContainer: {
     height: 500,
+  },
+  noPointer: {
+    // Remove pointer events for mobile devices on load
+    [theme.breakpoints.down('xs')]: {
+      pointerEvents: 'none',
+    },
   },
   paper: {
     position: 'relative',
@@ -27,14 +33,15 @@ const useStyles = makeStyles({
     paddingTop: 5,
     paddingRight: 10,
   },
-});
+}));
 
 const Example = () => {
-  const { editButton, paper, htmlContainer, fileName } = useStyles();
+  const classes = useStyles();
   const { exampleKey } = useParams((params) => params);
   const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
+  const [isNavigable, setIsNavigable] = useState(false);
 
   useEffect(() => {
     import(`../examples/${example.files.html}`).then((h) => {
@@ -44,7 +51,7 @@ const Example = () => {
       setHtml(h.default);
 
       // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
-      // We use to avoid cache and re-execute the code of the module.
+      // We use this to avoid cache and re-execute the code of the module.
       import(`../examples/${example.files.js}?`).then((module) => {
         module.default();
 
@@ -73,26 +80,40 @@ const Example = () => {
         <Typography>{example.description}</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
+        <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
           <div
-            className={htmlContainer}
+            className={`${classes.htmlContainer} ${
+              isNavigable ? '' : classes.noPointer
+            }`}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: html }}
           />
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
-          <Typography className={fileName}>{example.files.js}</Typography>
+        <Paper className={classes.paper}>
+          <Typography className={classes.fileName}>
+            {example.files.js}
+          </Typography>
           <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-          <CodeSandboxButton className={editButton} html={html} js={js} />
+          <CodeSandboxButton
+            className={classes.editButton}
+            html={html}
+            js={js}
+          />
         </Paper>
       </Grid>
       <Grid item xs={12}>
-        <Paper className={paper}>
-          <Typography className={fileName}>{example.files.html}</Typography>
+        <Paper className={classes.paper}>
+          <Typography className={classes.fileName}>
+            {example.files.html}
+          </Typography>
           <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-          <CodeSandboxButton className={editButton} html={html} js={js} />
+          <CodeSandboxButton
+            className={classes.editButton}
+            html={html}
+            js={js}
+          />
         </Paper>
       </Grid>
     </Grid>

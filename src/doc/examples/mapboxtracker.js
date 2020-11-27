@@ -8,6 +8,10 @@ export default () => {
     style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
     center: [7.47, 46.95],
     zoom: 12,
+    touchPitch: false,
+    pitchWithRotate: false,
+    dragRotate: false,
+    touchZoomRotate: false,
   });
 
   const tracker = new TrajservLayer({

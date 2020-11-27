@@ -165,15 +165,7 @@ export default class MapboxLayer extends Layer {
       featureProjection: this.map.getView().getProjection(),
     });
 
-    if (this.map.getTargetElement()) {
-      this.loadMbMap();
-    }
-
-    this.olListenersKeys.push(
-      this.map.on('change:target', () => {
-        this.loadMbMap();
-      }),
-    );
+    this.loadMbMap();
 
     this.olListenersKeys.push(
       this.map.on('change:size', () => {
@@ -195,6 +187,26 @@ export default class MapboxLayer extends Layer {
    * @private
    */
   loadMbMap() {
+    this.olListenersKeys.push(
+      this.map.on('change:target', () => {
+        this.loadMbMap();
+      }),
+    );
+
+    if (!this.map.getTargetElement()) {
+      return;
+    }
+
+    if (!this.visible) {
+      // On next change of visibility we load the map
+      this.olListenersKeys.push(
+        this.once('change:visible', () => {
+          this.loadMbMap();
+        }),
+      );
+      return;
+    }
+
     // If the map hasn't been resized, the center could be [NaN,NaN].
     // We set default good value for the mapbox map, to avoid the app crashes.
     let [x, y] = this.map.getView().getCenter();
