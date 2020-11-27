@@ -42,7 +42,6 @@
     "@neutrinojs/react": "9.1.0",
     "cypress": "4.12.1",
     "deepmerge": "4.2.2",
-    "documentation": "13.0.2",
     "esdoc": "1.1.0",
     "esdoc-ecmascript-proposal-plugin": "1.0.0",
     "esdoc-publish-html-plugin": "1.1.2",
