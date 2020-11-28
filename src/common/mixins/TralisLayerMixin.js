@@ -93,7 +93,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
       this.useDynamicIconScale = this.mode === TralisModes.SCHEMATIC;
       this.trajectories = [];
-      this.refreshTimeInMs = 100 / 60;
+      this.refreshTimeInMs = 1000 / 30;
       this.onMessage = this.onMessage.bind(this);
       this.onDeleteMessage = this.onDeleteMessage.bind(this);
       this.api = options.api || new TralisAPI(options);
