@@ -12,42 +12,36 @@ class Control extends Observable {
    * @param {boolean} [options.active = true] Whether the control is active.
    */
   constructor(map, options = {}) {
-    super();
-    this.map = map;
-
-    /** @ignore */
-    this.options = {
-      active: true,
-      ...options,
-    };
-
-    this.active = options.active;
-
-    if (this.options.active) {
-      this.activate();
-    }
+    super(map, options);
+    this.defineProperties({ active: true, map, ...options });
   }
 
   /**
-   * Activate the control.
+   * Define control's properties.
+   *
+   * @ignore
    */
-  activate() {
-    this.active = true;
-  }
-
-  /**
-   * Deactivate the control.
-   */
-  deactivate() {
-    this.active = false;
-  }
-
-  /**
-   * Get te control's active state.
-   * @returns {boolean} Active state.
-   */
-  getActive() {
-    return this.active;
+  defineProperties(opts) {
+    let { active } = opts;
+    Object.defineProperties(this, {
+      active: {
+        get: () => {
+          return active;
+        },
+        set: (newActiveVal) => {
+          active = newActiveVal;
+        },
+        configurable: true,
+      },
+      options: {
+        value: opts || {},
+        writable: true,
+      },
+      map: {
+        value: opts.map,
+        writable: true,
+      },
+    });
   }
 }
 
