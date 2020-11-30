@@ -7,7 +7,7 @@ export default () => {
   // Define a custom copyright
   const customCopyrightControl = new CopyrightControl({
     targetElement: document.getElementById('copyright'),
-    // renderCopyrights: (copyrights) => copyrights.join(', '),
+    renderCopyrights: (copyrights) => copyrights.join(', '),
   });
 
   const map = new Map({

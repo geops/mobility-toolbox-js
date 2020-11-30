@@ -30,12 +30,12 @@ class Copyright extends mixin(CommonControl) {
   }
 
   onLayerChange() {
-    this.renderCopyrights();
+    this.render();
 
     this.map.getMobilityLayers().forEach((l) => {
       if (l instanceof MapboxLayer) {
         l.mbMap.once('load', () => {
-          this.renderCopyrights();
+          this.render();
         });
       }
     });

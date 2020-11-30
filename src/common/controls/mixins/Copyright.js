@@ -1,11 +1,22 @@
 /**
- * @param {Object} [options] Control options.
+ * @param {ol/Map~Map|mapboxgl.Map} map Copyright's map.
+ * @param {Object} [options] Copyright options.
+ * @param {boolean} [options.active = true] Whether the copyright is active.
  * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
+ * @param {function} [options.renderCopyrights = (copyrights) => copyrights.join(' | ')] Callback function to render copyrights.
  */
 const CopyrightMixin = (Base) =>
   class extends Base {
-    constructor(options = {}) {
-      super(options);
+    defineProperties(opts) {
+      super.defineProperties(opts);
+      Object.defineProperties(this, {
+        renderCopyrights: {
+          value: opts.renderCopyrights
+            ? opts.renderCopyrights
+            : (copyrights) => copyrights.join(' | '),
+          writable: true,
+        },
+      });
     }
 
     addCopyrightContainer(target) {
@@ -39,9 +50,9 @@ const CopyrightMixin = (Base) =>
       return [...new Set(copyrights.filter((c) => c.trim()))];
     }
 
-    renderCopyrights() {
+    render() {
       const copyrights = this.getCopyrights();
-      this.copyrightElement.innerHTML = copyrights.join(' | ');
+      this.copyrightElement.innerHTML = this.renderCopyrights(copyrights);
     }
 
     removeCopyrightContainer() {
