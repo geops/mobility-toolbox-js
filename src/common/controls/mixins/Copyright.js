@@ -1,9 +1,28 @@
+/**
+ * @param {ol/Map~Map|mapboxgl.Map} map Copyright's map.
+ * @param {Object} [options] Copyright options.
+ * @param {boolean} [options.active = true] Whether the copyright is active.
+ * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
+ * @param {function} [options.renderCopyrights = (copyrights) => copyrights.join(' | ')] Callback function to render copyrights.
+ */
 const CopyrightMixin = (Base) =>
   class extends Base {
+    defineProperties(opts) {
+      super.defineProperties(opts);
+      Object.defineProperties(this, {
+        renderCopyrights: {
+          value: opts.renderCopyrights
+            ? opts.renderCopyrights
+            : (copyrights) => copyrights.join(' | '),
+          writable: true,
+        },
+      });
+    }
+
     addCopyrightContainer(target) {
-      this.target = target;
+      this.target = this.options.targetElement || target;
       this.copyrightElement = document.createElement('div');
-      this.copyrightElement.id = 'mb-copyrght';
+      this.copyrightElement.id = 'mb-copyright';
 
       Object.assign(this.copyrightElement.style, {
         position: 'absolute',
@@ -15,7 +34,6 @@ const CopyrightMixin = (Base) =>
       });
 
       this.target.appendChild(this.copyrightElement);
-      this.renderCopyrights();
     }
 
     getCopyrights() {
@@ -32,13 +50,12 @@ const CopyrightMixin = (Base) =>
       return [...new Set(copyrights.filter((c) => c.trim()))];
     }
 
-    renderCopyrights() {
+    render() {
       const copyrights = this.getCopyrights();
-      this.copyrightElement.innerHTML = copyrights.join(' | ');
+      this.copyrightElement.innerHTML = this.renderCopyrights(copyrights);
     }
 
     removeCopyrightContainer() {
-      super.deactivate();
       this.target.removeChild(this.copyrightElement);
     }
   };

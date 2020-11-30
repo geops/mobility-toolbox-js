@@ -4,24 +4,39 @@ import mixin from '../../common/controls/mixins/Copyright';
 import getMapboxMapCopyrights from '../../common/getMapboxMapCopyrights';
 
 class CopyrightControl extends mixin(CommonControl) {
-  activate() {
-    super.activate();
-    this.addCopyrightContainer(this.map.getContainer());
-
-    this.map.on('change:layers', this.renderCopyrights.bind(this));
-    this.map.on('change:mobilityLayers', this.renderCopyrights.bind(this));
-    this.map.once('load', () => this.renderCopyrights());
+  /**
+   * @ignore
+   */
+  defineProperties(opts) {
+    super.defineProperties(opts);
+    let { active } = opts;
+    const onRender = this.render.bind(this);
+    Object.defineProperties(this, {
+      active: {
+        get: () => {
+          return active;
+        },
+        set: (newActiveVal) => {
+          active = newActiveVal;
+          if (newActiveVal) {
+            this.addCopyrightContainer(this.map.getContainer());
+            this.map.on('change:layers', onRender);
+            this.map.on('change:mobilityLayers', onRender);
+            this.map.once('load', () => this.render());
+          } else {
+            this.removeCopyrightContainer();
+            this.map.off('change:layers', onRender);
+            this.map.off('change:mobilityLayers', onRender);
+            unByKey(this.layerChangeKey);
+          }
+        },
+        configurable: true,
+      },
+    });
   }
 
   getCopyrights() {
     return super.getCopyrights().concat(getMapboxMapCopyrights(this.map));
-  }
-
-  deactivate() {
-    this.removeCopyrightContainer();
-    this.map.off('change:layers', this.renderCopyrights);
-    this.map.off('change:mobilityLayers', this.renderCopyrights);
-    unByKey(this.layerChangeKey);
   }
 }
 

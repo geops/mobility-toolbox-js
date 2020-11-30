@@ -18,6 +18,8 @@ export class MapInterface {
    * Constructor.
    *
    * @param {Object} options Map options
+   * @param {Object} options Map options
+   * @param {Array<Control>} [options.mobilityControls] Custom controls of the map.
    */
   constructor(options = {}) {}
 
@@ -49,11 +51,19 @@ const MapMixin = (Base) =>
     constructor(options = {}) {
       super(options);
       this.mobilityControls = [];
+      if (options.mobilityControls) {
+        options.mobilityControls.forEach((control) => {
+          this.addMobilityControl(control);
+        });
+      }
     }
 
     addMobilityControl(control) {
       this.mobilityControls.push(control);
-      control.activate(this);
+      // eslint-disable-next-line no-param-reassign
+      control.map = this;
+      // eslint-disable-next-line no-param-reassign
+      control.active = true;
     }
 
     removeMobilityControl(control) {

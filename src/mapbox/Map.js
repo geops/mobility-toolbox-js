@@ -1,7 +1,7 @@
 import { Map as MBMap } from 'mapbox-gl';
 import Layer from '../common/layers/Layer';
-import CopyrightControl from './controls/Copyright';
 import mixin from '../common/mixins/MapMixin';
+import CopyrightControl from './controls/Copyright';
 
 /**
  * [mapbox-gl-js Map](https://docs.mapbox.com/mapbox-gl-js/api/map) wit some custom functionality for `mobility-toolbox-js.
@@ -22,7 +22,10 @@ class Map extends mixin(MBMap) {
     /** @ignore */
     this.mobilityLayers = [];
 
-    this.addMobilityControl(new CopyrightControl(this));
+    // Add default CopyrightControl if no custom one provided
+    if (!options.mobilityControls) {
+      this.addMobilityControl(new CopyrightControl());
+    }
   }
 
   /**
