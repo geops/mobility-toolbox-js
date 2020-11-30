@@ -45,7 +45,6 @@ const CopyrightMixin = (Base) =>
     }
 
     removeCopyrightContainer() {
-      this.active = false;
       this.target.removeChild(this.copyrightElement);
     }
   };

@@ -12,15 +12,35 @@ class Control extends Observable {
    */
   constructor(options = {}) {
     super(options);
+    this.defineProperties({ active: true, ...options });
+  }
 
-    /** @ignore */
-    this.options = options;
-
-    this.active = options.active;
-
-    if (this.options.active) {
-      this.active = true;
-    }
+  /**
+   * Define control's properties.
+   *
+   * @ignore
+   */
+  defineProperties(opts) {
+    let { active } = opts;
+    Object.defineProperties(this, {
+      active: {
+        get: () => {
+          return active;
+        },
+        set: (newActiveVal) => {
+          active = newActiveVal;
+        },
+        configurable: true,
+      },
+      options: {
+        value: opts || {},
+        writable: true,
+      },
+      map: {
+        value: opts.map,
+        writable: true,
+      },
+    });
   }
 }
 

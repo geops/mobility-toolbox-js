@@ -48,7 +48,10 @@ const MapMixin = (Base) =>
 
     addMobilityControl(control) {
       this.mobilityControls.push(control);
-      control.activate(this);
+      // eslint-disable-next-line no-param-reassign
+      control.map = this;
+      // eslint-disable-next-line no-param-reassign
+      control.active = true;
     }
   };
 

@@ -51,9 +51,7 @@ describe('Copyright', () => {
 
     const layer = new Layer({
       copyrights: ['copyright value'],
-      olLayer,
     });
-
     map.addLayer(layer);
     const copyrightWrapper = document.getElementById('copyright');
     expect(copyrightWrapper.innerHTML).toBe(
@@ -61,5 +59,28 @@ describe('Copyright', () => {
     );
     const copyright = document.getElementById('mb-copyright');
     expect(copyright.innerHTML).toBe('copyright value');
+  });
+
+  test('should activate/dactivate copyrights by default.', () => {
+    map = new Map({ target: document.body });
+
+    const customCopyright = new CopyrightControl(map);
+
+    const layer = new Layer({
+      copyrights: ['copyright 1'],
+      olLayer,
+    });
+
+    map.addLayer(layer);
+    map.addMobilityControl(customCopyright);
+    const copyright = document.getElementById('mb-copyright');
+    const spy = jest.spyOn(customCopyright, 'removeCopyrightContainer');
+
+    // Should be activated by default.
+    expect(customCopyright.active).toBe(true);
+    expect(copyright.innerHTML).toBe('copyright 1');
+
+    customCopyright.active = false;
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
