@@ -35,6 +35,29 @@ describe('Copyright', () => {
     });
   });
 
+  test('should activate/dactivate copyrights by default.', () => {
+    map = new Map({ target: document.body });
+
+    const customCopyright = new CopyrightControl(map);
+
+    const layer = new Layer({
+      copyrights: ['copyright 1'],
+      olLayer,
+    });
+
+    map.addLayer(layer);
+    map.addMobilityControl(customCopyright);
+    const copyright = document.getElementById('mb-copyright');
+    const spy = jest.spyOn(customCopyright, 'removeCopyrightContainer');
+
+    // Should be activated by default.
+    expect(customCopyright.active).toBe(true);
+    expect(copyright.innerHTML).toBe('copyright 1');
+
+    customCopyright.active = false;
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
   test('should render copyrights in target element.', () => {
     const target = document.createElement('div');
     target.setAttribute('id', 'copyright');
@@ -61,26 +84,23 @@ describe('Copyright', () => {
     expect(copyright.innerHTML).toBe('copyright value');
   });
 
-  test('should activate/dactivate copyrights by default.', () => {
-    map = new Map({ target: document.body });
-
-    const customCopyright = new CopyrightControl(map);
+  test('should render custom copyrights with renderCopyrights.', () => {
+    const customCopyright = new CopyrightControl({
+      renderCopyrights: (copyrights) => copyrights.join(', '),
+    });
 
     const layer = new Layer({
-      copyrights: ['copyright 1'],
+      copyrights: ['copyright 1', 'copyright 2', 'copyright 3'],
       olLayer,
     });
 
+    map = new Map({
+      target: document.body,
+      mobilityControls: [customCopyright],
+    });
     map.addLayer(layer);
-    map.addMobilityControl(customCopyright);
+
     const copyright = document.getElementById('mb-copyright');
-    const spy = jest.spyOn(customCopyright, 'removeCopyrightContainer');
-
-    // Should be activated by default.
-    expect(customCopyright.active).toBe(true);
-    expect(copyright.innerHTML).toBe('copyright 1');
-
-    customCopyright.active = false;
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(copyright.innerHTML).toBe('copyright 1, copyright 2, copyright 3');
   });
 });
