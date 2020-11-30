@@ -16,7 +16,7 @@ const CopyrightMixin = (Base) =>
     addCopyrightContainer(target) {
       this.target = target;
       this.copyrightElement = document.createElement('div');
-      this.copyrightElement.id = 'mb-copyrght';
+      this.copyrightElement.id = 'mb-copyright';
 
       Object.assign(this.copyrightElement.style, {
         position: 'absolute',
@@ -51,7 +51,6 @@ const CopyrightMixin = (Base) =>
     }
 
     removeCopyrightContainer() {
-      super.deactivate();
       this.target.removeChild(this.copyrightElement);
     }
   };
