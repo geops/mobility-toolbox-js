@@ -1,7 +1,15 @@
+/**
+ * @param {Object} [options] Control options.
+ * @param {HTMLElement} [options.targetElement = map.getTargetElement()] Container element where to locate the copyright.
+ */
 const CopyrightMixin = (Base) =>
   class extends Base {
+    constructor(options = {}) {
+      super(options);
+    }
+
     addCopyrightContainer(target) {
-      this.target = target;
+      this.target = this.options.targetElement || target;
       this.copyrightElement = document.createElement('div');
       this.copyrightElement.id = 'mb-copyright';
 
@@ -15,7 +23,6 @@ const CopyrightMixin = (Base) =>
       });
 
       this.target.appendChild(this.copyrightElement);
-      this.renderCopyrights();
     }
 
     getCopyrights() {

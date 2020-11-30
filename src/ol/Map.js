@@ -43,7 +43,10 @@ class Map extends mixin(OLMap) {
     this.mobilityLayers =
       (options.layers || []).filter((l) => l instanceof Layer) || [];
 
-    this.addMobilityControl(new CopyrightControl(this));
+    // Add default CopyrightControl if no custom one provided
+    if (!options.mobilityControls) {
+      this.addMobilityControl(new CopyrightControl());
+    }
   }
 
   /**
