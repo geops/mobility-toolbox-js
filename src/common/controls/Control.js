@@ -34,7 +34,7 @@ class Control extends Observable {
         configurable: true,
       },
       options: {
-        value: opts.options || {},
+        value: opts || {},
         writable: true,
       },
       map: {
