@@ -1,5 +1,4 @@
 /**
-<<<<<<< HEAD
  * @param {ol/Map~Map|mapboxgl.Map} map Copyright's map.
  * @param {Object} [options] Copyright options.
  * @param {boolean} [options.active = true] Whether the copyright is active.
@@ -35,7 +34,6 @@ const CopyrightMixin = (Base) =>
       });
 
       this.target.appendChild(this.copyrightElement);
-      // this.render();
     }
 
     getCopyrights() {
