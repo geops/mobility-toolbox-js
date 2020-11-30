@@ -6,6 +6,7 @@ class Copyright extends mixin(CommonControl) {
   defineProperties(opts) {
     super.defineProperties(opts);
     let { active } = opts;
+    const layerChange = this.onLayerChange.bind(this);
     Object.defineProperties(this, {
       active: {
         get: () => {
@@ -15,12 +16,12 @@ class Copyright extends mixin(CommonControl) {
           active = newActiveVal;
           if (newActiveVal) {
             this.addCopyrightContainer(this.map.getTargetElement());
-            this.map.on('change:layers', this.onLayerChange.bind(this));
-            this.map.on('change:mobilityLayers', this.onLayerChange.bind(this));
+            this.map.on('change:layers', layerChange);
+            this.map.on('change:mobilityLayers', layerChange);
           } else {
             this.removeCopyrightContainer();
-            this.map.un('change:layers', this.onLayerChange);
-            this.map.un('change:mobilityLayers', this.onLayerChange);
+            this.map.un('change:layers', layerChange);
+            this.map.un('change:mobilityLayers', layerChange);
           }
         },
         configurable: true,
@@ -49,7 +50,7 @@ class Copyright extends mixin(CommonControl) {
       }
     });
 
-    return copyrights;
+    return [...new Set(copyrights.filter((c) => c.trim()))];
   }
 }
 
