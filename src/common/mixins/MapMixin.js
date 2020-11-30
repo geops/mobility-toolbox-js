@@ -67,7 +67,8 @@ const MapMixin = (Base) =>
     }
 
     removeMobilityControl(control) {
-      control.deactivate(this);
+      // eslint-disable-next-line no-param-reassign
+      control.active = false;
       this.mobilityControls = this.mobilityControls.filter(
         (c) => c !== control,
       );

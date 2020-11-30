@@ -24,8 +24,13 @@ export default () => {
 
   map.addLayer(mapboxLayer);
 
-  // Add example button to remove the copyright Control from the map.
+  // Add example button to toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {
-    // map.removeMobilityControl(customCopyrightControl);
+    const { active } = customCopyrightControl;
+    if (active) {
+      map.removeMobilityControl(customCopyrightControl);
+    } else {
+      map.addMobilityControl(customCopyrightControl);
+    }
   });
 };

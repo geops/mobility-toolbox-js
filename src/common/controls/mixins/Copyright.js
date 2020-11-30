@@ -34,6 +34,9 @@ const CopyrightMixin = (Base) =>
       });
 
       this.target.appendChild(this.copyrightElement);
+      if (this.map.getMobilityLayers()) {
+        this.render();
+      }
     }
 
     getCopyrights() {
