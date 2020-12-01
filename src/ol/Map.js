@@ -2,7 +2,7 @@ import OLMap from 'ol/Map';
 import { defaults as defaultControls } from 'ol/control';
 import Layer from './layers/Layer';
 import mixin from '../common/mixins/MapMixin';
-import CopyrightControl from './controls/Copyright';
+import CopyrightControl from './controls/CopyrightControl';
 
 /**
  * An OpenLayers map for handling mobility layer.

@@ -1,11 +1,11 @@
 import View from 'ol/View';
 import { Map, MapboxLayer } from '../../ol';
-import Copyright from '../../ol/controls/Copyright';
+import CopyrightControl from '../../ol/controls/CopyrightControl';
 import 'ol/ol.css';
 
 export default () => {
   // Define a custom copyright
-  const control = new Copyright({
+  const control = new CopyrightControl({
     target: document.getElementById('copyright'),
     element: document.createElement('div'),
     render() {
