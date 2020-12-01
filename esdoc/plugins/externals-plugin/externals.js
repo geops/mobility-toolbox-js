@@ -56,6 +56,9 @@
  * @external {mapboxgl.IControl} https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol
  */
 /**
+ * @external {mapboxgl.position} https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addcontrol
+ */
+/**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
  */
 /**

@@ -1,5 +1,4 @@
 import { Map as MBMap } from 'mapbox-gl';
-import Control from '../common/controls/Control';
 import Layer from '../common/layers/Layer';
 import mixin from '../common/mixins/MapMixin';
 import Copyright from './controls/Copyright';
@@ -16,13 +15,9 @@ class Map extends mixin(MBMap) {
    */
   constructor(options) {
     super({
-      ...options,
       attributionControl: false,
-    });
-
-    // Add default CopyrightControl if no custom one provided
-    (options.controls || [new Copyright()]).forEach((control) => {
-      this.addMobilityControl(control);
+      controls: options.controls || [new Copyright()],
+      ...options,
     });
   }
 
@@ -68,11 +63,7 @@ class Map extends mixin(MBMap) {
    * @param {mapboxgl.position} position Position of the control. Only if control parameter is an <mapboxgl.IControl>.
    */
   addControl(control, position) {
-    if (control instanceof Control) {
-      this.addMobilityControl(control);
-    } else {
-      super.addControl(control, position);
-    }
+    super.addControl(control, position);
   }
 
   /**
@@ -80,11 +71,7 @@ class Map extends mixin(MBMap) {
    * @param {Control|mapboxgl.IControl} control The control to remove.
    */
   removeControl(control) {
-    if (control instanceof Control) {
-      this.removeMobilityControl(control);
-    } else {
-      super.removeControl(control);
-    }
+    super.removeControl(control);
   }
 }
 

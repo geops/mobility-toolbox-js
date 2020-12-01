@@ -6,6 +6,7 @@
 
 import { Map as MBMap } from 'mapbox-gl';
 import Observable from 'ol/Observable';
+import Control from '../controls/Control';
 import MapboxLayer from '../../ol/layers/MapboxLayer';
 
 /**
@@ -49,9 +50,19 @@ export class MapInterface {
 const MapMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
-      super(options);
+      super({ ...options, layers: [], controls: [] });
       this.mobilityLayers = [];
       this.mobilityControls = [];
+
+      // Add controls
+      (options.controls || []).forEach((control) => {
+        this.addControl(control);
+      });
+
+      // Add layers
+      (options.layers || []).forEach((layer) => {
+        this.addLayer(layer);
+      });
     }
 
     getMobilityLayers() {
@@ -74,6 +85,24 @@ const MapMixin = (Base) =>
       this.mobilityControls = this.mobilityControls.filter(
         (c) => c !== control,
       );
+    }
+
+    /** Documentation in inherited classes */
+    addControl(control, position) {
+      if (control instanceof Control) {
+        this.addMobilityControl(control);
+      } else {
+        super.addControl(control, position);
+      }
+    }
+
+    /** Documentation in inherited classes */
+    removeControl(control) {
+      if (control instanceof Control) {
+        this.removeMobilityControl(control);
+      } else {
+        super.removeControl(control);
+      }
     }
   };
 

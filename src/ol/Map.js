@@ -1,6 +1,5 @@
 import OLMap from 'ol/Map';
 import { defaults as defaultControls } from 'ol/control';
-import Control from '../common/controls/Control';
 import Layer from './layers/Layer';
 import mixin from '../common/mixins/MapMixin';
 import CopyrightControl from './controls/Copyright';
@@ -32,24 +31,11 @@ class Map extends mixin(OLMap) {
    */
   constructor(options = {}) {
     super({
-      ...options,
-      layers: [],
-      controls: [],
-    });
-
-    // Add controls
-    (
-      options.controls || [
+      controls: [
         ...defaultControls({ attribution: false }).getArray(),
         new CopyrightControl(),
-      ]
-    ).forEach((control) => {
-      this.addControl(control);
-    });
-
-    // Add layers
-    (options.layers || []).forEach((layer) => {
-      this.addLayer(layer);
+      ],
+      ...options,
     });
   }
 
@@ -108,11 +94,7 @@ class Map extends mixin(OLMap) {
    * @param {Control|ol/control/Control~Control} control The control to add.
    */
   addControl(control) {
-    if (control instanceof Control) {
-      this.addMobilityControl(control);
-    } else {
-      super.addControl(control);
-    }
+    super.addControl(control);
   }
 
   /**
@@ -120,12 +102,7 @@ class Map extends mixin(OLMap) {
    * @param {Control|ol/control/Control~Control} control The control to remove.
    */
   removeControl(control) {
-    if (control instanceof Control) {
-      this.removeMobilityControl(control);
-    } else {
-      // control is an OpenLayer control
-      super.removeControl(control);
-    }
+    super.removeControl(control);
   }
 }
 
