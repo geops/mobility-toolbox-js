@@ -1,9 +1,9 @@
-import Observable from 'ol/Observable';
+import BaseObject from 'ol/Object';
 
 /**
  * Generic control for mobility-toolbox-js.
  */
-class Control extends Observable {
+class Control extends BaseObject {
   /**
    * Constructor
    *
@@ -12,7 +12,14 @@ class Control extends Observable {
    */
   constructor(options = {}) {
     super(options);
-    this.defineProperties({ active: true, ...options });
+    this.defineProperties(options);
+
+    const { active } = {
+      active: true,
+      ...options,
+    };
+
+    this.active = active;
   }
 
   /**
@@ -20,27 +27,76 @@ class Control extends Observable {
    *
    * @ignore
    */
-  defineProperties(opts) {
-    let { active } = opts;
+  defineProperties(options) {
+    const { target, element, render } = {
+      ...options,
+    };
+
     Object.defineProperties(this, {
       active: {
         get: () => {
-          return active;
+          return this.get('active');
         },
-        set: (newActiveVal) => {
-          active = newActiveVal;
+        set: (newActive) => {
+          this.set('active', newActive);
+          if (newActive) {
+            this.activate();
+          } else {
+            this.deactivate();
+          }
         },
-        configurable: true,
-      },
-      options: {
-        value: opts || {},
-        writable: true,
       },
       map: {
-        value: opts.map,
+        get: () => {
+          return this.get('map');
+        },
+        set: (map) => {
+          if (map === this.map) {
+            return;
+          }
+
+          // Remove previous node.
+          if (this.map && this.element && this.element.parentNode) {
+            this.element.parentNode.removeChild(this.element);
+          }
+
+          // Clean listeners
+          this.deactivate();
+
+          this.set('map', map);
+
+          if (this.map) {
+            // Add new node
+            const targett = this.target || this.map.getContainer();
+            targett.appendChild(this.element);
+
+            // Add listeners
+            if (this.active) {
+              this.activate();
+            }
+          }
+        },
+      },
+      target: {
+        value: target,
+      },
+      element: {
+        value: element,
+      },
+      render: {
+        value: render || this.render,
         writable: true,
       },
     });
+  }
+
+  activate() {
+    this.deactivate();
+    this.render();
+  }
+
+  deactivate() {
+    this.render();
   }
 }
 

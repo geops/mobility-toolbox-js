@@ -24,22 +24,22 @@ export class MapInterface {
   constructor(options = {}) {}
 
   /**
+   * Returns the HTML element of the map.
+   * @returns {HTMLElement}
+   */
+  getContainer() {}
+
+  /**
    * Returns a list of mobility layers.
    * @returns {Layer[]}
    */
   getMobilityLayers() {}
 
   /**
-   * Add a mobility Control to the map.
-   * @param {Control} control control to add
+   * Returns a list of mobility controls.
+   * @returns {Control[]}
    */
-  addMobilityControl(control) {}
-
-  /**
-   * Remove a mobility control from the map.
-   * @param {Control} control Control to remove
-   */
-  removeMobilityControl(control) {}
+  getMobilityControls() {}
 }
 
 /**
@@ -50,25 +50,27 @@ const MapMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
       super(options);
+      this.mobilityLayers = [];
       this.mobilityControls = [];
-      if (options.mobilityControls) {
-        options.mobilityControls.forEach((control) => {
-          this.addMobilityControl(control);
-        });
-      }
+    }
+
+    getMobilityLayers() {
+      return this.mobilityLayers;
+    }
+
+    getMobilityControls() {
+      return this.mobilityControls;
     }
 
     addMobilityControl(control) {
       this.mobilityControls.push(control);
       // eslint-disable-next-line no-param-reassign
       control.map = this;
-      // eslint-disable-next-line no-param-reassign
-      control.active = true;
     }
 
     removeMobilityControl(control) {
       // eslint-disable-next-line no-param-reassign
-      control.active = false;
+      control.map = null;
       this.mobilityControls = this.mobilityControls.filter(
         (c) => c !== control,
       );

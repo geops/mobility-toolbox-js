@@ -7,6 +7,12 @@ const styles = require('@neutrinojs/style-loader');
 const merge = require('deepmerge');
 const path = require('path');
 
+const webpackDevServer = (neutrino) => {
+  neutrino.config.watchOptions({
+    ignored: /node_modules/,
+  });
+};
+
 if (process.env.REACT_APP_LIB_MODE) {
   module.exports = {
     options: {
@@ -26,8 +32,8 @@ if (process.env.REACT_APP_LIB_MODE) {
             'last 2 Opera versions',
             'last 2 Safari versions',
             'last 2 iOS versions',
-            'ie 11'
-          ]
+            'ie 11',
+          ],
         },
       }),
       jest({
@@ -54,6 +60,7 @@ if (process.env.REACT_APP_LIB_MODE) {
             );
         }
       },
+      webpackDevServer,
       copy({
         patterns: [
           {
@@ -110,8 +117,8 @@ if (process.env.REACT_APP_LIB_MODE) {
             'last 2 Opera versions',
             'last 2 Safari versions',
             'last 2 iOS versions',
-            'ie 11'
-          ]
+            'ie 11',
+          ],
         },
         style: {
           // Override the default file extension of `.css` if needed
@@ -135,6 +142,7 @@ if (process.env.REACT_APP_LIB_MODE) {
         },
       }),
       jest(),
+      webpackDevServer,
       copy({
         patterns: [
           {

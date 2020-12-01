@@ -1,56 +1,40 @@
-import MapboxLayer from '../layers/MapboxLayer';
 import CommonControl from '../../common/controls/Control';
-import mixin from '../../common/controls/mixins/Copyright';
+import mixin from '../../common/mixins/CopyrightMixin';
 
 class Copyright extends mixin(CommonControl) {
-  defineProperties(opts) {
-    super.defineProperties(opts);
-    let { active } = opts;
-    const layerChange = this.onLayerChange.bind(this);
-    Object.defineProperties(this, {
-      active: {
-        get: () => {
-          return active;
-        },
-        set: (newActiveVal) => {
-          active = newActiveVal;
-          if (newActiveVal) {
-            this.addCopyrightContainer(this.map.getTargetElement());
-            this.map.on('change:layers', layerChange);
-            this.map.on('change:mobilityLayers', layerChange);
-          } else {
-            this.removeCopyrightContainer();
-            this.map.un('change:layers', layerChange);
-            this.map.un('change:mobilityLayers', layerChange);
-          }
-        },
-        configurable: true,
-      },
-    });
+  constructor(options) {
+    super(options);
+    this.onLayerChange = this.onLayerChange.bind(this);
   }
 
   onLayerChange() {
-    this.render();
+    if (this.map) {
+      this.render();
 
-    this.map.getMobilityLayers().forEach((l) => {
-      if (l instanceof MapboxLayer) {
-        l.mbMap.once('load', () => {
-          this.render();
-        });
-      }
-    });
+      this.map.getMobilityLayers().forEach((layer) => {
+        if (layer.mbMap) {
+          layer.mbMap.once('load', () => {
+            this.render();
+          });
+        }
+      });
+    }
   }
 
-  getCopyrights() {
-    let copyrights = super.getCopyrights();
+  activate() {
+    super.activate();
+    if (this.map) {
+      this.map.on('change:layers', this.onLayerChange);
+      this.map.on('change:mobilityLayers', this.onLayerChange);
+    }
+  }
 
-    this.map.getMobilityLayers().forEach((l) => {
-      if (l.copyrights) {
-        copyrights = copyrights.concat(l.copyrights);
-      }
-    });
-
-    return [...new Set(copyrights.filter((c) => c.trim()))];
+  deactivate() {
+    if (this.map) {
+      this.map.un('change:layers', this.onLayerChange);
+      this.map.un('change:mobilityLayers', this.onLayerChange);
+    }
+    super.deactivate();
   }
 }
 

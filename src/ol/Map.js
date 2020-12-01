@@ -1,6 +1,6 @@
 import OLMap from 'ol/Map';
-import OLLayer from 'ol/layer/Layer';
 import { defaults as defaultControls } from 'ol/control';
+import Control from '../common/controls/Control';
 import Layer from './layers/Layer';
 import mixin from '../common/mixins/MapMixin';
 import CopyrightControl from './controls/Copyright';
@@ -33,20 +33,33 @@ class Map extends mixin(OLMap) {
   constructor(options = {}) {
     super({
       ...options,
-      layers: (options.layers || []).map((l) =>
-        l instanceof OLLayer ? l : l.olLayer,
-      ),
-      controls: options.controls || defaultControls({ attribution: false }),
+      layers: [],
+      controls: [],
     });
 
-    /** @ignore */
-    this.mobilityLayers =
-      (options.layers || []).filter((l) => l instanceof Layer) || [];
+    // Add controls
+    (
+      options.controls || [
+        ...defaultControls({ attribution: false }).getArray(),
+        new CopyrightControl(),
+      ]
+    ).forEach((control) => {
+      this.addControl(control);
+    });
 
-    // Add default CopyrightControl if no custom one provided
-    if (!options.mobilityControls) {
-      this.addMobilityControl(new CopyrightControl());
-    }
+    // Add layers
+    (options.layers || []).forEach((layer) => {
+      this.addLayer(layer);
+    });
+  }
+
+  /**
+   * Get the HTML element containing the map.
+   *
+   * @return {HTMLElement} The HTML element of the container.
+   */
+  getContainer() {
+    return this.getTargetElement();
   }
 
   /**
@@ -62,6 +75,7 @@ class Map extends mixin(OLMap) {
       if (layer.olLayer) {
         super.addLayer(layer.olLayer);
       }
+
       this.dispatchEvent({
         type: 'change:mobilityLayers',
         target: this,
@@ -73,27 +87,44 @@ class Map extends mixin(OLMap) {
   }
 
   /**
-   * Returns a list of mobility layers.
-   *
-   * @returns {Layer[]}
-   */
-  getMobilityLayers() {
-    return this.mobilityLayers;
-  }
-
-  /**
    * Removes a given layer from the map.
    * @param {Layer|ol/layer/Layer~Layer} layer The layer to remove.
    */
   removeLayer(layer) {
-    if (!layer.terminate) {
-      super.removeLayer(layer);
-    } else {
+    if (layer instanceof Layer) {
       layer.terminate();
       this.mobilityLayers = this.mobilityLayers.filter((l) => l !== layer);
       if (layer.olLayer) {
         super.removeLayer(layer);
       }
+    } else {
+      // layer is an OpenLayer layer
+      super.removeLayer(layer);
+    }
+  }
+
+  /**
+   * Adds a given control to the map.
+   * @param {Control|ol/control/Control~Control} control The control to add.
+   */
+  addControl(control) {
+    if (control instanceof Control) {
+      this.addMobilityControl(control);
+    } else {
+      super.addControl(control);
+    }
+  }
+
+  /**
+   * Removes a given control to the map.
+   * @param {Control|ol/control/Control~Control} control The control to remove.
+   */
+  removeControl(control) {
+    if (control instanceof Control) {
+      this.removeMobilityControl(control);
+    } else {
+      // control is an OpenLayer control
+      super.removeControl(control);
     }
   }
 }

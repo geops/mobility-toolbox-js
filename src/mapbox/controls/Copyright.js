@@ -1,42 +1,35 @@
-import { unByKey } from 'ol/Observable';
 import CommonControl from '../../common/controls/Control';
-import mixin from '../../common/controls/mixins/Copyright';
-import getMapboxMapCopyrights from '../../common/getMapboxMapCopyrights';
+import mixin from '../../common/mixins/CopyrightMixin';
+import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
+import removeDuplicate from '../../common/utils/removeDuplicate';
 
 class CopyrightControl extends mixin(CommonControl) {
-  /**
-   * @ignore
-   */
-  defineProperties(opts) {
-    super.defineProperties(opts);
-    let { active } = opts;
-    const onRender = this.render.bind(this);
-    Object.defineProperties(this, {
-      active: {
-        get: () => {
-          return active;
-        },
-        set: (newActiveVal) => {
-          active = newActiveVal;
-          if (newActiveVal) {
-            this.addCopyrightContainer(this.map.getContainer());
-            this.map.on('change:layers', onRender);
-            this.map.on('change:mobilityLayers', onRender);
-            this.map.once('load', () => this.render());
-          } else {
-            this.removeCopyrightContainer();
-            this.map.off('change:layers', onRender);
-            this.map.off('change:mobilityLayers', onRender);
-            unByKey(this.layerChangeKey);
-          }
-        },
-        configurable: true,
-      },
-    });
+  constructor(options) {
+    super(options);
+    this.render = this.render.bind(this);
+  }
+
+  activate() {
+    super.activate();
+    if (this.map) {
+      this.map.on('change:layers', this.render);
+      this.map.on('change:mobilityLayers', this.render);
+      this.map.once('load', this.render);
+    }
+  }
+
+  deactivate() {
+    if (this.map) {
+      this.map.off('change:layers', this.render);
+      this.map.off('change:mobilityLayers', this.render);
+    }
+    super.deactivate();
   }
 
   getCopyrights() {
-    return super.getCopyrights().concat(getMapboxMapCopyrights(this.map));
+    return removeDuplicate(
+      super.getCopyrights().concat(getMapboxMapCopyrights(this.map)),
+    );
   }
 }
 

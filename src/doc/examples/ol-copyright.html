@@ -1,27 +1,24 @@
 <style>
-  button#button {
+  #button,
+  #copyright {
+    margin: 10px 10px;
+  }
+
+  #button {
     position: absolute;
-    z-index: 1;
-    top: 10px;
-    right: 10px;
-    width: 150px;
-    background-color: #76B833;
-    border: none;
-    border-radius: 5px;
-    font: Bold 14px/24px Lato, Arial, sans-serif;
-    color: #FFFFFF;
+    bottom: 0;
+    left: 0;
   }
 
-  button#button:hover {
-    box-shadow: 0px 5px 16px #35353573;
-  }
-
-  #copyright > #mb-copyright{
-    font: 12px/20px Helvetica Neue,Arial,Helvetica,sans-serif;
+  #copyright {
+    position: absolute;
+    bottom: 0;
+    right: 0;
   }
 </style>
+
 <div style="width: 100%; height: 100%; position: relative;">
-  <button id="button" type="button">Toggle copyright</button>
   <div id="map" style="width: 100%; height: 100%;"></div>
+  <button id="button" type="button" class="geops-ui">Toggle copyright</button>
   <div id="copyright"></div>
 </div>

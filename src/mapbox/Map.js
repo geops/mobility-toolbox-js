@@ -1,7 +1,8 @@
 import { Map as MBMap } from 'mapbox-gl';
+import Control from '../common/controls/Control';
 import Layer from '../common/layers/Layer';
 import mixin from '../common/mixins/MapMixin';
-import CopyrightControl from './controls/Copyright';
+import Copyright from './controls/Copyright';
 
 /**
  * [mapbox-gl-js Map](https://docs.mapbox.com/mapbox-gl-js/api/map) wit some custom functionality for `mobility-toolbox-js.
@@ -19,13 +20,10 @@ class Map extends mixin(MBMap) {
       attributionControl: false,
     });
 
-    /** @ignore */
-    this.mobilityLayers = [];
-
     // Add default CopyrightControl if no custom one provided
-    if (!options.mobilityControls) {
-      this.addMobilityControl(new CopyrightControl());
-    }
+    (options.controls || [new Copyright()]).forEach((control) => {
+      this.addMobilityControl(control);
+    });
   }
 
   /**
@@ -51,14 +49,6 @@ class Map extends mixin(MBMap) {
   }
 
   /**
-   * Returns a list of mobility layers.
-   * @returns {Layer[]}
-   */
-  getMobilityLayers() {
-    return this.mobilityLayers;
-  }
-
-  /**
    * Removes a given layer from the map.
    * @param {Layer|number} layer The layer to remove.
    *    If it's a mapbox-layer, pass the id instead..
@@ -69,6 +59,31 @@ class Map extends mixin(MBMap) {
       this.mobilityLayers = this.mobilityLayers.filter((l) => l !== layer);
     } else {
       super.removeLayer(layer);
+    }
+  }
+
+  /**
+   * Adds a given control to the map.
+   * @param {Control|mapboxgl.IControl} control The control to add.
+   * @param {mapboxgl.position} position Position of the control. Only if control parameter is an <mapboxgl.IControl>.
+   */
+  addControl(control, position) {
+    if (control instanceof Control) {
+      this.addMobilityControl(control);
+    } else {
+      super.addControl(control, position);
+    }
+  }
+
+  /**
+   * Removes a given control to the map.
+   * @param {Control|mapboxgl.IControl} control The control to remove.
+   */
+  removeControl(control) {
+    if (control instanceof Control) {
+      this.removeMobilityControl(control);
+    } else {
+      super.removeControl(control);
     }
   }
 }

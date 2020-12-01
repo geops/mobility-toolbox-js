@@ -10,97 +10,135 @@ describe('Copyright', () => {
   let map;
 
   afterEach(() => {
-    document.getElementsByTagName('html')[0].innerHTML = '';
+    if (map) {
+      map.disposeInternal();
+    }
   });
 
-  describe('Default CopyrightControl', () => {
-    beforeEach(() => {
-      map = new Map({ target: document.body });
-    });
-
-    test('should render initial copyright empty, when no layers.', () => {
-      const copyright = document.getElementById('mb-copyright');
-      expect(copyright.innerHTML).toBe('');
-    });
-
-    test('should render default copyrights empty, and delete duplicates.', () => {
-      const layer = new Layer({
-        copyrights: ['layer copyright', 'test', 'layer copyright'],
-        olLayer,
+  describe('CopyrightControl', () => {
+    test('should activate the control on constrcution then deactivate it', () => {
+      map = new Map({
+        target: document.body,
+        layers: [
+          new Layer({
+            copyrights: ['copyright 1'],
+            olLayer,
+          }),
+        ],
       });
-      map.addLayer(layer);
 
-      const copyright = document.getElementById('mb-copyright');
-      expect(copyright.innerHTML).toBe('layer copyright | test');
-    });
-  });
+      const control = new CopyrightControl({ active: true });
 
-  test('should activate/dactivate copyrights by default.', () => {
-    map = new Map({ target: document.body });
+      control.map = map;
+      expect(control.element.parentNode).toBe(map.getContainer());
 
-    const customCopyright = new CopyrightControl(map);
+      // Should be activated by default.
+      expect(control.active).toBe(true);
+      expect(control.element.innerHTML).toBe('copyright 1');
 
-    const layer = new Layer({
-      copyrights: ['copyright 1'],
-      olLayer,
+      // on deactivation
+      control.active = false;
+      expect(control.element.innerHTML).toBe('');
     });
 
-    map.addLayer(layer);
-    map.addMobilityControl(customCopyright);
-    const copyright = document.getElementById('mb-copyright');
-    const spy = jest.spyOn(customCopyright, 'removeCopyrightContainer');
+    test('should deactivate the control on constrcution then activate it', () => {
+      map = new Map({
+        target: document.body,
+        layers: [
+          new Layer({
+            copyrights: ['copyright 1'],
+            olLayer,
+          }),
+        ],
+      });
 
-    // Should be activated by default.
-    expect(customCopyright.active).toBe(true);
-    expect(copyright.innerHTML).toBe('copyright 1');
+      const control = new CopyrightControl({ active: false });
+      control.map = map;
+      expect(control.element.parentNode).toBe(map.getContainer());
 
-    customCopyright.active = false;
-    expect(spy).toHaveBeenCalledTimes(1);
-  });
+      // Should be activated by default.
+      expect(control.active).toBe(false);
+      expect(control.element.innerHTML).toBe('');
 
-  test('should render copyrights in target element.', () => {
-    const target = document.createElement('div');
-    target.setAttribute('id', 'copyright');
-    document.body.appendChild(target);
-
-    const targetCopyright = new CopyrightControl({
-      targetElement: document.getElementById('copyright'),
+      // on deactivation
+      control.active = true;
+      expect(control.element.innerHTML).toBe('copyright 1');
     });
 
-    map = new Map({
-      target: document.body,
-      mobilityControls: [targetCopyright],
+    test('should add copyrights in the map container element then remove it.', () => {
+      map = new Map({
+        target: document.body,
+        layers: [
+          new Layer({
+            copyrights: ['copyright value'],
+            olLayer,
+          }),
+        ],
+      });
+
+      const control = new CopyrightControl();
+
+      // Add control
+      control.map = map;
+      expect(control.element.parentNode).toBe(map.getContainer());
+
+      // Remove control
+      control.map = null;
+      expect(control.element.parentNode).toBe(null);
     });
 
-    const layer = new Layer({
-      copyrights: ['copyright value'],
-    });
-    map.addLayer(layer);
-    const copyrightWrapper = document.getElementById('copyright');
-    expect(copyrightWrapper.innerHTML).toBe(
-      '<div id="mb-copyright" style="position: absolute; bottom: 0px; right: 0px; font-size: 10px; padding: 0px 10px; background-color: rgba(255, 255, 255, 0.5);">copyright value</div>',
-    );
-    const copyright = document.getElementById('mb-copyright');
-    expect(copyright.innerHTML).toBe('copyright value');
-  });
+    test('should add copyrights in the target element then remove it.', () => {
+      map = new Map({
+        target: document.body,
+        layers: [
+          new Layer({
+            copyrights: ['copyright value'],
+            olLayer,
+          }),
+        ],
+      });
 
-  test('should render custom copyrights with renderCopyrights.', () => {
-    const customCopyright = new CopyrightControl({
-      renderCopyrights: (copyrights) => copyrights.join(', '),
+      const target = document.createElement('div');
+      target.setAttribute('id', 'copyright');
+      document.body.appendChild(target);
+
+      const control = new CopyrightControl({
+        target: document.getElementById('copyright'),
+      });
+
+      // Add control
+      control.map = map;
+      expect(control.element.parentNode).toBe(target);
+
+      // Remove control
+      control.map = null;
+      expect(control.element.parentNode).toBe(null);
     });
 
-    const layer = new Layer({
-      copyrights: ['copyright 1', 'copyright 2', 'copyright 3'],
-      olLayer,
-    });
+    test('should render custom copyrights with the render method ', () => {
+      const control = new CopyrightControl({
+        active: true,
+        render() {
+          this.element.innerHTML = this.active
+            ? this.getCopyrights().join(', ')
+            : '';
+        },
+      });
 
-    map = new Map({
-      target: document.body,
-      mobilityControls: [customCopyright],
+      map = new Map({
+        target: document.body,
+        layers: [
+          new Layer({
+            copyrights: ['copyright 1', 'copyright 2', 'copyright 3'],
+            olLayer,
+          }),
+        ],
+      });
+      // Add control
+      control.map = map;
+      expect(control.element.innerHTML).toBe(
+        'copyright 1, copyright 2, copyright 3',
+      );
     });
-    map.addLayer(layer);
-
-    const copyright = document.getElementById('mb-copyright');
-    expect(copyright.innerHTML).toBe('copyright 1, copyright 2, copyright 3');
   });
 });
