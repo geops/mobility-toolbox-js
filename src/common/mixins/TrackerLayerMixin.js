@@ -250,6 +250,9 @@ const TrackerLayerMixin = (Base) =>
      * @param {number} zoom
      */
     startUpdateTime(zoom) {
+      if (this.updateTimeInterval) {
+        clearInterval(this.updateTimeInterval);
+      }
       this.updateTimeInterval = setInterval(() => {
         const newTime =
           this.currTime.getTime() +
