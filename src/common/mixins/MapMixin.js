@@ -56,6 +56,7 @@ const MapMixin = (Base) =>
 
       // Add controls
       (options.controls || []).forEach((control) => {
+        console.log('addControl');
         this.addControl(control);
       });
 
