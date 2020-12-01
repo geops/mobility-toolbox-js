@@ -28,6 +28,18 @@ export class MapInterface {
    * @returns {Layer[]}
    */
   getMobilityLayers() {}
+
+  /**
+   * Add a mobility Control to the map.
+   * @param {Control} control control to add
+   */
+  addMobilityControl(control) {}
+
+  /**
+   * Remove a mobility control from the map.
+   * @param {Control} control Control to remove
+   */
+  removeMobilityControl(control) {}
 }
 
 /**
@@ -52,6 +64,14 @@ const MapMixin = (Base) =>
       control.map = this;
       // eslint-disable-next-line no-param-reassign
       control.active = true;
+    }
+
+    removeMobilityControl(control) {
+      // eslint-disable-next-line no-param-reassign
+      control.active = false;
+      this.mobilityControls = this.mobilityControls.filter(
+        (c) => c !== control,
+      );
     }
   };
 
