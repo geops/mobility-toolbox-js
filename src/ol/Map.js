@@ -31,11 +31,11 @@ class Map extends mixin(OLMap) {
    */
   constructor(options = {}) {
     super({
-      ...options,
       controls: [
         ...defaultControls({ attribution: false }).getArray(),
         new CopyrightControl({ active: true }),
       ],
+      ...options,
     });
   }
 
