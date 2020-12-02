@@ -1,10 +1,12 @@
 /* eslint-disable no-underscore-dangle */
 import { toLonLat } from 'ol/proj';
 import mapboxgl from 'mapbox-gl';
+import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
+import getArrayFromString from '../../common/utils/getArrayFromString';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -28,6 +30,7 @@ export default class MapboxLayer extends Layer {
    */
   constructor(options = {}) {
     const mbLayer = new OLLayer({
+      source: new Source({}),
       render: (frameState) => {
         if (!this.mbMap) {
           // eslint-disable-next-line no-console
@@ -227,13 +230,15 @@ export default class MapboxLayer extends Layer {
        * @type {boolean}
        */
       this.loaded = true;
-      if (!this.copyrights) {
-        /**
-         * Copyright statement.
-         * @type {string}
-         */
-        this.copyrights = getMapboxMapCopyrights(this.mbMap);
-      }
+
+      this.olLayer
+        .getSource()
+        .setAttributions(
+          this.copyrights
+            ? getArrayFromString(this.copyrights)
+            : getMapboxMapCopyrights(this.mbMap),
+        );
+
       this.dispatchEvent({
         type: 'load',
         target: this,

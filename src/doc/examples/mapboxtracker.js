@@ -14,6 +14,7 @@ export default () => {
   });
 
   const tracker = new TrajservLayer({
+    copyrights: 'My TrajservLayer copyright',
     url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
   });

@@ -2,7 +2,6 @@ import OLMap from 'ol/Map';
 import { defaults as defaultControls } from 'ol/control';
 import Layer from './layers/Layer';
 import mixin from '../common/mixins/MapMixin';
-import CopyrightControl from './controls/CopyrightControl';
 
 /**
  * An OpenLayers map for handling mobility layer.
@@ -31,10 +30,7 @@ class Map extends mixin(OLMap) {
    */
   constructor(options = {}) {
     super({
-      controls: [
-        ...defaultControls({ attribution: false }).getArray(),
-        new CopyrightControl({ active: true }),
-      ],
+      controls: [...defaultControls().getArray()],
       ...options,
     });
   }

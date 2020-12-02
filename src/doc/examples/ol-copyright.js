@@ -8,14 +8,15 @@ export default () => {
   const control = new CopyrightControl({
     target: document.getElementById('copyright'),
     element: document.createElement('div'),
-    render() {
-      this.element.innerHTML = this.active
-        ? this.getCopyrights().join(' & ')
-        : '';
-    },
+    // render() {
+    //   this.element.innerHTML = this.active
+    //     ? this.getCopyrights().join(' & ')
+    //     : '';
+    // },
   });
 
   const mapboxLayer = new MapboxLayer({
+    copyrights: 'My MapboxLayer copyright',
     url: `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`,
   });
 

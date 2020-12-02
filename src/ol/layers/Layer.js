@@ -1,5 +1,7 @@
 import { unByKey } from 'ol/Observable';
+import Group from 'ol/layer/Group';
 import LayerCommon from '../../common/layers/Layer';
+import getArrayFromString from '../../common/utils/getArrayFromString';
 
 /**
  * A class representing a layer to display on an OpenLayers map.
@@ -70,6 +72,24 @@ class Layer extends LayerCommon {
         }
       }),
     );
+
+    if (this.copyrights) {
+      if (this.olLayer instanceof Group) {
+        this.olLayer.getArray().forEach((layer) => {
+          layer
+            .getSource()
+            .setAttributions(
+              (this.copyrights && getArrayFromString(this.copyrights)) || [],
+            );
+        });
+      } else {
+        this.olLayer
+          .getSource()
+          .setAttributions(
+            (this.copyrights && getArrayFromString(this.copyrights)) || [],
+          );
+      }
+    }
   }
 
   /**

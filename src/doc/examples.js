@@ -102,4 +102,15 @@ export default [
       js: 'ol-copyright.js',
     },
   },
+  {
+    name: 'Mapbox Copyright',
+    key: 'mb-copyright',
+    description:
+      'This example shows how to use the CopyrightControl component.',
+    img: olCopyrightImg,
+    files: {
+      html: 'mb-copyright.html',
+      js: 'mb-copyright.js',
+    },
+  },
 ];

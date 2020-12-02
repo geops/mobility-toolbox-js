@@ -12,6 +12,7 @@ export default () => {
   });
 
   const tracker = new TralisLayer({
+    copyrights: 'My TralisLayer copyright',
     url: '',
     apiKey: '',
   });

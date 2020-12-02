@@ -12,6 +12,7 @@ export default () => {
   });
 
   const layer = new MapboxLayer({
+    copyright: 'My Mapbox layer copyright',
     url: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
   });
 
