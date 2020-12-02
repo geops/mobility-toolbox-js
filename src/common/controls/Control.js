@@ -51,7 +51,6 @@ class Control extends BaseObject {
           return this.get('map');
         },
         set: (map) => {
-          console.log('ici');
           // Remove previous node.
           if (this.map && this.element && this.element.parentNode) {
             this.element.parentNode.removeChild(this.element);
