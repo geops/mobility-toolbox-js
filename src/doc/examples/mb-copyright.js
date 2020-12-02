@@ -1,7 +1,6 @@
-import View from 'ol/View';
-import { Map, MapboxLayer } from '../../ol';
-import CopyrightControl from '../../ol/controls/CopyrightControl';
-import 'ol/ol.css';
+import { Map } from '../../mapbox';
+import CopyrightControl from '../../mapbox/controls/CopyrightControl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default () => {
   // Define a custom copyright
@@ -15,18 +14,17 @@ export default () => {
     },
   });
 
-  const mapboxLayer = new MapboxLayer({
-    url: `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`,
-  });
-
   const map = new Map({
-    target: 'map',
+    container: 'map',
+    style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
+    center: [7.47, 46.95],
+    zoom: 12,
+    touchPitch: false,
+    pitchWithRotate: false,
+    dragRotate: false,
+    touchZoomRotate: false,
+    attributionControl: false,
     controls: [control],
-    layers: [mapboxLayer],
-    view: new View({
-      center: [950690.34, 6003962.67],
-      zoom: 15,
-    }),
   });
 
   // Add example button to toggle the copyright control.

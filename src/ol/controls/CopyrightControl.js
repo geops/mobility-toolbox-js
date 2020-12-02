@@ -1,38 +1,52 @@
 import Control from '../../common/controls/Control';
 import mixin from '../../common/mixins/CopyrightMixin';
+import removeDuplicate from '../../common/utils/removeDuplicate';
 
 class Copyright extends mixin(Control) {
   constructor(options) {
     super(options);
-    this.onLayerChange = this.onLayerChange.bind(this);
+    this.onPostRender = this.onPostRender.bind(this);
   }
 
-  onLayerChange() {
-    if (this.map) {
-      this.render();
-
-      this.map.getMobilityLayers().forEach((layer) => {
-        if (layer.mbMap) {
-          layer.mbMap.once('load', () => {
-            this.render();
-          });
-        }
-      });
+  getCopyrights() {
+    if (!this.map) {
+      return [];
     }
+    let copyrights = [];
+    this.map.getLayers().forEach((layer) => {
+      if (
+        layer &&
+        layer.getSource &&
+        layer.getSource() &&
+        layer.getSource().getAttributions()
+      ) {
+        copyrights = copyrights.concat(
+          layer.getSource().getAttributions()(this.frameState),
+        );
+      }
+    });
+    return removeDuplicate(copyrights);
   }
 
   activate() {
     super.activate();
     if (this.map) {
-      this.map.on('change:layers', this.onLayerChange);
+      this.map.on('postrender', this.onPostRender);
     }
   }
 
   deactivate() {
     if (this.map) {
-      this.map.un('change:layers', this.onLayerChange);
+      this.map.un('postrender', this.onPostRender);
     }
     super.deactivate();
+  }
+
+  onPostRender(evt) {
+    if (this.map && this.element) {
+      this.frameState = evt.frameState;
+      this.render();
+    }
   }
 }
 

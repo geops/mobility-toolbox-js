@@ -131,6 +131,11 @@ export default class MapboxLayer extends Layer {
      * @private
      */
     this.styleUrl = options.url;
+
+    /**
+     * @ignores
+     */
+    this.updateAttribution = this.updateAttribution.bind(this);
   }
 
   /**
@@ -160,9 +165,6 @@ export default class MapboxLayer extends Layer {
       this.map.on('change:target', () => {
         this.loadMbMap();
       }),
-    );
-
-    this.olListenersKeys.push(
       this.map.on('change:size', () => {
         try {
           if (this.mbMap) {
@@ -255,6 +257,13 @@ export default class MapboxLayer extends Layer {
         mapboxCanvas.removeAttribute('tabindex');
       }
     }
+    this.mbMap.on('idle', this.updateAttribution);
+  }
+
+  updateAttribution(evt) {
+    this.olLayer
+      .getSource()
+      .setAttributions(getMapboxMapCopyrights(evt.target));
   }
 
   /**
@@ -294,6 +303,7 @@ export default class MapboxLayer extends Layer {
    */
   terminate() {
     if (this.mbMap) {
+      this.mbMap.off('idle', this.updateAttribution);
       // Some asynchrone repaints are triggered even if the mbMap has been removed,
       // to avoid display of errors we set an empty function.
       this.mbMap.triggerRepaint = () => {};

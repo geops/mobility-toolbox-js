@@ -5,7 +5,7 @@ import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
 class CopyrightControl extends mixin(Control) {
   constructor(options) {
     super(options);
-    this.render = this.render().bind(this);
+    this.render = this.render.bind(this);
   }
 
   activate() {

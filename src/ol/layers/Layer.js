@@ -73,21 +73,19 @@ class Layer extends LayerCommon {
       }),
     );
 
+    // We set the copyright to the source used by the layer.
     if (this.copyrights) {
+      const attributions =
+        (this.copyrights && getArrayFromString(this.copyrights)) || [];
       if (this.olLayer instanceof Group) {
-        this.olLayer.getArray().forEach((layer) => {
-          layer
-            .getSource()
-            .setAttributions(
-              (this.copyrights && getArrayFromString(this.copyrights)) || [],
-            );
-        });
-      } else {
         this.olLayer
-          .getSource()
-          .setAttributions(
-            (this.copyrights && getArrayFromString(this.copyrights)) || [],
-          );
+          .getLayers()
+          .getArray()
+          .forEach((layer) => {
+            layer.getSource().setAttributions(attributions);
+          });
+      } else {
+        this.olLayer.getSource().setAttributions(attributions);
       }
     }
   }

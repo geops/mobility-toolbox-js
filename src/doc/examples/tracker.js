@@ -1,6 +1,7 @@
 import View from 'ol/View';
 import { Map, TrajservLayer, MapboxLayer } from '../../ol';
 import 'ol/ol.css';
+import CopyrightControl from '../../ol/controls/CopyrightControl';
 
 export default () => {
   const map = new Map({
@@ -9,6 +10,7 @@ export default () => {
       center: [831634, 5933959],
       zoom: 13,
     }),
+    controls: [new CopyrightControl()],
   });
 
   const layer = new MapboxLayer({
@@ -20,6 +22,7 @@ export default () => {
     url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
   });
+  window.tracker = tracker;
 
   tracker.onClick((vehicle) => {
     // eslint-disable-next-line no-console
