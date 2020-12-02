@@ -3,8 +3,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-
-import { Map as MBMap } from 'mapbox-gl';
 import Observable from 'ol/Observable';
 import Control from '../controls/Control';
 import MapboxLayer from '../../ol/layers/MapboxLayer';

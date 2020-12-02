@@ -1,4 +1,4 @@
-import mapboxgl from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-unminified';
 import { toLonLat } from 'ol/proj';
 import TrackerLayer from './TrackerLayer';
 

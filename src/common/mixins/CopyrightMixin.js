@@ -1,8 +1,6 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 
-import removeDuplicate from '../utils/removeDuplicate';
-
 /**
  * CopyrightInterface.
  *
@@ -42,24 +40,6 @@ const CopyrightMixin = (Base) =>
         });
       }
       super(opts);
-    }
-
-    getCopyrights() {
-      let copyrights = [];
-
-      if (!this.map) {
-        return [];
-      }
-
-      // add copyrights from layers
-      this.map
-        .getMobilityLayers()
-        .filter((l) => l.copyrights)
-        .forEach((l) => {
-          copyrights = copyrights.concat(l.copyrights);
-        });
-
-      return removeDuplicate(copyrights);
     }
 
     render() {

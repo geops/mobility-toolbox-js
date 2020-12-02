@@ -1,4 +1,4 @@
-import mapboxgl from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-unminified';
 import fetch from 'jest-fetch-mock';
 import { toLonLat } from 'ol/proj';
 import TrajservLayer from './TrajservLayer';

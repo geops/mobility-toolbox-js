@@ -23,6 +23,6 @@ export default () => {
     // eslint-disable-next-line no-console
     console.log(vehicle);
   });
-
+  window.tracker = tracker;
   map.addLayer(tracker);
 };

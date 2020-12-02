@@ -14,9 +14,11 @@ const getMapboxMapCopyrights = (map) => {
   Object.values(sourceCaches).forEach((sourceCache) => {
     if (sourceCache.used) {
       const source = sourceCache.getSource();
-      if (source.attribution) {
+      const attribution =
+        source.attribution || (source.options && source.options.attribution);
+      if (attribution) {
         copyrights = copyrights.concat(
-          source.attribution.replace(/&copy;/g, '©').split(/(<a.*?<\/a>)/),
+          attribution.replace(/&copy;/g, '©').split(/(<a.*?<\/a>)/),
         );
       }
     }
