@@ -4,7 +4,6 @@
  */
 const getArrayFromString = (value) => {
   if (Array.isArray(value)) {
-    console.log(value);
     return value;
   }
   return [value];

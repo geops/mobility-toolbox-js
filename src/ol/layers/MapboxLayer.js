@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { toLonLat } from 'ol/proj';
-import mapboxgl from 'mapbox-gl/dist/mapbox-gl-unminified';
+import mapboxgl from 'mapbox-gl';
 import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -156,7 +156,6 @@ export default class MapboxLayer extends Layer {
     this.format = new GeoJSON({
       featureProjection: this.map.getView().getProjection(),
     });
-
 
     this.loadMbMap();
 
