@@ -1,3 +1,4 @@
+import { inView } from 'ol/layer/Layer';
 import Control from '../../common/controls/Control';
 import mixin from '../../common/mixins/CopyrightMixin';
 import removeDuplicate from '../../common/utils/removeDuplicate';
@@ -9,12 +10,16 @@ class Copyright extends mixin(Control) {
   }
 
   getCopyrights() {
-    if (!this.map) {
+    if (!this.frameState) {
       return [];
     }
     let copyrights = [];
-    this.map.getLayers().forEach((layer) => {
+
+    // This code loop comes mainly from ol.
+    this.frameState.layerStatesArray.forEach((layerState) => {
+      const { layer } = layerState;
       if (
+        inView(layerState, this.frameState.viewState) &&
         layer &&
         layer.getSource &&
         layer.getSource() &&
