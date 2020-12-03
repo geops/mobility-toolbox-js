@@ -15,6 +15,5 @@ export default () => {
     copyright: 'My Mapbox layer copyright',
     url: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
   });
-
   map.addLayer(layer);
 };

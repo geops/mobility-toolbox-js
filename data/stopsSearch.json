@@ -1,18 +1,15 @@
 {
-   "type":"FeatureCollection",
-   "features":[
-      {
-         "type":"Feature",
-         "properties":{
-            "name":"Bern"
-         },
-         "geometry":{
-            "type":"Point",
-            "coordinates":[
-               1,
-               2
-            ]
-         }
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bern"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1, 2]
       }
-   ]
+    }
+  ]
 }

@@ -186,7 +186,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
             this.stationsCoords.push(fromLonLat(station.coordinates));
           });
           this.clickCallbacks.forEach((callback) =>
-            callback(vehicleWithStations, this, evt),
+            callback({ ...vehicle, ...vehicleWithStations }, this, evt),
           );
         },
       );
