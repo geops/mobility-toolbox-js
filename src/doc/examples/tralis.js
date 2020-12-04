@@ -12,7 +12,6 @@ export default () => {
       zoom: 9,
     }),
   });
-  window.map = map;
   const osm = new Layer({
     olLayer: new TileLayer({
       source: new OSMSource(),

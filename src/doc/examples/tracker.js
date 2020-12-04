@@ -21,7 +21,6 @@ export default () => {
     url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
   });
-  window.tracker = tracker;
 
   tracker.onClick((vehicle) => {
     // eslint-disable-next-line no-console
