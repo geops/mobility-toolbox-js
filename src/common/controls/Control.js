@@ -44,6 +44,7 @@ class Control extends BaseObject {
           } else {
             this.deactivate();
           }
+          this.render();
         },
       },
       map: {
@@ -64,13 +65,16 @@ class Control extends BaseObject {
           if (this.map) {
             // Add new node
             const targett = this.target || this.map.getContainer();
-            targett.appendChild(this.element);
+            if (this.element) {
+              targett.appendChild(this.element);
+            }
 
             // Add listeners
             if (this.active) {
               this.activate();
             }
           }
+          this.render();
         },
       },
       target: {
@@ -86,14 +90,26 @@ class Control extends BaseObject {
     });
   }
 
+  /**
+   * Add listeners then renders the control.
+   * To be defined in inherited classes.
+   */
   activate() {
     this.deactivate();
-    this.render();
   }
 
-  deactivate() {
-    this.render();
-  }
+  /**
+   * Remove listeners added by activate() function then renders the control.
+   * To be defined in inherited classes.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  deactivate() {}
+
+  /**
+   * Render content in the HTML element.
+   * To be defined in inherited classes.
+   */
+  render() {}
 }
 
 export default Control;
