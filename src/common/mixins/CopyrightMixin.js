@@ -2,14 +2,14 @@
 /* eslint-disable max-classes-per-file */
 
 /**
- * CopyrightInterface.
+ * Copyright control interface.
  *
  */
 export class CopyrightInterface {
   /**
-   * Return an array of mobility layer's copyright.
+   * Return an array of layer's copyright.
    *
-   * @returns {String[]} A list of vehicles.
+   * @returns {String[]} A list of copyrights to render.
    */
   getCopyrights() {}
 }

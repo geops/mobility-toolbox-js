@@ -18,7 +18,7 @@ import { getSourceCoordinates, getResolution } from '../utils';
  * });
  *
  * @see <a href="/api/class/src/api/trajserv/TrajservAPI%20js~TrajservAPI%20html">TrajservAPI</a>
- * @see <a href="/examples/mapbox-tracker">Mapbox tracker example</a>
+ * @see <a href="/example/mapbox-tracker">Mapbox tracker example</a>
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}

@@ -13,7 +13,7 @@ import getArrayFromString from '../../common/utils/getArrayFromString';
  *   olLayer: ...,
  * });
  *
- * @see <a href="/examples/ol-map">Map example</a>
+ * @see <a href="/example/ol-map">Map example</a>
  *
  * @extends {Layer}
  */

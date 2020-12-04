@@ -2,6 +2,26 @@ import Control from '../../common/controls/Control';
 import mixin from '../../common/mixins/CopyrightMixin';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
 
+/**
+ * Display layer's copyrights.
+ *
+ * @example
+ * import { Map, CopyrightControl } from 'mobility-toolbox-js/mapbox';
+ *
+ * const map = new Map({
+ *   container: 'map',
+ *   style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
+ *   controls: [
+ *     new CopyrightControl()
+ *   ]
+ * });
+ *
+ *
+ * @see <a href="/example/mb-copyright">Mapbox copyright example</a>
+ *
+ * @extends {Control}
+ * @implements {CopyrightInterface}
+ */
 class CopyrightControl extends mixin(Control) {
   constructor(options) {
     super(options);

@@ -92,7 +92,7 @@ export default [
     },
   },
   {
-    name: 'Copyright',
+    name: 'Copyrights with OpenLayers',
     key: 'ol-copyright',
     description:
       'This example shows how to use the CopyrightControl component.',
@@ -103,7 +103,7 @@ export default [
     },
   },
   {
-    name: 'Mapbox Copyright',
+    name: 'Copyrights with Mapbox',
     key: 'mb-copyright',
     description:
       'This example shows how to use the CopyrightControl component.',

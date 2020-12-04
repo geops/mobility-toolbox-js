@@ -3,7 +3,7 @@ import removeDuplicate from './removeDuplicate';
 /**
  * Return the copyright a Mapbox map.
  * @param {mapboxgl.Map} map A Mapbox map
- * @ignores
+ * @ignore
  */
 const getMapboxMapCopyrights = (map) => {
   if (!map || !map.style) {

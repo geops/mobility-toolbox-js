@@ -32,6 +32,9 @@
  * @external {ol/events~EventsKey} https://openlayers.org/en/latest/apidoc/module-ol_events.html#~EventsKey
  */
 /**
+ * @external {ol/Object~BaseObject} https://openlayers.org/en/latest/apidoc/module-ol_Object-BaseObject.html
+ */
+/**
  * @external {mapboxgl.Map} https://docs.mapbox.com/mapbox-gl-js/api/map/
  */
 /**
@@ -87,4 +90,7 @@
  */
 /**
  * @external {StopsSearchParams} https://developer.geops.io/apis/5dcbd702a256d90001cf1361/#/default/get_
+ */
+/**
+ * @external {HTMLElement} https://developer.mozilla.org/fr/docs/Web/API/HTMLElement
  */

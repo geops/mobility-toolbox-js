@@ -3,7 +3,7 @@
  * It removes also null, undefined or non string values.
  *
  * @param {array} array Array of values.
- * @ignores
+ * @ignore
  */
 const removeDuplicate = (array) => {
   return [

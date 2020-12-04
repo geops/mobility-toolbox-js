@@ -1,5 +1,4 @@
-import { Map } from '../../mapbox';
-import CopyrightControl from '../../mapbox/controls/CopyrightControl';
+import { Map, CopyrightControl } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default () => {

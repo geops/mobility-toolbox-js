@@ -3,7 +3,26 @@ import Control from '../../common/controls/Control';
 import mixin from '../../common/mixins/CopyrightMixin';
 import removeDuplicate from '../../common/utils/removeDuplicate';
 
-class Copyright extends mixin(Control) {
+/**
+ * Display layer's copyrights.
+ *
+ * @example
+ * import { Map, CopyrightControl } from 'mobility-toolbox-js/ol';
+ *
+ * const map = new Map({
+ *   target: 'map',
+ *   controls: [
+ *     new CopyrightControl()
+ *   ]
+ * });
+ *
+ *
+ * @see <a href="/example/ol-copyright">Openlayers copyright example</a>
+ *
+ * @extends {Control}
+ * @implements {CopyrightInterface}
+ */
+class CopyrightControl extends mixin(Control) {
   constructor(options) {
     super(options);
     this.onPostRender = this.onPostRender.bind(this);
@@ -49,10 +68,13 @@ class Copyright extends mixin(Control) {
 
   onPostRender(evt) {
     if (this.map && this.element) {
+      /**
+       * @ugnore
+       */
       this.frameState = evt.frameState;
       this.render();
     }
   }
 }
 
-export default Copyright;
+export default CopyrightControl;

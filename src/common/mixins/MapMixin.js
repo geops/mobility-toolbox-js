@@ -1,25 +1,21 @@
 /* eslint-disable no-empty-function */
 /* eslint-disable no-useless-constructor */
-/* eslint-disable no-unused-vars */
 /* eslint-disable class-methods-use-this */
-/* eslint-disable max-classes-per-file */
-import Observable from 'ol/Observable';
+// eslint-disable-next-line max-classes-per-file
 import Control from '../controls/Control';
-import MapboxLayer from '../../ol/layers/MapboxLayer';
 
 /**
- * MapInterface.
- *
- * @classproperty {Object} options Map options.
+ * Map interface.
  */
 export class MapInterface {
   /**
    * Constructor.
    *
    * @param {Object} options Map options
-   * @param {Object} options Map options
-   * @param {Array<Control>} [options.mobilityControls] Custom controls of the map.
+   * @param {Array<Layer>} [options.layers] Custom layers of the map.
+   * @param {Array<Control>} [options.controls] Custom controls of the map.
    */
+  // eslint-disable-next-line no-unused-vars
   constructor(options = {}) {}
 
   /**

@@ -1,6 +1,5 @@
 import View from 'ol/View';
-import { Map, MapboxLayer } from '../../ol';
-import CopyrightControl from '../../ol/controls/CopyrightControl';
+import { Map, MapboxLayer, CopyrightControl } from '../../ol';
 import 'ol/ol.css';
 
 export default () => {

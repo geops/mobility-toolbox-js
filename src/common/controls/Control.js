@@ -4,12 +4,10 @@ import BaseObject from 'ol/Object';
  * A class representing a control to display on map.
  *
  * @example
- * const map = new Map();
  * const control = new Control();
- * map.addControl(control);
  *
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map which the control refers to.
- * @classproperty {string} active - Active the control.
+ * @classproperty {boolean} active - Active the control.
  * @classproperty {function} render - Render function called whenever the control needs to be rerendered.
  * @classproperty {HTMLElement} element - The HTML element used to render the control. Read only.
  * @classproperty {HTMLElement} target - The HTML element where to render the element property. Default is the map's element. Read only.
@@ -33,13 +31,16 @@ class Control extends BaseObject {
       ...options,
     };
 
+    /**
+     * @ignore
+     */
     this.active = active;
   }
 
   /**
    * Define control's properties.
    *
-   * @ignores
+   * @ignore
    */
   defineProperties(options) {
     const { target, element, render } = {
@@ -98,6 +99,9 @@ class Control extends BaseObject {
         value: element,
       },
       render: {
+        /**
+         * @ignore
+         */
         value: render || this.render,
         writable: true,
       },
