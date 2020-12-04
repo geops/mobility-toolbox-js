@@ -36,19 +36,6 @@ const getLayer = (copyrights, visible = true) => {
     olLayer: getOLTileLayer(),
   });
 };
-// describe('Copyright', () => {
-//   let map;
-
-//   afterEach(() => {
-//     if (map) {
-//       map.dispose();
-//     }
-//   });
-describe('CopyrightControl', () => {
-  test('should activate the control on constrcution then deactivate it', () => {
-    expect(true).toBe(true);
-  });
-});
 
 describe('CopyrightControl', () => {
   let map;
