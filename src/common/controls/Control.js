@@ -1,14 +1,28 @@
 import BaseObject from 'ol/Object';
 
 /**
- * Generic control for mobility-toolbox-js.
+ * A class representing a control to display on map.
+ *
+ * @example
+ * const map = new Map();
+ * const control = new Control();
+ * map.addControl(control);
+ *
+ * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map which the control refers to.
+ * @classproperty {string} active - Active the control.
+ * @classproperty {function} render - Render function called whenever the control needs to be rerendered.
+ * @classproperty {HTMLElement} element - The HTML element used to render the control. Read only.
+ * @classproperty {HTMLElement} target - The HTML element where to render the element property. Default is the map's element. Read only.
  */
 class Control extends BaseObject {
   /**
    * Constructor
    *
    * @param {Object} [options] Control options.
-   * @param {boolean} [options.active = true] Whether the control is active.
+   * @param {boolean} [options.active = true] Whether the control is active or not.
+   * @param {HTMLElement} [options.element] The HTML element used to render the control.
+   * @param {HTMLElement} [options.target] The HTML element where to render the element property. Default is the map's element.
+   * @param {HTMLElement} [options.render] Render function called whenever the control needs to be rerendered.
    */
   constructor(options = {}) {
     super(options);
@@ -25,7 +39,7 @@ class Control extends BaseObject {
   /**
    * Define control's properties.
    *
-   * @ignore
+   * @ignores
    */
   defineProperties(options) {
     const { target, element, render } = {
@@ -106,7 +120,7 @@ class Control extends BaseObject {
   deactivate() {}
 
   /**
-   * Render content in the HTML element.
+   * The default render function. It renders content in the HTML element.
    * To be defined in inherited classes.
    */
   render() {}
