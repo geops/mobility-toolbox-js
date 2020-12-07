@@ -1,7 +1,6 @@
 import { unByKey } from 'ol/Observable';
 import Group from 'ol/layer/Group';
 import LayerCommon from '../../common/layers/Layer';
-import getArrayFromString from '../../common/utils/getArrayFromString';
 
 /**
  * A class representing a layer to display on an OpenLayers map.
@@ -75,8 +74,7 @@ class Layer extends LayerCommon {
 
     // We set the copyright to the source used by the layer.
     if (this.copyrights) {
-      const attributions =
-        (this.copyrights && getArrayFromString(this.copyrights)) || [];
+      const attributions = this.copyrights || [];
       if (this.olLayer instanceof Group) {
         this.olLayer
           .getLayers()

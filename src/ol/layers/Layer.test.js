@@ -1,10 +1,18 @@
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
+import Map from 'ol/Map';
+import Group from 'ol/layer/Group';
 import Layer from './Layer';
 
-const olLayer = new VectorLayer({ source: new VectorSource() });
+let olLayer;
+let map;
 
 describe('Layer', () => {
+  beforeEach(() => {
+    map = new Map({});
+    olLayer = new VectorLayer({ source: new VectorSource() });
+  });
+
   test('should initialize.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
     expect(layer).toBeInstanceOf(Layer);
@@ -37,10 +45,45 @@ describe('Layer', () => {
     expect(layer.name).toEqual('Layer');
   });
 
-  test('should called terminate on initialization.', () => {
+  test('should call terminate on initialization.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
     const spy = jest.spyOn(layer, 'terminate');
     layer.init();
     expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  test('should call terminate when the layer is removed.', () => {
+    const layer = new Layer({ name: 'Layer', olLayer });
+    const spy = jest.spyOn(layer, 'terminate');
+    layer.init(map);
+    map.addLayer(olLayer);
+    expect(spy).toHaveBeenCalledTimes(1);
+    map.removeLayer(olLayer);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  test('should manage copyrights as string.', () => {
+    const spy = jest.spyOn(VectorSource.prototype, 'setAttributions');
+    const layer = new Layer({ name: 'Layer', copyrights: 'foo', olLayer });
+    layer.init(map);
+    expect(spy).toHaveBeenCalledWith(['foo']);
+  });
+
+  test('should manage copyrights as array.', () => {
+    const spy = jest.spyOn(VectorSource.prototype, 'setAttributions');
+    const layer = new Layer({ name: 'Layer', copyrights: ['bar'], olLayer });
+    layer.init(map);
+    expect(spy).toHaveBeenCalledWith(['bar']);
+  });
+
+  test('should set attributions for Group.', () => {
+    const spy = jest.spyOn(VectorSource.prototype, 'setAttributions');
+    const layer = new Layer({
+      name: 'Layer',
+      copyrights: ['bar'],
+      olLayer: new Group({ layers: [olLayer] }),
+    });
+    layer.init(map);
+    expect(spy).toHaveBeenCalledWith(['bar']);
   });
 });

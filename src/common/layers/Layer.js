@@ -38,6 +38,10 @@ export default class Layer extends Observable {
     super();
     this.defineProperties({ isQueryable: true, ...options });
 
+    if (options.copyrights) {
+      this.copyrights = options.copyrights;
+    }
+
     // Add click callback
     const { onClick } = options;
     if (onClick) {
@@ -54,7 +58,6 @@ export default class Layer extends Observable {
     name,
     key,
     children,
-    copyrights,
     visible,
     properties,
     isBaseLayer,
@@ -86,10 +89,13 @@ export default class Layer extends Observable {
       },
       copyrights: {
         get: () => {
-          return this.get('copyrights') || copyrights;
+          return this.get('copyrights');
         },
         set: (newCopyrights) => {
-          return this.set('copyrights', newCopyrights);
+          const arrValue = !Array.isArray(newCopyrights)
+            ? [newCopyrights]
+            : newCopyrights;
+          return this.set('copyrights', arrValue);
         },
       },
       visible: {

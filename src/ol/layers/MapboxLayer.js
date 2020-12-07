@@ -6,7 +6,6 @@ import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
-import getArrayFromString from '../../common/utils/getArrayFromString';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -250,11 +249,7 @@ export default class MapboxLayer extends Layer {
 
       this.olLayer
         .getSource()
-        .setAttributions(
-          this.copyrights
-            ? getArrayFromString(this.copyrights)
-            : getMapboxMapCopyrights(this.mbMap),
-        );
+        .setAttributions(this.copyrights || getMapboxMapCopyrights(this.mbMap));
 
       this.dispatchEvent({
         type: 'load',
