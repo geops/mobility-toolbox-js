@@ -4,7 +4,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Feature } from 'ol';
 import { LineString, Point, MultiPoint } from 'ol/geom';
 import { Modify } from 'ol/interaction';
-
+import { unByKey } from 'ol/Observable';
 import EventType from 'ol/events/EventType';
 import Control from '../../common/controls/Control';
 import Layer from '../layers/Layer';
@@ -89,31 +89,33 @@ class RoutingControl extends Control {
       false,
     );
 
-    this.routingLayer = new Layer({
-      name: 'routing-layer',
-      olLayer: new Vector({
-        source: new VectorSource(),
-        style: [
-          new Style({
-            stroke: new Stroke({
-              color: [255, 0, 0, 1],
-              width: 5,
-            }),
-          }),
-          new Style({
-            image: new Circle({
-              radius: 6,
-              fill: new Fill({
+    this.routingLayer =
+      opts.layer ||
+      new Layer({
+        name: 'routing-layer',
+        olLayer: new Vector({
+          source: new VectorSource(),
+          style: [
+            new Style({
+              stroke: new Stroke({
                 color: [255, 0, 0, 1],
+                width: 5,
               }),
             }),
-            geometry: (feat) => {
-              return new MultiPoint(feat.getGeometry().getCoordinates());
-            },
-          }),
-        ],
-      }),
-    });
+            new Style({
+              image: new Circle({
+                radius: 6,
+                fill: new Fill({
+                  color: [255, 0, 0, 1],
+                }),
+              }),
+              geometry: (feat) => {
+                return new MultiPoint(feat.getGeometry().getCoordinates());
+              },
+            }),
+          ],
+        }),
+      });
 
     this.viaPoints = [];
 
@@ -123,20 +125,21 @@ class RoutingControl extends Control {
   setDrawEnabled(enabled, reset) {
     this.active = enabled;
 
-    // Clean viaPoints
+    // Clear viaPoints and source
     if (reset) {
       this.viaPoints = [];
+      this.routingLayer.olLayer.getSource().clear();
     }
 
     if (this.map) {
       // Define and add modify interaction
-      const modify = new Modify({
+      this.modify = new Modify({
         source: this.routingLayer.olLayer.getSource(),
         pixelTolerance: 4,
         style: defaultStyle,
       });
 
-      modify.on('modifyend', (e) => {
+      this.modify.on('modifyend', (e) => {
         // Redefine and redraw viaPoints on modify end
         this.viaPoints = [];
         const coords = e.features
@@ -149,23 +152,30 @@ class RoutingControl extends Control {
       });
 
       if (this.active) {
+        // Add control ressources to map
         this.map.addLayer(this.routingLayer);
-        this.map.on('singleclick', (e) => this.onMapClick(e));
-        this.map.addInteraction(modify);
+        this.onMapClickKey = this.map.on('singleclick', (e) =>
+          this.addViaPoint(e.coordinate),
+        );
+        this.map.addInteraction(this.modify);
         return;
       }
-      this.map.removeLayer(this.routingLayer);
-      this.map.un('singleclick', (e) => this.onMapClick(e));
-      this.map.removeInteraction(modify);
+
+      // Remove control ressources from map
+      this.map.removeLayer(this.routingLayer.olLayer);
+      this.map.removeInteraction(this.modify);
+      unByKey(this.onMapClickKey);
     }
   }
 
   addViaPoint(coordinate, index = this.viaPoints.length, overwrite = 0) {
+    // Add/Insert/Overwrite viapoint and redraw route
     this.viaPoints.splice(index, overwrite, coordinate);
     this.drawRoute(this.viaPoints);
   }
 
   removeViaPoint(index = this.viaPoints.length - 1) {
+    // Remove viapoint and redraw route
     if (this.viaPoints.length && this.viaPoints[index]) {
       this.viaPoints.splice(index, 1);
     }
@@ -177,8 +187,11 @@ class RoutingControl extends Control {
   }
 
   drawRoute(coordinateArray) {
+    // Clear source
     this.routingLayer.olLayer.getSource().clear();
+
     if (coordinateArray.length === 1) {
+      // Add point for first node
       const pointFeature = new Feature({
         geometry: new Point(coordinateArray[0]),
       });
@@ -186,23 +199,13 @@ class RoutingControl extends Control {
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
     if (coordinateArray.length >= 2) {
+      // Add line once there are two viaPoints
       const routeFeature = new Feature({
         geometry: new LineString(coordinateArray),
       });
       return this.routingLayer.olLayer.getSource().addFeature(routeFeature);
     }
     return null;
-  }
-
-  onMapClick(e) {
-    if (!this.viaPoints.length) {
-      this.addViaPoint(e.coordinate);
-      return this.drawRoute(this.viaPoints);
-    }
-    if (this.viaPoints.length === 1) {
-      this.addViaPoint(e.coordinate);
-    }
-    return this.drawRoute(this.viaPoints);
   }
 }
 

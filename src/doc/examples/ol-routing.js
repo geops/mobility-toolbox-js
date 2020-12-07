@@ -4,7 +4,6 @@ import RoutingControl from '../../ol/controls/RoutingControl';
 import 'ol/ol.css';
 
 export default () => {
-  // Define a custom copyright
   const control = new RoutingControl();
 
   const mapboxLayer = new MapboxLayer({
@@ -22,8 +21,6 @@ export default () => {
   });
 
   control.setDrawEnabled(true);
-  control.addViaPoint([949335.971405072, 6003355.951087987]);
-  control.addViaPoint([951605.1956822881, 6004177.649142052]);
 
   // Add example button to toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {
