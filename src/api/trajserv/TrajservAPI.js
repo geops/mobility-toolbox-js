@@ -3,7 +3,6 @@ import {
   translateTrajStationsResp,
 } from './TrajservAPIUtils';
 import API from '../../common/api/api';
-import { handleError } from '../../common/api/utils';
 
 /**
  * Access to the [Realtime service](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/).
@@ -60,7 +59,7 @@ class TrajservAPI extends API {
         return translateTrajCollResponse(data.features);
       })
       .catch((err) => {
-        handleError('trajectory_collection', err);
+        API.handleError('trajectory_collection', err);
       });
   }
 
@@ -79,7 +78,7 @@ class TrajservAPI extends API {
         return translateTrajStationsResp(data);
       })
       .catch((err) => {
-        handleError('trajstations', err);
+        API.handleError('trajstations', err);
       });
   }
 }

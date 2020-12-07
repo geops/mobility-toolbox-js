@@ -1,5 +1,4 @@
 import qs from 'query-string';
-import { handleError, readJsonResponse } from './utils';
 
 /**
  * Common class to access to a geOps api.
@@ -25,6 +24,21 @@ class API {
   }
 
   /**
+   * Display log message on error but not on AbortError.
+   * @ignore
+   */
+  static handleError(reqType, err) {
+    if (err.name === 'AbortError') {
+      // Ignore AbortError.
+      return;
+    }
+    // eslint-disable-next-line no-console
+    console.warn(`Fetch ${reqType} request failed: `, err);
+    // Propagate the error.
+    throw err;
+  }
+
+  /**
    * Append the apiKey before sending the request.
    * @ignore
    */
@@ -37,9 +51,20 @@ class API {
         (clone[key] === undefined || clone[key] === null) && delete clone[key],
     );
     return fetch(`${this.url}${path}?${qs.stringify(clone)}`, config)
-      .then(readJsonResponse)
+      .then((response) => {
+        try {
+          return response.json().then((data) => {
+            if (data.error) {
+              throw new Error(data.error);
+            }
+            return data;
+          });
+        } catch (err) {
+          return Promise.reject(new Error(err));
+        }
+      })
       .catch((err) => {
-        handleError(`${this.url}${path}`, err);
+        API.handleError(`${this.url}${path}`, err);
       });
   }
 }
