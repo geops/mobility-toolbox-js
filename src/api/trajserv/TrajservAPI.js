@@ -1,9 +1,9 @@
-import qs from 'query-string';
 import {
   translateTrajCollResponse,
   translateTrajStationsResp,
 } from './TrajservAPIUtils';
-import { handleError, readJsonResponse } from '../utils';
+import API from '../../common/api/api';
+import { handleError } from '../../common/api/utils';
 
 /**
  * Access to the [Realtime service](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/).
@@ -15,8 +15,9 @@ import { handleError, readJsonResponse } from '../utils';
  *   url: 'https://api.geops.io/tracker/v1',
  *   apiKey: [yourApiKey]
  * });
+ *
  */
-class TrajservAPI {
+class TrajservAPI extends API {
   /**
    * Constructor
    *
@@ -25,21 +26,7 @@ class TrajservAPI {
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    */
   constructor(options = {}) {
-    /** @ignore */
-    this.url = options.url || 'https://api.geops.io/tracker/v1';
-    /** @ignore */
-    this.apiKey = options.apiKey;
-  }
-
-  /**
-   * Append the apiKey before sending the request.
-   * @ignore
-   */
-  fetch(url, params = {}, config) {
-    const urlParams = { ...params, key: this.apiKey };
-    return fetch(`${url}?${qs.stringify(urlParams)}`, config).then(
-      readJsonResponse,
-    );
+    super({ url: 'https://api.geops.io/tracker/v1', ...options });
   }
 
   /**
@@ -50,10 +37,8 @@ class TrajservAPI {
    * @returns {Promise<TrajservTrajectory>} A trajectory.
    */
   fetchTrajectoryById(params, abortController = {}) {
-    return this.fetch(`${this.url}/trajectorybyid`, params, {
+    return this.fetch(`/trajectorybyid`, params, {
       signal: abortController.signal,
-    }).catch((err) => {
-      handleError('trajectorybyid', err);
     });
   }
 
@@ -65,7 +50,7 @@ class TrajservAPI {
    * @returns {Promise<Trajectory[]>} A list of trajectories.
    */
   fetchTrajectories(params, abortController = {}) {
-    return this.fetch(`${this.url}/trajectory_collection`, params, {
+    return this.fetch(`/trajectory_collection`, params, {
       signal: abortController.signal,
     })
       .then((data) => {
@@ -87,7 +72,7 @@ class TrajservAPI {
    * @returns {Promise<TrajectoryStation[]>} A list of stations.
    */
   fetchTrajectoryStations(params, abortController = {}) {
-    return this.fetch(`${this.url}/trajstations`, params, {
+    return this.fetch(`/trajstations`, params, {
       signal: abortController.signal,
     })
       .then((data) => {

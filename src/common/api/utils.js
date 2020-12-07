@@ -31,17 +31,4 @@ export const readJsonResponse = (response) => {
   }
 };
 
-/**
- * Remove undefined values of an object.
- * @ignore
- */
-export const cleanParams = (obj) => {
-  const clone = { ...obj };
-  Object.keys(obj).forEach(
-    (key) =>
-      (clone[key] === undefined || clone[key] === null) && delete clone[key],
-  );
-  return clone;
-};
-
-export default { handleError, readJsonResponse, cleanParams };
+export default { handleError, readJsonResponse };

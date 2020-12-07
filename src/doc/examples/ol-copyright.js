@@ -9,7 +9,7 @@ export default () => {
     element: document.createElement('div'),
     render() {
       this.element.innerHTML = this.active
-        ? this.getCopyrights().join(' & ')
+        ? this.getCopyrights().join(' | ')
         : '';
     },
   });

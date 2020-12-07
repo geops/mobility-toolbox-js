@@ -1,23 +1,4 @@
-import { handleError, cleanParams, readJsonResponse } from './utils';
-
-describe('cleanParams()', () => {
-  test('deletes property which value is undefined', () => {
-    let obj = {
-      foo: 'bar',
-      bar: 'foo',
-      quux: undefined,
-      testNull: null,
-      testEmptyString: '',
-    };
-    expect(Object.keys(obj).includes('quux')).toBe(true);
-    expect(Object.keys(obj).includes('testNull')).toBe(true);
-    expect(Object.keys(obj).includes('testEmptyString')).toBe(true);
-    obj = cleanParams(obj);
-    expect(Object.keys(obj).includes('quux')).toBe(false);
-    expect(Object.keys(obj).includes('testNull')).toBe(false);
-    expect(Object.keys(obj).includes('testEmptyString')).toBe(true);
-  });
-});
+import { handleError, readJsonResponse } from './utils';
 
 class MockResponse {
   constructor(body) {
