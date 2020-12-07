@@ -1,8 +1,7 @@
-import qs from 'query-string';
-import { handleError, readJsonResponse, cleanParams } from '../utils';
+import Api from '../Api';
 
 /**
- * Access to the [Stops service](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
+ * Access to the [Stops service](https://developer.geops.io/apis/stops/).
  *
  * @example
  * import { StopsAPI } from 'mobility-toolbox-js/api';
@@ -15,40 +14,12 @@ import { handleError, readJsonResponse, cleanParams } from '../utils';
  * @classproperty {string} url Url of the service.
  * @classproperty {string} apiKey Api key to access the service.
  */
-class StopsAPI {
+class StopsAPI extends Api {
   constructor(options = {}) {
-    /** @ignore */
-    this.url = options.url || 'https://api.geops.io/stops/v1/';
-    /** @ignore */
-    this.apiKey = options.apiKey;
-  }
-
-  /**
-   * Append the apiKey before sending the request.
-   * @ignore
-   */
-  fetch(params = {}, config) {
-    const urlParams = cleanParams({ ...params, key: this.apiKey });
-    return fetch(`${this.url}?${qs.stringify(urlParams)}`, config).then(
-      readJsonResponse,
-    );
-  }
-
-  /**
-   * Search.
-   *
-   * @param {StopsSearchParams} params Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
-   * @param {AbortController} abortController Abort controller used to cancel the request.
-   * @returns {Promise<GeoJSONFeature[]>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
-   */
-  search(params, abortController = {}) {
-    return this.fetch(params, {
-      signal: abortController.signal,
-    })
-      .then((featureCollection) => featureCollection.features)
-      .catch((err) => {
-        handleError('search', err);
-      });
+    super({
+      url: 'https://api.geops.io/stops/v1/',
+      ...options,
+    });
   }
 }
 
