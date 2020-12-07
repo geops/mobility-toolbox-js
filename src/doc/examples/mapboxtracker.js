@@ -1,5 +1,4 @@
-import { Map } from 'mapbox-gl';
-import { TrajservLayer } from '../../mapbox';
+import { Map, TrajservLayer } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default () => {
@@ -23,8 +22,5 @@ export default () => {
     // eslint-disable-next-line no-console
     console.log(vehicle);
   });
-
-  map.on('load', () => {
-    tracker.init(map, 'waterway-name');
-  });
+  map.addLayer(tracker);
 };

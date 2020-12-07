@@ -1,5 +1,6 @@
 import { Layer as OLLayer, Group } from 'ol/layer';
 import { unByKey } from 'ol/Observable';
+import Source from 'ol/source/Source';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
 
@@ -19,6 +20,7 @@ class TrackerLayer extends mixin(Layer) {
    */
   constructor(options = {}) {
     const olLayer = new OLLayer({
+      source: new Source({}),
       render: (frameState) => {
         if (this.tracker && this.tracker.canvas) {
           this.tracker.renderTrajectories(

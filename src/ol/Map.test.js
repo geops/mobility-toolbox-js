@@ -9,7 +9,7 @@ describe('Map', () => {
   let map;
 
   beforeEach(() => {
-    map = new Map({});
+    map = new Map({ target: document.body });
   });
 
   test('should init layer on add.', () => {

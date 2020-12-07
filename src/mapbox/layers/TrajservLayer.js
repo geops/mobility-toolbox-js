@@ -1,5 +1,6 @@
 import { fromLonLat } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
+import { unByKey } from 'ol/Observable';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TrajservLayerMixin';
 import { getUTCTimeString } from '../../common/timeUtils';
@@ -17,7 +18,7 @@ import { getSourceCoordinates, getResolution } from '../utils';
  * });
  *
  * @see <a href="/api/class/src/api/trajserv/TrajservAPI%20js~TrajservAPI%20html">TrajservAPI</a>
- * @see <a href="/examples/mapbox-tracker">Mapbox tracker example</a>
+ * @see <a href="/example/mapbox-tracker">Mapbox tracker example</a>
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
@@ -28,6 +29,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     this.onMapClick = this.onMapClick.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onMoveEnd = this.onMoveEnd.bind(this);
+    this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 
   /**
@@ -53,21 +55,27 @@ class TrajservLayer extends mixin(TrackerLayer) {
       coordinates: getSourceCoordinates(map),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
+      attribution: this.copyrights,
     };
 
-    const layer = {
+    this.beforeId = beforeId;
+    this.layer = {
       id: this.key,
       type: 'raster',
       source: this.key,
+      layout: {
+        visibility: this.visible ? 'visible' : 'none',
+      },
       paint: {
         'raster-opacity': 1,
         'raster-fade-duration': 0,
         'raster-resampling': 'nearest', // important otherwise it looks blurry
       },
     };
-
     map.addSource(this.key, source);
-    map.addLayer(layer, beforeId);
+    map.addLayer(this.layer, this.beforeId);
+
+    this.listeners = [this.on('change:visible', this.onVisibilityChange)];
   }
 
   /**
@@ -77,8 +85,11 @@ class TrajservLayer extends mixin(TrackerLayer) {
    */
   terminate() {
     if (this.map) {
-      this.map.removeSource(this.key);
+      this.listeners.forEach((listener) => {
+        unByKey(listener);
+      });
       this.map.removeLayer(this.key);
+      this.map.removeSource(this.key);
     }
     super.terminate();
   }
@@ -100,6 +111,20 @@ class TrajservLayer extends mixin(TrackerLayer) {
       this.map.off('moveend', this.onMoveEnd);
     }
     super.stop();
+  }
+
+  onVisibilityChange() {
+    if (this.visible && !this.map.getLayer(this.key)) {
+      this.map.addLayer(this.layer, this.beforeId);
+    } else if (this.map.getLayer(this.key)) {
+      this.map.removeLayer(this.key);
+    }
+    // We can't use setLayoutProperty it triggers an error probably a bug in mapbox
+    // this.map.setLayoutProperty(
+    //   this.key,
+    //   'visibilty',
+    //   this.visible ? 'visible' : 'none',
+    // );
   }
 
   /**

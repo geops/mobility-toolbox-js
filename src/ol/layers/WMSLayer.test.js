@@ -10,7 +10,10 @@ describe('WMSLayer', () => {
   let map;
   let layer;
   beforeEach(() => {
-    map = new Map({ view: new OLView({ resolution: 5 }) });
+    map = new Map({
+      view: new OLView({ resolution: 5 }),
+      target: document.body,
+    });
 
     layer = new WMSLayer({
       olLayer: new ImageLayer({

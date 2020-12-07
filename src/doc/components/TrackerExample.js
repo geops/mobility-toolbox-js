@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Map } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { TrajservLayer } from '../../mapbox';
+import { Map, TrajservLayer } from '../../mapbox';
 
 const useStyles = makeStyles({
   root: {

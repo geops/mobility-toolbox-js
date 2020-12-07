@@ -1,5 +1,4 @@
-import qs from 'query-string';
-import { handleError, readJsonResponse, cleanParams } from '../utils';
+import API from '../../common/api/api';
 
 /**
  * Access to the [Stops service](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
@@ -12,26 +11,17 @@ import { handleError, readJsonResponse, cleanParams } from '../utils';
  *   apiKey: [yourApiKey]
  * });
  *
- * @classproperty {string} url Url of the service.
- * @classproperty {string} apiKey Api key to access the service.
  */
-class StopsAPI {
-  constructor(options = {}) {
-    /** @ignore */
-    this.url = options.url || 'https://api.geops.io/stops/v1/';
-    /** @ignore */
-    this.apiKey = options.apiKey;
-  }
-
+class StopsAPI extends API {
   /**
-   * Append the apiKey before sending the request.
-   * @ignore
+   * Constructor
+   *
+   * @param {Object} options Options.
+   * @param {string} [options.url='https://api.geops.io/stops/v1/'] Service url.
+   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    */
-  fetch(params = {}, config) {
-    const urlParams = cleanParams({ ...params, key: this.apiKey });
-    return fetch(`${this.url}?${qs.stringify(urlParams)}`, config).then(
-      readJsonResponse,
-    );
+  constructor(options = {}) {
+    super({ url: 'https://api.geops.io/stops/v1/', ...options });
   }
 
   /**
@@ -42,13 +32,9 @@ class StopsAPI {
    * @returns {Promise<GeoJSONFeature[]>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
   search(params, abortController = {}) {
-    return this.fetch(params, {
+    return this.fetch('', params, {
       signal: abortController.signal,
-    })
-      .then((featureCollection) => featureCollection.features)
-      .catch((err) => {
-        handleError('search', err);
-      });
+    }).then((featureCollection) => featureCollection.features);
   }
 }
 

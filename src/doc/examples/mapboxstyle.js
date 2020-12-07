@@ -15,6 +15,7 @@ export default () => {
   const mapboxLayer = new MapboxLayer({ url });
 
   const poiLayer = new MapboxStyleLayer({
+    copyrights: 'My Mapbox style layer copyright',
     name: 'poi layer',
     visible: true,
     mapboxLayer,

@@ -73,7 +73,7 @@ describe('TrajservAPI', () => {
         .catch(() => {
           expect(consoleOutput).toEqual([
             [
-              'Fetch trajectorybyid request failed: ',
+              'Fetch https://api.geops.io/tracker/v1/trajectorybyid request failed: ',
               'FetchError: invalid json response body at  reason: Unexpected token i in JSON at position 0',
             ],
           ]);
@@ -112,14 +112,14 @@ describe('TrajservAPI', () => {
         });
     });
 
-    test('should display error message', () => {
+    test('should display error message if the transformation fails', () => {
       // Mock console statement
       const consoleOutput = [];
       // eslint-disable-next-line no-console
       console.warn = (message, err) =>
         consoleOutput.push([message, err.toString()]);
 
-      fetch.mockResponseOnce('invalid json');
+      fetch.mockResponseOnce(JSON.stringify({ foo: 'bar' }));
 
       return api
         .fetchTrajectories({
@@ -141,7 +141,7 @@ describe('TrajservAPI', () => {
           expect(consoleOutput).toEqual([
             [
               'Fetch trajectory_collection request failed: ',
-              'FetchError: invalid json response body at  reason: Unexpected token i in JSON at position 0',
+              "TypeError: Cannot read property 'length' of undefined",
             ],
           ]);
         });
@@ -180,41 +180,6 @@ describe('TrajservAPI', () => {
 
           // Correct search result
           expect(response.routeIdentifier).toEqual('01716.000072.001:1716');
-        });
-    });
-
-    test('should display error message', () => {
-      // Mock console statement
-      const consoleOutput = [];
-      // eslint-disable-next-line no-console
-      console.warn = (message, err) =>
-        consoleOutput.push([message, err.toString()]);
-
-      fetch.mockResponseOnce('invalid json');
-
-      return api
-        .fetchTrajectoryStations({
-          attr_det: '1',
-          bbox:
-            '922972.5439121567,5951167.694705085,923812.5648796591,5951532.096677226',
-          btime: '5:18:31.766',
-          etime: '5:18:41.967',
-          date: '20200701',
-          rid: '1',
-          a: '1',
-          cd: '1',
-          nm: '1',
-          fl: '1',
-          s: '0',
-          z: '18.66059982835272',
-        })
-        .catch(() => {
-          expect(consoleOutput).toEqual([
-            [
-              'Fetch trajstations request failed: ',
-              'FetchError: invalid json response body at  reason: Unexpected token i in JSON at position 0',
-            ],
-          ]);
         });
     });
   });

@@ -1,26 +1,11 @@
 /* eslint-disable no-underscore-dangle */
 import { toLonLat } from 'ol/proj';
 import mapboxgl from 'mapbox-gl';
+import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-
-const getCopyrightFromSources = (mbMap) => {
-  let copyrights = [];
-  const regex = /<[^>]*>[^>]*<\/[^>]*>/g;
-  // Trick from Mapbox AttributionControl to know if the source is used.
-  const { sourceCaches } = mbMap.style;
-  Object.entries(sourceCaches).forEach(([, sourceCache]) => {
-    if (sourceCache.used) {
-      copyrights = copyrights.concat(
-        regex.exec(sourceCache.getSource().attribution),
-      );
-    }
-  });
-  return Array.from(
-    new Set(copyrights.filter((copyright) => !!copyright)),
-  ).join(', ');
-};
+import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -44,6 +29,7 @@ export default class MapboxLayer extends Layer {
    */
   constructor(options = {}) {
     const mbLayer = new OLLayer({
+      source: new Source({}),
       render: (frameState) => {
         if (!this.mbMap) {
           // eslint-disable-next-line no-console
@@ -144,6 +130,11 @@ export default class MapboxLayer extends Layer {
      * @private
      */
     this.styleUrl = options.url;
+
+    /**
+     * @ignores
+     */
+    this.updateAttribution = this.updateAttribution.bind(this);
   }
 
   /**
@@ -255,13 +246,11 @@ export default class MapboxLayer extends Layer {
        * @type {boolean}
        */
       this.loaded = true;
-      if (!this.copyright) {
-        /**
-         * Copyright statement.
-         * @type {string}
-         */
-        this.copyright = getCopyrightFromSources(this.mbMap);
-      }
+
+      this.olLayer
+        .getSource()
+        .setAttributions(this.copyrights || getMapboxMapCopyrights(this.mbMap));
+
       this.dispatchEvent({
         type: 'load',
         target: this,
@@ -278,6 +267,13 @@ export default class MapboxLayer extends Layer {
         mapboxCanvas.removeAttribute('tabindex');
       }
     }
+    this.mbMap.on('idle', this.updateAttribution);
+  }
+
+  updateAttribution(evt) {
+    this.olLayer
+      .getSource()
+      .setAttributions(getMapboxMapCopyrights(evt.target));
   }
 
   /**
@@ -317,6 +313,7 @@ export default class MapboxLayer extends Layer {
    */
   terminate() {
     if (this.mbMap) {
+      this.mbMap.off('idle', this.updateAttribution);
       // Some asynchrone repaints are triggered even if the mbMap has been removed,
       // to avoid display of errors we set an empty function.
       this.mbMap.triggerRepaint = () => {};

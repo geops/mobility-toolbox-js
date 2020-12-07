@@ -15,7 +15,7 @@ import { v4 as uuid } from 'uuid';
  * @classproperty {boolean} isQueryable - Define if the layer can be queried. Read-only.
  * @classproperty {boolean} isReactSpatialLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
  * @classproperty {Layer[]} children - List of children.
- * @classproperty {string} copyright - Copyright.
+ * @classproperty {String[]} copyrights - Array of copyrights.
  * @classproperty {boolean} visible - Define if the layer is visible or not.
  * @classproperty {Object} properties - Custom properties.
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
@@ -27,7 +27,7 @@ export default class Layer extends Observable {
    * @param {Object} options
    * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
    * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
-   * @param {string} [options.copyright=undefined] Copyright-Statement.
+   * @param {string} [options.copyrights=undefined] Array of copyrights.
    * @param {Array<Layer>} [options.children=[]] Sublayers.
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is visible on the map.
@@ -37,6 +37,10 @@ export default class Layer extends Observable {
   constructor(options) {
     super();
     this.defineProperties({ isQueryable: true, ...options });
+
+    if (options.copyrights) {
+      this.copyrights = options.copyrights;
+    }
 
     // Add click callback
     const { onClick } = options;
@@ -54,7 +58,6 @@ export default class Layer extends Observable {
     name,
     key,
     children,
-    copyright,
     visible,
     properties,
     isBaseLayer,
@@ -84,12 +87,15 @@ export default class Layer extends Observable {
         value: children || [],
         writable: true,
       },
-      copyright: {
+      copyrights: {
         get: () => {
-          return this.get('copyright') || copyright;
+          return this.get('copyrights');
         },
-        set: (newCopyright) => {
-          return this.set('copyright', newCopyright);
+        set: (newCopyrights) => {
+          const arrValue = !Array.isArray(newCopyrights)
+            ? [newCopyrights]
+            : newCopyrights;
+          return this.set('copyrights', arrValue);
         },
       },
       visible: {

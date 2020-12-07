@@ -1,4 +1,5 @@
 import { unByKey } from 'ol/Observable';
+import Group from 'ol/layer/Group';
 import LayerCommon from '../../common/layers/Layer';
 
 /**
@@ -11,7 +12,7 @@ import LayerCommon from '../../common/layers/Layer';
  *   olLayer: ...,
  * });
  *
- * @see <a href="/examples/ol-map">Map example</a>
+ * @see <a href="/example/ol-map">Map example</a>
  *
  * @extends {Layer}
  */
@@ -70,6 +71,21 @@ class Layer extends LayerCommon {
         }
       }),
     );
+
+    // We set the copyright to the source used by the layer.
+    if (this.copyrights) {
+      const attributions = this.copyrights || [];
+      if (this.olLayer instanceof Group) {
+        this.olLayer
+          .getLayers()
+          .getArray()
+          .forEach((layer) => {
+            layer.getSource().setAttributions(attributions);
+          });
+      } else {
+        this.olLayer.getSource().setAttributions(attributions);
+      }
+    }
   }
 
   /**

@@ -32,7 +32,13 @@
  * @external {ol/events~EventsKey} https://openlayers.org/en/latest/apidoc/module-ol_events.html#~EventsKey
  */
 /**
+ * @external {ol/Object~BaseObject} https://openlayers.org/en/latest/apidoc/module-ol_Object-BaseObject.html
+ */
+/**
  * @external {mapboxgl.Map} https://docs.mapbox.com/mapbox-gl-js/api/map/
+ */
+/**
+ * @external {mapboxgl.Layer} https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/
  */
 /**
  * @external {mapboxgl.map.event:mousemove} https://docs.mapbox.com/mapbox-gl-js/api/map/#map.event:mousemove
@@ -48,6 +54,12 @@
  */
 /**
  * @external {mapboxgl.filter} https://docs.mapbox.com/help/glossary/filter/
+ */
+/**
+ * @external {mapboxgl.IControl} https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol
+ */
+/**
+ * @external {mapboxgl.position} https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addcontrol
  */
 /**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
@@ -78,4 +90,7 @@
  */
 /**
  * @external {StopsSearchParams} https://developer.geops.io/apis/5dcbd702a256d90001cf1361/#/default/get_
+ */
+/**
+ * @external {HTMLElement} https://developer.mozilla.org/fr/docs/Web/API/HTMLElement
  */
