@@ -58,7 +58,7 @@ const Example = () => {
       import(`../examples/${jsFileName}?`).then((module) => {
         module.default();
 
-        fetch(`../examples/${example.files.js}`)
+        fetch(`../examples/${jsFileName}`)
           .then((res) => res.text())
           .then((jsCode) => {
             // Replace relative import by library import
