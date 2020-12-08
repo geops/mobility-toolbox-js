@@ -5,6 +5,7 @@ import mapboxImg from './img/examples/mapbox.jpg';
 import mapboxStyleImg from './img/examples/mapbox_style.jpg';
 import queryObjectsImg from './img/examples/query_objects.jpg';
 import olCopyrightImg from './img/examples/ol-copyright.png';
+import stopsImg from './img/examples/stops.jpg';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -111,6 +112,16 @@ export default [
     files: {
       html: 'mb-copyright.html',
       js: 'mb-copyright.js',
+    },
+  },
+  {
+    name: 'Search',
+    key: 'ol-search',
+    description: 'Use the StopsAPI for finding public transport stops.',
+    img: stopsImg,
+    files: {
+      html: 'ol-search.html',
+      js: 'ol-search.js',
     },
   },
 ];

@@ -8,3 +8,4 @@ export { default as TralisLayer } from './layers/TralisLayer';
 export { default as TrackerLayer } from './layers/TrackerLayer';
 export { default as VectorLayer } from './layers/VectorLayer';
 export { default as CopyrightControl } from './controls/CopyrightControl';
+export { default as SearchControl } from './controls/SearchControl';
