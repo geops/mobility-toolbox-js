@@ -7,7 +7,6 @@ import { Modify } from 'ol/interaction';
 import { unByKey } from 'ol/Observable';
 import EventType from 'ol/events/EventType';
 import { fromLonLat, toLonLat } from 'ol/proj';
-import { never } from 'ol/events/condition';
 import lineSlice from '@turf/line-slice';
 import { getDistance } from 'ol/sphere';
 import {
@@ -26,26 +25,6 @@ const defaultPointStyle = new Style({
     }),
   }),
 });
-
-// const defaultStyle = [
-//   new Style({
-//     stroke: new Stroke({
-//       color: [255, 0, 0, 1],
-//       width: 5,
-//     }),
-//   }),
-//   new Style({
-//     image: new Circle({
-//       radius: 6,
-//       fill: new Fill({
-//         color: [255, 0, 0, 1],
-//       }),
-//     }),
-//     geometry: (feat) => {
-//       return new MultiPoint(feat.getGeometry().getCoordinates());
-//     },
-//   }),
-// ];
 
 /**
  * Display layer's copyrights.
@@ -102,14 +81,6 @@ class RoutingControl extends Control {
 
     this.mot = 'foot';
 
-    // ##########################
-    this.fakeLayer = new Layer({
-      name: 'falke-layer',
-      olLayer: new Vector({
-        source: new VectorSource(),
-      }),
-    });
-    // ##########################
     this.routingLayer =
       opts.layer ||
       new Layer({
@@ -139,17 +110,21 @@ class RoutingControl extends Control {
     if (reset) {
       this.viaPoints = [];
       this.routingLayer.olLayer.getSource().clear();
-      // ######################
-      this.fakeLayer.olLayer.getSource().clear();
-      // ######################
     }
 
     if (this.map) {
+      if (!this.active) {
+        // Remove control ressources from map
+        this.map.removeLayer(this.routingLayer.olLayer);
+        this.map.removeInteraction(this.modify);
+        unByKey(this.onMapClickKey);
+        return;
+      }
+
       // Define and add modify interaction
       this.modify = new Modify({
         source: this.routingLayer.olLayer.getSource(),
         pixelTolerance: 4,
-        insertVertexCondition: never,
       });
 
       this.modify.on('modifystart', (e) => {
@@ -166,144 +141,67 @@ class RoutingControl extends Control {
           oldRoute: route.clone(),
           coordinate: e.mapBrowserEvent.coordinate,
         };
-
-        // this.routingLayer.olLayer.getSource().removeFeature(route);
-        // ######################
-        this.fakeLayer.olLayer.getSource().clear();
-        // ######################
       });
 
       this.modify.on('modifyend', (e) => {
-        // Get the index for new viaPoint
+        /* Get the index for new viaPoint */
+        let newViaIndex;
+
         const { oldRoute } = this.initialRouteDrag;
 
         if (!oldRoute) {
           return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
         }
 
-        // const closest = nearestPointOnLine(
-        //   createTurfLine(oldRoute.getGeometry().getCoordinates()),
-        //   createTurfPoint(this.initialRouteDrag.coordinate),
-        // );
-        const closest = oldRoute
-          .getGeometry()
-          .getClosestPoint(this.initialRouteDrag.coordinate);
-
-        // ######################
-        const olpoint = new Feature({
-          geometry: new Point(closest),
-        });
-        olpoint.setStyle(
-          new Style({
-            image: new Circle({
-              radius: 15,
-              fill: new Fill({
-                color: 'green',
-              }),
-            }),
-          }),
-        );
-
-        this.fakeLayer.olLayer.getSource().addFeature(olpoint);
-        // ######################
-
+        // Get the closest point from viaPoints to original route
         const viaPointClosestPoints = this.viaPoints.map((viaPoint) => {
           const snapPoint = oldRoute.getGeometry().getClosestPoint(viaPoint);
-          // ######################
-          const snapolpoint = new Feature({
-            geometry: new Point(snapPoint),
-          });
-          snapolpoint.setStyle(
-            new Style({
-              image: new Circle({
-                radius: 8,
-                fill: new Fill({
-                  color: 'orange',
-                }),
-              }),
-            }),
-          );
-
-          this.fakeLayer.olLayer.getSource().addFeature(snapolpoint);
-          // ######################
           return snapPoint;
         });
 
-        const segments = [];
+        // Calculate the distance from the click point to each segment
+        let distanceToSegment;
         for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
-          const lineSegment = lineSlice(
+          // Create a segment for each pair of (closest) viaPoints using turf lineSlice
+          const turfLineSegment = lineSlice(
             createTurfPoint(viaPointClosestPoints[i]),
             createTurfPoint(viaPointClosestPoints[i + 1]),
             createTurfLine(oldRoute.getGeometry().getCoordinates()),
           );
-          const segment = new LineString(lineSegment.geometry.coordinates);
+
+          /* Create an ol LineString from segment and get the distance between
+           * the click point and the closest point on segment
+           */
+          const segment = new LineString(turfLineSegment.geometry.coordinates);
           const distanceToClick = getDistance(
-            segment.getClosestPoint(closest),
-            closest,
+            segment.getClosestPoint(this.initialRouteDrag.coordinate),
+            this.initialRouteDrag.coordinate,
           );
-          segments.push({
-            lineSegment: segment,
-            distanceToClick,
-            index: i + 1,
-          });
+
+          // Return segment index with smallest distance to click point
+          if (!distanceToSegment || distanceToClick < distanceToSegment) {
+            distanceToSegment = distanceToClick;
+            newViaIndex = i + 1;
+          }
         }
-        // ######################
-        segments.forEach((segment) => {
-          const olRoute = new Feature({
-            geometry: segment.lineSegment,
-          });
-          olRoute.setStyle(
-            new Style({
-              stroke: new Stroke({
-                color: 'blue',
-                width: 7,
-              }),
-            }),
-          );
-          this.fakeLayer.olLayer.getSource().addFeature(olRoute);
-          // if (segment.distanceToClick > segmentDistance) {
-          //   newViaIndex = segment.index;
-          // }
-        });
-        // ######################
 
-        const closestSegment = segments.reduce((prev, current) =>
-          prev.distanceToClick < current.distanceToClick ? prev : current,
-        );
-
-        return this.addViaPoint(
-          e.mapBrowserEvent.coordinate,
-          closestSegment.index,
-        );
+        // Insert new viaPoint at given index
+        return this.addViaPoint(e.mapBrowserEvent.coordinate, newViaIndex);
       });
 
-      if (this.active) {
-        // Add control ressources to map
-        // ######################
-        // this.map.addLayer(this.fakeLayer);
-        // ######################
-        this.map.addLayer(this.routingLayer);
-        this.onMapClickKey = this.map.on('singleclick', (e) => {
-          const feats = e.target.getFeaturesAtPixel(e.pixel, {
-            hitTolerance: 5,
-          });
-          if (feats[0] && feats[0].get('index')) {
-            this.removeViaPoint(feats[0].get('index'));
-          }
-
-          this.addViaPoint(e.coordinate);
+      // Add control ressources to map
+      this.map.addLayer(this.routingLayer);
+      this.onMapClickKey = this.map.on('singleclick', (e) => {
+        const feats = e.target.getFeaturesAtPixel(e.pixel, {
+          hitTolerance: 5,
         });
-        this.map.addInteraction(this.modify);
-        return;
-      }
+        if (feats[0] && feats[0].get('index')) {
+          this.removeViaPoint(feats[0].get('index'));
+        }
 
-      // Remove control ressources from map
-      // ######################
-      // this.map.removeLayer(this.fakeLayer.olLayer);
-      // ######################
-      this.map.removeLayer(this.routingLayer.olLayer);
-      this.map.removeInteraction(this.modify);
-      unByKey(this.onMapClickKey);
+        this.addViaPoint(e.coordinate);
+      });
+      this.map.addInteraction(this.modify);
     }
   }
 
