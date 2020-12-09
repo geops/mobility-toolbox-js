@@ -301,11 +301,13 @@ class RoutingControl extends Control {
       this.abortController = new AbortController();
       const { signal } = this.abortController;
 
+      // Coordinates need to be reversed because RoutingAPI wants them to be
       const viasLonLat = this.viaPoints.map((coord) => [
         toLonLat(coord)[1],
         toLonLat(coord)[0],
       ]);
 
+      // Fetch RoutingAPI data
       this.api
         .route(
           {
