@@ -6,6 +6,8 @@ import { LineString, Point } from 'ol/geom';
 import { Modify } from 'ol/interaction';
 import { unByKey } from 'ol/Observable';
 import EventType from 'ol/events/EventType';
+import { click } from 'ol/events/condition';
+
 import { fromLonLat, toLonLat } from 'ol/proj';
 import lineSlice from '@turf/line-slice';
 import { getDistance } from 'ol/sphere';
@@ -125,6 +127,19 @@ class RoutingControl extends Control {
       this.modify = new Modify({
         source: this.routingLayer.olLayer.getSource(),
         pixelTolerance: 4,
+        deleteCondition: (e) => {
+          const feats = e.target.getFeaturesAtPixel(e.pixel, {
+            hitTolerance: 5,
+          });
+          const viaPoint = feats.find(
+            (feat) => feat.getGeometry() instanceof Point && feat.get('index'),
+          );
+          if (click(e) && viaPoint) {
+            this.removeViaPoint(viaPoint.get('index'));
+            return true;
+          }
+          return false;
+        },
       });
 
       this.modify.on('modifystart', (e) => {
@@ -138,7 +153,7 @@ class RoutingControl extends Control {
 
         this.initialRouteDrag = {
           viaPoints,
-          oldRoute: route.clone(),
+          oldRoute: route && route.clone(),
           coordinate: e.mapBrowserEvent.coordinate,
         };
       });
@@ -146,7 +161,6 @@ class RoutingControl extends Control {
       this.modify.on('modifyend', (e) => {
         /* Get the index for new viaPoint */
         let newViaIndex;
-
         const { oldRoute } = this.initialRouteDrag;
 
         if (!oldRoute) {
@@ -192,11 +206,17 @@ class RoutingControl extends Control {
       // Add control ressources to map
       this.map.addLayer(this.routingLayer);
       this.onMapClickKey = this.map.on('singleclick', (e) => {
-        const feats = e.target.getFeaturesAtPixel(e.pixel, {
-          hitTolerance: 5,
-        });
-        if (feats[0] && feats[0].get('index')) {
-          this.removeViaPoint(feats[0].get('index'));
+        const feats = e.target.getFeaturesAtPixel(e.pixel);
+        const viaPoint = feats.find(
+          (feat) =>
+            feat.getGeometry() instanceof Point &&
+            feat.get('index') !== undefined,
+        );
+        console.log(feats);
+        if (viaPoint) {
+          // Remove existing viaPoint on click and abort viaPoint add
+          this.removeViaPoint(viaPoint.get('index'));
+          return;
         }
 
         this.addViaPoint(e.coordinate);
@@ -206,13 +226,13 @@ class RoutingControl extends Control {
   }
 
   addViaPoint(coordinate, index = this.viaPoints.length, overwrite = 0) {
-    // Add/Insert/Overwrite viapoint and redraw route
+    /* Add/Insert/Overwrite viapoint and redraw route */
     this.viaPoints.splice(index, overwrite, coordinate);
     this.drawRoute(this.viaPoints);
   }
 
   removeViaPoint(index = this.viaPoints.length - 1) {
-    // Remove viapoint and redraw route
+    /* Remove viapoint and redraw route */
     if (this.viaPoints.length && this.viaPoints[index]) {
       this.viaPoints.splice(index, 1);
     }
@@ -220,11 +240,21 @@ class RoutingControl extends Control {
   }
 
   getViaPoints() {
+    /* Return array of viaPoints */
     return this.viaPoints;
   }
 
+  setMot(motString) {
+    /* Return array of viaPoints */
+    this.mot = motString;
+    this.drawRoute(this.viaPoints);
+  }
+
   drawRoute(coordinateArray) {
+    /* Calls RoutingAPI to draw a route using the viaPoints array */
     if (coordinateArray.length === 1) {
+      // Clear source
+      this.routingLayer.olLayer.getSource().clear();
       // Add point for first node
       const pointFeature = new Feature({
         geometry: new Point(coordinateArray[0]),
