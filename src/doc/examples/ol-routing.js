@@ -21,6 +21,9 @@ export default () => {
   });
 
   control.setDrawEnabled(true);
+  control.addViaPoint([950392.6037236551, 6003690.136549125]);
+  control.addViaPoint([950779.6413455063, 6003844.260459255]);
+  control.addViaPoint([950824.3642397508, 6003892.216256931]);
 
   // Add example button to toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {
