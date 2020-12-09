@@ -162,9 +162,11 @@ const ClassDoc = ({ doc }) => {
                       </div>
                     )}
                     {/* <pre className="prettyprint source-code"> */}
-                    <SyntaxHighlighter language="js">
-                      {parsed.body}
-                    </SyntaxHighlighter>
+                    {parsed.body ? (
+                      <SyntaxHighlighter language="js">
+                        {parsed.body}
+                      </SyntaxHighlighter>
+                    ) : null}
                     {/* </pre> */}
                   </React.Fragment>
                 );

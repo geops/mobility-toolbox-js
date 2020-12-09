@@ -42,9 +42,12 @@ const Example = () => {
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
   const [isNavigable, setIsNavigable] = useState(false);
+  const htmlFileName =
+    (example.files && example.files.html) || `${exampleKey}.html`;
+  const jsFileName = (example.files && example.files.js) || `${exampleKey}.js`;
 
   useEffect(() => {
-    import(`../examples/${example.files.html}`).then((h) => {
+    import(`../examples/${htmlFileName}`).then((h) => {
       // Clean the html loaded by the previous example
       setHtml(null);
       // Load the new html
@@ -52,10 +55,10 @@ const Example = () => {
 
       // const filePath = `../examples/${example.files.js}?dfdf=ocr`;
       // We use this to avoid cache and re-execute the code of the module.
-      import(`../examples/${example.files.js}?`).then((module) => {
+      import(`../examples/${jsFileName}?`).then((module) => {
         module.default();
 
-        fetch(`../examples/${example.files.js}`)
+        fetch(`../examples/${jsFileName}`)
           .then((res) => res.text())
           .then((jsCode) => {
             // Replace relative import by library import
@@ -69,7 +72,7 @@ const Example = () => {
           });
       });
     });
-  }, [example]);
+  }, [example, htmlFileName, jsFileName]);
 
   return (
     <Grid container direction="column" spacing={3}>
@@ -90,32 +93,34 @@ const Example = () => {
           />
         </Paper>
       </Grid>
-      <Grid item xs={12}>
-        <Paper className={classes.paper}>
-          <Typography className={classes.fileName}>
-            {example.files.js}
-          </Typography>
-          <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-          <CodeSandboxButton
-            className={classes.editButton}
-            html={html}
-            js={js}
-          />
-        </Paper>
-      </Grid>
-      <Grid item xs={12}>
-        <Paper className={classes.paper}>
-          <Typography className={classes.fileName}>
-            {example.files.html}
-          </Typography>
-          <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-          <CodeSandboxButton
-            className={classes.editButton}
-            html={html}
-            js={js}
-          />
-        </Paper>
-      </Grid>
+      {js && html ? (
+        <>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <Typography className={classes.fileName}>{jsFileName}</Typography>
+              <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
+              <CodeSandboxButton
+                className={classes.editButton}
+                html={html}
+                js={js}
+              />
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <Typography className={classes.fileName}>
+                {htmlFileName}
+              </Typography>
+              <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+              <CodeSandboxButton
+                className={classes.editButton}
+                html={html}
+                js={js}
+              />
+            </Paper>
+          </Grid>
+        </>
+      ) : null}
     </Grid>
   );
 };
