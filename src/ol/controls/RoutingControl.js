@@ -212,7 +212,7 @@ class RoutingControl extends Control {
             feat.getGeometry() instanceof Point &&
             feat.get('index') !== undefined,
         );
-        console.log(feats);
+
         if (viaPoint) {
           // Remove existing viaPoint on click and abort viaPoint add
           this.removeViaPoint(viaPoint.get('index'));
