@@ -192,6 +192,9 @@ describe('CopyrightControl', () => {
     const control = new CopyrightControl({
       active: true,
       render() {
+        if (!this.element) {
+          return;
+        }
         this.element.innerHTML = this.active
           ? this.getCopyrights().join(', ')
           : '';

@@ -5,6 +5,7 @@ import mapboxImg from './img/examples/mapbox.jpg';
 import mapboxStyleImg from './img/examples/mapbox_style.jpg';
 import queryObjectsImg from './img/examples/query_objects.jpg';
 import olCopyrightImg from './img/examples/ol-copyright.png';
+import stopsImg from './img/examples/stops.jpg';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -72,5 +73,11 @@ export default [
     description:
       'This example shows how to use the CopyrightControl component.',
     img: olCopyrightImg,
+  },
+  {
+    name: 'Stops finder',
+    key: 'ol-stops-finder',
+    description: 'Use the StopsAPI for finding public transport stops.',
+    img: stopsImg,
   },
 ];

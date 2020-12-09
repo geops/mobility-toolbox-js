@@ -78,4 +78,16 @@ describe('Control', () => {
     });
     expect(spy).toBeCalledTimes(1);
   });
+
+  test('pass function params to custom render method', () => {
+    const spy = jest.fn();
+    // eslint-disable-next-line no-unused-vars
+    const control = new Control({
+      render: spy,
+    });
+    control.render('foo', 'bar');
+    expect(spy).toBeCalledTimes(2);
+    expect(spy.mock.calls[1][0]).toBe('foo');
+    expect(spy.mock.calls[1][1]).toBe('bar');
+  });
 });
