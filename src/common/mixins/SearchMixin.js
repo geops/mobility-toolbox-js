@@ -81,6 +81,10 @@ const SearchMixin = (Base) =>
       Object.assign(this.element.style, {
         position: 'absolute',
         top: 0,
+        left: '50px',
+        margin: '10px',
+        display: 'flex',
+        flexDirection: 'column',
       });
 
       // Create input element
@@ -91,10 +95,19 @@ const SearchMixin = (Base) =>
       inputElt.onkeyup = (evt) => {
         this.search(evt.target.value);
       };
+      Object.assign(inputElt.style, {
+        padding: '10px',
+      });
       this.element.appendChild(inputElt);
 
       // Create suggestions list element
       this.suggestionsElt = document.createElement('div');
+      Object.assign(this.suggestionsElt.style, {
+        backgroundColor: 'white',
+        maxHeight: '200px',
+        overflowY: 'auto',
+        padding: '10px',
+      });
       this.element.appendChild(this.suggestionsElt);
     }
 
