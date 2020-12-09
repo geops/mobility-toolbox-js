@@ -24,6 +24,9 @@ import mixin from '../../common/mixins/SearchMixin';
  * @implements {SearchInterface}
  */
 class SearchControl extends mixin(Control) {
+  /**
+   * @private
+   */
   onSuggestionClick({ geometry }) {
     const coord = fromLonLat(geometry.coordinates);
     this.map.getView().setCenter(coord);

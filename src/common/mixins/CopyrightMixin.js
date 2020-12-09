@@ -23,29 +23,25 @@ export class CopyrightInterface {
  */
 const CopyrightMixin = (Base) =>
   class extends Base {
-    constructor(options) {
-      const opts = { ...options };
-      if (!opts.element) {
-        /**
-         * Define a default element.
-         */
-        opts.element = document.createElement('div');
-        opts.element.id = 'mb-copyright';
-        Object.assign(opts.element.style, {
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          fontSize: '.8rem',
-          padding: '0 10px',
-        });
-      }
-      super(opts);
-    }
-
     render() {
+      if (!this.element) {
+        return;
+      }
       this.element.innerHTML = this.active
         ? this.getCopyrights().join(' | ')
         : '';
+    }
+
+    createDefaultElement() {
+      this.element = document.createElement('div');
+      this.element.id = 'mb-copyright';
+      Object.assign(this.element.style, {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        fontSize: '.8rem',
+        padding: '0 10px',
+      });
     }
   };
 

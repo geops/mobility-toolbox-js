@@ -12,7 +12,7 @@ describe('StopsAPI', () => {
   });
 
   describe('#search', () => {
-    test('should success', () => {
+    test('should success', (done) => {
       fetch.mockResponseOnce(JSON.stringify(global.stopsSearchResponse));
 
       return api
@@ -27,6 +27,7 @@ describe('StopsAPI', () => {
 
           // Correct search result
           expect(features[0].properties.name).toEqual('Bern');
+          done();
         });
     });
   });

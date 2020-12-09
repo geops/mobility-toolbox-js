@@ -80,6 +80,11 @@ class Control extends BaseObject {
           if (this.map) {
             // Add new node
             const targett = this.target || this.map.getContainer();
+
+            if (!this.element) {
+              this.createDefaultElement();
+            }
+
             if (this.element) {
               targett.appendChild(this.element);
             }
@@ -97,6 +102,7 @@ class Control extends BaseObject {
       },
       element: {
         value: element,
+        writable: true,
       },
       render: {
         /**
@@ -128,6 +134,14 @@ class Control extends BaseObject {
    * To be defined in inherited classes.
    */
   render() {}
+
+  /**
+   * The default element to display if this.element is not defined.
+   * To be defined in inherited classes.
+   * @private
+   */
+  // eslint-disable-next-line class-methods-use-this
+  createDefaultElement() {}
 }
 
 export default Control;

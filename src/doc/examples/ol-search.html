@@ -1,36 +1,26 @@
 <style>
 #mbt-search {
-  width: 320px;
   margin: 10px;
   left: 50px;
+  width: 320px;
   display: flex;
   flex-direction: column;
 }
 
-#mbt-search input {
-  flex: 1;
-  padding: 10px;
-}
-
 #mbt-search > div {
   background-color: white;
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
   max-height: 200px;
   overflow-y: auto;
+  cursor: pointer;
 }
 
-#mbt-search > div:first-child {
+#mbt-search input,
+#mbt-search > div > div {
   padding: 10px;
 }
 
-#mbt-search a {
-  cursor: pointer;
-  display: block;
-  border: 1px solid #ddd;
-  padding: 5px 10px;
-  margin: 10px;
+#mbt-search > div > div:hover {
+  background-color: lightgray;
 }
 
 </style>
