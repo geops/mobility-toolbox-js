@@ -4,12 +4,16 @@ import RoutingControl from '../../ol/controls/RoutingControl';
 import 'ol/ol.css';
 
 export default () => {
-  const control = new RoutingControl();
+  const control = new RoutingControl({
+    element: document.createElement('div'),
+    apiKey: `${window.apiKey}`,
+  });
 
   const mapboxLayer = new MapboxLayer({
     url: `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`,
   });
 
+  // eslint-disable-next-line no-unused-vars
   const map = new Map({
     target: 'map',
     controls: [control],
@@ -21,16 +25,24 @@ export default () => {
   });
 
   control.setDrawEnabled(true);
-  control.addViaPoint([950392.6037236551, 6003690.136549125]);
-  control.addViaPoint([950779.6413455063, 6003844.260459255]);
-  control.addViaPoint([950824.3642397508, 6003892.216256931]);
+  control.addViaPoint([950476.4055933182, 6003322.253698345]);
+  control.addViaPoint([950389.0813034325, 6003656.659274571]);
+  control.addViaPoint([950816.5851379244, 6003812.254424926]);
 
-  // Add example button to toggle the copyright control.
-  document.getElementById('button').addEventListener('click', () => {
-    if (control.element.parentNode) {
-      map.removeControl(control);
-    } else {
-      map.addControl(control);
-    }
+  // Add example button to toggle the RoutingControl.
+  document.getElementById('control-button').addEventListener('click', (e) => {
+    e.target.innerHTML = control.active
+      ? 'Activate RouteControl'
+      : 'Deactivate RouteControl';
+    control.setDrawEnabled(!control.active);
+  });
+
+  // Add example button to toggle the RoutingControl.
+  document.getElementById('mot-button').addEventListener('click', (e) => {
+    e.target.innerHTML =
+      control.mot === 'bus'
+        ? 'Switch to bus routing'
+        : 'Switch to foot routing';
+    control.setMot(control.mot === 'bus' ? 'foot' : 'bus');
   });
 };

@@ -59,29 +59,32 @@ class RoutingControl extends Control {
        */
       opts.element = document.createElement('button');
       opts.element.id = 'ol-routing';
+      opts.element.innerHTML = 'Toggle Route Control';
       Object.assign(opts.element.style, {
         position: 'absolute',
         right: '10px',
         top: '10px',
-        width: '40px',
-        height: '20px',
       });
+
+      opts.element.addEventListener(
+        EventType.CLICK,
+        () => this.setDrawEnabled(!this.active, true),
+        false,
+      );
     }
     super(opts);
 
-    this.element.addEventListener(
-      EventType.CLICK,
-      () => this.setDrawEnabled(!this.active, true),
-      false,
-    );
-
     this.abortController = new AbortController();
 
+    this.apiKey = opts.apiKey;
+
     this.api = new RoutingAPI({
-      apiKey: '5cc87b12d7c5370001c1d655012b7edc8da1475084e49b84b6ba658e',
+      apiKey: this.apiKey,
     });
 
-    this.mot = 'foot';
+    this.mot = 'bus';
+
+    this.active = opts.active || true;
 
     this.routingLayer =
       opts.layer ||
@@ -102,7 +105,7 @@ class RoutingControl extends Control {
 
     this.viaPoints = [];
 
-    this.setDrawEnabled(opts.active);
+    this.setDrawEnabled(this.active);
   }
 
   setDrawEnabled(enabled, reset) {
@@ -143,16 +146,27 @@ class RoutingControl extends Control {
       });
 
       this.modify.on('modifystart', (e) => {
+        // Create instances for LineString and Point features
         const route = e.features
           .getArray()
           .find((feat) => feat.getGeometry() instanceof LineString);
 
-        const viaPoints = e.features
+        const viaPointFeatures = e.features
           .getArray()
           .filter((feat) => feat.getGeometry() instanceof Point);
 
+        // Add listeners to viaPoint features to identify which one is being modified
+        this.relocateViaPoint = (evt) => {
+          this.initialRouteDrag.relocateViaPoint = evt.target;
+        };
+
+        viaPointFeatures.forEach((feature) => {
+          feature.on('change', this.relocateViaPoint);
+        });
+
+        // Write object with modify info
         this.initialRouteDrag = {
-          viaPoints,
+          viaPointFeatures,
           oldRoute: route && route.clone(),
           coordinate: e.mapBrowserEvent.coordinate,
         };
@@ -161,8 +175,27 @@ class RoutingControl extends Control {
       this.modify.on('modifyend', (e) => {
         /* Get the index for new viaPoint */
         let newViaIndex;
-        const { oldRoute } = this.initialRouteDrag;
+        const {
+          oldRoute,
+          relocateViaPoint,
+          viaPointFeatures,
+        } = this.initialRouteDrag;
 
+        // Unlisten feature change listeners
+        viaPointFeatures.forEach((feature) => {
+          feature.un('change', this.relocateViaPoint);
+        });
+
+        // If viaPoint is being relocated overwrite the old viaPoint
+        if (relocateViaPoint) {
+          return this.addViaPoint(
+            e.mapBrowserEvent.coordinate,
+            relocateViaPoint.get('index'),
+            1,
+          );
+        }
+
+        // In case there is no route overwrite first coordinate
         if (!oldRoute) {
           return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
         }
@@ -221,6 +254,7 @@ class RoutingControl extends Control {
 
         this.addViaPoint(e.coordinate);
       });
+
       this.map.addInteraction(this.modify);
     }
   }
@@ -311,6 +345,11 @@ class RoutingControl extends Control {
             geometry: new LineString(projectedCoords),
           });
           return this.routingLayer.olLayer.getSource().addFeature(routeFeature);
+        })
+        .catch(() => {
+          // Clear source
+          this.viaPoints = [];
+          this.routingLayer.olLayer.getSource().clear();
         });
     }
     return null;
