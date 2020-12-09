@@ -115,13 +115,13 @@ export default [
     },
   },
   {
-    name: 'Search',
-    key: 'ol-search',
+    name: 'Stops finder',
+    key: 'ol-stops-finder',
     description: 'Use the StopsAPI for finding public transport stops.',
     img: stopsImg,
     files: {
-      html: 'ol-search.html',
-      js: 'ol-search.js',
+      html: 'ol-stops-finder.html',
+      js: 'ol-stops-finder.js',
     },
   },
 ];
