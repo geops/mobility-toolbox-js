@@ -34,7 +34,7 @@ const CopyrightMixin = (Base) =>
 
     createDefaultElement() {
       this.element = document.createElement('div');
-      this.element.id = 'mb-copyright';
+      this.element.id = 'mbt-copyright';
       Object.assign(this.element.style, {
         position: 'absolute',
         bottom: 0,
