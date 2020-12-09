@@ -43,13 +43,15 @@ const SearchMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
       super(options);
+      const { apiParams, apiKey, url } = options;
 
-      this.apiParams = { limit: 20, ...(options.apiParams || {}) };
+      this.apiParams = { limit: 20, ...(apiParams || {}) };
 
-      this.api = new StopsAPI({
-        url: options.url,
-        apiKey: options.apiKey,
-      });
+      const apiOptions = { apiKey };
+      if (url) {
+        apiOptions.url = url;
+      }
+      this.api = new StopsAPI(apiOptions);
     }
 
     render(suggestions = []) {
@@ -68,6 +70,9 @@ const SearchMixin = (Base) =>
         suggElt.onclick = () => {
           this.onSuggestionClick(suggestion);
         };
+        Object.assign(suggElt.style, {
+          padding: '5px 12px',
+        });
         this.suggestionsElt.appendChild(suggElt);
       });
     }
@@ -85,6 +90,7 @@ const SearchMixin = (Base) =>
         margin: '10px',
         display: 'flex',
         flexDirection: 'column',
+        width: '320px',
       });
 
       // Create input element
@@ -106,7 +112,7 @@ const SearchMixin = (Base) =>
         backgroundColor: 'white',
         maxHeight: '200px',
         overflowY: 'auto',
-        padding: '10px',
+        cursor: 'pointer',
       });
       this.element.appendChild(this.suggestionsElt);
     }
