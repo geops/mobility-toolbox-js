@@ -90,35 +90,35 @@ const Example = () => {
           />
         </Paper>
       </Grid>
-      {js ? (
-        <Grid item xs={12}>
-          <Paper className={classes.paper}>
-            <Typography className={classes.fileName}>
-              {example.files.js}
-            </Typography>
-            <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-            <CodeSandboxButton
-              className={classes.editButton}
-              html={html}
-              js={js}
-            />
-          </Paper>
-        </Grid>
-      ) : null}
-      {html ? (
-        <Grid item xs={12}>
-          <Paper className={classes.paper}>
-            <Typography className={classes.fileName}>
-              {example.files.html}
-            </Typography>
-            <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-            <CodeSandboxButton
-              className={classes.editButton}
-              html={html}
-              js={js}
-            />
-          </Paper>
-        </Grid>
+      {js && html ? (
+        <>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <Typography className={classes.fileName}>
+                {example.files.js}
+              </Typography>
+              <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
+              <CodeSandboxButton
+                className={classes.editButton}
+                html={html}
+                js={js}
+              />
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <Typography className={classes.fileName}>
+                {example.files.html}
+              </Typography>
+              <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+              <CodeSandboxButton
+                className={classes.editButton}
+                html={html}
+                js={js}
+              />
+            </Paper>
+          </Grid>
+        </>
       ) : null}
     </Grid>
   );
