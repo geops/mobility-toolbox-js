@@ -93,28 +93,34 @@ const Example = () => {
           />
         </Paper>
       </Grid>
-      <Grid item xs={12}>
-        <Paper className={classes.paper}>
-          <Typography className={classes.fileName}>{jsFileName}</Typography>
-          <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-          <CodeSandboxButton
-            className={classes.editButton}
-            html={html}
-            js={js}
-          />
-        </Paper>
-      </Grid>
-      <Grid item xs={12}>
-        <Paper className={classes.paper}>
-          <Typography className={classes.fileName}>{htmlFileName}</Typography>
-          <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-          <CodeSandboxButton
-            className={classes.editButton}
-            html={html}
-            js={js}
-          />
-        </Paper>
-      </Grid>
+      {js && html ? (
+        <>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <Typography className={classes.fileName}>{jsFileName}</Typography>
+              <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
+              <CodeSandboxButton
+                className={classes.editButton}
+                html={html}
+                js={js}
+              />
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <Typography className={classes.fileName}>
+                {htmlFileName}
+              </Typography>
+              <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+              <CodeSandboxButton
+                className={classes.editButton}
+                html={html}
+                js={js}
+              />
+            </Paper>
+          </Grid>
+        </>
+      ) : null}
     </Grid>
   );
 };

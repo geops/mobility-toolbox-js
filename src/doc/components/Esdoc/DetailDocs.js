@@ -5,7 +5,7 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-underscore-dangle */
 import React from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import SyntaxHighlighter from 'react-syntax-highlighter';
 import Markdown from 'react-markdown';
 import { parseExample } from './DocBuilderUtils';
 import SignatureHTML from './SignatureHTML';
