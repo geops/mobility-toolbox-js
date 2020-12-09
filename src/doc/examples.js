@@ -79,9 +79,5 @@ export default [
     key: 'ol-stops-finder',
     description: 'Use the StopsAPI for finding public transport stops.',
     img: stopsImg,
-    files: {
-      html: 'ol-stops-finder.html',
-      js: 'ol-stops-finder.js',
-    },
   },
 ];
