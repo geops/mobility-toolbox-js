@@ -11,9 +11,11 @@ describe('removeDuplicate()', () => {
         'a',
         undefined,
         null,
+        'A',
         0,
         'c',
         'b',
+        'B',
       ]),
     ).toEqual(['a', 'b', 'c']);
   });
