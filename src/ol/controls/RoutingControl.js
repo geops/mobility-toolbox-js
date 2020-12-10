@@ -48,6 +48,7 @@ const defaultPointStyle = new Style({
 class RoutingControl extends Control {
   constructor(options) {
     const opts = {
+      active: true,
       ...options,
     };
 
@@ -61,9 +62,7 @@ class RoutingControl extends Control {
       apiKey: this.apiKey,
     });
 
-    this.mot = 'bus';
-
-    this.active = opts.active || true;
+    this.mot = opts.mot || 'bus';
 
     this.routingLayer =
       opts.layer ||
@@ -84,20 +83,26 @@ class RoutingControl extends Control {
 
     this.viaPoints = [];
 
-    this.setDrawEnabled(this.active);
+    this.setDrawEnabled = this.setDrawEnabled.bind(this);
+    this.onMapClick = this.onMapClick.bind(this);
+    this.onModifyEnd = this.onModifyEnd.bind(this);
+    this.onModifyStart = this.onModifyStart.bind(this);
   }
 
+  /**
+   * Enables/Disables route draw mode.
+   * @param {boolean} enabled Enable/Disable route draw mode
+   * @param {boolean} [reset=undefined] Clears all features and viaPoints
+   */
   setDrawEnabled(enabled, reset) {
-    this.active = enabled;
-
-    // Clear viaPoints and source
-    if (reset) {
-      this.viaPoints = [];
-      this.routingLayer.olLayer.getSource().clear();
-    }
-
     if (this.map) {
-      if (!this.active) {
+      // Clear viaPoints and source
+      if (reset) {
+        this.viaPoints = [];
+        this.routingLayer.olLayer.getSource().clear();
+      }
+
+      if (!enabled) {
         // Remove control ressources from map
         this.map.removeLayer(this.routingLayer.olLayer);
         this.map.removeInteraction(this.modify);
@@ -117,133 +122,44 @@ class RoutingControl extends Control {
             (feat) => feat.getGeometry() instanceof Point && feat.get('index'),
           );
           if (click(e) && viaPoint) {
+            // Remove node & viaPoint if an existing viaPoint was clicked
             this.removeViaPoint(viaPoint.get('index'));
             return true;
           }
           return false;
         },
       });
-
-      this.modify.on('modifystart', (e) => {
-        // Create instances for LineString and Point features
-        const route = e.features
-          .getArray()
-          .find((feat) => feat.getGeometry() instanceof LineString);
-
-        const viaPointFeatures = e.features
-          .getArray()
-          .filter((feat) => feat.getGeometry() instanceof Point);
-
-        // Add listeners to viaPoint features to identify which one is being modified
-        this.relocateViaPoint = (evt) => {
-          this.initialRouteDrag.relocateViaPoint = evt.target;
-        };
-
-        viaPointFeatures.forEach((feature) => {
-          feature.on('change', this.relocateViaPoint);
-        });
-
-        // Write object with modify info
-        this.initialRouteDrag = {
-          viaPointFeatures,
-          oldRoute: route && route.clone(),
-          coordinate: e.mapBrowserEvent.coordinate,
-        };
-      });
-
-      this.modify.on('modifyend', (e) => {
-        /* Get the index for new viaPoint */
-        let newViaIndex;
-        const {
-          oldRoute,
-          relocateViaPoint,
-          viaPointFeatures,
-        } = this.initialRouteDrag;
-
-        // Unlisten feature change listeners
-        viaPointFeatures.forEach((feature) => {
-          feature.un('change', this.relocateViaPoint);
-        });
-
-        // If viaPoint is being relocated overwrite the old viaPoint
-        if (relocateViaPoint) {
-          return this.addViaPoint(
-            e.mapBrowserEvent.coordinate,
-            relocateViaPoint.get('index'),
-            1,
-          );
-        }
-
-        // In case there is no route overwrite first coordinate
-        if (!oldRoute) {
-          return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
-        }
-
-        // Get the closest point from viaPoints to original route
-        const viaPointClosestPoints = this.viaPoints.map((viaPoint) => {
-          const snapPoint = oldRoute.getGeometry().getClosestPoint(viaPoint);
-          return snapPoint;
-        });
-
-        // Calculate the distance from the click point to each segment
-        let distanceToSegment;
-        for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
-          // Create a segment for each pair of (closest) viaPoints using turf lineSlice
-          const turfLineSegment = lineSlice(
-            createTurfPoint(viaPointClosestPoints[i]),
-            createTurfPoint(viaPointClosestPoints[i + 1]),
-            createTurfLine(oldRoute.getGeometry().getCoordinates()),
-          );
-
-          /* Create an ol LineString from segment and get the distance between
-           * the click point and the closest point on segment
-           */
-          const segment = new LineString(turfLineSegment.geometry.coordinates);
-          const distanceToClick = getDistance(
-            segment.getClosestPoint(this.initialRouteDrag.coordinate),
-            this.initialRouteDrag.coordinate,
-          );
-
-          // Return segment index with smallest distance to click point
-          if (!distanceToSegment || distanceToClick < distanceToSegment) {
-            distanceToSegment = distanceToClick;
-            newViaIndex = i + 1;
-          }
-        }
-
-        // Insert new viaPoint at given index
-        return this.addViaPoint(e.mapBrowserEvent.coordinate, newViaIndex);
-      });
+      this.modify.on('modifystart', this.onModifyStart);
+      this.modify.on('modifyend', this.onModifyEnd);
 
       // Add control ressources to map
       this.map.addLayer(this.routingLayer);
-      this.onMapClickKey = this.map.on('singleclick', (e) => {
-        const feats = e.target.getFeaturesAtPixel(e.pixel);
-        const viaPoint = feats.find(
-          (feat) =>
-            feat.getGeometry() instanceof Point &&
-            feat.get('index') !== undefined,
-        );
-
-        if (viaPoint) {
-          // Remove existing viaPoint on click and abort viaPoint add
-          this.removeViaPoint(viaPoint.get('index'));
-          return;
-        }
-
-        this.addViaPoint(e.coordinate);
-      });
-
+      this.onMapClickKey = this.map.on('singleclick', this.onMapClick);
       this.map.addInteraction(this.modify);
     }
   }
 
+  /**
+   * Adds/Replaces a viaPoint to the viaPoints array and redraws route:
+   *   - Adds a viaPoint at end of array by default
+   *   - If an index is passed a viaPoint is added at the specified index
+   *   - If an index and overwrite is set to true, a viaPoint at the specified
+   *       index is replaced with a new viaPoint.
+   * @param {Array<Array<number>>} coordinates Array of coordinates
+   * @param {number} index Integer representing the index of the added viaPoint.
+   * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
+   */
   addViaPoint(coordinate, index = this.viaPoints.length, overwrite = 0) {
     /* Add/Insert/Overwrite viapoint and redraw route */
     this.viaPoints.splice(index, overwrite, coordinate);
     this.drawRoute(this.viaPoints);
   }
 
+  /**
+   * Removes a viaPoint at the passed array index and redraws route
+   * By default the last viaPoint is removed.
+   * @param {number} index Integer representing the index of the viaPoint to delete.
+   */
   removeViaPoint(index = this.viaPoints.length - 1) {
     /* Remove viapoint and redraw route */
     if (this.viaPoints.length && this.viaPoints[index]) {
@@ -257,12 +173,23 @@ class RoutingControl extends Control {
     return this.viaPoints;
   }
 
+  /**
+   * Sets the current mot and redraws route.
+   * @param {string} motString String defining the mean of transport (e.g. bus, rail, foot...).
+   */
   setMot(motString) {
     /* Return array of viaPoints */
     this.mot = motString;
     this.drawRoute(this.viaPoints);
   }
 
+  /**
+   * Draws route on map using an array of coordinates:
+   *   - If a single coordinate is passed a single point feature is added to map.
+   *   - If two or more coordinates are passed a request to the RoutingAPI fetches
+   *       the route using the passed coordinates and the current mot.
+   * @private
+   */
   drawRoute(coordinateArray) {
     /* Calls RoutingAPI to draw a route using the viaPoints array */
     if (coordinateArray.length === 1) {
@@ -336,6 +263,130 @@ class RoutingControl extends Control {
     return null;
   }
 
+  /**
+   * Used on click on map while control is active:
+   *   - By default adds a viaPoint to the end of array
+   *   - If an existing viaPoint is clicked removes the clicked viaPoint
+   * @private
+   */
+  onMapClick(e) {
+    const feats = e.target.getFeaturesAtPixel(e.pixel);
+    const viaPoint = feats.find(
+      (feat) =>
+        feat.getGeometry() instanceof Point && feat.get('index') !== undefined,
+    );
+
+    if (viaPoint) {
+      // Remove existing viaPoint on click and abort viaPoint add
+      this.removeViaPoint(viaPoint.get('index'));
+      return;
+    }
+
+    this.addViaPoint(e.coordinate);
+  }
+
+  /**
+   * Used on start of the modify interaction. Stores relevant data
+   * in this.initialRouteDrag object
+   * @private
+   */
+  onModifyStart(e) {
+    // Create instances for LineString and Point features
+    const route = e.features
+      .getArray()
+      .find((feat) => feat.getGeometry() instanceof LineString);
+
+    const viaPointFeatures = e.features
+      .getArray()
+      .filter((feat) => feat.getGeometry() instanceof Point);
+
+    // Add listeners to viaPoint features to identify which one is being modified
+    this.relocateViaPoint = (evt) => {
+      this.initialRouteDrag.relocateViaPoint = evt.target;
+    };
+
+    viaPointFeatures.forEach((feature) => {
+      feature.on('change', this.relocateViaPoint);
+    });
+
+    // Write object with modify info
+    this.initialRouteDrag = {
+      viaPointFeatures,
+      oldRoute: route && route.clone(),
+      coordinate: e.mapBrowserEvent.coordinate,
+    };
+  }
+
+  /**
+   * Used on end of the modify interaction. Resolves feature modification:
+   *   - Line drag creates new viaPoint at the final coordinate of drag
+   *   - Point drag replaces old viaPoint
+   * @private
+   */
+  onModifyEnd(e) {
+    /* Get the index for new viaPoint */
+    let newViaIndex;
+    const {
+      oldRoute,
+      relocateViaPoint,
+      viaPointFeatures,
+    } = this.initialRouteDrag;
+
+    // Unlisten feature change listeners
+    viaPointFeatures.forEach((feature) => {
+      feature.un('change', this.relocateViaPoint);
+    });
+
+    // If viaPoint is being relocated overwrite the old viaPoint
+    if (relocateViaPoint) {
+      return this.addViaPoint(
+        e.mapBrowserEvent.coordinate,
+        relocateViaPoint.get('index'),
+        1,
+      );
+    }
+
+    // In case there is no route overwrite first coordinate
+    if (!oldRoute) {
+      return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
+    }
+
+    // Get the closest point from viaPoints to original route
+    const viaPointClosestPoints = this.viaPoints.map((viaPoint) => {
+      const snapPoint = oldRoute.getGeometry().getClosestPoint(viaPoint);
+      return snapPoint;
+    });
+
+    // Calculate the distance from the click point to each segment
+    let distanceToSegment;
+    for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
+      // Create a segment for each pair of (closest) viaPoints using turf lineSlice
+      const turfLineSegment = lineSlice(
+        createTurfPoint(viaPointClosestPoints[i]),
+        createTurfPoint(viaPointClosestPoints[i + 1]),
+        createTurfLine(oldRoute.getGeometry().getCoordinates()),
+      );
+
+      /* Create an ol LineString from segment and get the distance between
+       * the click point and the closest point on segment
+       */
+      const segment = new LineString(turfLineSegment.geometry.coordinates);
+      const distanceToClick = getDistance(
+        segment.getClosestPoint(this.initialRouteDrag.coordinate),
+        this.initialRouteDrag.coordinate,
+      );
+
+      // Return segment index with smallest distance to click point
+      if (!distanceToSegment || distanceToClick < distanceToSegment) {
+        distanceToSegment = distanceToClick;
+        newViaIndex = i + 1;
+      }
+    }
+
+    // Insert new viaPoint at given index
+    return this.addViaPoint(e.mapBrowserEvent.coordinate, newViaIndex);
+  }
+
   createDefaultElement() {
     /**
      * Define a default element.
@@ -343,12 +394,25 @@ class RoutingControl extends Control {
     this.element = document.createElement('button');
     this.element.id = 'ol-routing';
     this.element.innerHTML = 'Toggle Route Control';
-    this.element.onclick = () => this.setDrawEnabled(!this.active, true);
+    this.element.onclick = () =>
+      this.active ? this.deactivate() : this.activate();
     Object.assign(this.element.style, {
       position: 'absolute',
       right: '10px',
       top: '10px',
     });
+  }
+
+  activate() {
+    super.activate();
+    this.set('active', true);
+    this.setDrawEnabled(true, true);
+  }
+
+  deactivate() {
+    this.set('active', false);
+    this.setDrawEnabled(false);
+    super.deactivate();
   }
 }
 

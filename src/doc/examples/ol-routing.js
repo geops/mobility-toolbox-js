@@ -16,7 +16,6 @@ export default () => {
   // eslint-disable-next-line no-unused-vars
   const map = new Map({
     target: 'map',
-    controls: [control],
     layers: [mapboxLayer],
     view: new View({
       center: [950690.34, 6003962.67],
@@ -24,7 +23,9 @@ export default () => {
     }),
   });
 
-  control.setDrawEnabled(true);
+  map.addControl(control);
+
+  control.activate();
   control.addViaPoint([950476.4055933182, 6003322.253698345]);
   control.addViaPoint([950389.0813034325, 6003656.659274571]);
   control.addViaPoint([950816.5851379244, 6003812.254424926]);
@@ -34,7 +35,11 @@ export default () => {
     e.target.innerHTML = control.active
       ? 'Activate RouteControl'
       : 'Deactivate RouteControl';
-    control.setDrawEnabled(!control.active);
+    if (control.active) {
+      control.deactivate();
+    } else {
+      control.activate();
+    }
   });
 
   // Add example button to toggle the RoutingControl.
