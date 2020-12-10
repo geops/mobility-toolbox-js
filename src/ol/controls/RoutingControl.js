@@ -5,9 +5,7 @@ import { Feature } from 'ol';
 import { LineString, Point } from 'ol/geom';
 import { Modify } from 'ol/interaction';
 import { unByKey } from 'ol/Observable';
-import EventType from 'ol/events/EventType';
 import { click } from 'ol/events/condition';
-
 import { fromLonLat, toLonLat } from 'ol/proj';
 import lineSlice from '@turf/line-slice';
 import { getDistance } from 'ol/sphere';
@@ -53,25 +51,6 @@ class RoutingControl extends Control {
       ...options,
     };
 
-    if (!opts.element) {
-      /**
-       * Define a default element.
-       */
-      opts.element = document.createElement('button');
-      opts.element.id = 'ol-routing';
-      opts.element.innerHTML = 'Toggle Route Control';
-      Object.assign(opts.element.style, {
-        position: 'absolute',
-        right: '10px',
-        top: '10px',
-      });
-
-      opts.element.addEventListener(
-        EventType.CLICK,
-        () => this.setDrawEnabled(!this.active, true),
-        false,
-      );
-    }
     super(opts);
 
     this.abortController = new AbortController();
@@ -355,6 +334,21 @@ class RoutingControl extends Control {
         });
     }
     return null;
+  }
+
+  createDefaultElement() {
+    /**
+     * Define a default element.
+     */
+    this.element = document.createElement('button');
+    this.element.id = 'ol-routing';
+    this.element.innerHTML = 'Toggle Route Control';
+    this.element.onclick = () => this.setDrawEnabled(!this.active, true);
+    Object.assign(this.element.style, {
+      position: 'absolute',
+      right: '10px',
+      top: '10px',
+    });
   }
 }
 
