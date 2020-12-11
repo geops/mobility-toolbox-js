@@ -191,6 +191,16 @@ const TrajservLayerMixin = (TrackerLayer) =>
         operator,
         apiKey,
       } = options;
+
+      const apiOptions = {};
+      if (!options.api) {
+        if (options.url) {
+          apiOptions.url = options.url;
+        }
+        if (options.apiKey) {
+          apiOptions.apiKey = options.apiKey;
+        }
+      }
       Object.defineProperties(this, {
         showVehicleTraj: {
           value:
@@ -252,9 +262,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
           },
         },
         api: {
-          value:
-            options.api ||
-            new TrajservAPI({ url: options.url, apiKey: options.apiKey }),
+          value: options.api || new TrajservAPI(apiOptions),
         },
         apiKey: {
           get: () => {
