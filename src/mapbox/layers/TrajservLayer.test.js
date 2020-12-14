@@ -70,4 +70,20 @@ describe('TrajservLayer', () => {
     expect(layer.clickCallbacks[1]).toBe(bar);
     expect(layer.clickCallbacks.length).toBe(2);
   });
+
+  test('should create a default api with default url.', () => {
+    expect(layer).toBeInstanceOf(TrajservLayer);
+    expect(layer.api.url).toBe('https://api.geops.io/tracker/v1');
+    expect(layer.api.apiKey).toBe();
+  });
+
+  test('should create an api with custom url and apiKey.', () => {
+    const layr = new TrajservLayer({
+      url: 'https:foo.ch',
+      apiKey: 'bar',
+    });
+    expect(layr).toBeInstanceOf(TrajservLayer);
+    expect(layr.api.url).toBe('https:foo.ch');
+    expect(layr.api.apiKey).toBe('bar');
+  });
 });
