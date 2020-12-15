@@ -96,6 +96,7 @@ export default class MapboxLayer extends Layer {
           this.mbMap &&
           this.mbMap.style &&
           this.mbMap.isStyleLoaded() &&
+          !this.writingAttribution &&
           changed
         ) {
           try {
@@ -111,6 +112,7 @@ export default class MapboxLayer extends Layer {
             console.warn(err);
           }
         }
+        this.writingAttribution = false;
 
         return canvas;
       },
@@ -271,9 +273,20 @@ export default class MapboxLayer extends Layer {
   }
 
   updateAttribution(evt) {
-    this.olLayer
-      .getSource()
-      .setAttributions(getMapboxMapCopyrights(evt.target));
+    /**
+     * Since openlayers setAttributes on the source triggers a change event
+     * and may cause the mapbox map to rerender infinitely (e.g. Trafimage-maps),
+     * the copyright is written only when it changes
+     */
+    if (
+      JSON.stringify(this.olLayer.getSource().getAttributions()()) !==
+      JSON.stringify(getMapboxMapCopyrights(evt.target))
+    ) {
+      this.writingAttribution = true;
+      this.olLayer
+        .getSource()
+        .setAttributions(getMapboxMapCopyrights(evt.target));
+    }
   }
 
   /**
