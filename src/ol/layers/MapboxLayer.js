@@ -267,7 +267,6 @@ export default class MapboxLayer extends Layer {
         mapboxCanvas.removeAttribute('tabindex');
       }
     }
-    this.mbMap.on('idle', this.updateAttribution);
   }
 
   updateAttribution(evt) {
