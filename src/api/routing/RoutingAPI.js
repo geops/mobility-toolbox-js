@@ -7,7 +7,6 @@ import API from '../../common/api/api';
  * import { RoutingAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new RoutingAPI({
- *   url: 'https://api.geops.io/routing/v1/',
  *   apiKey: [yourApiKey]
  * });
  *
