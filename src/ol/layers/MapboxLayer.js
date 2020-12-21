@@ -312,7 +312,6 @@ export default class MapboxLayer extends Layer {
    */
   terminate() {
     if (this.mbMap) {
-      this.mbMap.off('idle', this.updateAttribution);
       // Some asynchrone repaints are triggered even if the mbMap has been removed,
       // to avoid display of errors we set an empty function.
       this.mbMap.triggerRepaint = () => {};
