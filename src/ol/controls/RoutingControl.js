@@ -10,8 +10,8 @@ import { fromLonLat, toLonLat } from 'ol/proj';
 import turfLineSlice from '@turf/line-slice';
 import { getDistance } from 'ol/sphere';
 import {
-  lineString as createTurfLine,
-  point as createTurfPoint,
+  lineString as turfLineString,
+  point as turfPoint,
 } from '@turf/helpers';
 import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
