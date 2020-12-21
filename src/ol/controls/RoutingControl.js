@@ -361,10 +361,10 @@ class RoutingControl extends Control {
     let distanceToSegment;
     for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
       // Create a segment for each pair of (closest) viaPoints using turf lineSlice
-      const turfLineSegment = lineSlice(
-        createTurfPoint(viaPointClosestPoints[i]),
-        createTurfPoint(viaPointClosestPoints[i + 1]),
-        createTurfLine(oldRoute.getGeometry().getCoordinates()),
+      const turfLineSegment = turfLineSlice(
+        turfPoint(viaPointClosestPoints[i]),
+        turfPoint(viaPointClosestPoints[i + 1]),
+        turfLineString(oldRoute.getGeometry().getCoordinates()),
       );
 
       /* Create an ol LineString from segment and get the distance between
