@@ -1,7 +1,7 @@
 import API from '../../common/api/api';
 
 /**
- * Access to the [Stops service](https://developer.geops.io/apis/routing).
+ * Access to the [Routing service](https://developer.geops.io/apis/routing).
  *
  * @example
  * import { RoutingAPI } from 'mobility-toolbox-js/api';
