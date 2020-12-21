@@ -27,7 +27,7 @@ class RoutingAPI extends API {
   /**
    * Route.
    *
-   * @param {RoutingSearchParams} params Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
+   * @param {RoutingSearchParams} params Request parameters. See [Routing service documentation](https://developer.geops.io/apis/routing/).
    * @param {AbortController} abortController Abort controller used to cancel the request.
    * @returns {Promise<GeoJSONFeature[]>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
