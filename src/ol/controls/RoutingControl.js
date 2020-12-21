@@ -7,7 +7,7 @@ import { Modify } from 'ol/interaction';
 import { unByKey } from 'ol/Observable';
 import { click } from 'ol/events/condition';
 import { fromLonLat, toLonLat } from 'ol/proj';
-import lineSlice from '@turf/line-slice';
+import turfLineSlice from '@turf/line-slice';
 import { getDistance } from 'ol/sphere';
 import {
   lineString as createTurfLine,
