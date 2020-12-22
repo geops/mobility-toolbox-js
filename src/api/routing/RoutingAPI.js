@@ -47,7 +47,7 @@ class RoutingAPI extends API {
    * @param {string} motString String defining the mean of transport (e.g. bus, rail, foot...).
    */
   setMot(motString) {
-    this.set('mot', motString);
+    this.mot = motString;
   }
 
   /**
