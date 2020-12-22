@@ -140,7 +140,7 @@ export const getTextSize = (ctx, markerSize, text, fontSize) => {
   ctx.font = `bold ${fontSize}px Arial`;
   let newText = ctx.measureText(text);
 
-  const maxiter = 15;
+  const maxiter = 25;
   let i = 0;
 
   while (newText.width > markerSize - 6 && i < maxiter) {
