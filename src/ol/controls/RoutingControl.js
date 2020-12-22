@@ -1,6 +1,3 @@
-import { Vector } from 'ol/layer';
-import { Circle, Stroke, Style, Fill } from 'ol/style';
-import { Vector as VectorSource } from 'ol/source';
 import { Feature } from 'ol';
 import { LineString, Point } from 'ol/geom';
 import { Modify } from 'ol/interaction';
@@ -15,16 +12,7 @@ import {
 } from '@turf/helpers';
 import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
-import Layer from '../layers/Layer';
-
-const defaultPointStyle = new Style({
-  image: new Circle({
-    radius: 6,
-    fill: new Fill({
-      color: [255, 0, 0, 1],
-    }),
-  }),
-});
+import RoutingLayer from '../layers/RoutingLayer';
 
 /**
  * Display layer's copyrights.
@@ -46,47 +34,31 @@ const defaultPointStyle = new Style({
  * @implements {RoutingInterface}
  */
 class RoutingControl extends Control {
-  constructor(options) {
-    const opts = {
-      active: true,
-      ...options,
-    };
-
-    super(opts);
+  constructor(options = {}) {
+    super(options);
 
     this.abortController = new AbortController();
 
-    this.apiKey = opts.apiKey;
+    this.apiKey = options.apiKey;
 
     this.api = new RoutingAPI({
+      url: options.url,
       apiKey: this.apiKey,
+      mot: options.mot,
     });
 
-    this.mot = opts.mot || 'bus';
-
     this.routingLayer =
-      opts.layer ||
-      new Layer({
+      options.routingLayer ||
+      new RoutingLayer({
         name: 'routing-layer',
-        olLayer: new Vector({
-          source: new VectorSource(),
-          style: [
-            new Style({
-              stroke: new Stroke({
-                color: [255, 0, 0, 1],
-                width: 5,
-              }),
-            }),
-          ],
-        }),
       });
 
     this.viaPoints = [];
-
     this.setDrawEnabled = this.setDrawEnabled.bind(this);
     this.onMapClick = this.onMapClick.bind(this);
     this.onModifyEnd = this.onModifyEnd.bind(this);
     this.onModifyStart = this.onModifyStart.bind(this);
+    this.apiChangeListener = () => this.drawRoute(this.viaPoints);
   }
 
   /**
@@ -168,21 +140,6 @@ class RoutingControl extends Control {
     this.drawRoute(this.viaPoints);
   }
 
-  getViaPoints() {
-    /* Return array of viaPoints */
-    return this.viaPoints;
-  }
-
-  /**
-   * Sets the current mot and redraws route.
-   * @param {string} motString String defining the mean of transport (e.g. bus, rail, foot...).
-   */
-  setMot(motString) {
-    /* Return array of viaPoints */
-    this.mot = motString;
-    this.drawRoute(this.viaPoints);
-  }
-
   /**
    * Draws route on map using an array of coordinates:
    *   - If a single coordinate is passed a single point feature is added to map.
@@ -199,7 +156,7 @@ class RoutingControl extends Control {
       const pointFeature = new Feature({
         geometry: new Point(coordinateArray[0]),
       });
-      pointFeature.setStyle(defaultPointStyle);
+      pointFeature.set('viaPointIdx', 0);
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
     if (coordinateArray.length >= 2) {
@@ -207,18 +164,18 @@ class RoutingControl extends Control {
       this.abortController = new AbortController();
       const { signal } = this.abortController;
 
-      // Coordinates need to be reversed because RoutingAPI wants them to be
+      // Coordinates need to be reversed as required by the backend RoutingAPI
       const viasLonLat = this.viaPoints.map((coord) => [
         toLonLat(coord)[1],
         toLonLat(coord)[0],
       ]);
 
       // Fetch RoutingAPI data
-      this.api
+      return this.api
         .route(
           {
             via: `${viasLonLat.join('|')}`,
-            mot: `${this.mot}`,
+            mot: `${this.api.mot}`,
             'resolve-hops': false,
             elevation: false,
             'coord-radius': 100.0,
@@ -235,8 +192,8 @@ class RoutingControl extends Control {
             const pointFeature = new Feature({
               geometry: new Point(viaPoint),
             });
-            pointFeature.set('index', idx);
-            pointFeature.setStyle(defaultPointStyle);
+            pointFeature.set('viaPointIdx', idx);
+            // pointFeature.setStyle(defaultPointStyle);
             return this.routingLayer.olLayer
               .getSource()
               .addFeature(pointFeature);
@@ -252,6 +209,7 @@ class RoutingControl extends Control {
           const routeFeature = new Feature({
             geometry: new LineString(projectedCoords),
           });
+          routeFeature.set('mot', this.api.mot);
           return this.routingLayer.olLayer.getSource().addFeature(routeFeature);
         })
         .catch(() => {
@@ -273,12 +231,13 @@ class RoutingControl extends Control {
     const feats = e.target.getFeaturesAtPixel(e.pixel);
     const viaPoint = feats.find(
       (feat) =>
-        feat.getGeometry() instanceof Point && feat.get('index') !== undefined,
+        feat.getGeometry() instanceof Point &&
+        feat.get('viaPointIdx') !== undefined,
     );
 
     if (viaPoint) {
       // Remove existing viaPoint on click and abort viaPoint add
-      this.removeViaPoint(viaPoint.get('index'));
+      this.removeViaPoint(viaPoint.get('viaPointIdx'));
       return;
     }
 
@@ -341,7 +300,7 @@ class RoutingControl extends Control {
     if (relocateViaPoint) {
       return this.addViaPoint(
         e.mapBrowserEvent.coordinate,
-        relocateViaPoint.get('index'),
+        relocateViaPoint.get('viaPointIdx'),
         1,
       );
     }
@@ -392,7 +351,7 @@ class RoutingControl extends Control {
      * Define a default element.
      */
     this.element = document.createElement('button');
-    this.element.id = 'ol-routing';
+    this.element.id = 'ol-toggle-routing';
     this.element.innerHTML = 'Toggle Route Control';
     this.element.onclick = () =>
       this.active ? this.deactivate() : this.activate();
@@ -406,10 +365,16 @@ class RoutingControl extends Control {
   activate() {
     super.activate();
     this.set('active', true);
+    if (this.api) {
+      this.api.on('propertychange', this.apiChangeListener);
+    }
     this.setDrawEnabled(true, true);
   }
 
   deactivate() {
+    if (this.api) {
+      this.api.un('propertychange', this.apiChangeListener);
+    }
     this.set('active', false);
     this.setDrawEnabled(false);
     super.deactivate();

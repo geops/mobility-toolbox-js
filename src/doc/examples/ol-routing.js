@@ -7,6 +7,7 @@ export default () => {
   const control = new RoutingControl({
     element: document.createElement('div'),
     apiKey: `${window.apiKey}`,
+    active: false,
   });
 
   const mapboxLayer = new MapboxLayer({
@@ -42,12 +43,12 @@ export default () => {
     }
   });
 
-  // Add example button to toggle the RoutingControl.
+  // Add example button to toggle the RoutingControl mot.
   document.getElementById('mot-button').addEventListener('click', (e) => {
     e.target.innerHTML =
-      control.mot === 'bus'
+      control.api.mot === 'bus'
         ? 'Switch to bus routing'
         : 'Switch to foot routing';
-    control.setMot(control.mot === 'bus' ? 'foot' : 'bus');
+    control.api.mot = control.api.mot === 'bus' ? 'foot' : 'bus';
   });
 };
