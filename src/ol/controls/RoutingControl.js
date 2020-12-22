@@ -58,7 +58,7 @@ class RoutingControl extends Control {
     this.onMapClick = this.onMapClick.bind(this);
     this.onModifyEnd = this.onModifyEnd.bind(this);
     this.onModifyStart = this.onModifyStart.bind(this);
-    this.apiChangeListener = () => this.drawRoute(this.viaPoints);
+    this.apiChangeListener = () => this.drawRoute();
   }
 
   /**
@@ -117,14 +117,14 @@ class RoutingControl extends Control {
    *   - If an index is passed a viaPoint is added at the specified index
    *   - If an index and overwrite is set to true, a viaPoint at the specified
    *       index is replaced with a new viaPoint.
-   * @param {Array<Array<number>>} coordinates Array of coordinates
+   * @param {Array<Array<number>>} coordinates Array of coordinates or staion UID
    * @param {number} index Integer representing the index of the added viaPoint.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
    */
-  addViaPoint(coordinate, index = this.viaPoints.length, overwrite = 0) {
+  addViaPoint(location, index = this.viaPoints.length, overwrite = 0) {
     /* Add/Insert/Overwrite viapoint and redraw route */
-    this.viaPoints.splice(index, overwrite, coordinate);
-    this.drawRoute(this.viaPoints);
+    this.viaPoints.splice(index, overwrite, location);
+    this.drawRoute();
   }
 
   /**
@@ -137,7 +137,7 @@ class RoutingControl extends Control {
     if (this.viaPoints.length && this.viaPoints[index]) {
       this.viaPoints.splice(index, 1);
     }
-    this.drawRoute(this.viaPoints);
+    this.drawRoute();
   }
 
   /**
@@ -147,34 +147,38 @@ class RoutingControl extends Control {
    *       the route using the passed coordinates and the current mot.
    * @private
    */
-  drawRoute(coordinateArray) {
+  drawRoute() {
     /* Calls RoutingAPI to draw a route using the viaPoints array */
-    if (coordinateArray.length === 1) {
+    if (this.viaPoints.length === 1) {
       // Clear source
       this.routingLayer.olLayer.getSource().clear();
       // Add point for first node
       const pointFeature = new Feature({
-        geometry: new Point(coordinateArray[0]),
+        geometry: new Point(this.viaPoints[0]),
       });
       pointFeature.set('viaPointIdx', 0);
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
-    if (coordinateArray.length >= 2) {
+    if (this.viaPoints.length >= 2) {
       this.abortController.abort();
       this.abortController = new AbortController();
       const { signal } = this.abortController;
 
-      // Coordinates need to be reversed as required by the backend RoutingAPI
-      const viasLonLat = this.viaPoints.map((coord) => [
-        toLonLat(coord)[1],
-        toLonLat(coord)[0],
-      ]);
+      const formattedViaPoints = this.viaPoints.map((viaPoint) => {
+        if (Array.isArray(viaPoint)) {
+          // viaPoint is a coordinate
+          // Coordinates need to be reversed as required by the backend RoutingAPI
+          return [toLonLat(viaPoint)[1], toLonLat(viaPoint)[0]];
+        }
+        // viaPoint is a UID
+        return `!${viaPoint}`;
+      });
 
       // Fetch RoutingAPI data
       return this.api
         .route(
           {
-            via: `${viasLonLat.join('|')}`,
+            via: `${formattedViaPoints.join('|')}`,
             mot: `${this.api.mot}`,
             'resolve-hops': false,
             elevation: false,
@@ -189,14 +193,25 @@ class RoutingControl extends Control {
 
           // Create point features for the viaPoints
           this.viaPoints.forEach((viaPoint, idx) => {
-            const pointFeature = new Feature({
-              geometry: new Point(viaPoint),
-            });
+            const pointFeature = new Feature();
             pointFeature.set('viaPointIdx', idx);
-            // pointFeature.setStyle(defaultPointStyle);
-            return this.routingLayer.olLayer
-              .getSource()
-              .addFeature(pointFeature);
+            if (Array.isArray(viaPoint)) {
+              pointFeature.setGeometry(new Point(viaPoint));
+              return this.routingLayer.olLayer
+                .getSource()
+                .addFeature(pointFeature);
+            }
+            return fetch(
+              `https://api.geops.io/stops/v1/search/lookup/${viaPoint}?key=${this.apiKey}`,
+            )
+              .then((res) => res.json())
+              .then((stationData) => {
+                const { coordinates } = stationData.features[0].geometry;
+                pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
+                return this.routingLayer.olLayer
+                  .getSource()
+                  .addFeature(pointFeature);
+              });
           });
 
           // Create new route once there are at least two viaPoints
