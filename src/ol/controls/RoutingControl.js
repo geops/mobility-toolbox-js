@@ -113,10 +113,10 @@ class RoutingControl extends Control {
 
   /**
    * Adds/Replaces a viaPoint to the viaPoints array and redraws route:
-   *   - Adds a viaPoint at end of array by default
-   *   - If an index is passed a viaPoint is added at the specified index
-   *   - If an index and overwrite is set to true, a viaPoint at the specified
-   *       index is replaced with a new viaPoint.
+   *   Adds a viaPoint at end of array by default.
+   *   If an index is passed a viaPoint is added at the specified index.
+   *   If an index is passed and overwrite is set to true, a viaPoint at the specified
+   *     index is replaced with a new viaPoint.
    * @param {Array<Array<number>>} coordinates Array of coordinates
    * @param {number} index Integer representing the index of the added viaPoint.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
@@ -142,8 +142,8 @@ class RoutingControl extends Control {
 
   /**
    * Draws route on map using an array of coordinates:
-   *   - If a single coordinate is passed a single point feature is added to map.
-   *   - If two or more coordinates are passed a request to the RoutingAPI fetches
+   *   If a single coordinate is passed a single point feature is added to map.
+   *   If two or more coordinates are passed a request to the RoutingAPI fetches
    *       the route using the passed coordinates and the current mot.
    * @private
    */
@@ -223,8 +223,8 @@ class RoutingControl extends Control {
 
   /**
    * Used on click on map while control is active:
-   *   - By default adds a viaPoint to the end of array
-   *   - If an existing viaPoint is clicked removes the clicked viaPoint
+   *   By default adds a viaPoint to the end of array.
+   *   If an existing viaPoint is clicked removes the clicked viaPoint.
    * @private
    */
   onMapClick(e) {
@@ -278,8 +278,8 @@ class RoutingControl extends Control {
 
   /**
    * Used on end of the modify interaction. Resolves feature modification:
-   *   - Line drag creates new viaPoint at the final coordinate of drag
-   *   - Point drag replaces old viaPoint
+   *   Line drag creates new viaPoint at the final coordinate of drag.
+   *   Point drag replaces old viaPoint.
    * @private
    */
   onModifyEnd(e) {
