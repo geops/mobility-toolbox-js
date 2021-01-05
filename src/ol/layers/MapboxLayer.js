@@ -6,6 +6,7 @@ import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
+import getUrlParams from '../../common/utils/getUrlParams';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
 
 /**
@@ -22,18 +23,6 @@ import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
  * @extends {Layer}
  */
 export default class MapboxLayer extends Layer {
-  static getParams(str = '') {
-    const hashes = str.slice(str.indexOf('?') + 1).split('&');
-    const params = {};
-    hashes.forEach((hash) => {
-      const [key, val] = hash.split('=');
-      if (val) {
-        params[key] = decodeURIComponent(val);
-      }
-    });
-    return params;
-  }
-
   /**
    * Constructor.
    *
@@ -232,7 +221,7 @@ export default class MapboxLayer extends Layer {
     if (this.apiKey === false) {
       style = this.styleUrl;
     } else {
-      const parameters = MapboxLayer.getParams(this.styleUrl);
+      const parameters = getUrlParams(this.styleUrl);
       if (!this.apiKey) {
         // eslint-disable-next-line no-console
         console.warn(

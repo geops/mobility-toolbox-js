@@ -1,7 +1,9 @@
+import qs from 'query-string';
 import { Map as MBMap } from 'mapbox-gl';
 import Layer from '../common/layers/Layer';
 import mixin from '../common/mixins/MapMixin';
 import CopyrightControl from './controls/CopyrightControl';
+import getUrlParams from '../common/utils/getUrlParams';
 
 /**
  * An Mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map) for handling mobility layers and controls.
@@ -14,6 +16,25 @@ class Map extends mixin(MBMap) {
    * Constructor.
    */
   constructor(options) {
+    const { style, apiKey } = options;
+    if (apiKey !== false) {
+      let newStyle;
+      const parameters = getUrlParams(style);
+
+      if (!apiKey) {
+        // eslint-disable-next-line no-console
+        console.warn(`No apiKey is defined for Mapbox Map request to ${style}`);
+      } else if (parameters.key) {
+        // replace key value from apiKey parameter.
+        parameters.key = apiKey;
+        const [baseUrl] = style.split('?');
+        newStyle = `${baseUrl}?${qs.stringify(parameters)}`;
+      } else {
+        newStyle = `${style}?key=${apiKey}`;
+      }
+      // eslint-disable-next-line no-param-reassign
+      options.style = newStyle;
+    }
     super({
       attributionControl: false,
       controls: [new CopyrightControl()],
