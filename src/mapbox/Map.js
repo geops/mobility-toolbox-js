@@ -16,8 +16,8 @@ class Map extends mixin(MBMap) {
    */
   constructor(options) {
     const { style, apiKey } = options;
+    let newStyle = options.style;
     if (apiKey !== false) {
-      let newStyle;
       const [baseUrl, searchUrl] = style.split('?');
       const parameters = qs.parse(searchUrl);
       if (!apiKey) {
@@ -30,13 +30,12 @@ class Map extends mixin(MBMap) {
       } else {
         newStyle = `${style}?key=${apiKey}`;
       }
-      // eslint-disable-next-line no-param-reassign
-      options.style = newStyle;
     }
     super({
       attributionControl: false,
       controls: [new CopyrightControl()],
       ...options,
+      style: newStyle,
     });
   }
 
