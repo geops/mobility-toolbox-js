@@ -15,6 +15,7 @@ describe('TrajservLayer', () => {
     onClick = jest.fn();
     layer = new TrajservLayer({
       onClick,
+      apiKey: 'apiKey',
     });
 
     olMap = new Map({
@@ -88,7 +89,7 @@ describe('TrajservLayer', () => {
   test('should create a default api with default url.', () => {
     expect(layer).toBeInstanceOf(TrajservLayer);
     expect(layer.api.url).toBe('https://api.geops.io/tracker/v1');
-    expect(layer.api.apiKey).toBe();
+    expect(layer.api.apiKey).toBe('apiKey');
   });
 
   test('should create an api with custom url and apiKey.', () => {

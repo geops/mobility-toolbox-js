@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { toLonLat } from 'ol/proj';
+import qs from 'query-string';
 import mapboxgl from 'mapbox-gl';
 import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
@@ -14,12 +15,25 @@ import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
  * import { MapboxLayer } from 'mobility-toolbox-js/ol';
  *
  * const layer = new MapboxLayer({
- *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
+ *   url: 'https://maps.geops.io/styles/travic/style.json',
+ *   apikey: 'yourApiKey',
  * });
  *
  * @extends {Layer}
  */
 export default class MapboxLayer extends Layer {
+  static getParams(str = '') {
+    const hashes = str.slice(str.indexOf('?') + 1).split('&');
+    const params = {};
+    hashes.forEach((hash) => {
+      const [key, val] = hash.split('=');
+      if (val) {
+        params[key] = decodeURIComponent(val);
+      }
+    });
+    return params;
+  }
+
   /**
    * Constructor.
    *
@@ -132,6 +146,14 @@ export default class MapboxLayer extends Layer {
     this.styleUrl = options.url;
 
     /**
+     * Api key for the url of the mapbox style.
+     * If set to false, the apiKey is not required.
+     * @type {string}
+     * @private
+     */
+    this.apiKey = options.apiKey;
+
+    /**
      * @ignores
      */
     this.updateAttribution = this.updateAttribution.bind(this);
@@ -206,13 +228,35 @@ export default class MapboxLayer extends Layer {
       y = 0;
     }
 
+    let style;
+    if (this.apiKey === false) {
+      style = this.styleUrl;
+    } else {
+      const parameters = MapboxLayer.getParams(this.styleUrl);
+      if (!this.apiKey) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `No apiKey is defined for MapboxLayer's request to ${this.styleUrl}`,
+        );
+        return;
+      }
+      if (parameters.key) {
+        // replace key value from apiKey parameter.
+        parameters.key = this.apiKey;
+        const [baseUrl] = this.styleUrl.split('?');
+        style = `${baseUrl}?${qs.stringify(parameters)}`;
+      } else {
+        style = `${this.styleUrl}?key=${this.apiKey}`;
+      }
+    }
+
     try {
       /**
        * A mapbox map
        * @type {mapboxgl.Map}
        */
       this.mbMap = new mapboxgl.Map({
-        style: this.styleUrl,
+        style,
         attributionControl: false,
         boxZoom: false,
         center: toLonLat([x, y]),
