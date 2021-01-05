@@ -6,7 +6,6 @@ import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-import getUrlParams from '../../common/utils/getUrlParams';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
 
 /**
@@ -221,7 +220,8 @@ export default class MapboxLayer extends Layer {
     if (this.apiKey === false) {
       style = this.styleUrl;
     } else {
-      const parameters = getUrlParams(this.styleUrl);
+      const [baseUrl, searchUrl] = this.styleUrl.split('?');
+      const parameters = qs.parse(searchUrl);
       if (!this.apiKey) {
         // eslint-disable-next-line no-console
         console.warn(
@@ -232,7 +232,6 @@ export default class MapboxLayer extends Layer {
       if (parameters.key) {
         // replace key value from apiKey parameter.
         parameters.key = this.apiKey;
-        const [baseUrl] = this.styleUrl.split('?');
         style = `${baseUrl}?${qs.stringify(parameters)}`;
       } else {
         style = `${this.styleUrl}?key=${this.apiKey}`;
