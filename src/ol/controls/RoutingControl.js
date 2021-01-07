@@ -76,7 +76,6 @@ class RoutingControl extends Control {
 
       if (!enabled) {
         // Remove control ressources from map
-        this.map.removeLayer(this.routingLayer.olLayer);
         this.map.removeInteraction(this.modify);
         unByKey(this.onMapClickKey);
         return;
@@ -122,6 +121,10 @@ class RoutingControl extends Control {
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
    */
   addViaPoint(coordinate, index = this.viaPoints.length, overwrite = 0) {
+    this.dispatchEvent({
+      type: `change:${overwrite ? 'modifyViaPoint' : 'addViaPoint'}`,
+      target: this,
+    });
     /* Add/Insert/Overwrite viapoint and redraw route */
     this.viaPoints.splice(index, overwrite, coordinate);
     this.drawRoute(this.viaPoints);
@@ -133,6 +136,10 @@ class RoutingControl extends Control {
    * @param {number} index Integer representing the index of the viaPoint to delete.
    */
   removeViaPoint(index = this.viaPoints.length - 1) {
+    this.dispatchEvent({
+      type: `change:removeViaPoint`,
+      target: this,
+    });
     /* Remove viapoint and redraw route */
     if (this.viaPoints.length && this.viaPoints[index]) {
       this.viaPoints.splice(index, 1);
@@ -372,11 +379,15 @@ class RoutingControl extends Control {
   }
 
   deactivate() {
+    if (this.map) {
+      this.map.removeLayer(this.routingLayer.olLayer);
+    }
+
     if (this.api) {
       this.api.un('propertychange', this.apiChangeListener);
     }
     this.set('active', false);
-    this.setDrawEnabled(false);
+    this.setDrawEnabled(false, true);
     super.deactivate();
   }
 }
