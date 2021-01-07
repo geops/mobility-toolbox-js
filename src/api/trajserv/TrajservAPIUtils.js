@@ -119,7 +119,7 @@ export const translateTrajStationsResp = (data) => {
  * @returns {Array} returns an array of trajectories.
  * @ignore
  */
-export const translateTrajCollResponse = (features) => {
+export const translateTrajCollResponse = (features = []) => {
   const trajectories = [];
   for (let i = 0; i < features.length; i += 1) {
     const traj = features[i];
