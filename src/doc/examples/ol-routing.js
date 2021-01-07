@@ -7,7 +7,6 @@ export default () => {
   const control = new RoutingControl({
     element: document.createElement('div'),
     apiKey: `${window.apiKey}`,
-    active: false,
   });
 
   const mapboxLayer = new MapboxLayer({
