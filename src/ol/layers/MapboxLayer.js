@@ -142,6 +142,14 @@ export default class MapboxLayer extends Layer {
     this.apiKey = options.apiKey;
 
     /**
+     * Name of the apiKey to set in the url request.
+     * Default is 'key'.
+     * @type {string}
+     * @private
+     */
+    this.apiKeyName = options.apiKeyName || 'key';
+
+    /**
      * @ignores
      */
     this.updateAttribution = this.updateAttribution.bind(this);
@@ -229,12 +237,12 @@ export default class MapboxLayer extends Layer {
         );
         return;
       }
-      if (parameters.key) {
+      if (parameters[this.apiKeyName]) {
         // replace key value from apiKey parameter.
-        parameters.key = this.apiKey;
+        parameters[this.apiKeyName] = this.apiKey;
         style = `${baseUrl}?${qs.stringify(parameters)}`;
       } else {
-        style = `${this.styleUrl}?key=${this.apiKey}`;
+        style = `${this.styleUrl}?${this.apiKeyName}=${this.apiKey}`;
       }
     }
 
@@ -300,6 +308,9 @@ export default class MapboxLayer extends Layer {
       }
     }
     this.mbMap.on('idle', this.updateAttribution);
+    // returns value to allow testing easily.
+    // eslint-disable-next-line consistent-return
+    return style;
   }
 
   updateAttribution(evt) {

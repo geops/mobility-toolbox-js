@@ -65,5 +65,30 @@ describe('MapboxLayer', () => {
       layer.init();
       expect(layer.mbMap).toBe();
     });
+
+    test("should initalized mapbox map, with 'apiKey' prop", () => {
+      const layer1 = new MapboxLayer({
+        name: 'Layer',
+        url: styleUrl,
+        apiKey: 'apiKeyVal',
+      });
+      const spy = jest.spyOn(layer1, 'loadMbMap');
+      layer1.init(map);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).lastReturnedWith('foo.com/styles?key=apiKeyVal');
+    });
+
+    test("should initalized mapbox map, with 'apiKeyName' prop", () => {
+      const layer1 = new MapboxLayer({
+        name: 'Layer',
+        url: styleUrl,
+        apiKey: 'test',
+        apiKeyName: 'apiKey',
+      });
+      const spy = jest.spyOn(layer1, 'loadMbMap');
+      layer1.init(map);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).lastReturnedWith('foo.com/styles?apiKey=test');
+    });
   });
 });
