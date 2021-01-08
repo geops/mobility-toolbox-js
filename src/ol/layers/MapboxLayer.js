@@ -192,6 +192,34 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
+   * Returns a style URL with apiKey & apiKeyName infos.
+   */
+  createStyleUrl() {
+    let style;
+    if (this.apiKey === false) {
+      style = this.styleUrl;
+    } else {
+      const [baseUrl, searchUrl] = this.styleUrl.split('?');
+      const parameters = qs.parse(searchUrl);
+      if (!this.apiKey) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `No apiKey is defined for MapboxLayer's request to ${this.styleUrl}`,
+        );
+        return null;
+      }
+      if (parameters[this.apiKeyName]) {
+        // replace key value from apiKey parameter.
+        parameters[this.apiKeyName] = this.apiKey;
+        style = `${baseUrl}?${qs.stringify(parameters)}`;
+      } else {
+        style = `${this.styleUrl}?${this.apiKeyName}=${this.apiKey}`;
+      }
+    }
+    return style;
+  }
+
+  /**
    * Create the mapbox map.
    * @private
    */
@@ -224,28 +252,7 @@ export default class MapboxLayer extends Layer {
       y = 0;
     }
 
-    let style;
-    if (this.apiKey === false) {
-      style = this.styleUrl;
-    } else {
-      const [baseUrl, searchUrl] = this.styleUrl.split('?');
-      const parameters = qs.parse(searchUrl);
-      if (!this.apiKey) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `No apiKey is defined for MapboxLayer's request to ${this.styleUrl}`,
-        );
-        return;
-      }
-      if (parameters[this.apiKeyName]) {
-        // replace key value from apiKey parameter.
-        parameters[this.apiKeyName] = this.apiKey;
-        style = `${baseUrl}?${qs.stringify(parameters)}`;
-      } else {
-        style = `${this.styleUrl}?${this.apiKeyName}=${this.apiKey}`;
-      }
-    }
-
+    const style = this.createStyleUrl();
     try {
       /**
        * A mapbox map
