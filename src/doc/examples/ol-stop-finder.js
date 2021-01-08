@@ -1,9 +1,9 @@
 import View from 'ol/View';
-import { Map, MapboxLayer, StopsFinderControl } from '../../ol';
+import { Map, MapboxLayer, StopFinderControl } from '../../ol';
 import 'ol/ol.css';
 
 export default () => {
-  const control = new StopsFinderControl({
+  const control = new StopFinderControl({
     apiKey: window.apiKey,
   });
 
