@@ -21,4 +21,6 @@ export default () => {
   });
 
   map.addControl(control);
+
+  map.on('singleclick', () => control.clear());
 };
