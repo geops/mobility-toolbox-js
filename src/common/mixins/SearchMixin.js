@@ -135,7 +135,11 @@ const SearchMixin = (Base) =>
       if (q !== undefined || q !== null) {
         this.apiParams.q = q;
       }
-      this.clearElt.style.display = 'block';
+
+      if (this.clearElt) {
+        this.clearElt.style.display = 'block';
+      }
+
       return this.api
         .search(this.apiParams, abortController)
         .then((data) => {
