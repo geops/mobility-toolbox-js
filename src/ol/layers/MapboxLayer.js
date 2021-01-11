@@ -247,9 +247,10 @@ export default class MapboxLayer extends Layer {
        */
       this.loaded = true;
 
-      this.olLayer
-        .getSource()
-        .setAttributions(this.copyrights || getMapboxMapCopyrights(this.mbMap));
+      this.copyrights =
+        this.copyrights || getMapboxMapCopyrights(this.mbMap) || [];
+
+      this.olLayer.getSource().setAttributions(this.copyrights);
 
       this.dispatchEvent({
         type: 'load',
@@ -267,13 +268,16 @@ export default class MapboxLayer extends Layer {
         mapboxCanvas.removeAttribute('tabindex');
       }
     }
+
     this.mbMap.on('idle', this.updateAttribution);
   }
 
   updateAttribution(evt) {
-    this.olLayer
-      .getSource()
-      .setAttributions(getMapboxMapCopyrights(evt.target));
+    const newAttributions =
+      this.copyrights || getMapboxMapCopyrights(evt.target) || [];
+    if (this.copyrights.toString() !== newAttributions.toString()) {
+      this.olLayer.getSource().setAttributions(newAttributions);
+    }
   }
 
   /**
