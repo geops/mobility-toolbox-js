@@ -6,12 +6,12 @@ import mixin from '../../common/mixins/SearchMixin';
  * Search stations.
  *
  * @example
- * import { Map, StopsFinderControl } from 'mobility-toolbox-js/ol';
+ * import { Map, StopFinderControl } from 'mobility-toolbox-js/ol';
  *
  * const map = new Map({
  *   target: 'map',
  *   controls: [
- *     new StopsFinderControl({
+ *     new StopFinderControl({
  *       apiKey: [yourApiKey]
  *     })
  *   ]
@@ -23,7 +23,7 @@ import mixin from '../../common/mixins/SearchMixin';
  * @extends {Control}
  * @implements {SearchInterface}
  */
-class StopsFinderControl extends mixin(Control) {
+class StopFinderControl extends mixin(Control) {
   /**
    * @private
    */
@@ -33,4 +33,4 @@ class StopsFinderControl extends mixin(Control) {
   }
 }
 
-export default StopsFinderControl;
+export default StopFinderControl;

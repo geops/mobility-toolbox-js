@@ -1,9 +1,9 @@
 import fetch from 'jest-fetch-mock';
 import View from 'ol/View';
 import Map from '../Map';
-import StopsFinderControl from './StopsFinderControl';
+import StopFinderControl from './StopFinderControl';
 
-describe('StopsFinderControl', () => {
+describe('StopFinderControl', () => {
   let map;
 
   beforeEach(() => {
@@ -28,14 +28,14 @@ describe('StopsFinderControl', () => {
   });
 
   test('should be activate by default', () => {
-    const control = new StopsFinderControl();
+    const control = new StopFinderControl();
     expect(control.active).toBe(true);
   });
 
   test('launch a search and display results', (done) => {
     fetch.mockResponseOnce(JSON.stringify(global.stopsSearchResponse));
 
-    const control = new StopsFinderControl({
+    const control = new StopFinderControl({
       url: 'https://foo.ch',
       apiKey: 'foo',
       apiParams: {
