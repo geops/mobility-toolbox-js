@@ -13,7 +13,6 @@ describe('MapboxLayer', () => {
       layer = new MapboxLayer({
         name: 'Layer',
         url: styleUrl,
-        apiKey: false,
       });
       map = new Map({
         target: document.createElement('div'),
@@ -72,10 +71,8 @@ describe('MapboxLayer', () => {
         url: styleUrl,
         apiKey: 'apiKeyVal',
       });
-      const spy = jest.spyOn(layer1, 'loadMbMap');
       layer1.init(map);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).lastReturnedWith('foo.com/styles?key=apiKeyVal');
+      expect(layer1.mbMap.options.style).toBe('foo.com/styles?key=apiKeyVal');
     });
 
     test("should initalized mapbox map, with 'apiKeyName' prop", () => {
@@ -85,10 +82,8 @@ describe('MapboxLayer', () => {
         apiKey: 'test',
         apiKeyName: 'apiKey',
       });
-      const spy = jest.spyOn(layer1, 'loadMbMap');
       layer1.init(map);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).lastReturnedWith('foo.com/styles?apiKey=test');
+      expect(layer1.mbMap.options.style).toBe('foo.com/styles?apiKey=test');
     });
   });
 });

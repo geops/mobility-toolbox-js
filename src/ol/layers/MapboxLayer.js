@@ -1,12 +1,12 @@
 /* eslint-disable no-underscore-dangle */
 import { toLonLat } from 'ol/proj';
-import qs from 'query-string';
 import mapboxgl from 'mapbox-gl';
 import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
+import getMapboxStyle from '../../common/utils/getMapboxStyle';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -195,28 +195,7 @@ export default class MapboxLayer extends Layer {
    * Returns a style URL with apiKey & apiKeyName infos.
    */
   createStyleUrl() {
-    let style;
-    if (this.apiKey === false) {
-      style = this.styleUrl;
-    } else {
-      const [baseUrl, searchUrl] = this.styleUrl.split('?');
-      const parameters = qs.parse(searchUrl);
-      if (!this.apiKey) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `No apiKey is defined for MapboxLayer's request to ${this.styleUrl}`,
-        );
-        return null;
-      }
-      if (parameters[this.apiKeyName]) {
-        // replace key value from apiKey parameter.
-        parameters[this.apiKeyName] = this.apiKey;
-        style = `${baseUrl}?${qs.stringify(parameters)}`;
-      } else {
-        style = `${this.styleUrl}?${this.apiKeyName}=${this.apiKey}`;
-      }
-    }
-    return style;
+    return getMapboxStyle(this.apiKey, this.apiKeyName, this.styleUrl);
   }
 
   /**
@@ -315,9 +294,6 @@ export default class MapboxLayer extends Layer {
       }
     }
     this.mbMap.on('idle', this.updateAttribution);
-    // returns value to allow testing easily.
-    // eslint-disable-next-line consistent-return
-    return style;
   }
 
   updateAttribution(evt) {
