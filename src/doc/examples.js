@@ -75,8 +75,8 @@ export default [
     img: olCopyrightImg,
   },
   {
-    name: 'Stops finder',
-    key: 'ol-stops-finder',
+    name: 'Stop finder',
+    key: 'ol-stop-finder',
     description: 'Use the StopsAPI for finding public transport stops.',
     img: stopsImg,
   },

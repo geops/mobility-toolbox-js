@@ -16,6 +16,7 @@ export class SearchInterface {
    * @param {Object} options Map options
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/). See StopsAPI.
    * @param {string} [options.url='https://api.geops.io/tracker/v1'] Stops service url. See StopsAPI.
+   * @param {string} [options.placeholder='Search for a stop...'] Input field placeholder.
    * @param {StopsSearchParams} [options.apiParams={ limit: 20 }] Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
    */
   // eslint-disable-next-line no-unused-vars
@@ -46,6 +47,7 @@ const SearchMixin = (Base) =>
       const { apiParams, apiKey, url } = options;
 
       this.apiParams = { limit: 20, ...(apiParams || {}) };
+      this.placeholder = options.placeholder || 'Search for a stop...';
 
       const apiOptions = { apiKey };
       if (url) {
@@ -94,33 +96,50 @@ const SearchMixin = (Base) =>
       });
 
       // Create input element
-      const inputElt = document.createElement('input');
-      inputElt.type = 'text';
-      inputElt.placeholder = 'Search for a stop...';
-      inputElt.autoComplete = 'off';
-      inputElt.onkeyup = (evt) => {
+      this.inputElt = document.createElement('input');
+      this.inputElt.type = 'text';
+      this.inputElt.placeholder = this.placeholder;
+      this.inputElt.autoComplete = 'off';
+      this.inputElt.onkeyup = (evt) => {
         this.search(evt.target.value);
       };
-      Object.assign(inputElt.style, {
-        padding: '10px',
+      Object.assign(this.inputElt.style, {
+        padding: '10px 30px 10px 10px',
       });
-      this.element.appendChild(inputElt);
+      this.element.appendChild(this.inputElt);
 
       // Create suggestions list element
       this.suggestionsElt = document.createElement('div');
       Object.assign(this.suggestionsElt.style, {
         backgroundColor: 'white',
-        maxHeight: '200px',
         overflowY: 'auto',
         cursor: 'pointer',
       });
       this.element.appendChild(this.suggestionsElt);
+
+      this.clearElt = document.createElement('div');
+      Object.assign(this.clearElt.style, {
+        display: 'none',
+        position: 'absolute',
+        right: '0',
+        padding: '10px',
+        fontSize: '200%',
+        cursor: 'pointer',
+      });
+      this.clearElt.innerHTML = '×';
+      this.clearElt.onclick = () => this.clear();
+      this.element.appendChild(this.clearElt);
     }
 
     search(q, abortController) {
       if (q !== undefined || q !== null) {
         this.apiParams.q = q;
       }
+
+      if (this.clearElt) {
+        this.clearElt.style.display = 'block';
+      }
+
       return this.api
         .search(this.apiParams, abortController)
         .then((data) => {
@@ -136,6 +155,19 @@ const SearchMixin = (Base) =>
      */
     // eslint-disable-next-line no-unused-vars
     onSuggestionClick(suggestion) {}
+
+    /**
+     * Clear the search field and close the control.
+     */
+    clear() {
+      if (!this.suggestionsElt) {
+        return;
+      }
+
+      this.inputElt.value = '';
+      this.suggestionsElt.innerHTML = '';
+      this.clearElt.style.display = 'none';
+    }
   };
 
 export default SearchMixin;
