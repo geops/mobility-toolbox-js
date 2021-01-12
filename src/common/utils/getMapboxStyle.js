@@ -21,7 +21,7 @@ const getMapboxStyle = (apiKey, apiKeyName, styleUrl) => {
       parsedStyle.query[apiKeyName] = apiKey;
       style = qs.stringifyUrl({
         url: parsedStyle.url,
-        query: parsedStyle,
+        query: parsedStyle.query,
       });
     } else {
       style = qs.stringifyUrl({
