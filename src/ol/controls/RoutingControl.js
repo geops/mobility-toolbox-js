@@ -53,6 +53,14 @@ class RoutingControl extends Control {
         name: 'routing-layer',
       });
 
+    this.onRouteError =
+      options.onRouteError ||
+      ((error) => {
+        this.viaPoints = [];
+        this.routingLayer.olLayer.getSource().clear();
+        console.error('Route not found!', error);
+      });
+
     this.viaPoints = [];
     this.setDrawEnabled = this.setDrawEnabled.bind(this);
     this.onMapClick = this.onMapClick.bind(this);
@@ -234,10 +242,13 @@ class RoutingControl extends Control {
           routeFeature.set('mot', this.api.mot);
           return this.routingLayer.olLayer.getSource().addFeature(routeFeature);
         })
-        .catch(() => {
+        .catch((error) => {
           // Clear source
-          this.viaPoints = [];
-          this.routingLayer.olLayer.getSource().clear();
+          this.dispatchEvent({
+            type: 'error',
+            target: this,
+          });
+          this.onRouteError(error);
         });
     }
     return null;
