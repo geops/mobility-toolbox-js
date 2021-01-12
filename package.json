@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "1.2.3-beta.7",
+  "version": "1.2.3-beta.8",
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
