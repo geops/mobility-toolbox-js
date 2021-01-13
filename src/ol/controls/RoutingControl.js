@@ -74,6 +74,10 @@ class RoutingControl extends Control {
     this.onRouteError =
       options.onRouteError ||
       ((error) => {
+        this.dispatchEvent({
+          type: 'change:route',
+          target: this,
+        });
         this.viaPoints = [];
         this.routingLayer.olLayer.getSource().clear();
         // eslint-disable-next-line no-console
@@ -98,6 +102,10 @@ class RoutingControl extends Control {
     if (this.map) {
       if (reset) {
         // Clear viaPoints and source
+        this.dispatchEvent({
+          type: 'change:route',
+          target: this,
+        });
         this.viaPoints = [];
         this.routingLayer.olLayer.getSource().clear();
       }
