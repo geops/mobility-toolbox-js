@@ -16,21 +16,13 @@ const getMapboxStyle = (apiKey, apiKeyName, styleUrl) => {
       console.warn(`No apiKey is defined for request to ${styleUrl}`);
       return null;
     }
-    if (parsedStyle.query && parsedStyle.query[apiKeyName]) {
-      // replace key value from apiKey parameter.
-      parsedStyle.query[apiKeyName] = apiKey;
-      style = qs.stringifyUrl({
-        url: parsedStyle.url,
-        query: parsedStyle.query,
-      });
-    } else {
-      style = qs.stringifyUrl({
-        url: styleUrl,
+      return  qs.stringifyUrl({
+      ...parsedStyle
         query: {
+          ...parsedStyle.query,
           [apiKeyName]: apiKey,
         },
       });
-    }
   }
   return style;
 };
