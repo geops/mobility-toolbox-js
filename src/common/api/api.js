@@ -50,6 +50,12 @@ class API {
       (key) =>
         (clone[key] === undefined || clone[key] === null) && delete clone[key],
     );
+    if (!this.apiKey) {
+      // eslint-disable-next-line no-console
+      return Promise.reject(
+        new Error(`No apiKey defined for request to ${this.url}`),
+      );
+    }
     return fetch(`${this.url}${path}?${qs.stringify(clone)}`, config)
       .then((response) => {
         try {

@@ -8,7 +8,8 @@ export default () => {
   });
 
   const mapboxLayer = new MapboxLayer({
-    url: `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`,
+    url: 'https://maps.geops.io/styles/base_bright_v2/style.json',
+    apiKey: window.apiKey,
   });
 
   const map = new Map({
