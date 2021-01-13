@@ -15,7 +15,7 @@ import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
 
 /**
- * Display layer's copyrights.
+ * Display a route of a specified mean of transport.
  *
  * @example
  * import { Map, RoutingControl } from 'mobility-toolbox-js/ol';
@@ -36,6 +36,24 @@ import RoutingLayer from '../layers/RoutingLayer';
 class RoutingControl extends Control {
   constructor(options = {}) {
     super(options);
+
+    Object.defineProperties(this, {
+      mot: {
+        get: () => {
+          return this.get('mot');
+        },
+        set: (newMot) => {
+          if (newMot) {
+            this.set('mot', newMot);
+            if (this.viaPoints) {
+              this.drawRoute();
+            }
+          }
+        },
+      },
+    });
+
+    this.mot = options.mot || 'bus';
 
     this.abortController = new AbortController();
 
@@ -58,7 +76,8 @@ class RoutingControl extends Control {
       ((error) => {
         this.viaPoints = [];
         this.routingLayer.olLayer.getSource().clear();
-        console.error('Route not found!', error);
+        // eslint-disable-next-line no-console
+        console.error(error);
       });
 
     this.viaPoints = [];
@@ -93,6 +112,7 @@ class RoutingControl extends Control {
       this.modify = new Modify({
         source: this.routingLayer.olLayer.getSource(),
         pixelTolerance: 4,
+        hitDetection: this.routingLayer.olLayer,
         deleteCondition: (e) => {
           const feats = e.target.getFeaturesAtPixel(e.pixel, {
             hitTolerance: 5,
@@ -194,7 +214,7 @@ class RoutingControl extends Control {
         .route(
           {
             via: `${formattedViaPoints.join('|')}`,
-            mot: `${this.api.mot}`,
+            mot: `${this.mot}`,
             'resolve-hops': false,
             elevation: false,
             'coord-radius': 100.0,
@@ -217,7 +237,7 @@ class RoutingControl extends Control {
                 .addFeature(pointFeature);
             }
             return fetch(
-              `https://api.geops.io/stops/v1/search/lookup/${viaPoint}?key=${this.apiKey}`,
+              `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${this.apiKey}`,
             )
               .then((res) => res.json())
               .then((stationData) => {
@@ -239,16 +259,16 @@ class RoutingControl extends Control {
           const routeFeature = new Feature({
             geometry: new LineString(projectedCoords),
           });
-          routeFeature.set('mot', this.api.mot);
+          routeFeature.set('mot', this.mot);
           return this.routingLayer.olLayer.getSource().addFeature(routeFeature);
         })
         .catch((error) => {
-          // Clear source
+          // Dispatch error event and execute error function
           this.dispatchEvent({
             type: 'error',
             target: this,
           });
-          this.onRouteError(error);
+          this.onRouteError(error, this);
         });
     }
     return null;
@@ -397,10 +417,6 @@ class RoutingControl extends Control {
 
   activate() {
     super.activate();
-    this.set('active', true);
-    if (this.api) {
-      this.api.on('propertychange', this.apiChangeListener);
-    }
     this.setDrawEnabled(true, true);
   }
 
@@ -408,11 +424,6 @@ class RoutingControl extends Control {
     if (this.map) {
       this.map.removeLayer(this.routingLayer.olLayer);
     }
-
-    if (this.api) {
-      this.api.un('propertychange', this.apiChangeListener);
-    }
-    this.set('active', false);
     this.setDrawEnabled(false, true);
     super.deactivate();
   }

@@ -25,29 +25,6 @@ class RoutingAPI extends API {
       ...options,
       url: options.url || 'https://api.geops.io/routing/v1/',
     });
-
-    Object.defineProperties(this, {
-      mot: {
-        get: () => {
-          return this.get('mot');
-        },
-        set: (newMot) => {
-          if (newMot) {
-            this.set('mot', newMot);
-          }
-        },
-      },
-    });
-
-    this.mot = options.mot || 'bus';
-  }
-
-  /**
-   * Sets the current mot and redraws route.
-   * @param {string} motString String defining the mean of transport (e.g. bus, rail, foot...).
-   */
-  setMot(motString) {
-    this.mot = motString;
   }
 
   /**
