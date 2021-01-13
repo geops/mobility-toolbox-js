@@ -2,7 +2,7 @@ import { Map as MBMap } from 'mapbox-gl';
 import Layer from '../common/layers/Layer';
 import mixin from '../common/mixins/MapMixin';
 import CopyrightControl from './controls/CopyrightControl';
-import getMapboxStyle from '../common/utils/getMapboxStyle';
+import getMapboxStyleUrl from '../common/utils/getMapboxStyleUrl';
 
 /**
  * An Mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map) for handling mobility layers and controls.
@@ -19,7 +19,9 @@ class Map extends mixin(MBMap) {
     const apiKey = options.apiKey || false;
     const apiKeyName = options.apiKeyName || 'key';
     let newStyle = options.style;
-    newStyle = getMapboxStyle(apiKey, apiKeyName, style);
+    if (typeof style === 'string') {
+      newStyle = getMapboxStyleUrl(apiKey, apiKeyName, style);
+    }
     super({
       attributionControl: false,
       controls: [new CopyrightControl()],

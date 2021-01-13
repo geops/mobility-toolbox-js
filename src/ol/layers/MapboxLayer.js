@@ -6,7 +6,7 @@ import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
-import getMapboxStyle from '../../common/utils/getMapboxStyle';
+import getMapboxStyleUrl from '../../common/utils/getMapboxStyleUrl';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -224,7 +224,11 @@ export default class MapboxLayer extends Layer {
       y = 0;
     }
 
-    const style = getMapboxStyle(this.apiKey, this.apiKeyName, this.styleUrl);
+    const style = getMapboxStyleUrl(
+      this.apiKey,
+      this.apiKeyName,
+      this.styleUrl,
+    );
     try {
       /**
        * A mapbox map

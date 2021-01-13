@@ -5,7 +5,7 @@ import qs from 'query-string';
  * @param {mapboxgl.Map} map A Mapbox map
  * @ignore
  */
-const getMapboxStyle = (apiKey, apiKeyName, styleUrl) => {
+const getMapboxStyleUrl = (apiKey, apiKeyName, styleUrl) => {
   if (apiKey === false) {
     return styleUrl;
   }
@@ -27,4 +27,4 @@ const getMapboxStyle = (apiKey, apiKeyName, styleUrl) => {
   });
 };
 
-export default getMapboxStyle;
+export default getMapboxStyleUrl;
