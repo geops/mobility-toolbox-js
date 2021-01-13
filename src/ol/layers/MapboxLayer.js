@@ -192,6 +192,13 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
+   * Returns a style URL with apiKey & apiKeyName infos.
+   */
+  createStyleUrl() {
+    return getMapboxStyleUrl(this.apiKey, this.apiKeyName, this.styleUrl);
+  }
+
+  /**
    * Create the mapbox map.
    * @private
    */
@@ -224,11 +231,7 @@ export default class MapboxLayer extends Layer {
       y = 0;
     }
 
-    const style = getMapboxStyleUrl(
-      this.apiKey,
-      this.apiKeyName,
-      this.styleUrl,
-    );
+    const style = this.createStyleUrl();
     try {
       /**
        * A mapbox map
