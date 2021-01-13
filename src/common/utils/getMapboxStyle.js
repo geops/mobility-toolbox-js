@@ -8,7 +8,7 @@ import qs from 'query-string';
 const getMapboxStyle = (apiKey, apiKeyName, styleUrl) => {
   let style;
   if (apiKey === false) {
-    style = styleUrl;
+    return styleUrl;
   } else {
     const parsedStyle = qs.parseUrl(styleUrl);
     if (!apiKey) {
