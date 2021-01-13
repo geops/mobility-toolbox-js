@@ -1,8 +1,10 @@
 import qs from 'query-string';
 
 /**
- * Return the copyright a Mapbox map.
- * @param {mapboxgl.Map} map A Mapbox map
+ * Return the styleUrl with apiKey parameters set.
+ * @param {string} apiKey apiKey value for the mapbox request.
+ * @param {string} apiKeyName parameter name for apiKey in the mapbox request.
+ * @param {string} styleUrl mapbox styleUrl value.
  * @ignore
  */
 const getMapboxStyleUrl = (apiKey, apiKeyName, styleUrl) => {
