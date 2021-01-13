@@ -86,6 +86,7 @@ class RoutingControl extends Control {
     this.onModifyEnd = this.onModifyEnd.bind(this);
     this.onModifyStart = this.onModifyStart.bind(this);
     this.apiChangeListener = () => this.drawRoute();
+    this.createModifyInteraction();
   }
 
   /**
@@ -95,46 +96,23 @@ class RoutingControl extends Control {
    */
   setDrawEnabled(enabled, reset) {
     if (this.map) {
-      // Clear viaPoints and source
       if (reset) {
+        // Clear viaPoints and source
         this.viaPoints = [];
         this.routingLayer.olLayer.getSource().clear();
       }
 
       if (!enabled) {
-        // Remove control ressources from map
-        this.map.removeInteraction(this.modify);
-        unByKey(this.onMapClickKey);
+        // Deactivate modify interaction and remove listeners
+        this.modifyInteraction.setActive(false);
+        this.removeListeners();
         return;
       }
 
-      // Define and add modify interaction
-      this.modify = new Modify({
-        source: this.routingLayer.olLayer.getSource(),
-        pixelTolerance: 4,
-        hitDetection: this.routingLayer.olLayer,
-        deleteCondition: (e) => {
-          const feats = e.target.getFeaturesAtPixel(e.pixel, {
-            hitTolerance: 5,
-          });
-          const viaPoint = feats.find(
-            (feat) => feat.getGeometry() instanceof Point && feat.get('index'),
-          );
-          if (click(e) && viaPoint) {
-            // Remove node & viaPoint if an existing viaPoint was clicked
-            this.removeViaPoint(viaPoint.get('index'));
-            return true;
-          }
-          return false;
-        },
-      });
-      this.modify.on('modifystart', this.onModifyStart);
-      this.modify.on('modifyend', this.onModifyEnd);
-
-      // Add control ressources to map
+      // Activate modify interaction and add listeners
       this.map.addLayer(this.routingLayer);
-      this.onMapClickKey = this.map.on('singleclick', this.onMapClick);
-      this.map.addInteraction(this.modify);
+      this.modifyInteraction.setActive(true);
+      this.addListeners();
     }
   }
 
@@ -415,8 +393,65 @@ class RoutingControl extends Control {
     });
   }
 
+  /**
+   * Create the interaction used to modify vertexes of features.
+   * @private
+   */
+  createModifyInteraction() {
+    /**
+     * @type {ol.interaction.Modify}
+     * @private
+     */
+    // Define and add modify interaction
+    this.modifyInteraction = new Modify({
+      source: this.routingLayer.olLayer.getSource(),
+      pixelTolerance: 4,
+      hitDetection: this.routingLayer.olLayer,
+      deleteCondition: (e) => {
+        const feats = e.target.getFeaturesAtPixel(e.pixel, {
+          hitTolerance: 5,
+        });
+        const viaPoint = feats.find(
+          (feat) => feat.getGeometry() instanceof Point && feat.get('index'),
+        );
+        if (click(e) && viaPoint) {
+          // Remove node & viaPoint if an existing viaPoint was clicked
+          this.removeViaPoint(viaPoint.get('index'));
+          return true;
+        }
+        return false;
+      },
+    });
+    this.modifyInteraction.on('modifystart', this.onModifyStart);
+    this.modifyInteraction.on('modifyend', this.onModifyEnd);
+    this.modifyInteraction.setActive(false);
+  }
+
+  /**
+   * Add click listener to map.
+   * @private
+   */
+  addListeners() {
+    this.removeListeners();
+    this.onMapClickKey = this.map.on('singleclick', this.onMapClick);
+  }
+
+  /**
+   * Remove click listener from map.
+   * @private
+   */
+  removeListeners() {
+    unByKey(this.onMapClickKey);
+  }
+
   activate() {
     super.activate();
+    if (
+      this.map &&
+      !this.map.getInteractions().getArray().includes(this.modifyInteraction)
+    ) {
+      this.map.addInteraction(this.modifyInteraction);
+    }
     this.setDrawEnabled(true, true);
   }
 
