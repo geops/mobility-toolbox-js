@@ -11,6 +11,9 @@ const getMapboxStyle = (apiKey, apiKeyName, styleUrl) => {
     style = styleUrl;
   } else {
     const parsedStyle = qs.parseUrl(styleUrl);
+    if (!apiKey && parsedStyle.query[apiKeyName]) {
+      return styleUrl;
+    }
     if (!apiKey) {
       // eslint-disable-next-line no-console
       console.warn(`No apiKey is defined for request to ${styleUrl}`);
