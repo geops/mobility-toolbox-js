@@ -54,6 +54,4 @@ export default () => {
   document.getElementById('reset-button').addEventListener('click', () => {
     control.reset();
   });
-
-  control.on('propertychange', () => console.log(control.loading));
 };

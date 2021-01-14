@@ -1,9 +1,14 @@
 import Control from './Control';
 
 describe('Control', () => {
-  test('should be activate by default', () => {
+  test('should be activated by default', () => {
     const control = new Control();
     expect(control.active).toBe(true);
+  });
+
+  test('should not be activated if set to false in the options', () => {
+    const control = new Control({ active: false });
+    expect(control.active).toBe(false);
   });
 
   test('should call activate/deactivate when active is set to true/false', () => {
