@@ -464,8 +464,8 @@ class RoutingControl extends Control {
       this.map.removeInteraction(this.modifyInteraction);
       this.removeListeners();
       this.reset();
-      super.deactivate();
     }
+    super.deactivate();
   }
 }
 
