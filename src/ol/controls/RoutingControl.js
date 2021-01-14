@@ -221,6 +221,15 @@ class RoutingControl extends Control {
                 const { coordinates } = stationData.features[0].geometry;
                 pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
                 this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+              })
+              .catch((error) => {
+                // Dispatch error event and execute error function
+                this.dispatchEvent({
+                  type: 'error',
+                  target: this,
+                });
+                this.onRouteError(error, this);
+                this.loading = false;
               });
           });
 
