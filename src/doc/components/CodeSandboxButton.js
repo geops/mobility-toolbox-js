@@ -80,7 +80,7 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
           </SvgIcon>
         }
       >
-        Edit in Sandox
+        Edit in Sandbox
       </Button>
     </form>
   );
