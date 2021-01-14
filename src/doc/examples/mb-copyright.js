@@ -15,7 +15,8 @@ export default () => {
 
   const map = new Map({
     container: 'map',
-    style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
+    style: 'https://maps.geops.io/styles/travic/style.json',
+    apiKey: window.apiKey,
     center: [7.47, 46.95],
     zoom: 12,
     touchPitch: false,
