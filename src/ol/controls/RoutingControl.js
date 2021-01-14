@@ -51,6 +51,14 @@ class RoutingControl extends Control {
           }
         },
       },
+      loading: {
+        get: () => {
+          return this.get('loading');
+        },
+        set: (newLoading) => {
+          this.set('loading', newLoading);
+        },
+      },
     });
 
     this.mot = options.mot || 'bus';
@@ -85,43 +93,11 @@ class RoutingControl extends Control {
       });
 
     this.viaPoints = [];
-    this.setDrawEnabled = this.setDrawEnabled.bind(this);
     this.onMapClick = this.onMapClick.bind(this);
     this.onModifyEnd = this.onModifyEnd.bind(this);
     this.onModifyStart = this.onModifyStart.bind(this);
     this.apiChangeListener = () => this.drawRoute();
     this.createModifyInteraction();
-  }
-
-  /**
-   * Enables/Disables route draw mode.
-   * @param {boolean} enabled Enable/Disable route draw mode
-   * @param {boolean} [reset=undefined] Clears all features and viaPoints
-   */
-  setDrawEnabled(enabled, reset) {
-    if (this.map) {
-      if (reset) {
-        // Clear viaPoints and source
-        this.dispatchEvent({
-          type: 'change:route',
-          target: this,
-        });
-        this.viaPoints = [];
-        this.routingLayer.olLayer.getSource().clear();
-      }
-
-      if (!enabled) {
-        // Deactivate modify interaction and remove listeners
-        this.modifyInteraction.setActive(false);
-        this.removeListeners();
-        return;
-      }
-
-      // Activate modify interaction and add listeners
-      this.map.addLayer(this.routingLayer);
-      this.modifyInteraction.setActive(true);
-      this.addListeners();
-    }
   }
 
   /**
@@ -162,6 +138,19 @@ class RoutingControl extends Control {
   }
 
   /**
+   * Removes all viaPoints, clears the source and triggers a change event
+   */
+  reset() {
+    // Clear viaPoints and source
+    this.dispatchEvent({
+      type: 'change:route',
+      target: this,
+    });
+    this.viaPoints = [];
+    this.routingLayer.olLayer.getSource().clear();
+  }
+
+  /**
    * Draws route on map using an array of coordinates:
    *   If a single coordinate is passed a single point feature is added to map.
    *   If two or more coordinates are passed a request to the RoutingAPI fetches
@@ -194,6 +183,8 @@ class RoutingControl extends Control {
         // viaPoint is a UID
         return `!${viaPoint}`;
       });
+
+      this.loading = true;
 
       // Fetch RoutingAPI data
       return this.api
@@ -229,9 +220,7 @@ class RoutingControl extends Control {
               .then((stationData) => {
                 const { coordinates } = stationData.features[0].geometry;
                 pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
-                return this.routingLayer.olLayer
-                  .getSource()
-                  .addFeature(pointFeature);
+                this.routingLayer.olLayer.getSource().addFeature(pointFeature);
               });
           });
 
@@ -246,7 +235,8 @@ class RoutingControl extends Control {
             geometry: new LineString(projectedCoords),
           });
           routeFeature.set('mot', this.mot);
-          return this.routingLayer.olLayer.getSource().addFeature(routeFeature);
+          this.routingLayer.olLayer.getSource().addFeature(routeFeature);
+          this.loading = false;
         })
         .catch((error) => {
           // Dispatch error event and execute error function
@@ -255,6 +245,7 @@ class RoutingControl extends Control {
             target: this,
           });
           this.onRouteError(error, this);
+          this.loading = false;
         });
     }
     return null;
@@ -454,21 +445,27 @@ class RoutingControl extends Control {
 
   activate() {
     super.activate();
-    if (
-      this.map &&
-      !this.map.getInteractions().getArray().includes(this.modifyInteraction)
-    ) {
+    if (this.map) {
+      // Clean the modifyInteraction if present
+      this.map.removeInteraction(this.modifyInteraction);
+
+      // Add modify interaction, RoutingLayer and listeners
+      this.map.addLayer(this.routingLayer);
       this.map.addInteraction(this.modifyInteraction);
+      this.modifyInteraction.setActive(true);
+      this.addListeners();
     }
-    this.setDrawEnabled(true, true);
   }
 
   deactivate() {
     if (this.map) {
+      // Remove modify interaction, RoutingLayer, listeners and viaPoints
       this.map.removeLayer(this.routingLayer.olLayer);
+      this.map.removeInteraction(this.modifyInteraction);
+      this.removeListeners();
+      this.reset();
+      super.deactivate();
     }
-    this.setDrawEnabled(false, true);
-    super.deactivate();
   }
 }
 

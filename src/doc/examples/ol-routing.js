@@ -49,4 +49,11 @@ export default () => {
         : 'Switch to foot routing';
     control.mot = control.mot === 'bus' ? 'foot' : 'bus';
   });
+
+  // Add example button to toggle the RoutingControl mot.
+  document.getElementById('reset-button').addEventListener('click', () => {
+    control.reset();
+  });
+
+  control.on('propertychange', () => console.log(control.loading));
 };
