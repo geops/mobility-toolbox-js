@@ -401,7 +401,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const z = Math.min(Math.floor(zoom || 1), 16);
       const hover = this.tracker.hoverVehicleId === id;
       const selected = this.selectedVehicleId === id;
-      const key = `${z}${type}${name}${delay}${hover}${selected}`;
+      const key = `${z}${type}${name}${delay}${hover}${selected}${cancelled}`;
 
       if (!this.styleCache[key]) {
         let radius = getRadius(type, z);
@@ -430,7 +430,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         }
 
         // Show delay if feature is hovered or if delay is above 5mins.
-        if (hover || delay >= this.delayDisplay) {
+        if (hover || delay >= this.delayDisplay || cancelled) {
           // Draw delay text
           ctx.save();
           ctx.textAlign = 'left';
