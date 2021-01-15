@@ -439,7 +439,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
             14,
             Math.min(17, radius * 1.2),
           )}px arial, sans-serif`;
-          ctx.fillStyle = getDelayColor(delay, cancelled);
+          ctx.fillStyle = getDelayColor(delay, cancelled, true);
 
           ctx.strokeStyle = this.delayOutlineColor;
           ctx.lineWidth = 1.5;

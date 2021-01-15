@@ -156,9 +156,9 @@ export const getTextSize = (ctx, markerSize, text, fontSize) => {
 /**
  * @ignore
  */
-export const getDelayColor = (delayInMs, cancelled) => {
+export const getDelayColor = (delayInMs, cancelled, isText) => {
   if (cancelled) {
-    return '#ff0000';
+    return isText ? '#ff0000' : '#00a00c';
   }
   if (delayInMs >= 3600000) {
     return '#ed004c'; // pink { r: 237, g: 0, b: 76, s: '237,0,76' };
