@@ -158,6 +158,9 @@ class RoutingControl extends Control {
    * @private
    */
   drawRoute() {
+    this.abortController.abort();
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
     /* Calls RoutingAPI to draw a route using the viaPoints array */
     if (this.viaPoints.length === 1) {
       // Clear source
@@ -170,10 +173,6 @@ class RoutingControl extends Control {
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
     if (this.viaPoints.length >= 2) {
-      this.abortController.abort();
-      this.abortController = new AbortController();
-      const { signal } = this.abortController;
-
       const formattedViaPoints = this.viaPoints.map((viaPoint) => {
         if (Array.isArray(viaPoint)) {
           // viaPoint is a coordinate
