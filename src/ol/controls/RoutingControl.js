@@ -142,12 +142,12 @@ class RoutingControl extends Control {
    */
   reset() {
     // Clear viaPoints and source
+    this.viaPoints = [];
+    this.routingLayer.olLayer.getSource().clear();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
     });
-    this.viaPoints = [];
-    this.routingLayer.olLayer.getSource().clear();
   }
 
   /**
