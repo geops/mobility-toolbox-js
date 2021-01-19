@@ -103,9 +103,9 @@ class RoutingControl extends Control {
    * Adds/Replaces a viaPoint to the viaPoints array and redraws route:
    *   Adds a viaPoint at end of array by default.
    *   If an index is passed a viaPoint is added at the specified index.
-   *   If an index is passed and overwrite is set to true, a viaPoint at the specified
-   *     index is replaced with a new viaPoint.
-   * @param {Array<Array<number>>} coordinates Array of coordinates
+   *   If an index is passed and overwrite x is > 0, x viaPoints at the specified
+   *     index are replaced with a single new viaPoint.
+   * @param {Array<number>} coordinates Array of coordinates
    * @param {number} index Integer representing the index of the added viaPoint.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
    */
@@ -136,7 +136,18 @@ class RoutingControl extends Control {
     });
   }
 
-  // setViaPoints
+  /**
+   * Replaces the current viaPoints with a new coordinate array.
+   * @param {Array<Array<number>>} coordinates Array of nested coordinates
+   */
+  setViaPoints(coordinateArray) {
+    this.viaPoints = [...coordinateArray];
+    this.drawRoute(this.viaPoints);
+    this.dispatchEvent({
+      type: 'change:route',
+      target: this,
+    });
+  }
 
   /**
    * Removes all viaPoints, clears the source and triggers a change event
