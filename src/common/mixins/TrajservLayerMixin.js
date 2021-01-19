@@ -397,11 +397,20 @@ const TrajservLayerMixin = (TrackerLayer) =>
     }
 
     defaultStyle(props, zoom) {
-      const { type, name, id, color, textColor, delay, cancelled } = props;
+      const {
+        type,
+        name,
+        id,
+        color,
+        textColor,
+        delay,
+        cancelled,
+        operatorProvidesRealtime,
+      } = props;
       const z = Math.min(Math.floor(zoom || 1), 16);
       const hover = this.tracker.hoverVehicleId === id;
       const selected = this.selectedVehicleId === id;
-      const key = `${z}${type}${name}${delay}${hover}${selected}`;
+      const key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}`;
 
       if (!this.styleCache[key]) {
         let radius = getRadius(type, z);
@@ -411,6 +420,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         }
         const margin = 1;
         const radiusDelay = radius + 2;
+        const markerSize = radius * 2;
         const origin = radiusDelay + margin;
 
         const canvas = document.createElement('canvas');
@@ -419,7 +429,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         const ctx = canvas.getContext('2d');
 
         if (delay !== null) {
-          // Draw delay background
+          // Draw circle delay background
           ctx.save();
           ctx.beginPath();
           ctx.arc(origin, origin, radiusDelay, 0, 2 * Math.PI, false);
@@ -448,33 +458,89 @@ const TrajservLayerMixin = (TrackerLayer) =>
           ctx.restore();
         }
 
-        ctx.beginPath();
-        ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
-        if (!this.useDelayStyle) {
-          ctx.fillStyle = color || getBgColor(type);
-          ctx.fill();
+        // Draw colored circle with black border
+        let circleFillColor;
+        if (this.useDelayStyle) {
+          circleFillColor = getDelayColor(delay, cancelled);
         } else {
-          ctx.fillStyle = getDelayColor(delay, cancelled);
-          ctx.fill();
+          circleFillColor = color || getBgColor(type);
         }
-
+        ctx.save();
         ctx.lineWidth = 1;
         ctx.strokeStyle = '#000000';
+        ctx.fillStyle = circleFillColor;
+        ctx.beginPath();
+        ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
+        ctx.fill();
         ctx.stroke();
+        ctx.restore();
 
-        const markerSize = radius * 2;
+        // Draw diagonale in the circle if a provider provides realtime but we don't use it.
+        if (delay === null && operatorProvidesRealtime === 'yes') {
+          // delay=null (no realtime) but provider has data.
+          // Draw black cross in the middle of the gravy circle
+          let diff = radius >= 10 ? 4 : 2;
+          if (hover) {
+            diff = radius >= 10 ? 5 : 3;
+          }
+          const middle = markerSize / 2;
+          ctx.save();
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = '#000000';
+          // translate to midpoint
+          // ctx.translate(origin, origin);
+
+          ctx.beginPath();
+          // rotate some angle (radians)
+          // ctx.rotate((90 * Math.PI) / 180);
+
+          ctx.moveTo(origin - radius + diff, origin - radius + diff);
+          ctx.lineTo(origin + radius - diff, origin + radius - diff);
+          // const rad = radius % 2 === 0 ? radius : radius + 1;
+          // ctx.moveTo(-radius - 4, 0);
+          // ctx.lineTo(radius + 4, 0);
+          // ctx.stroke();
+          // ctx.beginPath();
+          // ctx.moveTo(0, -radius - 4);
+          // ctx.lineTo(0, radius + 4);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(origin - radius + diff, origin + radius - diff);
+          ctx.lineTo(origin + radius - diff, origin - radius + diff);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Draw text in the circle
         if (radius > 10) {
           const fontSize = Math.max(radius, 10);
           const textSize = getTextSize(ctx, markerSize, name, fontSize);
 
+          // Draw a stroke to the text only if a provider provides realtime but we don't use it.
+          if (delay === null && operatorProvidesRealtime === 'yes') {
+            ctx.save();
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            ctx.font = `bold ${textSize + 2}px Arial`;
+            ctx.strokeStyle = circleFillColor;
+            ctx.strokeText(name, origin, origin);
+            ctx.restore();
+          }
+
+          // Draw a text
+          ctx.save();
           ctx.textBaseline = 'middle';
           ctx.textAlign = 'center';
           ctx.fillStyle = !this.useDelayStyle
             ? textColor || getTextColor(type)
             : '#000000';
           ctx.font = `bold ${textSize}px Arial`;
+          ctx.strokeStyle = circleFillColor;
+          ctx.strokeText(name, origin, origin);
           ctx.fillText(name, origin, origin);
+          ctx.restore();
         }
+
         this.styleCache[key] = canvas;
       }
 
