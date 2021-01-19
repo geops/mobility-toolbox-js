@@ -30,10 +30,6 @@ class API extends BaseObject {
    * @ignore
    */
   static handleError(reqType, err) {
-    if (err.name === 'AbortError') {
-      // Ignore AbortError.
-      return;
-    }
     // eslint-disable-next-line no-console
     console.warn(`Fetch ${reqType} request failed: `, err);
     // Propagate the error.

@@ -86,8 +86,7 @@ class RoutingControl extends Control {
           type: 'change:route',
           target: this,
         });
-        this.viaPoints = [];
-        this.routingLayer.olLayer.getSource().clear();
+        this.reset();
         // eslint-disable-next-line no-console
         console.error(error);
       });
@@ -137,6 +136,8 @@ class RoutingControl extends Control {
     });
   }
 
+  // setViaPoints
+
   /**
    * Removes all viaPoints, clears the source and triggers a change event
    */
@@ -158,9 +159,6 @@ class RoutingControl extends Control {
    * @private
    */
   drawRoute() {
-    this.abortController.abort();
-    this.abortController = new AbortController();
-    const { signal } = this.abortController;
     /* Calls RoutingAPI to draw a route using the viaPoints array */
     if (this.viaPoints.length === 1) {
       // Clear source
@@ -173,6 +171,13 @@ class RoutingControl extends Control {
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
     if (this.viaPoints.length >= 2) {
+      // console.log('before', this.abortController.signal);
+      this.abortController.abort();
+      // console.log('after: ', this.abortController.signal);
+      this.abortController = new AbortController();
+      // const { signal } = this.abortController;
+      // console.log('after after: ', this.abortController.signal);
+
       const formattedViaPoints = this.viaPoints.map((viaPoint) => {
         if (Array.isArray(viaPoint)) {
           // viaPoint is a coordinate
@@ -196,9 +201,12 @@ class RoutingControl extends Control {
             'coord-radius': 100.0,
             'coord-punish': 1000.0,
           },
-          signal,
+          this.abortController,
         )
         .then((data) => {
+          // if (!data) {
+          //   return;
+          // }
           // Clear source
           this.routingLayer.olLayer.getSource().clear();
 
@@ -247,6 +255,10 @@ class RoutingControl extends Control {
           this.loading = false;
         })
         .catch((error) => {
+          if (error.name === 'AbortError') {
+            // Ignore abort error
+            return;
+          }
           // Dispatch error event and execute error function
           this.dispatchEvent({
             type: 'error',
