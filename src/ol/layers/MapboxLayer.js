@@ -6,6 +6,7 @@ import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
 import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
+import getMapboxStyleUrl from '../../common/utils/getMapboxStyleUrl';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -14,7 +15,8 @@ import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
  * import { MapboxLayer } from 'mobility-toolbox-js/ol';
  *
  * const layer = new MapboxLayer({
- *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
+ *   url: 'https://maps.geops.io/styles/travic/style.json',
+ *   apikey: 'yourApiKey',
  * });
  *
  * @extends {Layer}
@@ -132,6 +134,22 @@ export default class MapboxLayer extends Layer {
     this.styleUrl = options.url;
 
     /**
+     * Api key for the url of the mapbox style.
+     * If set to false, the apiKey is not required.
+     * @type {string}
+     * @private
+     */
+    this.apiKey = options.apiKey;
+
+    /**
+     * Name of the apiKey to set in the url request.
+     * Default is 'key'.
+     * @type {string}
+     * @private
+     */
+    this.apiKeyName = options.apiKeyName || 'key';
+
+    /**
      * @ignores
      */
     this.updateAttribution = this.updateAttribution.bind(this);
@@ -174,6 +192,13 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
+   * Returns a style URL with apiKey & apiKeyName infos.
+   */
+  createStyleUrl() {
+    return getMapboxStyleUrl(this.apiKey, this.apiKeyName, this.styleUrl);
+  }
+
+  /**
    * Create the mapbox map.
    * @private
    */
@@ -206,13 +231,14 @@ export default class MapboxLayer extends Layer {
       y = 0;
     }
 
+    const style = this.createStyleUrl();
     try {
       /**
        * A mapbox map
        * @type {mapboxgl.Map}
        */
       this.mbMap = new mapboxgl.Map({
-        style: this.styleUrl,
+        style,
         attributionControl: false,
         boxZoom: false,
         center: toLonLat([x, y]),

@@ -1,5 +1,9 @@
 /* eslint-disable class-methods-use-this */
 class Map {
+  constructor(options) {
+    this.options = options;
+  }
+
   addLayer() {}
 
   addSource() {}

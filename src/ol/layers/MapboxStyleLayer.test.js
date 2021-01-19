@@ -18,6 +18,7 @@ describe('MapboxStyleLayer', () => {
     onClick = jest.fn();
     source = new MapboxLayer({
       name: 'Layer',
+      apiKey: false,
     });
     layer = new MapboxStyleLayer({
       name: 'mapbox layer',
