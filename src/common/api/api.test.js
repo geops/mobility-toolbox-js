@@ -2,7 +2,6 @@ import fetch from 'jest-fetch-mock';
 import API from './api';
 
 let api;
-let consoleOutput;
 
 describe('API', () => {
   beforeEach(() => {
@@ -34,34 +33,12 @@ describe('API', () => {
         });
     });
 
-    // test('ignores Abort Error and returns undefined', (done) => {
-    //   const error = new Error('Error');
-    //   error.name = 'AbortError';
-    //   fetch.mockRejectOnce(error);
-    //   return api.fetch().then((data) => {
-    //     expect(data).toBe();
-    //     done();
-    //   });
-    // });
-
     describe('should display error message', () => {
-      beforeEach(() => {
-        // Mock console statement
-        consoleOutput = [];
-        // eslint-disable-next-line no-console
-        console.warn = (message, err) =>
-          consoleOutput.push([message, err.toString()]);
-      });
-
       test('reject error', (done) => {
         fetch.mockRejectOnce(new Error('Fake error message'));
-        return api.fetch().catch(() => {
-          expect(consoleOutput).toEqual([
-            [
-              'Fetch https://foo.ch request failed: ',
-              'Error: Fake error message',
-            ],
-          ]);
+        return api.fetch().catch((err) => {
+          expect(err.name).toEqual('Error');
+          expect(err.message).toEqual('Fake error message');
           done();
         });
       });
@@ -69,13 +46,11 @@ describe('API', () => {
       test('if the response is invalid json', (done) => {
         fetch.mockResponseOnce('invalid json');
 
-        api.fetch().catch(() => {
-          expect(consoleOutput).toEqual([
-            [
-              'Fetch https://foo.ch request failed: ',
-              'FetchError: invalid json response body at  reason: Unexpected token i in JSON at position 0',
-            ],
-          ]);
+        api.fetch().catch((err) => {
+          expect(err.name).toEqual('FetchError');
+          expect(err.message).toEqual(
+            'invalid json response body at  reason: Unexpected token i in JSON at position 0',
+          );
           done();
         });
       });
@@ -83,10 +58,8 @@ describe('API', () => {
       test('if the response contains an error message', (done) => {
         fetch.mockResponseOnce('{"error":"foo2"}');
         api.fetch().catch((err) => {
-          expect(err.toString()).toBe('Error: foo2');
-          expect(consoleOutput).toEqual([
-            ['Fetch https://foo.ch request failed: ', 'Error: foo2'],
-          ]);
+          expect(err.name).toEqual('Error');
+          expect(err.message).toEqual('foo2');
           done();
         });
       });

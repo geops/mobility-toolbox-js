@@ -26,17 +26,6 @@ class API extends BaseObject {
   }
 
   /**
-   * Display log message on error but not on AbortError.
-   * @ignore
-   */
-  static handleError(reqType, err) {
-    // eslint-disable-next-line no-console
-    console.warn(`Fetch ${reqType} request failed: `, err);
-    // Propagate the error.
-    throw err;
-  }
-
-  /**
    * Append the apiKey before sending the request.
    * @ignore
    */
@@ -54,8 +43,8 @@ class API extends BaseObject {
         new Error(`No apiKey defined for request to ${this.url}`),
       );
     }
-    return fetch(`${this.url}${path}?${qs.stringify(clone)}`, config)
-      .then((response) => {
+    return fetch(`${this.url}${path}?${qs.stringify(clone)}`, config).then(
+      (response) => {
         try {
           return response.json().then((data) => {
             if (data.error) {
@@ -66,10 +55,8 @@ class API extends BaseObject {
         } catch (err) {
           return Promise.reject(new Error(err));
         }
-      })
-      .catch((err) => {
-        API.handleError(`${this.url}${path}`, err);
-      });
+      },
+    );
   }
 }
 

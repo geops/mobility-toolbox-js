@@ -5,11 +5,16 @@ import MapboxLayer from './MapboxLayer';
 
 let layer;
 let map;
+let consoleOutput;
 const styleUrl = 'foo.com/styles';
 
 describe('MapboxLayer', () => {
   describe('without apiKey', () => {
     beforeEach(() => {
+      // Mock console statement
+      consoleOutput = [];
+      // eslint-disable-next-line no-console
+      console.warn = (message) => consoleOutput.push(message);
       layer = new MapboxLayer({
         name: 'Layer',
         url: styleUrl,
@@ -30,9 +35,12 @@ describe('MapboxLayer', () => {
       expect(layer.mbMap).toBe();
     });
 
-    test('should initalized mapbox map.', () => {
+    test('should initalized mapbox map and warn the user if there is no api key defined.', () => {
       layer.init(map);
       expect(layer.mbMap).toBeInstanceOf(mapboxgl.Map);
+      expect(consoleOutput[0]).toBe(
+        'No apiKey is defined for request to foo.com/styles',
+      );
     });
 
     test('should called terminate on initalization.', () => {
