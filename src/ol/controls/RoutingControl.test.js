@@ -60,4 +60,23 @@ describe('RoutingControl', () => {
       .catch(() => {});
     done();
   });
+
+  test('ignores Abort Error and returns undefined', (done) => {
+    const control = new RoutingControl({
+      url: 'https://foo.ch',
+      apiKey: 'foo',
+    });
+    control.map = map;
+    control.viaPoints = [
+      [950476.4055933182, 6003322.253698345],
+      [950389.0813034325, 6003656.659274571],
+    ];
+    const error = new Error('Error');
+    error.name = 'AbortError';
+    fetch.mockRejectOnce(error);
+    return control.drawRoute().then((data) => {
+      expect(data).toBe();
+      done();
+    });
+  });
 });

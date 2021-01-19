@@ -171,12 +171,8 @@ class RoutingControl extends Control {
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
     if (this.viaPoints.length >= 2) {
-      // console.log('before', this.abortController.signal);
       this.abortController.abort();
-      // console.log('after: ', this.abortController.signal);
       this.abortController = new AbortController();
-      // const { signal } = this.abortController;
-      // console.log('after after: ', this.abortController.signal);
 
       const formattedViaPoints = this.viaPoints.map((viaPoint) => {
         if (Array.isArray(viaPoint)) {
@@ -204,9 +200,6 @@ class RoutingControl extends Control {
           this.abortController,
         )
         .then((data) => {
-          // if (!data) {
-          //   return;
-          // }
           // Clear source
           this.routingLayer.olLayer.getSource().clear();
 
