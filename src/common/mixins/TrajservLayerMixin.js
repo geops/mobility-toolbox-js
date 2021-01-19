@@ -477,7 +477,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
         // Draw diagonale in the circle if a provider provides realtime but we don't use it.
         if (delay === null && operatorProvidesRealtime === 'yes') {
-          // delay=null (no realtime) but provider has data.
+          // delay=null (no realtime) but provider has realtime data.
           // Draw black cross in the middle of the gravy circle
           let diff = radius >= 10 ? 4 : 2;
           if (hover) {
@@ -487,22 +487,9 @@ const TrajservLayerMixin = (TrackerLayer) =>
           ctx.save();
           ctx.lineWidth = 1;
           ctx.strokeStyle = '#000000';
-          // translate to midpoint
-          // ctx.translate(origin, origin);
-
           ctx.beginPath();
-          // rotate some angle (radians)
-          // ctx.rotate((90 * Math.PI) / 180);
-
           ctx.moveTo(origin - radius + diff, origin - radius + diff);
           ctx.lineTo(origin + radius - diff, origin + radius - diff);
-          // const rad = radius % 2 === 0 ? radius : radius + 1;
-          // ctx.moveTo(-radius - 4, 0);
-          // ctx.lineTo(radius + 4, 0);
-          // ctx.stroke();
-          // ctx.beginPath();
-          // ctx.moveTo(0, -radius - 4);
-          // ctx.lineTo(0, radius + 4);
           ctx.stroke();
           ctx.beginPath();
           ctx.moveTo(origin - radius + diff, origin + radius - diff);
