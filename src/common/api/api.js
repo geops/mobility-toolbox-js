@@ -1,4 +1,5 @@
 import qs from 'query-string';
+import BaseObject from 'ol/Object';
 
 /**
  * Common class to access to a geOps api.
@@ -14,8 +15,9 @@ import qs from 'query-string';
  * @classproperty {string} url Url of the service.
  * @classproperty {string} apiKey Api key to access the service.
  */
-class API {
+class API extends BaseObject {
   constructor(options = {}) {
+    super();
     /** @ignore */
     this.url = options.url;
 
@@ -28,10 +30,6 @@ class API {
    * @ignore
    */
   static handleError(reqType, err) {
-    if (err.name === 'AbortError') {
-      // Ignore AbortError.
-      return;
-    }
     // eslint-disable-next-line no-console
     console.warn(`Fetch ${reqType} request failed: `, err);
     // Propagate the error.

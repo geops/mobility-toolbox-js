@@ -388,6 +388,13 @@ const TrajservLayerMixin = (TrackerLayer) =>
           }),
           this.abortController,
         )
+        .catch((err) => {
+          if (err.name === 'AbortError') {
+            // Ignore abort error
+            return;
+          }
+          throw err;
+        })
         .then((trajectories) => {
           // Don't set trajectories when the user has aborted the request.
           if (trajectories) {

@@ -80,4 +80,14 @@ export default [
     description: 'Use the StopsAPI for finding public transport stops.',
     img: stopsImg,
   },
+  {
+    name: 'RoutingControl',
+    key: 'routing-control',
+    description: 'This example shows how to use the RoutingControl component.',
+    img: olCopyrightImg,
+    files: {
+      html: 'ol-routing.html',
+      js: 'ol-routing.js',
+    },
+  },
 ];

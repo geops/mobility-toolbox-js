@@ -69,7 +69,7 @@ class CopyrightControl extends mixin(Control) {
   onPostRender(evt) {
     if (this.map && this.element) {
       /**
-       * @ugnore
+       * @ignore
        */
       this.frameState = evt.frameState;
       this.render();

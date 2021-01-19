@@ -27,7 +27,7 @@ class Control extends BaseObject {
     this.defineProperties(options);
 
     const { active } = {
-      active: true,
+      active: options.active !== false,
       ...options,
     };
 

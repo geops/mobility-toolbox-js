@@ -34,15 +34,15 @@ describe('API', () => {
         });
     });
 
-    test('ignores Abort Error and returns undefined', (done) => {
-      const error = new Error('Error');
-      error.name = 'AbortError';
-      fetch.mockRejectOnce(error);
-      return api.fetch().then((data) => {
-        expect(data).toBe();
-        done();
-      });
-    });
+    // test('ignores Abort Error and returns undefined', (done) => {
+    //   const error = new Error('Error');
+    //   error.name = 'AbortError';
+    //   fetch.mockRejectOnce(error);
+    //   return api.fetch().then((data) => {
+    //     expect(data).toBe();
+    //     done();
+    //   });
+    // });
 
     describe('should display error message', () => {
       beforeEach(() => {
