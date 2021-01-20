@@ -483,7 +483,11 @@ const TrajservLayerMixin = (TrackerLayer) =>
         ctx.restore();
 
         // Draw diagonale in the circle if a provider provides realtime but we don't use it.
-        if (delay === null && operatorProvidesRealtime === 'yes') {
+        if (
+          this.useDelayStyle &&
+          delay === null &&
+          operatorProvidesRealtime === 'yes'
+        ) {
           // delay=null (no realtime) but provider has realtime data.
           // Draw black cross in the middle of the gravy circle
           let diff = radius >= 10 ? 4 : 2;
@@ -511,7 +515,11 @@ const TrajservLayerMixin = (TrackerLayer) =>
           const textSize = getTextSize(ctx, markerSize, name, fontSize);
 
           // Draw a stroke to the text only if a provider provides realtime but we don't use it.
-          if (delay === null && operatorProvidesRealtime === 'yes') {
+          if (
+            this.useDelayStyle &&
+            delay === null &&
+            operatorProvidesRealtime === 'yes'
+          ) {
             ctx.save();
             ctx.textBaseline = 'middle';
             ctx.textAlign = 'center';
