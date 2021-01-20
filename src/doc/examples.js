@@ -6,6 +6,7 @@ import mapboxStyleImg from './img/examples/mapbox_style.jpg';
 import queryObjectsImg from './img/examples/query_objects.jpg';
 import olCopyrightImg from './img/examples/ol-copyright.png';
 import stopsImg from './img/examples/stops.jpg';
+import routingImg from './img/examples/routing.jpg';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -84,7 +85,7 @@ export default [
     name: 'RoutingControl',
     key: 'routing-control',
     description: 'This example shows how to use the RoutingControl component.',
-    img: olCopyrightImg,
+    img: routingImg,
     files: {
       html: 'ol-routing.html',
       js: 'ol-routing.js',

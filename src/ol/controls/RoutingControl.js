@@ -61,6 +61,8 @@ class RoutingControl extends Control {
       },
     });
 
+    this.stopsKey = options.stopsKey;
+
     this.mot = options.mot || 'bus';
 
     this.abortController = new AbortController();
@@ -225,7 +227,9 @@ class RoutingControl extends Control {
                 .addFeature(pointFeature);
             }
             return fetch(
-              `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${this.apiKey}`,
+              `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${
+                this.stopsKey || this.apiKey
+              }`,
             )
               .then((res) => res.json())
               .then((stationData) => {
