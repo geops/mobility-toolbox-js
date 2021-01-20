@@ -65,8 +65,9 @@ class RoutingControl extends Control {
 
     this.abortController = new AbortController();
 
+    // By default one apiKey is used. Optionally the api key for the tops lookup can be configured
     this.apiKey = options.apiKey;
-    this.stopsKey = options.stopsKey;
+    this.stopsKey = options.stopsKey || this.apiKey;
 
     this.api = new RoutingAPI({
       url: options.url,
@@ -255,9 +256,7 @@ class RoutingControl extends Control {
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
     return fetch(
-      `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${
-        this.stopsKey || this.apiKey
-      }`,
+      `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${this.stopsKey}`,
     )
       .then((res) => res.json())
       .then((stationData) => {
