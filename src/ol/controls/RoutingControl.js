@@ -27,7 +27,12 @@ import RoutingLayer from '../layers/RoutingLayer';
  *   ]
  * });
  *
- *
+ * @classproperty {string} apiKey - Key used for RoutingApi requests.
+ * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
+ * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).
+ * @classproperty {string} mot - Mean of transport to be used for routing.
+ * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.
+ * @classproperty {function} onRouteError - Callback on error.
  * @see <a href="/example/ol-routing">Openlayers routing example</a>
  *
  * @extends {Control}
@@ -61,13 +66,20 @@ class RoutingControl extends Control {
       },
     });
 
+    /** @ignore */
     this.mot = options.mot || 'bus';
 
     this.abortController = new AbortController();
 
-    // By default one apiKey is used. Optionally the api key for the tops lookup can be configured
+    /** @ignore */
     this.apiKey = options.apiKey;
-    this.stopsKey = options.stopsKey || this.apiKey;
+
+    /** @ignore */
+    this.stopsApiKey = options.stopsApiKey || this.apiKey;
+
+    /** @ignore */
+    this.stopsApiUrl =
+      options.stopsApiUrl || 'https://api.geops.io/stops/v1/lookup/';
 
     this.api = new RoutingAPI({
       url: options.url,
@@ -75,12 +87,14 @@ class RoutingControl extends Control {
       mot: options.mot,
     });
 
+    /** @ignore */
     this.routingLayer =
       options.routingLayer ||
       new RoutingLayer({
         name: 'routing-layer',
       });
 
+    /** @ignore */
     this.onRouteError =
       options.onRouteError ||
       ((error) => {
@@ -140,7 +154,7 @@ class RoutingControl extends Control {
 
   /**
    * Replaces the current viaPoints with a new coordinate array.
-   * @param {Array<Array<number>>} coordinates Array of nested coordinates
+   * @param {Array<Array<number>>} coordinateArray Array of nested coordinates
    */
   setViaPoints(coordinateArray) {
     this.viaPoints = [...coordinateArray];
@@ -255,9 +269,7 @@ class RoutingControl extends Control {
       pointFeature.setGeometry(new Point(viaPoint));
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
-    return fetch(
-      `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${this.stopsKey}`,
-    )
+    return fetch(`${this.stopsApiUrl}${viaPoint}?key=${this.stopsApiKey}`)
       .then((res) => res.json())
       .then((stationData) => {
         const { coordinates } = stationData.features[0].geometry;
