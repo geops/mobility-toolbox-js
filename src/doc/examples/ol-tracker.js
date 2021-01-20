@@ -21,7 +21,6 @@ export default () => {
   const tracker = new TrajservLayer({
     url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
-    useDelayStyle: true,
   });
 
   tracker.onClick((vehicle) => {
