@@ -82,9 +82,10 @@ export default [
     img: stopsImg,
   },
   {
-    name: 'RoutingControl',
+    name: 'Routing',
     key: 'routing-control',
-    description: 'This example shows how to use the RoutingControl component.',
+    description:
+      'Use the RoutingControl component to visualize routes on a map.',
     img: routingImg,
     files: {
       html: 'ol-routing.html',
