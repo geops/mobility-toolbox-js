@@ -113,7 +113,7 @@ class RoutingControl extends Control {
   addViaPoint(coordinates, index = this.viaPoints.length, overwrite = 0) {
     /* Add/Insert/Overwrite viapoint and redraw route */
     this.viaPoints.splice(index, overwrite, coordinates);
-    this.drawRoute(this.viaPoints);
+    this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
@@ -130,7 +130,7 @@ class RoutingControl extends Control {
     if (this.viaPoints.length && this.viaPoints[index]) {
       this.viaPoints.splice(index, 1);
     }
-    this.drawRoute(this.viaPoints);
+    this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
@@ -143,7 +143,7 @@ class RoutingControl extends Control {
    */
   setViaPoints(coordinateArray) {
     this.viaPoints = [...coordinateArray];
-    this.drawRoute(this.viaPoints);
+    this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
@@ -176,11 +176,7 @@ class RoutingControl extends Control {
       // Clear source
       this.routingLayer.olLayer.getSource().clear();
       // Add point for first node
-      const pointFeature = new Feature({
-        geometry: new Point(this.viaPoints[0]),
-      });
-      pointFeature.set('viaPointIdx', 0);
-      return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      return this.drawViaPoint(this.viaPoints[0], 0);
     }
     if (this.viaPoints.length >= 2) {
       this.abortController.abort();
@@ -217,34 +213,7 @@ class RoutingControl extends Control {
 
           // Create point features for the viaPoints
           this.viaPoints.forEach((viaPoint, idx) => {
-            const pointFeature = new Feature();
-            pointFeature.set('viaPointIdx', idx);
-            if (Array.isArray(viaPoint)) {
-              pointFeature.setGeometry(new Point(viaPoint));
-              return this.routingLayer.olLayer
-                .getSource()
-                .addFeature(pointFeature);
-            }
-            return fetch(
-              `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${
-                this.stopsKey || this.apiKey
-              }`,
-            )
-              .then((res) => res.json())
-              .then((stationData) => {
-                const { coordinates } = stationData.features[0].geometry;
-                pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
-                this.routingLayer.olLayer.getSource().addFeature(pointFeature);
-              })
-              .catch((error) => {
-                // Dispatch error event and execute error function
-                this.dispatchEvent({
-                  type: 'error',
-                  target: this,
-                });
-                this.onRouteError(error, this);
-                this.loading = false;
-              });
+            return this.drawViaPoint(viaPoint, idx);
           });
 
           // Create new route once there are at least two viaPoints
@@ -276,6 +245,35 @@ class RoutingControl extends Control {
         });
     }
     return null;
+  }
+
+  drawViaPoint(viaPoint, idx) {
+    const pointFeature = new Feature();
+    pointFeature.set('viaPointIdx', idx);
+    if (Array.isArray(viaPoint)) {
+      pointFeature.setGeometry(new Point(viaPoint));
+      return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+    }
+    return fetch(
+      `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${
+        this.stopsKey || this.apiKey
+      }`,
+    )
+      .then((res) => res.json())
+      .then((stationData) => {
+        const { coordinates } = stationData.features[0].geometry;
+        pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
+        this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      })
+      .catch((error) => {
+        // Dispatch error event and execute error function
+        this.dispatchEvent({
+          type: 'error',
+          target: this,
+        });
+        this.onRouteError(error, this);
+        this.loading = false;
+      });
   }
 
   /**
