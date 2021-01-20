@@ -61,13 +61,12 @@ class RoutingControl extends Control {
       },
     });
 
-    this.stopsKey = options.stopsKey;
-
     this.mot = options.mot || 'bus';
 
     this.abortController = new AbortController();
 
     this.apiKey = options.apiKey;
+    this.stopsKey = options.stopsKey;
 
     this.api = new RoutingAPI({
       url: options.url,
