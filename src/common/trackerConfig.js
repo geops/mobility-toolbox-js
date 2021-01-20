@@ -155,10 +155,13 @@ export const getTextSize = (ctx, markerSize, text, fontSize) => {
 
 /**
  * @ignore
+ * @param {number} delayInMs Delay in milliseconds.
+ * @param {boolean} cancelled true if the journey is cancelled.
+ * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
  */
-export const getDelayColor = (delayInMs, cancelled) => {
+export const getDelayColor = (delayInMs, cancelled, isDelayText) => {
   if (cancelled) {
-    return '#ff0000';
+    return isDelayText ? '#ff0000' : '#00a00c';
   }
   if (delayInMs >= 3600000) {
     return '#ed004c'; // pink { r: 237, g: 0, b: 76, s: '237,0,76' };
