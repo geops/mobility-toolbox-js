@@ -27,7 +27,12 @@ import RoutingLayer from '../layers/RoutingLayer';
  *   ]
  * });
  *
- *
+ * @classproperty {string} apiKey - Key used for RoutingApi requests.
+ * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
+ * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).
+ * @classproperty {string} mot - Mean of transport to be used for routing.
+ * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.
+ * @classproperty {function} onRouteError - Callback on error.
  * @see <a href="/example/ol-routing">Openlayers routing example</a>
  *
  * @extends {Control}
@@ -61,11 +66,20 @@ class RoutingControl extends Control {
       },
     });
 
+    /** @ignore */
     this.mot = options.mot || 'bus';
 
     this.abortController = new AbortController();
 
+    /** @ignore */
     this.apiKey = options.apiKey;
+
+    /** @ignore */
+    this.stopsApiKey = options.stopsApiKey || this.apiKey;
+
+    /** @ignore */
+    this.stopsApiUrl =
+      options.stopsApiUrl || 'https://api.geops.io/stops/v1/lookup/';
 
     this.api = new RoutingAPI({
       url: options.url,
@@ -73,12 +87,14 @@ class RoutingControl extends Control {
       mot: options.mot,
     });
 
+    /** @ignore */
     this.routingLayer =
       options.routingLayer ||
       new RoutingLayer({
         name: 'routing-layer',
       });
 
+    /** @ignore */
     this.onRouteError =
       options.onRouteError ||
       ((error) => {
@@ -112,7 +128,7 @@ class RoutingControl extends Control {
   addViaPoint(coordinates, index = this.viaPoints.length, overwrite = 0) {
     /* Add/Insert/Overwrite viapoint and redraw route */
     this.viaPoints.splice(index, overwrite, coordinates);
-    this.drawRoute(this.viaPoints);
+    this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
@@ -129,7 +145,7 @@ class RoutingControl extends Control {
     if (this.viaPoints.length && this.viaPoints[index]) {
       this.viaPoints.splice(index, 1);
     }
-    this.drawRoute(this.viaPoints);
+    this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
@@ -138,11 +154,11 @@ class RoutingControl extends Control {
 
   /**
    * Replaces the current viaPoints with a new coordinate array.
-   * @param {Array<Array<number>>} coordinates Array of nested coordinates
+   * @param {Array<Array<number>>} coordinateArray Array of nested coordinates
    */
   setViaPoints(coordinateArray) {
     this.viaPoints = [...coordinateArray];
-    this.drawRoute(this.viaPoints);
+    this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
@@ -175,11 +191,7 @@ class RoutingControl extends Control {
       // Clear source
       this.routingLayer.olLayer.getSource().clear();
       // Add point for first node
-      const pointFeature = new Feature({
-        geometry: new Point(this.viaPoints[0]),
-      });
-      pointFeature.set('viaPointIdx', 0);
-      return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      return this.drawViaPoint(this.viaPoints[0], 0);
     }
     if (this.viaPoints.length >= 2) {
       this.abortController.abort();
@@ -216,32 +228,7 @@ class RoutingControl extends Control {
 
           // Create point features for the viaPoints
           this.viaPoints.forEach((viaPoint, idx) => {
-            const pointFeature = new Feature();
-            pointFeature.set('viaPointIdx', idx);
-            if (Array.isArray(viaPoint)) {
-              pointFeature.setGeometry(new Point(viaPoint));
-              return this.routingLayer.olLayer
-                .getSource()
-                .addFeature(pointFeature);
-            }
-            return fetch(
-              `https://api.geops.io/stops/v1/lookup/${viaPoint}?key=${this.apiKey}`,
-            )
-              .then((res) => res.json())
-              .then((stationData) => {
-                const { coordinates } = stationData.features[0].geometry;
-                pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
-                this.routingLayer.olLayer.getSource().addFeature(pointFeature);
-              })
-              .catch((error) => {
-                // Dispatch error event and execute error function
-                this.dispatchEvent({
-                  type: 'error',
-                  target: this,
-                });
-                this.onRouteError(error, this);
-                this.loading = false;
-              });
+            return this.drawViaPoint(viaPoint, idx);
           });
 
           // Create new route once there are at least two viaPoints
@@ -273,6 +260,31 @@ class RoutingControl extends Control {
         });
     }
     return null;
+  }
+
+  drawViaPoint(viaPoint, idx) {
+    const pointFeature = new Feature();
+    pointFeature.set('viaPointIdx', idx);
+    if (Array.isArray(viaPoint)) {
+      pointFeature.setGeometry(new Point(viaPoint));
+      return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+    }
+    return fetch(`${this.stopsApiUrl}${viaPoint}?key=${this.stopsApiKey}`)
+      .then((res) => res.json())
+      .then((stationData) => {
+        const { coordinates } = stationData.features[0].geometry;
+        pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
+        this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      })
+      .catch((error) => {
+        // Dispatch error event and execute error function
+        this.dispatchEvent({
+          type: 'error',
+          target: this,
+        });
+        this.onRouteError(error, this);
+        this.loading = false;
+      });
   }
 
   /**
