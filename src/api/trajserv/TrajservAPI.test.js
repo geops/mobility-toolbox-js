@@ -45,7 +45,7 @@ describe('TrajservAPI', () => {
         });
     });
 
-    test('should display error message', () => {
+    test('should trigger error message', () => {
       // Mock console statement
       const consoleOutput = [];
       // eslint-disable-next-line no-console
@@ -70,13 +70,11 @@ describe('TrajservAPI', () => {
           s: '0',
           z: '18.66059982835272',
         })
-        .catch(() => {
-          expect(consoleOutput).toEqual([
-            [
-              'Fetch https://api.geops.io/tracker/v1/trajectorybyid request failed: ',
-              'FetchError: invalid json response body at  reason: Unexpected token i in JSON at position 0',
-            ],
-          ]);
+        .catch((err) => {
+          expect(err.name).toEqual('FetchError');
+          expect(err.message).toEqual(
+            'invalid json response body at  reason: Unexpected token i in JSON at position 0',
+          );
         });
     });
   });
@@ -113,12 +111,6 @@ describe('TrajservAPI', () => {
     });
 
     test('should display error message if the transformation fails', () => {
-      // Mock console statement
-      const consoleOutput = [];
-      // eslint-disable-next-line no-console
-      console.warn = (message, err) =>
-        consoleOutput.push([message, err.toString()]);
-
       fetch.mockResponseOnce(JSON.stringify({ foo: 'bar' }));
 
       return api
@@ -137,13 +129,11 @@ describe('TrajservAPI', () => {
           s: '0',
           z: '18.66059982835272',
         })
-        .catch(() => {
-          expect(consoleOutput).toEqual([
-            [
-              'Fetch trajectory_collection request failed: ',
-              "TypeError: Cannot read property 'length' of undefined",
-            ],
-          ]);
+        .catch((err) => {
+          expect(err.name).toEqual('TypeError');
+          expect(err.message).toEqual(
+            "Cannot read property 'length' of undefined",
+          );
         });
     });
   });
