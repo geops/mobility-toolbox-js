@@ -269,7 +269,9 @@ class RoutingControl extends Control {
       pointFeature.setGeometry(new Point(viaPoint));
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
-    return fetch(`${this.stopsApiUrl}${viaPoint}?key=${this.stopsApiKey}`)
+    return fetch(
+      `${this.stopsApiUrl}${viaPoint.split('$')[0]}?key=${this.stopsApiKey}`,
+    )
       .then((res) => res.json())
       .then((stationData) => {
         const { coordinates } = stationData.features[0].geometry;
