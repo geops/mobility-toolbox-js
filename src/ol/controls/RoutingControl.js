@@ -5,6 +5,8 @@ import { unByKey } from 'ol/Observable';
 import { click } from 'ol/events/condition';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import turfLineSlice from '@turf/line-slice';
+import turfBooleanPointOnLine from '@turf/boolean-point-on-line';
+import turfNearestPoint from '@turf/nearest-point-on-line';
 import { getDistance } from 'ol/sphere';
 import {
   lineString as turfLineString,
@@ -385,6 +387,10 @@ class RoutingControl extends Control {
       return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
     }
 
+    const turfOldRoute = turfLineString(
+      oldRoute.getGeometry().getCoordinates(),
+    );
+
     const closestPoints = await Promise.all(
       this.viaPoints.map((viaPoint) => {
         if (typeof viaPoint === 'string') {
@@ -393,10 +399,28 @@ class RoutingControl extends Control {
             .then((stationData) => {
               const { geometry } = stationData.features[0];
               const projected = fromLonLat(geometry.coordinates);
-              return oldRoute.getGeometry().getClosestPoint(projected);
+              const closestPoint = turfNearestPoint(
+                turfOldRoute,
+                turfPoint(projected),
+              );
+              console.log(
+                'fetch: ',
+                closestPoint,
+                turfBooleanPointOnLine(closestPoint, turfOldRoute),
+              );
+              return closestPoint;
             });
         }
-        return oldRoute.getGeometry().getClosestPoint(viaPoint);
+        const closestPoint = turfNearestPoint(
+          turfOldRoute,
+          turfPoint(viaPoint),
+        );
+        console.log(
+          'no fetch: ',
+          closestPoint,
+          turfBooleanPointOnLine(closestPoint, turfOldRoute),
+        );
+        return closestPoint;
       }),
     );
 
@@ -426,9 +450,9 @@ class RoutingControl extends Control {
     for (let i = 0; i < closestPoints.length - 1; i += 1) {
       // Create a segment for each pair of (closest) viaPoints using turf lineSlice
       const turfLineSegment = turfLineSlice(
-        turfPoint(closestPoints[i]),
-        turfPoint(closestPoints[i + 1]),
-        turfLineString(oldRoute.getGeometry().getCoordinates()),
+        closestPoints[i],
+        closestPoints[i + 1],
+        turfOldRoute,
       );
 
       /* Create an ol LineString from segment and get the distance between
@@ -451,7 +475,27 @@ class RoutingControl extends Control {
       );
 
       this.routingLayer.olLayer.getSource().addFeature(segmentFeat);
-      console.log(this.initialRouteDrag);
+
+      const closestToSegment = segment.getClosestPoint(
+        this.initialRouteDrag.coordinate,
+      );
+
+      const feature = new Feature({
+        geometry: new Point(closestToSegment),
+      });
+      feature.setStyle(
+        new Style({
+          image: new Circle({
+            radius: 10,
+            stroke: new Stroke({
+              color: 'blue',
+              width: 4,
+            }),
+          }),
+        }),
+      );
+      this.routingLayer.olLayer.getSource().addFeature(feature);
+
       // #################################
       const distanceToClick = getDistance(
         segment.getClosestPoint(this.initialRouteDrag.coordinate),
@@ -460,8 +504,6 @@ class RoutingControl extends Control {
 
       // Return segment index with smallest distance to click point
       if (!distanceToSegment || distanceToClick < distanceToSegment) {
-        console.log('dis2Seg: ', distanceToSegment);
-        console.log('dis2Click: ', distanceToClick);
         distanceToSegment = distanceToClick;
         newViaIndex = i + 1;
       }
