@@ -10,6 +10,7 @@ import {
   lineString as turfLineString,
   point as turfPoint,
 } from '@turf/helpers';
+import { Style, Circle, Fill, Stroke } from 'ol/style';
 import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
@@ -186,6 +187,7 @@ class RoutingControl extends Control {
    * @private
    */
   drawRoute() {
+    console.log(this.viaPoints);
     /* Calls RoutingAPI to draw a route using the viaPoints array */
     if (this.viaPoints.length === 1) {
       // Clear source
@@ -262,6 +264,13 @@ class RoutingControl extends Control {
     return null;
   }
 
+  async fetchStationData(viaPoint) {
+    const lookupResponse = await fetch(
+      `${this.stopsApiUrl}${viaPoint.split('$')[0]}?key=${this.stopsApiKey}`,
+    );
+    return lookupResponse;
+  }
+
   drawViaPoint(viaPoint, idx) {
     const pointFeature = new Feature();
     pointFeature.set('viaPointIdx', idx);
@@ -269,9 +278,7 @@ class RoutingControl extends Control {
       pointFeature.setGeometry(new Point(viaPoint));
       return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
     }
-    return fetch(
-      `${this.stopsApiUrl}${viaPoint.split('$')[0]}?key=${this.stopsApiKey}`,
-    )
+    return this.fetchStationData(viaPoint)
       .then((res) => res.json())
       .then((stationData) => {
         const { coordinates } = stationData.features[0].geometry;
@@ -350,7 +357,7 @@ class RoutingControl extends Control {
    *   Point drag replaces old viaPoint.
    * @private
    */
-  onModifyEnd(e) {
+  async onModifyEnd(e) {
     /* Get the index for new viaPoint */
     let newViaIndex;
     const {
@@ -378,19 +385,49 @@ class RoutingControl extends Control {
       return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
     }
 
-    // Get the closest point from viaPoints to original route
-    const viaPointClosestPoints = this.viaPoints.map((viaPoint) => {
-      const snapPoint = oldRoute.getGeometry().getClosestPoint(viaPoint);
-      return snapPoint;
+    const closestPoints = await Promise.all(
+      this.viaPoints.map((viaPoint) => {
+        if (typeof viaPoint === 'string') {
+          return this.fetchStationData(viaPoint)
+            .then((res) => res.json())
+            .then((stationData) => {
+              const { geometry } = stationData.features[0];
+              const projected = fromLonLat(geometry.coordinates);
+              return oldRoute.getGeometry().getClosestPoint(projected);
+            });
+        }
+        return oldRoute.getGeometry().getClosestPoint(viaPoint);
+      }),
+    );
+
+    console.log(closestPoints);
+
+    // #################################
+    closestPoints.forEach((point) => {
+      const feature = new Feature({
+        geometry: new Point(point),
+      });
+      feature.setStyle(
+        new Style({
+          image: new Circle({
+            radius: 6,
+            fill: new Fill({
+              color: 'blue',
+            }),
+          }),
+        }),
+      );
+      this.routingLayer.olLayer.getSource().addFeature(feature);
     });
 
+    // #################################
     // Calculate the distance from the click point to each segment
     let distanceToSegment;
-    for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
+    for (let i = 0; i < closestPoints.length - 1; i += 1) {
       // Create a segment for each pair of (closest) viaPoints using turf lineSlice
       const turfLineSegment = turfLineSlice(
-        turfPoint(viaPointClosestPoints[i]),
-        turfPoint(viaPointClosestPoints[i + 1]),
+        turfPoint(closestPoints[i]),
+        turfPoint(closestPoints[i + 1]),
         turfLineString(oldRoute.getGeometry().getCoordinates()),
       );
 
@@ -398,6 +435,24 @@ class RoutingControl extends Control {
        * the click point and the closest point on segment
        */
       const segment = new LineString(turfLineSegment.geometry.coordinates);
+
+      // #################################
+      const segmentFeat = new Feature({
+        geometry: segment,
+      });
+
+      segmentFeat.setStyle(
+        new Style({
+          stroke: new Stroke({
+            width: 6,
+            color: `#${Math.random().toString(16).substr(-6)}`,
+          }),
+        }),
+      );
+
+      this.routingLayer.olLayer.getSource().addFeature(segmentFeat);
+      console.log(this.initialRouteDrag);
+      // #################################
       const distanceToClick = getDistance(
         segment.getClosestPoint(this.initialRouteDrag.coordinate),
         this.initialRouteDrag.coordinate,
@@ -405,10 +460,14 @@ class RoutingControl extends Control {
 
       // Return segment index with smallest distance to click point
       if (!distanceToSegment || distanceToClick < distanceToSegment) {
+        console.log('dis2Seg: ', distanceToSegment);
+        console.log('dis2Click: ', distanceToClick);
         distanceToSegment = distanceToClick;
         newViaIndex = i + 1;
       }
     }
+
+    console.log(newViaIndex);
 
     // Insert new viaPoint at given index
     return this.addViaPoint(e.mapBrowserEvent.coordinate, newViaIndex);

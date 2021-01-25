@@ -25,9 +25,14 @@ export default () => {
 
   map.addControl(control);
 
-  control.addViaPoint([950476.4055933182, 6003322.253698345]);
-  control.addViaPoint([950389.0813034325, 6003656.659274571]);
+  // control.addViaPoint([950476.4055933182, 6003322.253698345]);
+  // control.addViaPoint([950389.0813034325, 6003656.659274571]);
+  // control.addViaPoint([950534.8595446487, 6003887.478366449]);
+  // control.addViaPoint('29563461696e881d');
+
   control.addViaPoint('29563461696e881d');
+  control.addViaPoint([950476.4055933182, 6003322.253698345]);
+  control.addViaPoint('d2909bcd3c57a5b4');
 
   // Add example button to toggle the RoutingControl.
   document.getElementById('control-button').addEventListener('click', (e) => {
