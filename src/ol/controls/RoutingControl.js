@@ -3,6 +3,8 @@ import { LineString, Point } from 'ol/geom';
 import { Modify } from 'ol/interaction';
 import { unByKey } from 'ol/Observable';
 import { click } from 'ol/events/condition';
+import OLVectorLayer from 'ol/layer/Vector';
+import OLVectorSource from 'ol/source/Vector';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import turfLineSlice from '@turf/line-slice';
 import { getDistance } from 'ol/sphere';
@@ -10,9 +12,11 @@ import {
   lineString as turfLineString,
   point as turfPoint,
 } from '@turf/helpers';
+import { Fill, Style, Circle, Stroke } from 'ol/style';
 import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
+import VectorLayer from '../layers/VectorLayer';
 
 /**
  * Display a route of a specified mean of transport.
@@ -69,6 +73,10 @@ class RoutingControl extends Control {
     /** @ignore */
     this.mot = options.mot || 'bus';
 
+    /** @ignore */
+    this.cacheStationData = {};
+
+    /** @ignore */
     this.abortController = new AbortController();
 
     /** @ignore */
@@ -92,6 +100,18 @@ class RoutingControl extends Control {
       options.routingLayer ||
       new RoutingLayer({
         name: 'routing-layer',
+      });
+
+    /** @ignore */
+    this.debugLayer =
+      options.debugLayer ||
+      new VectorLayer({
+        name: 'debug-layer',
+        olLayer: new OLVectorLayer({
+          source: new OLVectorSource({
+            features: [],
+          }),
+        }),
       });
 
     /** @ignore */
@@ -275,6 +295,8 @@ class RoutingControl extends Control {
       .then((res) => res.json())
       .then((stationData) => {
         const { coordinates } = stationData.features[0].geometry;
+        console.log('setCachStation', viaPoint, coordinates);
+        this.cacheStationData[viaPoint] = fromLonLat(coordinates);
         pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
         this.routingLayer.olLayer.getSource().addFeature(pointFeature);
       })
@@ -317,7 +339,8 @@ class RoutingControl extends Control {
    * in this.initialRouteDrag object
    * @private
    */
-  onModifyStart(e) {
+  onModifyStart(e, a, b) {
+    console.log('onmodifystart', e, a, b);
     // Create instances for LineString and Point features
     const route = e.features
       .getArray()
@@ -344,13 +367,37 @@ class RoutingControl extends Control {
     };
   }
 
+  displayViaClosestPoints(points, color = [255, 255, 0, 1], radius = 3) {
+    points.forEach((pt) => {
+      const feat = new Feature(new Point(this.cacheStationData[pt] || pt));
+      feat.setStyle(() => {
+        return [
+          new Style({
+            image: new Circle({
+              radius,
+              stroke: new Stroke({
+                color: [0, 0, 0, 1],
+                width: 1,
+              }),
+              fill: new Fill({
+                color,
+              }),
+            }),
+          }),
+        ];
+      });
+      this.debugLayer.olLayer.getSource().addFeature(feat);
+    });
+  }
+
   /**
    * Used on end of the modify interaction. Resolves feature modification:
    *   Line drag creates new viaPoint at the final coordinate of drag.
    *   Point drag replaces old viaPoint.
    * @private
    */
-  onModifyEnd(e) {
+  onModifyEnd(e, a, b) {
+    console.log('onmodifyend', e, a, b);
     /* Get the index for new viaPoint */
     let newViaIndex;
     const {
@@ -366,6 +413,7 @@ class RoutingControl extends Control {
 
     // If viaPoint is being relocated overwrite the old viaPoint
     if (relocateViaPoint) {
+      console.log('isRelocated', relocateViaPoint.get('viaPointIdx'));
       return this.addViaPoint(
         e.mapBrowserEvent.coordinate,
         relocateViaPoint.get('viaPointIdx'),
@@ -375,43 +423,116 @@ class RoutingControl extends Control {
 
     // In case there is no route overwrite first coordinate
     if (!oldRoute) {
+      console.log('isoldRoute');
       return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
     }
+    this.debugLayer.olLayer.getSource().clear();
 
+    this.displayViaClosestPoints(this.viaPoints, [0, 0, 255, 1], 6);
     // Get the closest point from viaPoints to original route
     const viaPointClosestPoints = this.viaPoints.map((viaPoint) => {
-      const snapPoint = oldRoute.getGeometry().getClosestPoint(viaPoint);
-      return snapPoint;
+      console.log(
+        'CLOSEST ',
+        viaPoint,
+        this.cacheStationData[viaPoint],
+        this.cacheStationData,
+      );
+      return oldRoute
+        .getGeometry()
+        .getClosestPoint(this.cacheStationData[viaPoint] || viaPoint);
     });
+    this.displayViaClosestPoints(viaPointClosestPoints);
 
-    // Calculate the distance from the click point to each segment
-    let distanceToSegment;
-    for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
-      // Create a segment for each pair of (closest) viaPoints using turf lineSlice
-      const turfLineSegment = turfLineSlice(
-        turfPoint(viaPointClosestPoints[i]),
-        turfPoint(viaPointClosestPoints[i + 1]),
-        turfLineString(oldRoute.getGeometry().getCoordinates()),
-      );
-
-      /* Create an ol LineString from segment and get the distance between
-       * the click point and the closest point on segment
-       */
-      const segment = new LineString(turfLineSegment.geometry.coordinates);
-      const distanceToClick = getDistance(
-        segment.getClosestPoint(this.initialRouteDrag.coordinate),
-        this.initialRouteDrag.coordinate,
-      );
-
-      // Return segment index with smallest distance to click point
-      if (!distanceToSegment || distanceToClick < distanceToSegment) {
-        distanceToSegment = distanceToClick;
-        newViaIndex = i + 1;
+    // A new point has been added so we need to find what is its cordinate.
+    let index = 0;
+    const newRoute = e.features.getArray()[0];
+    const oldCoords = oldRoute.getGeometry().getCoordinates();
+    const newCoords = newRoute.getGeometry().getCoordinates();
+    let currentViaPointCoord = viaPointClosestPoints[index];
+    for (let i = 0; i < oldCoords.length - 1; i += 1) {
+      const segmt = new LineString([oldCoords[i], oldCoords[i + 1]]);
+      if (
+        segmt.intersectsExtent([
+          currentViaPointCoord[0] - 1,
+          currentViaPointCoord[1] - 1,
+          currentViaPointCoord[0] + 1,
+          currentViaPointCoord[1] + 1,
+        ])
+      ) {
+        console.log('INTERSECT', index, currentViaPointCoord);
+        index += 1;
+        currentViaPointCoord = viaPointClosestPoints[index];
+        console.log('INTERSECT', currentViaPointCoord);
+      }
+      console.log(oldCoords[i], newCoords[i]);
+      if (
+        oldCoords[i][0] !== newCoords[i][0] ||
+        oldCoords[i][1] !== newCoords[i][1]
+      ) {
+        console.log('check');
+        break;
       }
     }
+    console.log('NEW INDEX', index);
 
+    // // Calculate the distance from the click point to each segment
+    // let distanceToSegment;
+    // console.log('this.viaPoints', this.viaPoints);
+    // debugger;
+    // console.log('viaPointClosestPoints', viaPointClosestPoints);
+    // for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
+    //   // Create a segment for each pair of (closest) viaPoints using turf lineSlice
+    //   const a = turfPoint(viaPointClosestPoints[i]);
+    //   const b = turfPoint(viaPointClosestPoints[i + 1]);
+    //   console.log('Turf point 1 ', a);
+    //   console.log('Turf point 2 ', b);
+    //   console.log('Old route ', oldRoute.getGeometry().getCoordinates());
+    //   const turfLineSegment = turfLineSlice(
+    //     a,
+    //     b,
+    //     turfLineString(oldRoute.getGeometry().getCoordinates()),
+    //   );
+    //   const index = i;
+    //   oldRoute.getGeometry().forEachSegment((start, end) => {
+    //     const viaPointClosestCoordinate = viaPointClosestPoints[i];
+    //     const segmt = new LineString([start, end]);
+    //     if (segmt.intersectsCoordinate(viaPointClosestCoordinate)) {
+    //       console.log(
+    //         'AAAAAAAAAAAAAAAAAAAAAAAAAH',
+    //         start,
+    //         end,
+    //         viaPointClosestCoordinate,
+    //       );
+    //     }
+    //   });
+
+    //   console.log('segment ', turfLineSegment.geometry.coordinates);
+
+    //   /* Create an ol LineString from segment and get the distance between
+    //    * the click point and the closest point on segment
+    //    */
+    //   const segment = new LineString(turfLineSegment.geometry.coordinates);
+    //   const distanceToClick = getDistance(
+    //     segment.getClosestPoint(this.initialRouteDrag.coordinate),
+    //     this.initialRouteDrag.coordinate,
+    //   );
+
+    //   // Return segment index with smallest distance to click point
+    //   console.log(
+    //     `distanceToSegment ${i}`,
+    //     distanceToClick < distanceToSegment,
+    //     distanceToClick,
+    //     distanceToSegment,
+    //   );
+    //   if (!distanceToSegment || distanceToClick < distanceToSegment) {
+    //     distanceToSegment = distanceToClick;
+    //     newViaIndex = i + 1;
+    //   }
+    // }
+
+    // console.log('addViaPoint', newViaIndex);
     // Insert new viaPoint at given index
-    return this.addViaPoint(e.mapBrowserEvent.coordinate, newViaIndex);
+    return this.addViaPoint(e.mapBrowserEvent.coordinate, index);
   }
 
   createDefaultElement() {
@@ -489,6 +610,7 @@ class RoutingControl extends Control {
 
       // Add modify interaction, RoutingLayer and listeners
       this.map.addLayer(this.routingLayer);
+      this.map.addLayer(this.debugLayer);
       this.map.addInteraction(this.modifyInteraction);
       this.modifyInteraction.setActive(true);
       this.addListeners();
@@ -499,6 +621,7 @@ class RoutingControl extends Control {
     if (this.map) {
       // Remove modify interaction, RoutingLayer, listeners and viaPoints
       this.map.removeLayer(this.routingLayer.olLayer);
+      this.map.removeLayer(this.debugLayer.olLayer);
       this.map.removeInteraction(this.modifyInteraction);
       this.removeListeners();
       this.reset();
