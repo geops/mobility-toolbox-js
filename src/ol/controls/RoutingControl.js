@@ -5,14 +5,9 @@ import { unByKey } from 'ol/Observable';
 import { click } from 'ol/events/condition';
 import OLVectorLayer from 'ol/layer/Vector';
 import OLVectorSource from 'ol/source/Vector';
+import { GeoJSON } from 'ol/format';
+import { buffer } from 'ol/extent';
 import { fromLonLat, toLonLat } from 'ol/proj';
-import turfLineSlice from '@turf/line-slice';
-import { getDistance } from 'ol/sphere';
-import {
-  lineString as turfLineString,
-  point as turfPoint,
-} from '@turf/helpers';
-import { Fill, Style, Circle, Stroke } from 'ol/style';
 import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
@@ -213,73 +208,73 @@ class RoutingControl extends Control {
       // Add point for first node
       return this.drawViaPoint(this.viaPoints[0], 0);
     }
-    if (this.viaPoints.length >= 2) {
-      this.abortController.abort();
-      this.abortController = new AbortController();
-
-      const formattedViaPoints = this.viaPoints.map((viaPoint) => {
-        if (Array.isArray(viaPoint)) {
-          // viaPoint is a coordinate
-          // Coordinates need to be reversed as required by the backend RoutingAPI
-          return [toLonLat(viaPoint)[1], toLonLat(viaPoint)[0]];
-        }
-        // viaPoint is a UID
-        return `!${viaPoint}`;
-      });
-
-      this.loading = true;
-
-      // Fetch RoutingAPI data
-      return this.api
-        .route(
-          {
-            via: `${formattedViaPoints.join('|')}`,
-            mot: `${this.mot}`,
-            'resolve-hops': false,
-            elevation: false,
-            'coord-radius': 100.0,
-            'coord-punish': 1000.0,
-          },
-          this.abortController,
-        )
-        .then((data) => {
-          // Clear source
-          this.routingLayer.olLayer.getSource().clear();
-
-          // Create point features for the viaPoints
-          this.viaPoints.forEach((viaPoint, idx) => {
-            return this.drawViaPoint(viaPoint, idx);
-          });
-
-          // Create new route once there are at least two viaPoints
-          const projectedCoords = [];
-          data.forEach((feature) =>
-            feature.geometry.coordinates.forEach((coord) =>
-              projectedCoords.push(fromLonLat(coord)),
-            ),
-          );
-          const routeFeature = new Feature({
-            geometry: new LineString(projectedCoords),
-          });
-          routeFeature.set('mot', this.mot);
-          this.routingLayer.olLayer.getSource().addFeature(routeFeature);
-          this.loading = false;
-        })
-        .catch((error) => {
-          if (error.name === 'AbortError') {
-            // Ignore abort error
-            return;
-          }
-          // Dispatch error event and execute error function
-          this.dispatchEvent({
-            type: 'error',
-            target: this,
-          });
-          this.onRouteError(error, this);
-          this.loading = false;
-        });
+    if (this.viaPoints.length < 2) {
+      return null;
     }
-    return null;
+    this.abortController.abort();
+    this.abortController = new AbortController();
+
+    const formattedViaPoints = this.viaPoints.map((viaPoint) => {
+      if (Array.isArray(viaPoint)) {
+        // viaPoint is a coordinate
+        // Coordinates need to be reversed as required by the backend RoutingAPI
+        return [toLonLat(viaPoint)[1], toLonLat(viaPoint)[0]];
+      }
+      // viaPoint is a UID
+      return `!${viaPoint}`;
+    });
+
+    this.loading = true;
+
+    // Fetch RoutingAPI data
+    return this.api
+      .route(
+        {
+          via: `${formattedViaPoints.join('|')}`,
+          mot: `${this.mot}`,
+          'resolve-hops': false,
+          elevation: false,
+          'coord-radius': 100.0,
+          'coord-punish': 1000.0,
+        },
+        this.abortController,
+      )
+      .then((featureCollection) => {
+        this.segments = this.format.readFeatures(featureCollection);
+
+        // Clear source
+        this.routingLayer.olLayer.getSource().clear();
+
+        // Create point features for the viaPoints
+        this.viaPoints.forEach((viaPoint, idx) => {
+          return this.drawViaPoint(viaPoint, idx);
+        });
+
+        // Create the new route. This route will be modifiable by the Modifiy interaction.
+        const coords = [];
+        this.segments.forEach((seg) => {
+          coords.push(...seg.getGeometry().getCoordinates());
+        });
+        const routeFeature = new Feature({
+          geometry: new LineString(coords),
+        });
+        routeFeature.set('mot', this.mot);
+        this.routingLayer.olLayer.getSource().addFeature(routeFeature);
+        this.loading = false;
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') {
+          // Ignore abort error
+          return;
+        }
+        // Dispatch error event and execute error function
+        this.dispatchEvent({
+          type: 'error',
+          target: this,
+        });
+        this.onRouteError(error, this);
+        this.loading = false;
+      });
   }
 
   drawViaPoint(viaPoint, idx) {
@@ -295,7 +290,6 @@ class RoutingControl extends Control {
       .then((res) => res.json())
       .then((stationData) => {
         const { coordinates } = stationData.features[0].geometry;
-        console.log('setCachStation', viaPoint, coordinates);
         this.cacheStationData[viaPoint] = fromLonLat(coordinates);
         pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
         this.routingLayer.olLayer.getSource().addFeature(pointFeature);
@@ -339,55 +333,39 @@ class RoutingControl extends Control {
    * in this.initialRouteDrag object
    * @private
    */
-  onModifyStart(e, a, b) {
-    console.log('onmodifystart', e, a, b);
-    // Create instances for LineString and Point features
-    const route = e.features
+  onModifyStart(evt) {
+    // When modify start, we search the index of the segment that is modifying.
+    let segmentIndex = -1;
+    const route = evt.features
       .getArray()
       .find((feat) => feat.getGeometry() instanceof LineString);
 
-    const viaPointFeatures = e.features
+    // Find the segment index that is being modified
+    if (route) {
+      // We use a buff extent to fix floating issues , see https://github.com/openlayers/openlayers/issues/7130#issuecomment-535856422
+      const closestExtent = buffer(
+        new Point(
+          route.getGeometry().getClosestPoint(evt.mapBrowserEvent.coordinate),
+        ).getExtent(),
+        0.001,
+      );
+
+      segmentIndex = this.segments.findIndex((segment) =>
+        segment.getGeometry().intersectsExtent(closestExtent),
+      );
+    }
+
+    // Find the viaPoint that is being modified
+    const viaPoint = (evt.features
       .getArray()
-      .filter((feat) => feat.getGeometry() instanceof Point);
-
-    // Add listeners to viaPoint features to identify which one is being modified
-    this.relocateViaPoint = (evt) => {
-      this.initialRouteDrag.relocateViaPoint = evt.target;
-    };
-
-    viaPointFeatures.forEach((feature) => {
-      feature.on('change', this.relocateViaPoint);
-    });
+      .filter((feat) => feat.getGeometry() instanceof Point) || [])[0];
 
     // Write object with modify info
     this.initialRouteDrag = {
-      viaPointFeatures,
+      viaPoint,
       oldRoute: route && route.clone(),
-      coordinate: e.mapBrowserEvent.coordinate,
+      segmentIndex,
     };
-  }
-
-  displayViaClosestPoints(points, color = [255, 255, 0, 1], radius = 3) {
-    points.forEach((pt) => {
-      const feat = new Feature(new Point(this.cacheStationData[pt] || pt));
-      feat.setStyle(() => {
-        return [
-          new Style({
-            image: new Circle({
-              radius,
-              stroke: new Stroke({
-                color: [0, 0, 0, 1],
-                width: 1,
-              }),
-              fill: new Fill({
-                color,
-              }),
-            }),
-          }),
-        ];
-      });
-      this.debugLayer.olLayer.getSource().addFeature(feat);
-    });
   }
 
   /**
@@ -396,143 +374,27 @@ class RoutingControl extends Control {
    *   Point drag replaces old viaPoint.
    * @private
    */
-  onModifyEnd(e, a, b) {
-    console.log('onmodifyend', e, a, b);
-    /* Get the index for new viaPoint */
-    let newViaIndex;
-    const {
-      oldRoute,
-      relocateViaPoint,
-      viaPointFeatures,
-    } = this.initialRouteDrag;
-
-    // Unlisten feature change listeners
-    viaPointFeatures.forEach((feature) => {
-      feature.un('change', this.relocateViaPoint);
-    });
+  onModifyEnd(evt) {
+    const coord = evt.mapBrowserEvent.coordinate;
+    const { oldRoute, viaPoint, segmentIndex } = this.initialRouteDrag;
 
     // If viaPoint is being relocated overwrite the old viaPoint
-    if (relocateViaPoint) {
-      console.log('isRelocated', relocateViaPoint.get('viaPointIdx'));
-      return this.addViaPoint(
-        e.mapBrowserEvent.coordinate,
-        relocateViaPoint.get('viaPointIdx'),
-        1,
-      );
+    if (viaPoint) {
+      return this.addViaPoint(coord, viaPoint.get('viaPointIdx'), 1);
     }
 
     // In case there is no route overwrite first coordinate
     if (!oldRoute) {
-      console.log('isoldRoute');
-      return this.addViaPoint(e.mapBrowserEvent.coordinate, 0, 1);
+      return this.addViaPoint(coord, 0, 1);
     }
-    this.debugLayer.olLayer.getSource().clear();
 
-    this.displayViaClosestPoints(this.viaPoints, [0, 0, 255, 1], 6);
-    // Get the closest point from viaPoints to original route
-    const viaPointClosestPoints = this.viaPoints.map((viaPoint) => {
-      console.log(
-        'CLOSEST ',
-        viaPoint,
-        this.cacheStationData[viaPoint],
-        this.cacheStationData,
-      );
-      return oldRoute
-        .getGeometry()
-        .getClosestPoint(this.cacheStationData[viaPoint] || viaPoint);
-    });
-    this.displayViaClosestPoints(viaPointClosestPoints);
-
-    // A new point has been added so we need to find what is its cordinate.
-    let index = 0;
-    const newRoute = e.features.getArray()[0];
-    const oldCoords = oldRoute.getGeometry().getCoordinates();
-    const newCoords = newRoute.getGeometry().getCoordinates();
-    let currentViaPointCoord = viaPointClosestPoints[index];
-    for (let i = 0; i < oldCoords.length - 1; i += 1) {
-      const segmt = new LineString([oldCoords[i], oldCoords[i + 1]]);
-      if (
-        segmt.intersectsExtent([
-          currentViaPointCoord[0] - 1,
-          currentViaPointCoord[1] - 1,
-          currentViaPointCoord[0] + 1,
-          currentViaPointCoord[1] + 1,
-        ])
-      ) {
-        console.log('INTERSECT', index, currentViaPointCoord);
-        index += 1;
-        currentViaPointCoord = viaPointClosestPoints[index];
-        console.log('INTERSECT', currentViaPointCoord);
-      }
-      console.log(oldCoords[i], newCoords[i]);
-      if (
-        oldCoords[i][0] !== newCoords[i][0] ||
-        oldCoords[i][1] !== newCoords[i][1]
-      ) {
-        console.log('check');
-        break;
-      }
+    // We can't add a via point because we haven't found which segment has been modified.
+    if (segmentIndex === -1) {
+      return Promise.reject(new Error('No segment found'));
     }
-    console.log('NEW INDEX', index);
 
-    // // Calculate the distance from the click point to each segment
-    // let distanceToSegment;
-    // console.log('this.viaPoints', this.viaPoints);
-    // debugger;
-    // console.log('viaPointClosestPoints', viaPointClosestPoints);
-    // for (let i = 0; i < viaPointClosestPoints.length - 1; i += 1) {
-    //   // Create a segment for each pair of (closest) viaPoints using turf lineSlice
-    //   const a = turfPoint(viaPointClosestPoints[i]);
-    //   const b = turfPoint(viaPointClosestPoints[i + 1]);
-    //   console.log('Turf point 1 ', a);
-    //   console.log('Turf point 2 ', b);
-    //   console.log('Old route ', oldRoute.getGeometry().getCoordinates());
-    //   const turfLineSegment = turfLineSlice(
-    //     a,
-    //     b,
-    //     turfLineString(oldRoute.getGeometry().getCoordinates()),
-    //   );
-    //   const index = i;
-    //   oldRoute.getGeometry().forEachSegment((start, end) => {
-    //     const viaPointClosestCoordinate = viaPointClosestPoints[i];
-    //     const segmt = new LineString([start, end]);
-    //     if (segmt.intersectsCoordinate(viaPointClosestCoordinate)) {
-    //       console.log(
-    //         'AAAAAAAAAAAAAAAAAAAAAAAAAH',
-    //         start,
-    //         end,
-    //         viaPointClosestCoordinate,
-    //       );
-    //     }
-    //   });
-
-    //   console.log('segment ', turfLineSegment.geometry.coordinates);
-
-    //   /* Create an ol LineString from segment and get the distance between
-    //    * the click point and the closest point on segment
-    //    */
-    //   const segment = new LineString(turfLineSegment.geometry.coordinates);
-    //   const distanceToClick = getDistance(
-    //     segment.getClosestPoint(this.initialRouteDrag.coordinate),
-    //     this.initialRouteDrag.coordinate,
-    //   );
-
-    //   // Return segment index with smallest distance to click point
-    //   console.log(
-    //     `distanceToSegment ${i}`,
-    //     distanceToClick < distanceToSegment,
-    //     distanceToClick,
-    //     distanceToSegment,
-    //   );
-    //   if (!distanceToSegment || distanceToClick < distanceToSegment) {
-    //     distanceToSegment = distanceToClick;
-    //     newViaIndex = i + 1;
-    //   }
-    // }
-
-    // console.log('addViaPoint', newViaIndex);
-    // Insert new viaPoint at given index
-    return this.addViaPoint(e.mapBrowserEvent.coordinate, index);
+    // Insert new viaPoint at the  modified segment index + 1
+    return this.addViaPoint(coord, segmentIndex + 1);
   }
 
   createDefaultElement() {
@@ -605,6 +467,11 @@ class RoutingControl extends Control {
   activate() {
     super.activate();
     if (this.map) {
+      /** @ignore */
+      this.format = new GeoJSON({
+        featureProjection: this.map.getView().getProjection(),
+      });
+
       // Clean the modifyInteraction if present
       this.map.removeInteraction(this.modifyInteraction);
 

@@ -32,12 +32,12 @@ class RoutingAPI extends API {
    *
    * @param {RoutingSearchParams} params Request parameters. See [Routing service documentation](https://developer.geops.io/apis/routing/).
    * @param {AbortController} abortController Abort controller used to cancel the request.
-   * @returns {Promise<GeoJSONFeature[]>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
+   * @returns {Promise<GeoJSONFeatureCollection>} An GeoJSON feature collection with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
   route(params, abortController = new AbortController()) {
     return this.fetch('', params, {
       signal: abortController.signal,
-    }).then((featureCollection) => featureCollection.features);
+    });
   }
 }
 

@@ -1,4 +1,4 @@
-import { Circle, Fill, Stroke, Style, Text } from 'ol/style';
+import { Circle, Fill, Stroke, Style } from 'ol/style';
 import { Vector as VectorSource } from 'ol/source';
 import { Vector } from 'ol/layer';
 import Layer from './Layer';
@@ -17,9 +17,6 @@ const defaultStyleFunction = (feature) => {
     });
 
   // Default style for via points
-  if (viaPointIdx === undefined) {
-    console.log(feature);
-  }
   const image =
     viaPointIdx !== undefined &&
     new Circle({
@@ -27,32 +24,24 @@ const defaultStyleFunction = (feature) => {
       fill: new Fill({
         color: [255, 0, 0, 1],
       }),
-    });
-  console.log(viaPointIdx);
-
-  const style = new Style({
-    text: new Text({
-      text: `${viaPointIdx}`,
-      offsetY: 15,
       stroke: new Stroke({
         color: [0, 0, 0, 1],
-        width: 2,
+        width: 1,
       }),
-      fill: new Fill({
-        color: [0, 255, 0, 1],
-      }),
-    }),
+    });
+
+  const style = new Style({
     stroke,
     image,
   });
 
-  const style2 = new Style({
+  const blackBorder = new Style({
     stroke: new Stroke({
       color: [0, 0, 0, 1],
       width: 5,
     }),
   });
-  return [style2, style];
+  return [blackBorder, style];
 };
 
 /**
