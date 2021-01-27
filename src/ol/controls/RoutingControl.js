@@ -3,15 +3,12 @@ import { LineString, Point } from 'ol/geom';
 import { Modify } from 'ol/interaction';
 import { unByKey } from 'ol/Observable';
 import { click } from 'ol/events/condition';
-import OLVectorLayer from 'ol/layer/Vector';
-import OLVectorSource from 'ol/source/Vector';
 import { GeoJSON } from 'ol/format';
 import { buffer } from 'ol/extent';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
-import VectorLayer from '../layers/VectorLayer';
 
 /**
  * Display a route of a specified mean of transport.
@@ -95,18 +92,6 @@ class RoutingControl extends Control {
       options.routingLayer ||
       new RoutingLayer({
         name: 'routing-layer',
-      });
-
-    /** @ignore */
-    this.debugLayer =
-      options.debugLayer ||
-      new VectorLayer({
-        name: 'debug-layer',
-        olLayer: new OLVectorLayer({
-          source: new OLVectorSource({
-            features: [],
-          }),
-        }),
       });
 
     /** @ignore */
@@ -477,7 +462,6 @@ class RoutingControl extends Control {
 
       // Add modify interaction, RoutingLayer and listeners
       this.map.addLayer(this.routingLayer);
-      this.map.addLayer(this.debugLayer);
       this.map.addInteraction(this.modifyInteraction);
       this.modifyInteraction.setActive(true);
       this.addListeners();
@@ -488,7 +472,6 @@ class RoutingControl extends Control {
     if (this.map) {
       // Remove modify interaction, RoutingLayer, listeners and viaPoints
       this.map.removeLayer(this.routingLayer.olLayer);
-      this.map.removeLayer(this.debugLayer.olLayer);
       this.map.removeInteraction(this.modifyInteraction);
       this.removeListeners();
       this.reset();
