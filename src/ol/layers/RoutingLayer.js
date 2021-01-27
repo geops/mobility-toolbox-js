@@ -37,7 +37,7 @@ const defaultStyleFunction = (feature) => {
 
   const blackBorder = new Style({
     stroke: new Stroke({
-      color: [0, 0, 0, 1],
+      color: [0, 0, 0, mot === 'foot' ? 0 : 1],
       width: 5,
     }),
   });
