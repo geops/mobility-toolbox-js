@@ -201,17 +201,16 @@ export default class Tracker {
       const traj = this.trajectories[i];
 
       // We simplify the traj object
-      const { geometry, timeIntervals, timeOffset } = traj;
+      const { geometry, timeIntervals, timeOffset, publisher } = traj;
       const swissExtent = [656409.5, 5740863.4, 1200512.3, 6077033.16];
       if (
-        (containsCoordinate(swissExtent, traj.geometry.getFirstCoordinate()) ||
-          containsCoordinate(swissExtent, traj.geometry.getLastCoordinate())) &&
-        traj.published !== 'SBB'
+        (containsCoordinate(swissExtent, geometry.getFirstCoordinate()) ||
+          containsCoordinate(swissExtent, geometry.getLastCoordinate())) &&
+        publisher !== 'SBB'
       ) {
         // eslint-disable-next-line no-continue
         continue;
       }
-      // if publisher === 'SBB' && [824881.9568922471, 5933406.55552249] in swissExtent
       if (this.filter && !this.filter(traj)) {
         // eslint-disable-next-line no-continue
         continue;
