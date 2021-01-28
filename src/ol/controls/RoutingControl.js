@@ -2,7 +2,6 @@ import { Feature } from 'ol';
 import { LineString, Point } from 'ol/geom';
 import { Modify } from 'ol/interaction';
 import { unByKey } from 'ol/Observable';
-import { click } from 'ol/events/condition';
 import { GeoJSON } from 'ol/format';
 import { buffer } from 'ol/extent';
 import { fromLonLat, toLonLat } from 'ol/proj';
@@ -343,7 +342,10 @@ class RoutingControl extends Control {
     // Find the viaPoint that is being modified
     const viaPoint = (evt.features
       .getArray()
-      .filter((feat) => feat.getGeometry() instanceof Point) || [])[0];
+      .filter(
+        (feat) =>
+          feat.getGeometry() instanceof Point && feat.get('viaPointIdx'),
+      ) || [])[0];
 
     // Write object with modify info
     this.initialRouteDrag = {
@@ -412,20 +414,7 @@ class RoutingControl extends Control {
       source: this.routingLayer.olLayer.getSource(),
       pixelTolerance: 4,
       hitDetection: this.routingLayer.olLayer,
-      deleteCondition: (e) => {
-        const feats = e.target.getFeaturesAtPixel(e.pixel, {
-          hitTolerance: 5,
-        });
-        const viaPoint = feats.find(
-          (feat) => feat.getGeometry() instanceof Point && feat.get('index'),
-        );
-        if (click(e) && viaPoint) {
-          // Remove node & viaPoint if an existing viaPoint was clicked
-          this.removeViaPoint(viaPoint.get('index'));
-          return true;
-        }
-        return false;
-      },
+      deleteCondition: () => {}, // Omit modify interaction node deletion and let it be handled by onMapClick
     });
     this.modifyInteraction.on('modifystart', this.onModifyStart);
     this.modifyInteraction.on('modifyend', this.onModifyEnd);
