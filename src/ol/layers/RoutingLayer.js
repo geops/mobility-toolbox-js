@@ -12,7 +12,7 @@ const defaultStyleFunction = (feature) => {
     mot &&
     new Stroke({
       color: [255, 0, 0, 1],
-      width: 5,
+      width: 3,
       lineDash: mot === 'foot' ? [1, 10] : undefined,
     });
 
@@ -24,13 +24,24 @@ const defaultStyleFunction = (feature) => {
       fill: new Fill({
         color: [255, 0, 0, 1],
       }),
+      stroke: new Stroke({
+        color: [0, 0, 0, 1],
+        width: 1,
+      }),
     });
 
   const style = new Style({
     stroke,
     image,
   });
-  return style;
+
+  const blackBorder = new Style({
+    stroke: new Stroke({
+      color: [0, 0, 0, mot === 'foot' ? 0 : 1],
+      width: 5,
+    }),
+  });
+  return [blackBorder, style];
 };
 
 /**
