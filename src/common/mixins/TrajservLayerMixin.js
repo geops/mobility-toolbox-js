@@ -112,10 +112,10 @@ const OPERATOR_FILTER = 'operator';
  * @param {string} regexLine
  * @private
  */
-const createFilters = (line, route, operator, regexLine) => {
+const createFilters = (line, route, operator, regexLine, filterFunc) => {
   const filterList = [];
 
-  if (!line && !route && !operator && !regexLine) {
+  if (!line && !route && !operator && !regexLine && !filterFunc) {
     return null;
   }
 
@@ -154,6 +154,10 @@ const createFilters = (line, route, operator, regexLine) => {
     filterList.push(operatorFilter);
   }
 
+  if (filterFunc) {
+    filterList.push(filterFunc);
+  }
+
   if (!filterList.length) {
     return null;
   }
@@ -189,6 +193,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         publishedLineName,
         tripNumber,
         operator,
+        filterFunc,
       } = options;
 
       let defaultApi;
@@ -262,6 +267,15 @@ const TrajservLayerMixin = (TrackerLayer) =>
             this.updateFilters();
           },
         },
+        filterFunc: {
+          get: () => {
+            return filterFunc;
+          },
+          set: (newFilterFunc) => {
+            filterFunc = newFilterFunc;
+            this.updateFilters();
+          },
+        },
         api: {
           value: options.api || defaultApi,
         },
@@ -305,6 +319,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         this.tripNumber || parameters[ROUTE_FILTER],
         this.operator || parameters[OPERATOR_FILTER],
         this.regexPublishedLineName,
+        this.filterFunc,
       );
     }
 
