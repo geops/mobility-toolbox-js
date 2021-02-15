@@ -36,7 +36,7 @@ const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
  * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';
  *
  * const mapboxLayer = new MapboxLayer({
- *   url: 'https://maps.geops.io/styles/travic/style.json?key=[yourApiKey]',
+ *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',
  * });
  *
  * const layer = new MapboxStyleLayer({

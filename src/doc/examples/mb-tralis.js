@@ -6,7 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 export default () => {
   const map = new Map({
     container: 'map',
-    style: 'https://maps.geops.io/styles/travic/style.json',
+    style: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
     center: toLonLat([1282278, 6128615]),
     zoom: 9,
