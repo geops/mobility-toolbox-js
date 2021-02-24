@@ -485,8 +485,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         // Draw diagonale in the circle if a provider provides realtime but we don't use it.
         if (
           this.useDelayStyle &&
-          delay === null &&
-          operatorProvidesRealtime === 'yes'
+          ((delay === null && operatorProvidesRealtime === 'yes') || cancelled)
         ) {
           // delay=null (no realtime) but provider has realtime data.
           // Draw black cross in the middle of the gravy circle
