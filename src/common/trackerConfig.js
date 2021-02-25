@@ -186,7 +186,7 @@ export const getDelayColor = (delayInMs, cancelled, isDelayText) => {
  */
 export const getDelayText = (delayInMs, cancelled) => {
   if (cancelled) {
-    return String.fromCharCode(10006);
+    return String.fromCodePoint(0x00d7);
   }
   if (delayInMs > 3600000) {
     const rounded = Math.round(delayInMs / 3600000);

@@ -453,8 +453,8 @@ const TrajservLayerMixin = (TrackerLayer) =>
           ctx.textAlign = 'left';
           ctx.textBaseline = 'middle';
           ctx.font = `bold ${Math.max(
-            14,
-            Math.min(17, radius * 1.2),
+            cancelled ? 19 : 14,
+            Math.min(cancelled ? 19 : 17, radius * 1.2),
           )}px arial, sans-serif`;
           ctx.fillStyle = getDelayColor(delay, cancelled, true);
 
