@@ -43,6 +43,7 @@ class TralisAPI {
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
    */
   constructor(options = {}) {
     let wsUrl = null;
