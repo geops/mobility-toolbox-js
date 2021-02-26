@@ -43,6 +43,7 @@ class TralisAPI {
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
    */
   constructor(options = {}) {
     let wsUrl = null;
@@ -56,9 +57,7 @@ class TralisAPI {
     }
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
-    /** @ignore */
-    this.dfltProjection = 'epsg:3857';
-    this.conn.setProjection(this.dfltProjection);
+    this.conn.setProjection(options.projection || 'epsg:3857');
     /** @ignore */
     this.subscribedStationUic = null;
     /** @ignore */
@@ -312,7 +311,7 @@ class TralisAPI {
    */
   unsubscribeStations() {
     window.clearTimeout(this.stationUpdateTimeout);
-    this.unsubscribe('stations');
+    this.unsubscribe('station');
   }
 
   /**
@@ -391,21 +390,15 @@ class TralisAPI {
    *
    * @param {number} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
-   * @param {string} projection The epsg code of a projection (ex: EPSG:3857).
    * @returns {Promise<FullTrajectory>} Return a full trajectory.
    */
-  getFullTrajectory(id, mode, projection) {
-    if (projection) {
-      this.conn.setProjection(projection);
-    }
+  getFullTrajectory(id, mode) {
     const params = {
       channel: `full_trajectory${getModeSuffix(mode, TralisModes)}_${id}`,
     };
 
     return new Promise((resolve) => {
       this.conn.get(params, (data) => {
-        // Reset the projection after the request is done.
-        this.conn.setProjection(this.dfltProjection);
         if (data.content) {
           resolve(data.content);
         }
