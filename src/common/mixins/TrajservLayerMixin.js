@@ -479,34 +479,16 @@ const TrajservLayerMixin = (TrackerLayer) =>
         ctx.beginPath();
         ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
         ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        // Draw diagonale in the circle if a provider provides realtime but we don't use it.
+        // Dashed outline if a provider provides realtime but we don't use it.
         if (
           this.useDelayStyle &&
-          ((delay === null && operatorProvidesRealtime === 'yes') || cancelled)
+          delay === null &&
+          operatorProvidesRealtime === 'yes'
         ) {
-          // delay=null (no realtime) but provider has realtime data.
-          // Draw black cross in the middle of the gravy circle
-          let diff = radius >= 10 ? 4 : 2;
-          if (hover) {
-            diff = radius >= 10 ? 5 : 3;
-          }
-          const middle = markerSize / 2;
-          ctx.save();
-          ctx.lineWidth = 1;
-          ctx.strokeStyle = '#000000';
-          ctx.beginPath();
-          ctx.moveTo(origin - radius + diff, origin - radius + diff);
-          ctx.lineTo(origin + radius - diff, origin + radius - diff);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(origin - radius + diff, origin + radius - diff);
-          ctx.lineTo(origin + radius - diff, origin - radius + diff);
-          ctx.stroke();
-          ctx.restore();
+          ctx.setLineDash([5, 3]);
         }
+        ctx.stroke();
+        ctx.restore();
 
         // Draw text in the circle
         if (radius > 10) {
