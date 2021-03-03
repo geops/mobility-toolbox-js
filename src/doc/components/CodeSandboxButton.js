@@ -24,8 +24,8 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
       },
       'index.js': {
         content: js // eslint-disable-next-line no-template-curly-in-string
-          .replace('${window.apiKey}', window.apiKey)
-          .replace('window.apiKey', `'${window.apiKey}'`),
+          .replaceAll('${window.apiKey}', window.apiKey)
+          .replaceAll('window.apiKey', `'${window.apiKey}'`),
       },
       'package.json': {
         content: {
