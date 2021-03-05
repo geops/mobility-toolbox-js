@@ -48,7 +48,7 @@ export default () => {
 
       // add text
       ctx.font = '14px Arial';
-      ctx.fillStyle = 'white';
+      ctx.fillStyle = lineName === 'S8' ? '#f2b42c' : 'white';
       ctx.globalAlpha = 1;
       ctx.fillText(lineName, 12 - textWidth / 2, 20);
 
