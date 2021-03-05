@@ -3,6 +3,7 @@ import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { useParams } from 'react-router-dom';
+import Markdown from 'react-markdown';
 import CodeSandboxButton from './CodeSandboxButton';
 import EXAMPLES from '../examples';
 
@@ -33,6 +34,11 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: 5,
     paddingRight: 10,
   },
+  readme: {
+    '& p': {
+      fontSize: 18,
+    },
+  },
 }));
 
 const Example = () => {
@@ -41,9 +47,12 @@ const Example = () => {
   const example = EXAMPLES.find((e) => e.key === exampleKey);
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
+  const [readme, setReadme] = useState();
   const [isNavigable, setIsNavigable] = useState(false);
   const htmlFileName =
     (example.files && example.files.html) || `${exampleKey}.html`;
+  const readmeFileName =
+    (example.files && example.files.readme) || `${exampleKey}.md`;
   const jsFileName = (example.files && example.files.js) || `${exampleKey}.js`;
 
   useEffect(() => {
@@ -71,8 +80,13 @@ const Example = () => {
             );
           });
       });
+
+      fetch(`../examples/${readmeFileName}`)
+        .then((res) => res.status === 200 && res.text())
+        .then((md) => setReadme(md))
+        .catch(() => setReadme(''));
     });
-  }, [example, htmlFileName, jsFileName]);
+  }, [example, htmlFileName, jsFileName, readmeFileName]);
 
   return (
     <Grid container direction="column" spacing={3}>
@@ -81,6 +95,7 @@ const Example = () => {
           {example.name}
         </Typography>
         <Typography>{example.description}</Typography>
+        <Markdown className={classes.readme} source={readme || ''} />
       </Grid>
       <Grid item xs={12}>
         <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>

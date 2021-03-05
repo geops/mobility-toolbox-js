@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="s4kreis"
+   width="25"
+   height="24.999966"
+   viewBox="0 0 25 24.999966"
+   version="1.1"
+   sodipodi:docname="s4kreis.svg"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)">
+  <metadata
+     id="metadata13">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs11" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2149"
+     inkscape:window-height="1712"
+     id="namedview9"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="5.5333333"
+     inkscape:cx="38.800001"
+     inkscape:cy="37.9"
+     inkscape:window-x="2391"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Gruppe_147" />
+  <rect
+     id="Rechteck_37"
+     data-name="Rechteck 37"
+     width="150"
+     height="150"
+     fill="none"
+     x="-36.199997"
+     y="-37.099998" />
+  <g
+     id="Gruppe_147"
+     data-name="Gruppe 147"
+     opacity="0.85"
+     transform="translate(-36.199999,-37.1)">
+    <circle
+       id="Ellipse_21"
+       data-name="Ellipse 21"
+       cx="48.699982"
+       cy="49.599983"
+       r="12.499983"
+       fill="#e4001b"
+       style="stroke-width:0.322165" />
+  </g>
+  <path
+     id="Pfad_485"
+     data-name="Pfad 485"
+     d="M 12.499984,1.771905 A 10.695862,10.695862 0 1 1 1.8041221,12.467766 v 0 A 10.75224,10.75224 0 0 1 12.499984,1.771905 Z m 0,-1.771905 a 12.499983,12.499983 0 1 0 12.499982,12.499983 v 0 A 12.470666,12.470666 0 0 0 12.558618,0 Z"
+     fill="#e4001b"
+     style="stroke-width:0.322165" />
+  <path
+     id="Pfad_486"
+     data-name="Pfad 486"
+     d="m 3.0283471,14.400753 h 2.190719 c 0.193299,1.320875 0.837628,1.804122 2.44845,1.804122 1.127576,0 2.094069,-0.386598 2.094069,-1.417524 0,-1.030927 -1.030926,-1.224225 -2.641748,-1.610823 -1.900771,-0.483247 -3.704892,-0.934277 -3.704892,-3.221645 0,-2.190718 1.707472,-3.221645 4.155922,-3.221645 2.4484499,0 3.9948399,1.224225 4.1559219,3.414944 H 9.6327201 c -0.09665,-1.127576 -0.934277,-1.610823 -2.09407,-1.610823 -1.159792,0 -1.99742,0.483247 -1.99742,1.224225 0,0.837628 0.773195,1.127576 2.384018,1.514174 2.2873679,0.483246 4.0592729,1.030926 4.0592729,3.318294 0,2.190719 -1.804122,3.414944 -4.2525719,3.414944 -2.99613,-0.03222 -4.606952,-1.353091 -4.703602,-3.608243 z"
+     fill="#ffffff"
+     style="stroke-width:0.322165" />
+  <path
+     id="Pfad_487"
+     data-name="Pfad 487"
+     d="m 18.105646,15.528329 h -4.832467 v -2.287368 l 4.735818,-6.056693 h 2.094069 v 6.636589 h 1.610823 v 1.707472 h -1.610823 v 2.287368 h -1.99742 z m -3.157212,-1.707472 h 3.124996 v -3.99484 0 z"
+     fill="#ffffff"
+     style="stroke-width:0.322165" />
+</svg>
