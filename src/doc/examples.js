@@ -1,6 +1,7 @@
 import simpleMapImg from './img/examples/simple_map.jpg';
 import liveTrackerOLImg from './img/examples/live_tracker_ol.jpg';
 import liveTrackerMBImg from './img/examples/live_tracker_mb.jpg';
+import liveTrackerMunichImg from './img/examples/live_tracker_munich.jpg';
 import mapboxImg from './img/examples/mapbox.jpg';
 import mapboxStyleImg from './img/examples/mapbox_style.jpg';
 import queryObjectsImg from './img/examples/query_objects.jpg';
@@ -28,6 +29,13 @@ export default [
     key: 'mb-tracker',
     description: 'Show moving trains in a Mapbox map.',
     img: liveTrackerMBImg,
+  },
+  {
+    name: 'Live train positions for Munich',
+    key: 'munich-tracker',
+    description:
+      'Vehicle positions in Munich based on train schedule, delay information and GPS signals.',
+    img: liveTrackerMunichImg,
   },
   // These examples are used for the dbug of TralisLayer don't remove them pls.
   // {
