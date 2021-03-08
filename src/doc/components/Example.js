@@ -116,6 +116,7 @@ const Example = () => {
               <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
               <CodeSandboxButton
                 className={classes.editButton}
+                extraFiles={example.extraFiles || {}}
                 html={html}
                 js={js}
               />
