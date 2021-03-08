@@ -10,7 +10,7 @@ const useStyles = makeStyles({
   },
 });
 
-const CodeSandboxButton = ({ html, js, ...props }) => {
+const CodeSandboxButton = ({ html, js, extraFiles, ...props }) => {
   const classes = useStyles();
 
   if (!html || !js) {
@@ -56,6 +56,7 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
           ],
         },
       },
+      ...extraFiles,
     },
   };
   const dataSBStr = getParameters(dataSB);
@@ -89,11 +90,13 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
 CodeSandboxButton.propTypes = {
   html: PropTypes.string,
   js: PropTypes.string,
+  extraFiles: PropTypes.shape(PropTypes.string),
 };
 
 CodeSandboxButton.defaultProps = {
   html: null,
   js: null,
+  extraFiles: {},
 };
 
 export default React.memo(CodeSandboxButton);

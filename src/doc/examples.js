@@ -9,6 +9,8 @@ import olCopyrightImg from './img/examples/ol-copyright.png';
 import stopsImg from './img/examples/stops.jpg';
 import routingImg from './img/examples/routing.jpg';
 
+const munichAssets = require('./examples/assets/munich-tracker').default;
+
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
 export default [
@@ -36,6 +38,11 @@ export default [
     description:
       'Vehicle positions in Munich based on train schedule, delay information and GPS signals.',
     img: liveTrackerMunichImg,
+    extraFiles: {
+      'assets/munich-tracker/index.js': {
+        content: `export default ${JSON.stringify(munichAssets)};`,
+      },
+    },
   },
   // These examples are used for the dbug of TralisLayer don't remove them pls.
   // {
