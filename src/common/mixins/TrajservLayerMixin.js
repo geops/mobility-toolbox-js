@@ -431,7 +431,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         const origin = radiusDelay + margin;
 
         const canvas = document.createElement('canvas');
-        canvas.width = radiusDelay * 2 + margin * 2 + 100;
+        canvas.width = radiusDelay * 2 + margin * 2;
         canvas.height = radiusDelay * 2 + margin * 2;
         const ctx = canvas.getContext('2d');
 

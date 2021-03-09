@@ -22,6 +22,14 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
+   * Update the icon scale if the window (and probably the canvas) is resized.
+   * @private
+   */
+  updateIconScale(canvas) {
+    this.tracker.setIconScale(canvas.width / canvas.clientWidth);
+  }
+
+  /**
    * Initialize the layer.
    *
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
@@ -31,11 +39,15 @@ class TrackerLayer extends mixin(Layer) {
     if (!map) {
       return;
     }
-    const { width, height } = map.getCanvas();
+    const canvas = map.getCanvas();
+    const iconScale = canvas.width / canvas.clientWidth;
+
+    window.addEventListener('resize', this.updateIconScale.bind(this, canvas));
 
     super.init(map, {
-      width,
-      height,
+      width: canvas.width,
+      height: canvas.height,
+      iconScale,
       getPixelFromCoordinate: (coord) => {
         const pixelRatio = window.devicePixelRatio || 1;
         const [lng, lat] = toLonLat(coord);
@@ -43,6 +55,11 @@ class TrackerLayer extends mixin(Layer) {
         return [x * pixelRatio, y * pixelRatio];
       },
     });
+  }
+
+  terminate() {
+    window.removeEventListener('resize', this.updateIconScale);
+    return super.terminate();
   }
 
   /**

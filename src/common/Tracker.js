@@ -47,6 +47,12 @@ export default class Tracker {
      */
     this.hoverVehicleId = null;
 
+    /**
+     * Scale the vehicle icons with this value.
+     * @param {number}
+     */
+    this.iconScale = opts.iconScale;
+
     // we draw directly on the canvas since openlayers is too slow.
     /**
      * HTML <canvas> element.
@@ -160,6 +166,14 @@ export default class Tracker {
   }
 
   /**
+   * set the scale of the vehicle icons.
+   * @param {number} iconScale Scale value.
+   */
+  setIconScale(iconScale) {
+    this.iconScale = iconScale;
+  }
+
+  /**
    * Set the tracker style.
    * @param {function} s OpenLayers style function.
    */
@@ -195,6 +209,8 @@ export default class Tracker {
     this.currResolution = resolution || this.currResolution;
     let hoverVehicleImg;
     let hoverVehiclePx;
+    let hoverVehicleWidth;
+    let hoverVehicleHeight;
 
     for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
       const traj = this.trajectories[i];
@@ -288,24 +304,38 @@ export default class Tracker {
         this.trajectories[i].rendered = true;
 
         const vehicleImg = this.style(traj, this.currResolution);
+        let imgWidth = vehicleImg.width;
+        let imgHeight = vehicleImg.height;
+
+        if (this.iconScale) {
+          imgHeight = Math.floor(imgHeight * this.iconScale);
+          imgWidth = Math.floor(imgWidth * this.iconScale);
+        }
+
         if (this.hoverVehicleId !== traj.id) {
           this.canvasContext.drawImage(
             vehicleImg,
-            px[0] - vehicleImg.height / 2,
-            px[1] - vehicleImg.height / 2,
+            px[0] - imgWidth / 2,
+            px[1] - imgHeight / 2,
+            imgWidth,
+            imgHeight,
           );
         } else {
           // Store the canvas to draw it at the end
           hoverVehicleImg = vehicleImg;
           hoverVehiclePx = px;
+          hoverVehicleWidth = imgWidth;
+          hoverVehicleHeight = imgHeight;
         }
       }
     }
     if (hoverVehicleImg) {
       this.canvasContext.drawImage(
         hoverVehicleImg,
-        hoverVehiclePx[0] - hoverVehicleImg.height / 2,
-        hoverVehiclePx[1] - hoverVehicleImg.height / 2,
+        hoverVehiclePx[0] - hoverVehicleWidth / 2,
+        hoverVehiclePx[1] - hoverVehicleHeight / 2,
+        hoverVehicleWidth,
+        hoverVehicleHeight,
       );
     }
 
