@@ -39,10 +39,10 @@ class TrackerLayer extends mixin(Layer) {
     if (!map) {
       return;
     }
+
     const canvas = map.getCanvas();
     const iconScale = canvas.width / canvas.clientWidth;
-
-    window.addEventListener('resize', this.updateIconScale.bind(this, canvas));
+    map.on('resize', this.updateIconScale.bind(this, canvas));
 
     super.init(map, {
       width: canvas.width,
@@ -58,7 +58,9 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   terminate() {
-    window.removeEventListener('resize', this.updateIconScale);
+    if (this.map) {
+      this.map.off('resize', this.updateIconScale);
+    }
     return super.terminate();
   }
 
