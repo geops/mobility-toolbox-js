@@ -1,6 +1,6 @@
 import { Map, TralisLayer } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import LINE_IMAGES from './assets/munich-tracker';
+import LINE_IMAGES from './assets/tralis-live-map';
 
 export default () => {
   const map = new Map({
