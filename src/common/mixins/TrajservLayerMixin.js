@@ -428,12 +428,13 @@ const TrajservLayerMixin = (TrackerLayer) =>
         const margin = 1;
         const radiusDelay = radius + 2;
         const markerSize = radius * 2;
-        const origin = radiusDelay + margin;
 
         const canvas = document.createElement('canvas');
-        canvas.width = radiusDelay * 2 + margin * 2;
-        canvas.height = radiusDelay * 2 + margin * 2;
+        // add space for delay information
+        canvas.width = radiusDelay * 2 + margin * 2 + 100;
+        canvas.height = radiusDelay * 2 + margin * 2 + 100;
         const ctx = canvas.getContext('2d');
+        const origin = canvas.width / 2;
 
         if (delay !== null) {
           // Draw circle delay background
@@ -460,8 +461,9 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
           ctx.strokeStyle = this.delayOutlineColor;
           ctx.lineWidth = 1.5;
-          ctx.strokeText(getDelayText(delay, cancelled), origin * 2, origin);
-          ctx.fillText(getDelayText(delay, cancelled), origin * 2, origin);
+          const delayText = getDelayText(delay, cancelled);
+          ctx.strokeText(delayText, origin + radiusDelay + margin, origin);
+          ctx.fillText(delayText, origin + radiusDelay + margin, origin);
           ctx.restore();
         }
 
