@@ -17,7 +17,7 @@ const TrackerExample = () => {
   useEffect(() => {
     const map = new Map({
       container: 'map',
-      style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
+      style: `https://maps.geops.io/styles/travic_v2_generalized/style.json?key=${window.apiKey}`,
       center: [7.4707, 46.95],
       zoom: 12,
     });
