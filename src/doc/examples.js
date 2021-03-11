@@ -36,7 +36,7 @@ export default [
     name: 'Live train positions for Munich',
     key: 'tralis-live-map',
     description:
-      'Vehicle positions in Munich based on train schedule, delay information and GPS signals.',
+      'Realtime vehicle positions and prognosis data based on scheduled times, realtime updates and GPS locations.',
     img: liveTrackerMunichImg,
     extraFiles: {
       'assets/tralis-live-map/index.js': {
