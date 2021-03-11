@@ -32,10 +32,7 @@ const tracker = new TrajservLayer({
   apiKey: window.apiKey,
 });
 
-map.on('load', () => {
-  // add tracker before layer 'waterway-name'
-  tracker.init(map, 'waterway-name');
-});
+map.addLayer(tracker);
 `;
 
 function Home() {

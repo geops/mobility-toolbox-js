@@ -27,9 +27,7 @@ const TrackerExample = () => {
       apiKey: window.apiKey,
     });
 
-    map.on('load', () => {
-      tracker.init(map, 'waterway-name');
-    });
+    map.addLayer(tracker);
   }, []);
 
   return <div id="map" className={classes.root} />;
