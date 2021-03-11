@@ -10,7 +10,7 @@ import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
  *
  * const map = new Map({
  *   container: 'map',
- *   style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
+ *   style: `https://maps.geops.io/styles/travic/style.json?key=${window.apiKey}`,
  *   controls: [
  *     new CopyrightControl()
  *   ]

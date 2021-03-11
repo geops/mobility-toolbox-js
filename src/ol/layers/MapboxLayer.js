@@ -15,7 +15,7 @@ import getMapboxStyleUrl from '../../common/utils/getMapboxStyleUrl';
  * import { MapboxLayer } from 'mobility-toolbox-js/ol';
  *
  * const layer = new MapboxLayer({
- *   url: 'https://maps.geops.io/styles/travic_v2/style.json',
+ *   url: 'https://maps.geops.io/styles/travic/style.json',
  *   apikey: 'yourApiKey',
  * });
  *
