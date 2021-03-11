@@ -15,7 +15,7 @@ export default () => {
   });
 
   const mapboxLayer = new MapboxLayer({
-    url: 'https://maps.geops.io/styles/travic_v2_generalized/style.json',
+    url: 'https://maps.geops.io/styles/travic/style.json',
     apiKey: window.apiKey,
   });
 
