@@ -13,7 +13,7 @@ export default () => {
 
   const layer = new MapboxLayer({
     copyright: 'My Mapbox layer copyright',
-    url: 'https://maps.geops.io/styles/travic/style.json',
+    url: 'https://maps.geops.io/styles/travic_v2_generalized/style.json',
     apiKey: window.apiKey,
   });
   map.addLayer(layer);
