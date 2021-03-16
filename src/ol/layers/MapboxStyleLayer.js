@@ -232,12 +232,11 @@ class MapboxStyleLayer extends Layer {
    */
   terminate(map) {
     const { mbMap } = this.mapboxLayer;
-    if (!mbMap) {
+    if (mbMap) {
+      mbMap.off('load', this.onLoad);
+      this.removeStyleLayers();
       return;
     }
-
-    mbMap.off('load', this.onLoad);
-    this.removeStyleLayers();
     super.terminate(map);
   }
 
