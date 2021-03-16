@@ -83,11 +83,20 @@ describe('MapboxStyleLayer', () => {
     expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
   });
 
-  test('should call super class terminate even if the mapboxLayer associated has been terminated before.', () => {
+  test('should call super class terminate function.', () => {
+    layer.init(map);
+    const spy = jest.spyOn(Layer.prototype, 'terminate');
+    layer.terminate(map);
+    expect(spy).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  });
+
+  test('should call super class terminate if the mapboxLayer associated has been terminated before.', () => {
     layer.init(map);
     source.terminate(map);
     const spy = jest.spyOn(Layer.prototype, 'terminate');
     layer.terminate(map);
     expect(spy).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
   });
 });

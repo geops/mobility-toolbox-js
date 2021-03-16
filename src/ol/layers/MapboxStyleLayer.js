@@ -235,7 +235,6 @@ class MapboxStyleLayer extends Layer {
     if (mbMap) {
       mbMap.off('load', this.onLoad);
       this.removeStyleLayers();
-      return;
     }
     super.terminate(map);
   }
