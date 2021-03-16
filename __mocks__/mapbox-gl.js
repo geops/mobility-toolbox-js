@@ -39,6 +39,8 @@ class Map {
   off() {}
 
   loaded() {}
+
+  remove() {}
 }
 module.exports = {
   Map,
