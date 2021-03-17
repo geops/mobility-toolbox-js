@@ -1,6 +1,7 @@
 import Map from 'ol/Map';
 import View from 'ol/View';
 import mapboxgl from 'mapbox-gl';
+import Layer from './Layer';
 import MapboxLayer from './MapboxLayer';
 import MapboxStyleLayer from './MapboxStyleLayer';
 
@@ -80,5 +81,22 @@ describe('MapboxStyleLayer', () => {
     await map.dispatchEvent(evt);
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
+  });
+
+  test('should call super class terminate function.', () => {
+    layer.init(map);
+    const spy = jest.spyOn(Layer.prototype, 'terminate');
+    layer.terminate(map);
+    expect(spy).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
+  });
+
+  test('should call super class terminate if the mapboxLayer associated has been terminated before.', () => {
+    layer.init(map);
+    source.terminate(map);
+    const spy = jest.spyOn(Layer.prototype, 'terminate');
+    layer.terminate(map);
+    expect(spy).toHaveBeenCalledTimes(1);
+    spy.mockRestore();
   });
 });

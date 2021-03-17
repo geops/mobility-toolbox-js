@@ -51,7 +51,7 @@ class MapboxStyleLayer extends Layer {
    * Constructor.
    *
    * @param {Object} options
-   * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.   *
+   * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.
    * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.
    */
   constructor(options = {}) {
@@ -72,6 +72,14 @@ class MapboxStyleLayer extends Layer {
      * @private
      */
     this.styleLayersFilter = options.styleLayersFilter;
+
+    /**
+     * Mapbox style layer id where to add the style layers.
+     * See [mapbox.map.addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.
+     * @type {String}
+     * @private
+     */
+    this.beforeId = options.beforeId;
 
     /**
      * Function to filter features for getFeatureInfoAtCoordinate method.
@@ -232,12 +240,10 @@ class MapboxStyleLayer extends Layer {
    */
   terminate(map) {
     const { mbMap } = this.mapboxLayer;
-    if (!mbMap) {
-      return;
+    if (mbMap) {
+      mbMap.off('load', this.onLoad);
+      this.removeStyleLayers();
     }
-
-    mbMap.off('load', this.onLoad);
-    this.removeStyleLayers();
     super.terminate(map);
   }
 
@@ -252,7 +258,7 @@ class MapboxStyleLayer extends Layer {
     this.styleLayers.forEach((styleLayer) => {
       const { id, source } = styleLayer;
       if (mbMap.getSource(source) && !mbMap.getLayer(id)) {
-        mbMap.addLayer(styleLayer);
+        mbMap.addLayer(styleLayer, this.beforeId);
       }
     });
     applyLayoutVisibility(mbMap, this.visible, this.styleLayersFilter);
