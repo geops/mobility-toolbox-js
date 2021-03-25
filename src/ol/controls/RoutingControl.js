@@ -27,7 +27,7 @@ import RoutingLayer from '../layers/RoutingLayer';
  * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
  * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).
  * @classproperty {string} mot - Mean of transport to be used for routing.
- * @classproperty {object} additionalRoutingParams - object of additional parameters to pass to the routing request.
+ * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.
  * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.
  * @classproperty {function} onRouteError - Callback on error.
  * @see <a href="/example/ol-routing">Openlayers routing example</a>
@@ -67,7 +67,7 @@ class RoutingControl extends Control {
     this.mot = options.mot || 'bus';
 
     /** @ignore */
-    this.additionalRoutingParams = options.additionalRoutingParams || {};
+    this.routingApiParams = options.routingApiParams || {};
 
     /** @ignore */
     this.cacheStationData = {};
@@ -225,7 +225,7 @@ class RoutingControl extends Control {
           elevation: false,
           'coord-radius': 100.0,
           'coord-punish': 1000.0,
-          ...this.additionalRoutingParams,
+          ...this.routingApiParams,
         },
         this.abortController,
       )
