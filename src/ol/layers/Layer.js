@@ -33,6 +33,7 @@ class Layer extends LayerCommon {
    */
   constructor(options) {
     super(options);
+
     if (this.olLayer) {
       this.olLayer.setVisible(this.visible);
     }
@@ -124,6 +125,15 @@ class Layer extends LayerCommon {
     if (this.olLayer) {
       this.olLayer.setVisible(this.visible);
     }
+  }
+
+  /**
+   * Create a copy of the Layer.
+   * @param {Object} newOptions Options to override
+   * @returns {Layer} A Layer
+   */
+  clone(newOptions) {
+    return new Layer({ ...this.options, ...newOptions });
   }
 }
 export default Layer;

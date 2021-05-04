@@ -29,23 +29,16 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  * @implements {TrajservLayerInterface}
  */
 class TrajservLayer extends mixin(TrackerLayer) {
-  /**
-   * Define layer's properties.
-   *
-   * @ignore
-   */
-  defineProperties(options) {
-    super.defineProperties(options);
-    const vectorLayer = new VectorLayer({
+  constructor(options = {}) {
+    // We use a group to be able to add custom vector layer in extended class.
+    // For example TrajservLayer use a vectorLayer to display the complete trajectory.
+    super({
+      ...options,
+    });
+    this.vectorLayer = new VectorLayer({
       source: new VectorSource({ features: [] }),
     });
-    this.olLayer.getLayers().insertAt(0, vectorLayer);
-
-    Object.defineProperties(this, {
-      vectorLayer: {
-        value: vectorLayer,
-      },
-    });
+    this.olLayer.getLayers().insertAt(0, this.vectorLayer);
   }
 
   /**
@@ -288,6 +281,15 @@ class TrajservLayer extends mixin(TrackerLayer) {
   defaultStyle(props) {
     const zoom = this.map.getView().getZoom();
     return super.defaultStyle(props, zoom);
+  }
+
+  /**
+   * Create a copy of the TrajservLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {TrajservLayer} A TrajservLayer
+   */
+  clone(newOptions) {
+    return new TrajservLayer({ ...this.options, ...newOptions });
   }
 }
 

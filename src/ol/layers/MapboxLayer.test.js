@@ -48,6 +48,13 @@ describe('MapboxLayer', () => {
       layer.init();
       expect(spy).toHaveBeenCalledTimes(1);
     });
+
+    test('should clone', () => {
+      const clone = layer.clone({ name: 'clone' });
+      expect(clone).not.toBe(layer);
+      expect(clone.name).toBe('clone');
+      expect(clone).toBeInstanceOf(MapboxLayer);
+    });
   });
 
   describe('with apiKey', () => {

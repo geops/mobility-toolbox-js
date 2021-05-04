@@ -93,6 +93,15 @@ class VectorLayer extends Layer {
       unByKey(this.singleClickRef);
     }
   }
+
+  /**
+   * Create a copy of the VectorLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {VectorLayer} A VectorLayer
+   */
+  clone(newOptions) {
+    return new VectorLayer({ ...this.options, ...newOptions });
+  }
 }
 
 export default VectorLayer;

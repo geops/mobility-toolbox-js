@@ -54,18 +54,23 @@ export default class Layer extends Observable {
    *
    * @ignore
    */
-  defineProperties({
-    name,
-    key,
-    children,
-    visible,
-    properties,
-    isBaseLayer,
-    isQueryable,
-  }) {
+  defineProperties(options) {
+    const {
+      name,
+      key,
+      children,
+      visible,
+      properties,
+      isBaseLayer,
+      isQueryable,
+    } = options;
     const uid = uuid();
     const dfltName = name || uid;
     Object.defineProperties(this, {
+      // options is used for clone function.
+      options: {
+        value: options,
+      },
       name: {
         value: dfltName,
       },

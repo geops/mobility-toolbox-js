@@ -52,4 +52,11 @@ describe('TrackerLayer', () => {
     expect(layer.clickCallbacks[1]).toBe(bar);
     expect(layer.clickCallbacks.length).toBe(2);
   });
+
+  test('should clone', () => {
+    const clone = layer.clone({ name: 'clone' });
+    expect(clone).not.toBe(layer);
+    expect(clone.name).toBe('clone');
+    expect(clone).toBeInstanceOf(TrackerLayer);
+  });
 });

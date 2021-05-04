@@ -19,26 +19,32 @@ class TrackerLayer extends mixin(Layer) {
    * @private
    */
   constructor(options = {}) {
-    const olLayer = new OLLayer({
-      source: new Source({}),
-      render: (frameState) => {
-        if (this.tracker && this.tracker.canvas) {
-          this.tracker.renderTrajectories(
-            this.currTime,
-            frameState.size,
-            frameState.viewState.resolution,
-          );
-          return this.tracker.canvas;
-        }
-        return null;
-      },
-    });
     // We use a group to be able to add custom vector layer in extended class.
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
-      olLayer: new Group({ layers: [olLayer] }),
       ...options,
     });
+
+    this.olLayer =
+      options.olLayer ||
+      new Group({
+        layers: [
+          new OLLayer({
+            source: new Source({}),
+            render: (frameState) => {
+              if (this.tracker && this.tracker.canvas) {
+                this.tracker.renderTrajectories(
+                  this.currTime,
+                  frameState.size,
+                  frameState.viewState.resolution,
+                );
+                return this.tracker.canvas;
+              }
+              return null;
+            },
+          }),
+        ],
+      });
 
     /**
      * Array of ol events key, returned by on() or once().
@@ -127,6 +133,15 @@ class TrackerLayer extends mixin(Layer) {
   getVehiclesAtCoordinate(coordinate) {
     const resolution = this.map.getView().getResolution();
     return super.getVehiclesAtCoordinate(coordinate, resolution);
+  }
+
+  /**
+   * Create a copy of the TrackerLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {TrackerLayer} A TrackerLayer
+   */
+  clone(newOptions) {
+    return new TrackerLayer({ ...this.options, ...newOptions });
   }
 }
 

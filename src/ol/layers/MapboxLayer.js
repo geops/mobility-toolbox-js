@@ -123,9 +123,6 @@ export default class MapboxLayer extends Layer {
       olLayer: mbLayer,
     });
 
-    /** @ignore */
-    this.options = options;
-
     /**
      * Url of the mapbox style.
      * @type {string}
@@ -355,10 +352,11 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
-   * Create exact copy of the MapboxLayer
-   * @returns {MapboxLayer} MapboxLayer
+   * Create a copy of the MapboxLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {MapboxLayer} A MapboxLayer
    */
-  clone() {
-    return new MapboxLayer({ ...this.options, url: this.styleUrl });
+  clone(newOptions) {
+    return new MapboxLayer({ ...this.options, ...newOptions });
   }
 }

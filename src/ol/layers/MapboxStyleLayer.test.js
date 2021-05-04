@@ -99,4 +99,11 @@ describe('MapboxStyleLayer', () => {
     expect(spy).toHaveBeenCalledTimes(1);
     spy.mockRestore();
   });
+
+  test('should clone', () => {
+    const clone = layer.clone({ name: 'clone' });
+    expect(clone).not.toBe(layer);
+    expect(clone.name).toBe('clone');
+    expect(clone).toBeInstanceOf(MapboxStyleLayer);
+  });
 });

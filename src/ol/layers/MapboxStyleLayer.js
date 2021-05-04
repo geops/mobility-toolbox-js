@@ -56,8 +56,6 @@ class MapboxStyleLayer extends Layer {
    */
   constructor(options = {}) {
     super(options);
-    /** @ignore */
-    this.options = options;
 
     /**
      * MapboxLayer provided for the style Layer.
@@ -412,13 +410,12 @@ class MapboxStyleLayer extends Layer {
   }
 
   /**
-   * Create exact copy of the MapboxLayer
-   * @param {MapboxLayer} mapboxLayer mapboxLayer to clone.
-   * @returns {MapboxLayer} cloned MapboxLayer
+   * Create a copy of the MapboxStyleLayer.
+   * @param {Object} newOptions Options to override.
+   * @returns {MapboxStyleLayer} A MapboxStyleLayer.
    */
-  clone(mapboxLayer) {
-    const options = { ...this.options, mapboxLayer };
-    return new MapboxStyleLayer(options);
+  clone(newOptions) {
+    return new MapboxStyleLayer({ ...this.options, ...newOptions });
   }
 }
 

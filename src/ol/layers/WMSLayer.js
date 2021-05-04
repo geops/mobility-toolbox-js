@@ -117,6 +117,15 @@ class WMSLayer extends Layer {
       unByKey(this.singleClickRef);
     }
   }
+
+  /**
+   * Create a copy of the WMSLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {WMSLayer} A WMSLayer
+   */
+  clone(newOptions) {
+    return new WMSLayer({ ...this.options, ...newOptions });
+  }
 }
 
 export default WMSLayer;

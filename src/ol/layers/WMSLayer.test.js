@@ -70,4 +70,11 @@ describe('WMSLayer', () => {
       layer.onClick('not of type function');
     }).toThrow(Error);
   });
+
+  test('should clone', () => {
+    const clone = layer.clone({ name: 'clone' });
+    expect(clone).not.toBe(layer);
+    expect(clone.name).toBe('clone');
+    expect(clone).toBeInstanceOf(WMSLayer);
+  });
 });
