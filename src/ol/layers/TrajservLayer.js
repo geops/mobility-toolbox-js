@@ -35,6 +35,8 @@ class TrajservLayer extends mixin(TrackerLayer) {
     super({
       ...options,
     });
+
+    /** @ignore */
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({ features: [] }),
     });

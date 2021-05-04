@@ -8882,10 +8882,10 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-mapbox-gl@1.12.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-1.12.0.tgz#7d1c73b1153d7ee219d30d80728d7df079bc7c05"
-  integrity sha512-B3URR4qY9R/Bx+DKqP8qmGCai8IOZYMSZF7ZSvcCZaYTaOYhQQi8ErTEDZtFMOR0ZPj7HFWOkkhl5SqvDfpJpA==
+mapbox-gl@^1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-1.13.1.tgz#322efe75ab4c764fc4c776da1506aad58d5a5b9d"
+  integrity sha512-GSyubcoSF5MyaP8z+DasLu5v7KmDK2pp4S5+VQ5WdVQUOaAqQY4jwl4JpcdNho3uWm2bIKs7x1l7q3ynGmW60g==
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.0"
     "@mapbox/geojson-types" "^1.0.2"
@@ -9777,7 +9777,7 @@ ol-mapbox-style@^6.1.1:
     mapbox-to-css-font "^2.4.0"
     webfont-matcher "^1.1.0"
 
-ol@6.5.0:
+ol@^6:
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/ol/-/ol-6.5.0.tgz#d9cd59081ac34dc4caf0509c3f667748a8207a21"
   integrity sha512-a5ebahrjF5yCPFle1rc0aHzKp/9A4LlUnjh+S3I+x4EgcvcddDhpOX3WDOs0Pg9/wEElrikHSGEvbeej2Hh4Ug==
