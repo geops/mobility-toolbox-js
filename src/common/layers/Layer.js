@@ -108,7 +108,7 @@ export default class Layer extends Observable {
         writable: true,
       },
       properties: {
-        value: properties || {},
+        value: { ...(properties || {}) },
       },
       map: {
         writable: true,
