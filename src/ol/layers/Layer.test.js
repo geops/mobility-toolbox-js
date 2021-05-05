@@ -86,4 +86,16 @@ describe('Layer', () => {
     layer.init(map);
     expect(spy).toHaveBeenCalledWith(['bar']);
   });
+
+  test('should clone', () => {
+    const layer = new Layer({
+      name: 'Layer',
+      copyrights: ['bar'],
+      olLayer: new Group({ layers: [olLayer] }),
+    });
+    const clone = layer.clone({ name: 'clone' });
+    expect(clone).not.toBe(layer);
+    expect(clone.name).toBe('clone');
+    expect(clone).toBeInstanceOf(Layer);
+  });
 });

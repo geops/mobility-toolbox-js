@@ -56,8 +56,6 @@ class MapboxStyleLayer extends Layer {
    */
   constructor(options = {}) {
     super(options);
-    /** @ignore */
-    this.options = options;
 
     /**
      * MapboxLayer provided for the style Layer.
@@ -299,16 +297,26 @@ class MapboxStyleLayer extends Layer {
    */
   getFeatureInfoAtCoordinate(coordinate) {
     const { mbMap } = this.mapboxLayer;
+
     // Ignore the getFeatureInfo until the mapbox map is loaded
     if (!mbMap || !mbMap.isStyleLoaded()) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
+
+    // We query features only on style layers used by this layer.
+    let layers = this.styleLayers || [];
+
+    if (this.styleLayersFilter) {
+      layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);
+    }
+
+    if (this.queryRenderedLayersFilter) {
+      layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
+    }
+
     return this.mapboxLayer
       .getFeatureInfoAtCoordinate(coordinate, {
-        layers: (this.queryRenderedLayersFilter
-          ? mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter)
-          : this.styleLayers
-        ).map((s) => s && s.id),
+        layers: layers.map((layer) => layer && layer.id),
         validate: false,
       })
       .then((featureInfo) => {
@@ -354,9 +362,9 @@ class MapboxStyleLayer extends Layer {
       return;
     }
 
-    const options = this.styleLayers[0];
     features.forEach((feature) => {
-      if ((!options.source && !options['source-layer']) || !feature.getId()) {
+      const { source, sourceLayer } = feature.get('mapboxFeature') || {};
+      if ((!source && !sourceLayer) || !feature.getId()) {
         if (!feature.getId()) {
           // eslint-disable-next-line no-console
           console.warn(
@@ -371,8 +379,8 @@ class MapboxStyleLayer extends Layer {
       mbMap.setFeatureState(
         {
           id: feature.getId(),
-          source: options.source,
-          sourceLayer: options['source-layer'],
+          source,
+          sourceLayer,
         },
         { hover: state },
       );
@@ -412,13 +420,12 @@ class MapboxStyleLayer extends Layer {
   }
 
   /**
-   * Create exact copy of the MapboxLayer
-   * @param {MapboxLayer} mapboxLayer mapboxLayer to clone.
-   * @returns {MapboxLayer} cloned MapboxLayer
+   * Create a copy of the MapboxStyleLayer.
+   * @param {Object} newOptions Options to override.
+   * @returns {MapboxStyleLayer} A MapboxStyleLayer.
    */
-  clone(mapboxLayer) {
-    const options = { ...this.options, mapboxLayer };
-    return new MapboxStyleLayer(options);
+  clone(newOptions) {
+    return new MapboxStyleLayer({ ...this.options, ...newOptions });
   }
 }
 

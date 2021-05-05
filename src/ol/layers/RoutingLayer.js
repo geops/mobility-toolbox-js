@@ -57,12 +57,22 @@ class RoutingLayer extends Layer {
    */
   constructor(options = {}) {
     super(options);
+
     this.olLayer =
       options.olLayer ||
       new Vector({
         source: new VectorSource(),
         style: options.style || defaultStyleFunction,
       });
+  }
+
+  /**
+   * Create a copy of the RoutingLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {RoutingLayer} A RoutingLayer
+   */
+  clone(newOptions) {
+    return new RoutingLayer({ ...this.options, ...newOptions });
   }
 }
 

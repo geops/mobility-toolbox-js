@@ -48,6 +48,13 @@ describe('MapboxLayer', () => {
       layer.init();
       expect(spy).toHaveBeenCalledTimes(1);
     });
+
+    test('should clone', () => {
+      const clone = layer.clone({ name: 'clone' });
+      expect(clone).not.toBe(layer);
+      expect(clone.name).toBe('clone');
+      expect(clone).toBeInstanceOf(MapboxLayer);
+    });
   });
 
   describe('with apiKey', () => {
@@ -92,6 +99,56 @@ describe('MapboxLayer', () => {
       });
       layer1.init(map);
       expect(layer1.mbMap.options.style).toBe('foo.com/styles?apiKey=test');
+    });
+  });
+
+  describe('#getFeatureInfoAtCoordinate()', () => {
+    let layer1;
+    beforeEach(() => {
+      layer1 = new MapboxLayer({
+        name: 'Layer',
+        url: styleUrl,
+        apiKey: 'test',
+        apiKeyName: 'apiKey',
+      });
+      layer1.init(map);
+      layer1.mbMap.isStyleLoaded = jest.fn(() => {
+        return true;
+      });
+      layer1.mbMap.getSource = jest.fn(() => {
+        return true;
+      });
+    });
+
+    afterEach(() => {
+      layer1.mbMap.getSource.mockRestore();
+      layer1.mbMap.isStyleLoaded.mockRestore();
+    });
+
+    test('should set the mapboxFeature as a property', (done) => {
+      const mapboxFeature = {
+        id: '2',
+        type: 'Feature',
+        properties: {
+          foo: 'bar',
+        },
+        source: 'barr',
+        sourceLayer: 'fooo',
+      };
+      layer1.mbMap.project = jest.fn((coord) => {
+        return coord;
+      });
+      layer1.mbMap.queryRenderedFeatures = jest.fn(() => {
+        return [mapboxFeature];
+      });
+      layer1.getFeatureInfoAtCoordinate([0, 0], {}).then((featureInfo) => {
+        expect(featureInfo.features[0].get('mapboxFeature')).toBe(
+          mapboxFeature,
+        );
+        done();
+      });
+      layer1.mbMap.project.mockRestore();
+      layer1.mbMap.queryRenderedFeatures.mockRestore();
     });
   });
 });

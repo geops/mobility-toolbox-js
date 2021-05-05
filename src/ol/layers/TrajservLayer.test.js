@@ -101,4 +101,17 @@ describe('TrajservLayer', () => {
     expect(layr.api.url).toBe('https:foo.ch');
     expect(layr.api.apiKey).toBe('bar');
   });
+
+  test('should clone', () => {
+    const layr = new TrajservLayer({
+      name: 'test',
+      url: 'https:foo.ch',
+      apiKey: 'bar',
+    });
+    const clone = layr.clone({ name: 'clone' });
+    expect(layr.name).toBe('test');
+    expect(clone).not.toBe(layr);
+    expect(clone.name).toBe('clone');
+    expect(clone).toBeInstanceOf(TrajservLayer);
+  });
 });
