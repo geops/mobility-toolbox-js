@@ -326,7 +326,14 @@ export default class MapboxLayer extends Layer {
     // feature to be consistent with other layers.
     const features = this.mbMap
       .queryRenderedFeatures(pixel, options)
-      .map((feature) => this.format.readFeature(feature));
+      .map((feature) => {
+        const olFeature = this.format.readFeature(feature);
+        // We save the original mapbox feature to avoid losing informations
+        // potentially needed for other functionnality like highlighting
+        // (id, layer id, source, sourceLayer ...)
+        olFeature.set('mapboxFeature', feature);
+        return olFeature;
+      });
 
     return Promise.resolve({
       layer: this,

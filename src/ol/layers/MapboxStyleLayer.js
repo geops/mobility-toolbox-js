@@ -362,9 +362,9 @@ class MapboxStyleLayer extends Layer {
       return;
     }
 
-    const options = this.styleLayers[0];
     features.forEach((feature) => {
-      if ((!options.source && !options['source-layer']) || !feature.getId()) {
+      const { source, sourceLayer } = feature.get('mapboxFeature') || {};
+      if ((!source && !sourceLayer) || !feature.getId()) {
         if (!feature.getId()) {
           // eslint-disable-next-line no-console
           console.warn(
@@ -379,8 +379,8 @@ class MapboxStyleLayer extends Layer {
       mbMap.setFeatureState(
         {
           id: feature.getId(),
-          source: options.source,
-          sourceLayer: options['source-layer'],
+          source,
+          sourceLayer,
         },
         { hover: state },
       );
