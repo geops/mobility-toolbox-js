@@ -308,7 +308,7 @@ export default class MapboxLayer extends Layer {
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
-   *  or null if no feature was hit.
+   *  or null if no feature was hit. The original Mapbox feature is available as a property named 'mapboxFeature'.
    */
   getFeatureInfoAtCoordinate(coordinate, options) {
     // Ignore the getFeatureInfo until the mapbox map is loaded
@@ -328,10 +328,12 @@ export default class MapboxLayer extends Layer {
       .queryRenderedFeatures(pixel, options)
       .map((feature) => {
         const olFeature = this.format.readFeature(feature);
-        // We save the original mapbox feature to avoid losing informations
-        // potentially needed for other functionnality like highlighting
-        // (id, layer id, source, sourceLayer ...)
-        olFeature.set('mapboxFeature', feature);
+        if (olFeature) {
+          // We save the original mapbox feature to avoid losing informations
+          // potentially needed for other functionnality like highlighting
+          // (id, layer id, source, sourceLayer ...)
+          olFeature.set('mapboxFeature', feature);
+        }
         return olFeature;
       });
 
