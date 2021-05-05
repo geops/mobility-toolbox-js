@@ -106,4 +106,110 @@ describe('MapboxStyleLayer', () => {
     expect(clone.name).toBe('clone');
     expect(clone).toBeInstanceOf(MapboxStyleLayer);
   });
+
+  describe('#getFeatureInfoAtCoordinate()', () => {
+    beforeEach(() => {
+      source.init(map);
+      source.mbMap.isStyleLoaded = jest.fn(() => {
+        return true;
+      });
+      source.mbMap.getSource = jest.fn(() => {
+        return true;
+      });
+    });
+    afterEach(() => {
+      source.mbMap.getSource.mockRestore();
+      source.mbMap.isStyleLoaded.mockRestore();
+    });
+
+    test('should request features on layers ids from styleLayers property', () => {
+      source.mbMap.getStyle = jest.fn(() => {
+        return { layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }] };
+      });
+      layer.init(map);
+      layer.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
+        return Promise.resolve({ features: [] });
+      });
+      layer.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
+      expect(
+        layer.mapboxLayer.getFeatureInfoAtCoordinate,
+      ).toHaveBeenCalledWith([0, 0], { layers: ['layer'], validate: false });
+      layer.mapboxLayer.getFeatureInfoAtCoordinate.mockRestore();
+      source.mbMap.getStyle.mockRestore();
+    });
+
+    test('should request features on layers ids from styleLayersFilter property', () => {
+      source.mbMap.getStyle = jest.fn(() => {
+        return {
+          layers: [
+            { id: 'foo' },
+            { id: 'layer' },
+            { id: 'bar' },
+            { id: 'foo2' },
+          ],
+        };
+      });
+      const layer2 = new MapboxStyleLayer({
+        name: 'mapbox layer',
+        visible: true,
+        mapboxLayer: source,
+        styleLayer,
+        styleLayersFilter: ({ id }) => {
+          return /foo/.test(id);
+        },
+      });
+      layer2.init(map);
+      layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
+        return Promise.resolve({ features: [] });
+      });
+      layer2.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
+      expect(
+        layer2.mapboxLayer.getFeatureInfoAtCoordinate,
+      ).toHaveBeenCalledWith([0, 0], {
+        layers: ['foo', 'foo2'],
+        validate: false,
+      });
+      layer2.mapboxLayer.getFeatureInfoAtCoordinate.mockRestore();
+      source.mbMap.getStyle.mockRestore();
+    });
+
+    test('should request features on layers ids from queryRenderedLayersFilter property', () => {
+      source.mbMap.getStyle = jest.fn(() => {
+        return {
+          layers: [
+            { id: 'foo' },
+            { id: 'bar2' },
+            { id: 'layer' },
+            { id: 'bar' },
+            { id: 'foo2' },
+          ],
+        };
+      });
+      const layer2 = new MapboxStyleLayer({
+        name: 'mapbox layer',
+        visible: true,
+        mapboxLayer: source,
+        styleLayer,
+        styleLayersFilter: ({ id }) => {
+          return /foo/.test(id);
+        },
+        queryRenderedLayersFilter: ({ id }) => {
+          return /bar/.test(id);
+        },
+      });
+      layer2.init(map);
+      layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
+        return Promise.resolve({ features: [] });
+      });
+      layer2.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
+      expect(
+        layer2.mapboxLayer.getFeatureInfoAtCoordinate,
+      ).toHaveBeenCalledWith([0, 0], {
+        layers: ['bar2', 'bar'],
+        validate: false,
+      });
+      layer2.mapboxLayer.getFeatureInfoAtCoordinate.mockRestore();
+      source.mbMap.getStyle.mockRestore();
+    });
+  });
 });

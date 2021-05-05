@@ -297,16 +297,26 @@ class MapboxStyleLayer extends Layer {
    */
   getFeatureInfoAtCoordinate(coordinate) {
     const { mbMap } = this.mapboxLayer;
+
     // Ignore the getFeatureInfo until the mapbox map is loaded
     if (!mbMap || !mbMap.isStyleLoaded()) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
+
+    // We query features only on style layers used by this layer.
+    let layers = this.styleLayers || [];
+
+    if (this.styleLayersFilter) {
+      layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);
+    }
+
+    if (this.queryRenderedLayersFilter) {
+      layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
+    }
+
     return this.mapboxLayer
       .getFeatureInfoAtCoordinate(coordinate, {
-        layers: (this.queryRenderedLayersFilter
-          ? mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter)
-          : this.styleLayers
-        ).map((s) => s && s.id),
+        layers: layers.map((layer) => layer && layer.id),
         validate: false,
       })
       .then((featureInfo) => {
