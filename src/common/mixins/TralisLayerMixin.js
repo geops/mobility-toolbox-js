@@ -3,18 +3,8 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-import qs from 'query-string';
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from 'ol/geom/Point';
-import { getDateString, getUTCTimeString } from '../timeUtils';
-import {
-  getRadius,
-  getBgColor,
-  getDelayColor,
-  getDelayText,
-  getTextColor,
-  getTextSize,
-} from '../trackerConfig';
 import { TralisAPI, TralisModes } from '../../api';
 
 /**
