@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 import qs from 'query-string';
-import { getDateString, getUTCTimeString } from '../timeUtils';
+import { getUTCDateString, getUTCTimeString } from '../timeUtils';
 import {
   getRadius,
   getBgColor,
@@ -347,7 +347,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         ...extraParams,
         btime: getUTCTimeString(now),
         etime: getUTCTimeString(this.later),
-        date: getDateString(now),
+        date: getUTCDateString(now),
         rid: 1,
         a: 1,
         cd: 1,
