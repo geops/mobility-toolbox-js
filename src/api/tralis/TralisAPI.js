@@ -43,6 +43,7 @@ class TralisAPI {
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} [options.prefix=''] Service prefix to specify tenant.
    * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
    */
   constructor(options = {}) {
@@ -66,6 +67,7 @@ class TralisAPI {
     this.maxDepartureAge = 30;
     /** @ignore */
     this.extraGeoms = {};
+    this.prefix = options.prefix || '';
   }
 
   /**
@@ -213,12 +215,12 @@ class TralisAPI {
   }
 
   /**
-   * Subscribe to the disruptions channel.
+   * Subscribe to the disruptions channel for tenant.
    *
    * @param {function} onMessage Function called on each message of the channel.
    */
   subscribeDisruptions(onMessage) {
-    this.subscribe('newsticker', (data) => {
+    this.subscribe(`${this.prefix}newsticker`, (data) => {
       onMessage(data.content);
     });
   }
@@ -227,7 +229,7 @@ class TralisAPI {
    * Unsubscribe disruptions.
    */
   unsubscribeDisruptions() {
-    this.unsubscribe('newsticker');
+    this.unsubscribe(`${this.prefix}newsticker`);
   }
 
   /**
