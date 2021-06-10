@@ -457,12 +457,11 @@ class TralisAPI {
    * Get the list of stops for this vehicle.
    *
    * @param {number} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<StopSequence>} Returns a stop sequence object.
    */
-  getStopSequence(id, mode) {
+  getStopSequence(id) {
     const params = {
-      channel: `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
+      channel: `stopsequence_${id}`,
     };
     return new Promise((resolve, reject) => {
       this.conn.get(
@@ -482,12 +481,11 @@ class TralisAPI {
    * Get a list of stops for a list of vehicles.
    *
    * @param {number[]} ids List of vehicles ids.
-   * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<StopSequence[]>} Return an array of stop sequences.
    */
-  getStopSequences(ids, mode) {
+  getStopSequences(ids) {
     const promises = ids.map((id) => {
-      return this.getStopSequence(id, mode);
+      return this.getStopSequence(id);
     });
     return Promise.all(promises);
   }
@@ -496,15 +494,14 @@ class TralisAPI {
    * Subscribe to stopsequence channel of a given vehicle.
    *
    * @param {number} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
    * @param {function(stopSequence: StopSequence)} onMessage Function called on each message of the channel.
    */
-  subscribeStopSequence(id, mode, onMessage) {
+  subscribeStopSequence(id, onMessage) {
     window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeStopSequence(id);
 
     this.subscribe(
-      `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
+      `stopsequence_${id}`,
       (data) => {
         // Remove the delay from arrivalTime nad departureTime
         onMessage(cleanStopTime(data.content && data.content[0]));
