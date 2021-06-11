@@ -43,6 +43,7 @@ class TralisAPI {
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} [options.prefix=''] Service prefix to specify tenant.
    * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
    */
   constructor(options = {}) {
@@ -66,6 +67,7 @@ class TralisAPI {
     this.maxDepartureAge = 30;
     /** @ignore */
     this.extraGeoms = {};
+    this.prefix = options.prefix || '';
   }
 
   /**
@@ -213,12 +215,12 @@ class TralisAPI {
   }
 
   /**
-   * Subscribe to the disruptions channel.
+   * Subscribe to the disruptions channel for tenant.
    *
    * @param {function} onMessage Function called on each message of the channel.
    */
   subscribeDisruptions(onMessage) {
-    this.subscribe('newsticker', (data) => {
+    this.subscribe(`${this.prefix}newsticker`, (data) => {
       onMessage(data.content);
     });
   }
@@ -227,7 +229,7 @@ class TralisAPI {
    * Unsubscribe disruptions.
    */
   unsubscribeDisruptions() {
-    this.unsubscribe('newsticker');
+    this.unsubscribe(`${this.prefix}newsticker`);
   }
 
   /**
@@ -455,12 +457,11 @@ class TralisAPI {
    * Get the list of stops for this vehicle.
    *
    * @param {number} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<StopSequence>} Returns a stop sequence object.
    */
-  getStopSequence(id, mode) {
+  getStopSequence(id) {
     const params = {
-      channel: `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
+      channel: `stopsequence_${id}`,
     };
     return new Promise((resolve, reject) => {
       this.conn.get(
@@ -480,12 +481,11 @@ class TralisAPI {
    * Get a list of stops for a list of vehicles.
    *
    * @param {number[]} ids List of vehicles ids.
-   * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<StopSequence[]>} Return an array of stop sequences.
    */
-  getStopSequences(ids, mode) {
+  getStopSequences(ids) {
     const promises = ids.map((id) => {
-      return this.getStopSequence(id, mode);
+      return this.getStopSequence(id);
     });
     return Promise.all(promises);
   }
@@ -494,15 +494,14 @@ class TralisAPI {
    * Subscribe to stopsequence channel of a given vehicle.
    *
    * @param {number} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
    * @param {function(stopSequence: StopSequence)} onMessage Function called on each message of the channel.
    */
-  subscribeStopSequence(id, mode, onMessage) {
+  subscribeStopSequence(id, onMessage) {
     window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeStopSequence(id);
 
     this.subscribe(
-      `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
+      `stopsequence_${id}`,
       (data) => {
         // Remove the delay from arrivalTime nad departureTime
         onMessage(cleanStopTime(data.content && data.content[0]));
