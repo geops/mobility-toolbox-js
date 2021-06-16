@@ -42,7 +42,7 @@ const EsdocSearch = () => {
     <div className="search-box active">
       <TextField
         className={classes.filterField}
-        placeholder="Filter"
+        placeholder="Search..."
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
       />

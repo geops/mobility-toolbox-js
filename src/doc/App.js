@@ -17,6 +17,8 @@ const useStyles = makeStyles({
     overflowY: 'auto',
     marginTop: 30,
     paddingBottom: 200,
+    maxWidth: '78vh',
+    minHeight: 'calc(100vh - 528px)',
   },
 });
 
@@ -46,7 +48,7 @@ const App = () => {
     <ThemeProvider theme={geopsTheme}>
       <Router>
         <Header title="mobility-toolbox-js" tabs={tabs} />
-        <Container maxWidth="lg" className={classes.content}>
+        <Container className={classes.content}>
           <Route exact path="/">
             <Redirect to="/home" />
           </Route>
