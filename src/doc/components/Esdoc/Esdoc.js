@@ -12,11 +12,16 @@ const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
   },
-  navigation: {
-    padding: theme.spacing(1),
-  },
   content: {
     padding: theme.spacing(1),
+    paddingBottom: 200,
+    margin: 'auto',
+    maxWidth: '740px',
+  },
+  navWrapper: {
+    height: 'calc(100% - 32px)',
+    padding: theme.spacing(2),
+    backgroundColor: 'rgb(239, 239, 239)',
   },
 }));
 
@@ -37,10 +42,12 @@ const Esdoc = ({ path }) => {
         </Grid>
       </Hidden>
       <Hidden only="xs">
-        <Grid container>
-          <Grid item xs={3} className={classes.navigation}>
-            <EsdocSearch />
-            <EsdocNavigation />
+        <Grid container wrap="nowrap">
+          <Grid item xs={2} style={{ minWidth: 240, maxWidth: 280 }}>
+            <div className={classes.navWrapper}>
+              <EsdocSearch />
+              <EsdocNavigation />
+            </div>
           </Grid>
           <Grid item xs={9} className={classes.content}>
             <EsdocContent path={path} />

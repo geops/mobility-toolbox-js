@@ -54,6 +54,7 @@ function Home() {
   return (
     <>
       <Markdown source={source} />
+      <br />
       <h2>Quick Start</h2>
       <TrackerExample />
       <p>

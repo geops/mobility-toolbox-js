@@ -15,10 +15,16 @@ const useStyles = makeStyles({
   content: {
     flexGrow: 1,
     overflowY: 'auto',
-    marginTop: 30,
     paddingBottom: 200,
-    maxWidth: '78vh',
     minHeight: 'calc(100vh - 528px)',
+    maxWidth: 'calc(85vh + 48px)',
+    margin: 'auto',
+    marginTop: 30,
+  },
+  documentation: {
+    flexGrow: 1,
+    overflowY: 'auto',
+    padding: 0,
   },
 });
 
@@ -48,23 +54,31 @@ const App = () => {
     <ThemeProvider theme={geopsTheme}>
       <Router>
         <Header title="mobility-toolbox-js" tabs={tabs} />
-        <Container className={classes.content}>
-          <Route exact path="/">
+        <Route exact path="/">
+          <Container className={classes.content}>
             <Redirect to="/home" />
-          </Route>
-          <Route exact path="/examples">
+          </Container>
+        </Route>
+        <Route exact path="/examples">
+          <Container className={classes.content}>
             <Examples />
-          </Route>
-          <Route path="/example/:exampleKey">
+          </Container>
+        </Route>
+        <Route path="/example/:exampleKey">
+          <Container className={classes.content}>
             <Example />
-          </Route>
-          <Route exact path="/home">
+          </Container>
+        </Route>
+        <Route exact path="/home">
+          <Container className={classes.content}>
             <Home />
-          </Route>
-          <Route path="/api/:path*">
+          </Container>
+        </Route>
+        <Route path="/api/:path*">
+          <Container className={classes.documentation} maxWidth={false}>
             <Documentation />
-          </Route>
-        </Container>
+          </Container>
+        </Route>
         <Footer />
       </Router>
     </ThemeProvider>

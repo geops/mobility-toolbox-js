@@ -3,10 +3,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import { TextField } from '@material-ui/core';
 import { _getSearchIndex } from './DocBuilderUtils';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   filterField: {
     width: '100%',
-    marginBottom: theme.spacing(2),
+  },
+  searchWrapper: {
+    backgroundColor: 'white',
   },
 }));
 
@@ -39,8 +41,15 @@ const EsdocSearch = () => {
   }, [filter, searchIndex]);
 
   return (
-    <div className="search-box active">
+    <div className={`search-box active ${classes.searchWrapper}`}>
       <TextField
+        inputProps={{
+          style: {
+            padding: 8,
+            fontSize: 16,
+          },
+        }}
+        variant="outlined"
         className={classes.filterField}
         placeholder="Search..."
         value={filter}
