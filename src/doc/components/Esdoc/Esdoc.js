@@ -6,6 +6,7 @@ import Hidden from '@material-ui/core/Hidden';
 import EsdocContent from './EsdocContent';
 import EsdocNavigation from './EsdocNavigation';
 import EsdocSearch from './EsdocSearch';
+import { version } from '../../../../package.json';
 import './css/style.css';
 
 const useStyles = makeStyles((theme) => ({
@@ -45,6 +46,7 @@ const Esdoc = ({ path }) => {
         <Grid container wrap="nowrap">
           <Grid item xs={2} style={{ minWidth: 240, maxWidth: 280 }}>
             <div className={classes.navWrapper}>
+              {version}
               <EsdocSearch />
               <EsdocNavigation />
             </div>
