@@ -1016,10 +1016,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@geops/geops-ui@0.1.11-beta.1":
-  version "0.1.11-beta.1"
-  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.1.11-beta.1.tgz#0a1336157914f79843eaec8e4a9eeea115845014"
-  integrity sha512-QFdrciWwUZyLRRWFb7Oj+EBWgfkn8KmSyNrLAApWkkWk/2b4sPtwcQ3MGDKSIBryPiPU04OTb2U8ofMBBYtNNw==
+"@geops/geops-ui@0.1.11-beta.2":
+  version "0.1.11-beta.2"
+  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.1.11-beta.2.tgz#8eb7b37016d6d1bc5a389e7ea0164ed6a9d5e75d"
+  integrity sha512-5KlczripbrVXMYD4fpLv1L9b7iAEf7sW5aLE74u84jTKh/HXLjtcwBRmsqyZv9x0RJZ1eDAojfpfmZv0O5cPYA==
   dependencies:
     prop-types "^15.7.2"
     react-app-polyfill "^2.0.0"
