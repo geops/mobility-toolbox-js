@@ -44,7 +44,7 @@ const Esdoc = ({ path }) => {
       </Hidden>
       <Hidden only="xs">
         <Grid container wrap="nowrap">
-          <Grid item xs={2} style={{ minWidth: 240, maxWidth: 280 }}>
+          <Grid item style={{ minWidth: 260, maxWidth: 300 }}>
             <div className={classes.navWrapper}>
               {version}
               <EsdocSearch />
