@@ -101,7 +101,7 @@ export default class Tracker {
     }
 
     this.trajectories = trajectories;
-    this.tracker.renderTrajectories();
+    this.renderTrajectories();
   }
 
   /**
