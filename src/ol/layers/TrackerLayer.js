@@ -25,6 +25,9 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
+    let oldCenter = null;
+    let oldZoom = null;
+
     this.olLayer =
       options.olLayer ||
       new Group({
@@ -32,15 +35,33 @@ class TrackerLayer extends mixin(Layer) {
           new OLLayer({
             source: new Source({}),
             render: (frameState) => {
-              if (this.tracker && this.tracker.canvas) {
+              if (!this.tracker || !this.tracker.canvas) {
+                return null;
+              }
+              const { zoom, center } = frameState.viewState;
+              oldZoom = oldZoom || zoom;
+              oldCenter = oldCenter || center;
+
+              if (zoom !== oldZoom) {
                 this.tracker.renderTrajectories(
                   this.currTime,
                   frameState.size,
                   frameState.viewState.resolution,
+                  true,
                 );
-                return this.tracker.canvas;
+                oldZoom = zoom;
+                oldCenter = center;
+              } else if (
+                oldCenter[0] !== center[0] ||
+                oldCenter[1] !== center[1]
+              ) {
+                const px = this.map.getPixelFromCoordinate(center);
+                const oldPx = this.map.getPixelFromCoordinate(oldCenter);
+                this.tracker.moveCanvas(px[0] - oldPx[0], px[1] - oldPx[1]);
+                oldCenter = center;
               }
-              return null;
+
+              return this.tracker.canvas;
             },
           }),
         ],

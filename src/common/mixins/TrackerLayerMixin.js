@@ -204,6 +204,18 @@ const TrackerLayerMixin = (Base) =>
       this.tracker = new Tracker(options);
       this.tracker.setStyle((props, r) => this.style(props, r));
 
+      this.map.on('movestart', () => {
+        this.isMapMoving = true;
+      });
+
+      this.map.on('moveend', () => {
+        window.clearTimeout(this.moveendTimeout);
+        this.moveendTimeout = window.setTimeout(() => {
+          this.isMapMoving = false;
+          this.tracker.renderTrajectories();
+        }, 500);
+      });
+
       if (this.visible) {
         this.start();
       }
@@ -290,7 +302,9 @@ const TrackerLayerMixin = (Base) =>
       const newTime = new Date(time);
       this.currTime = newTime;
       this.lastUpdateTime = new Date();
-      this.tracker.renderTrajectories(this.currTime, size, resolution);
+      if (!this.isMapMoving) {
+        this.tracker.renderTrajectories(this.currTime, size, resolution);
+      }
     }
 
     /**
