@@ -209,11 +209,7 @@ const TrackerLayerMixin = (Base) =>
       });
 
       this.map.on('moveend', () => {
-        window.clearTimeout(this.moveendTimeout);
-        this.moveendTimeout = window.setTimeout(() => {
-          this.isMapMoving = false;
-          this.tracker.renderTrajectories();
-        }, 500);
+        this.isMapMoving = false;
       });
 
       if (this.visible) {
