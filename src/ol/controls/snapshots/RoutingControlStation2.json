@@ -1,0 +1,49 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "uid": "e3666f03cba06b2b",
+        "name": "Luzern",
+        "country_code": "CH",
+        "rank": null,
+        "translated_names": [],
+        "mot": {
+          "bus": false,
+          "rail": true,
+          "tram": false,
+          "ferry": false,
+          "subway": false,
+          "gondola": false,
+          "cable_car": false,
+          "funicular": false
+        },
+        "platforms": {
+          "rail": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15"
+          ]
+        },
+        "ifopt": null,
+        "ident_source": "sbb",
+        "id": "8505000",
+        "code": "LZ"
+      },
+      "geometry": { "type": "Point", "coordinates": [8.310183, 47.050178] }
+    }
+  ]
+}
