@@ -3,13 +3,17 @@ import { Vector as VectorSource } from 'ol/source';
 import { Vector } from 'ol/layer';
 import Layer from './Layer';
 
-const defaultStyleFunction = (feature) => {
+const defaultStyleFunction = (feature, resolution) => {
   const mot = feature.get('mot');
   const viaPointIdx = feature.get('viaPointIdx');
+  const minResolution = feature.get('minResolution');
+  const maxResolution = feature.get('maxResolution');
+  const inRange = resolution <= minResolution && resolution >= maxResolution;
 
   // Default style for route lines
   const stroke =
     mot &&
+    inRange &&
     new Stroke({
       color: [255, 0, 0, 1],
       width: 3,
@@ -36,10 +40,12 @@ const defaultStyleFunction = (feature) => {
   });
 
   const blackBorder = new Style({
-    stroke: new Stroke({
-      color: [0, 0, 0, mot === 'foot' ? 0 : 1],
-      width: 5,
-    }),
+    stroke:
+      inRange &&
+      new Stroke({
+        color: [0, 0, 0, mot === 'foot' ? 0 : 1],
+        width: 5,
+      }),
   });
   return [blackBorder, style];
 };
