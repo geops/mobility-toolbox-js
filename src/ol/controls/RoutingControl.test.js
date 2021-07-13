@@ -58,7 +58,7 @@ describe('RoutingControl', () => {
       .then(() => {
         // Should use correct URL
         expect(fetch.mock.calls[0][0]).toEqual(
-          'https://foo.ch?coord-punish=1000&coord-radius=100&elevation=false&key=foo&mot=bus&resolve-hops=false&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839',
+          'https://foo.ch?coord-punish=1000&coord-radius=100&elevation=false&graph=osm&key=foo&mot=bus&resolve-hops=false&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839',
         );
         // routingLayer should contain three features (2 x viapoints, 1 x route)
         expect(
@@ -117,7 +117,7 @@ describe('RoutingControl', () => {
           'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=gen100&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
         );
         expect(fetch.mock.calls[6][0]).toEqual(
-          'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
+          'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=osm&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
         );
         // routingLayer should contain seven features (2 x viapoints, 5 x route for each graph)
         expect(
@@ -142,7 +142,7 @@ describe('RoutingControl', () => {
     error.name = 'AbortError';
     fetch.mockRejectOnce(error);
     return control.drawRoute().then((data) => {
-      expect(data).toBe();
+      expect(data).toEqual([undefined]);
       done();
     });
   });
