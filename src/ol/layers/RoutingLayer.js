@@ -10,16 +10,6 @@ const defaultStyleFunction = (feature, resolution) => {
   const maxResolution = feature.get('maxResolution');
   const inRange = resolution <= minResolution && resolution >= maxResolution;
 
-  // Default style for route lines
-  const stroke =
-    mot &&
-    inRange &&
-    new Stroke({
-      color: [255, 0, 0, 1],
-      width: 3,
-      lineDash: mot === 'foot' ? [1, 10] : undefined,
-    });
-
   // Default style for via points
   const image =
     viaPointIdx !== undefined &&
@@ -34,18 +24,29 @@ const defaultStyleFunction = (feature, resolution) => {
       }),
     });
 
+  if (inRange === false) {
+    return [new Style({ image })];
+  }
+
+  // Default style for route lines
+  const stroke =
+    mot &&
+    new Stroke({
+      color: [255, 0, 0, 1],
+      width: 3,
+      lineDash: mot === 'foot' ? [1, 10] : undefined,
+    });
+
   const style = new Style({
     stroke,
     image,
   });
 
   const blackBorder = new Style({
-    stroke:
-      inRange &&
-      new Stroke({
-        color: [0, 0, 0, mot === 'foot' ? 0 : 1],
-        width: 5,
-      }),
+    stroke: new Stroke({
+      color: [0, 0, 0, mot === 'foot' ? 0 : 1],
+      width: 5,
+    }),
   });
   return [blackBorder, style];
 };
