@@ -486,6 +486,10 @@ class RoutingControl extends Control {
       this.map.addInteraction(this.modifyInteraction);
       this.modifyInteraction.setActive(true);
       this.addListeners();
+    } else {
+      // fall back to some default values if map is not available
+      this.format = new GeoJSON({ featureProjection: 'EPSG:3857' });
+      this.graphsResolutions = this.graphs;
     }
   }
 
