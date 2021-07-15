@@ -119,11 +119,12 @@ class TrackerLayer extends mixin(Layer) {
    *
    * @param {Array<number>} coordinate
    * @returns {Array<ol/Feature~Feature>} Array of vehicle.
+   * @param {number} nb Number of vehicles to return;
    * @override
    */
-  getVehiclesAtCoordinate(coordinate) {
+  getVehiclesAtCoordinate(coordinate, nb) {
     const resolution = getResolution(this.map);
-    return super.getVehiclesAtCoordinate(coordinate, resolution);
+    return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
   /**
@@ -153,9 +154,16 @@ class TrackerLayer extends mixin(Layer) {
     }
     const [vehicle] = this.getVehiclesAtCoordinate(
       fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
+      1,
     );
-    this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
-    this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+
+    const id = vehicle && vehicle.id;
+    if (this.tracker.hoverVehicleId !== id) {
+      this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
+      this.tracker.setHoverVehicleId(id);
+      // We doesn´t wait the next render, we force it.
+      this.tracker.renderTrajectories(this.currTime);
+    }
   }
 }
 

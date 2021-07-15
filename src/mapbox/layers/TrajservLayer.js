@@ -165,6 +165,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
     const [vehicle] = this.getVehiclesAtCoordinate(
       fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
+      1,
     );
 
     if (vehicle) {
