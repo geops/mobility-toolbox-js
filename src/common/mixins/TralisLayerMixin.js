@@ -19,6 +19,8 @@ export class TralisLayerInterface {
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    * @param {boolean} [options.debug=false] Display additional debug informations.
    * @param {TralisMode} [options.mode=TralisMode.TOPOGRAPHIC] - Mode.
+   * @param {number} [options.defaultIconScale=0.6] - Scale of vehicle icons.
+   * @param {number} [options.dfltIconHighlightScale=0.8] - Scale of vehicle icons when they are highlighted.
    */
   constructor(options = {}) {}
 
@@ -91,8 +93,8 @@ const TralisLayerMixin = (TrackerLayer) =>
 
       // These scales depends from the size specifed in the svgs.
       // For some reason the size must be specified in the svg (../img/lines) for firefox.
-      this.dfltIconScale = 0.6;
-      this.dfltIconHighlightScale = 0.8;
+      this.dfltIconScale = options.dfltIconScale || 0.6;
+      this.dfltIconHighlightScale = options.dfltIconHighlightScale || 0.8;
       this.minIconScale = this.dfltIconScale * 0.75;
     }
 
