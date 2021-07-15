@@ -8,7 +8,7 @@ const defaultStyleFunction = (feature, resolution) => {
   const viaPointIdx = feature.get('viaPointIdx');
   const minResolution = feature.get('minResolution');
   const maxResolution = feature.get('maxResolution');
-  const inRange = resolution <= minResolution && resolution >= maxResolution;
+  const inRange = resolution <= minResolution && resolution > maxResolution;
 
   // Default style for via points
   const image =
