@@ -123,6 +123,14 @@ class RoutingControl extends Control {
     this.createModifyInteraction();
   }
 
+  static getGraphsResolutions(graphs, map) {
+    const view = map.getView();
+    return graphs.map(([, minZoom, maxZoom]) => [
+      view.getResolutionForZoom(minZoom),
+      view.getResolutionForZoom((maxZoom || minZoom) + 1),
+    ]);
+  }
+
   /**
    * Adds/Replaces a viaPoint to the viaPoints array and redraws route:
    *   Adds a viaPoint at end of array by default.
@@ -473,10 +481,10 @@ class RoutingControl extends Control {
       });
 
       /** @ignore */
-      this.graphsResolutions = this.graphs.map(([, minZoom, maxZoom]) => [
-        this.map.getView().getResolutionForZoom(minZoom),
-        this.map.getView().getResolutionForZoom((maxZoom || minZoom) + 1),
-      ]);
+      this.graphsResolutions = RoutingControl.getGraphsResolutions(
+        this.graphs,
+        this.map,
+      );
 
       // Clean the modifyInteraction if present
       this.map.removeInteraction(this.modifyInteraction);
