@@ -60,9 +60,10 @@ export class TrackerLayerInterface {
    * @param {Date} time The date to render.
    * @param {number[2]} size Size of the canvas to render.
    * @param {number} resolution Map's resolution to render.
+   * @param {boolean=true} mustRender If false bypass the rendering of vehicles.
    */
   // eslint-disable-next-line no-unused-vars
-  setCurrTime(time, size, resolution) {}
+  setCurrTime(time, size, resolution, mustRender = true) {}
 
   /**
    * Get vehicle.
@@ -77,10 +78,11 @@ export class TrackerLayerInterface {
    *
    * @param {number[2]} coordinate A coordinate ([x,y]).
    * @param {number=1} resolution The resolution of the map.
+   * @param {number=Infinity} nb The max number of vehicles to return.
    * @returns {Object[]} A list of vehicles.
    */
   // eslint-disable-next-line no-unused-vars
-  getVehiclesAtCoordinate(coordinate, resolution = 1) {}
+  getVehiclesAtCoordinate(coordinate, resolution = 1, number = Infinity) {}
 
   /**
    * Get the duration before the next update depending on zoom level.
@@ -285,12 +287,15 @@ const TrackerLayerMixin = (Base) =>
      * @param {dateString | value} time
      * @param {Array<number>} size
      * @param {number} resolution
+     * @param {number} mustRender
      */
-    setCurrTime(time, size, resolution) {
+    setCurrTime(time, size, resolution, mustRender = true) {
       const newTime = new Date(time);
       this.currTime = newTime;
       this.lastUpdateTime = new Date();
-      this.tracker.renderTrajectories(this.currTime, size, resolution);
+      if (mustRender) {
+        this.tracker.renderTrajectories(this.currTime, size, resolution);
+      }
     }
 
     /**
@@ -305,11 +310,12 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Returns an array of vehicles located at the given coordinates and resolution.
      *
-     * @param {Array<number>} coordinate
-     * @param {number} resolution
-     * @returns {Object[]} Array of vehicle.
+     * @param {number[2]} coordinate A coordinate ([x,y]).
+     * @param {number=1} resolution The resolution of the map.
+     * @param {number=Infinity} nb The max number of vehicles to return.
+     * @returns {Object[]} A list of vehicles.
      */
-    getVehiclesAtCoordinate(coordinate, resolution = 1) {
+    getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {
       const ext = buffer([...coordinate, ...coordinate], 10 * resolution);
       const trajectories = this.tracker.getTrajectories();
       const vehicles = [];
@@ -319,6 +325,9 @@ const TrackerLayerMixin = (Base) =>
           containsCoordinate(ext, trajectories[i].coordinate)
         ) {
           vehicles.push(trajectories[i]);
+        }
+        if (vehicles.length === nb) {
+          break;
         }
       }
 

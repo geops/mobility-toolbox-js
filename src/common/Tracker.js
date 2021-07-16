@@ -67,8 +67,8 @@ export default class Tracker {
         'position: absolute',
         'top: 0',
         'bottom: 0',
-        'right: 0',
-        'left: 0',
+        'width: 100%',
+        'height: 100%',
         'pointer-events: none',
         'visibility: visible',
         'margin-top: inherit', // for scrolling behavior.
@@ -101,6 +101,7 @@ export default class Tracker {
     }
 
     this.trajectories = trajectories;
+    this.renderTrajectories();
   }
 
   /**
@@ -185,15 +186,33 @@ export default class Tracker {
     this.style = s;
   }
 
+  moveCanvas(offsetX, offsetY) {
+    const oldLeft = parseFloat(this.canvas.style.left);
+    const oldTop = parseFloat(this.canvas.style.top);
+    this.canvas.style.left = `${oldLeft - offsetX}px`;
+    this.canvas.style.top = `${oldTop - offsetY}px`;
+  }
+
   /**
    * Draw all the trajectories available to the canvas.
    * @param {Date} currTime The date to render.
    * @param {number[2]} size Size ([width, height]) of the canvas to render.
    * @param {number} resolution Which resolution of the map to render.
+   * @param {boolean} noInterpolate If true trajectories are not interpolated but
+   *   drawn at the last known coordinate. Use this for performance optimization
+   *   during map navigation.
    * @private
    */
-  renderTrajectories(currTime = Date.now(), size = [], resolution) {
+  renderTrajectories(
+    currTime = Date.now(),
+    size = [],
+    resolution,
+    noInterpolate = false,
+  ) {
     this.clear();
+    this.canvas.style.left = '0px';
+    this.canvas.style.top = '0px';
+
     const [width, height] = size;
     if (
       width &&
@@ -226,7 +245,9 @@ export default class Tracker {
       let coord = null;
       let rotation;
 
-      if (timeIntervals && timeIntervals.length > 1) {
+      if (noInterpolate) {
+        coord = traj.coordinate;
+      } else if (timeIntervals && timeIntervals.length > 1) {
         const now = currTime - (timeOffset || 0);
         let start;
         let end;
@@ -284,7 +305,6 @@ export default class Tracker {
             geometry,
           );
         }
-
         // We set the rotation and the timeFraction of the trajectory (used by tralis).
         // if rotation === null that seems there is no rotation available.
         this.trajectories[i].rotation = rotation;
