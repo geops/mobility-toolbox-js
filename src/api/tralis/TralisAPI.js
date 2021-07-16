@@ -45,29 +45,43 @@ class TralisAPI {
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    * @param {string} [options.prefix=''] Service prefix to specify tenant.
    * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
+   * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY] The bounding box to receive data from.
    */
   constructor(options = {}) {
     let wsUrl = null;
+
     if (typeof options === 'string') {
       wsUrl = options;
     } else {
       wsUrl = options.url;
     }
+
     if (options.apiKey) {
       wsUrl = `${wsUrl}?key=${options.apiKey}`;
     }
+
+    /** @ignore */
+    this.subscribedStationUic = null;
+
+    /** @ignore */
+    this.departureUpdateTimeout = null;
+
+    /** @ignore */
+    this.maxDepartureAge = 30;
+
+    /** @ignore */
+    this.extraGeoms = {};
+
+    /** @ignore */
+    this.prefix = options.prefix || '';
+
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
     this.conn.setProjection(options.projection || 'epsg:3857');
-    /** @ignore */
-    this.subscribedStationUic = null;
-    /** @ignore */
-    this.departureUpdateTimeout = null;
-    /** @ignore */
-    this.maxDepartureAge = 30;
-    /** @ignore */
-    this.extraGeoms = {};
-    this.prefix = options.prefix || '';
+
+    if (options.bbox) {
+      this.conn.setBbox(options.bbox);
+    }
   }
 
   /**
