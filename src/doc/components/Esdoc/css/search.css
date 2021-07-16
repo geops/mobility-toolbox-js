@@ -10,11 +10,8 @@
   font-size: 12px;
 
   /* Geops */
-  width: 210px;
   background: white;
-  padding: 6px;
-  height: 50px;
-  margin-top: 10px;
+  margin: 20px 5px 10px !important;
 }
 
 .search-box img {
