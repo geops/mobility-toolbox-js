@@ -83,7 +83,6 @@ const TralisLayerMixin = (TrackerLayer) =>
       super({ ...options });
       this.debug = options.debug;
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
-      this.useDynamicIconScale = this.mode === TralisModes.SCHEMATIC;
       this.trajectories = [];
       this.refreshTimeInMs = 1000 / 30;
       this.onMessage = this.onMessage.bind(this);
@@ -111,6 +110,9 @@ const TralisLayerMixin = (TrackerLayer) =>
     }
 
     setMode(mode) {
+      if (this.mode === mode) {
+        return;
+      }
       this.mode = mode;
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
@@ -126,7 +128,11 @@ const TralisLayerMixin = (TrackerLayer) =>
 
       // ignore old events [SBAHNM-97]
       if (feat.get('time_since_update') >= 0) {
-        if (this.debug && this.mode === TralisModes.TOPOGRAPHIC) {
+        if (
+          this.debug &&
+          this.mode === TralisModes.TOPOGRAPHIC &&
+          feat.get('raw_coordinates')
+        ) {
           const point = new Point(feat.get('raw_coordinates'));
           point.transform('EPSG:4326', this.map.getView().getProjection());
           feat.setGeometry(point);
