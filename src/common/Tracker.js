@@ -49,7 +49,7 @@ export default class Tracker {
 
     /**
      * Scale the vehicle icons with this value.
-     * @param {number}
+     * @type {number}
      */
     this.iconScale = opts.iconScale;
 
@@ -186,6 +186,12 @@ export default class Tracker {
     this.style = s;
   }
 
+  /**
+   * Move the canvas.
+   * @param {number} offsetX Offset X.
+   * @param {number} offsetY Offset Y.
+   * @private
+   */
   moveCanvas(offsetX, offsetY) {
     const oldLeft = parseFloat(this.canvas.style.left);
     const oldTop = parseFloat(this.canvas.style.top);

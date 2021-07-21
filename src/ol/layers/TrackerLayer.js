@@ -172,8 +172,8 @@ class TrackerLayer extends mixin(Layer) {
    * Returns null when no vehicle is located at the given coordinates.
    * @param {ol/coordinate~Coordinate} coordinate
    * @param {number} nb Number of vehicles to return;
-   * @returns {ol/Feature~Feature} Vehicle feature.
-   * @private
+   * @returns {Array<ol/Feature~Feature>} Vehicle feature.
+   * @override
    */
   getVehiclesAtCoordinate(coordinate, nb) {
     const resolution = this.map.getView().getResolution();
