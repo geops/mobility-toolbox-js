@@ -102,17 +102,20 @@ class TralisAPI {
    *
    * @param {string} channel Name of the websocket channel to unsubscribe.
    * @param {string} [suffix=''] Suffix to add to the channel name.
+   * @param {function} cb The callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    * @private
    */
-  unsubscribe(channel, suffix = '') {
+  unsubscribe(channel, suffix = '', cb) {
     this.conn.unsubscribe(
       `${channel}${getModeSuffix(TralisModes.SCHEMATIC, TralisModes)}${suffix}`,
+      cb,
     );
     this.conn.unsubscribe(
       `${channel}${getModeSuffix(
         TralisModes.TOPOGRAPHIC,
         TralisModes,
       )}${suffix}`,
+      cb,
     );
   }
 
@@ -220,10 +223,11 @@ class TralisAPI {
 
   /**
    * Unsubscribe from current departures channel.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeDepartures() {
+  unsubscribeDepartures(cb) {
     if (this.subscribedStationUic) {
-      this.unsubscribe(`timetable_${this.subscribedStationUic}`);
+      this.unsubscribe(`timetable_${this.subscribedStationUic}`, '', cb);
       this.subscribedStationUic = null;
     }
   }
@@ -241,9 +245,10 @@ class TralisAPI {
 
   /**
    * Unsubscribe disruptions.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeDisruptions() {
-    this.unsubscribe(`${this.prefix}newsticker`);
+  unsubscribeDisruptions(cb) {
+    this.unsubscribe(`${this.prefix}newsticker`, '', cb);
   }
 
   /**
@@ -324,10 +329,11 @@ class TralisAPI {
 
   /**
    * Unsubscribe to stations channel.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeStations() {
+  unsubscribeStations(cb) {
     window.clearTimeout(this.stationUpdateTimeout);
-    this.unsubscribe('station');
+    this.unsubscribe('station', '', cb);
   }
 
   /**
@@ -357,9 +363,10 @@ class TralisAPI {
 
   /**
    * Unsubscribe to extra_geoms channel.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeExtraGeoms() {
-    this.unsubscribe('extra_geoms');
+  unsubscribeExtraGeoms(cb) {
+    this.unsubscribe('extra_geoms', '', cb);
   }
 
   /**
@@ -375,9 +382,10 @@ class TralisAPI {
 
   /**
    * Unsubscribe to trajectory channels.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeTrajectory() {
-    this.unsubscribe(`trajectory`);
+  unsubscribeTrajectory(cb) {
+    this.unsubscribe(`trajectory`, '', cb);
   }
 
   /**
@@ -396,9 +404,10 @@ class TralisAPI {
 
   /**
    * Unsubscribe to deleted_vhicles channels.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeDeletedVehicles() {
-    this.unsubscribe('deleted_vehicles');
+  unsubscribeDeletedVehicles(cb) {
+    this.unsubscribe('deleted_vehicles', '', cb);
   }
 
   /**
@@ -462,9 +471,10 @@ class TralisAPI {
    * Unsubscribe from full_trajectory channel
    *
    * @param {number} id A vehicle id.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeFullTrajectory(id) {
-    this.unsubscribe('full_trajectory', `_${id}`);
+  unsubscribeFullTrajectory(id, cb) {
+    this.unsubscribe('full_trajectory', `_${id}`, cb);
   }
 
   /**
@@ -531,9 +541,10 @@ class TralisAPI {
    * Unsubscribe from stopsequence channel
    *
    * @param {number} id A vehicle id.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeStopSequence(id) {
-    this.unsubscribe(`stopsequence`, `_${id}`);
+  unsubscribeStopSequence(id, cb) {
+    this.unsubscribe(`stopsequence`, `_${id}`, cb);
   }
 
   /**

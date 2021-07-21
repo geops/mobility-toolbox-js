@@ -183,11 +183,12 @@ class WebSocketConnector {
   /**
    * Unsubscribe from a channel.
    * @param {string} source source to unsubscribe from
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    * @private
    */
-  unsubscribe(source) {
+  unsubscribe(source, cb) {
     this.subscriptions
-      .filter((s) => s.params.channel === source)
+      .filter((s) => s.params.channel === source && (!cb || s.params.cb === cb))
       .forEach(({ onMessageCb, onErrorCb }) => {
         this.websocket.removeEventListener('message', onMessageCb);
         if (onErrorCb) {
