@@ -112,24 +112,8 @@ const TralisLayerMixin = (TrackerLayer) =>
 
     setMode(mode) {
       this.mode = mode;
-      this.useDynamicIconScale = this.mode === TralisModes.SCHEMATIC;
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
-    }
-
-    getIconScaleFromRes(res) {
-      let scale = this.dfltIconScale;
-      if (!this.useDynamicIconScale) {
-        return scale;
-      }
-      if (res > this.resZoom11) {
-        const dynamicScale = this.resZoom11 / res;
-        scale =
-          dynamicScale < this.minIconScale ? this.minIconScale : dynamicScale;
-      } else if (res < this.resZoom112) {
-        scale = this.resZoom12 / res;
-      }
-      return parseFloat(scale.toFixed(1));
     }
 
     onMessage(data) {
