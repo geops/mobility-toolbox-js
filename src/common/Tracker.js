@@ -276,7 +276,7 @@ export default class Tracker {
         }
         // The geometry can also be a Point
         if (geometry.getType() === GeomType.POINT) {
-          coord = geometry.getCoordinate();
+          coord = geometry.getCoordinates();
         } else if (geometry.getType() === GeomType.LINE_STRING) {
           if (start && end) {
             // interpolate position inside the time interval.
