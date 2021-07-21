@@ -188,7 +188,9 @@ class WebSocketConnector {
    */
   unsubscribe(source, cb) {
     this.subscriptions
-      .filter((s) => s.params.channel === source && (!cb || s.params.cb === cb))
+      .filter((s) => {
+        return s.params.channel === source && (!cb || s.cb === cb);
+      })
       .forEach(({ onMessageCb, onErrorCb }) => {
         this.websocket.removeEventListener('message', onMessageCb);
         if (onErrorCb) {
@@ -198,10 +200,14 @@ class WebSocketConnector {
       });
 
     this.subscriptions = this.subscriptions.filter(
-      (s) => s.params.channel !== source,
+      (s) => s.params.channel !== source || (cb && s.cb !== cb),
     );
 
-    if (source) {
+    // If there is no more subscriptions to this channel we DEL it.
+    if (
+      source &&
+      !this.subscriptions.find((s) => s.params.channel === source)
+    ) {
       this.send(`DEL ${source}`);
     }
   }
