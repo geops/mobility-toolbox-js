@@ -15,6 +15,7 @@ class WebSocketConnector {
     setInterval(() => {
       this.send('PING');
     }, 10000);
+    this.subscribed = {};
   }
 
   /**
@@ -157,7 +158,7 @@ class WebSocketConnector {
       this.websocket.addEventListener('close', errorCb);
     }
 
-    return { onMessage, onErrorCb: errorCb };
+    return { onMessageCb: onMessage, onErrorCb: errorCb };
   }
 
   /**
@@ -176,8 +177,11 @@ class WebSocketConnector {
       this.subscriptions.push({ params, cb, errorCb, onMessageCb, onErrorCb });
     }
 
-    this.send(`GET ${reqStr}`);
-    this.send(`SUB ${reqStr}`);
+    if (!this.subscribed[reqStr]) {
+      this.send(`GET ${reqStr}`);
+      this.send(`SUB ${reqStr}`);
+      this.subscribed[reqStr] = true;
+    }
   }
 
   /**
@@ -206,9 +210,11 @@ class WebSocketConnector {
     // If there is no more subscriptions to this channel we DEL it.
     if (
       source &&
+      this.subscribed[source] &&
       !this.subscriptions.find((s) => s.params.channel === source)
     ) {
       this.send(`DEL ${source}`);
+      this.subscribed[source] = false;
     }
   }
 }

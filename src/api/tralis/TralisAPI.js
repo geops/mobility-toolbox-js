@@ -376,7 +376,7 @@ class TralisAPI {
    * @param {function(trajectory: TralisTrajectory)} onMessage Function called on each message of the channel.
    */
   subscribeTrajectory(mode, onMessage) {
-    this.unsubscribeTrajectory();
+    this.unsubscribeTrajectory(onMessage);
     this.subscribe(`trajectory${getModeSuffix(mode, TralisModes)}`, onMessage);
   }
 

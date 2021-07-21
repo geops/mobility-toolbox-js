@@ -104,8 +104,8 @@ const TralisLayerMixin = (TrackerLayer) =>
     }
 
     terminate() {
-      this.api.unsubscribeTrajectory();
-      this.api.unsubscribeDeletedVehicles();
+      this.api.unsubscribeTrajectory(this.onMessage);
+      this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
       super.terminate();
     }
 
