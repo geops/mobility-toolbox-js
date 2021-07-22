@@ -2,34 +2,6 @@
 import Layer from './Layer';
 
 /**
- * Apply visibility to style layers that fits the filter function.
- * @private
- */
-const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
-  if (!mbMap) {
-    return;
-  }
-
-  const style = mbMap.getStyle();
-
-  if (!style) {
-    return;
-  }
-
-  if (filterFunc) {
-    const visibilityValue = visible ? 'visible' : 'none';
-    for (let i = 0; i < style.layers.length; i += 1) {
-      const styleLayer = style.layers[i];
-      if (filterFunc(styleLayer)) {
-        if (mbMap.getLayer(styleLayer.id)) {
-          mbMap.setLayoutProperty(styleLayer.id, 'visibility', visibilityValue);
-        }
-      }
-    }
-  }
-};
-
-/**
  * Layer for visualizing a specific set of layer from a MapboxLayer.
  *
  * @example
@@ -190,10 +162,10 @@ class MapboxStyleLayer extends Layer {
 
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
-      this.on('change:visible', ({ target: layer }) => {
+      this.on('change:visible', () => {
         // Once the map is loaded we can apply vsiiblity without waiting
         // the style. Mapbox take care of the application of style changes.
-        applyLayoutVisibility(mbMap, layer.visible, this.styleLayersFilter);
+        this.applyLayoutVisibility();
       }),
     );
 
@@ -259,7 +231,7 @@ class MapboxStyleLayer extends Layer {
         mbMap.addLayer(styleLayer, this.beforeId);
       }
     });
-    applyLayoutVisibility(mbMap, this.visible, this.styleLayersFilter);
+    this.applyLayoutVisibility();
   }
 
   /** @ignore */
@@ -417,6 +389,42 @@ class MapboxStyleLayer extends Layer {
 
     // Add highlight
     this.setHoverState(this.highlightedFeatures, true);
+  }
+
+  /**
+   * Apply visibility to style layers that fits the styleLayersFilter function.
+   * @private
+   */
+  applyLayoutVisibility() {
+    const { visible } = this;
+    const { mbMap } = this.mapboxLayer;
+    const filterFunc = this.styleLayersFilter;
+
+    if (!mbMap) {
+      return;
+    }
+
+    const style = mbMap.getStyle();
+
+    if (!style) {
+      return;
+    }
+
+    if (filterFunc) {
+      const visibilityValue = visible ? 'visible' : 'none';
+      for (let i = 0; i < style.layers.length; i += 1) {
+        const styleLayer = style.layers[i];
+        if (filterFunc(styleLayer)) {
+          if (mbMap.getLayer(styleLayer.id)) {
+            mbMap.setLayoutProperty(
+              styleLayer.id,
+              'visibility',
+              visibilityValue,
+            );
+          }
+        }
+      }
+    }
   }
 
   /**
