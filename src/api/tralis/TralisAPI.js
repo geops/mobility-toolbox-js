@@ -102,7 +102,7 @@ class TralisAPI {
    *
    * @param {string} channel Name of the websocket channel to unsubscribe.
    * @param {string} [suffix=''] Suffix to add to the channel name.
-   * @param {function} cb The callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
   unsubscribe(channel, suffix = '', cb) {
