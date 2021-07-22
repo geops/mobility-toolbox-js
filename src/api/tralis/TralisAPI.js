@@ -223,7 +223,7 @@ class TralisAPI {
 
   /**
    * Unsubscribe from current departures channel.
-   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeDepartures(cb) {
     if (this.subscribedStationUic) {
