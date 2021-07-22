@@ -471,7 +471,7 @@ class TralisAPI {
    * Unsubscribe from full_trajectory channel
    *
    * @param {number} id A vehicle id.
-   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeFullTrajectory(id, cb) {
     this.unsubscribe('full_trajectory', `_${id}`, cb);
