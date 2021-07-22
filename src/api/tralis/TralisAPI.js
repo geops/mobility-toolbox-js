@@ -363,7 +363,7 @@ class TralisAPI {
 
   /**
    * Unsubscribe to extra_geoms channel.
-   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeExtraGeoms(cb) {
     this.unsubscribe('extra_geoms', '', cb);
