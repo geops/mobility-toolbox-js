@@ -49,7 +49,7 @@ export default class Tracker {
 
     /**
      * Scale the vehicle icons with this value.
-     * @param {number}
+     * @type {number}
      */
     this.iconScale = opts.iconScale;
 
@@ -186,6 +186,12 @@ export default class Tracker {
     this.style = s;
   }
 
+  /**
+   * Move the canvas.
+   * @param {number} offsetX Offset X.
+   * @param {number} offsetY Offset Y.
+   * @private
+   */
   moveCanvas(offsetX, offsetY) {
     const oldLeft = parseFloat(this.canvas.style.left);
     const oldTop = parseFloat(this.canvas.style.top);
@@ -270,7 +276,7 @@ export default class Tracker {
         }
         // The geometry can also be a Point
         if (geometry.getType() === GeomType.POINT) {
-          coord = geometry.getCoordinate();
+          coord = geometry.getCoordinates();
         } else if (geometry.getType() === GeomType.LINE_STRING) {
           if (start && end) {
             // interpolate position inside the time interval.

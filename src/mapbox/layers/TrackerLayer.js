@@ -118,8 +118,8 @@ class TrackerLayer extends mixin(Layer) {
    * Returns an array of vehicles located at the given coordinate.
    *
    * @param {Array<number>} coordinate
-   * @returns {Array<ol/Feature~Feature>} Array of vehicle.
    * @param {number} nb Number of vehicles to return;
+   * @returns {Array<ol/Feature~Feature>} Array of vehicle.
    * @override
    */
   getVehiclesAtCoordinate(coordinate, nb) {

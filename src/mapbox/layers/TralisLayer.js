@@ -24,8 +24,6 @@ class TralisLayer extends mixin(TrackerLayer) {
     super({ ...options });
 
     /** @ignore */
-    this.onZoomEnd = this.onZoomEnd.bind(this);
-    /** @ignore */
     this.onMove = this.onMove.bind(this);
     /** @ignore */
     this.onMoveEnd = this.onMoveEnd.bind(this);
@@ -44,8 +42,6 @@ class TralisLayer extends mixin(TrackerLayer) {
       return;
     }
 
-    /** @ignore */
-    this.iconScale = this.getIconScaleFromRes(getResolution(this.map));
     this.map.on('zoomend', this.onZoomEnd);
     this.map.on('move', this.onMove);
     this.map.on('moveend', this.onMoveEnd);
@@ -111,15 +107,6 @@ class TralisLayer extends mixin(TrackerLayer) {
    */
   onMoveEnd() {
     this.updateTrajectories();
-  }
-
-  /**
-   * Callback on 'zoomend' event.
-   *
-   * @private
-   */
-  onZoomEnd() {
-    this.iconScale = this.getIconScaleFromRes(getResolution(this.map));
   }
 }
 

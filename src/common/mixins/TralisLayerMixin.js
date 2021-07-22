@@ -83,7 +83,6 @@ const TralisLayerMixin = (TrackerLayer) =>
       super({ ...options });
       this.debug = options.debug;
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
-      this.useDynamicIconScale = this.mode === TralisModes.SCHEMATIC;
       this.trajectories = [];
       this.refreshTimeInMs = 1000 / 30;
       this.onMessage = this.onMessage.bind(this);
@@ -105,31 +104,18 @@ const TralisLayerMixin = (TrackerLayer) =>
     }
 
     terminate() {
-      this.api.unsubscribeTrajectory();
-      this.api.unsubscribeDeletedVehicles();
+      this.api.unsubscribeTrajectory(this.onMessage);
+      this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
       super.terminate();
     }
 
     setMode(mode) {
+      if (this.mode === mode) {
+        return;
+      }
       this.mode = mode;
-      this.useDynamicIconScale = this.mode === TralisModes.SCHEMATIC;
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
-    }
-
-    getIconScaleFromRes(res) {
-      let scale = this.dfltIconScale;
-      if (!this.useDynamicIconScale) {
-        return scale;
-      }
-      if (res > this.resZoom11) {
-        const dynamicScale = this.resZoom11 / res;
-        scale =
-          dynamicScale < this.minIconScale ? this.minIconScale : dynamicScale;
-      } else if (res < this.resZoom112) {
-        scale = this.resZoom12 / res;
-      }
-      return parseFloat(scale.toFixed(1));
     }
 
     onMessage(data) {
@@ -142,7 +128,11 @@ const TralisLayerMixin = (TrackerLayer) =>
 
       // ignore old events [SBAHNM-97]
       if (feat.get('time_since_update') >= 0) {
-        if (this.debug && this.mode === TralisModes.TOPOGRAPHIC) {
+        if (
+          this.debug &&
+          this.mode === TralisModes.TOPOGRAPHIC &&
+          feat.get('raw_coordinates')
+        ) {
           const point = new Point(feat.get('raw_coordinates'));
           point.transform('EPSG:4326', this.map.getView().getProjection());
           feat.setGeometry(point);
