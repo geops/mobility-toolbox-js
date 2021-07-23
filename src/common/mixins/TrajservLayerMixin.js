@@ -421,9 +421,16 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
       if (!this.styleCache[key]) {
         let radius = getRadius(type, z);
+        const isDisplayStrokeAndDelay = radius >= 7;
+        // console.log(type, radius);
+
+        if (radius === 0) {
+          this.styleCache[key] = null;
+          return null;
+        }
 
         if (hover || selected) {
-          radius += 5;
+          radius = isDisplayStrokeAndDelay ? radius + 5 : 14;
         }
         const margin = 1;
         const radiusDelay = radius + 2;
@@ -436,7 +443,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         const ctx = canvas.getContext('2d');
         const origin = canvas.width / 2;
 
-        if (delay !== null) {
+        if (isDisplayStrokeAndDelay && delay !== null) {
           // Draw circle delay background
           ctx.save();
           ctx.beginPath();
@@ -448,7 +455,10 @@ const TrajservLayerMixin = (TrackerLayer) =>
         }
 
         // Show delay if feature is hovered or if delay is above 5mins.
-        if (hover || delay >= this.delayDisplay || cancelled) {
+        if (
+          isDisplayStrokeAndDelay &&
+          (hover || delay >= this.delayDisplay || cancelled)
+        ) {
           // Draw delay text
           ctx.save();
           ctx.textAlign = 'left';
@@ -474,22 +484,28 @@ const TrajservLayerMixin = (TrackerLayer) =>
         } else {
           circleFillColor = color || getBgColor(type);
         }
+
         ctx.save();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = '#000000';
+        if (isDisplayStrokeAndDelay || hover || selected) {
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = '#000000';
+        }
         ctx.fillStyle = circleFillColor;
         ctx.beginPath();
         ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
         ctx.fill();
         // Dashed outline if a provider provides realtime but we don't use it.
         if (
+          isDisplayStrokeAndDelay &&
           this.useDelayStyle &&
           delay === null &&
           operatorProvidesRealtime === 'yes'
         ) {
           ctx.setLineDash([5, 3]);
         }
-        ctx.stroke();
+        if (isDisplayStrokeAndDelay || hover || selected) {
+          ctx.stroke();
+        }
         ctx.restore();
 
         // Draw text in the circle

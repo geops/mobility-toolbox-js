@@ -330,6 +330,12 @@ export default class Tracker {
         this.trajectories[i].rendered = true;
 
         const vehicleImg = this.style(traj, this.currResolution);
+
+        if (!vehicleImg) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
         let imgWidth = vehicleImg.width;
         let imgHeight = vehicleImg.height;
 
