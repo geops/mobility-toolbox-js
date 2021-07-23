@@ -422,7 +422,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
       if (!this.styleCache[key]) {
         let radius = getRadius(type, z);
         const isDisplayStrokeAndDelay = radius >= 7;
-        // console.log(type, radius);
 
         if (radius === 0) {
           this.styleCache[key] = null;
