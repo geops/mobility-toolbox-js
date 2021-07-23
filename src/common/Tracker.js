@@ -394,9 +394,8 @@ export default class Tracker {
         }
       }
     }
-    console.log('render', this.selectedVehicleId, selectedVehicleImg);
+
     if (selectedVehicleImg) {
-      console.log('select', selectedVehicleImg);
       this.canvasContext.drawImage(
         selectedVehicleImg,
         selectedVehiclePx[0] - selectedVehicleWidth / 2,
@@ -405,8 +404,8 @@ export default class Tracker {
         selectedVehicleHeight,
       );
     }
+
     if (hoverVehicleImg) {
-      console.log('hover', hoverVehicleImg);
       this.canvasContext.drawImage(
         hoverVehicleImg,
         hoverVehiclePx[0] - hoverVehicleWidth / 2,
