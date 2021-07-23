@@ -415,7 +415,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         operatorProvidesRealtime,
       } = props;
       const z = Math.min(Math.floor(zoom || 1), 16);
-      const hover = this.tracker.hoverVehicleId === id;
+      const hover = this.hoverVehicleId === id;
       const selected = this.selectedVehicleId === id;
       const key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
 

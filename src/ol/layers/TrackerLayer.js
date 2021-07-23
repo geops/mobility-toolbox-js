@@ -144,11 +144,11 @@ class TrackerLayer extends mixin(Layer) {
         }
         const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
         const id = vehicle && vehicle.id;
-        if (this.tracker.hoverVehicleId !== id) {
+        if (this.hoverVehicleId !== id) {
           this.map.getTargetElement().style.cursor = vehicle
             ? 'pointer'
             : 'auto';
-          this.tracker.setHoverVehicleId(id);
+          this.hoverVehicleId = id;
 
           // We doesn´t wait the next render, we force it.
           this.tracker.renderTrajectories(this.currTime);

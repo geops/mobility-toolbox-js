@@ -48,6 +48,12 @@ export default class Tracker {
     this.hoverVehicleId = null;
 
     /**
+     * Id of the trajectory which is selected.
+     * @type {string}
+     */
+    this.selectedVehicleId = null;
+
+    /**
      * Scale the vehicle icons with this value.
      * @type {number}
      */
@@ -167,6 +173,17 @@ export default class Tracker {
   }
 
   /**
+   * Set the id of the trajectory which is selected.
+   * @param {string} id Id of a vehicle.
+   * @private
+   */
+  setSelectedVehicleId(id) {
+    if (id !== this.selectedVehicleId) {
+      this.selectedVehicleId = id;
+    }
+  }
+
+  /**
    * set the scale of the vehicle icons.
    * @param {number} iconScale Scale value.
    */
@@ -236,6 +253,10 @@ export default class Tracker {
     let hoverVehiclePx;
     let hoverVehicleWidth;
     let hoverVehicleHeight;
+    let selectedVehicleImg;
+    let selectedVehiclePx;
+    let selectedVehicleWidth;
+    let selectedVehicleHeight;
 
     for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
       const traj = this.trajectories[i];
@@ -344,7 +365,10 @@ export default class Tracker {
           imgWidth = Math.floor(imgWidth * this.iconScale);
         }
 
-        if (this.hoverVehicleId !== traj.id) {
+        if (
+          this.hoverVehicleId !== traj.id &&
+          this.selectedVehicleId !== traj.id
+        ) {
           this.canvasContext.drawImage(
             vehicleImg,
             px[0] - imgWidth / 2,
@@ -352,16 +376,37 @@ export default class Tracker {
             imgWidth,
             imgHeight,
           );
-        } else {
+        }
+        if (this.hoverVehicleId === traj.id) {
           // Store the canvas to draw it at the end
           hoverVehicleImg = vehicleImg;
           hoverVehiclePx = px;
           hoverVehicleWidth = imgWidth;
           hoverVehicleHeight = imgHeight;
         }
+
+        if (this.selectedVehicleId === traj.id) {
+          // Store the canvas to draw it at the end
+          selectedVehicleImg = vehicleImg;
+          selectedVehiclePx = px;
+          selectedVehicleWidth = imgWidth;
+          selectedVehicleHeight = imgHeight;
+        }
       }
     }
+    console.log('render', this.selectedVehicleId, selectedVehicleImg);
+    if (selectedVehicleImg) {
+      console.log('select', selectedVehicleImg);
+      this.canvasContext.drawImage(
+        selectedVehicleImg,
+        selectedVehiclePx[0] - selectedVehicleWidth / 2,
+        selectedVehiclePx[1] - selectedVehicleHeight / 2,
+        selectedVehicleWidth,
+        selectedVehicleHeight,
+      );
+    }
     if (hoverVehicleImg) {
+      console.log('hover', hoverVehicleImg);
       this.canvasContext.drawImage(
         hoverVehicleImg,
         hoverVehiclePx[0] - hoverVehicleWidth / 2,

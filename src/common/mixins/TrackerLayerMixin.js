@@ -191,6 +191,30 @@ const TrackerLayerMixin = (Base) =>
         renderedTrajectories: {
           get: () => this.tracker.renderedTrajectories,
         },
+
+        /**
+         * Id of the hovered vehicle.
+         */
+        hoverVehicleId: {
+          get: () => {
+            return this.tracker.hoverVehicleId;
+          },
+          set: (hoverVehicleId) => {
+            this.tracker.hoverVehicleId = hoverVehicleId;
+          },
+        },
+
+        /**
+         * Id of the selected vehicle.
+         */
+        selectedVehicleId: {
+          get: () => {
+            return this.tracker.selectedVehicleId;
+          },
+          set: (selectedVehicleId) => {
+            this.tracker.selectedVehicleId = selectedVehicleId;
+          },
+        },
       });
     }
 
