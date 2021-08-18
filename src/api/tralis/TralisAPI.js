@@ -413,7 +413,7 @@ class TralisAPI {
   /**
    * Get a full trajectory of a vehicule .
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<FullTrajectory>} Return a full trajectory.
    */
@@ -434,7 +434,7 @@ class TralisAPI {
   /**
    * Get full trajectories of a vehicules .
    *
-   * @param {number[]} ids List of vehicles ids.
+   * @param {string[]} ids List of vehicles ids.
    * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<FullTrajectory[]>} Return an array of full trajectories.
    */
@@ -448,7 +448,7 @@ class TralisAPI {
   /**
    * Subscribe to full_trajectory channel of a given vehicle.
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
    */
   subscribeFullTrajectory(id, mode) {
@@ -470,7 +470,7 @@ class TralisAPI {
   /**
    * Unsubscribe from full_trajectory channel
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeFullTrajectory(id, cb) {
@@ -480,7 +480,7 @@ class TralisAPI {
   /**
    * Get the list of stops for this vehicle.
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @returns {Promise<StopSequence>} Returns a stop sequence object.
    */
   getStopSequence(id) {
@@ -491,7 +491,7 @@ class TralisAPI {
       this.conn.get(
         params,
         (data) => {
-          // Remove the delay from arrivalTime nad departureTime
+          // Remove the delay from arrivalTime nnd departureTime
           resolve(cleanStopTime(data.content && data.content[0]));
         },
         (err) => {
@@ -504,7 +504,7 @@ class TralisAPI {
   /**
    * Get a list of stops for a list of vehicles.
    *
-   * @param {number[]} ids List of vehicles ids.
+   * @param {string[]} ids List of vehicles ids.
    * @returns {Promise<StopSequence[]>} Return an array of stop sequences.
    */
   getStopSequences(ids) {
@@ -517,7 +517,7 @@ class TralisAPI {
   /**
    * Subscribe to stopsequence channel of a given vehicle.
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @param {function(stopSequence: StopSequence)} onMessage Function called on each message of the channel.
    */
   subscribeStopSequence(id, onMessage) {
@@ -540,7 +540,7 @@ class TralisAPI {
   /**
    * Unsubscribe from stopsequence channel
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeStopSequence(id, cb) {
