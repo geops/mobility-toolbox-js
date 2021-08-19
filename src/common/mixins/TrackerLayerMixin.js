@@ -268,7 +268,7 @@ const TrackerLayerMixin = (Base) =>
      */
     init(map, options = {}) {
       super.init(map);
-      console.log(options);
+
       this.tracker = new Tracker({
         style: (props, r) => this.style(props, r),
         ...this.initTrackerOptions,
