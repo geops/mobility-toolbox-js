@@ -30,8 +30,8 @@ export default class Tracker {
     this.renderedTrajectories = [];
 
     /**
-     * Array of ol events key, returned by on() or once().
-     * @type {Array<key>}
+     * Active interpolation calcultion or not. If false, the train will not move until we receive the next message for the websocket.
+     * @type {boolean}
      */
     this.interpolate = !!opts.interpolate;
 
@@ -45,19 +45,37 @@ export default class Tracker {
      * Id of the trajectory which is hovered.
      * @type {string}
      */
-    this.hoverVehicleId = null;
+    this.hoverVehicleId = opts.hoverVehicleId;
 
     /**
      * Id of the trajectory which is selected.
      * @type {string}
      */
-    this.selectedVehicleId = null;
+    this.selectedVehicleId = opts.selectedVehicleId;
 
     /**
      * Scale the vehicle icons with this value.
      * @type {number}
      */
     this.iconScale = opts.iconScale;
+
+    /**
+     * Function use to filter the features displayed.
+     * @type {function}
+     */
+    this.filter = opts.filter;
+
+    /**
+     * Function use to sort the features displayed.
+     * @type {function}
+     */
+    this.sort = opts.sort;
+
+    /**
+     * Function use to style the features displayed.
+     * @type {function}
+     */
+    this.style = opts.style;
 
     // we draw directly on the canvas since openlayers is too slow.
     /**
@@ -140,24 +158,20 @@ export default class Tracker {
   /**
    * Set the filter for tracker features.
    * @param {function} filter Filter function.
+   * @private
+   * @deprecated Set the property this.filter directly.
    */
   setFilter(filter) {
-    /**
-     * Current filter function.
-     * @type {function}
-     */
     this.filter = filter;
   }
 
   /**
    * Set the sort for tracker features.
    * @param {function} sort Sort function.
+   * @private
+   * @deprecated Set the property this.sort directly.
    */
   setSort(sort) {
-    /**
-     * The sort function for tracker features.
-     * @type {function}
-     */
     this.sort = sort;
   }
 
@@ -165,6 +179,7 @@ export default class Tracker {
    * Set the id of the trajectory which is hovered.
    * @param {string} id Id of a vehicle.
    * @private
+   * @deprecated Set the property this.hoverVehicleId directly.
    */
   setHoverVehicleId(id) {
     if (id !== this.hoverVehicleId) {
@@ -176,6 +191,7 @@ export default class Tracker {
    * Set the id of the trajectory which is selected.
    * @param {string} id Id of a vehicle.
    * @private
+   * @deprecated Set the property this.selectedVehicleId directly.
    */
   setSelectedVehicleId(id) {
     if (id !== this.selectedVehicleId) {
@@ -186,6 +202,8 @@ export default class Tracker {
   /**
    * set the scale of the vehicle icons.
    * @param {number} iconScale Scale value.
+   * @private
+   * @deprecated Set the property this.iconScale directly.
    */
   setIconScale(iconScale) {
     this.iconScale = iconScale;
@@ -193,14 +211,12 @@ export default class Tracker {
 
   /**
    * Set the tracker style.
-   * @param {function} s OpenLayers style function.
+   * @param {function} style OpenLayers style function.
+   * @private
+   * @deprecated Set the property this.style directly.
    */
-  setStyle(s) {
-    /**
-     * Style function.
-     * @type {function}
-     */
-    this.style = s;
+  setStyle(style) {
+    this.style = style;
   }
 
   /**

@@ -123,8 +123,33 @@ const TrackerLayerMixin = (Base) =>
         isHoverActive: true,
         ...options,
       };
+
+      // Tracker options use to build the tracker.
+      const {
+        interpolate,
+        hoverVehicleId,
+        selectedVehicleId,
+        filter,
+        sort,
+      } = options;
+      const initTrackerOptions = {
+        interpolate,
+        hoverVehicleId,
+        selectedVehicleId,
+        filter,
+        sort,
+        style,
+      };
+      Object.keys(initTrackerOptions).forEach(
+        (key) =>
+          initTrackerOptions[key] === undefined &&
+          delete initTrackerOptions[key],
+      );
+
       let cuurSpeed = speed || 1;
+
       super.defineProperties(options);
+
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
         isHoverActive: {
@@ -143,17 +168,17 @@ const TrackerLayerMixin = (Base) =>
         },
         filter: {
           get: () => this.tracker.filter,
-          set: (filter) => {
+          set: (newFilter) => {
             if (this.tracker) {
-              this.tracker.setFilter(filter);
+              this.tracker.filter = newFilter;
             }
           },
         },
         sort: {
           get: () => this.tracker.sort,
-          set: (sort) => {
+          set: (newSort) => {
             if (this.sort) {
-              this.tracker.setSort(sort);
+              this.tracker.sort = newSort;
             }
           },
         },
@@ -199,8 +224,8 @@ const TrackerLayerMixin = (Base) =>
           get: () => {
             return this.tracker.hoverVehicleId;
           },
-          set: (hoverVehicleId) => {
-            this.tracker.hoverVehicleId = hoverVehicleId;
+          set: (newHoverVehicleId) => {
+            this.tracker.hoverVehicleId = newHoverVehicleId;
           },
         },
 
@@ -211,9 +236,17 @@ const TrackerLayerMixin = (Base) =>
           get: () => {
             return this.tracker.selectedVehicleId;
           },
-          set: (selectedVehicleId) => {
-            this.tracker.selectedVehicleId = selectedVehicleId;
+          set: (newSelectedVehicleId) => {
+            this.tracker.selectedVehicleId = newSelectedVehicleId;
           },
+        },
+
+        /**
+         * Options used by the constructor of the Tracker class.
+         */
+        initTrackerOptions: {
+          value: initTrackerOptions,
+          writable: false,
         },
       });
     }
@@ -222,14 +255,25 @@ const TrackerLayerMixin = (Base) =>
      * Initalize the Tracker.
      * @param {ol/Map~Map} map
      * @param {Object} options
-     * @param {Number} [options.width] Canvas's width.
-     * @param {Number} [options.height] Canvas's height.
+     * @param {number} [options.width] Canvas's width.
+     * @param {number} [options.height] Canvas's height.
+     * @param {bool} [options.interpolate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
+     * @param {string} [options.hoverVehicleId] Id of the trajectory which is hovered.
+     * @param {string} [options.selectedVehicleId] Id of the trajectory which is selected.
+     * @param {number} [options.iconScale] Scale the vehicle icons with this value.
      * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
+     * @param {function} [options.filter] Function use to filter the features displayed.
+     * @param {function} [options.sort] Function use to sort the features displayed.
+     * @param {function} [options.style] Function use to style the features displayed.
      */
-    init(map, options) {
+    init(map, options = {}) {
       super.init(map);
-      this.tracker = new Tracker(options);
-      this.tracker.setStyle((props, r) => this.style(props, r));
+      console.log(options);
+      this.tracker = new Tracker({
+        style: (props, r) => this.style(props, r),
+        ...this.initTrackerOptions,
+        ...options,
+      });
 
       if (this.visible) {
         this.start();
@@ -261,8 +305,8 @@ const TrackerLayerMixin = (Base) =>
      * Start the clock.
      *
      * @param {Array<Number>} size Map's size: [width, height].
-     * @param {Number} zoom Map's zoom level.
-     * @param {Number} resolution Map's resolution.
+     * @param {number} zoom Map's zoom level.
+     * @param {number} resolution Map's resolution.
      */
     start(size, zoom, resolution) {
       this.stop();
