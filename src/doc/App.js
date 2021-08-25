@@ -15,7 +15,7 @@ const useStyles = makeStyles({
   content: {
     flexGrow: 1,
     overflowY: 'auto',
-    paddingBottom: 200,
+    paddingBottom: 115,
     minHeight: 'calc(100vh - 528px)',
     maxWidth: 'calc(85vh + 48px)',
     margin: 'auto',
