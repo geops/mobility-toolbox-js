@@ -48,8 +48,14 @@ export default class Tracker {
     this.hoverVehicleId = null;
 
     /**
+     * Id of the trajectory which is selected.
+     * @type {string}
+     */
+    this.selectedVehicleId = null;
+
+    /**
      * Scale the vehicle icons with this value.
-     * @param {number}
+     * @type {number}
      */
     this.iconScale = opts.iconScale;
 
@@ -67,8 +73,8 @@ export default class Tracker {
         'position: absolute',
         'top: 0',
         'bottom: 0',
-        'right: 0',
-        'left: 0',
+        'width: 100%',
+        'height: 100%',
         'pointer-events: none',
         'visibility: visible',
         'margin-top: inherit', // for scrolling behavior.
@@ -101,6 +107,7 @@ export default class Tracker {
     }
 
     this.trajectories = trajectories;
+    this.renderTrajectories();
   }
 
   /**
@@ -166,6 +173,17 @@ export default class Tracker {
   }
 
   /**
+   * Set the id of the trajectory which is selected.
+   * @param {string} id Id of a vehicle.
+   * @private
+   */
+  setSelectedVehicleId(id) {
+    if (id !== this.selectedVehicleId) {
+      this.selectedVehicleId = id;
+    }
+  }
+
+  /**
    * set the scale of the vehicle icons.
    * @param {number} iconScale Scale value.
    */
@@ -186,14 +204,38 @@ export default class Tracker {
   }
 
   /**
+   * Move the canvas.
+   * @param {number} offsetX Offset X.
+   * @param {number} offsetY Offset Y.
+   * @private
+   */
+  moveCanvas(offsetX, offsetY) {
+    const oldLeft = parseFloat(this.canvas.style.left);
+    const oldTop = parseFloat(this.canvas.style.top);
+    this.canvas.style.left = `${oldLeft - offsetX}px`;
+    this.canvas.style.top = `${oldTop - offsetY}px`;
+  }
+
+  /**
    * Draw all the trajectories available to the canvas.
    * @param {Date} currTime The date to render.
    * @param {number[2]} size Size ([width, height]) of the canvas to render.
    * @param {number} resolution Which resolution of the map to render.
+   * @param {boolean} noInterpolate If true trajectories are not interpolated but
+   *   drawn at the last known coordinate. Use this for performance optimization
+   *   during map navigation.
    * @private
    */
-  renderTrajectories(currTime = Date.now(), size = [], resolution) {
+  renderTrajectories(
+    currTime = Date.now(),
+    size = [],
+    resolution,
+    noInterpolate = false,
+  ) {
     this.clear();
+    this.canvas.style.left = '0px';
+    this.canvas.style.top = '0px';
+
     const [width, height] = size;
     if (
       width &&
@@ -211,6 +253,10 @@ export default class Tracker {
     let hoverVehiclePx;
     let hoverVehicleWidth;
     let hoverVehicleHeight;
+    let selectedVehicleImg;
+    let selectedVehiclePx;
+    let selectedVehicleWidth;
+    let selectedVehicleHeight;
 
     for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
       const traj = this.trajectories[i];
@@ -226,7 +272,9 @@ export default class Tracker {
       let coord = null;
       let rotation;
 
-      if (timeIntervals && timeIntervals.length > 1) {
+      if (noInterpolate) {
+        coord = traj.coordinate;
+      } else if (timeIntervals && timeIntervals.length > 1) {
         const now = currTime - (timeOffset || 0);
         let start;
         let end;
@@ -249,7 +297,7 @@ export default class Tracker {
         }
         // The geometry can also be a Point
         if (geometry.getType() === GeomType.POINT) {
-          coord = geometry.getCoordinate();
+          coord = geometry.getCoordinates();
         } else if (geometry.getType() === GeomType.LINE_STRING) {
           if (start && end) {
             // interpolate position inside the time interval.
@@ -284,7 +332,6 @@ export default class Tracker {
             geometry,
           );
         }
-
         // We set the rotation and the timeFraction of the trajectory (used by tralis).
         // if rotation === null that seems there is no rotation available.
         this.trajectories[i].rotation = rotation;
@@ -304,6 +351,12 @@ export default class Tracker {
         this.trajectories[i].rendered = true;
 
         const vehicleImg = this.style(traj, this.currResolution);
+
+        if (!vehicleImg) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
         let imgWidth = vehicleImg.width;
         let imgHeight = vehicleImg.height;
 
@@ -312,7 +365,10 @@ export default class Tracker {
           imgWidth = Math.floor(imgWidth * this.iconScale);
         }
 
-        if (this.hoverVehicleId !== traj.id) {
+        if (
+          this.hoverVehicleId !== traj.id &&
+          this.selectedVehicleId !== traj.id
+        ) {
           this.canvasContext.drawImage(
             vehicleImg,
             px[0] - imgWidth / 2,
@@ -320,15 +376,35 @@ export default class Tracker {
             imgWidth,
             imgHeight,
           );
-        } else {
+        }
+        if (this.hoverVehicleId === traj.id) {
           // Store the canvas to draw it at the end
           hoverVehicleImg = vehicleImg;
           hoverVehiclePx = px;
           hoverVehicleWidth = imgWidth;
           hoverVehicleHeight = imgHeight;
         }
+
+        if (this.selectedVehicleId === traj.id) {
+          // Store the canvas to draw it at the end
+          selectedVehicleImg = vehicleImg;
+          selectedVehiclePx = px;
+          selectedVehicleWidth = imgWidth;
+          selectedVehicleHeight = imgHeight;
+        }
       }
     }
+
+    if (selectedVehicleImg) {
+      this.canvasContext.drawImage(
+        selectedVehicleImg,
+        selectedVehiclePx[0] - selectedVehicleWidth / 2,
+        selectedVehiclePx[1] - selectedVehicleHeight / 2,
+        selectedVehicleWidth,
+        selectedVehicleHeight,
+      );
+    }
+
     if (hoverVehicleImg) {
       this.canvasContext.drawImage(
         hoverVehicleImg,

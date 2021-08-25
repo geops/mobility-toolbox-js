@@ -1,16 +1,15 @@
 /**
- * Get a Date object as date string .
+ * Get a Date object as UTC date string .
  * ex: 2019 09 01
  * @ignore
  */
-export const getDateString = (now) => {
-  const n = now || new Date();
-  let month = (n.getMonth() + 1).toString();
+export const getUTCDateString = (now = new Date()) => {
+  let month = (now.getUTCMonth() + 1).toString();
   month = month.length === 1 ? `0${month}` : month;
-  let day = n.getDate().toString();
+  let day = now.getUTCDate().toString();
   day = day.length === 1 ? `0${day}` : day;
 
-  return [now.getFullYear(), month, day].join('');
+  return [now.getUTCFullYear(), month, day].join('');
 };
 
 /**

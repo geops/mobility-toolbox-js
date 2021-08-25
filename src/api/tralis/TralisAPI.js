@@ -43,29 +43,45 @@ class TralisAPI {
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} [options.prefix=''] Service prefix to specify tenant.
    * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
+   * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY] The bounding box to receive data from.
    */
   constructor(options = {}) {
     let wsUrl = null;
+
     if (typeof options === 'string') {
       wsUrl = options;
     } else {
       wsUrl = options.url;
     }
+
     if (options.apiKey) {
       wsUrl = `${wsUrl}?key=${options.apiKey}`;
     }
+
+    /** @ignore */
+    this.subscribedStationUic = null;
+
+    /** @ignore */
+    this.departureUpdateTimeout = null;
+
+    /** @ignore */
+    this.maxDepartureAge = 30;
+
+    /** @ignore */
+    this.extraGeoms = {};
+
+    /** @ignore */
+    this.prefix = options.prefix || '';
+
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
     this.conn.setProjection(options.projection || 'epsg:3857');
-    /** @ignore */
-    this.subscribedStationUic = null;
-    /** @ignore */
-    this.departureUpdateTimeout = null;
-    /** @ignore */
-    this.maxDepartureAge = 30;
-    /** @ignore */
-    this.extraGeoms = {};
+
+    if (options.bbox) {
+      this.conn.setBbox(options.bbox);
+    }
   }
 
   /**
@@ -86,17 +102,20 @@ class TralisAPI {
    *
    * @param {string} channel Name of the websocket channel to unsubscribe.
    * @param {string} [suffix=''] Suffix to add to the channel name.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(channel, suffix = '') {
+  unsubscribe(channel, suffix = '', cb) {
     this.conn.unsubscribe(
       `${channel}${getModeSuffix(TralisModes.SCHEMATIC, TralisModes)}${suffix}`,
+      cb,
     );
     this.conn.unsubscribe(
       `${channel}${getModeSuffix(
         TralisModes.TOPOGRAPHIC,
         TralisModes,
       )}${suffix}`,
+      cb,
     );
   }
 
@@ -204,30 +223,32 @@ class TralisAPI {
 
   /**
    * Unsubscribe from current departures channel.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDepartures() {
+  unsubscribeDepartures(cb) {
     if (this.subscribedStationUic) {
-      this.unsubscribe(`timetable_${this.subscribedStationUic}`);
+      this.unsubscribe(`timetable_${this.subscribedStationUic}`, '', cb);
       this.subscribedStationUic = null;
     }
   }
 
   /**
-   * Subscribe to the disruptions channel.
+   * Subscribe to the disruptions channel for tenant.
    *
    * @param {function} onMessage Function called on each message of the channel.
    */
   subscribeDisruptions(onMessage) {
-    this.subscribe('newsticker', (data) => {
+    this.subscribe(`${this.prefix}newsticker`, (data) => {
       onMessage(data.content);
     });
   }
 
   /**
    * Unsubscribe disruptions.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDisruptions() {
-    this.unsubscribe('newsticker');
+  unsubscribeDisruptions(cb) {
+    this.unsubscribe(`${this.prefix}newsticker`, '', cb);
   }
 
   /**
@@ -308,10 +329,11 @@ class TralisAPI {
 
   /**
    * Unsubscribe to stations channel.
+   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeStations() {
+  unsubscribeStations(cb) {
     window.clearTimeout(this.stationUpdateTimeout);
-    this.unsubscribe('station');
+    this.unsubscribe('station', '', cb);
   }
 
   /**
@@ -341,9 +363,10 @@ class TralisAPI {
 
   /**
    * Unsubscribe to extra_geoms channel.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeExtraGeoms() {
-    this.unsubscribe('extra_geoms');
+  unsubscribeExtraGeoms(cb) {
+    this.unsubscribe('extra_geoms', '', cb);
   }
 
   /**
@@ -353,15 +376,16 @@ class TralisAPI {
    * @param {function(trajectory: TralisTrajectory)} onMessage Function called on each message of the channel.
    */
   subscribeTrajectory(mode, onMessage) {
-    this.unsubscribeTrajectory();
+    this.unsubscribeTrajectory(onMessage);
     this.subscribe(`trajectory${getModeSuffix(mode, TralisModes)}`, onMessage);
   }
 
   /**
    * Unsubscribe to trajectory channels.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeTrajectory() {
-    this.unsubscribe(`trajectory`);
+  unsubscribeTrajectory(cb) {
+    this.unsubscribe(`trajectory`, '', cb);
   }
 
   /**
@@ -380,15 +404,16 @@ class TralisAPI {
 
   /**
    * Unsubscribe to deleted_vhicles channels.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDeletedVehicles() {
-    this.unsubscribe('deleted_vehicles');
+  unsubscribeDeletedVehicles(cb) {
+    this.unsubscribe('deleted_vehicles', '', cb);
   }
 
   /**
    * Get a full trajectory of a vehicule .
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<FullTrajectory>} Return a full trajectory.
    */
@@ -409,7 +434,7 @@ class TralisAPI {
   /**
    * Get full trajectories of a vehicules .
    *
-   * @param {number[]} ids List of vehicles ids.
+   * @param {string[]} ids List of vehicles ids.
    * @param {TralisMode} mode Tralis mode.
    * @returns {Promise<FullTrajectory[]>} Return an array of full trajectories.
    */
@@ -423,7 +448,7 @@ class TralisAPI {
   /**
    * Subscribe to full_trajectory channel of a given vehicle.
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
    */
   subscribeFullTrajectory(id, mode) {
@@ -445,28 +470,28 @@ class TralisAPI {
   /**
    * Unsubscribe from full_trajectory channel
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeFullTrajectory(id) {
-    this.unsubscribe('full_trajectory', `_${id}`);
+  unsubscribeFullTrajectory(id, cb) {
+    this.unsubscribe('full_trajectory', `_${id}`, cb);
   }
 
   /**
    * Get the list of stops for this vehicle.
    *
-   * @param {number} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
+   * @param {string} id A vehicle id.
    * @returns {Promise<StopSequence>} Returns a stop sequence object.
    */
-  getStopSequence(id, mode) {
+  getStopSequence(id) {
     const params = {
-      channel: `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
+      channel: `stopsequence_${id}`,
     };
     return new Promise((resolve, reject) => {
       this.conn.get(
         params,
         (data) => {
-          // Remove the delay from arrivalTime nad departureTime
+          // Remove the delay from arrivalTime nnd departureTime
           resolve(cleanStopTime(data.content && data.content[0]));
         },
         (err) => {
@@ -479,13 +504,12 @@ class TralisAPI {
   /**
    * Get a list of stops for a list of vehicles.
    *
-   * @param {number[]} ids List of vehicles ids.
-   * @param {TralisMode} mode Tralis mode.
+   * @param {string[]} ids List of vehicles ids.
    * @returns {Promise<StopSequence[]>} Return an array of stop sequences.
    */
-  getStopSequences(ids, mode) {
+  getStopSequences(ids) {
     const promises = ids.map((id) => {
-      return this.getStopSequence(id, mode);
+      return this.getStopSequence(id);
     });
     return Promise.all(promises);
   }
@@ -493,16 +517,15 @@ class TralisAPI {
   /**
    * Subscribe to stopsequence channel of a given vehicle.
    *
-   * @param {number} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
+   * @param {string} id A vehicle id.
    * @param {function(stopSequence: StopSequence)} onMessage Function called on each message of the channel.
    */
-  subscribeStopSequence(id, mode, onMessage) {
+  subscribeStopSequence(id, onMessage) {
     window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeStopSequence(id);
 
     this.subscribe(
-      `stopsequence${getModeSuffix(mode, TralisModes)}_${id}`,
+      `stopsequence_${id}`,
       (data) => {
         // Remove the delay from arrivalTime nad departureTime
         onMessage(cleanStopTime(data.content && data.content[0]));
@@ -517,10 +540,11 @@ class TralisAPI {
   /**
    * Unsubscribe from stopsequence channel
    *
-   * @param {number} id A vehicle id.
+   * @param {string} id A vehicle id.
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeStopSequence(id) {
-    this.unsubscribe(`stopsequence`, `_${id}`);
+  unsubscribeStopSequence(id, cb) {
+    this.unsubscribe(`stopsequence`, `_${id}`, cb);
   }
 
   /**

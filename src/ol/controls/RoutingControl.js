@@ -26,6 +26,7 @@ import RoutingLayer from '../layers/RoutingLayer';
  * @classproperty {string} apiKey - Key used for RoutingApi requests.
  * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
  * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).
+ * @classproperty {Array.<Array<graph="osm", minZoom=0, maxZoom=99>>} graphs - Array of routing graphs and min/max zoom levels.
  * @classproperty {string} mot - Mean of transport to be used for routing.
  * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.
  * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.
@@ -62,6 +63,9 @@ class RoutingControl extends Control {
         },
       },
     });
+
+    /** @ignore */
+    this.graphs = options.graphs || [['osm', 0, 99]];
 
     /** @ignore */
     this.mot = options.mot || 'bus';
@@ -117,6 +121,14 @@ class RoutingControl extends Control {
     this.onModifyStart = this.onModifyStart.bind(this);
     this.apiChangeListener = () => this.drawRoute();
     this.createModifyInteraction();
+  }
+
+  static getGraphsResolutions(graphs, map) {
+    const view = map.getView();
+    return graphs.map(([, minZoom, maxZoom]) => [
+      view.getResolutionForZoom(minZoom),
+      view.getResolutionForZoom((maxZoom || minZoom) + 1),
+    ]);
   }
 
   /**
@@ -215,56 +227,62 @@ class RoutingControl extends Control {
 
     this.loading = true;
 
-    // Fetch RoutingAPI data
-    return this.api
-      .route(
-        {
-          via: `${formattedViaPoints.join('|')}`,
-          mot: `${this.mot}`,
-          'resolve-hops': false,
-          elevation: false,
-          'coord-radius': 100.0,
-          'coord-punish': 1000.0,
-          ...this.routingApiParams,
-        },
-        this.abortController,
-      )
-      .then((featureCollection) => {
-        this.segments = this.format.readFeatures(featureCollection);
+    // Clear source
+    this.routingLayer.olLayer.getSource().clear();
 
-        // Clear source
-        this.routingLayer.olLayer.getSource().clear();
+    // Create point features for the viaPoints
+    this.viaPoints.forEach((viaPoint, idx) => {
+      return this.drawViaPoint(viaPoint, idx);
+    });
 
-        // Create point features for the viaPoints
-        this.viaPoints.forEach((viaPoint, idx) => {
-          return this.drawViaPoint(viaPoint, idx);
-        });
+    return Promise.all(
+      this.graphs.map(([graph], index) =>
+        this.api
+          .route(
+            {
+              graph,
+              via: `${formattedViaPoints.join('|')}`,
+              mot: `${this.mot}`,
+              'resolve-hops': false,
+              elevation: false,
+              'coord-radius': 100.0,
+              'coord-punish': 1000.0,
+              ...this.routingApiParams,
+            },
+            this.abortController,
+          )
+          .then((featureCollection) => {
+            const segments = this.format.readFeatures(featureCollection);
 
-        // Create the new route. This route will be modifiable by the Modifiy interaction.
-        const coords = [];
-        this.segments.forEach((seg) => {
-          coords.push(...seg.getGeometry().getCoordinates());
-        });
-        const routeFeature = new Feature({
-          geometry: new LineString(coords),
-        });
-        routeFeature.set('mot', this.mot);
-        this.routingLayer.olLayer.getSource().addFeature(routeFeature);
-        this.loading = false;
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') {
-          // Ignore abort error
-          return;
-        }
-        // Dispatch error event and execute error function
-        this.dispatchEvent({
-          type: 'error',
-          target: this,
-        });
-        this.onRouteError(error, this);
-        this.loading = false;
-      });
+            // Create the new route. This route will be modifiable by the Modifiy interaction.
+            const coords = [];
+            segments.forEach((seg) => {
+              coords.push(...seg.getGeometry().getCoordinates());
+            });
+
+            const routeFeature = new Feature({
+              geometry: new LineString(coords),
+            });
+            routeFeature.set('graph', graph);
+            routeFeature.set('mot', this.mot);
+            routeFeature.set('minResolution', this.graphsResolutions[index][0]);
+            routeFeature.set('maxResolution', this.graphsResolutions[index][1]);
+            this.routingLayer.olLayer.getSource().addFeature(routeFeature);
+          })
+          .catch((error) => {
+            if (error.name === 'AbortError') {
+              // Ignore abort error
+              return;
+            }
+            // Dispatch error event and execute error function
+            this.dispatchEvent({
+              type: 'error',
+              target: this,
+            });
+            this.onRouteError(error, this);
+          }),
+      ),
+    );
   }
 
   drawViaPoint(viaPoint, idx) {
@@ -462,6 +480,12 @@ class RoutingControl extends Control {
         featureProjection: this.map.getView().getProjection(),
       });
 
+      /** @ignore */
+      this.graphsResolutions = RoutingControl.getGraphsResolutions(
+        this.graphs,
+        this.map,
+      );
+
       // Clean the modifyInteraction if present
       this.map.removeInteraction(this.modifyInteraction);
 
@@ -470,6 +494,10 @@ class RoutingControl extends Control {
       this.map.addInteraction(this.modifyInteraction);
       this.modifyInteraction.setActive(true);
       this.addListeners();
+    } else {
+      // fall back to some default values if map is not available
+      this.format = new GeoJSON({ featureProjection: 'EPSG:3857' });
+      this.graphsResolutions = this.graphs;
     }
   }
 

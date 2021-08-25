@@ -32,19 +32,45 @@ class TrackerLayer extends mixin(Layer) {
           new OLLayer({
             source: new Source({}),
             render: (frameState) => {
-              if (this.tracker && this.tracker.canvas) {
+              if (!this.tracker || !this.tracker.canvas) {
+                return null;
+              }
+              const { zoom, center, resolution } = frameState.viewState;
+
+              if (zoom !== this.renderState.zoom) {
                 this.tracker.renderTrajectories(
                   this.currTime,
                   frameState.size,
-                  frameState.viewState.resolution,
+                  resolution,
+                  true,
                 );
-                return this.tracker.canvas;
+                this.renderState.zoom = zoom;
+                this.renderState.center = center;
+              } else if (
+                this.renderState.center[0] !== center[0] ||
+                this.renderState.center[1] !== center[1]
+              ) {
+                const px = this.map.getPixelFromCoordinate(center);
+                const oldPx = this.map.getPixelFromCoordinate(
+                  this.renderState.center,
+                );
+                this.tracker.moveCanvas(px[0] - oldPx[0], px[1] - oldPx[1]);
+                this.renderState.center = center;
               }
-              return null;
+
+              return this.tracker.canvas;
             },
           }),
         ],
       });
+
+    // Options the last render run did happen. If something changes
+    // we have to render again
+    /** @ignore */
+    this.renderState = {
+      center: [0, 0],
+      zoom: null,
+    };
 
     /**
      * Array of ol events key, returned by on() or once().
@@ -75,7 +101,13 @@ class TrackerLayer extends mixin(Layer) {
    */
   setCurrTime(time) {
     const view = this.map.getView();
-    super.setCurrTime(time, this.map.getSize(), view.getResolution());
+    super.setCurrTime(
+      time,
+      this.map.getSize(),
+      view.getResolution(),
+      !this.map.getView().getAnimating() &&
+        !this.map.getView().getInteracting(),
+    );
   }
 
   /**
@@ -103,12 +135,24 @@ class TrackerLayer extends mixin(Layer) {
         }
       }),
       this.map.on('pointermove', (evt) => {
-        if (this.map.getView().getInteracting() || !this.isHoverActive) {
+        if (
+          this.map.getView().getInteracting() ||
+          this.map.getView().getAnimating() ||
+          !this.isHoverActive
+        ) {
           return;
         }
-        const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate);
-        this.map.getTargetElement().style.cursor = vehicle ? 'pointer' : 'auto';
-        this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+        const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
+        const id = vehicle && vehicle.id;
+        if (this.hoverVehicleId !== id) {
+          this.map.getTargetElement().style.cursor = vehicle
+            ? 'pointer'
+            : 'auto';
+          this.hoverVehicleId = id;
+
+          // We doesn´t wait the next render, we force it.
+          this.tracker.renderTrajectories(this.currTime);
+        }
       }),
     ];
   }
@@ -127,12 +171,13 @@ class TrackerLayer extends mixin(Layer) {
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
    * @param {ol/coordinate~Coordinate} coordinate
-   * @returns {ol/Feature~Feature} Vehicle feature.
-   * @private
+   * @param {number} nb Number of vehicles to return;
+   * @returns {Array<ol/Feature~Feature>} Vehicle feature.
+   * @override
    */
-  getVehiclesAtCoordinate(coordinate) {
+  getVehiclesAtCoordinate(coordinate, nb) {
     const resolution = this.map.getView().getResolution();
-    return super.getVehiclesAtCoordinate(coordinate, resolution);
+    return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
   /**

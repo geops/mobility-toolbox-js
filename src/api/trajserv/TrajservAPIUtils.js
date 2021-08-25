@@ -5,7 +5,7 @@ import { LineString } from 'ol/geom';
  * @returns {array<Date>}
  * @ignore
  */
-const translateDates = (dates) => {
+const translateDates = (dates = []) => {
   const newDates = [];
 
   for (let i = 0; i < dates.length; i += 1) {
@@ -25,6 +25,15 @@ const translateDates = (dates) => {
  * @private
  */
 export const translateTrajStationsResp = (data) => {
+  const newData = { ...data };
+
+  // MAke sure all property exists.
+  ['a', 'f', 'tt'].forEach((prop) => {
+    if (!newData[prop]) {
+      newData[prop] = {};
+    }
+  });
+
   const {
     id,
     hs: destination,
@@ -46,7 +55,7 @@ export const translateTrajStationsResp = (data) => {
       t: operatingPeriod,
     },
     sts: dataStations,
-  } = data;
+  } = newData;
 
   const notOperatingDays = translateDates(dateNotOperatingDays);
   const additionalOperatingDays = translateDates(dateAdditionalOperatingDays);
@@ -54,7 +63,7 @@ export const translateTrajStationsResp = (data) => {
   const color = datacolor && `#${datacolor}`;
 
   const stations = [];
-  for (let i = 0; i < dataStations.length; i += 1) {
+  for (let i = 0; i < (dataStations || []).length; i += 1) {
     const {
       sid: stationId,
       n: stationName,

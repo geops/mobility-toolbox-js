@@ -15,6 +15,7 @@ class WebSocketConnector {
     setInterval(() => {
       this.send('PING');
     }, 10000);
+    this.subscribed = {};
   }
 
   /**
@@ -157,7 +158,7 @@ class WebSocketConnector {
       this.websocket.addEventListener('close', errorCb);
     }
 
-    return { onMessage, onErrorCb: errorCb };
+    return { onMessageCb: onMessage, onErrorCb: errorCb };
   }
 
   /**
@@ -176,18 +177,24 @@ class WebSocketConnector {
       this.subscriptions.push({ params, cb, errorCb, onMessageCb, onErrorCb });
     }
 
-    this.send(`GET ${reqStr}`);
-    this.send(`SUB ${reqStr}`);
+    if (!this.subscribed[reqStr]) {
+      this.send(`GET ${reqStr}`);
+      this.send(`SUB ${reqStr}`);
+      this.subscribed[reqStr] = true;
+    }
   }
 
   /**
    * Unsubscribe from a channel.
    * @param {string} source source to unsubscribe from
+   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(source) {
+  unsubscribe(source, cb) {
     this.subscriptions
-      .filter((s) => s.params.channel === source)
+      .filter((s) => {
+        return s.params.channel === source && (!cb || s.cb === cb);
+      })
       .forEach(({ onMessageCb, onErrorCb }) => {
         this.websocket.removeEventListener('message', onMessageCb);
         if (onErrorCb) {
@@ -197,11 +204,17 @@ class WebSocketConnector {
       });
 
     this.subscriptions = this.subscriptions.filter(
-      (s) => s.params.channel !== source,
+      (s) => s.params.channel !== source || (cb && s.cb !== cb),
     );
 
-    if (source) {
+    // If there is no more subscriptions to this channel we DEL it.
+    if (
+      source &&
+      this.subscribed[source] &&
+      !this.subscriptions.find((s) => s.params.channel === source)
+    ) {
       this.send(`DEL ${source}`);
+      this.subscribed[source] = false;
     }
   }
 }

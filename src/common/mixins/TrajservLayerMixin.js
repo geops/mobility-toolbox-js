@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 import qs from 'query-string';
-import { getDateString, getUTCTimeString } from '../timeUtils';
+import { getUTCDateString, getUTCTimeString } from '../timeUtils';
 import {
   getRadius,
   getBgColor,
@@ -347,7 +347,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         ...extraParams,
         btime: getUTCTimeString(now),
         etime: getUTCTimeString(this.later),
-        date: getDateString(now),
+        date: getUTCDateString(now),
         rid: 1,
         a: 1,
         cd: 1,
@@ -415,15 +415,21 @@ const TrajservLayerMixin = (TrackerLayer) =>
         operatorProvidesRealtime,
       } = props;
       const z = Math.min(Math.floor(zoom || 1), 16);
-      const hover = this.tracker.hoverVehicleId === id;
+      const hover = this.hoverVehicleId === id;
       const selected = this.selectedVehicleId === id;
       const key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
 
       if (!this.styleCache[key]) {
         let radius = getRadius(type, z);
+        const isDisplayStrokeAndDelay = radius >= 7;
+
+        if (radius === 0) {
+          this.styleCache[key] = null;
+          return null;
+        }
 
         if (hover || selected) {
-          radius += 5;
+          radius = isDisplayStrokeAndDelay ? radius + 5 : 14;
         }
         const margin = 1;
         const radiusDelay = radius + 2;
@@ -436,7 +442,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         const ctx = canvas.getContext('2d');
         const origin = canvas.width / 2;
 
-        if (delay !== null) {
+        if (isDisplayStrokeAndDelay && delay !== null) {
           // Draw circle delay background
           ctx.save();
           ctx.beginPath();
@@ -448,7 +454,10 @@ const TrajservLayerMixin = (TrackerLayer) =>
         }
 
         // Show delay if feature is hovered or if delay is above 5mins.
-        if (hover || delay >= this.delayDisplay || cancelled) {
+        if (
+          isDisplayStrokeAndDelay &&
+          (hover || delay >= this.delayDisplay || cancelled)
+        ) {
           // Draw delay text
           ctx.save();
           ctx.textAlign = 'left';
@@ -474,22 +483,28 @@ const TrajservLayerMixin = (TrackerLayer) =>
         } else {
           circleFillColor = color || getBgColor(type);
         }
+
         ctx.save();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = '#000000';
+        if (isDisplayStrokeAndDelay || hover || selected) {
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = '#000000';
+        }
         ctx.fillStyle = circleFillColor;
         ctx.beginPath();
         ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
         ctx.fill();
         // Dashed outline if a provider provides realtime but we don't use it.
         if (
+          isDisplayStrokeAndDelay &&
           this.useDelayStyle &&
           delay === null &&
           operatorProvidesRealtime === 'yes'
         ) {
           ctx.setLineDash([5, 3]);
         }
-        ctx.stroke();
+        if (isDisplayStrokeAndDelay || hover || selected) {
+          ctx.stroke();
+        }
         ctx.restore();
 
         // Draw text in the circle
