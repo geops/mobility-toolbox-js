@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Markdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import Typography from '@material-ui/core/Typography';
 import TrackerExample from './TrackerExample';
 
 const codeHtmlPage = `
@@ -51,9 +52,18 @@ function Home() {
     return null;
   }
 
+  const MarkdownHeading = ({ ...props }) => {
+    const { level, children } = props;
+    return <Typography variant={`h${level}`}>{children}</Typography>;
+  };
+
+  const renderers = {
+    heading: MarkdownHeading,
+  };
+
   return (
     <>
-      <Markdown source={source} />
+      <Markdown source={source} renderers={renderers} />
       <br />
       <h2>Quick Start</h2>
       <TrackerExample />
