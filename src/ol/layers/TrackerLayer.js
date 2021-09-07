@@ -46,6 +46,7 @@ class TrackerLayer extends mixin(Layer) {
 
               if (zoom !== this.renderState.zoom) {
                 if (!this.renderWhenZooming(zoom)) {
+                  this.renderState.zoom = zoom;
                   this.tracker.clear();
                   return this.tracker.canvas;
                 }
@@ -56,7 +57,6 @@ class TrackerLayer extends mixin(Layer) {
                   resolution,
                   true,
                 );
-                this.renderState.zoom = zoom;
                 this.renderState.center = center;
               } else if (
                 this.renderState.center[0] !== center[0] ||
