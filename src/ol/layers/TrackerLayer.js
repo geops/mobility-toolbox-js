@@ -57,6 +57,7 @@ class TrackerLayer extends mixin(Layer) {
                   resolution,
                   true,
                 );
+                this.renderState.zoom = zoom;
                 this.renderState.center = center;
               } else if (
                 this.renderState.center[0] !== center[0] ||
