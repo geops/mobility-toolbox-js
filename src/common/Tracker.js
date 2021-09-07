@@ -258,13 +258,15 @@ export default class Tracker {
     let selectedVehicleWidth;
     let selectedVehicleHeight;
 
+    this.renderedTrajectories = [];
+
     for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
       const traj = this.trajectories[i];
 
       // We simplify the traj object
       const { geometry, timeIntervals, timeOffset } = traj;
 
-      if (this.filter && !this.filter(traj)) {
+      if (this.filter && !this.filter(traj, i, this.trajectories)) {
         // eslint-disable-next-line no-continue
         continue;
       }
@@ -349,7 +351,7 @@ export default class Tracker {
         }
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
         this.trajectories[i].rendered = true;
-
+        this.renderedTrajectories.push(this.trajectories[i]);
         const vehicleImg = this.style(traj, this.currResolution);
 
         if (!vehicleImg) {
@@ -414,8 +416,6 @@ export default class Tracker {
         hoverVehicleHeight,
       );
     }
-
-    this.renderedTrajectories = this.trajectories.filter((t) => t.rendered);
   }
 
   /**

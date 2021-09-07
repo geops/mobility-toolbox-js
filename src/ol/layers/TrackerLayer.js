@@ -25,6 +25,13 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
+    /**
+     * Function to define  when allowing the render of trajectories depending on the zoom level. Default the fundtion return true.
+     * It's useful to avoid rendering the map when the map is animating or interacting
+     * @type {function}
+     */
+    this.renderWhenZooming = options.renderWhenZooming || (() => true);
+
     this.olLayer =
       options.olLayer ||
       new Group({
@@ -38,6 +45,11 @@ class TrackerLayer extends mixin(Layer) {
               const { zoom, center, resolution } = frameState.viewState;
 
               if (zoom !== this.renderState.zoom) {
+                if (!this.renderWhenZooming(zoom)) {
+                  this.tracker.clear();
+                  return this.tracker.canvas;
+                }
+
                 this.tracker.renderTrajectories(
                   this.currTime,
                   frameState.size,
@@ -117,7 +129,7 @@ class TrackerLayer extends mixin(Layer) {
   start() {
     super.start(
       this.map.getSize(),
-      this.currentZoom,
+      this.currentZoom || this.map.getView().getZoom(),
       this.map.getView().getResolution(),
     );
 
