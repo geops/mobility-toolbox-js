@@ -89,55 +89,61 @@ const Example = () => {
   }, [example, htmlFileName, jsFileName, readmeFileName]);
 
   return (
-    <Grid container direction="column" spacing={3}>
-      <Grid item xs={12}>
-        <Typography variant="h1" className="headline">
-          {example.name}
-        </Typography>
-        <Typography>{example.description}</Typography>
-        <Markdown className={classes.readme} source={readme || ''} />
+    <div style={{ maxWidth: '85vh', margin: 'auto', marginTop: 30 }}>
+      <Grid container direction="column" spacing={3}>
+        <Grid item xs={12}>
+          <Typography variant="h1" className="headline">
+            {example.name}
+          </Typography>
+          <Typography>{example.description}</Typography>
+          <Markdown className={classes.readme} source={readme || ''} />
+        </Grid>
+        <Grid item xs={12}>
+          <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
+            <div
+              className={`${classes.htmlContainer} ${
+                isNavigable ? '' : classes.noPointer
+              }`}
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          </Paper>
+        </Grid>
+        {js && html ? (
+          <>
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <Typography className={classes.fileName}>
+                  {jsFileName}
+                </Typography>
+                <SyntaxHighlighter language="javascript">
+                  {js}
+                </SyntaxHighlighter>
+                <CodeSandboxButton
+                  className={classes.editButton}
+                  extraFiles={example.extraFiles || {}}
+                  html={html}
+                  js={js}
+                />
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <Typography className={classes.fileName}>
+                  {htmlFileName}
+                </Typography>
+                <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
+                <CodeSandboxButton
+                  className={classes.editButton}
+                  html={html}
+                  js={js}
+                />
+              </Paper>
+            </Grid>
+          </>
+        ) : null}
       </Grid>
-      <Grid item xs={12}>
-        <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
-          <div
-            className={`${classes.htmlContainer} ${
-              isNavigable ? '' : classes.noPointer
-            }`}
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-        </Paper>
-      </Grid>
-      {js && html ? (
-        <>
-          <Grid item xs={12}>
-            <Paper className={classes.paper}>
-              <Typography className={classes.fileName}>{jsFileName}</Typography>
-              <SyntaxHighlighter language="javascript">{js}</SyntaxHighlighter>
-              <CodeSandboxButton
-                className={classes.editButton}
-                extraFiles={example.extraFiles || {}}
-                html={html}
-                js={js}
-              />
-            </Paper>
-          </Grid>
-          <Grid item xs={12}>
-            <Paper className={classes.paper}>
-              <Typography className={classes.fileName}>
-                {htmlFileName}
-              </Typography>
-              <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-              <CodeSandboxButton
-                className={classes.editButton}
-                html={html}
-                js={js}
-              />
-            </Paper>
-          </Grid>
-        </>
-      ) : null}
-    </Grid>
+    </div>
   );
 };
 
