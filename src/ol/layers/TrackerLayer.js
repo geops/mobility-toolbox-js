@@ -53,7 +53,7 @@ class TrackerLayer extends mixin(Layer) {
                   return this.tracker.canvas;
                 }
 
-                this.tracker.renderTrajectories(
+                this.renderTrajectories(
                   this.currTime,
                   frameState.size,
                   resolution,
@@ -164,7 +164,7 @@ class TrackerLayer extends mixin(Layer) {
           this.hoverVehicleId = id;
 
           // We doesn´t wait the next render, we force it.
-          this.tracker.renderTrajectories(this.currTime);
+          this.renderTrajectories(this.currTime);
         }
       }),
     ];

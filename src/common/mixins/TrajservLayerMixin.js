@@ -191,6 +191,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         operator,
       } = options;
 
+      let requestIntervalSeconds = 3;
       let defaultApi;
       if (!options.api) {
         const apiOptions = {};
@@ -223,8 +224,18 @@ const TrajservLayerMixin = (TrackerLayer) =>
           writable: true,
         },
         requestIntervalSeconds: {
-          value: 3,
-          writable: true,
+          get: () => {
+            return requestIntervalSeconds;
+          },
+          set: (newRequestIntervalSeconds) => {
+            if (newRequestIntervalSeconds !== requestIntervalSeconds) {
+              requestIntervalSeconds = newRequestIntervalSeconds;
+              if (this.visible) {
+                // stop() is call within the start.
+                this.start();
+              }
+            }
+          },
         },
         publishedLineName: {
           get: () => {
@@ -323,14 +334,17 @@ const TrajservLayerMixin = (TrackerLayer) =>
     }
 
     getParams(extraParams = {}) {
-      const intervalMs = this.speed * 20000; // 20 seconds, arbitrary value, could be : (this.requestIntervalSeconds + 1) * 1000;
+      // The 5 seconds more are used as a buffer if the request takes too long.
+      const requestIntervalInMs = (this.requestIntervalSeconds + 5) * 1000;
+      const intervalMs = this.speed * requestIntervalInMs;
       const now = this.currTime;
 
       let diff = true;
 
       if (
         this.later &&
-        now.getTime() > this.later.getTime() - 3000 * this.speed
+        now.getTime() >
+          this.later.getTime() - this.requestIntervalSeconds * 1000
       ) {
         diff = false;
       }
@@ -399,6 +413,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
           // Don't set trajectories when the user has aborted the request.
           if (trajectories) {
             this.tracker.setTrajectories(trajectories);
+            this.renderTrajectories();
           }
         });
     }

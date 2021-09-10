@@ -2,7 +2,7 @@ import { unByKey } from 'ol/Observable';
 import GeomType from 'ol/geom/GeometryType';
 
 /**
- * Tracker. This class draw trajectories on a canvas.
+ * Tracker. This class store and allow to draw trajectories on a canvas.
  * @class
  * @param {Object} options
  * @private
@@ -107,7 +107,6 @@ export default class Tracker {
     }
 
     this.trajectories = trajectories;
-    this.renderTrajectories();
   }
 
   /**
@@ -274,7 +273,7 @@ export default class Tracker {
       let coord = null;
       let rotation;
 
-      if (noInterpolate) {
+      if (traj.coordinate && (noInterpolate || !this.interpolate)) {
         coord = traj.coordinate;
       } else if (timeIntervals && timeIntervals.length > 1) {
         const now = currTime - (timeOffset || 0);
