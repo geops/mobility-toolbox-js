@@ -2,7 +2,7 @@ import { unByKey } from 'ol/Observable';
 import GeomType from 'ol/geom/GeometryType';
 
 /**
- * Tracker. This class store and allow to draw trajectories on a canvas.
+ * Tracker. This class stores and allows to draw trajectories on a canvas.
  * @class
  * @param {Object} options
  * @private
