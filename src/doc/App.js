@@ -17,7 +17,7 @@ const useStyles = makeStyles({
     overflowY: 'auto',
     paddingBottom: 115,
     minHeight: 'calc(100vh - 528px)',
-    maxWidth: 'calc(85vh + 48px)',
+    maxWidth: 'calc(85vw + 48px)',
     margin: 'auto',
     marginTop: 30,
   },
