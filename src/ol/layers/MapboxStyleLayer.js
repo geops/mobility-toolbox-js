@@ -162,10 +162,10 @@ class MapboxStyleLayer extends Layer {
 
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
-      this.on('change:visible', () => {
+      this.on('change:visible', (evt) => {
         // Once the map is loaded we can apply vsiiblity without waiting
         // the style. Mapbox take care of the application of style changes.
-        this.applyLayoutVisibility();
+        this.applyLayoutVisibility(evt);
       }),
     );
 
@@ -393,6 +393,7 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * Apply visibility to style layers that fits the styleLayersFilter function.
+   * @param {Event} evt Layer's event that has called the function.
    * @private
    */
   applyLayoutVisibility() {
