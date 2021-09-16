@@ -5,8 +5,7 @@ import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
-import getMapboxStyleUrl from '../../common/utils/getMapboxStyleUrl';
+import { getMapboxMapCopyrights, getMapboxStyleUrl } from '../../common/utils';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap

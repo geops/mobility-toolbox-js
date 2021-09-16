@@ -1,6 +1,6 @@
 import Control from '../../common/controls/Control';
 import mixin from '../../common/mixins/CopyrightMixin';
-import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
+import { getMapboxMapCopyrights } from '../../common/utils';
 
 /**
  * Display layer's copyrights.
