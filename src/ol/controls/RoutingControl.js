@@ -86,6 +86,9 @@ class RoutingControl extends Control {
     this.stopsApiKey = options.stopsApiKey || this.apiKey;
 
     /** @ignore */
+    this.segments = [];
+
+    /** @ignore */
     this.stopsApiUrl =
       options.stopsApiUrl || 'https://api.geops.io/stops/v1/lookup/';
 
@@ -252,11 +255,11 @@ class RoutingControl extends Control {
             this.abortController,
           )
           .then((featureCollection) => {
-            const segments = this.format.readFeatures(featureCollection);
+            this.segments = this.format.readFeatures(featureCollection);
 
             // Create the new route. This route will be modifiable by the Modifiy interaction.
             const coords = [];
-            segments.forEach((seg) => {
+            this.segments.forEach((seg) => {
               coords.push(...seg.getGeometry().getCoordinates());
             });
 
@@ -274,6 +277,7 @@ class RoutingControl extends Control {
               // Ignore abort error
               return;
             }
+            this.segments = [];
             // Dispatch error event and execute error function
             this.dispatchEvent({
               type: 'error',
