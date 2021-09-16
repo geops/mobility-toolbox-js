@@ -162,7 +162,7 @@ class TrackerLayer extends mixin(Layer) {
       this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
       this.hoverVehicleId = id;
       // We doesn´t wait the next render, we force it.
-      this.tracker.renderTrajectories(this.currTime);
+      this.renderTrajectories(this.currTime);
     }
   }
 }

@@ -51,14 +51,12 @@
   margin-bottom: 10px;
   font-size: 50px;
   font-weight: 900;
-  border-bottom: solid 1px #ddd;
 }
 
 .esdoc h2 {
   margin-top: 24px;
   margin-bottom: 10px;
   font-size: 22px;
-  border-bottom: solid 1px #ddd;
   font-weight: 900;
 }
 
@@ -166,7 +164,6 @@
   left: 0; */
   /* box-sizing: border-box; */
   width: 100%;
-  height: 100%;
   /* margin-top: 40px;
   padding-top: 40px;
   padding-left: 15px;
@@ -174,7 +171,6 @@
   margin-top:1em; */
   overflow-x: auto;
   /* box-shadow: rgba(255, 255, 255, 1) -1px 0 0 inset; */
-  border-right: 1px solid #ddd;
 }
 
 .esdoc .navigation ul {
@@ -193,7 +189,7 @@
 
 .esdoc .navigation .nav-dir-path {
   display: block;
-  margin-top: 0.7em;
+  margin-top: 1.5em;
   margin-bottom: 0.25em;
   font-weight: 600;
 }
@@ -256,8 +252,8 @@
 }
 
 .esdoc .content {
-  /* margin-top: 40px;
-  margin-left: 250px;
+  margin-top: 40px;
+  /* margin-left: 250px;
   padding: 10px 50px 10px 20px; */
 }
 
