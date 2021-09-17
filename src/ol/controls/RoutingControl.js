@@ -10,6 +10,14 @@ import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
 
+const getFlatCoordinatesFromSegments = (segmentArray) => {
+  const coords = [];
+  segmentArray.forEach((seg) => {
+    coords.push(...seg.getGeometry().getCoordinates());
+  });
+  return coords;
+};
+
 /**
  * Display a route of a specified mean of transport.
  *
@@ -257,11 +265,36 @@ class RoutingControl extends Control {
           .then((featureCollection) => {
             this.segments = this.format.readFeatures(featureCollection);
 
+            if (this.mot === 'foot') {
+              // Extract unique values from viaPoint target value
+              const uniqueVias = this.segments.reduce(
+                (resultVias, currentFeat) => {
+                  const segTrg = currentFeat.get('trg');
+                  return resultVias.find(
+                    (via) => via[0] === segTrg[0] && via[1] === segTrg[1],
+                  )
+                    ? resultVias
+                    : [...resultVias, segTrg];
+                },
+                [],
+              );
+
+              // Create LineString features from segments with same unique value
+              this.segments = uniqueVias.map((via) => {
+                const viaSegments = this.segments.filter((seg) => {
+                  const segTrg = seg.get('trg');
+                  return segTrg[0] === via[0] && segTrg[1] === via[1];
+                });
+
+                const coords = getFlatCoordinatesFromSegments(viaSegments);
+                return new Feature({
+                  geometry: new LineString(coords),
+                });
+              });
+            }
+
             // Create the new route. This route will be modifiable by the Modifiy interaction.
-            const coords = [];
-            this.segments.forEach((seg) => {
-              coords.push(...seg.getGeometry().getCoordinates());
-            });
+            const coords = getFlatCoordinatesFromSegments(this.segments);
 
             const routeFeature = new Feature({
               geometry: new LineString(coords),
