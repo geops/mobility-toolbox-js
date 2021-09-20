@@ -323,9 +323,10 @@ export default class MapboxLayer extends Layer {
     let pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
 
     if (this.hitTolerance) {
+      const { x, y } = pixel;
       pixel = [
-        [pixel[0] - this.hitTolerance, pixel[1] - this.hitTolerance],
-        [pixel[0] + this.hitTolerance, pixel[1] + this.hitTolerance],
+        { x: x - this.hitTolerance, y: y - this.hitTolerance },
+        { x: x + this.hitTolerance, y: y + this.hitTolerance },
       ];
     }
 

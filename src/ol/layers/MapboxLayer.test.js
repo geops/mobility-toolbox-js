@@ -136,7 +136,7 @@ describe('MapboxLayer', () => {
         sourceLayer: 'fooo',
       };
       layer1.mbMap.project = jest.fn((coord) => {
-        return coord;
+        return { x: coord[0], y: coord[1] };
       });
       layer1.mbMap.queryRenderedFeatures = jest.fn(() => {
         return [mapboxFeature];
@@ -153,7 +153,7 @@ describe('MapboxLayer', () => {
     describe('should use hitTolerance property', () => {
       beforeEach(() => {
         layer1.mbMap.project = jest.fn((coord) => {
-          return coord;
+          return { x: coord[0], y: coord[1] };
         });
       });
 
@@ -166,8 +166,8 @@ describe('MapboxLayer', () => {
         layer1.mbMap.queryRenderedFeatures = jest.fn((pixelBounds) => {
           // Use default hoitTolerance
           expect(pixelBounds).toEqual([
-            [-5, -5],
-            [5, 5],
+            { x: -5, y: -5 },
+            { x: 5, y: 5 },
           ]);
           done();
           return [];
@@ -180,8 +180,8 @@ describe('MapboxLayer', () => {
         layer1.mbMap.queryRenderedFeatures = jest.fn((pixelBounds) => {
           // Use default hoitTolerance
           expect(pixelBounds).toEqual([
-            [-10, -10],
-            [10, 10],
+            { x: -10, y: -10 },
+            { x: 10, y: 10 },
           ]);
           done();
           return [];
