@@ -150,5 +150,44 @@ describe('MapboxLayer', () => {
       layer1.mbMap.project.mockRestore();
       layer1.mbMap.queryRenderedFeatures.mockRestore();
     });
+    describe('should use hitTolerance property', () => {
+      beforeEach(() => {
+        layer1.mbMap.project = jest.fn((coord) => {
+          return coord;
+        });
+      });
+
+      afterEach(() => {
+        layer1.mbMap.project.mockRestore();
+        layer1.mbMap.queryRenderedFeatures.mockRestore();
+      });
+
+      test('when hitTolerance is not set', (done) => {
+        layer1.mbMap.queryRenderedFeatures = jest.fn((pixelBounds) => {
+          // Use default hoitTolerance
+          expect(pixelBounds).toEqual([
+            [-5, -5],
+            [5, 5],
+          ]);
+          done();
+          return [];
+        });
+        layer1.getFeatureInfoAtCoordinate([0, 0], {});
+      });
+
+      test('when hitTolerance is set to 10', (done) => {
+        layer1.hitTolerance = 10;
+        layer1.mbMap.queryRenderedFeatures = jest.fn((pixelBounds) => {
+          // Use default hoitTolerance
+          expect(pixelBounds).toEqual([
+            [-10, -10],
+            [10, 10],
+          ]);
+          done();
+          return [];
+        });
+        layer1.getFeatureInfoAtCoordinate([0, 0], {});
+      });
+    });
   });
 });
