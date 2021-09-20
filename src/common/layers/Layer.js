@@ -17,6 +17,7 @@ import { v4 as uuid } from 'uuid';
  * @classproperty {Layer[]} children - List of children.
  * @classproperty {String[]} copyrights - Array of copyrights.
  * @classproperty {boolean} visible - Define if the layer is visible or not.
+ * @classproperty {number} hitTolerance - Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
  * @classproperty {Object} properties - Custom properties.
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
  */
@@ -33,6 +34,7 @@ export default class Layer extends Observable {
    * @param {boolean} [options.visible=true] If true this layer is visible on the map.
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
    * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
+   * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
    */
   constructor(options) {
     super();
@@ -63,6 +65,7 @@ export default class Layer extends Observable {
       properties,
       isBaseLayer,
       isQueryable,
+      hitTolerance,
     } = options;
     const uid = uuid();
     const dfltName = name || uid;
@@ -82,6 +85,10 @@ export default class Layer extends Observable {
       },
       isQueryable: {
         value: !!isQueryable,
+      },
+      hitTolerance: {
+        value: hitTolerance || 5,
+        writable: true,
       },
       // Custom property for duck typing since `instanceof` is not working
       // when the instance was created on different bundles.
