@@ -193,6 +193,7 @@ const TralisLayerMixin = (TrackerLayer) =>
 
     updateTrajectories() {
       this.tracker.setTrajectories(this.trajectories);
+      this.renderTrajectories();
     }
 
     getRefreshTimeInMs() {

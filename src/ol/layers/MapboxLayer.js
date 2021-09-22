@@ -5,8 +5,7 @@ import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-import getMapboxMapCopyrights from '../../common/utils/getMapboxMapCopyrights';
-import getMapboxStyleUrl from '../../common/utils/getMapboxStyleUrl';
+import { getMapboxMapCopyrights, getMapboxStyleUrl } from '../../common/utils';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -321,7 +320,16 @@ export default class MapboxLayer extends Layer {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
 
-    const pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
+    let pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
+
+    if (this.hitTolerance) {
+      const { x, y } = pixel;
+      pixel = [
+        { x: x - this.hitTolerance, y: y - this.hitTolerance },
+        { x: x + this.hitTolerance, y: y + this.hitTolerance },
+      ];
+    }
+
     // At this point we get GeoJSON Mapbox feature, we transform it to an OpenLayers
     // feature to be consistent with other layers.
     const features = this.mbMap

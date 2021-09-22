@@ -136,7 +136,7 @@ describe('MapboxLayer', () => {
         sourceLayer: 'fooo',
       };
       layer1.mbMap.project = jest.fn((coord) => {
-        return coord;
+        return { x: coord[0], y: coord[1] };
       });
       layer1.mbMap.queryRenderedFeatures = jest.fn(() => {
         return [mapboxFeature];
@@ -149,6 +149,45 @@ describe('MapboxLayer', () => {
       });
       layer1.mbMap.project.mockRestore();
       layer1.mbMap.queryRenderedFeatures.mockRestore();
+    });
+    describe('should use hitTolerance property', () => {
+      beforeEach(() => {
+        layer1.mbMap.project = jest.fn((coord) => {
+          return { x: coord[0], y: coord[1] };
+        });
+      });
+
+      afterEach(() => {
+        layer1.mbMap.project.mockRestore();
+        layer1.mbMap.queryRenderedFeatures.mockRestore();
+      });
+
+      test('when hitTolerance is not set', (done) => {
+        layer1.mbMap.queryRenderedFeatures = jest.fn((pixelBounds) => {
+          // Use default hoitTolerance
+          expect(pixelBounds).toEqual([
+            { x: -5, y: -5 },
+            { x: 5, y: 5 },
+          ]);
+          done();
+          return [];
+        });
+        layer1.getFeatureInfoAtCoordinate([0, 0], {});
+      });
+
+      test('when hitTolerance is set to 10', (done) => {
+        layer1.hitTolerance = 10;
+        layer1.mbMap.queryRenderedFeatures = jest.fn((pixelBounds) => {
+          // Use default hoitTolerance
+          expect(pixelBounds).toEqual([
+            { x: -10, y: -10 },
+            { x: 10, y: 10 },
+          ]);
+          done();
+          return [];
+        });
+        layer1.getFeatureInfoAtCoordinate([0, 0], {});
+      });
     });
   });
 });

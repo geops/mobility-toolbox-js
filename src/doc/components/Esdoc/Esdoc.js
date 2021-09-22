@@ -6,17 +6,23 @@ import Hidden from '@material-ui/core/Hidden';
 import EsdocContent from './EsdocContent';
 import EsdocNavigation from './EsdocNavigation';
 import EsdocSearch from './EsdocSearch';
+import { version } from '../../../../package.json';
 import './css/style.css';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
   },
-  navigation: {
-    padding: theme.spacing(1),
-  },
   content: {
     padding: theme.spacing(1),
+    paddingBottom: 115,
+    margin: 'auto',
+    maxWidth: '740px',
+  },
+  navWrapper: {
+    height: 'calc(100% - 32px)',
+    padding: theme.spacing(2),
+    backgroundColor: 'rgb(239, 239, 239)',
   },
 }));
 
@@ -37,10 +43,13 @@ const Esdoc = ({ path }) => {
         </Grid>
       </Hidden>
       <Hidden only="xs">
-        <Grid container>
-          <Grid item xs={3} className={classes.navigation}>
-            <EsdocSearch />
-            <EsdocNavigation />
+        <Grid container wrap="nowrap">
+          <Grid item style={{ minWidth: 260, maxWidth: 300 }}>
+            <div className={classes.navWrapper}>
+              {version}
+              <EsdocSearch />
+              <EsdocNavigation />
+            </div>
           </Grid>
           <Grid item xs={9} className={classes.content}>
             <EsdocContent path={path} />

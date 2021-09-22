@@ -13,6 +13,7 @@ import { timeSteps } from '../trackerConfig';
  * @classproperty {function} style - Style of the vehicle.
  * @classproperty {FilterFunction} filter - Time speed.
  * @classproperty {function} sort - Set the filter for tracker features.
+ * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
  */
 export class TrackerLayerInterface {
   /**
@@ -248,6 +249,14 @@ const TrackerLayerMixin = (Base) =>
           value: initTrackerOptions,
           writable: false,
         },
+
+        /**
+         * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame
+         */
+        useRequestAnimationFrame: {
+          default: false,
+          writable: true,
+        },
       });
     }
 
@@ -311,7 +320,7 @@ const TrackerLayerMixin = (Base) =>
     start(size, zoom, resolution) {
       this.stop();
       this.tracker.setVisible(true);
-      this.tracker.renderTrajectories(this.currTime, size, resolution);
+      this.renderTrajectories(this.currTime, size, resolution);
       this.startUpdateTime(zoom);
     }
 
@@ -352,6 +361,23 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
+     * Render the trajectories requesting an animation frame and cancelling the previous one
+     * @private
+     */
+    renderTrajectories(time, size, resolution) {
+      if (this.requestId) {
+        cancelAnimationFrame(this.requestId);
+      }
+      if (this.useRequestAnimationFrame) {
+        this.requestId = requestAnimationFrame(() => {
+          this.tracker.renderTrajectories(time, size, resolution);
+        });
+      } else {
+        this.tracker.renderTrajectories(time, size, resolution);
+      }
+    }
+
+    /**
      * Set the current time, it triggers a rendering of the trajectories.
      * @param {dateString | value} time
      * @param {Array<number>} size
@@ -363,7 +389,7 @@ const TrackerLayerMixin = (Base) =>
       this.currTime = newTime;
       this.lastUpdateTime = new Date();
       if (mustRender) {
-        this.tracker.renderTrajectories(this.currTime, size, resolution);
+        this.renderTrajectories(this.currTime, size, resolution);
       }
     }
 

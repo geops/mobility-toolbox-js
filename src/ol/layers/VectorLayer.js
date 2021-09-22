@@ -8,19 +8,6 @@ import Layer from './Layer';
  */
 class VectorLayer extends Layer {
   /**
-   * Constructor.
-   *
-   * @param {Object} [options]
-   * @param {number} [options.hitTolerance=5] Pixel value of the click hitTolerance of clicks.
-   */
-  constructor(options = {}) {
-    super(options);
-
-    /** @ignore */
-    this.hitTolerance = options.hitTolerance || 5;
-  }
-
-  /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
