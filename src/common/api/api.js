@@ -43,19 +43,49 @@ class API extends BaseObject {
         new Error(`No apiKey defined for request to ${this.url}`),
       );
     }
-    return fetch(`${this.url}${path}?${qs.stringify(clone)}`, config).then(
-      (response) => {
-        try {
-          return response.json().then((data) => {
-            if (data.error) {
-              throw new Error(data.error);
-            }
-            return data;
-          });
-        } catch (err) {
-          return Promise.reject(new Error(err));
-        }
-      },
+    return (
+      fetch(`${this.url}${path}?${qs.stringify(clone)}`, config)
+        // Retrieve its body as ReadableStream
+        // .then((response) => response.body)
+        // .then((rs) => {
+        //   const reader = rs.getReader();
+
+        //   return new ReadableStream({
+        //     async start(controller) {
+        //       while (true) {
+        //         // eslint-disable-next-line no-await-in-loop
+        //         const { done, value } = await reader.read();
+
+        //         // When no more data needs to be consumed, break the reading
+        //         if (done) {
+        //           break;
+        //         }
+
+        //         // Enqueue the next data chunk into our target stream
+        //         controller.enqueue(value);
+        //       }
+
+        //       // Close the stream
+        //       controller.close();
+        //       reader.releaseLock();
+        //     },
+        //   });
+        // })
+        // // Create a new response out of the stream
+        // .then((rs) => new Response(rs))
+        // Create an object URL for the response
+        .then((response) => {
+          try {
+            return response.json().then((data) => {
+              if (data.error) {
+                throw new Error(data.error);
+              }
+              return data;
+            });
+          } catch (err) {
+            return Promise.reject(new Error(err));
+          }
+        })
     );
   }
 }

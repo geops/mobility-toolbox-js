@@ -16,8 +16,10 @@ const useStyles = makeStyles({
     flexGrow: 1,
     overflowY: 'auto',
     paddingBottom: 115,
-    minHeight: 'calc(100vh - 528px)',
-    maxWidth: 'calc(85vw + 48px)',
+    // minHeight: 'calc(100vh - 528px)',
+    // maxWidth: 'calc(85vw + 48px)',
+    width: '100%',
+    height: '100%',
     margin: 'auto',
     marginTop: 30,
   },
@@ -55,17 +57,17 @@ const App = () => {
       <Router>
         <Header title="mobility-toolbox-js" tabs={tabs} />
         <Route exact path="/">
-          <Container className={classes.content}>
+          <Container className={classes.content} lg={12}>
             <Redirect to="/home" />
           </Container>
         </Route>
         <Route exact path="/examples">
-          <Container className={classes.content}>
+          <Container className={classes.content} lg={12}>
             <Examples />
           </Container>
         </Route>
         <Route path="/example/:exampleKey">
-          <Container className={classes.content}>
+          <Container className={classes.content} lg={12}>
             <Example />
           </Container>
         </Route>

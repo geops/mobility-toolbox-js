@@ -132,7 +132,7 @@ export const translateTrajCollResponse = (features = []) => {
   const trajectories = [];
   for (let i = 0; i < features.length; i += 1) {
     const traj = features[i];
-    const geometry = new LineString(traj.geometry.coordinates);
+    // const geometry = traj.geometry.coordinates;
     const {
       ID: id,
       ProductIdentifier: type,
@@ -178,7 +178,7 @@ export const translateTrajCollResponse = (features = []) => {
       timeIntervals,
       color: color && `#${color}`,
       textColor: textColor && `#${textColor}`,
-      geometry,
+      geometry: traj.geometry,
       cancelled,
     });
   }

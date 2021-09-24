@@ -382,6 +382,21 @@ const TrajservLayerMixin = (TrackerLayer) =>
     startUpdateTrajectories() {
       this.stopUpdateTrajectories();
 
+      this.api.fetchTrajectoriesWorker.onmessage = (evt) => {
+        console.timeEnd('fetch');
+        if (evt.data) {
+          this.tracker.setTrajectories(evt.data);
+          console.time('render');
+          this.renderTrajectories();
+          console.timeEnd('render');
+        }
+      };
+
+      // this.updateTrajectoriesWorker();
+      // this.updateInterval = window.setInterval(() => {
+      //   this.updateTrajectoriesWorker();
+      // }, this.requestIntervalSeconds * 1000);
+
       this.updateTrajectories();
       this.updateInterval = window.setInterval(() => {
         this.updateTrajectories();
@@ -390,9 +405,20 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
     stopUpdateTrajectories() {
       clearInterval(this.updateInterval);
+      this.api.fetchTrajectoriesWorker.onmessage = null;
+    }
+
+    updateTrajectoriesWorker() {
+      console.time('fetch');
+      this.api.fetchTrajectoriesWorkerr(
+        this.getParams({
+          attr_det: 1,
+        }),
+      );
     }
 
     updateTrajectories() {
+      console.time('fetch');
       this.abortFetchTrajectories();
       this.abortController = new AbortController();
       this.api
@@ -410,10 +436,13 @@ const TrajservLayerMixin = (TrackerLayer) =>
           throw err;
         })
         .then((trajectories) => {
+          console.timeEnd('fetch');
           // Don't set trajectories when the user has aborted the request.
           if (trajectories) {
             this.tracker.setTrajectories(trajectories);
+            console.time('render');
             this.renderTrajectories();
+            console.timeEnd('render');
           }
         });
     }

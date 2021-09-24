@@ -8,7 +8,7 @@ export default () => {
     target: 'map',
     view: new View({
       center: [831634, 5933959],
-      zoom: 13,
+      zoom: 7,
     }),
     controls: [new CopyrightControl()],
   });
@@ -21,6 +21,7 @@ export default () => {
   const tracker = new TrajservLayer({
     url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
+    useRequestAnimationFrame: true,
   });
 
   tracker.onClick((vehicle) => {

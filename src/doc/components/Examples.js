@@ -140,7 +140,7 @@ export default () => {
             item
             xs={12}
             sm={6}
-            lg={4}
+            lg={12}
             container
             className={classes.example}
             key={ex.key}

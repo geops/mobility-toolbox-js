@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 12,
   },
   htmlContainer: {
-    height: 500,
+    height: 1000,
   },
   noPointer: {
     // Remove pointer events for mobile devices on load
@@ -89,7 +89,7 @@ const Example = () => {
   }, [example, htmlFileName, jsFileName, readmeFileName]);
 
   return (
-    <div style={{ maxWidth: '85vh', margin: 'auto', marginTop: 30 }}>
+    <div style={{ width: '100%', margin: 'auto', marginTop: 30 }}>
       <Grid container direction="column" spacing={3}>
         <Grid item xs={12}>
           <Typography variant="h1" className="headline">

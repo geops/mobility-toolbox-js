@@ -276,7 +276,7 @@ const TrackerLayerMixin = (Base) =>
     start(size, zoom, resolution) {
       this.stop();
       this.tracker.setVisible(true);
-      this.renderTrajectories(this.currTime, size, resolution);
+      this.renderTrajectories(this.currTime, size, resolution, false);
       this.startUpdateTime(zoom);
     }
 
@@ -324,12 +324,39 @@ const TrackerLayerMixin = (Base) =>
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
+      // if (this.useRequestAnimationFrame) {
+      //   this.requestId = requestAnimationFrame(() => {
+      //     this.tracker.renderTrajectories(time, size, resolution);
+      //   });
+      // } else {
+      //   this.tracker.renderTrajectories(time, size, resolution);
+      // }
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
-          this.tracker.renderTrajectories(time, size, resolution);
+          this.tracker.renderTrajectoriesWorkerr(
+            time,
+            size,
+            resolution,
+            false,
+            this.map.getView().calculateExtent(),
+            this.map.getView().getZoom(),
+            this.delayDisplay,
+            this.delayOutlineColor,
+            this.useDelayStyle,
+          );
         });
       } else {
-        this.tracker.renderTrajectories(time, size, resolution);
+        this.tracker.renderTrajectoriesWorkerr(
+          time,
+          size,
+          resolution,
+          false,
+          this.map.getView().calculateExtent(),
+          this.map.getView().getZoom(),
+          this.delayDisplay,
+          this.delayOutlineColor,
+          this.useDelayStyle,
+        );
       }
     }
 

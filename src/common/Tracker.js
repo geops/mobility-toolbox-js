@@ -1,5 +1,7 @@
 import { unByKey } from 'ol/Observable';
 import GeomType from 'ol/geom/GeometryType';
+import { Point, LineString } from 'ol/geom';
+import RenderTrajectoriesWorker from './renderTrajectories.worker';
 
 /**
  * Tracker. This class stores and allows to draw trajectories on a canvas.
@@ -16,6 +18,8 @@ export default class Tracker {
       interpolate: true,
       ...options,
     };
+
+    this.renderTrajectoriesWorker = new RenderTrajectoriesWorker();
 
     /**
      * Array of trajectories.
@@ -80,11 +84,21 @@ export default class Tracker {
         'margin-top: inherit', // for scrolling behavior.
       ].join(';'),
     );
+    this.offscreenCanvas = this.canvas.transferControlToOffscreen();
+
+    if (!this.offscreenCanvas) {
+      this.offscreenCanvas = this.canvas.transferControlToOffscreen();
+    }
+    this.renderTrajectoriesWorker.postMessage(
+      { canvas: this.offscreenCanvas },
+      [this.offscreenCanvas],
+    );
+
     /**
      * 2d drawing context on the canvas.
      * @type {CanvasRenderingContext2D}
      */
-    this.canvasContext = this.canvas.getContext('2d');
+    // this.canvasContext = this.canvas.getContext('2d');
   }
 
   /**
@@ -131,9 +145,9 @@ export default class Tracker {
    * @private
    */
   clear() {
-    if (this.canvasContext) {
-      this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
+    // if (this.canvasContext) {
+    //   this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // }
   }
 
   /**
@@ -215,6 +229,41 @@ export default class Tracker {
     this.canvas.style.top = `${oldTop - offsetY}px`;
   }
 
+  renderTrajectoriesWorkerr(
+    currTime = Date.now(),
+    size = [],
+    resolution,
+    noInterpolate = false,
+    extent,
+    zoom,
+    delayDisplay,
+    delayOutlineColor,
+    useDelayStyle,
+  ) {
+    if (resolution) {
+      this.currResolution = resolution;
+    }
+
+    this.canvas.style.left = '0px';
+    this.canvas.style.top = '0px';
+    // console.log(this.canvas, this.offscreenCanvas);
+    this.renderTrajectoriesWorker.postMessage([
+      this.trajectories,
+      currTime,
+      size,
+      this.currResolution,
+      noInterpolate ? false : this.interpolate,
+      this.iconScale,
+      this.hoverVehicleId,
+      this.selectedVehicleId,
+      extent,
+      zoom,
+      delayDisplay,
+      delayOutlineColor,
+      useDelayStyle,
+    ]);
+  }
+
   /**
    * Draw all the trajectories available to the canvas.
    * @param {Date} currTime The date to render.
@@ -231,6 +280,7 @@ export default class Tracker {
     resolution,
     noInterpolate = false,
   ) {
+    // console.time('render');
     this.clear();
     this.canvas.style.left = '0px';
     this.canvas.style.top = '0px';
@@ -263,7 +313,16 @@ export default class Tracker {
       const traj = this.trajectories[i];
 
       // We simplify the traj object
-      const { geometry, timeIntervals, timeOffset } = traj;
+      let { geometry } = traj;
+      const { timeIntervals, timeOffset } = traj;
+
+      if (Array.isArray(geometry.coordinates)) {
+        if (geometry.type === 'Point') {
+          geometry = new Point(geometry.coordinates);
+        } else if (geometry.type === 'LineString') {
+          geometry = new LineString(geometry.coordinates);
+        }
+      }
 
       if (this.filter && !this.filter(traj, i, this.trajectories)) {
         // eslint-disable-next-line no-continue
@@ -415,6 +474,8 @@ export default class Tracker {
         hoverVehicleHeight,
       );
     }
+
+    // console.timeEnd('render');
   }
 
   /**

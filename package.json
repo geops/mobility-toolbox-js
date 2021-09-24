@@ -12,6 +12,7 @@
     "@material-ui/styles": "^4.9.14",
     "codesandbox": "^2.1.16",
     "es6-mixin": "^0.3.0",
+    "greenlet": "^1.1.0",
     "path": "^0.12.7",
     "prop-types": "^15.7.2",
     "query-string": "^6.13.0",
@@ -26,7 +27,8 @@
     "react-syntax-highlighter": "^15.4.1",
     "taffydb": "^2.7.3",
     "typeface-lato": "^0.0.75",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "worker-loader": "^3.0.8"
   },
   "peerDependencies": {
     "mapbox-gl": "^1",
