@@ -395,7 +395,7 @@ class TralisAPI {
    * @param {function(response: { content: Vehicle })} onMessage Function called on each message of the channel.
    */
   subscribeDeletedVehicles(mode, onMessage) {
-    this.unsubscribeDeletedVehicles();
+    this.unsubscribeDeletedVehicles(onMessage);
     this.subscribe(
       `deleted_vehicles${getModeSuffix(mode, TralisModes)}`,
       onMessage,
