@@ -55,19 +55,66 @@ describe('WebSocketConnector', () => {
       test('should unsubscribe all subscriptions related to a channel', () => {
         // eslint-disable-next-line no-unused-vars
         const client = new Connector(`ws://foo:1234`);
+        client.websocket.removeEventListener = jest.fn();
+        client.websocket.addEventListener = jest.fn();
         const params = { channel: 'foo' };
         const params2 = { channel: 'bar' };
         const cb = jest.fn();
         const cb2 = jest.fn();
         client.subscribe(params, cb);
+        client.subscribe(params, cb);
+        client.subscribe(params, cb);
         client.subscribe(params, cb2);
         client.subscribe(params2, cb2);
         expect(client.subscriptions.length).toBe(3);
+        expect(client.websocket.removeEventListener).toBeCalledTimes(2);
+        expect(client.websocket.addEventListener).toBeCalledTimes(9);
 
         client.unsubscribe('foo');
         expect(client.subscriptions.length).toBe(1);
         expect(client.subscriptions[0].params).toBe(params2);
         expect(client.subscriptions[0].cb).toBe(cb2);
+      });
+    });
+
+    describe('#setBbox', () => {
+      test.only('should remove subscriptions before re adding it ', () => {
+        // eslint-disable-next-line no-unused-vars
+        const client = new Connector(`ws://foo:1234`);
+        client.websocket.removeEventListener = jest.fn();
+        client.websocket.addEventListener = jest.fn();
+        client.send = jest.fn();
+        const params = { channel: 'foo' };
+        const params2 = { channel: 'bar' };
+        const cb = jest.fn();
+        const cb2 = jest.fn();
+        client.subscribe(params, cb);
+        client.subscribe(params, cb);
+        client.subscribe(params, cb);
+        client.subscribe(params, cb2);
+        client.subscribe(params2, cb2);
+        expect(client.subscriptions.length).toBe(3);
+        expect(client.websocket.removeEventListener).toBeCalledTimes(2);
+        expect(client.websocket.addEventListener).toBeCalledTimes(5);
+
+        client.websocket.removeEventListener.mockReset();
+        client.websocket.addEventListener.mockReset();
+
+        client.setBbox([0, 0, 0, 0]);
+
+        expect(client.subscriptions.length).toBe(3);
+        expect(client.websocket.removeEventListener).toBeCalledTimes(3);
+        expect(client.websocket.addEventListener).toBeCalledTimes(3);
+
+        client.unsubscribe('foo');
+        expect(client.subscriptions.length).toBe(1);
+        expect(client.subscriptions[0].params).toBe(params2);
+        expect(client.subscriptions[0].cb).toBe(cb2);
+        client.unsubscribe('bar');
+        expect(client.subscriptions.length).toBe(0);
+        client.send.mockRestore();
+        client.websocket.removeEventListener.mockRestore();
+        client.websocket.addEventListener.mockRestore();
       });
     });
   });
