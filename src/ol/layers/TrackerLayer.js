@@ -53,12 +53,7 @@ class TrackerLayer extends mixin(Layer) {
                   return this.tracker.canvas;
                 }
 
-                this.renderTrajectories(
-                  this.currTime,
-                  frameState.size,
-                  resolution,
-                  true,
-                );
+                this.renderTrajectories(frameState.size, resolution, true);
               } else if (
                 this.renderState.center[0] !== center[0] ||
                 this.renderState.center[1] !== center[1]
@@ -162,9 +157,7 @@ class TrackerLayer extends mixin(Layer) {
             ? 'pointer'
             : 'auto';
           this.hoverVehicleId = id;
-
-          // We doesn´t wait the next render, we force it.
-          this.renderTrajectories(this.currTime);
+          this.renderTrajectories();
         }
       }),
     ];

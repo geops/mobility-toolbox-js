@@ -13,6 +13,7 @@ import { timeSteps } from '../trackerConfig';
  * @classproperty {function} style - Style of the vehicle.
  * @classproperty {FilterFunction} filter - Time speed.
  * @classproperty {function} sort - Set the filter for tracker features.
+ * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
  */
 export class TrackerLayerInterface {
@@ -160,6 +161,11 @@ const TrackerLayerMixin = (Base) =>
         style: {
           value: style || this.defaultStyle,
         },
+
+        /**
+         * Speed of the wheel of time.
+         * If live property is true. The speed is ignored.
+         */
         speed: {
           get: () => cuurSpeed,
           set: (newSpeed) => {
@@ -195,7 +201,17 @@ const TrackerLayerMixin = (Base) =>
         styleCache: { value: {} },
 
         /**
+         * If true. The layer will always use Date.now() on the next tick to render the trajectories.
+         * When true, setCurrTime will have no effect.
+         */
+        live: {
+          value: true,
+          writable: true,
+        },
+
+        /**
          * Time used to display the trajectories.
+         * If live property is true. This function does nothing execpt rerender the trajectories using Date.now().
          */
         currTime: {
           value: new Date(),
@@ -203,7 +219,7 @@ const TrackerLayerMixin = (Base) =>
         },
 
         /**
-         * Keep track of the last time used to render trajectories.
+         * Keep track of the last update of the interval.
          * Useful when the speed increase.
          */
         lastUpdateTime: {
@@ -320,7 +336,7 @@ const TrackerLayerMixin = (Base) =>
     start(size, zoom, resolution) {
       this.stop();
       this.tracker.setVisible(true);
-      this.renderTrajectories(this.currTime, size, resolution);
+      this.renderTrajectories(size, resolution);
       this.startUpdateTime(zoom);
     }
 
@@ -361,35 +377,54 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
+     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
+     * @private
+     */
+    renderTrajectoriesInternal(size, resolution, noInterpolate) {
+      if (!this.tracker) {
+        return;
+      }
+
+      const renderTime = this.live ? Date.now() : this.currTime;
+      this.tracker.renderTrajectories(
+        renderTime,
+        size,
+        resolution,
+        noInterpolate,
+      );
+    }
+
+    /**
      * Render the trajectories requesting an animation frame and cancelling the previous one
      * @private
      */
-    renderTrajectories(time, size, resolution) {
+    renderTrajectories(size, resolution, noInterpolate) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
+
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
-          this.tracker.renderTrajectories(time, size, resolution);
+          this.renderTrajectoriesInternal(size, resolution, noInterpolate);
         });
       } else {
-        this.tracker.renderTrajectories(time, size, resolution);
+        this.renderTrajectoriesInternal(size, resolution, noInterpolate);
       }
     }
 
     /**
      * Set the current time, it triggers a rendering of the trajectories.
+     * If live is true. This function will have no effect.
      * @param {dateString | value} time
      * @param {Array<number>} size
      * @param {number} resolution
      * @param {boolean} [mustRender=true]
      */
     setCurrTime(time, size, resolution, mustRender = true) {
-      const newTime = new Date(time);
-      this.currTime = newTime;
-      this.lastUpdateTime = new Date();
+      this.currTime = new Date(time);
+      this.lastUpdateTime = this.currTime;
       if (mustRender) {
-        this.renderTrajectories(this.currTime, size, resolution);
+        this.renderTrajectories(size, resolution);
       }
     }
 
