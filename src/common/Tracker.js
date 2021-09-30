@@ -16,6 +16,7 @@ export default class Tracker {
       interpolate: true,
       ...options,
     };
+    console.log(window.devicePixelRatio);
 
     /**
      * Pixel ratio to use to draw the canvas. Default to window.devicePixelRatio
@@ -381,7 +382,11 @@ export default class Tracker {
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
         this.trajectories[i].rendered = true;
         this.renderedTrajectories.push(this.trajectories[i]);
-        const vehicleImg = this.style(traj, this.currResolution);
+        const vehicleImg = this.style(
+          traj,
+          this.currResolution,
+          this.pixelRatio,
+        );
 
         if (!vehicleImg) {
           // eslint-disable-next-line no-continue
@@ -392,8 +397,8 @@ export default class Tracker {
         let imgHeight = vehicleImg.height;
 
         if (this.iconScale) {
-          imgHeight = Math.floor(imgHeight * this.iconScale);
-          imgWidth = Math.floor(imgWidth * this.iconScale);
+          imgHeight = Math.floor(imgHeight * this.iconScale * this.pixelRatio);
+          imgWidth = Math.floor(imgWidth * this.iconScale * this.pixelRatio);
         }
 
         if (
