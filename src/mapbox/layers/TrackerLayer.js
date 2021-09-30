@@ -22,14 +22,6 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Update the icon scale if the window (and probably the canvas) is resized.
-   * @private
-   */
-  updateIconScale(canvas) {
-    this.tracker.setIconScale(canvas.width / canvas.clientWidth);
-  }
-
-  /**
    * Initialize the layer.
    *
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
@@ -41,27 +33,16 @@ class TrackerLayer extends mixin(Layer) {
     }
 
     const canvas = map.getCanvas();
-    const iconScale = canvas.width / canvas.clientWidth;
-    map.on('resize', this.updateIconScale.bind(this, canvas));
 
     super.init(map, {
-      width: canvas.width,
-      height: canvas.height,
-      iconScale,
+      width: canvas.width / this.pixelRatio,
+      height: canvas.height / this.pixelRatio,
       getPixelFromCoordinate: (coord) => {
-        const pixelRatio = window.devicePixelRatio || 1;
         const [lng, lat] = toLonLat(coord);
         const { x, y } = this.map.project({ lng, lat });
-        return [x * pixelRatio, y * pixelRatio];
+        return [x, y];
       },
     });
-  }
-
-  terminate() {
-    if (this.map) {
-      this.map.off('resize', this.updateIconScale);
-    }
-    return super.terminate();
   }
 
   /**
@@ -73,7 +54,7 @@ class TrackerLayer extends mixin(Layer) {
     const canvas = this.map.getCanvas();
     super.setCurrTime(
       time,
-      [canvas.width, canvas.height],
+      [canvas.width / this.pixelRatio, canvas.height / this.pixelRatio],
       getResolution(this.map),
       !this.map.isMoving() && !this.map.isRotating() && !this.map.isZooming(),
     );
@@ -89,7 +70,7 @@ class TrackerLayer extends mixin(Layer) {
   start() {
     const canvas = this.map.getCanvas();
     super.start(
-      [canvas.width, canvas.height],
+      [canvas.width / this.pixelRatio, canvas.height / this.pixelRatio],
       this.map.getZoom(),
       getResolution(this.map),
     );

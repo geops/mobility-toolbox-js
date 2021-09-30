@@ -418,7 +418,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         });
     }
 
-    defaultStyle(props, zoom, pixelRatio = 3) {
+    defaultStyle(props, zoom) {
       const {
         type,
         name,
@@ -435,8 +435,8 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
 
       if (!this.styleCache[key]) {
-        let radius = getRadius(type, z) * pixelRatio;
-        const isDisplayStrokeAndDelay = radius >= 7 * pixelRatio;
+        let radius = getRadius(type, z) * this.pixelRatio;
+        const isDisplayStrokeAndDelay = radius >= 7 * this.pixelRatio;
 
         if (radius === 0) {
           this.styleCache[key] = null;
@@ -445,17 +445,17 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
         if (hover || selected) {
           radius = isDisplayStrokeAndDelay
-            ? radius + 5 * pixelRatio
-            : 14 * pixelRatio;
+            ? radius + 5 * this.pixelRatio
+            : 14 * this.pixelRatio;
         }
-        const margin = 1 * pixelRatio;
+        const margin = 1 * this.pixelRatio;
         const radiusDelay = radius + 2;
         const markerSize = radius * 2;
 
         const canvas = document.createElement('canvas');
         // add space for delay information
-        canvas.width = radiusDelay * 2 + margin * 2 + 100 * pixelRatio;
-        canvas.height = radiusDelay * 2 + margin * 2 + 100 * pixelRatio;
+        canvas.width = radiusDelay * 2 + margin * 2 + 100 * this.pixelRatio;
+        canvas.height = radiusDelay * 2 + margin * 2 + 100 * this.pixelRatio;
         const ctx = canvas.getContext('2d');
         const origin = canvas.width / 2;
 
@@ -486,7 +486,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
           ctx.fillStyle = getDelayColor(delay, cancelled, true);
 
           ctx.strokeStyle = this.delayOutlineColor;
-          ctx.lineWidth = 1.5 * pixelRatio;
+          ctx.lineWidth = 1.5 * this.pixelRatio;
           const delayText = getDelayText(delay, cancelled);
           ctx.strokeText(delayText, origin + radiusDelay + margin, origin);
           ctx.fillText(delayText, origin + radiusDelay + margin, origin);
@@ -503,7 +503,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
         ctx.save();
         if (isDisplayStrokeAndDelay || hover || selected) {
-          ctx.lineWidth = 1 * pixelRatio;
+          ctx.lineWidth = 1 * this.pixelRatio;
           ctx.strokeStyle = '#000000';
         }
         ctx.fillStyle = circleFillColor;

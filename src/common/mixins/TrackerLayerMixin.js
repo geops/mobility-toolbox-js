@@ -136,7 +136,7 @@ const TrackerLayerMixin = (Base) =>
         sort,
       } = options;
       const initTrackerOptions = {
-        pixelRatio,
+        pixelRatio: pixelRatio || window.devicePixelRatio || 1,
         interpolate,
         hoverVehicleId,
         selectedVehicleId,
@@ -257,6 +257,24 @@ const TrackerLayerMixin = (Base) =>
           },
           set: (newSelectedVehicleId) => {
             this.tracker.selectedVehicleId = newSelectedVehicleId;
+          },
+        },
+
+        /**
+         * Pixel ratio use for the rendering. Default to window.devicePixelRatio.
+         */
+        pixelRatio: {
+          get: () => {
+            return this.tracker
+              ? this.tracker.pixelRatio
+              : this.initTrackerOptions.pixelRatio;
+          },
+          set: (newPixelRatio) => {
+            if (!this.tracker) {
+              this.tracker.pixelRatio = newPixelRatio;
+            } else {
+              this.initTrackerOptions.pixelRatio = newPixelRatio;
+            }
           },
         },
 
