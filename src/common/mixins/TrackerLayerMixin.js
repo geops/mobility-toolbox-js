@@ -128,6 +128,7 @@ const TrackerLayerMixin = (Base) =>
 
       // Tracker options use to build the tracker.
       const {
+        pixelRatio,
         interpolate,
         hoverVehicleId,
         selectedVehicleId,
@@ -135,6 +136,7 @@ const TrackerLayerMixin = (Base) =>
         sort,
       } = options;
       const initTrackerOptions = {
+        pixelRatio,
         interpolate,
         hoverVehicleId,
         selectedVehicleId,

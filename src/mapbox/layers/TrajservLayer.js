@@ -45,10 +45,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
     super.init(map);
 
-    const { width, height } = map.getCanvas();
-    this.tracker.canvas.width = width;
-    this.tracker.canvas.height = height;
-
     const source = {
       type: 'canvas',
       canvas: this.tracker.canvas,
@@ -133,8 +129,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
    */
   onMove() {
     this.map.getSource(this.key).setCoordinates(getSourceCoordinates(this.map));
-    const { width, height } = this.map.getCanvas();
-    this.renderTrajectories([width, height], getResolution(this.map));
+    this.renderTrajectories(undefined, getResolution(this.map));
   }
 
   /**

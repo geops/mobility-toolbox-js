@@ -46,10 +46,6 @@ class TralisLayer extends mixin(TrackerLayer) {
     this.map.on('move', this.onMove);
     this.map.on('moveend', this.onMoveEnd);
 
-    const { width, height } = this.map.getCanvas();
-    this.tracker.canvas.width = width;
-    this.tracker.canvas.height = height;
-
     this.map.addSource('canvas-source', {
       type: 'canvas',
       canvas: this.tracker.canvas,

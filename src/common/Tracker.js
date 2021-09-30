@@ -18,6 +18,11 @@ export default class Tracker {
     };
 
     /**
+     * Pixel ratio to use to draw the canvas. Default to window.devicePixelRatio
+     * @type {Array<trajectory>}
+     */
+    this.pixelRatio = options.pixelRatio || window.devicePixelRatio || 1;
+    /**
      * Array of trajectories.
      * @type {Array<trajectory>}
      */
@@ -83,16 +88,16 @@ export default class Tracker {
      * @type {Canvas}
      */
     this.canvas = opts.canvas || document.createElement('canvas');
-    this.canvas.width = opts.width;
-    this.canvas.height = opts.height;
+    this.canvas.width = opts.width * this.pixelRatio;
+    this.canvas.height = opts.height * this.pixelRatio;
     this.canvas.setAttribute(
       'style',
       [
         'position: absolute',
         'top: 0',
         'bottom: 0',
-        'width: 100%',
-        'height: 100%',
+        `width: ${opts.width}px`,
+        `height: ${opts.height}px`,
         'pointer-events: none',
         'visibility: visible',
         'margin-top: inherit', // for scrolling behavior.
@@ -248,8 +253,6 @@ export default class Tracker {
     noInterpolate = false,
   ) {
     this.clear();
-    this.canvas.style.left = '0px';
-    this.canvas.style.top = '0px';
 
     const [width, height] = size;
     if (
@@ -257,13 +260,21 @@ export default class Tracker {
       height &&
       (this.canvas.width !== width || this.canvas.height !== height)
     ) {
-      [this.canvas.width, this.canvas.height] = [width, height];
+      [this.canvas.width, this.canvas.height] = [
+        width * this.pixelRatio,
+        height * this.pixelRatio,
+      ];
     }
+
+    this.canvas.style.left = '0px';
+    this.canvas.style.top = '0px';
+    this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
+    this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
     /**
      * Current resolution.
      * @type {number}
      */
-    this.currResolution = resolution || this.currResolution;
+    (this.currResolution = resolution || this.currResolution);
     let hoverVehicleImg;
     let hoverVehiclePx;
     let hoverVehicleWidth;
@@ -358,12 +369,15 @@ export default class Tracker {
       if (coord) {
         // We set the rotation of the trajectory (used by tralis).
         this.trajectories[i].coordinate = coord;
-        const px = this.getPixelFromCoordinate(coord);
+        let px = this.getPixelFromCoordinate(coord);
 
         if (!px) {
           // eslint-disable-next-line no-continue
           continue;
         }
+        px = px.map((p) => {
+          return p * this.pixelRatio;
+        });
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
         this.trajectories[i].rendered = true;
         this.renderedTrajectories.push(this.trajectories[i]);
