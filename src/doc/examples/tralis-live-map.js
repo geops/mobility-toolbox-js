@@ -21,6 +21,8 @@ export default () => {
     style: (props) => {
       const img = new Image();
       img.src = LINE_IMAGES[(props.line || {}).name || 'unknown'];
+      img.width = 25 * tracker.pixelRatio;
+      img.height = 25 * tracker.pixelRatio;
       return img;
     },
   });

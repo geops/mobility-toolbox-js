@@ -16,7 +16,6 @@ export default class Tracker {
       interpolate: true,
       ...options,
     };
-    console.log(window.devicePixelRatio);
 
     /**
      * Pixel ratio to use to draw the canvas. Default to window.devicePixelRatio
