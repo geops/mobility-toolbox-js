@@ -27,10 +27,17 @@ class TrackerLayer extends mixin(Layer) {
 
     /**
      * Function to define  when allowing the render of trajectories depending on the zoom level. Default the fundtion return true.
-     * It's useful to avoid rendering the map when the map is animating or interacting
+     * It's useful to avoid rendering the map when the map is animating or interacting.
      * @type {function}
      */
     this.renderWhenZooming = options.renderWhenZooming || (() => true);
+
+    /**
+     * Function to define  when allowing the render of trajectories depending on the rotation. Default the fundtion return true.
+     * It's useful to avoid rendering the map when the map is animating or interacting.
+     * @type {function}
+     */
+    this.renderWhenRotating = options.renderWhenRotating || (() => true);
 
     this.olLayer =
       options.olLayer ||
@@ -42,13 +49,27 @@ class TrackerLayer extends mixin(Layer) {
               if (!this.tracker || !this.tracker.canvas) {
                 return null;
               }
-              const { zoom, center, resolution } = frameState.viewState;
+              const {
+                zoom,
+                center,
+                resolution,
+                rotation,
+              } = frameState.viewState;
 
-              if (zoom !== this.renderState.zoom) {
+              if (
+                zoom !== this.renderState.zoom ||
+                rotation !== this.renderState.rotation
+              ) {
                 this.renderState.zoom = zoom;
                 this.renderState.center = center;
+                this.renderState.rotation = rotation;
 
-                if (!this.renderWhenZooming(zoom)) {
+                if (
+                  (zoom !== this.renderState.zoom &&
+                    !this.renderWhenZooming(zoom)) ||
+                  (rotation !== this.renderState.rotation &&
+                    !this.renderWhenRotating(rotation))
+                ) {
                   this.tracker.clear();
                   return this.tracker.canvas;
                 }
@@ -62,8 +83,19 @@ class TrackerLayer extends mixin(Layer) {
                 const oldPx = this.map.getPixelFromCoordinate(
                   this.renderState.center,
                 );
-                this.tracker.moveCanvas(px[0] - oldPx[0], px[1] - oldPx[1]);
+
+                // We move the canvas to avoid re render the trajectories
+                const oldLeft = parseFloat(this.tracker.canvas.style.left);
+                const oldTop = parseFloat(this.tracker.canvas.style.top);
+                this.tracker.canvas.style.left = `${
+                  oldLeft - (px[0] - oldPx[0])
+                }px`;
+                this.tracker.canvas.style.top = `${
+                  oldTop - (px[1] - oldPx[1])
+                }px`;
+
                 this.renderState.center = center;
+                this.renderState.rotation = rotation;
               }
 
               return this.tracker.canvas;
@@ -78,6 +110,7 @@ class TrackerLayer extends mixin(Layer) {
     this.renderState = {
       center: [0, 0],
       zoom: null,
+      rotation: 0,
     };
 
     /**

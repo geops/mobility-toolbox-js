@@ -145,19 +145,6 @@ export default class Tracker {
   }
 
   /**
-   * Move the canvas.
-   * @param {number} offsetX Offset X.
-   * @param {number} offsetY Offset Y.
-   * @private
-   */
-  moveCanvas(offsetX, offsetY) {
-    const oldLeft = parseFloat(this.canvas.style.left);
-    const oldTop = parseFloat(this.canvas.style.top);
-    this.canvas.style.left = `${oldLeft - offsetX}px`;
-    this.canvas.style.top = `${oldTop - offsetY}px`;
-  }
-
-  /**
    * Draw all the trajectories available to the canvas.
    * @param {Date} currTime The date to render.
    * @param {number[2]} size Size ([width, height]) of the canvas to render.
@@ -189,6 +176,7 @@ export default class Tracker {
 
     this.canvas.style.left = '0px';
     this.canvas.style.top = '0px';
+    this.canvas.style.transform = ``;
     this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
     this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
     /**
