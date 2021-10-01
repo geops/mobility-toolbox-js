@@ -20,13 +20,16 @@ export const getResolution = (map) => {
  * @param {mapboxgl.Map} map A map object.
  * @private
  */
-export const getSourceCoordinates = (map) => {
+export const getSourceCoordinates = (map, pixelRatio) => {
   // Requesting getBounds is not enough when we rotate the map, so we request manually each corner.
   const { width, height } = map.getCanvas();
   const leftTop = map.unproject({ x: 0, y: 0 });
-  const leftBottom = map.unproject({ x: 0, y: height }); // southWest
-  const rightBottom = map.unproject({ x: width, y: height });
-  const rightTop = map.unproject({ x: width, y: 0 }); // north east
+  const leftBottom = map.unproject({ x: 0, y: height / pixelRatio }); // southWest
+  const rightBottom = map.unproject({
+    x: width / pixelRatio,
+    y: height / pixelRatio,
+  });
+  const rightTop = map.unproject({ x: width / pixelRatio, y: 0 }); // north east
   return [
     [leftTop.lng, leftTop.lat],
     [rightTop.lng, rightTop.lat],
