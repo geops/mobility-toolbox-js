@@ -156,10 +156,18 @@ const TrackerLayerMixin = (Base) =>
 
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
+
+        /**
+         * Active on hover effect.
+         */
         isHoverActive: {
           value: !!isHoverActive,
           writable: true,
         },
+
+        /**
+         * Style function used to render a vehicle.
+         */
         style: {
           value: style || this.defaultStyle,
         },
@@ -175,19 +183,33 @@ const TrackerLayerMixin = (Base) =>
             this.start();
           },
         },
+
+        /**
+         * Function to filter which vehicles to display.
+         */
         filter: {
-          get: () => this.tracker.filter,
+          get: () =>
+            this.tracker ? this.tracker.filter : this.initTrackerOptions.filter,
           set: (newFilter) => {
             if (this.tracker) {
               this.tracker.filter = newFilter;
+            } else {
+              this.initTrackerOptions.filter = newFilter;
             }
           },
         },
+
+        /**
+         * Function to sort the vehicles to display.
+         */
         sort: {
-          get: () => this.tracker.sort,
+          get: () =>
+            this.tracker ? this.tracker.sort : this.initTrackerOptions.sort,
           set: (newSort) => {
-            if (this.sort) {
+            if (this.tracker) {
               this.tracker.sort = newSort;
+            } else {
+              this.initTrackerOptions.sort = newSort;
             }
           },
         },
@@ -233,7 +255,7 @@ const TrackerLayerMixin = (Base) =>
          * Keep track of which trajectories are currently drawn.
          */
         renderedTrajectories: {
-          get: () => this.tracker.renderedTrajectories,
+          get: () => this.tracker?.renderedTrajectories || [],
         },
 
         /**
@@ -241,10 +263,16 @@ const TrackerLayerMixin = (Base) =>
          */
         hoverVehicleId: {
           get: () => {
-            return this.tracker.hoverVehicleId;
+            return this.tracker
+              ? this.tracker.hoverVehicleId
+              : this.initTrackerOptions.hoverVehicleId;
           },
           set: (newHoverVehicleId) => {
-            this.tracker.hoverVehicleId = newHoverVehicleId;
+            if (this.tracker) {
+              this.tracker.hoverVehicleId = newHoverVehicleId;
+            } else {
+              this.initTrackerOptions.hoverVehicleId = newHoverVehicleId;
+            }
           },
         },
 
@@ -252,11 +280,16 @@ const TrackerLayerMixin = (Base) =>
          * Id of the selected vehicle.
          */
         selectedVehicleId: {
-          get: () => {
-            return this.tracker.selectedVehicleId;
-          },
+          get: () =>
+            this.tracker
+              ? this.tracker.selectedVehicleId
+              : this.initTrackerOptions.selectedVehicleId,
           set: (newSelectedVehicleId) => {
-            this.tracker.selectedVehicleId = newSelectedVehicleId;
+            if (this.tracker) {
+              this.tracker.selectedVehicleId = newSelectedVehicleId;
+            } else {
+              this.initTrackerOptions.selectedVehicleId = newSelectedVehicleId;
+            }
           },
         },
 
@@ -264,13 +297,12 @@ const TrackerLayerMixin = (Base) =>
          * Pixel ratio use for the rendering. Default to window.devicePixelRatio.
          */
         pixelRatio: {
-          get: () => {
-            return this.tracker
+          get: () =>
+            this.tracker
               ? this.tracker.pixelRatio
-              : this.initTrackerOptions.pixelRatio;
-          },
+              : this.initTrackerOptions.pixelRatio,
           set: (newPixelRatio) => {
-            if (!this.tracker) {
+            if (this.tracker) {
               this.tracker.pixelRatio = newPixelRatio;
             } else {
               this.initTrackerOptions.pixelRatio = newPixelRatio;
@@ -287,7 +319,7 @@ const TrackerLayerMixin = (Base) =>
         },
 
         /**
-         * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame
+         * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame.
          */
         useRequestAnimationFrame: {
           default: false,
