@@ -59,12 +59,6 @@ export default class Tracker {
     this.selectedVehicleId = opts.selectedVehicleId;
 
     /**
-     * Scale the vehicle icons with this value.
-     * @type {number}
-     */
-    this.iconScale = opts.iconScale;
-
-    /**
      * Function use to filter the features displayed.
      * @type {function}
      */
@@ -141,15 +135,6 @@ export default class Tracker {
   }
 
   /**
-   * Return rendered trajectories.
-   * Use this to avoid race conditions while rendering.
-   * @returns {array<trajectory>} trajectories
-   */
-  getRenderedTrajectories() {
-    return this.renderedTrajectories;
-  }
-
-  /**
    * Clear the canvas.
    * @private
    */
@@ -157,70 +142,6 @@ export default class Tracker {
     if (this.canvasContext) {
       this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
-  }
-
-  /**
-   * Set the filter for tracker features.
-   * @param {function} filter Filter function.
-   * @private
-   * @deprecated Set the property this.filter directly.
-   */
-  setFilter(filter) {
-    this.filter = filter;
-  }
-
-  /**
-   * Set the sort for tracker features.
-   * @param {function} sort Sort function.
-   * @private
-   * @deprecated Set the property this.sort directly.
-   */
-  setSort(sort) {
-    this.sort = sort;
-  }
-
-  /**
-   * Set the id of the trajectory which is hovered.
-   * @param {string} id Id of a vehicle.
-   * @private
-   * @deprecated Set the property this.hoverVehicleId directly.
-   */
-  setHoverVehicleId(id) {
-    if (id !== this.hoverVehicleId) {
-      this.hoverVehicleId = id;
-    }
-  }
-
-  /**
-   * Set the id of the trajectory which is selected.
-   * @param {string} id Id of a vehicle.
-   * @private
-   * @deprecated Set the property this.selectedVehicleId directly.
-   */
-  setSelectedVehicleId(id) {
-    if (id !== this.selectedVehicleId) {
-      this.selectedVehicleId = id;
-    }
-  }
-
-  /**
-   * set the scale of the vehicle icons.
-   * @param {number} iconScale Scale value.
-   * @private
-   * @deprecated Set the property this.iconScale directly.
-   */
-  setIconScale(iconScale) {
-    this.iconScale = iconScale;
-  }
-
-  /**
-   * Set the tracker style.
-   * @param {function} style OpenLayers style function.
-   * @private
-   * @deprecated Set the property this.style directly.
-   */
-  setStyle(style) {
-    this.style = style;
   }
 
   /**
@@ -392,13 +313,8 @@ export default class Tracker {
           continue;
         }
 
-        let imgWidth = vehicleImg.width;
-        let imgHeight = vehicleImg.height;
-
-        if (this.iconScale) {
-          imgHeight = Math.floor(imgHeight * this.iconScale * this.pixelRatio);
-          imgWidth = Math.floor(imgWidth * this.iconScale * this.pixelRatio);
-        }
+        const imgWidth = vehicleImg.width;
+        const imgHeight = vehicleImg.height;
 
         if (
           this.hoverVehicleId !== traj.id &&

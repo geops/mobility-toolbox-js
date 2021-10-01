@@ -337,7 +337,6 @@ const TrackerLayerMixin = (Base) =>
      * @param {bool} [options.interpolate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
      * @param {string} [options.hoverVehicleId] Id of the trajectory which is hovered.
      * @param {string} [options.selectedVehicleId] Id of the trajectory which is selected.
-     * @param {number} [options.iconScale] Scale the vehicle icons with this value.
      * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
      * @param {function} [options.filter] Function use to filter the features displayed.
      * @param {function} [options.sort] Function use to sort the features displayed.
