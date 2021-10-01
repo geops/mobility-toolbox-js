@@ -21,12 +21,17 @@ export const getResolution = (map) => {
  * @private
  */
 export const getSourceCoordinates = (map) => {
-  const bounds = map.getBounds().toArray();
+  // Requesting getBounds is not enough when we rotate the map, so we request manually each corner.
+  const { width, height } = map.getCanvas();
+  const leftTop = map.unproject({ x: 0, y: 0 });
+  const leftBottom = map.unproject({ x: 0, y: height }); // southWest
+  const rightBottom = map.unproject({ x: width, y: height });
+  const rightTop = map.unproject({ x: width, y: 0 }); // north east
   return [
-    [bounds[0][0], bounds[1][1]],
-    [...bounds[1]],
-    [bounds[1][0], bounds[0][1]],
-    [...bounds[0]],
+    [leftTop.lng, leftTop.lat],
+    [rightTop.lng, rightTop.lat],
+    [rightBottom.lng, rightBottom.lat],
+    [leftBottom.lng, leftBottom.lat],
   ];
 };
 

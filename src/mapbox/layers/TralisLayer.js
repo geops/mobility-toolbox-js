@@ -88,6 +88,7 @@ class TralisLayer extends mixin(TrackerLayer) {
     this.map
       .getSource('canvas-source')
       .setCoordinates(getSourceCoordinates(this.map));
+
     const { width, height } = this.map.getCanvas();
     this.renderTrajectories(
       [width / this.pixelRatio, height / this.pixelRatio],
