@@ -439,6 +439,7 @@ const TrackerLayerMixin = (Base) =>
 
       this.lastRenderTime = renderTime;
       this.lastRenderResolution = resolution;
+      this.lastRenderRotation = rotation;
 
       this.tracker.renderTrajectories(
         renderTime,
