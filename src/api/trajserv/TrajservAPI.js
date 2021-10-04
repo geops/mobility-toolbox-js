@@ -57,6 +57,21 @@ class TrajservAPI extends API {
   }
 
   /**
+   * Fetch trajectories.
+   *
+   * @param {GetTrajectoriesParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajectory_collection).
+   * @param {AbortController} abortController Abort controller used to cancel the request.
+   * @returns {Promise<Trajectory[]>} A list of trajectories.
+   */
+  fetchTrajectoriesGeojson(params, abortController = {}) {
+    return this.fetch(`/trajectory_collection`, params, {
+      signal: abortController.signal,
+    }).then((data) => {
+      return data;
+    });
+  }
+
+  /**
    * Fetch stations informations about a trajectory.
    *
    * @param {GetTrajectoryStationsParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajstations).

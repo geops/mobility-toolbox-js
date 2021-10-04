@@ -5,6 +5,7 @@ export { default as MapboxStyleLayer } from './layers/MapboxStyleLayer';
 export { default as RoutingLayer } from './layers/RoutingLayer';
 export { default as TrackerLayer } from './layers/TrackerLayer';
 export { default as TrajservLayer } from './layers/TrajservLayer';
+export { default as TrajservLayerWebgl } from './layers/TrajservLayerWebgl';
 export { default as TralisLayer } from './layers/TralisLayer';
 export { default as VectorLayer } from './layers/VectorLayer';
 export { default as WMSLayer } from './layers/WMSLayer';

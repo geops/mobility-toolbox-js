@@ -27,6 +27,12 @@ export default [
     img: liveTrackerOLImg,
   },
   {
+    name: 'Live tracker with OpenLayers Webgl Points',
+    key: 'ol-tracker-webgl',
+    description: 'Show moving trains in an OpenLayers map.',
+    img: liveTrackerOLImg,
+  },
+  {
     name: 'Live tracker with Mapbox',
     key: 'mb-tracker',
     description: 'Show moving trains in a Mapbox map.',
