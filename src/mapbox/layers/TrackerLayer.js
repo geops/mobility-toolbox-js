@@ -46,21 +46,6 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Set the current time, it triggers a rendering of the trajectories.
-   *
-   * @param {Date} time  The current time.
-   */
-  setCurrTime(time) {
-    const canvas = this.map.getCanvas();
-    super.setCurrTime(
-      time,
-      [canvas.width / this.pixelRatio, canvas.height / this.pixelRatio],
-      getResolution(this.map),
-      !this.map.isMoving() && !this.map.isRotating() && !this.map.isZooming(),
-    );
-  }
-
-  /**
    * Start updating vehicles position.
    *
    * @listens {mapboxgl.map.event:zoomend} Listen to zoom end event.
@@ -68,12 +53,7 @@ class TrackerLayer extends mixin(Layer) {
    * @override
    */
   start() {
-    const canvas = this.map.getCanvas();
-    super.start(
-      [canvas.width / this.pixelRatio, canvas.height / this.pixelRatio],
-      this.map.getZoom(),
-      getResolution(this.map),
-    );
+    super.start();
 
     this.map.on('zoomend', this.onMapZoomEnd);
 
@@ -93,6 +73,28 @@ class TrackerLayer extends mixin(Layer) {
       this.map.off('zoomend', this.onMapZoomEnd);
       this.map.off('mousemove', this.onMapMouseMove);
     }
+  }
+
+  /**
+   * Render the trajectories using current map's size, resolution and rotation.
+   * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
+   * @overrides
+   */
+  renderTrajectories(noInterpolate) {
+    const canvas = this.map.getCanvas();
+    super.renderTrajectories(
+      [canvas.width / this.pixelRatio, canvas.height / this.pixelRatio],
+      getResolution(this.map),
+      this.map.getBearing(),
+      noInterpolate,
+    );
+  }
+
+  /**
+   * Return the delay in ms before the next rendering.
+   */
+  getRefreshTimeInMs() {
+    return super.getRefreshTimeInMs(this.map.getZoom());
   }
 
   /**

@@ -49,12 +49,7 @@ class TrackerLayer extends mixin(Layer) {
               if (!this.tracker || !this.tracker.canvas) {
                 return null;
               }
-              const {
-                zoom,
-                center,
-                resolution,
-                rotation,
-              } = frameState.viewState;
+              const { zoom, center, rotation } = frameState.viewState;
 
               if (
                 zoom !== this.renderState.zoom ||
@@ -74,7 +69,7 @@ class TrackerLayer extends mixin(Layer) {
                   return this.tracker.canvas;
                 }
 
-                this.renderTrajectories(frameState.size, resolution, true);
+                this.renderTrajectories(true);
               } else if (
                 this.renderState.center[0] !== center[0] ||
                 this.renderState.center[1] !== center[1]
@@ -137,30 +132,11 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Set the current time, it triggers a rendering of the trajectories.
-   * @param {dateString | value} time
-   */
-  setCurrTime(time) {
-    const view = this.map.getView();
-    super.setCurrTime(
-      time,
-      this.map.getSize(),
-      view.getResolution(),
-      !this.map.getView().getAnimating() &&
-        !this.map.getView().getInteracting(),
-    );
-  }
-
-  /**
    * Trackerlayer is started.
    * @private
    */
   start() {
-    super.start(
-      this.map.getSize(),
-      this.currentZoom || this.map.getView().getZoom(),
-      this.map.getView().getResolution(),
-    );
+    super.start();
 
     this.olEventsKeys = [
       this.map.on('moveend', () => {
@@ -204,6 +180,28 @@ class TrackerLayer extends mixin(Layer) {
     super.stop();
     unByKey(this.olEventsKeys);
     this.olEventsKeys = [];
+  }
+
+  /**
+   * Render the trajectories using current map's size, resolution and rotation.
+   * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
+   * @overrides
+   */
+  renderTrajectories(noInterpolate) {
+    const view = this.map.getView();
+    super.renderTrajectories(
+      this.map.getSize(),
+      view.getResolution(),
+      view.getRotation(),
+      noInterpolate,
+    );
+  }
+
+  /**
+   * Return the delay in ms before the next rendering.
+   */
+  getRefreshTimeInMs() {
+    return super.getRefreshTimeInMs(this.map.getView().getZoom());
   }
 
   /**

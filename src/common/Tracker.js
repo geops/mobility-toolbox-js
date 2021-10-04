@@ -284,9 +284,11 @@ export default class Tracker {
           // eslint-disable-next-line no-continue
           continue;
         }
+
         px = px.map((p) => {
           return p * this.pixelRatio;
         });
+
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
         this.trajectories[i].rendered = true;
         this.renderedTrajectories.push(this.trajectories[i]);

@@ -32,6 +32,8 @@ class Map {
 
   getZoom() {}
 
+  getBearing() {}
+
   once() {}
 
   on() {}

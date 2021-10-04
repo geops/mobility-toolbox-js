@@ -131,7 +131,11 @@ class TrajservLayer extends mixin(TrackerLayer) {
     this.map
       .getSource(this.key)
       .setCoordinates(getSourceCoordinates(this.map, this.pixelRatio));
-    this.renderTrajectories(undefined, getResolution(this.map));
+    this.renderTrajectories(
+      undefined,
+      getResolution(this.map),
+      this.map.getBearing(),
+    );
   }
 
   /**

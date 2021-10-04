@@ -337,7 +337,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       // The 5 seconds more are used as a buffer if the request takes too long.
       const requestIntervalInMs = (this.requestIntervalSeconds + 5) * 1000;
       const intervalMs = this.speed * requestIntervalInMs;
-      const now = this.currTime;
+      const now = this.time;
 
       let diff = true;
 
@@ -367,7 +367,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         cd: 1,
         nm: 1,
         fl: 1,
-        // toff: this.currTime.getTime() / 1000,
+        // toff: this.time.getTime() / 1000,
       };
 
       // Allow to load only differences between the last request,

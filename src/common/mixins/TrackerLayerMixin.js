@@ -35,16 +35,11 @@ export class TrackerLayerInterface {
 
   /**
    * Start the clock.
-   *
-   * @param {Array<number>} size Map's size: [width, height].
-   * @param {number} zoom Map's zoom level.
-   * @param {number} resolution Map's resolution.
    */
-  // eslint-disable-next-line no-unused-vars
-  start(size, zoom, resolution) {}
+  start() {}
 
   /**
-   * Stop the time.
+   * Start the timeout for the next update.
    * @private
    * @param {number} zoom
    */
@@ -55,17 +50,6 @@ export class TrackerLayerInterface {
    * Stop the clock.
    */
   stop() {}
-
-  /**
-   * Set the current time, it triggers a rendering of the trajectories.
-   *
-   * @param {Date} time The date to render.
-   * @param {number[2]} size Size of the canvas to render.
-   * @param {number} resolution Map's resolution to render.
-   * @param {boolean} [mustRender=true] If false bypass the rendering of vehicles.
-   */
-  // eslint-disable-next-line no-unused-vars
-  setCurrTime(time, size, resolution, mustRender = true) {}
 
   /**
    * Get vehicle.
@@ -134,7 +118,9 @@ const TrackerLayerMixin = (Base) =>
         selectedVehicleId,
         filter,
         sort,
+        time,
       } = options;
+
       const initTrackerOptions = {
         pixelRatio: pixelRatio || window.devicePixelRatio || 1,
         interpolate,
@@ -144,13 +130,15 @@ const TrackerLayerMixin = (Base) =>
         sort,
         style,
       };
+
       Object.keys(initTrackerOptions).forEach(
         (key) =>
           initTrackerOptions[key] === undefined &&
           delete initTrackerOptions[key],
       );
 
-      let cuurSpeed = speed || 1;
+      let currSpeed = speed || 1;
+      let currTime = time || new Date();
 
       super.defineProperties(options);
 
@@ -177,9 +165,9 @@ const TrackerLayerMixin = (Base) =>
          * If live property is true. The speed is ignored.
          */
         speed: {
-          get: () => cuurSpeed,
+          get: () => currSpeed,
           set: (newSpeed) => {
-            cuurSpeed = newSpeed;
+            currSpeed = newSpeed;
             this.start();
           },
         },
@@ -226,7 +214,7 @@ const TrackerLayerMixin = (Base) =>
 
         /**
          * If true. The layer will always use Date.now() on the next tick to render the trajectories.
-         * When true, setCurrTime will have no effect.
+         * When true, setting the time property has no effect.
          */
         live: {
           value: true,
@@ -234,12 +222,15 @@ const TrackerLayerMixin = (Base) =>
         },
 
         /**
-         * Time used to display the trajectories.
-         * If live property is true. This function does nothing execpt rerender the trajectories using Date.now().
+         * Time used to display the trajectories. Can be a Date or a number in ms representing a Date.
+         * If live property is true. The setter does nothing.
          */
-        currTime: {
-          value: new Date(),
-          writable: true,
+        time: {
+          get: () => currTime,
+          set: (newTime) => {
+            currTime = newTime.getTime ? newTime : new Date(newTime);
+            this.renderTrajectories();
+          },
         },
 
         /**
@@ -378,36 +369,34 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Start the clock.
+     * Start the trajectories rendering.
      *
      * @param {Array<Number>} size Map's size: [width, height].
      * @param {number} zoom Map's zoom level.
      * @param {number} resolution Map's resolution.
+     * @param {number} rotation Map's rotation.
      */
-    start(size, zoom, resolution) {
+    start() {
       this.stop();
       this.tracker.setVisible(true);
-      this.renderTrajectories(size, resolution);
-      this.startUpdateTime(zoom);
+      this.renderTrajectories();
+      this.startUpdateTime();
     }
 
     /**
-     * Start the time.
+     * Start the clock.
      * @private
-     * @param {number} zoom
      */
-    startUpdateTime(zoom) {
+    startUpdateTime() {
       this.stopUpdateTime();
+      this.updateTimeDelay = this.getRefreshTimeInMs();
       this.updateTimeInterval = setInterval(() => {
-        const newTime =
-          this.currTime.getTime() +
-          (new Date() - this.lastUpdateTime) * this.speed;
-        this.setCurrTime(newTime);
-      }, this.getRefreshTimeInMs(zoom));
+        this.time = this.time.getTime() + (new Date() - this.time) * this.speed;
+      }, this.updateTimeDelay);
     }
 
     /**
-     * Stop the clock.
+     * Stop the trajectories rendering.
      */
     stop() {
       this.stopUpdateTime();
@@ -418,7 +407,7 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Stop the time.
+     * Stop the clock.
      * @private
      */
     stopUpdateTime() {
@@ -431,12 +420,26 @@ const TrackerLayerMixin = (Base) =>
      * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
      * @private
      */
-    renderTrajectoriesInternal(size, resolution, noInterpolate) {
+    renderTrajectoriesInternal(size, resolution, rotation, noInterpolate) {
       if (!this.tracker) {
         return;
       }
 
-      const renderTime = this.live ? Date.now() : this.currTime;
+      const renderTime = this.live ? Date.now() : this.time;
+
+      // Avoid useless render before the next tick.
+      if (
+        this.live &&
+        resolution === this.lastRenderResolution &&
+        rotation === this.lastRenderRotation &&
+        renderTime - this.lastRenderTime < this.updateTimeDelay
+      ) {
+        return;
+      }
+
+      this.lastRenderTime = renderTime;
+      this.lastRenderResolution = resolution;
+
       this.tracker.renderTrajectories(
         renderTime,
         size,
@@ -446,36 +449,31 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Render the trajectories requesting an animation frame and cancelling the previous one
+     * Render the trajectories requesting an animation frame and cancelling the previous one.
+     * This function must be overrided by children to provide the correct parameters.
      * @private
      */
-    renderTrajectories(size, resolution, noInterpolate) {
+    renderTrajectories(size, resolution, rotation, noInterpolate) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
 
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
-          this.renderTrajectoriesInternal(size, resolution, noInterpolate);
+          this.renderTrajectoriesInternal(
+            size,
+            resolution,
+            rotation,
+            noInterpolate,
+          );
         });
       } else {
-        this.renderTrajectoriesInternal(size, resolution, noInterpolate);
-      }
-    }
-
-    /**
-     * Set the current time, it triggers a rendering of the trajectories.
-     * If live is true. This function will have no effect.
-     * @param {dateString | value} time
-     * @param {Array<number>} size
-     * @param {number} resolution
-     * @param {boolean} [mustRender=true]
-     */
-    setCurrTime(time, size, resolution, mustRender = true) {
-      this.currTime = new Date(time);
-      this.lastUpdateTime = this.currTime;
-      if (mustRender) {
-        this.renderTrajectories(size, resolution);
+        this.renderTrajectoriesInternal(
+          size,
+          resolution,
+          rotation,
+          noInterpolate,
+        );
       }
     }
 

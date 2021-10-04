@@ -93,6 +93,7 @@ class TralisLayer extends mixin(TrackerLayer) {
     this.renderTrajectories(
       [width / this.pixelRatio, height / this.pixelRatio],
       getResolution(this.map),
+      this.map.getBearing(),
     );
   }
 
