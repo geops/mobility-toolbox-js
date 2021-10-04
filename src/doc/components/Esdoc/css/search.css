@@ -1,0 +1,76 @@
+/* stylelint-disable */
+/* search box */
+.search-box {
+  /* position: absolute;
+  top: 10px;
+  right: 50px; */
+  position: relative;
+  margin: 10px;
+  line-height: normal;
+  font-size: 12px;
+
+  /* Geops */
+  background: white;
+  margin: 20px 5px 10px !important;
+}
+
+.search-box img {
+  width: 20px;
+  vertical-align: top;
+}
+
+.esdoc .search-result {
+  position: absolute;
+  height: 600px;
+  width: 100%;
+  padding: 0;
+  margin-top: 5px;
+  margin-left: 24px;
+  background: white;
+  box-shadow: 1px 1px 4px rgb(0,0,0);
+  white-space: nowrap;
+  overflow-y: scroll;
+
+  /* Geops */
+  max-height: 300px;
+  min-width: 200px;
+  max-width: 500px;
+  width: auto;
+  margin-left: 0px;
+  height: auto;
+
+}
+
+.esdoc .search-result-import-path {
+  color: #aaa;
+  font-size: 12px;
+}
+
+.esdoc .search-result li {
+  list-style: none;
+  padding: 2px 4px;
+}
+
+.search-result li a {
+  display: block;
+}
+
+.search-result li.selected {
+  background: #ddd;
+}
+
+.search-result li.search-separator {
+  background: rgb(37, 138, 175);
+  color: white;
+}
+
+.search-box.active .search-input {
+  visibility: visible;
+  transition: width 0.2s ease-out;
+  /* Geops width: 300px; */
+}
+
+.search-box.active .search-input-edge {
+  display: inline-block;
+}
+

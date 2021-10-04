@@ -1,208 +1,175 @@
-import OLLayer from 'ol/layer/Layer';
+import { Layer as OLLayer, Group } from 'ol/layer';
 import { unByKey } from 'ol/Observable';
+import Source from 'ol/source/Source';
+import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
-import Tracker from '../../common/Tracker';
-import { timeSteps } from '../../common/trackerConfig';
 import GetVehicleAtCoordinateW from '../../common/workers/getVehicleAtCoordinate.worker';
 
 /**
  * Responsible for loading tracker data.
- * Extented from Layer {@link https://react-spatial.geops.de/docjs.html react-spatial/layers/Layer}
- * @class
- * @inheritDoc
- * @param {Object} options
- * @param {boolean} options.useDelayStyle Set the delay style.
- * @param {string} options.onClick Callback function on feature click.
- * @private
+ *
+ * @extends {Layer}
+ * @implements {TrackerLayerInterface}
  */
-class TrackerLayer extends Layer {
+class TrackerLayer extends mixin(Layer) {
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {boolean} options.useDelayStyle Set the delay style.
+   * @private
+   */
   constructor(options = {}) {
-    const olLayer = new OLLayer({
-      render: (frameState) => {
-        if (this.tracker && this.tracker.canvas) {
-          this.tracker.renderTrajectories(
-            this.currTime,
-            frameState.size,
-            frameState.viewState.resolution,
-          );
-          return this.tracker.canvas;
-        }
-        return null;
-      },
-    });
+    // We use a group to be able to add custom vector layer in extended class.
+    // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
-      olLayer,
       ...options,
     });
 
-    // Array of ol events key. Be careful to not override this value in child classe.
-    this.olEventsKeys = [];
+    /**
+     * Function to define  when allowing the render of trajectories depending on the zoom level. Default the fundtion return true.
+     * It's useful to avoid rendering the map when the map is animating or interacting.
+     * @type {function}
+     */
+    this.renderWhenZooming = options.renderWhenZooming || (() => true);
 
     /**
-     * Cache object for trajectories drawn.
+     * Function to define  when allowing the render of trajectories depending on the rotation. Default the fundtion return true.
+     * It's useful to avoid rendering the map when the map is animating or interacting.
+     * @type {function}
+     */
+    this.renderWhenRotating = options.renderWhenRotating || (() => true);
+
+    this.olLayer =
+      options.olLayer ||
+      new Group({
+        layers: [
+          new OLLayer({
+            source: new Source({}),
+            render: (frameState) => {
+              if (!this.tracker || !this.tracker.canvas) {
+                return null;
+              }
+              const { zoom, center, rotation } = frameState.viewState;
+
+              if (
+                zoom !== this.renderState.zoom ||
+                rotation !== this.renderState.rotation
+              ) {
+                this.renderState.zoom = zoom;
+                this.renderState.center = center;
+                this.renderState.rotation = rotation;
+
+                if (
+                  (zoom !== this.renderState.zoom &&
+                    !this.renderWhenZooming(zoom)) ||
+                  (rotation !== this.renderState.rotation &&
+                    !this.renderWhenRotating(rotation))
+                ) {
+                  this.tracker.clear();
+                  return this.tracker.canvas;
+                }
+
+                this.renderTrajectories(true);
+              } else if (
+                this.renderState.center[0] !== center[0] ||
+                this.renderState.center[1] !== center[1]
+              ) {
+                const px = this.map.getPixelFromCoordinate(center);
+                const oldPx = this.map.getPixelFromCoordinate(
+                  this.renderState.center,
+                );
+
+                // We move the canvas to avoid re render the trajectories
+                const oldLeft = parseFloat(this.tracker.canvas.style.left);
+                const oldTop = parseFloat(this.tracker.canvas.style.top);
+                this.tracker.canvas.style.left = `${
+                  oldLeft - (px[0] - oldPx[0])
+                }px`;
+                this.tracker.canvas.style.top = `${
+                  oldTop - (px[1] - oldPx[1])
+                }px`;
+
+                this.renderState.center = center;
+                this.renderState.rotation = rotation;
+              }
+
+              return this.tracker.canvas;
+            },
+          }),
+        ],
+      });
+
+    // Options the last render run did happen. If something changes
+    // we have to render again
+    /** @ignore */
+    this.renderState = {
+      center: [0, 0],
+      zoom: null,
+      rotation: 0,
+    };
+
+    /**
+     * Array of ol events key, returned by on() or once().
+     * @type {Array<ol/events~EventsKey>}
      * @private
      */
-    this.styleCache = {};
-
-    /**
-     * Time speed.
-     * @private
-     */
-    this.speed = 1;
-
-    /**
-     * Time used to display the trajectories.
-     * @private
-     */
-    this.currTime = new Date();
-
-    /**
-     * Keep track of the last time used to render trajectories.
-     * Useful when the speed increase.
-     * @private
-     */
-    this.lastUpdateTime = new Date();
-
-    /**
-     * Activate/deactivate pointer hover effect.
-     * @private
-     */
-    this.isHoverActive =
-      options.isHoverActive !== undefined ? options.isHoverActive : true;
-
-    /**
-     * Callback function when a user click on a vehicle.
-     * @private
-     */
-    this.clickCallbacks = [];
-
-    // Add click callback
-    if (options.onClick) {
-      this.onClick(options.onClick);
-    }
-
-    /**
-     * Custom property for duck typing since `instanceof` is not working
-     * when the instance was created on different bundles.
-     * @public
-     */
-    this.isTrackerLayer = true;
+    this.olEventsKeys = []; // Be careful to not override this value in child classe.
   }
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html Map}
+   * @param {ol/Map~Map} map A OpenLayers map.
    * @private
    */
   init(map) {
-    super.init(map);
-    if (!this.map) {
+    if (!map) {
       return;
     }
     this.getVehicleAtCoordinateWorker = new GetVehicleAtCoordinateW();
 
-    this.tracker = new Tracker({
-      getPixelFromCoordinate: this.map.getPixelFromCoordinate.bind(this.map),
-    });
-    this.tracker.setStyle((props, r) => this.style(props, r));
-
-    if (this.getVisible()) {
-      this.start();
-    }
-
-    this.visibilityRef = this.on('change:visible', (evt) => {
-      if (evt.target.getVisible()) {
-        this.start();
-      } else {
-        this.stop();
-      }
+    super.init(map, {
+      getPixelFromCoordinate: map.getPixelFromCoordinate.bind(map),
     });
   }
 
-  terminate() {
-    this.stop();
-    unByKey(this.visibilityRef);
-    if (this.tracker) {
-      this.tracker.destroy();
-      this.tracker = null;
-    }
-    super.terminate();
-  }
-
   /**
-   * Get the duration before the next update.
-   * @private
-   */
-  getRefreshTimeInMs() {
-    const z = this.map.getView().getZoom();
-    const roundedZoom = Math.round(z);
-    const timeStep = timeSteps[roundedZoom] || 25;
-    const nextTick = Math.max(25, timeStep / this.speed);
-    return nextTick;
-  }
-
-  /**
-   * Set the current time, it triggers a rendering of the trajectories.
-   * @param {dateString | value} time
-   */
-  setCurrTime(time) {
-    const newTime = new Date(time);
-    this.currTime = newTime;
-    this.lastUpdateTime = new Date();
-    if (
-      !this.map.getView().getInteracting() &&
-      !this.map.getView().getAnimating()
-    ) {
-      this.tracker.renderTrajectories(
-        this.currTime,
-        this.map.getSize(),
-        this.map.getView().getResolution(),
-      );
-    }
-  }
-
-  /**
-   * Set the speed.
-   * @param {number} speed
-   */
-  setSpeed(speed) {
-    this.speed = speed;
-    this.start();
-  }
-
-  /**
-   * Trackerlayer is started
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * Trackerlayer is started.
    * @private
    */
   start() {
-    this.stop();
-    this.tracker.setVisible(true);
-    this.tracker.renderTrajectories(
-      this.currTime,
-      this.map.getSize(),
-      this.map.getView().getResolution(),
-    );
-    this.startUpdateTime();
-    this.currentZoom = this.map.getView().getZoom();
+    super.start();
 
     this.olEventsKeys = [
       this.map.on('moveend', () => {
         const z = this.map.getView().getZoom();
 
         if (z !== this.currentZoom) {
+          /**
+           * Current value of the zoom.
+           * @type {number}
+           */
           this.currentZoom = z;
-          this.startUpdateTime();
+          this.startUpdateTime(z);
         }
       }),
       this.map.on('pointermove', (evt) => {
-        if (this.map.getView().getInteracting() || !this.isHoverActive) {
+        if (
+          this.map.getView().getInteracting() ||
+          this.map.getView().getAnimating() ||
+          !this.isHoverActive
+        ) {
           return;
         }
-        this.getVehiclesAtCoordinate(evt.coordinate);
-        const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate);
-        this.map.getTargetElement().style.cursor = vehicle ? 'pointer' : 'auto';
-        this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+        const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
+        const id = vehicle && vehicle.id;
+        if (this.hoverVehicleId !== id) {
+          this.map.getTargetElement().style.cursor = vehicle
+            ? 'pointer'
+            : 'auto';
+          this.hoverVehicleId = id;
+          this.renderTrajectories();
+        }
       }),
     ];
 
@@ -216,71 +183,44 @@ class TrackerLayer extends Layer {
   }
 
   /**
-   * Stop current layer,.
+   * Stop current layer.
    * @private
    */
   stop() {
-    this.stopUpdateTime();
-    if (this.tracker) {
-      this.tracker.setVisible(false);
-      this.tracker.clear();
-    }
+    super.stop();
     unByKey(this.olEventsKeys);
     this.olEventsKeys = [];
   }
 
   /**
-   * Set the filter for tracker features.
-   * @param {Function} filter Filter function.
+   * Render the trajectories using current map's size, resolution and rotation.
+   * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
+   * @overrides
    */
-  setFilter(filter) {
-    if (this.tracker) {
-      this.tracker.setFilter(filter);
-    }
+  renderTrajectories(noInterpolate) {
+    const view = this.map.getView();
+    super.renderTrajectories(
+      this.map.getSize(),
+      view.getResolution(),
+      view.getRotation(),
+      noInterpolate,
+    );
   }
 
   /**
-   * Set the sort for tracker features.
-   * @param {Function} sort Sort function.
+   * Return the delay in ms before the next rendering.
    */
-  setSort(sort) {
-    if (this.tracker) {
-      this.tracker.setSort(sort);
-    }
-  }
-
-  getVehicle(filterFc) {
-    return this.tracker.getTrajectories().filter(filterFc);
-  }
-
-  /**
-   * Start to update the current time depending on the speed.
-   * @private
-   */
-  startUpdateTime() {
-    this.stopUpdateTime();
-    this.updateTime = setInterval(() => {
-      const newTime =
-        this.currTime.getTime() +
-        (new Date() - this.lastUpdateTime) * this.speed;
-      this.setCurrTime(newTime);
-    }, this.getRefreshTimeInMs());
-  }
-
-  /**
-   * Stop to update time.
-   * @private
-   */
-  stopUpdateTime() {
-    clearInterval(this.updateTime);
+  getRefreshTimeInMs() {
+    return super.getRefreshTimeInMs(this.map.getView().getZoom());
   }
 
   /**
    * Returns the vehicle which are at the given coordinates.
    * Returns null when no vehicle is located at the given coordinates.
-   * @param {ol.coordinate} coordinate
-   * @returns {ol.feature | null} Vehicle feature
-   * @private
+   * @param {ol/coordinate~Coordinate} coordinate
+   * @param {number} nb Number of vehicles to return;
+   * @returns {Array<ol/Feature~Feature>} Vehicle feature.
+   * @override
    */
   getVehiclesAtCoordinate(coordinate) {
     const res = this.map.getView().getResolution();
@@ -302,66 +242,12 @@ class TrackerLayer extends Layer {
   }
 
   /**
-   * Define the style of the vehicle.
-   * Draw a blue circle with the id of the props parameter.
-   *
-   * @param {Object} props Properties
-   * @private
+   * Create a copy of the TrackerLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {TrackerLayer} A TrackerLayer
    */
-  style(props) {
-    const { id: text } = props;
-    if (this.styleCache[text]) {
-      return this.styleCache[text];
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = 200;
-    canvas.height = 15;
-    const ctx = canvas.getContext('2d');
-    ctx.arc(8, 8, 5, 0, 2 * Math.PI, false);
-    ctx.fillStyle = '#8ED6FF';
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = 'black';
-    ctx.stroke();
-    ctx.font = 'bold 12px arial';
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 3;
-    ctx.strokeText(text, 20, 10);
-    ctx.fillStyle = 'black';
-    ctx.fillText(text, 20, 10);
-    this.styleCache[text] = canvas;
-    return this.styleCache[text];
-  }
-
-  /**
-   * Listens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
-   *   the layer instance and the click event.
-   */
-  onClick(callback) {
-    if (typeof callback === 'function') {
-      if (!this.clickCallbacks.includes(callback)) {
-        this.clickCallbacks.push(callback);
-      }
-    } else {
-      throw new Error('callback must be of type function.');
-    }
-  }
-
-  /**
-   * Unlistens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
-   *   the layer instance and the click event.
-   */
-  unClick(callback) {
-    if (typeof callback === 'function') {
-      const idx = this.clickCallbacks.indexOf(callback);
-      if (idx >= -1) {
-        this.clickCallbacks.splice(idx, 1);
-      }
-    }
+  clone(newOptions) {
+    return new TrackerLayer({ ...this.options, ...newOptions });
   }
 }
 

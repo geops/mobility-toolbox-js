@@ -2,54 +2,102 @@
 import Layer from './Layer';
 
 /**
- * Apply visibility to style layers that fits the filter function.
- * @private
- */
-const applyLayoutVisibility = (mbMap, visible, filterFunc) => {
-  const style = mbMap.getStyle();
-
-  if (!mbMap || !style) {
-    return;
-  }
-
-  if (filterFunc) {
-    const visibilityValue = visible ? 'visible' : 'none';
-    for (let i = 0; i < style.layers.length; i += 1) {
-      const styleLayer = style.layers[i];
-      if (filterFunc(styleLayer)) {
-        if (mbMap.getLayer(styleLayer.id)) {
-          mbMap.setLayoutProperty(styleLayer.id, 'visibility', visibilityValue);
-        }
-      }
-    }
-  }
-};
-
-/**
  * Layer for visualizing a specific set of layer from a MapboxLayer.
- * @class
  *
  * @example
- * import { MapboxStyleLayer } from 'mobility-toolbox-js/src/ol';
+ * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';
  *
- * @param {Object} [options] Layer options.
- * @inheritdoc
+ * const mapboxLayer = new MapboxLayer({
+ *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',
+ * });
+ *
+ * const layer = new MapboxStyleLayer({
+ *   mapboxLayer: mapboxLayer,
+ *   styleLayersFilter: () => {},
+ * });
+ *
+ * @extends {Layer}
  */
 class MapboxStyleLayer extends Layer {
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.
+   * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.
+   */
   constructor(options = {}) {
     super(options);
-    this.options = options;
+
+    /**
+     * MapboxLayer provided for the style Layer.
+     * @type {MapboxLayer}
+     * @private
+     */
     this.mapboxLayer = options.mapboxLayer;
+
+    /**
+     * Function to filter features to be displayed.
+     * @type {function}
+     * @private
+     */
     this.styleLayersFilter = options.styleLayersFilter;
+
+    /**
+     * Mapbox style layer id where to add the style layers.
+     * See [mapbox.map.addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.
+     * @type {String}
+     * @private
+     */
+    this.beforeId = options.beforeId;
+
+    /**
+     * Function to filter features for getFeatureInfoAtCoordinate method.
+     * @type {function}
+     * @private
+     */
     this.featureInfoFilter = options.featureInfoFilter || ((obj) => obj);
+
+    /**
+     * Function to query the rendered features.
+     * @type {function}
+     * @private
+     */
     this.queryRenderedLayersFilter = options.queryRenderedLayersFilter;
+
+    /**
+     * Array of features to highlight.
+     * @type {Array<ol/Feature~Feature>}
+     * @private
+     */
     this.highlightedFeatures = [];
+
+    /**
+     * Array of selected features.
+     * @type {Array<ol/Feature~Feature>}
+     * @private
+     */
     this.selectedFeatures = [];
+
+    /**
+     * Array of mapbox style layers to add.
+     * @type {Array<mapboxgl.styleLayer>}
+     * @private
+     */
     this.styleLayers =
       (options.styleLayer ? [options.styleLayer] : options.styleLayers) || [];
+
+    /**
+     * @private
+     */
     this.addStyleLayers = this.addStyleLayers.bind(this);
+
+    /**
+     * @private
+     */
     this.onLoad = this.onLoad.bind(this);
     if (options.filters) {
+      /** @private */
       this.addDynamicFilters = () => {
         this.setFilter(
           typeof options.filters === 'function'
@@ -67,9 +115,19 @@ class MapboxStyleLayer extends Layer {
     }
   }
 
+  /**
+   * Initialize the layer.
+   * @param {mapboxgl.Map} map the mapbox map.
+   * @override
+   */
   init(map) {
     if (!this.mapboxLayer.map) {
       this.mapboxLayer.init(map);
+      /**
+       * An OpenLayers Layer.
+       * @type {ol/layer/Layer~Layer}
+       * @private
+       */
       this.olLayer = this.mapboxLayer.olLayer;
     }
     super.init(map);
@@ -104,59 +162,86 @@ class MapboxStyleLayer extends Layer {
 
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
-      this.on('change:visible', ({ target: layer }) => {
-        if (this.isMbMapLoaded) {
-          // Once the map is loaded we can apply vsiiblity without waiting
-          // the style. Mapbox take care of the application of style changes.
-          applyLayoutVisibility(
-            mbMap,
-            layer.getVisible(),
-            this.styleLayersFilter,
-          );
-        }
+      this.on('change:visible', (evt) => {
+        // Once the map is loaded we can apply vsiiblity without waiting
+        // the style. Mapbox take care of the application of style changes.
+        this.applyLayoutVisibility(evt);
       }),
     );
 
     this.olListenersKeys.push(
-      this.mapboxLayer.on('change:styleurl', () => {
-        this.addStyleLayers();
-        if (this.addDynamicFilters) {
-          this.addDynamicFilters();
-        }
+      this.mapboxLayer.on('load', () => {
+        this.onLoad();
       }),
-      // this.addDynamicFilters &&
-      //   this.map.on('moveend', () => {
-      //     this.addDynamicFilters();
-      //   }),
+    );
+
+    // Listen to click events
+    this.olListenersKeys.push(
+      this.map.on('singleclick', (e) => {
+        if (!this.clickCallbacks.length) {
+          return;
+        }
+
+        this.getFeatureInfoAtCoordinate(e.coordinate)
+          .then((d) =>
+            this.callClickCallbacks(d.features, d.layer, d.coordinate),
+          )
+          .catch(() => this.callClickCallbacks([], this, e.coordinate));
+      }),
     );
   }
 
+  /**
+   * Call click callbacks with given parameters.
+   * This is done in a separate function for being able to modify the response.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {ol/layer/Layer~Layer} layer
+   * @param {ol/coordinate~Coordinate} coordinate
+   * @private
+   */
+  callClickCallbacks(features, layer, coordinate) {
+    this.clickCallbacks.forEach((c) => c(features, layer, coordinate));
+  }
+
+  /**
+   * Terminate the layer.
+   * @param {mapboxgl.Map} map the mapbox map.
+   * @override
+   */
   terminate(map) {
     const { mbMap } = this.mapboxLayer;
-    if (!mbMap) {
-      return;
-    }
-
-    mbMap.off('load', this.onLoad);
-    if (this.isMbMapLoaded) {
+    if (mbMap) {
+      mbMap.off('load', this.onLoad);
       this.removeStyleLayers();
     }
     super.terminate(map);
   }
 
+  /** @ignore */
   addStyleLayers() {
     const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     this.styleLayers.forEach((styleLayer) => {
       const { id, source } = styleLayer;
       if (mbMap.getSource(source) && !mbMap.getLayer(id)) {
-        mbMap.addLayer(styleLayer);
+        mbMap.addLayer(styleLayer, this.beforeId);
       }
     });
-    applyLayoutVisibility(mbMap, this.getVisible(), this.styleLayersFilter);
+    this.applyLayoutVisibility();
   }
 
+  /** @ignore */
   removeStyleLayers() {
     const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     this.styleLayers.forEach((styleLayer) => {
       if (mbMap.getLayer(styleLayer.id)) {
         mbMap.removeLayer(styleLayer.id);
@@ -164,8 +249,11 @@ class MapboxStyleLayer extends Layer {
     });
   }
 
+  /**
+   * On Mapbox map load callback function. Add style layers and dynaimc filters.
+   * @ignore
+   */
   onLoad() {
-    this.isMbMapLoaded = true;
     this.addStyleLayers();
 
     if (this.addDynamicFilters) {
@@ -175,22 +263,32 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate Coordinate to request the information at.
+   * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     const { mbMap } = this.mapboxLayer;
+
     // Ignore the getFeatureInfo until the mapbox map is loaded
     if (!mbMap || !mbMap.isStyleLoaded()) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
+
+    // We query features only on style layers used by this layer.
+    let layers = this.styleLayers || [];
+
+    if (this.styleLayersFilter) {
+      layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);
+    }
+
+    if (this.queryRenderedLayersFilter) {
+      layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
+    }
+
     return this.mapboxLayer
       .getFeatureInfoAtCoordinate(coordinate, {
-        layers: (this.queryRenderedLayersFilter
-          ? mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter)
-          : this.styleLayers
-        ).map((s) => s && s.id),
+        layers: layers.map((layer) => layer && layer.id),
         validate: false,
       })
       .then((featureInfo) => {
@@ -205,12 +303,17 @@ class MapboxStyleLayer extends Layer {
       });
   }
 
-  getFeatures2(resolve) {
-    resolve(this.getFeatures());
-  }
-
+  /**
+   * Set filter that determines which features should be rendered in a style layer.
+   * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.
+   */
   setFilter(filter) {
     const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     this.styleLayers.forEach(({ id }) => {
       if (mbMap.getLayer(id)) {
         mbMap.setFilter(id, filter);
@@ -218,10 +321,22 @@ class MapboxStyleLayer extends Layer {
     });
   }
 
+  /**
+   * Set if features are hovered or not.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {boolean} state Is the feature hovered
+   * @private
+   */
   setHoverState(features = [], state) {
-    const options = this.styleLayers[0];
+    const { mbMap } = this.mapboxLayer;
+
+    if (!mbMap) {
+      return;
+    }
+
     features.forEach((feature) => {
-      if ((!options.source && !options['source-layer']) || !feature.getId()) {
+      const { source, sourceLayer } = feature.get('mapboxFeature') || {};
+      if ((!source && !sourceLayer) || !feature.getId()) {
         if (!feature.getId()) {
           // eslint-disable-next-line no-console
           console.warn(
@@ -233,23 +348,33 @@ class MapboxStyleLayer extends Layer {
         return;
       }
 
-      this.mapboxLayer.mbMap.setFeatureState(
+      mbMap.setFeatureState(
         {
           id: feature.getId(),
-          source: options.source,
-          sourceLayer: options['source-layer'],
+          source,
+          sourceLayer,
         },
         { hover: state },
       );
     });
   }
 
+  /**
+   * Select a list of features.
+   * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.
+   * @private
+   */
   select(features = []) {
     this.setHoverState(this.selectedFeatures, false);
     this.selectedFeatures = features;
     this.setHoverState(this.selectedFeatures, true);
   }
 
+  /**
+   * Highlight a list of features.
+   * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.
+   * @private
+   */
   highlight(features = []) {
     // Filter out selected features
     const filtered = this.highlightedFeatures.filter((feature) => {
@@ -267,12 +392,49 @@ class MapboxStyleLayer extends Layer {
   }
 
   /**
-   * Create exact copy of the MapboxLayer
-   * @returns {MapboxLayer} MapboxLayer
+   * Apply visibility to style layers that fits the styleLayersFilter function.
+   * @param {Event} evt Layer's event that has called the function.
+   * @private
    */
-  clone(mapboxLayer) {
-    const options = { ...this.options, mapboxLayer };
-    return new MapboxStyleLayer(options);
+  applyLayoutVisibility() {
+    const { visible } = this;
+    const { mbMap } = this.mapboxLayer;
+    const filterFunc = this.styleLayersFilter;
+
+    if (!mbMap) {
+      return;
+    }
+
+    const style = mbMap.getStyle();
+
+    if (!style) {
+      return;
+    }
+
+    if (filterFunc) {
+      const visibilityValue = visible ? 'visible' : 'none';
+      for (let i = 0; i < style.layers.length; i += 1) {
+        const styleLayer = style.layers[i];
+        if (filterFunc(styleLayer)) {
+          if (mbMap.getLayer(styleLayer.id)) {
+            mbMap.setLayoutProperty(
+              styleLayer.id,
+              'visibility',
+              visibilityValue,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Create a copy of the MapboxStyleLayer.
+   * @param {Object} newOptions Options to override.
+   * @returns {MapboxStyleLayer} A MapboxStyleLayer.
+   */
+  clone(newOptions) {
+    return new MapboxStyleLayer({ ...this.options, ...newOptions });
   }
 }
 

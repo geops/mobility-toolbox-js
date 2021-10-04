@@ -1,9 +1,11 @@
+import Map from 'ol/Map';
+import View from 'ol/View';
 import TrackerLayer from './TrackerLayer';
 
 let layer;
 let onClick;
 
-describe('VectorLayer', () => {
+describe('TrackerLayer', () => {
   beforeEach(() => {
     onClick = jest.fn();
     layer = new TrackerLayer({
@@ -18,7 +20,14 @@ describe('VectorLayer', () => {
 
   test('should called terminate on initalization.', () => {
     const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    layer.init(
+      new Map({
+        view: new View({
+          center: [831634, 5933959],
+          zoom: 9,
+        }),
+      }),
+    );
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -42,5 +51,12 @@ describe('VectorLayer', () => {
     layer.unClick(foo);
     expect(layer.clickCallbacks[1]).toBe(bar);
     expect(layer.clickCallbacks.length).toBe(2);
+  });
+
+  test('should clone', () => {
+    const clone = layer.clone({ name: 'clone' });
+    expect(clone).not.toBe(layer);
+    expect(clone.name).toBe('clone');
+    expect(clone).toBeInstanceOf(TrackerLayer);
   });
 });

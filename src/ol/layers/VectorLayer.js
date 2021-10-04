@@ -2,45 +2,14 @@ import { unByKey } from 'ol/Observable';
 import Layer from './Layer';
 
 /**
- * A class representing vector layer to display on BasicMap
- * @class
- * @example
- * import { VectorLayer } from 'mobility-toolbox-js/src/ol';
- * @inheritDoc
- * @param {Object} [options]
+ * A class use to display vector data.
+ *
+ * @extends {Layer}
  */
 class VectorLayer extends Layer {
-  constructor(options = {}) {
-    super(options);
-
-    this.hitTolerance = options.hitTolerance || 5;
-
-    // Array of click callbacks
-    this.clickCallbacks = [];
-
-    // Add click callback
-    if (options.onClick) {
-      this.onClick(options.onClick);
-    }
-  }
-
-  /**
-   * Listens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features (https://openlayers.org/en/latest/apidoc/module-ol_Feature.html),
-   *   the layer instance and the click coordinate.
-   */
-  onClick(callback) {
-    if (typeof callback === 'function') {
-      this.clickCallbacks.push(callback);
-    } else {
-      throw new Error('callback must be of type function.');
-    }
-  }
-
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate {@link https://openlayers.org/en/latest/apidoc/module-ol_coordinate.html ol/Coordinate} to request the information at.
+   * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
    *  or null if no feature was hit.
    * eslint-disable-next-line class-methods-use-this
@@ -65,7 +34,7 @@ class VectorLayer extends Layer {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map
    */
   init(map) {
     super.init(map);
@@ -74,7 +43,11 @@ class VectorLayer extends Layer {
       return;
     }
 
-    // Listen to click events
+    /**
+     * ol click events key, returned by map.on('singleclick')
+     * @type {ol/events~EventsKey}
+     * @private
+     */
     this.singleClickRef = this.map.on('singleclick', (e) => {
       if (!this.clickCallbacks.length) {
         return;
@@ -89,6 +62,9 @@ class VectorLayer extends Layer {
   /**
    * Call click callbacks with given parameters.
    * This is done in a separate function for being able to modify the response.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {ol/layer/Layer~Layer} layer
+   * @param {ol/coordinate~Coordinate} coordinate
    * @private
    */
   callClickCallbacks(features, layer, coordinate) {
@@ -103,6 +79,15 @@ class VectorLayer extends Layer {
     if (this.singleClickRef) {
       unByKey(this.singleClickRef);
     }
+  }
+
+  /**
+   * Create a copy of the VectorLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {VectorLayer} A VectorLayer
+   */
+  clone(newOptions) {
+    return new VectorLayer({ ...this.options, ...newOptions });
   }
 }
 

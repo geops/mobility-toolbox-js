@@ -1,0 +1,48 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Lato, Arial, sans-serif;
+  color: #353535;
+  position: relative;
+  min-height: 100%;
+  overflow-y: scroll;
+  font-size: 18px;
+}
+
+a {
+  text-decoration: none;
+  color: #76b833;
+}
+
+#map a {
+  color: initial;
+}
+
+/* geops ui css */
+button.geops-ui {
+  color: #fff;
+  padding: 5px 15px;
+  font-size: 18px;
+  box-sizing: border-box;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  font-weight: 700;
+  line-height: 24px;
+  border-radius: 5px;
+  text-transform: none;
+  background-color: #76b833;
+  border: 0;
+  outline: none;
+
+  &:not([disabled]) {
+    cursor: pointer;
+  }
+
+  &:hover {
+    box-shadow: 0 5px 16px #35353540;
+    text-decoration: none;
+    background-color: #76b833;
+  }
+}

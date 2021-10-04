@@ -2,8 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getParameters } from 'codesandbox/lib/api/define';
 import { Button, SvgIcon } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
-const CodeSandboxButton = ({ html, js, ...props }) => {
+const useStyles = makeStyles({
+  button: {
+    padding: '5px 15px',
+  },
+});
+
+const CodeSandboxButton = ({ html, js, extraFiles, ...props }) => {
+  const classes = useStyles();
+
   if (!html || !js) {
     return null;
   }
@@ -15,8 +24,8 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
       },
       'index.js': {
         content: js // eslint-disable-next-line no-template-curly-in-string
-          .replace('${window.apiKey}', window.apiKey)
-          .replace('window.apiKey', `'${window.apiKey}'`),
+          .replaceAll('${window.apiKey}', window.apiKey)
+          .replaceAll('window.apiKey', `'${window.apiKey}'`),
       },
       'package.json': {
         content: {
@@ -29,8 +38,8 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
             build: 'parcel build index.html',
           },
           dependencies: {
-            'mapbox-gl': '1.11.0',
-            'mobility-toolbox-js': 'beta',
+            'mapbox-gl': '1.11.1',
+            'mobility-toolbox-js': 'latest',
             ol: '6.3.1',
             'query-string': '6.13.1',
           },
@@ -47,6 +56,7 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
           ],
         },
       },
+      ...extraFiles,
     },
   };
   const dataSBStr = getParameters(dataSB);
@@ -61,7 +71,7 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
       <input type="hidden" name="parameters" value={dataSBStr} />
       <Button
         type="submit"
-        variant="outlined"
+        className={classes.button}
         startIcon={
           <SvgIcon fontSize="large">
             <path
@@ -71,7 +81,7 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
           </SvgIcon>
         }
       >
-        Edit in Sandox
+        Edit in Sandbox
       </Button>
     </form>
   );
@@ -80,11 +90,13 @@ const CodeSandboxButton = ({ html, js, ...props }) => {
 CodeSandboxButton.propTypes = {
   html: PropTypes.string,
   js: PropTypes.string,
+  extraFiles: PropTypes.shape(PropTypes.string),
 };
 
 CodeSandboxButton.defaultProps = {
   html: null,
   js: null,
+  extraFiles: {},
 };
 
 export default React.memo(CodeSandboxButton);

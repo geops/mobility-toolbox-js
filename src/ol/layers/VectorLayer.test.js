@@ -34,7 +34,10 @@ describe('VectorLayer', () => {
       olLayer,
       onClick,
     });
-    map = new Map({ view: new View({ resution: 5 }) });
+    map = new Map({
+      view: new View({ resolution: 5 }),
+      target: document.body,
+    });
   });
 
   test('should be instanced.', () => {
@@ -47,6 +50,12 @@ describe('VectorLayer', () => {
     const onClick2 = jest.fn();
     layer.onClick(onClick2);
     expect(layer.clickCallbacks[1]).toBe(onClick2);
+  });
+
+  test('should onClick throw error.', () => {
+    expect(() => {
+      layer.onClick('not of type function');
+    }).toThrow(Error);
   });
 
   test('should called terminate on initalization.', () => {
@@ -78,5 +87,12 @@ describe('VectorLayer', () => {
     expect(spy3.mock.calls[0][1].layerFilter({})).toBe(false);
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
+  });
+
+  test('should clone', () => {
+    const clone = layer.clone({ name: 'clone' });
+    expect(clone).not.toBe(layer);
+    expect(clone.name).toBe('clone');
+    expect(clone).toBeInstanceOf(VectorLayer);
   });
 });

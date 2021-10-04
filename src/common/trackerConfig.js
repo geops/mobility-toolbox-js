@@ -1,16 +1,19 @@
 const trackerRadiusMapping = {
-  0: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  1: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  2: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 9, 12.5, 14, 15, 15, 15, 15],
-  3: [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
-  4: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  5: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  6: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  7: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  8: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  9: [5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 9, 12.5, 14, 15, 15, 15, 15],
+  0: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  1: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  2: [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
+  3: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  4: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  5: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  6: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  7: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  8: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  9: [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 };
 
+/**
+ * @ignore
+ */
 export const types = [
   'Tram',
   'Subway / Metro / S-Bahn',
@@ -24,6 +27,9 @@ export const types = [
   'Rail', // New endpoint use Rail instead of Train.
 ];
 
+/**
+ * @ignore
+ */
 export const bgColors = [
   '#ffb400',
   '#ff5400',
@@ -37,6 +43,9 @@ export const bgColors = [
   '#ff8080',
 ];
 
+/**
+ * @ignore
+ */
 export const textColors = [
   '#000000',
   '#ffffff',
@@ -50,6 +59,9 @@ export const textColors = [
   '#000000',
 ];
 
+/**
+ * @ignore
+ */
 export const timeSteps = [
   100000,
   50000,
@@ -74,6 +86,9 @@ export const timeSteps = [
   50,
 ];
 
+/**
+ * @ignore
+ */
 const getTypeIndex = (type) => {
   if (typeof type === 'string') {
     const matched = types.find((t) => new RegExp(type).test(t));
@@ -82,6 +97,9 @@ const getTypeIndex = (type) => {
   return type;
 };
 
+/**
+ * @ignore
+ */
 export const getRadius = (type = 0, zoom) => {
   try {
     const typeIdx = getTypeIndex(type);
@@ -91,6 +109,9 @@ export const getRadius = (type = 0, zoom) => {
   }
 };
 
+/**
+ * @ignore
+ */
 export const getBgColor = (type = 0) => {
   try {
     const typeIdx = getTypeIndex(type);
@@ -100,6 +121,9 @@ export const getBgColor = (type = 0) => {
   }
 };
 
+/**
+ * @ignore
+ */
 export const getTextColor = (type = 0) => {
   try {
     const typeIdx = getTypeIndex(type);
@@ -109,11 +133,14 @@ export const getTextColor = (type = 0) => {
   }
 };
 
+/**
+ * @ignore
+ */
 export const getTextSize = (ctx, markerSize, text, fontSize) => {
   ctx.font = `bold ${fontSize}px Arial`;
   let newText = ctx.measureText(text);
 
-  const maxiter = 15;
+  const maxiter = 25;
   let i = 0;
 
   while (newText.width > markerSize - 6 && i < maxiter) {
@@ -126,9 +153,15 @@ export const getTextSize = (ctx, markerSize, text, fontSize) => {
   return fontSize;
 };
 
-export const getDelayColor = (delayInMs, cancelled) => {
+/**
+ * @ignore
+ * @param {number} delayInMs Delay in milliseconds.
+ * @param {boolean} cancelled true if the journey is cancelled.
+ * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
+ */
+export const getDelayColor = (delayInMs, cancelled, isDelayText) => {
   if (cancelled) {
-    return '#ff0000';
+    return isDelayText ? '#ff0000' : '#a0a0a0'; // red or gray
   }
   if (delayInMs >= 3600000) {
     return '#ed004c'; // pink { r: 237, g: 0, b: 76, s: '237,0,76' };
@@ -148,9 +181,12 @@ export const getDelayColor = (delayInMs, cancelled) => {
   return '#00a00c'; // green { r: 0, g: 160, b: 12, s: '0,160,12' };
 };
 
+/**
+ * @ignore
+ */
 export const getDelayText = (delayInMs, cancelled) => {
   if (cancelled) {
-    return String.fromCharCode(10006);
+    return String.fromCodePoint(0x00d7);
   }
   if (delayInMs > 3600000) {
     const rounded = Math.round(delayInMs / 3600000);

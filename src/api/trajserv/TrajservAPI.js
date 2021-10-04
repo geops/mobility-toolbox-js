@@ -1,81 +1,74 @@
-import qs from 'query-string';
 import {
   translateTrajCollResponse,
   translateTrajStationsResp,
 } from './TrajservAPIUtils';
-import { handleError, readJsonResponse } from '../utils';
+import API from '../../common/api/api';
 
 /**
- * Access to Trajserv api.
- * @class
+ * Access to the [Realtime service](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/).
+ *
  * @example
- * import { TrajservAPI } from 'mobility-toolbox-js/src/api';
+ * import { TrajservAPI } from 'mobility-toolbox-js/api';
+ *
+ * const api = new TrajservAPI({
+ *   url: 'https://api.geops.io/tracker/v1',
+ *   apiKey: [yourApiKey]
+ * });
+ *
  */
-class TrajservAPI {
-  constructor(options = {}) {
-    this.url = options.url || 'https://api.geops.io/tracker/v1';
-    this.apiKey = options.apiKey;
-  }
-
+class TrajservAPI extends API {
   /**
-   * Append the apiKey before sending the request.
-   * @private
+   * Constructor
+   *
+   * @param {Object} options Options.
+   * @param {string} [options.url='https://api.geops.io/tracker/v1'] Service url.
+   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    */
-  fetch(url, params = {}, config) {
-    const urlParams = { ...params, key: this.apiKey };
-    return fetch(`${url}?${qs.stringify(urlParams)}`, config).then(
-      readJsonResponse,
-    );
+  constructor(options = {}) {
+    super({ url: 'https://api.geops.io/tracker/v1', ...options });
   }
 
   /**
    * Fetch a trajectory by id.
-   * @param {Object} params Request parameters.
-   * @param {AbportController} abortController
+   *
+   * @param {GetTrajectoryByIdParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajectorybyid).
+   * @param {AbortController} abortController Abort controller used to cancel the request.
+   * @returns {Promise<TrajservTrajectory>} A trajectory.
    */
   fetchTrajectoryById(params, abortController = {}) {
-    return this.fetch(`${this.url}/trajectorybyid`, params, {
+    return this.fetch(`/trajectorybyid`, params, {
       signal: abortController.signal,
-    }).catch((err) => {
-      handleError('trajectorybyid', err);
     });
   }
 
   /**
    * Fetch trajectories.
-   * @param {Object} params Request parameters.
-   * @param {AbportController} abortController
+   *
+   * @param {GetTrajectoriesParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajectory_collection).
+   * @param {AbortController} abortController Abort controller used to cancel the request.
+   * @returns {Promise<Trajectory[]>} A list of trajectories.
    */
   fetchTrajectories(params, abortController = {}) {
-    return this.fetch(`${this.url}/trajectory_collection`, params, {
+    return this.fetch(`/trajectory_collection`, params, {
       signal: abortController.signal,
-    })
-      .then((data) => {
-        if (!data) {
-          return [];
-        }
-        return translateTrajCollResponse(data.features);
-      })
-      .catch((err) => {
-        handleError('trajectory_collection', err);
-      });
+    }).then((data) => {
+      return translateTrajCollResponse(data.features);
+    });
   }
 
   /**
-   * Fetch stations information about a trajectory.
-   * @param {Object} params Request parameters.
-   * @param {AbportController} abortController
+   * Fetch stations informations about a trajectory.
+   *
+   * @param {GetTrajectoryStationsParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajstations).
+   * @param {AbortController} abortController Abort controller used to cancel the request.
+   * @returns {Promise<TrajectoryStation[]>} A list of stations.
    */
   fetchTrajectoryStations(params, abortController = {}) {
-    return this.fetch(`${this.url}/trajstations`, params, {
+    return this.fetch(`/trajstations`, params, {
       signal: abortController.signal,
-    })
-      .then((data) => {
-        return translateTrajStationsResp(data);
-      })
-      .catch((err) => {
-        handleError('trajstations', err);
-      });
+    }).then((data) => {
+      return translateTrajStationsResp(data);
+    });
   }
 }
 

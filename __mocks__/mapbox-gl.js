@@ -1,8 +1,38 @@
 /* eslint-disable class-methods-use-this */
 class Map {
+  constructor(options) {
+    this.options = options;
+  }
+
+  addLayer() {}
+
+  addSource() {}
+
   isStyleLoaded() {}
 
-  getCanvas() {}
+  getLayer() {}
+
+  getBounds() {
+    return {
+      toArray: () => [
+        [1, 2],
+        [1, 2],
+      ],
+    };
+  }
+
+  getCanvas() {
+    return {
+      height: '100px',
+      width: '100px',
+      setAttribute: () => {},
+      removeAttribute: () => {},
+    };
+  }
+
+  getZoom() {}
+
+  getBearing() {}
 
   once() {}
 
@@ -11,6 +41,17 @@ class Map {
   off() {}
 
   loaded() {}
+
+  remove() {}
+
+  unproject() {
+    return [
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+    ];
+  }
 }
 module.exports = {
   Map,

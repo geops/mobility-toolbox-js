@@ -1,38 +1,42 @@
 /* eslint-disable no-underscore-dangle */
 import { toLonLat } from 'ol/proj';
-import { unByKey } from 'ol/Observable';
 import mapboxgl from 'mapbox-gl';
+import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-
-const getCopyrightFromSources = (mbMap) => {
-  let copyrights = [];
-  const regex = /<[^>]*>[^>]*<\/[^>]*>/g;
-  // Trick from Mapbox AttributionControl to know if the source is used.
-  const { sourceCaches } = mbMap.style;
-  Object.entries(sourceCaches).forEach(([, sourceCache]) => {
-    if (sourceCache.used) {
-      copyrights = copyrights.concat(
-        regex.exec(sourceCache.getSource().attribution),
-      );
-    }
-  });
-  return Array.from(
-    new Set(copyrights.filter((copyright) => !!copyright)),
-  ).join(', ');
-};
+import { getMapboxMapCopyrights, getMapboxStyleUrl } from '../../common/utils';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
- * @class
- * @inheritDoc
- * @param {Object} [options]
+ *
+ * @example
+ * import { MapboxLayer } from 'mobility-toolbox-js/ol';
+ *
+ * const layer = new MapboxLayer({
+ *   url: 'https://maps.geops.io/styles/travic_v2/style.json',
+ *   apikey: 'yourApiKey',
+ * });
+ *
+ * @extends {Layer}
  */
 export default class MapboxLayer extends Layer {
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {boolean} [options.preserveDrawingBuffer=false] If true able to export the canvas.
+   * @param {number} [options.fadeDuration=300] Duration of the fade effect in ms.
+   */
   constructor(options = {}) {
-    const olLayer = new OLLayer({
+    const mbLayer = new OLLayer({
+      source: new Source({}),
       render: (frameState) => {
+        if (!this.mbMap) {
+          // eslint-disable-next-line no-console
+          console.warn("Mapbox map doesn't exist.");
+          return null;
+        }
         let changed = false;
         const canvas = this.mbMap.getCanvas();
         const { viewState } = frameState;
@@ -41,11 +45,10 @@ export default class MapboxLayer extends Layer {
         if (this.renderState.visible !== visible) {
           canvas.style.display = visible ? 'block' : 'none';
           this.renderState.visible = visible;
+          // Needed since mapbox-gl 1.9.0.
+          // Without you don't see others ol layers on top.
+          canvas.style.position = 'absolute';
         }
-
-        // Needed since mapbox-gl 1.9.0.
-        // Without you don't see others ol layers on top.
-        canvas.style.position = 'absolute';
 
         const opacity = this.olLayer.getOpacity();
         if (this.renderState.opacity !== opacity) {
@@ -55,8 +58,8 @@ export default class MapboxLayer extends Layer {
 
         // adjust view parameters in mapbox
         const { rotation } = viewState;
-        if (rotation && this.renderState.rotation !== rotation) {
-          this.mbMap.rotateTo((-rotation * 180) / Math.PI, {
+        if (this.renderState.rotation !== rotation) {
+          this.mbMap.rotateTo((-(rotation || 0) * 180) / Math.PI, {
             animate: false,
           });
           changed = true;
@@ -78,18 +81,30 @@ export default class MapboxLayer extends Layer {
           this.renderState.center = viewState.center;
         }
 
+        const size = this.map.getSize();
+        if (
+          this.renderState.size[0] !== size[0] ||
+          this.renderState.size[1] !== size[1]
+        ) {
+          changed = true;
+          this.renderState.size = size;
+        }
+
         // cancel the scheduled update & trigger synchronous redraw
         // see https://github.com/mapbox/mapbox-gl-js/issues/7893#issue-408992184
         // NOTE: THIS MIGHT BREAK WHEN UPDATING MAPBOX
-        if (this.mbMap && this.mbMap.style && this.mbMap.isStyleLoaded()) {
-          if (this.mbMap._frame) {
-            this.mbMap._frame.cancel();
-            this.mbMap._frame = null;
-          }
+        if (
+          this.mbMap &&
+          this.mbMap.style &&
+          this.mbMap.isStyleLoaded() &&
+          changed
+        ) {
           try {
-            if (changed) {
-              this.mbMap._render();
+            if (this.mbMap._frame) {
+              this.mbMap._frame.cancel();
+              this.mbMap._frame = null;
             }
+            this.mbMap._render();
           } catch (err) {
             // ignore render errors because it's probably related to
             // a render during an update of the style.
@@ -104,99 +119,195 @@ export default class MapboxLayer extends Layer {
 
     super({
       ...options,
-      olLayer,
+      olLayer: mbLayer,
     });
-    this.options = options;
+
+    /**
+     * Url of the mapbox style.
+     * @type {string}
+     * @private
+     */
     this.styleUrl = options.url;
+
+    /**
+     * Api key for the url of the mapbox style.
+     * If set to false, the apiKey is not required.
+     * @type {string}
+     * @private
+     */
+    this.apiKey = options.apiKey;
+
+    /**
+     * Name of the apiKey to set in the url request.
+     * Default is 'key'.
+     * @type {string}
+     * @private
+     */
+    this.apiKeyName = options.apiKeyName || 'key';
+
+    /**
+     * @ignores
+     */
+    this.updateAttribution = this.updateAttribution.bind(this);
   }
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol.map} map {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html ol/Map}
+   * @param {ol/Map~Map} map
    */
   init(map) {
     super.init(map);
 
-    // Options the last render run did happen. If something changes
-    // we have to render again
-    this.renderState = {
-      center: [0, 0],
-      zoom: undefined,
-      rotation: undefined,
-      visible: undefined,
-      opacity: undefined,
-    };
-
-    if (!this.map || !this.map.getTargetElement() || this.mbMap) {
+    if (!this.map || this.mbMap) {
       return;
     }
 
+    /**
+     * The feature format.
+     * @type {ol/format/GeoJSON}
+     */
     this.format = new GeoJSON({
       featureProjection: this.map.getView().getProjection(),
     });
 
+    this.loadMbMap();
+
+    this.olListenersKeys.push(
+      this.map.on('change:size', () => {
+        try {
+          if (this.mbMap) {
+            this.mbMap.resize();
+          }
+        } catch (err) {
+          // ignore render errors
+          // eslint-disable-next-line no-console
+          console.warn(err);
+        }
+      }),
+    );
+  }
+
+  /**
+   * Returns a style URL with apiKey & apiKeyName infos.
+   */
+  createStyleUrl() {
+    return getMapboxStyleUrl(this.apiKey, this.apiKeyName, this.styleUrl);
+  }
+
+  /**
+   * Create the mapbox map.
+   * @private
+   */
+  loadMbMap() {
+    this.olListenersKeys.push(
+      this.map.on('change:target', () => {
+        this.loadMbMap();
+      }),
+    );
+
+    if (!this.map.getTargetElement()) {
+      return;
+    }
+
+    if (!this.visible) {
+      // On next change of visibility we load the map
+      this.olListenersKeys.push(
+        this.once('change:visible', () => {
+          this.loadMbMap();
+        }),
+      );
+      return;
+    }
+
     // If the map hasn't been resized, the center could be [NaN,NaN].
     // We set default good value for the mapbox map, to avoid the app crashes.
-    let [x, y] = map.getView().getCenter();
+    let [x, y] = this.map.getView().getCenter();
     if (!x || !y) {
       x = 0;
       y = 0;
     }
 
-    this.mbMap = new mapboxgl.Map({
-      style: this.styleUrl,
-      attributionControl: false,
-      boxZoom: false,
-      center: toLonLat([x, y]),
-      container: this.map.getTargetElement(),
-      doubleClickZoom: false,
-      dragPan: false,
-      dragRotate: false,
-      interactive: false,
-      keyboard: false,
-      pitchWithRotate: false,
-      scrollZoom: false,
-      touchZoomRotate: false,
-      fadeDuration:
-        'fadeDuration' in this.options ? this.options.fadeDuration : 300,
-      // Needs to be true to able to export the canvas, but could lead to performance issue on mobile.
-      preserveDrawingBuffer: this.options.preserveDrawingBuffer || false,
-    });
+    const style = this.createStyleUrl();
+    try {
+      /**
+       * A mapbox map
+       * @type {mapboxgl.Map}
+       */
+      this.mbMap = new mapboxgl.Map({
+        style,
+        attributionControl: false,
+        boxZoom: false,
+        center: toLonLat([x, y]),
+        container: this.map.getTargetElement(),
+        interactive: false,
+        fadeDuration:
+          'fadeDuration' in this.options ? this.options.fadeDuration : 300,
+        // Needs to be true to able to export the canvas, but could lead to performance issue on mobile.
+        preserveDrawingBuffer: this.options.preserveDrawingBuffer || false,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed creating mapbox map: ', err);
+    }
+
+    // Options the last render run did happen. If something changes
+    // we have to render again
+    /** @ignore */
+    this.renderState = {
+      center: [x, y],
+      zoom: null,
+      rotation: null,
+      visible: null,
+      opacity: null,
+      size: [0, 0],
+    };
 
     this.mbMap.once('load', () => {
+      /**
+       * Is the map loaded.
+       * @type {boolean}
+       */
       this.loaded = true;
-      if (!this.getCopyright()) {
-        this.setCopyright(getCopyrightFromSources(this.mbMap));
-      }
+
+      this.copyrights =
+        this.copyrights || getMapboxMapCopyrights(this.mbMap) || [];
+
+      this.olLayer.getSource().setAttributions(this.copyrights);
+
       this.dispatchEvent({
         type: 'load',
         target: this,
       });
     });
 
-    this.changeSizeRef = this.map.on('change:size', () => {
-      try {
-        this.mbMap.resize();
-      } catch (err) {
-        // ignore render errors
-        // eslint-disable-next-line no-console
-        console.warn(err);
-      }
-    });
-
     const mapboxCanvas = this.mbMap.getCanvas();
     if (mapboxCanvas) {
-      // Set default tabIndex to -1, so we can't access the canvas via Tab nav.
-      mapboxCanvas.setAttribute('tabindex', this.options.tabIndex || -1);
+      if (this.options.tabIndex) {
+        mapboxCanvas.setAttribute('tabindex', this.options.tabIndex);
+      } else {
+        // With a tabIndex='-1' the mouse events works but the map is not focused when we click on it
+        // so we remove completely the tabIndex attribute.
+        mapboxCanvas.removeAttribute('tabindex');
+      }
+    }
+
+    this.mbMap.on('idle', this.updateAttribution);
+  }
+
+  updateAttribution(evt) {
+    const newAttributions =
+      this.copyrights || getMapboxMapCopyrights(evt.target) || [];
+    if (this.copyrights.toString() !== newAttributions.toString()) {
+      this.olLayer.getSource().setAttributions(newAttributions);
     }
   }
 
   /**
    * Request feature information for a given coordinate.
-   * @param {ol.Coordinate} coordinate Coordinate to request the information at.
-   * @param {Object} options A mapbox {@link https://openlayers.org/en/latest/apidoc/module-ol_layer_Layer-Layer.html options object}.
+   * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
+   * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.
    * @returns {Promise<Object>} Promise with features, layer and coordinate
-   *  or null if no feature was hit.
+   *  or null if no feature was hit. The original Mapbox feature is available as a property named 'mapboxFeature'.
    */
   getFeatureInfoAtCoordinate(coordinate, options) {
     // Ignore the getFeatureInfo until the mapbox map is loaded
@@ -209,12 +320,30 @@ export default class MapboxLayer extends Layer {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
 
-    const pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
-    // At this point we get GeoJSON Mapbox feature, we transform it to an Openlayers
+    let pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
+
+    if (this.hitTolerance) {
+      const { x, y } = pixel;
+      pixel = [
+        { x: x - this.hitTolerance, y: y - this.hitTolerance },
+        { x: x + this.hitTolerance, y: y + this.hitTolerance },
+      ];
+    }
+
+    // At this point we get GeoJSON Mapbox feature, we transform it to an OpenLayers
     // feature to be consistent with other layers.
     const features = this.mbMap
       .queryRenderedFeatures(pixel, options)
-      .map((feature) => this.format.readFeature(feature));
+      .map((feature) => {
+        const olFeature = this.format.readFeature(feature);
+        if (olFeature) {
+          // We save the original mapbox feature to avoid losing informations
+          // potentially needed for other functionnality like highlighting
+          // (id, layer id, source, sourceLayer ...)
+          olFeature.set('mapboxFeature', feature);
+        }
+        return olFeature;
+      });
 
     return Promise.resolve({
       layer: this,
@@ -227,10 +356,8 @@ export default class MapboxLayer extends Layer {
    * Terminate what was initialized in init function. Remove layer, events...
    */
   terminate() {
-    if (this.changeSizeRef) {
-      unByKey(this.changeSizeRef);
-    }
     if (this.mbMap) {
+      this.mbMap.off('idle', this.updateAttribution);
       // Some asynchrone repaints are triggered even if the mbMap has been removed,
       // to avoid display of errors we set an empty function.
       this.mbMap.triggerRepaint = () => {};
@@ -242,10 +369,11 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
-   * Create exact copy of the MapboxLayer
-   * @returns {MapboxLayer} MapboxLayer
+   * Create a copy of the MapboxLayer.
+   * @param {Object} newOptions Options to override
+   * @returns {MapboxLayer} A MapboxLayer
    */
-  clone() {
-    return new MapboxLayer({ ...this.options, url: this.styleUrl });
+  clone(newOptions) {
+    return new MapboxLayer({ ...this.options, ...newOptions });
   }
 }

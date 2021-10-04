@@ -1,71 +1,108 @@
 import OLMap from 'ol/Map';
-import OLLayer from 'ol/layer/Layer';
+import { defaults as defaultControls } from 'ol/control';
 import Layer from './layers/Layer';
+import mixin from '../common/mixins/MapMixin';
+import CopyrightControl from './controls/CopyrightControl';
 
 /**
- * An OpenLayers for handling {@link Layer|Layers}.
- * This class extends the OpenLayers class
- * {@link https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html|ol/Map}.
+ * An OpenLayers map for handling mobility layers and controls.
  *
  * @example
- * import { Map } from 'mobility-toolbox-js/src/ol';
+ * import { Map } from 'mobility-toolbox-js/ol';
  *
- * @class
- * @namespace
- * @param {Object} options Map options.
- * @param {Array.Layer} [options.layers] List of {@link Layer|Layers}.
+ * const map = new Map({
+ *   target: 'map',
+ *   view: new View({
+ *     center: [0, 0],
+ *     zoom: 1,
+ *  }),
+ * });
+ *
+ * @see <a href="/example/ol-map">Map example</a>
+ *
+ * @extends {ol/Map~Map}
  */
-class Map extends OLMap {
+class Map extends mixin(OLMap) {
+  /**
+   * Constructor.
+   *
+   * @param {Object} options See [ol/Map~Map](https://openlayers.org/en/latest/apidoc/module-ol_Map-Map.html) options documentation.
+   * @param {Array<Layer|ol/layer/Layer~Layer>} [options.layers] Array of layers.
+   */
   constructor(options = {}) {
     super({
+      controls: [
+        ...defaultControls({ attribution: false }).getArray(),
+        new CopyrightControl(),
+      ],
       ...options,
-      layers: (options.layers || []).map((l) =>
-        l instanceof OLLayer ? l : l.olLayer,
-      ),
     });
-
-    this.mobilityLayers =
-      (options.layers || []).filter((l) => l instanceof Layer) || [];
-    this.mobilityLayers.forEach((l) => l.init(this));
   }
 
   /**
-   * Adds a {@link Layer} to the map.
-   * @param {Layer} The {@link Layer} to add.
+   * Get the HTML element containing the map.
+   *
+   * @return {HTMLElement} The HTML element of the container.
+   */
+  getContainer() {
+    return this.getTargetElement();
+  }
+
+  /**
+   * Adds a layer to the map.
+   * @param {Layer|ol/layer/Layer~Layer} layer The layer to add.
    */
   addLayer(layer) {
-    layer.init(this);
-
-    if (layer.olLayer) {
-      super.addLayer(layer.olLayer);
-    }
-
     if (layer instanceof Layer) {
+      // layer is an mobility layer
+      layer.init(this);
       this.mobilityLayers.push(layer);
-    }
-  }
 
-  /**
-   * Returns a list of mobility layers.
-   * @returns {Layer} {@link Layer}.
-   */
-  getMobilityLayers() {
-    return this.mobilityLayers;
+      if (layer.olLayer) {
+        super.addLayer(layer.olLayer);
+      }
+
+      this.dispatchEvent({
+        type: 'change:mobilityLayers',
+        target: this,
+      });
+    } else {
+      // layer is an OpenLayer layer
+      super.addLayer(layer);
+    }
   }
 
   /**
    * Removes a given layer from the map.
-   * @param {Layer} The {@link Layer} to remove.
-   * @returns The removed layer (or undefined if the layer was not found).
+   * @param {Layer|ol/layer/Layer~Layer} layer The layer to remove.
    */
   removeLayer(layer) {
     if (layer instanceof Layer) {
       layer.terminate();
       this.mobilityLayers = this.mobilityLayers.filter((l) => l !== layer);
-    }
-    if (layer.olLayer) {
+      if (layer.olLayer) {
+        super.removeLayer(layer);
+      }
+    } else {
+      // layer is an OpenLayer layer
       super.removeLayer(layer);
     }
+  }
+
+  /**
+   * Adds a given control to the map.
+   * @param {Control|ol/control/Control~Control} control The control to add.
+   */
+  addControl(control) {
+    super.addControl(control);
+  }
+
+  /**
+   * Removes a given control to the map.
+   * @param {Control|ol/control/Control~Control} control The control to remove.
+   */
+  removeControl(control) {
+    super.removeControl(control);
   }
 }
 
