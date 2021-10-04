@@ -183,7 +183,7 @@ export default class Tracker {
      * Current resolution.
      * @type {number}
      */
-    (this.currResolution = resolution || this.currResolution);
+    this.currResolution = resolution || this.currResolution;
     let hoverVehicleImg;
     let hoverVehiclePx;
     let hoverVehicleWidth;
