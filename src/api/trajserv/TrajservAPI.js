@@ -1,4 +1,3 @@
-import greenlet from 'greenlet';
 import qs from 'query-string';
 import {
   translateTrajCollResponse,
@@ -6,24 +5,6 @@ import {
 } from './TrajservAPIUtils';
 import API from '../../common/api/api';
 import FetchTrajectoriesWorker from './fetchTrajectories.worker';
-
-// fetchTrajectoriesWorker.postMessage('lala2');
-// console.log('Before postemessage');
-// Test.postMessage('lala2');
-// console.log('TEST', Test);
-
-// const wor = new Test();
-// wor.postMessage('lala');
-// console.log(work, wor);
-
-// const greenFetchTrajectories = greenlet((url) => {
-//   return fetch(url)
-//     .then((res) => res.json())
-//     .then((data) => {
-//       console.log(data.features);
-//       return translateTrajCollResponse(data.features);
-//     });
-// });
 
 /**
  * Access to the [Realtime service](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/).
@@ -72,7 +53,7 @@ class TrajservAPI extends API {
    */
   // eslint-disable-next-line class-methods-use-this
   fetchTrajectoriesWorkerr(params) {
-    // Clean requets parameters, removing undefined and null values.
+    // Clean request parameters, removing undefined and null values.
     const urlParams = { ...params, key: this.apiKey };
     const clone = { ...urlParams };
     Object.keys(urlParams).forEach(

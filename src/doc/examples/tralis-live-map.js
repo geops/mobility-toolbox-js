@@ -11,16 +11,17 @@ export default () => {
     zoom: 10,
     touchPitch: false,
     pitchWithRotate: false,
-    dragRotate: false,
-    touchZoomRotate: false,
   });
 
   const tracker = new TralisLayer({
     url: 'wss://api.geops.io/realtime-ws/v1/',
     apiKey: window.apiKey,
+    bbox: [1152072, 6048052, 1433666, 6205578],
     style: (props) => {
       const img = new Image();
       img.src = LINE_IMAGES[(props.line || {}).name || 'unknown'];
+      img.width = 25 * window.devicePixelRatio;
+      img.height = 25 * window.devicePixelRatio;
       return img;
     },
   });

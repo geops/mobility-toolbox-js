@@ -22,6 +22,7 @@ export default () => {
     url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
     useRequestAnimationFrame: true,
+    useWorker: true,
   });
 
   tracker.onClick((vehicle) => {

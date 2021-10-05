@@ -45,14 +45,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
     super.init(map);
 
-    const { width, height } = map.getCanvas();
-    this.tracker.canvas.width = width;
-    this.tracker.canvas.height = height;
-
     const source = {
       type: 'canvas',
       canvas: this.tracker.canvas,
-      coordinates: getSourceCoordinates(map),
+      coordinates: getSourceCoordinates(map, this.pixelRatio),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
       attribution: this.copyrights,
@@ -132,14 +128,13 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * @private
    */
   onMove() {
-    this.map.getSource(this.key).setCoordinates(getSourceCoordinates(this.map));
-
-    const { width, height } = this.map.getCanvas();
-
+    this.map
+      .getSource(this.key)
+      .setCoordinates(getSourceCoordinates(this.map, this.pixelRatio));
     this.renderTrajectories(
-      this.currTime,
-      [width, height],
+      undefined,
       getResolution(this.map),
+      this.map.getBearing(),
     );
   }
 

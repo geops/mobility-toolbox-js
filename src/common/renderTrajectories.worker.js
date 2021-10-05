@@ -187,6 +187,7 @@ const style = (
   return styleCache[key];
 };
 let canvas = null;
+let idframe = null;
 
 self.onmessage = function (evt) {
   // console.log('WOOOOOOORKER', evt.data);
@@ -214,209 +215,218 @@ self.onmessage = function (evt) {
   if (!canvasContext || !canvasContext.commit) {
     // console.log('pas de commoit');
   }
-  canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-  // console.time('render');
-  //   this.clear();
-  // canvas.style.left = '0px';
-  // canvas.style.top = '0px';
+  self.cancelAnimationFrame(idframe);
 
-  const [width, height] = size;
-  if (width && height && (canvas.width !== width || canvas.height !== height)) {
-    [canvas.width, canvas.height] = [width, height];
-  }
+  idframe = self.requestAnimationFrame(() => {
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    console.time('render');
+    // this.clear();
+    canvas.style.left = '0px';
+    canvas.style.top = '0px';
 
-  let hoverVehicleImg;
-  let hoverVehiclePx;
-  let hoverVehicleWidth;
-  let hoverVehicleHeight;
-  let selectedVehicleImg;
-  let selectedVehiclePx;
-  let selectedVehicleWidth;
-  let selectedVehicleHeight;
-
-  for (let i = (trajectories || []).length - 1; i >= 0; i -= 1) {
-    const traj = trajectories[i];
-
-    // We simplify the traj object
-    let { geometry } = traj;
-    const { timeIntervals, timeOffset } = traj;
-
-    if (Array.isArray(geometry.coordinates)) {
-      if (geometry.type === 'Point') {
-        geometry = new Point(geometry.coordinates);
-      } else if (geometry.type === 'LineString') {
-        geometry = new LineString(geometry.coordinates);
-      }
+    const [width, height] = size;
+    if (
+      width &&
+      height &&
+      (canvas.width !== width || canvas.height !== height)
+    ) {
+      [canvas.width, canvas.height] = [width, height];
     }
 
-    // if (this.filter && !this.filter(traj, i, this.trajectories)) {
-    //   // eslint-disable-next-line no-continue
-    //   continue;
-    // }
+    let hoverVehicleImg;
+    let hoverVehiclePx;
+    let hoverVehicleWidth;
+    let hoverVehicleHeight;
+    let selectedVehicleImg;
+    let selectedVehiclePx;
+    let selectedVehicleWidth;
+    let selectedVehicleHeight;
 
-    let coord = null;
-    let rotation;
+    for (let i = (trajectories || []).length - 1; i >= 0; i -= 1) {
+      const traj = trajectories[i];
 
-    if (traj.coordinate && !interpolate) {
-      coord = traj.coordinate;
-    } else if (timeIntervals && timeIntervals.length > 1) {
-      const now = currTime - (timeOffset || 0);
-      let start;
-      let end;
-      let startFrac;
-      let endFrac;
-      let timeFrac;
+      // We simplify the traj object
+      let { geometry } = traj;
+      const { timeIntervals, timeOffset } = traj;
 
-      // Search th time interval.
-      for (let j = 0; j < timeIntervals.length - 1; j += 1) {
-        // Rotation only available in tralis layer.
-        [start, startFrac, rotation] = timeIntervals[j];
-        [end, endFrac] = timeIntervals[j + 1];
+      if (Array.isArray(geometry.coordinates)) {
+        if (geometry.type === 'Point') {
+          geometry = new Point(geometry.coordinates);
+        } else if (geometry.type === 'LineString') {
+          geometry = new LineString(geometry.coordinates);
+        }
+      }
 
-        if (start <= now && now <= end) {
-          break;
+      // if (this.filter && !this.filter(traj, i, this.trajectories)) {
+      //   // eslint-disable-next-line no-continue
+      //   continue;
+      // }
+
+      let coord = null;
+      let rotation;
+
+      if (traj.coordinate && !interpolate) {
+        coord = traj.coordinate;
+      } else if (timeIntervals && timeIntervals.length > 1) {
+        const now = currTime - (timeOffset || 0);
+        let start;
+        let end;
+        let startFrac;
+        let endFrac;
+        let timeFrac;
+
+        // Search th time interval.
+        for (let j = 0; j < timeIntervals.length - 1; j += 1) {
+          // Rotation only available in tralis layer.
+          [start, startFrac, rotation] = timeIntervals[j];
+          [end, endFrac] = timeIntervals[j + 1];
+
+          if (start <= now && now <= end) {
+            break;
+          } else {
+            start = null;
+            end = null;
+          }
+        }
+        // The geometry can also be a Point
+        if (geometry.getType() === GeomType.POINT) {
+          coord = geometry.getCoordinates();
+        } else if (geometry.getType() === GeomType.LINE_STRING) {
+          if (start && end) {
+            // interpolate position inside the time interval.
+            timeFrac = interpolate
+              ? Math.min((now - start) / (end - start), 1)
+              : 0;
+
+            const geomFrac = interpolate
+              ? timeFrac * (endFrac - startFrac) + startFrac
+              : 0;
+
+            coord = geometry.getCoordinateAt(geomFrac);
+
+            // We set the rotation and the timeFraction of the trajectory (used by tralis).
+            trajectories[i].rotation = rotation;
+            trajectories[i].endFraction = timeFrac;
+
+            // It happens that the now date was some ms before the first timeIntervals we have.
+          } else if (now < timeIntervals[0][0]) {
+            [[, , rotation]] = timeIntervals;
+            timeFrac = 0;
+            coord = geometry.getFirstCoordinate();
+          } else if (now > timeIntervals[timeIntervals.length - 1][0]) {
+            [, , rotation] = timeIntervals[timeIntervals.length - 1];
+            timeFrac = 1;
+            coord = geometry.getLastCoordinate();
+          }
         } else {
-          start = null;
-          end = null;
+          // eslint-disable-next-line no-console
+          console.error(
+            'This geometry type is not supported. Only Point or LineString are. Current geometry: ',
+            geometry,
+          );
         }
+        // We set the rotation and the timeFraction of the trajectory (used by tralis).
+        // if rotation === null that seems there is no rotation available.
+        trajectories[i].rotation = rotation;
+        trajectories[i].endFraction = timeFrac || 0;
       }
-      // The geometry can also be a Point
-      if (geometry.getType() === GeomType.POINT) {
-        coord = geometry.getCoordinates();
-      } else if (geometry.getType() === GeomType.LINE_STRING) {
-        if (start && end) {
-          // interpolate position inside the time interval.
-          timeFrac = interpolate
-            ? Math.min((now - start) / (end - start), 1)
-            : 0;
 
-          const geomFrac = interpolate
-            ? timeFrac * (endFrac - startFrac) + startFrac
-            : 0;
+      if (coord) {
+        // We set the rotation of the trajectory (used by tralis).
+        // console.log(extent, canvas.width, canvas.width, coord);
+        trajectories[i].coordinate = coord;
+        const extentWidth = extent[2] - extent[0];
+        const extentHeight = extent[3] - extent[1];
+        const diffX = coord[0] - extent[0]; // 100* extent[0] / extent[2]
+        const diffY = coord[1] - extent[1]; // 100* extent[0] / extent[2]
+        const deltaX = (diffX / extentWidth) * canvas.width;
+        const deltaY = canvas.height - (diffY / extentHeight) * canvas.height;
 
-          coord = geometry.getCoordinateAt(geomFrac);
+        const px = [deltaX, deltaY]; // this.getPixelFromCoordinate(coord);
 
-          // We set the rotation and the timeFraction of the trajectory (used by tralis).
-          trajectories[i].rotation = rotation;
-          trajectories[i].endFraction = timeFrac;
-
-          // It happens that the now date was some ms before the first timeIntervals we have.
-        } else if (now < timeIntervals[0][0]) {
-          [[, , rotation]] = timeIntervals;
-          timeFrac = 0;
-          coord = geometry.getFirstCoordinate();
-        } else if (now > timeIntervals[timeIntervals.length - 1][0]) {
-          [, , rotation] = timeIntervals[timeIntervals.length - 1];
-          timeFrac = 1;
-          coord = geometry.getLastCoordinate();
+        if (deltaX < 0 && deltaX > width && deltaY < 0 && deltaY > height) {
+          // eslint-disable-next-line no-continue
+          continue;
         }
-      } else {
-        // eslint-disable-next-line no-console
-        console.error(
-          'This geometry type is not supported. Only Point or LineString are. Current geometry: ',
-          geometry,
+
+        // console.log(px);
+        // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
+        trajectories[i].rendered = true;
+        //   this.renderedTrajectories.push(this.trajectories[i]);
+        const vehicleImg = style(
+          traj,
+          zoom,
+          hoverVehicleId,
+          selectedVehicleId,
+          delayDisplay,
+          delayOutlineColor,
+          useDelayStyle,
         );
+
+        if (!vehicleImg) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        let imgWidth = vehicleImg.width;
+        let imgHeight = vehicleImg.height;
+
+        if (iconScale) {
+          imgHeight = Math.floor(imgHeight * iconScale);
+          imgWidth = Math.floor(imgWidth * iconScale);
+        }
+
+        if (hoverVehicleId !== traj.id && selectedVehicleId !== traj.id) {
+          // requestAnimationFrame(() => {
+          // console.log('icic');
+          canvasContext.drawImage(
+            vehicleImg,
+            px[0] - imgWidth / 2,
+            px[1] - imgHeight / 2,
+            imgWidth,
+            imgHeight,
+          );
+          // })
+        }
+        if (hoverVehicleId === traj.id) {
+          // Store the canvas to draw it at the end
+          hoverVehicleImg = vehicleImg;
+          hoverVehiclePx = px;
+          hoverVehicleWidth = imgWidth;
+          hoverVehicleHeight = imgHeight;
+        }
+
+        if (selectedVehicleId === traj.id) {
+          // Store the canvas to draw it at the end
+          selectedVehicleImg = vehicleImg;
+          selectedVehiclePx = px;
+          selectedVehicleWidth = imgWidth;
+          selectedVehicleHeight = imgHeight;
+        }
       }
-      // We set the rotation and the timeFraction of the trajectory (used by tralis).
-      // if rotation === null that seems there is no rotation available.
-      trajectories[i].rotation = rotation;
-      trajectories[i].endFraction = timeFrac || 0;
     }
 
-    if (coord) {
-      // We set the rotation of the trajectory (used by tralis).
-      // console.log(extent, canvas.width, canvas.width, coord);
-      trajectories[i].coordinate = coord;
-      const extentWidth = extent[2] - extent[0];
-      const extentHeight = extent[3] - extent[1];
-      const diffX = coord[0] - extent[0]; // 100* extent[0] / extent[2]
-      const diffY = coord[1] - extent[1]; // 100* extent[0] / extent[2]
-      const deltaX = (diffX / extentWidth) * canvas.width;
-      const deltaY = canvas.height - (diffY / extentHeight) * canvas.height;
-
-      const px = [deltaX, deltaY]; // this.getPixelFromCoordinate(coord);
-
-      if (deltaX < 0 && deltaX > width && deltaY < 0 && deltaY > height) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-
-      // console.log(px);
-      // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
-      trajectories[i].rendered = true;
-      //   this.renderedTrajectories.push(this.trajectories[i]);
-      const vehicleImg = style(
-        traj,
-        zoom,
-        hoverVehicleId,
-        selectedVehicleId,
-        delayDisplay,
-        delayOutlineColor,
-        useDelayStyle,
+    if (selectedVehicleImg) {
+      canvasContext.drawImage(
+        selectedVehicleImg,
+        selectedVehiclePx[0] - selectedVehicleWidth / 2,
+        selectedVehiclePx[1] - selectedVehicleHeight / 2,
+        selectedVehicleWidth,
+        selectedVehicleHeight,
       );
-
-      if (!vehicleImg) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-
-      let imgWidth = vehicleImg.width;
-      let imgHeight = vehicleImg.height;
-
-      if (iconScale) {
-        imgHeight = Math.floor(imgHeight * iconScale);
-        imgWidth = Math.floor(imgWidth * iconScale);
-      }
-
-      if (hoverVehicleId !== traj.id && selectedVehicleId !== traj.id) {
-        // requestAnimationFrame(() => {
-        // console.log('icic');
-        canvasContext.drawImage(
-          vehicleImg,
-          px[0] - imgWidth / 2,
-          px[1] - imgHeight / 2,
-          imgWidth,
-          imgHeight,
-        );
-        // })
-      }
-      if (hoverVehicleId === traj.id) {
-        // Store the canvas to draw it at the end
-        hoverVehicleImg = vehicleImg;
-        hoverVehiclePx = px;
-        hoverVehicleWidth = imgWidth;
-        hoverVehicleHeight = imgHeight;
-      }
-
-      if (selectedVehicleId === traj.id) {
-        // Store the canvas to draw it at the end
-        selectedVehicleImg = vehicleImg;
-        selectedVehiclePx = px;
-        selectedVehicleWidth = imgWidth;
-        selectedVehicleHeight = imgHeight;
-      }
     }
-  }
 
-  if (selectedVehicleImg) {
-    canvasContext.drawImage(
-      selectedVehicleImg,
-      selectedVehiclePx[0] - selectedVehicleWidth / 2,
-      selectedVehiclePx[1] - selectedVehicleHeight / 2,
-      selectedVehicleWidth,
-      selectedVehicleHeight,
-    );
-  }
-
-  if (hoverVehicleImg) {
-    canvasContext.drawImage(
-      hoverVehicleImg,
-      hoverVehiclePx[0] - hoverVehicleWidth / 2,
-      hoverVehiclePx[1] - hoverVehicleHeight / 2,
-      hoverVehicleWidth,
-      hoverVehicleHeight,
-    );
-  }
+    if (hoverVehicleImg) {
+      canvasContext.drawImage(
+        hoverVehicleImg,
+        hoverVehiclePx[0] - hoverVehicleWidth / 2,
+        hoverVehiclePx[1] - hoverVehicleHeight / 2,
+        hoverVehicleWidth,
+        hoverVehicleHeight,
+      );
+    }
+    console.timeEnd('render');
+  });
   // if (canvasContext.commit) canvasContext.commit();
 
   // self.postMessage(canvas);

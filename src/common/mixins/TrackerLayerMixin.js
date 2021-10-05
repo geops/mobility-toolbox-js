@@ -13,6 +13,7 @@ import { timeSteps } from '../trackerConfig';
  * @classproperty {function} style - Style of the vehicle.
  * @classproperty {FilterFunction} filter - Time speed.
  * @classproperty {function} sort - Set the filter for tracker features.
+ * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
  */
 export class TrackerLayerInterface {
@@ -34,16 +35,11 @@ export class TrackerLayerInterface {
 
   /**
    * Start the clock.
-   *
-   * @param {Array<number>} size Map's size: [width, height].
-   * @param {number} zoom Map's zoom level.
-   * @param {number} resolution Map's resolution.
    */
-  // eslint-disable-next-line no-unused-vars
-  start(size, zoom, resolution) {}
+  start() {}
 
   /**
-   * Stop the time.
+   * Start the timeout for the next update.
    * @private
    * @param {number} zoom
    */
@@ -54,17 +50,6 @@ export class TrackerLayerInterface {
    * Stop the clock.
    */
   stop() {}
-
-  /**
-   * Set the current time, it triggers a rendering of the trajectories.
-   *
-   * @param {Date} time The date to render.
-   * @param {number[2]} size Size of the canvas to render.
-   * @param {number} resolution Map's resolution to render.
-   * @param {boolean} [mustRender=true] If false bypass the rendering of vehicles.
-   */
-  // eslint-disable-next-line no-unused-vars
-  setCurrTime(time, size, resolution, mustRender = true) {}
 
   /**
    * Get vehicle.
@@ -124,37 +109,95 @@ const TrackerLayerMixin = (Base) =>
         isHoverActive: true,
         ...options,
       };
-      let cuurSpeed = speed || 1;
+
+      // Tracker options use to build the tracker.
+      const {
+        pixelRatio,
+        interpolate,
+        hoverVehicleId,
+        selectedVehicleId,
+        filter,
+        sort,
+        time,
+      } = options;
+
+      const initTrackerOptions = {
+        pixelRatio: pixelRatio || window.devicePixelRatio || 1,
+        interpolate,
+        hoverVehicleId,
+        selectedVehicleId,
+        filter,
+        sort,
+        style,
+      };
+
+      Object.keys(initTrackerOptions).forEach(
+        (key) =>
+          initTrackerOptions[key] === undefined &&
+          delete initTrackerOptions[key],
+      );
+
+      let currSpeed = speed || 1;
+      let currTime = time || new Date();
+
       super.defineProperties(options);
+
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
+
+        /**
+         * Active on hover effect.
+         */
         isHoverActive: {
           value: !!isHoverActive,
           writable: true,
         },
+
+        /**
+         * Style function used to render a vehicle.
+         */
         style: {
           value: style || this.defaultStyle,
         },
+
+        /**
+         * Speed of the wheel of time.
+         * If live property is true. The speed is ignored.
+         */
         speed: {
-          get: () => cuurSpeed,
+          get: () => currSpeed,
           set: (newSpeed) => {
-            cuurSpeed = newSpeed;
+            currSpeed = newSpeed;
             this.start();
           },
         },
+
+        /**
+         * Function to filter which vehicles to display.
+         */
         filter: {
-          get: () => this.tracker.filter,
-          set: (filter) => {
+          get: () =>
+            this.tracker ? this.tracker.filter : this.initTrackerOptions.filter,
+          set: (newFilter) => {
             if (this.tracker) {
-              this.tracker.setFilter(filter);
+              this.tracker.filter = newFilter;
+            } else {
+              this.initTrackerOptions.filter = newFilter;
             }
           },
         },
+
+        /**
+         * Function to sort the vehicles to display.
+         */
         sort: {
-          get: () => this.tracker.sort,
-          set: (sort) => {
-            if (this.sort) {
-              this.tracker.setSort(sort);
+          get: () =>
+            this.tracker ? this.tracker.sort : this.initTrackerOptions.sort,
+          set: (newSort) => {
+            if (this.tracker) {
+              this.tracker.sort = newSort;
+            } else {
+              this.initTrackerOptions.sort = newSort;
             }
           },
         },
@@ -170,15 +213,28 @@ const TrackerLayerMixin = (Base) =>
         styleCache: { value: {} },
 
         /**
-         * Time used to display the trajectories.
+         * If true. The layer will always use Date.now() on the next tick to render the trajectories.
+         * When true, setting the time property has no effect.
          */
-        currTime: {
-          value: new Date(),
+        live: {
+          value: true,
           writable: true,
         },
 
         /**
-         * Keep track of the last time used to render trajectories.
+         * Time used to display the trajectories. Can be a Date or a number in ms representing a Date.
+         * If live property is true. The setter does nothing.
+         */
+        time: {
+          get: () => currTime,
+          set: (newTime) => {
+            currTime = newTime.getTime ? newTime : new Date(newTime);
+            this.renderTrajectories();
+          },
+        },
+
+        /**
+         * Keep track of the last update of the interval.
          * Useful when the speed increase.
          */
         lastUpdateTime: {
@@ -190,7 +246,7 @@ const TrackerLayerMixin = (Base) =>
          * Keep track of which trajectories are currently drawn.
          */
         renderedTrajectories: {
-          get: () => this.tracker.renderedTrajectories,
+          get: () => this.tracker?.renderedTrajectories || [],
         },
 
         /**
@@ -198,10 +254,16 @@ const TrackerLayerMixin = (Base) =>
          */
         hoverVehicleId: {
           get: () => {
-            return this.tracker.hoverVehicleId;
+            return this.tracker
+              ? this.tracker.hoverVehicleId
+              : this.initTrackerOptions.hoverVehicleId;
           },
-          set: (hoverVehicleId) => {
-            this.tracker.hoverVehicleId = hoverVehicleId;
+          set: (newHoverVehicleId) => {
+            if (this.tracker) {
+              this.tracker.hoverVehicleId = newHoverVehicleId;
+            } else {
+              this.initTrackerOptions.hoverVehicleId = newHoverVehicleId;
+            }
           },
         },
 
@@ -209,16 +271,46 @@ const TrackerLayerMixin = (Base) =>
          * Id of the selected vehicle.
          */
         selectedVehicleId: {
-          get: () => {
-            return this.tracker.selectedVehicleId;
-          },
-          set: (selectedVehicleId) => {
-            this.tracker.selectedVehicleId = selectedVehicleId;
+          get: () =>
+            this.tracker
+              ? this.tracker.selectedVehicleId
+              : this.initTrackerOptions.selectedVehicleId,
+          set: (newSelectedVehicleId) => {
+            if (this.tracker) {
+              this.tracker.selectedVehicleId = newSelectedVehicleId;
+            } else {
+              this.initTrackerOptions.selectedVehicleId = newSelectedVehicleId;
+            }
           },
         },
 
         /**
-         * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame
+         * Pixel ratio use for the rendering. Default to window.devicePixelRatio.
+         */
+        pixelRatio: {
+          get: () =>
+            this.tracker
+              ? this.tracker.pixelRatio
+              : this.initTrackerOptions.pixelRatio,
+          set: (newPixelRatio) => {
+            if (this.tracker) {
+              this.tracker.pixelRatio = newPixelRatio;
+            } else {
+              this.initTrackerOptions.pixelRatio = newPixelRatio;
+            }
+          },
+        },
+
+        /**
+         * Options used by the constructor of the Tracker class.
+         */
+        initTrackerOptions: {
+          value: initTrackerOptions,
+          writable: false,
+        },
+
+        /**
+         * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame.
          */
         useRequestAnimationFrame: {
           default: false,
@@ -231,14 +323,24 @@ const TrackerLayerMixin = (Base) =>
      * Initalize the Tracker.
      * @param {ol/Map~Map} map
      * @param {Object} options
-     * @param {Number} [options.width] Canvas's width.
-     * @param {Number} [options.height] Canvas's height.
+     * @param {number} [options.width] Canvas's width.
+     * @param {number} [options.height] Canvas's height.
+     * @param {bool} [options.interpolate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
+     * @param {string} [options.hoverVehicleId] Id of the trajectory which is hovered.
+     * @param {string} [options.selectedVehicleId] Id of the trajectory which is selected.
      * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
+     * @param {function} [options.filter] Function use to filter the features displayed.
+     * @param {function} [options.sort] Function use to sort the features displayed.
+     * @param {function} [options.style] Function use to style the features displayed.
      */
-    init(map, options) {
+    init(map, options = {}) {
       super.init(map);
-      this.tracker = new Tracker(options);
-      this.tracker.setStyle((props, r) => this.style(props, r));
+
+      this.tracker = new Tracker({
+        style: (props, r) => this.style(props, r),
+        ...this.initTrackerOptions,
+        ...options,
+      });
 
       if (this.visible) {
         this.start();
@@ -267,36 +369,34 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Start the clock.
+     * Start the trajectories rendering.
      *
      * @param {Array<Number>} size Map's size: [width, height].
-     * @param {Number} zoom Map's zoom level.
-     * @param {Number} resolution Map's resolution.
+     * @param {number} zoom Map's zoom level.
+     * @param {number} resolution Map's resolution.
+     * @param {number} rotation Map's rotation.
      */
-    start(size, zoom, resolution) {
+    start() {
       this.stop();
       this.tracker.setVisible(true);
-      this.renderTrajectories(this.currTime, size, resolution, false);
-      this.startUpdateTime(zoom);
+      this.renderTrajectories();
+      this.startUpdateTime();
     }
 
     /**
-     * Start the time.
+     * Start the clock.
      * @private
-     * @param {number} zoom
      */
-    startUpdateTime(zoom) {
+    startUpdateTime() {
       this.stopUpdateTime();
+      this.updateTimeDelay = this.getRefreshTimeInMs();
       this.updateTimeInterval = setInterval(() => {
-        const newTime =
-          this.currTime.getTime() +
-          (new Date() - this.lastUpdateTime) * this.speed;
-        this.setCurrTime(newTime);
-      }, this.getRefreshTimeInMs(zoom));
+        this.time = this.time.getTime() + (new Date() - this.time) * this.speed;
+      }, this.updateTimeDelay);
     }
 
     /**
-     * Stop the clock.
+     * Stop the trajectories rendering.
      */
     stop() {
       this.stopUpdateTime();
@@ -307,7 +407,7 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Stop the time.
+     * Stop the clock.
      * @private
      */
     stopUpdateTime() {
@@ -317,62 +417,74 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Render the trajectories requesting an animation frame and cancelling the previous one
+     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
      * @private
      */
-    renderTrajectories(time, size, resolution) {
-      if (this.requestId) {
-        cancelAnimationFrame(this.requestId);
+    renderTrajectoriesInternal(size, resolution, rotation, noInterpolate) {
+      if (!this.tracker) {
+        return;
       }
-      // if (this.useRequestAnimationFrame) {
-      //   this.requestId = requestAnimationFrame(() => {
-      //     this.tracker.renderTrajectories(time, size, resolution);
-      //   });
-      // } else {
-      //   this.tracker.renderTrajectories(time, size, resolution);
-      // }
-      if (this.useRequestAnimationFrame) {
-        this.requestId = requestAnimationFrame(() => {
-          this.tracker.renderTrajectoriesWorkerr(
-            time,
-            size,
-            resolution,
-            false,
-            this.map.getView().calculateExtent(),
-            this.map.getView().getZoom(),
-            this.delayDisplay,
-            this.delayOutlineColor,
-            this.useDelayStyle,
-          );
-        });
-      } else {
-        this.tracker.renderTrajectoriesWorkerr(
-          time,
-          size,
-          resolution,
-          false,
-          this.map.getView().calculateExtent(),
-          this.map.getView().getZoom(),
-          this.delayDisplay,
-          this.delayOutlineColor,
-          this.useDelayStyle,
-        );
+
+      const renderTime = this.live ? Date.now() : this.time;
+
+      // Avoid useless render before the next tick.
+      if (
+        this.live &&
+        resolution === this.lastRenderResolution &&
+        rotation === this.lastRenderRotation &&
+        renderTime - this.lastRenderTime < this.updateTimeDelay
+      ) {
+        return;
       }
+
+      this.lastRenderTime = renderTime;
+      this.lastRenderResolution = resolution;
+      this.lastRenderRotation = rotation;
+
+      // this.tracker.renderTrajectories(
+      //   renderTime,
+      //   size,
+      //   resolution,
+      //   noInterpolate,
+      // );
+      this.tracker.renderTrajectoriesWorkerr(
+        renderTime,
+        size,
+        resolution,
+        noInterpolate,
+        this.map.getView().calculateExtent(),
+        this.map.getView().getZoom(),
+        this.delayDisplay,
+        this.delayOutlineColor,
+        this.useDelayStyle,
+      );
     }
 
     /**
-     * Set the current time, it triggers a rendering of the trajectories.
-     * @param {dateString | value} time
-     * @param {Array<number>} size
-     * @param {number} resolution
-     * @param {boolean} [mustRender=true]
+     * Render the trajectories requesting an animation frame and cancelling the previous one.
+     * This function must be overrided by children to provide the correct parameters.
+     * @private
      */
-    setCurrTime(time, size, resolution, mustRender = true) {
-      const newTime = new Date(time);
-      this.currTime = newTime;
-      this.lastUpdateTime = new Date();
-      if (mustRender) {
-        this.renderTrajectories(this.currTime, size, resolution);
+    renderTrajectories(size, resolution, rotation, noInterpolate) {
+      if (this.requestId) {
+        cancelAnimationFrame(this.requestId);
+      }
+      if (this.useRequestAnimationFrame) {
+        this.requestId = requestAnimationFrame(() => {
+          this.renderTrajectoriesInternal(
+            size,
+            resolution,
+            rotation,
+            noInterpolate,
+          );
+        });
+      } else {
+        this.renderTrajectoriesInternal(
+          size,
+          resolution,
+          rotation,
+          noInterpolate,
+        );
       }
     }
 
