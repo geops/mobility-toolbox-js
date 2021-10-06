@@ -422,7 +422,7 @@ const TrackerLayerMixin = (Base) =>
      */
     renderTrajectoriesInternal(size, resolution, rotation, noInterpolate) {
       if (!this.tracker) {
-        return;
+        return false;
       }
 
       const renderTime = this.live ? Date.now() : this.time;
@@ -434,7 +434,7 @@ const TrackerLayerMixin = (Base) =>
         rotation === this.lastRenderRotation &&
         renderTime - this.lastRenderTime < this.updateTimeDelay
       ) {
-        return;
+        return false;
       }
 
       this.lastRenderTime = renderTime;
@@ -447,6 +447,7 @@ const TrackerLayerMixin = (Base) =>
         resolution,
         noInterpolate,
       );
+      return true;
     }
 
     /**
@@ -458,6 +459,7 @@ const TrackerLayerMixin = (Base) =>
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
+      console.log('render');:q
 
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
