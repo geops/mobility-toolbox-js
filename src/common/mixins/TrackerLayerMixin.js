@@ -383,8 +383,10 @@ const TrackerLayerMixin = (Base) =>
       this.stopUpdateTime();
       this.updateTimeDelay = this.getRefreshTimeInMs();
       this.updateTimeInterval = setInterval(() => {
-        // When live=true, this code is only use to triggers a new render of trajectories.
-        this.time = this.time.getTime() + this.updateTimeDelay * this.speed;
+        // When live=true, we update the time with new Date();
+        this.time = this.live
+          ? new Date()
+          : this.time.getTime() + this.updateTimeDelay * this.speed;
       }, this.updateTimeDelay);
     }
 
