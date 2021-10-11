@@ -46,14 +46,10 @@ class TralisLayer extends mixin(TrackerLayer) {
     this.map.on('move', this.onMove);
     this.map.on('moveend', this.onMoveEnd);
 
-    const { width, height } = this.map.getCanvas();
-    this.tracker.canvas.width = width;
-    this.tracker.canvas.height = height;
-
     this.map.addSource('canvas-source', {
       type: 'canvas',
       canvas: this.tracker.canvas,
-      coordinates: getSourceCoordinates(this.map),
+      coordinates: getSourceCoordinates(this.map, this.pixelRatio),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
     });
@@ -91,12 +87,13 @@ class TralisLayer extends mixin(TrackerLayer) {
   onMove() {
     this.map
       .getSource('canvas-source')
-      .setCoordinates(getSourceCoordinates(this.map));
+      .setCoordinates(getSourceCoordinates(this.map, this.pixelRatio));
+
     const { width, height } = this.map.getCanvas();
     this.renderTrajectories(
-      this.currTime,
-      [width, height],
+      [width / this.pixelRatio, height / this.pixelRatio],
       getResolution(this.map),
+      this.map.getBearing(),
     );
   }
 

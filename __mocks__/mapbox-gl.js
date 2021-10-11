@@ -32,6 +32,8 @@ class Map {
 
   getZoom() {}
 
+  getBearing() {}
+
   once() {}
 
   on() {}
@@ -41,6 +43,15 @@ class Map {
   loaded() {}
 
   remove() {}
+
+  unproject() {
+    return [
+      [0, 0],
+      [0, 0],
+      [0, 0],
+      [0, 0],
+    ];
+  }
 }
 module.exports = {
   Map,

@@ -337,7 +337,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       // The 5 seconds more are used as a buffer if the request takes too long.
       const requestIntervalInMs = (this.requestIntervalSeconds + 5) * 1000;
       const intervalMs = this.speed * requestIntervalInMs;
-      const now = this.currTime;
+      const now = this.time;
 
       let diff = true;
 
@@ -367,7 +367,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         cd: 1,
         nm: 1,
         fl: 1,
-        // toff: this.currTime.getTime() / 1000,
+        // toff: this.time.getTime() / 1000,
       };
 
       // Allow to load only differences between the last request,
@@ -435,8 +435,8 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
 
       if (!this.styleCache[key]) {
-        let radius = getRadius(type, z);
-        const isDisplayStrokeAndDelay = radius >= 7;
+        let radius = getRadius(type, z) * this.pixelRatio;
+        const isDisplayStrokeAndDelay = radius >= 7 * this.pixelRatio;
 
         if (radius === 0) {
           this.styleCache[key] = null;
@@ -444,16 +444,18 @@ const TrajservLayerMixin = (TrackerLayer) =>
         }
 
         if (hover || selected) {
-          radius = isDisplayStrokeAndDelay ? radius + 5 : 14;
+          radius = isDisplayStrokeAndDelay
+            ? radius + 5 * this.pixelRatio
+            : 14 * this.pixelRatio;
         }
-        const margin = 1;
+        const margin = 1 * this.pixelRatio;
         const radiusDelay = radius + 2;
         const markerSize = radius * 2;
 
         const canvas = document.createElement('canvas');
         // add space for delay information
-        canvas.width = radiusDelay * 2 + margin * 2 + 100;
-        canvas.height = radiusDelay * 2 + margin * 2 + 100;
+        canvas.width = radiusDelay * 2 + margin * 2 + 100 * this.pixelRatio;
+        canvas.height = radiusDelay * 2 + margin * 2 + 100 * this.pixelRatio;
         const ctx = canvas.getContext('2d');
         const origin = canvas.width / 2;
 
@@ -484,7 +486,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
           ctx.fillStyle = getDelayColor(delay, cancelled, true);
 
           ctx.strokeStyle = this.delayOutlineColor;
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 1.5 * this.pixelRatio;
           const delayText = getDelayText(delay, cancelled);
           ctx.strokeText(delayText, origin + radiusDelay + margin, origin);
           ctx.fillText(delayText, origin + radiusDelay + margin, origin);
@@ -501,7 +503,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
 
         ctx.save();
         if (isDisplayStrokeAndDelay || hover || selected) {
-          ctx.lineWidth = 1;
+          ctx.lineWidth = 1 * this.pixelRatio;
           ctx.strokeStyle = '#000000';
         }
         ctx.fillStyle = circleFillColor;

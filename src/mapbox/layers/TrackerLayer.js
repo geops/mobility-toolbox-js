@@ -22,14 +22,6 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * Update the icon scale if the window (and probably the canvas) is resized.
-   * @private
-   */
-  updateIconScale(canvas) {
-    this.tracker.setIconScale(canvas.width / canvas.clientWidth);
-  }
-
-  /**
    * Initialize the layer.
    *
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
@@ -41,42 +33,16 @@ class TrackerLayer extends mixin(Layer) {
     }
 
     const canvas = map.getCanvas();
-    const iconScale = canvas.width / canvas.clientWidth;
-    map.on('resize', this.updateIconScale.bind(this, canvas));
 
     super.init(map, {
-      width: canvas.width,
-      height: canvas.height,
-      iconScale,
+      width: canvas.width / this.pixelRatio,
+      height: canvas.height / this.pixelRatio,
       getPixelFromCoordinate: (coord) => {
-        const pixelRatio = window.devicePixelRatio || 1;
         const [lng, lat] = toLonLat(coord);
         const { x, y } = this.map.project({ lng, lat });
-        return [x * pixelRatio, y * pixelRatio];
+        return [x, y];
       },
     });
-  }
-
-  terminate() {
-    if (this.map) {
-      this.map.off('resize', this.updateIconScale);
-    }
-    return super.terminate();
-  }
-
-  /**
-   * Set the current time, it triggers a rendering of the trajectories.
-   *
-   * @param {Date} time  The current time.
-   */
-  setCurrTime(time) {
-    const canvas = this.map.getCanvas();
-    super.setCurrTime(
-      time,
-      [canvas.width, canvas.height],
-      getResolution(this.map),
-      !this.map.isMoving() && !this.map.isRotating() && !this.map.isZooming(),
-    );
   }
 
   /**
@@ -87,12 +53,7 @@ class TrackerLayer extends mixin(Layer) {
    * @override
    */
   start() {
-    const canvas = this.map.getCanvas();
-    super.start(
-      [canvas.width, canvas.height],
-      this.map.getZoom(),
-      getResolution(this.map),
-    );
+    super.start();
 
     this.map.on('zoomend', this.onMapZoomEnd);
 
@@ -112,6 +73,28 @@ class TrackerLayer extends mixin(Layer) {
       this.map.off('zoomend', this.onMapZoomEnd);
       this.map.off('mousemove', this.onMapMouseMove);
     }
+  }
+
+  /**
+   * Render the trajectories using current map's size, resolution and rotation.
+   * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
+   * @overrides
+   */
+  renderTrajectories(noInterpolate) {
+    const canvas = this.map.getCanvas();
+    super.renderTrajectories(
+      [canvas.width / this.pixelRatio, canvas.height / this.pixelRatio],
+      getResolution(this.map),
+      this.map.getBearing(),
+      noInterpolate,
+    );
+  }
+
+  /**
+   * Return the delay in ms before the next rendering.
+   */
+  getRefreshTimeInMs() {
+    return super.getRefreshTimeInMs(this.map.getZoom());
   }
 
   /**
@@ -162,7 +145,7 @@ class TrackerLayer extends mixin(Layer) {
       this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
       this.hoverVehicleId = id;
       // We doesn´t wait the next render, we force it.
-      this.renderTrajectories(this.currTime);
+      this.renderTrajectories();
     }
   }
 }

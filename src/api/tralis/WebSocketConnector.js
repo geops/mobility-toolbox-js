@@ -138,6 +138,9 @@ class WebSocketConnector {
    * @returns {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
    */
   listen(params, cb, errorCb) {
+    // Remove the previous identical callback
+    this.unlisten(params, cb);
+
     const onMessage = (e) => {
       const data = JSON.parse(e.data);
       let source = params.channel;
@@ -161,6 +164,20 @@ class WebSocketConnector {
     return { onMessageCb: onMessage, onErrorCb: errorCb };
   }
 
+  unlisten(params, cb) {
+    this.subscriptions
+      .filter((s) => {
+        return s.params.channel === params.channel && (!cb || s.cb === cb);
+      })
+      .forEach(({ onMessageCb, onErrorCb }) => {
+        this.websocket.removeEventListener('message', onMessageCb);
+        if (onErrorCb) {
+          this.websocket.removeEventListener('error', onErrorCb);
+          this.websocket.removeEventListener('close', onErrorCb);
+        }
+      });
+  }
+
   /**
    * Subscribe to a given channel.
    * @private
@@ -174,7 +191,15 @@ class WebSocketConnector {
     const reqStr = WebSocketConnector.getRequestString('', params);
 
     if (!quiet) {
-      this.subscriptions.push({ params, cb, errorCb, onMessageCb, onErrorCb });
+      const index = this.subscriptions.findIndex((subcr) => {
+        return params.channel === subcr.params.channel && cb === subcr.cb;
+      });
+      const newSubscr = { params, cb, errorCb, onMessageCb, onErrorCb };
+      if (index > -1) {
+        this.subscriptions[index] = newSubscr;
+      } else {
+        this.subscriptions.push(newSubscr);
+      }
     }
 
     if (!this.subscribed[reqStr]) {

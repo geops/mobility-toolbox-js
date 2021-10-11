@@ -54,6 +54,7 @@ const SearchMixin = (Base) =>
         apiOptions.url = url;
       }
       this.api = new StopsAPI(apiOptions);
+      this.abortController = new AbortController();
     }
 
     render(suggestions = []) {
@@ -101,7 +102,9 @@ const SearchMixin = (Base) =>
       this.inputElt.placeholder = this.placeholder;
       this.inputElt.autoComplete = 'off';
       this.inputElt.onkeyup = (evt) => {
-        this.search(evt.target.value);
+        this.abortController.abort();
+        this.abortController = new AbortController();
+        this.search(evt.target.value, this.abortController);
       };
       Object.assign(this.inputElt.style, {
         padding: '10px 30px 10px 10px',

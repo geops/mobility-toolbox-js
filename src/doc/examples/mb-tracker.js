@@ -10,8 +10,6 @@ export default () => {
     zoom: 12,
     touchPitch: false,
     pitchWithRotate: false,
-    dragRotate: false,
-    touchZoomRotate: false,
   });
 
   const tracker = new TrajservLayer({

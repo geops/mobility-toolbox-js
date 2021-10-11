@@ -18,6 +18,11 @@ export default class Tracker {
     };
 
     /**
+     * Pixel ratio to use to draw the canvas. Default to window.devicePixelRatio
+     * @type {Array<trajectory>}
+     */
+    this.pixelRatio = options.pixelRatio || window.devicePixelRatio || 1;
+    /**
      * Array of trajectories.
      * @type {Array<trajectory>}
      */
@@ -30,8 +35,8 @@ export default class Tracker {
     this.renderedTrajectories = [];
 
     /**
-     * Array of ol events key, returned by on() or once().
-     * @type {Array<key>}
+     * Active interpolation calculation or not. If false, the train will not move until we receive the next message for the websocket.
+     * @type {boolean}
      */
     this.interpolate = !!opts.interpolate;
 
@@ -45,19 +50,31 @@ export default class Tracker {
      * Id of the trajectory which is hovered.
      * @type {string}
      */
-    this.hoverVehicleId = null;
+    this.hoverVehicleId = opts.hoverVehicleId;
 
     /**
      * Id of the trajectory which is selected.
      * @type {string}
      */
-    this.selectedVehicleId = null;
+    this.selectedVehicleId = opts.selectedVehicleId;
 
     /**
-     * Scale the vehicle icons with this value.
-     * @type {number}
+     * Function use to filter the features displayed.
+     * @type {function}
      */
-    this.iconScale = opts.iconScale;
+    this.filter = opts.filter;
+
+    /**
+     * Function use to sort the features displayed.
+     * @type {function}
+     */
+    this.sort = opts.sort;
+
+    /**
+     * Function use to style the features displayed.
+     * @type {function}
+     */
+    this.style = opts.style;
 
     // we draw directly on the canvas since openlayers is too slow.
     /**
@@ -65,16 +82,16 @@ export default class Tracker {
      * @type {Canvas}
      */
     this.canvas = opts.canvas || document.createElement('canvas');
-    this.canvas.width = opts.width;
-    this.canvas.height = opts.height;
+    this.canvas.width = opts.width * this.pixelRatio;
+    this.canvas.height = opts.height * this.pixelRatio;
     this.canvas.setAttribute(
       'style',
       [
         'position: absolute',
         'top: 0',
         'bottom: 0',
-        'width: 100%',
-        'height: 100%',
+        `width: ${opts.width}px`,
+        `height: ${opts.height}px`,
         'pointer-events: none',
         'visibility: visible',
         'margin-top: inherit', // for scrolling behavior.
@@ -118,15 +135,6 @@ export default class Tracker {
   }
 
   /**
-   * Return rendered trajectories.
-   * Use this to avoid race conditions while rendering.
-   * @returns {array<trajectory>} trajectories
-   */
-  getRenderedTrajectories() {
-    return this.renderedTrajectories;
-  }
-
-  /**
    * Clear the canvas.
    * @private
    */
@@ -134,85 +142,6 @@ export default class Tracker {
     if (this.canvasContext) {
       this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
-  }
-
-  /**
-   * Set the filter for tracker features.
-   * @param {function} filter Filter function.
-   */
-  setFilter(filter) {
-    /**
-     * Current filter function.
-     * @type {function}
-     */
-    this.filter = filter;
-  }
-
-  /**
-   * Set the sort for tracker features.
-   * @param {function} sort Sort function.
-   */
-  setSort(sort) {
-    /**
-     * The sort function for tracker features.
-     * @type {function}
-     */
-    this.sort = sort;
-  }
-
-  /**
-   * Set the id of the trajectory which is hovered.
-   * @param {string} id Id of a vehicle.
-   * @private
-   */
-  setHoverVehicleId(id) {
-    if (id !== this.hoverVehicleId) {
-      this.hoverVehicleId = id;
-    }
-  }
-
-  /**
-   * Set the id of the trajectory which is selected.
-   * @param {string} id Id of a vehicle.
-   * @private
-   */
-  setSelectedVehicleId(id) {
-    if (id !== this.selectedVehicleId) {
-      this.selectedVehicleId = id;
-    }
-  }
-
-  /**
-   * set the scale of the vehicle icons.
-   * @param {number} iconScale Scale value.
-   */
-  setIconScale(iconScale) {
-    this.iconScale = iconScale;
-  }
-
-  /**
-   * Set the tracker style.
-   * @param {function} s OpenLayers style function.
-   */
-  setStyle(s) {
-    /**
-     * Style function.
-     * @type {function}
-     */
-    this.style = s;
-  }
-
-  /**
-   * Move the canvas.
-   * @param {number} offsetX Offset X.
-   * @param {number} offsetY Offset Y.
-   * @private
-   */
-  moveCanvas(offsetX, offsetY) {
-    const oldLeft = parseFloat(this.canvas.style.left);
-    const oldTop = parseFloat(this.canvas.style.top);
-    this.canvas.style.left = `${oldLeft - offsetX}px`;
-    this.canvas.style.top = `${oldTop - offsetY}px`;
   }
 
   /**
@@ -232,8 +161,6 @@ export default class Tracker {
     noInterpolate = false,
   ) {
     this.clear();
-    this.canvas.style.left = '0px';
-    this.canvas.style.top = '0px';
 
     const [width, height] = size;
     if (
@@ -241,8 +168,17 @@ export default class Tracker {
       height &&
       (this.canvas.width !== width || this.canvas.height !== height)
     ) {
-      [this.canvas.width, this.canvas.height] = [width, height];
+      [this.canvas.width, this.canvas.height] = [
+        width * this.pixelRatio,
+        height * this.pixelRatio,
+      ];
     }
+
+    this.canvas.style.left = '0px';
+    this.canvas.style.top = '0px';
+    this.canvas.style.transform = ``;
+    this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
+    this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
     /**
      * Current resolution.
      * @type {number}
@@ -342,29 +278,33 @@ export default class Tracker {
       if (coord) {
         // We set the rotation of the trajectory (used by tralis).
         this.trajectories[i].coordinate = coord;
-        const px = this.getPixelFromCoordinate(coord);
+        let px = this.getPixelFromCoordinate(coord);
 
         if (!px) {
           // eslint-disable-next-line no-continue
           continue;
         }
+
+        px = px.map((p) => {
+          return p * this.pixelRatio;
+        });
+
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
         this.trajectories[i].rendered = true;
         this.renderedTrajectories.push(this.trajectories[i]);
-        const vehicleImg = this.style(traj, this.currResolution);
+        const vehicleImg = this.style(
+          traj,
+          this.currResolution,
+          this.pixelRatio,
+        );
 
         if (!vehicleImg) {
           // eslint-disable-next-line no-continue
           continue;
         }
 
-        let imgWidth = vehicleImg.width;
-        let imgHeight = vehicleImg.height;
-
-        if (this.iconScale) {
-          imgHeight = Math.floor(imgHeight * this.iconScale);
-          imgWidth = Math.floor(imgWidth * this.iconScale);
-        }
+        const imgWidth = vehicleImg.width;
+        const imgHeight = vehicleImg.height;
 
         if (
           this.hoverVehicleId !== traj.id &&
