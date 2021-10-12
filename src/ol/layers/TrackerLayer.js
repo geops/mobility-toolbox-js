@@ -59,8 +59,8 @@ class TrackerLayer extends mixin(Layer) {
       });
 
     /**
-     * Function to define if we want to allow the render of trajectories when the map is panning. By default the function return true.
-     * If it returns false, the canvas will be moved using css until the next render.
+     * Function to define  when allowing the render of trajectories depending on the zoom level. Default the fundtion return true.
+     * It's useful to avoid rendering the map when the map is animating or interacting.
      * @type {function}
      */
     this.renderWhenPanning = options.renderWhenPanning || (() => true);
@@ -68,6 +68,13 @@ class TrackerLayer extends mixin(Layer) {
     /**
      * Function to define if we want to allow the render of trajectories when the map is rotating. By default the function return true.
      * If it returns false, the canvas will be rotated using css until the next render.
+     * @type {function}
+     */
+    this.renderWhenRotating = options.renderWhenRotating || (() => true);
+
+    /**
+     * Function to define  when allowing the render of trajectories depending on the rotation. Default the fundtion return true.
+     * It's useful to avoid rendering the map when the map is animating or interacting.
      * @type {function}
      */
     this.renderWhenRotating = options.renderWhenRotating || (() => true);
@@ -253,13 +260,6 @@ class TrackerLayer extends mixin(Layer) {
    */
   renderTrajectories(noInterpolate) {
     const view = this.map.getView();
-
-    if (
-      this.map.getView().getAnimating() ||
-      this.map.getView().getInteracting()
-    ) {
-      return;
-    }
     super.renderTrajectories(
       this.map.getSize(),
       view.getResolution(),
