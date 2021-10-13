@@ -395,6 +395,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
     updateTrajectories() {
       this.abortFetchTrajectories();
       this.abortController = new AbortController();
+
       this.api
         .fetchTrajectories(
           this.getParams({

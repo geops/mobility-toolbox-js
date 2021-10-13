@@ -28,56 +28,11 @@ class TrackerLayer extends mixin(Layer) {
     });
 
     /**
-     * Boolean that defines if the layer is allow to renderTrajectories when this.map.getView().getInterating() id true.
+     * Boolean that defines if the layer is allow to renderTrajectories when the map is zooming, rotating or poanning true.
      * It's useful to avoid rendering the map when the map is animating or interacting.
      * @type {function}
      */
-    this.renderWhenInteracting = options.renderWhenInteracting || (() => true);
-
-    /**
-     * Function to define if we want to allow the render of trajectories when the map is animating. By default the function return true.
-     * If it returns false, the canva swill be scaled
-     * @type {function}
-     */
-    this.renderWhenAnimating = options.renderWhenAnimating || (() => true);
-
-    /**
-     * Function to define if we want to allow the render of trajectories when the map is zooming. By default the function return true.
-     * If it returns false, the canvas will be scaled using css until the next render.
-     * @type {function}
-     */
-    this.renderWhenZooming =
-      options.renderWhenZooming ||
-      ((viewState, renderedState) => {
-        if (viewState.resolution <= renderedState.resolution) {
-          this.tracker.clear();
-          console.log('tufalsere');
-          return false;
-        }
-        console.log('ture');
-        return !this.map.getView().getInteracting();
-      });
-
-    /**
-     * Function to define  when allowing the render of trajectories depending on the zoom level. Default the fundtion return true.
-     * It's useful to avoid rendering the map when the map is animating or interacting.
-     * @type {function}
-     */
-    this.renderWhenPanning = options.renderWhenPanning || (() => true);
-
-    /**
-     * Function to define if we want to allow the render of trajectories when the map is rotating. By default the function return true.
-     * If it returns false, the canvas will be rotated using css until the next render.
-     * @type {function}
-     */
-    this.renderWhenRotating = options.renderWhenRotating || (() => true);
-
-    /**
-     * Function to define  when allowing the render of trajectories depending on the rotation. Default the fundtion return true.
-     * It's useful to avoid rendering the map when the map is animating or interacting.
-     * @type {function}
-     */
-    this.renderWhenRotating = options.renderWhenRotating || (() => true);
+    this.renderWhenInteracting = options.renderWhenInteracting || (() => false);
 
     this.olLayer =
       options.olLayer ||
@@ -89,7 +44,6 @@ class TrackerLayer extends mixin(Layer) {
               if (!this.tracker || !this.tracker.canvas) {
                 return null;
               }
-
               if (!this.container) {
                 this.container = document.createElement('div');
                 this.container.style.position = 'absolute';
@@ -101,13 +55,13 @@ class TrackerLayer extends mixin(Layer) {
                 this.transformContainer.style.height = '100%';
                 this.container.appendChild(this.transformContainer);
                 this.tracker.canvas.style.position = 'absolute';
+                this.tracker.canvas.style.top = '0';
                 this.tracker.canvas.style.left = '0';
                 this.tracker.canvas.style.transformOrigin = 'top left';
                 this.transformContainer.appendChild(this.tracker.canvas);
               }
 
               if (this.renderedViewState) {
-                // Update container tranform
                 const { center, resolution, rotation } = frameState.viewState;
                 const {
                   center: renderedCenter,
@@ -116,43 +70,17 @@ class TrackerLayer extends mixin(Layer) {
                 } = this.renderedViewState;
 
                 if (
-                  !this.map.getView().getInteracting() &&
-                  !this.map.getView().getAnimating()
+                  this.renderWhenInteracting &&
+                  this.renderWhenInteracting(
+                    frameState.viewState,
+                    this.renderedViewState,
+                  )
                 ) {
-                  if (
-                    resolution !== renderedResolution &&
-                    this.renderWhenZooming
-                  ) {
-                    const allowRender = this.renderWhenZooming(
-                      frameState.viewState,
-                      this.renderedViewState,
-                    );
-                    if (allowRender) {
-                      console.log('ici');
-                      this.renderTrajectories(true);
-                    }
-                  } else if (
-                    (center[0] !== renderedCenter[0] ||
-                      center[1] !== renderedCenter[1]) &&
-                    this.renderWhenPanning(
-                      frameState.viewState,
-                      this.renderedViewState,
-                    )
-                  ) {
-                    console.log('ici2');
-                    this.renderTrajectories(true);
-                  } else if (
-                    rotation !== renderedRotation &&
-                    this.renderWhenRotating(
-                      frameState.viewState,
-                      this.renderedViewState,
-                    )
-                  ) {
-                    console.log('ici3');
-                    this.renderTrajectories(true);
-                  }
+                  this.renderTrajectories(true);
+                } else if (renderedResolution / resolution >= 3) {
+                  // Avoid having really big points when zooming fast.
+                  this.tracker.clear();
                 } else {
-                  console.log('ici4');
                   this.transformContainer.style.transform = composeCssTransform(
                     (renderedCenter[0] - center[0]) / resolution,
                     (center[1] - renderedCenter[1]) / resolution,
@@ -185,21 +113,6 @@ class TrackerLayer extends mixin(Layer) {
      * @private
      */
     this.olEventsKeys = []; // Be careful to not override this value in child classe.
-  }
-
-  /**
-   * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map A OpenLayers map.
-   * @private
-   */
-  init(map) {
-    if (!map) {
-      return;
-    }
-
-    super.init(map, {
-      getPixelFromCoordinate: map.getPixelFromCoordinate.bind(map),
-    });
   }
 
   /**
@@ -262,6 +175,8 @@ class TrackerLayer extends mixin(Layer) {
     const view = this.map.getView();
     super.renderTrajectories(
       this.map.getSize(),
+      this.map.getView().getCenter(),
+      view.calculateExtent(),
       view.getResolution(),
       view.getRotation(),
       noInterpolate,
@@ -272,9 +187,20 @@ class TrackerLayer extends mixin(Layer) {
    * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
    * @private
    */
-  renderTrajectoriesInternal(size, resolution, rotation, noInterpolate) {
-    const isRendered = super.renderTrajectoriesInternal(
+  renderTrajectoriesInternal(
+    size,
+    center,
+    extent,
+    resolution,
+    rotation,
+    noInterpolate,
+  ) {
+    let isRendered = false;
+
+    isRendered = super.renderTrajectoriesInternal(
       size,
+      center,
+      extent,
       resolution,
       rotation,
       noInterpolate,
@@ -282,15 +208,17 @@ class TrackerLayer extends mixin(Layer) {
 
     // We update the current render state.
     if (isRendered) {
-      if (this.transformContainer) {
-        this.transformContainer.style.transform = null;
-      }
       this.renderedViewState = {
         size,
-        center: this.map.getView().getCenter(),
+        center,
+        extent,
         resolution,
         rotation,
       };
+
+      if (this.transformContainer) {
+        this.transformContainer.style.transform = '';
+      }
     }
   }
 

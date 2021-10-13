@@ -1,4 +1,3 @@
-import { fromLonLat } from 'ol/proj';
 import { getWidth, getHeight } from 'ol/extent';
 
 /**
@@ -8,7 +7,7 @@ import { getWidth, getHeight } from 'ol/extent';
  */
 export const getResolution = (map) => {
   const bounds = map.getBounds().toArray();
-  const extent = [...fromLonLat(bounds[0]), ...fromLonLat(bounds[1])];
+  const extent = [...bounds[0], ...bounds[1]];
   const { width, height } = map.getCanvas();
   const xResolution = getWidth(extent) / width;
   const yResolution = getHeight(extent) / height;

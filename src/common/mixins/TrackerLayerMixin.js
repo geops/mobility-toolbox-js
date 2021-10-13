@@ -23,7 +23,6 @@ export class TrackerLayerInterface {
    * @param {Object} options
    * @param {number} [options.width] Canvas's width.
    * @param {number} [options.height] Canvas's height.
-   * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
    */
   // eslint-disable-next-line no-unused-vars
   init(map, options) {}
@@ -320,7 +319,6 @@ const TrackerLayerMixin = (Base) =>
      * @param {bool} [options.interpolate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
      * @param {string} [options.hoverVehicleId] Id of the trajectory which is hovered.
      * @param {string} [options.selectedVehicleId] Id of the trajectory which is selected.
-     * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
      * @param {function} [options.filter] Function use to filter the features displayed.
      * @param {function} [options.sort] Function use to sort the features displayed.
      * @param {function} [options.style] Function use to style the features displayed.
@@ -415,9 +413,16 @@ const TrackerLayerMixin = (Base) =>
      * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
      * @private
      */
-    renderTrajectoriesInternal(size, resolution, rotation, noInterpolate) {
+    renderTrajectoriesInternal(
+      size,
+      center,
+      extent,
+      resolution,
+      rotation,
+      noInterpolate,
+    ) {
       if (!this.tracker) {
-        return;
+        return false;
       }
 
       const renderTime = this.live ? Date.now() : this.time;
@@ -429,7 +434,7 @@ const TrackerLayerMixin = (Base) =>
         rotation === this.lastRenderRotation &&
         renderTime - this.lastRenderTime < this.updateTimeDelay
       ) {
-        return;
+        return false;
       }
 
       this.lastRenderTime = renderTime;
@@ -439,9 +444,13 @@ const TrackerLayerMixin = (Base) =>
       this.tracker.renderTrajectories(
         renderTime,
         size,
+        center,
+        extent,
         resolution,
+        rotation,
         noInterpolate,
       );
+      return true;
     }
 
     /**
@@ -449,7 +458,14 @@ const TrackerLayerMixin = (Base) =>
      * This function must be overrided by children to provide the correct parameters.
      * @private
      */
-    renderTrajectories(size, resolution, rotation, noInterpolate) {
+    renderTrajectories(
+      size,
+      center,
+      extent,
+      resolution,
+      rotation,
+      noInterpolate,
+    ) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
@@ -458,6 +474,8 @@ const TrackerLayerMixin = (Base) =>
         this.requestId = requestAnimationFrame(() => {
           this.renderTrajectoriesInternal(
             size,
+            center,
+            extent,
             resolution,
             rotation,
             noInterpolate,
@@ -466,6 +484,8 @@ const TrackerLayerMixin = (Base) =>
       } else {
         this.renderTrajectoriesInternal(
           size,
+          center,
+          extent,
           resolution,
           rotation,
           noInterpolate,

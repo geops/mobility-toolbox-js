@@ -30,6 +30,10 @@ class Map {
     };
   }
 
+  getCenter() {
+    return { lng: 0, lat: 0 };
+  }
+
   getZoom() {}
 
   getBearing() {}

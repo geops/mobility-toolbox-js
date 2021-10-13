@@ -84,6 +84,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
     this.olEventsKeys = [
       ...this.olEventsKeys,
       this.map.on('singleclick', this.onMapClick.bind(this)),
+
+      this.map.on('movestart', () => {
+        this.abortFetchTrajectories();
+      }),
       this.map.on('moveend', this.onMoveEnd.bind(this)),
     ];
   }
@@ -93,7 +97,13 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * @private
    */
   onMoveEnd() {
-    this.updateTrajectories();
+    this.abortFetchTrajectories();
+    if (
+      !this.map.getView().getAnimating() &&
+      !this.map.getView().getInteracting()
+    ) {
+      this.updateTrajectories();
+    }
     if (this.selectedVehicleId && this.journeyId) {
       this.highlightTrajectory();
     }

@@ -1,5 +1,7 @@
 import { unByKey } from 'ol/Observable';
 import GeomType from 'ol/geom/GeometryType';
+import { compose, apply, create } from 'ol/transform';
+import { toLonLat } from 'ol/proj';
 
 /**
  * Tracker. This class stores and allows to draw trajectories on a canvas.
@@ -39,12 +41,6 @@ export default class Tracker {
      * @type {boolean}
      */
     this.interpolate = !!opts.interpolate;
-
-    /**
-     * Function to Convert coordinate to canvas pixel.
-     * @type {function}
-     */
-    this.getPixelFromCoordinate = opts.getPixelFromCoordinate;
 
     /**
      * Id of the trajectory which is hovered.
@@ -157,7 +153,10 @@ export default class Tracker {
   renderTrajectories(
     currTime = Date.now(),
     size = [],
+    center,
+    extent,
     resolution,
+    rotation = 0,
     noInterpolate = false,
   ) {
     this.clear();
@@ -174,11 +173,23 @@ export default class Tracker {
       ];
     }
 
+    const coordinateToPixelTransform = compose(
+      create(),
+      size[0] / 2,
+      size[1] / 2,
+      1 / resolution,
+      -1 / resolution,
+      -rotation,
+      -center[0],
+      -center[1],
+    );
+
     this.canvas.style.left = '0px';
     this.canvas.style.top = '0px';
     this.canvas.style.transform = ``;
     this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
     this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
+
     /**
      * Current resolution.
      * @type {number}
@@ -207,7 +218,7 @@ export default class Tracker {
       }
 
       let coord = null;
-      let rotation;
+      let rotationIcon;
 
       if (traj.coordinate && (noInterpolate || !this.interpolate)) {
         coord = traj.coordinate;
@@ -222,7 +233,7 @@ export default class Tracker {
         // Search th time interval.
         for (let j = 0; j < timeIntervals.length - 1; j += 1) {
           // Rotation only available in tralis layer.
-          [start, startFrac, rotation] = timeIntervals[j];
+          [start, startFrac, rotationIcon] = timeIntervals[j];
           [end, endFrac] = timeIntervals[j + 1];
 
           if (start <= now && now <= end) {
@@ -249,16 +260,16 @@ export default class Tracker {
             coord = geometry.getCoordinateAt(geomFrac);
 
             // We set the rotation and the timeFraction of the trajectory (used by tralis).
-            this.trajectories[i].rotation = rotation;
+            this.trajectories[i].rotation = rotationIcon;
             this.trajectories[i].endFraction = timeFrac;
 
             // It happens that the now date was some ms before the first timeIntervals we have.
           } else if (now < timeIntervals[0][0]) {
-            [[, , rotation]] = timeIntervals;
+            [[, , rotationIcon]] = timeIntervals;
             timeFrac = 0;
             coord = geometry.getFirstCoordinate();
           } else if (now > timeIntervals[timeIntervals.length - 1][0]) {
-            [, , rotation] = timeIntervals[timeIntervals.length - 1];
+            [, , rotationIcon] = timeIntervals[timeIntervals.length - 1];
             timeFrac = 1;
             coord = geometry.getLastCoordinate();
           }
@@ -271,15 +282,16 @@ export default class Tracker {
         }
         // We set the rotation and the timeFraction of the trajectory (used by tralis).
         // if rotation === null that seems there is no rotation available.
-        this.trajectories[i].rotation = rotation;
+        this.trajectories[i].rotation = rotationIcon;
         this.trajectories[i].endFraction = timeFrac || 0;
       }
 
       if (coord) {
         // We set the rotation of the trajectory (used by tralis).
         this.trajectories[i].coordinate = coord;
-        let px = this.getPixelFromCoordinate(coord);
-
+        // console.log([...toLonLat(coord)]);
+        let px = apply(coordinateToPixelTransform, [...toLonLat(coord)]);
+        // console.log(px);
         if (!px) {
           // eslint-disable-next-line no-continue
           continue;
