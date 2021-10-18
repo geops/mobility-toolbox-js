@@ -1,7 +1,6 @@
 import { unByKey } from 'ol/Observable';
 import GeomType from 'ol/geom/GeometryType';
 import { compose, apply, create } from 'ol/transform';
-import { toLonLat } from 'ol/proj';
 
 /**
  * Tracker. This class stores and allows to draw trajectories on a canvas.
@@ -290,7 +289,7 @@ export default class Tracker {
         // We set the rotation of the trajectory (used by tralis).
         this.trajectories[i].coordinate = coord;
         // console.log([...toLonLat(coord)]);
-        let px = apply(coordinateToPixelTransform, [...toLonLat(coord)]);
+        let px = apply(coordinateToPixelTransform, [...coord]); // [...toLonLat(coord)]);
         // console.log(px);
         if (!px) {
           // eslint-disable-next-line no-continue

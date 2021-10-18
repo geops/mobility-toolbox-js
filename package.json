@@ -10,6 +10,8 @@
     "@material-ui/core": "^4.9.14",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/styles": "^4.9.14",
+    "@turf/helpers": "^6.5.0",
+    "@turf/transform-rotate": "^6.5.0",
     "codesandbox": "^2.1.16",
     "es6-mixin": "^0.3.0",
     "path": "^0.12.7",
@@ -25,6 +27,7 @@
     "react-scrollchor": "^6.0.0",
     "react-syntax-highlighter": "^15.4.1",
     "taffydb": "^2.7.3",
+    "turf": "^3.0.14",
     "typeface-lato": "^0.0.75",
     "uuid": "^8.1.0"
   },

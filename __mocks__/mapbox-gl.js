@@ -36,7 +36,9 @@ class Map {
 
   getZoom() {}
 
-  getBearing() {}
+  getBearing() {
+    return 0;
+  }
 
   once() {}
 
@@ -49,12 +51,7 @@ class Map {
   remove() {}
 
   unproject() {
-    return [
-      [0, 0],
-      [0, 0],
-      [0, 0],
-      [0, 0],
-    ];
+    return { lng: 0, lat: 0 };
   }
 }
 module.exports = {
