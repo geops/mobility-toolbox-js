@@ -35,7 +35,7 @@ export default class Tracker {
     this.renderedTrajectories = [];
 
     /**
-     * Active interpolation calcultion or not. If false, the train will not move until we receive the next message for the websocket.
+     * Active interpolation calculation or not. If false, the train will not move until we receive the next message for the websocket.
      * @type {boolean}
      */
     this.interpolate = !!opts.interpolate;

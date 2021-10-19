@@ -119,6 +119,7 @@ const TrackerLayerMixin = (Base) =>
         filter,
         sort,
         time,
+        live,
       } = options;
 
       const initTrackerOptions = {
@@ -217,7 +218,7 @@ const TrackerLayerMixin = (Base) =>
          * When true, setting the time property has no effect.
          */
         live: {
-          value: true,
+          value: live === false ? live : true,
           writable: true,
         },
 
@@ -228,18 +229,9 @@ const TrackerLayerMixin = (Base) =>
         time: {
           get: () => currTime,
           set: (newTime) => {
-            currTime = newTime.getTime ? newTime : new Date(newTime);
+            currTime = newTime && newTime.getTime ? newTime : new Date(newTime);
             this.renderTrajectories();
           },
-        },
-
-        /**
-         * Keep track of the last update of the interval.
-         * Useful when the speed increase.
-         */
-        lastUpdateTime: {
-          value: new Date(),
-          writable: true,
         },
 
         /**
@@ -391,7 +383,10 @@ const TrackerLayerMixin = (Base) =>
       this.stopUpdateTime();
       this.updateTimeDelay = this.getRefreshTimeInMs();
       this.updateTimeInterval = setInterval(() => {
-        this.time = this.time.getTime() + (new Date() - this.time) * this.speed;
+        // When live=true, we update the time with new Date();
+        this.time = this.live
+          ? new Date()
+          : this.time.getTime() + this.updateTimeDelay * this.speed;
       }, this.updateTimeDelay);
     }
 
