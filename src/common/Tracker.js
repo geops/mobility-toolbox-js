@@ -227,10 +227,10 @@ export default class Tracker {
       height &&
       (this.canvas.width !== width || this.canvas.height !== height)
     ) {
-      [this.canvas.width, this.canvas.height] = [
-        width * this.pixelRatio,
-        height * this.pixelRatio,
-      ];
+      // [this.canvas.width, this.canvas.height] = [
+      //   width * this.pixelRatio,
+      //   height * this.pixelRatio,
+      // ];
     }
 
     this.canvas.style.left = '0px';
@@ -378,13 +378,13 @@ export default class Tracker {
           this.hoverVehicleId !== traj.id &&
           this.selectedVehicleId !== traj.id
         ) {
-          this.canvasContext.drawImage(
-            vehicleImg,
-            px[0] - imgWidth / 2,
-            px[1] - imgHeight / 2,
-            imgWidth,
-            imgHeight,
-          );
+          // this.canvasContext.drawImage(
+          //   vehicleImg,
+          //   px[0] - imgWidth / 2,
+          //   px[1] - imgHeight / 2,
+          //   imgWidth,
+          //   imgHeight,
+          // );
         }
         if (this.hoverVehicleId === traj.id) {
           // Store the canvas to draw it at the end
@@ -405,23 +405,23 @@ export default class Tracker {
     }
 
     if (selectedVehicleImg) {
-      this.canvasContext.drawImage(
-        selectedVehicleImg,
-        selectedVehiclePx[0] - selectedVehicleWidth / 2,
-        selectedVehiclePx[1] - selectedVehicleHeight / 2,
-        selectedVehicleWidth,
-        selectedVehicleHeight,
-      );
+      // this.canvasContext.drawImage(
+      //   selectedVehicleImg,
+      //   selectedVehiclePx[0] - selectedVehicleWidth / 2,
+      //   selectedVehiclePx[1] - selectedVehicleHeight / 2,
+      //   selectedVehicleWidth,
+      //   selectedVehicleHeight,
+      // );
     }
 
     if (hoverVehicleImg) {
-      this.canvasContext.drawImage(
-        hoverVehicleImg,
-        hoverVehiclePx[0] - hoverVehicleWidth / 2,
-        hoverVehiclePx[1] - hoverVehicleHeight / 2,
-        hoverVehicleWidth,
-        hoverVehicleHeight,
-      );
+      // this.canvasContext.drawImage(
+      //   hoverVehicleImg,
+      //   hoverVehiclePx[0] - hoverVehicleWidth / 2,
+      //   hoverVehiclePx[1] - hoverVehicleHeight / 2,
+      //   hoverVehicleWidth,
+      //   hoverVehicleHeight,
+      // );
     }
 
     // console.timeEnd('render');

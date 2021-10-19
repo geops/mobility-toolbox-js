@@ -427,7 +427,7 @@ self.onmessage = function (evt) {
     }
     console.timeEnd('render');
   });
-  // if (canvasContext.commit) canvasContext.commit();
+  if (canvasContext.commit) canvasContext.commit();
 
-  // self.postMessage(canvas);
+  self.postMessage(canvas);
 };
