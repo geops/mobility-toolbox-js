@@ -27,6 +27,11 @@ export default class Tracker {
      */
     this.pixelRatio = options.pixelRatio || window.devicePixelRatio || 1;
     /**
+     * Pixel ratio to use to draw the canvas. Default to window.devicePixelRatio
+     * @type {Array<trajectory>}
+     */
+    this.pixelRatio = options.pixelRatio || window.devicePixelRatio || 1;
+    /**
      * Array of trajectories.
      * @type {Array<trajectory>}
      */
@@ -39,7 +44,7 @@ export default class Tracker {
     this.renderedTrajectories = [];
 
     /**
-     * Active interpolation calcultion or not. If false, the train will not move until we receive the next message for the websocket.
+     * Active interpolation calculation or not. If false, the train will not move until we receive the next message for the websocket.
      * @type {boolean}
      */
     this.interpolate = !!opts.interpolate;
@@ -192,6 +197,9 @@ export default class Tracker {
       delayOutlineColor,
       useDelayStyle,
     ]);
+    if (this.canvasContext) {
+      this.canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
   }
 
   /**

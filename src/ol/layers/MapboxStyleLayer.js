@@ -396,7 +396,8 @@ class MapboxStyleLayer extends Layer {
    * @param {Event} evt Layer's event that has called the function.
    * @private
    */
-  applyLayoutVisibility() {
+  // eslint-disable-next-line no-unused-vars
+  applyLayoutVisibility(evt) {
     const { visible } = this;
     const { mbMap } = this.mapboxLayer;
     const filterFunc = this.styleLayersFilter;
