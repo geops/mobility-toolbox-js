@@ -1,5 +1,3 @@
-import { LineString } from 'ol/geom';
-
 /**
  * Translate the response date object into a readable object.
  * @returns {array<Date>}
@@ -132,7 +130,7 @@ export const translateTrajCollResponse = (features = []) => {
   const trajectories = [];
   for (let i = 0; i < features.length; i += 1) {
     const traj = features[i];
-    const geometry = new LineString(traj.geometry.coordinates);
+    const { geometry } = traj;
     const {
       ID: id,
       ProductIdentifier: type,

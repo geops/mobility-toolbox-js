@@ -2,9 +2,38 @@ import { Layer as OLLayer, Group } from 'ol/layer';
 import { unByKey } from 'ol/Observable';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
+import stringify from 'json-stringify-safe';
 
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
+
+import Worker from '../../common/tracker.worker';
+
+const updateContainerTransform = (layer) => {
+  if (layer.workerFrameState) {
+    const {
+      center,
+      resolution,
+      rotation,
+    } = layer.mainThreadFrameState.viewState;
+    const {
+      center: renderedCenter,
+      resolution: renderedResolution,
+      rotation: renderedRotation,
+    } = layer.workerFrameState.viewState;
+
+    // eslint-disable-next-line no-param-reassign
+    layer.transformContainer.style.transform = composeCssTransform(
+      (renderedCenter[0] - center[0]) / resolution,
+      (center[1] - renderedCenter[1]) / resolution,
+      renderedResolution / resolution,
+      renderedResolution / resolution,
+      rotation - renderedRotation,
+      0,
+      0,
+    );
+  }
+};
 
 /**
  * Responsible for loading tracker data.
@@ -25,6 +54,31 @@ class TrackerLayer extends mixin(Layer) {
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
       ...options,
+    });
+    const that = this;
+
+    // Worker that render trajectories.
+    this.worker = new Worker();
+    // Worker messaging and actions
+    this.worker.addEventListener('message', (message) => {
+      if (message.data.action === 'requestRender') {
+        // Worker requested a new render frame
+        that.map.render();
+      } else if (that.canvas && message.data.action === 'rendered') {
+        // Worker provies a new render frame
+        console.log('icic');
+
+        requestAnimationFrame(() => {
+          const { imageData } = message.data;
+          that.canvas.width = imageData.width;
+          that.canvas.height = imageData.height;
+          that.canvas.getContext('2d').drawImage(imageData, 0, 0);
+          // this.canvas.style.transform = message.data.transform;
+          that.workerFrameState = message.data.frameState;
+          updateContainerTransform(that);
+        });
+        that.rendering = false;
+      }
     });
 
     /**
@@ -54,42 +108,45 @@ class TrackerLayer extends mixin(Layer) {
                 this.transformContainer.style.width = '100%';
                 this.transformContainer.style.height = '100%';
                 this.container.appendChild(this.transformContainer);
-                this.tracker.canvas.style.position = 'absolute';
-                this.tracker.canvas.style.top = '0';
-                this.tracker.canvas.style.left = '0';
-                this.tracker.canvas.style.transformOrigin = 'top left';
-                this.transformContainer.appendChild(this.tracker.canvas);
+                this.canvas = document.createElement('canvas');
+                this.canvas.style.position = 'absolute';
+                this.canvas.style.left = '0';
+                this.canvas.style.transformOrigin = 'top left';
+                this.transformContainer.appendChild(this.canvas);
               }
+              this.mainThreadFrameState = frameState;
 
-              if (this.renderedViewState) {
-                const { center, resolution, rotation } = frameState.viewState;
+              if (this.workerFrameState) {
+                const { resolution } = this.mainThreadFrameState.viewState;
                 const {
-                  center: renderedCenter,
                   resolution: renderedResolution,
-                  rotation: renderedRotation,
-                } = this.renderedViewState;
+                } = this.workerFrameState.viewState;
+
+                updateContainerTransform(this);
+
+                // Avoid having really big points when zooming fast.
+                if (this.canvas && renderedResolution / resolution >= 3) {
+                  const context = this.canvas.getContext('2d');
+                  context.clearRect(
+                    0,
+                    0,
+                    this.canvas.width,
+                    this.canvas.height,
+                  );
+                }
 
                 if (
+                  !this.rendering &&
                   this.renderWhenInteracting &&
                   this.renderWhenInteracting(
-                    frameState.viewState,
-                    this.renderedViewState,
+                    this.mainThreadFrameState,
+                    this.workerFrameState,
                   )
                 ) {
-                  this.renderTrajectories(true);
-                } else if (renderedResolution / resolution >= 3) {
-                  // Avoid having really big points when zooming fast.
-                  this.tracker.clear();
-                } else {
-                  this.transformContainer.style.transform = composeCssTransform(
-                    (renderedCenter[0] - center[0]) / resolution,
-                    (center[1] - renderedCenter[1]) / resolution,
-                    renderedResolution / resolution,
-                    renderedResolution / resolution,
-                    rotation - renderedRotation,
-                    0,
-                    0,
-                  );
+                  this.renderTrajectories(false);
+                } else if (this.rendering) {
+                  // eslint-disable-next-line no-param-reassign
+                  frameState.animate = true;
                 }
               }
               return this.container;
@@ -135,24 +192,24 @@ class TrackerLayer extends mixin(Layer) {
           this.startUpdateTime(z);
         }
       }),
-      this.map.on('pointermove', (evt) => {
-        if (
-          this.map.getView().getInteracting() ||
-          this.map.getView().getAnimating() ||
-          !this.isHoverActive
-        ) {
-          return;
-        }
-        const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
-        const id = vehicle && vehicle.id;
-        if (this.hoverVehicleId !== id) {
-          this.map.getTargetElement().style.cursor = vehicle
-            ? 'pointer'
-            : 'auto';
-          this.hoverVehicleId = id;
-          this.renderTrajectories();
-        }
-      }),
+      // this.map.on('pointermove', (evt) => {
+      //   if (
+      //     this.map.getView().getInteracting() ||
+      //     this.map.getView().getAnimating() ||
+      //     !this.isHoverActive
+      //   ) {
+      //     return;
+      //   }
+      //   const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
+      //   const id = vehicle && vehicle.id;
+      //   if (this.hoverVehicleId !== id) {
+      //     this.map.getTargetElement().style.cursor = vehicle
+      //       ? 'pointer'
+      //       : 'auto';
+      //     this.hoverVehicleId = id;
+      //     this.renderTrajectories();
+      //   }
+      // }),
     ];
   }
 
@@ -175,7 +232,7 @@ class TrackerLayer extends mixin(Layer) {
     const view = this.map.getView();
     super.renderTrajectories(
       this.map.getSize(),
-      this.map.getView().getCenter(),
+      view.getCenter(),
       view.calculateExtent(),
       view.getResolution(),
       view.getRotation(),
@@ -195,6 +252,67 @@ class TrackerLayer extends mixin(Layer) {
     rotation,
     noInterpolate,
   ) {
+    if (this.worker) {
+      if (!this.tracker) {
+        return false;
+      }
+
+      const renderTime = this.live ? Date.now() : this.time;
+
+      // Avoid useless render before the next tick.
+      if (
+        this.live &&
+        resolution === this.lastRenderResolution &&
+        rotation === this.lastRenderRotation &&
+        renderTime - this.lastRenderTime < this.updateTimeDelay
+      ) {
+        return false;
+      }
+
+      this.lastRenderTime = renderTime;
+      this.lastRenderResolution = resolution;
+      this.lastRenderRotation = rotation;
+
+      if (this.mainThreadFrameState && this.mainThreadFrameState) {
+        this.rendering = true;
+        const frameState = { ...this.mainThreadFrameState };
+        delete frameState.layerStatesArray;
+        delete frameState.viewState.projection;
+        const {
+          // center, resolution, rotation,
+          zoom,
+        } = frameState.viewState;
+
+        if (
+          this.map.getView().getInteracting() ||
+          this.map.getView().getAnimating()
+        ) {
+          return false;
+        }
+
+        this.worker.postMessage({
+          action: 'render',
+          time: renderTime,
+          size,
+          center,
+          resolution,
+          extent,
+          zoom,
+          rotation,
+          pixelRatio: this.pixelRatio,
+          interpolate: !noInterpolate,
+          iconScale: this.iconScale,
+          hoverVehicleId: this.hoverVehicleId,
+          selectedVehicleId: this.selectedVehicleId,
+          delayDisplay: this.delayDisplay,
+          delayOutlineColor: this.delayOutlineColor,
+          useDelayStyle: this.useDelayStyle,
+          frameState: JSON.parse(stringify(frameState)),
+        });
+      }
+      return true;
+    }
+
     let isRendered = false;
 
     isRendered = super.renderTrajectoriesInternal(
@@ -220,6 +338,7 @@ class TrackerLayer extends mixin(Layer) {
         this.transformContainer.style.transform = '';
       }
     }
+    return isRendered;
   }
 
   /**

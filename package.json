@@ -14,6 +14,7 @@
     "@turf/transform-rotate": "^6.5.0",
     "codesandbox": "^2.1.16",
     "es6-mixin": "^0.3.0",
+    "json-stringify-safe": "^5.0.1",
     "path": "^0.12.7",
     "prop-types": "^15.7.2",
     "query-string": "^6.13.0",
