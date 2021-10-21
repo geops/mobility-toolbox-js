@@ -50,25 +50,20 @@ class TrackerLayer extends mixin(Layer) {
                 return null;
               }
               const { zoom, center, rotation } = frameState.viewState;
+              const isZooming = zoom !== this.renderState.zoom;
+              const isRotating = zoom !== this.renderState.zoom;
 
-              if (
-                zoom !== this.renderState.zoom ||
-                rotation !== this.renderState.rotation
-              ) {
+              if (isZooming || isRotating) {
                 this.renderState.zoom = zoom;
                 this.renderState.center = center;
                 this.renderState.rotation = rotation;
-
                 if (
-                  (zoom !== this.renderState.zoom &&
-                    !this.renderWhenZooming(zoom)) ||
-                  (rotation !== this.renderState.rotation &&
-                    !this.renderWhenRotating(rotation))
+                  (isZooming && !this.renderWhenZooming(zoom)) ||
+                  (isRotating && !this.renderWhenRotating(rotation))
                 ) {
                   this.tracker.clear();
                   return this.tracker.canvas;
                 }
-
                 this.renderTrajectories(true);
               } else if (
                 this.renderState.center[0] !== center[0] ||
