@@ -66,8 +66,6 @@ class TrackerLayer extends mixin(Layer) {
         that.map.render();
       } else if (that.canvas && message.data.action === 'rendered') {
         // Worker provies a new render frame
-        console.log('icic');
-
         requestAnimationFrame(() => {
           const { imageData } = message.data;
           that.canvas.width = imageData.width;

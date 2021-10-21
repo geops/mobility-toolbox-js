@@ -177,6 +177,19 @@ const createFilters = (line, route, operator, regexLine) => {
  */
 const TrajservLayerMixin = (TrackerLayer) =>
   class extends TrackerLayer {
+    constructor(options) {
+      super(options);
+
+      if (this.api.fetchTrajectoriesWorkerr) {
+        const that = this;
+        this.api.fetchTrajectoriesWorker.onmessage = (evt) => {
+          if (evt.data) {
+            that.onReceiveTrajectories(evt.data);
+          }
+        };
+      }
+    }
+
     /**
      * Define layer's properties.
      *
@@ -396,6 +409,11 @@ const TrajservLayerMixin = (TrackerLayer) =>
       this.abortFetchTrajectories();
       this.abortController = new AbortController();
 
+      if (this.api.fetchTrajectoriesWorkerr) {
+        this.api.fetchTrajectoriesWorkerr(this.getParams({ attr_det: 1 }));
+        return;
+      }
+
       this.api
         .fetchTrajectories(
           this.getParams({
@@ -411,19 +429,23 @@ const TrajservLayerMixin = (TrackerLayer) =>
           throw err;
         })
         .then((trajectories) => {
-          // Don't set trajectories when the user has aborted the request.
-          if (trajectories) {
-            this.tracker.setTrajectories(trajectories);
-            if (this.worker) {
-              this.worker.postMessage({
-                action: 'sendData',
-                trajectories,
-              });
-            } else {
-              this.renderTrajectories();
-            }
-          }
+          this.onReceiveTrajectories(trajectories);
         });
+    }
+
+    onReceiveTrajectories(trajectories) {
+      // Don't set trajectories when the user has aborted the request.
+      if (trajectories) {
+        this.tracker.setTrajectories(trajectories);
+        if (this.worker) {
+          this.worker.postMessage({
+            action: 'sendData',
+            trajectories,
+          });
+        } else {
+          this.renderTrajectories();
+        }
+      }
     }
 
     defaultStyle(props, zoom) {
