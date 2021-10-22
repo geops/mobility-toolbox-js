@@ -3,7 +3,7 @@ name: Build
 on: [push]
 
 jobs:
-  build:
+  lintAndTest:
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,6 +23,26 @@ jobs:
           yarn install
           yarn lint
           yarn test
+        env:
+          CI: true
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: yarn install, build, and test
+        run: |
+          echo '[]' > src/doc/components/Esdoc/index.json
+          npm install -g yarn
+          yarn install
           yarn build
         env:
           CI: true
