@@ -143,7 +143,10 @@ class TrackerLayer extends mixin(Layer) {
            * @type {number}
            */
           this.currentZoom = z;
-          this.startUpdateTime(z);
+
+          // This will restart the timeouts.
+          // TODO maybe find a caluclation a bit less approximative one.
+          this.requestIntervalSeconds = 200 / z || 1000;
         }
       }),
       this.map.on('pointermove', (evt) => {
