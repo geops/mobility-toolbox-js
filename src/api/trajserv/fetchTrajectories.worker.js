@@ -18,6 +18,6 @@ self.onmessage = function (evt) {
     })
     .catch(() => {
       // eslint-disable-next-line no-restricted-globals
-      self.postMessage(null);
+      // self.postMessage(null);
     });
 };
