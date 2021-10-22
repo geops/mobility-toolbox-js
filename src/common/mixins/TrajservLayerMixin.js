@@ -437,14 +437,15 @@ const TrajservLayerMixin = (TrackerLayer) =>
       // Don't set trajectories when the user has aborted the request.
       if (trajectories) {
         this.tracker.setTrajectories(trajectories);
+
         if (this.worker) {
           this.worker.postMessage({
             action: 'sendData',
             trajectories,
           });
-        } else {
-          this.renderTrajectories();
         }
+
+        this.renderTrajectories();
       }
     }
 

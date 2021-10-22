@@ -17,7 +17,7 @@ import {
   getTextSize,
 } from './trackerConfig';
 
-const debug = true;
+const debug = false;
 
 let trajectories = [];
 const styleCache = {};

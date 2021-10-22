@@ -7,8 +7,8 @@ export default () => {
   const map = new Map({
     target: 'map',
     view: new View({
-      center: [831634, 5933959],
-      zoom: 13,
+      center: [955156.2377088447, 6096616.996190854],
+      zoom: 7,
     }),
     controls: [new CopyrightControl()],
   });

@@ -55,18 +55,31 @@ class TrackerLayer extends mixin(Layer) {
     super({
       ...options,
     });
+    this.firstRender = true;
     const that = this;
 
     // Worker that render trajectories.
     this.worker = new Worker();
     // Worker messaging and actions
-    this.worker.addEventListener('message', (message) => {
+    this.worker.onmessage = (message) => {
       if (message.data.action === 'requestRender') {
         // Worker requested a new render frame
         that.map.render();
       } else if (that.canvas && message.data.action === 'rendered') {
+        if (
+          that.map.getView().getInteracting() ||
+          that.map.getView().getAnimating()
+        ) {
+          return;
+        }
         // Worker provies a new render frame
         requestAnimationFrame(() => {
+          if (
+            that.map.getView().getInteracting() ||
+            that.map.getView().getAnimating()
+          ) {
+            return;
+          }
           const { imageData } = message.data;
           that.canvas.width = imageData.width;
           that.canvas.height = imageData.height;
@@ -77,7 +90,7 @@ class TrackerLayer extends mixin(Layer) {
         });
         that.rendering = false;
       }
-    });
+    };
 
     /**
      * Boolean that defines if the layer is allow to renderTrajectories when the map is zooming, rotating or poanning true.
@@ -187,7 +200,10 @@ class TrackerLayer extends mixin(Layer) {
            * @type {number}
            */
           this.currentZoom = z;
-          this.startUpdateTime(z);
+
+          // This will restart the timeouts.
+          // TODO maybe find a caluclation a bit less approximative one.
+          this.requestIntervalSeconds = 200 / z || 1000;
         }
       }),
       // this.map.on('pointermove', (evt) => {
@@ -257,21 +273,37 @@ class TrackerLayer extends mixin(Layer) {
 
       const renderTime = this.live ? Date.now() : this.time;
 
-      // Avoid useless render before the next tick.
       if (
-        this.live &&
-        resolution === this.lastRenderResolution &&
-        rotation === this.lastRenderRotation &&
-        renderTime - this.lastRenderTime < this.updateTimeDelay
+        this.map.getView().getAnimating() ||
+        this.map.getView().getInteracting()
       ) {
         return false;
       }
+      // // Avoid useless render before the next tick.
+      // if (
+      //   this.live
+      //   // center[0] === (this.lastRenderCenter || [])[0] &&
+      //   // center[1] === (this.lastRenderCenter || [])[1] &&
+      //   // resolution === this.lastRenderResolution &&
+      //   // rotation === this.lastRenderRotation
+      //   // !this.isFirstRender &&
+      //   // renderTime - this.lastRenderTime < 150
+      // ) {
+      //   console.log('la', this.updateTimeDelay);
+      //   return false;
+      // }
 
-      this.lastRenderTime = renderTime;
-      this.lastRenderResolution = resolution;
-      this.lastRenderRotation = rotation;
+      // if (this.firstRender && this.tracker.trajectories.length > 0) {
+      //   console.log('LA', this.mainThreadFrameState);
+      //   this.isFirstRender = false;
+      // }
 
-      if (this.mainThreadFrameState && this.mainThreadFrameState) {
+      // this.lastRenderCenter = center;
+      // this.lastRenderTime = renderTime;
+      // this.lastRenderResolution = resolution;
+      // this.lastRenderRotation = rotation;
+
+      if (this.mainThreadFrameState) {
         this.rendering = true;
         const frameState = { ...this.mainThreadFrameState };
         delete frameState.layerStatesArray;
