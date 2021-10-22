@@ -83,6 +83,11 @@ class TrackerLayer extends mixin(Layer) {
           const { imageData } = message.data;
           that.canvas.width = imageData.width;
           that.canvas.height = imageData.height;
+          this.canvas.style.transform = ``;
+          this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
+          this.canvas.style.height = `${
+            this.canvas.height / this.pixelRatio
+          }px`;
           that.canvas.getContext('2d').drawImage(imageData, 0, 0);
           // this.canvas.style.transform = message.data.transform;
           that.workerFrameState = message.data.frameState;

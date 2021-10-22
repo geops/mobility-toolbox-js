@@ -236,12 +236,12 @@ const render = (evt) => {
     useDelayStyle,
   } = evt.data;
 
-  const canvas = new OffscreenCanvas(size[0], size[1]);
+  const canvas = new OffscreenCanvas(
+    size[0] * pixelRatio,
+    size[1] * pixelRatio,
+  );
+
   const canvasContext = canvas.getContext('2d');
-  const [width, height] = size;
-  if (width && height && (canvas.width !== width || canvas.height !== height)) {
-    [canvas.width, canvas.height] = [width, height];
-  }
 
   const coordinateToPixelTransform = compose(
     create(),
