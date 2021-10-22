@@ -145,7 +145,7 @@ class TrackerLayer extends mixin(Layer) {
           this.currentZoom = z;
 
           // This will restart the timeouts.
-          // TODO maybe find a caluclation a bit less approximative one.
+          // TODO maybe find a calculation a bit less approximative.
           this.requestIntervalSeconds = 200 / z || 1000;
         }
       }),
