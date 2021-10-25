@@ -62,7 +62,7 @@ describe('TrajservLayer', () => {
     expect(layer.clickCallbacks.length).toBe(2);
   });
 
-  test('map events should be called', () => {
+  test("map events should be called if zoom doesn't change", () => {
     const spy = jest.spyOn(layer, 'onMapClick');
     const spy2 = jest.spyOn(layer, 'onMoveEnd');
 
@@ -82,6 +82,9 @@ describe('TrajservLayer', () => {
 
     // dispatchEvent uses mockResponse
     const evt2 = { type: 'moveend', olMap };
+    // On the first movend requestIntervalInSec will be updated so it will unlistne the event then readd them.
+    olMap.dispatchEvent(evt2);
+    expect(spy2).toHaveBeenCalledTimes(0);
     olMap.dispatchEvent(evt2);
     expect(spy2).toHaveBeenCalledTimes(1);
   });
