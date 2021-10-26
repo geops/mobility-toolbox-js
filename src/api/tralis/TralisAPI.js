@@ -77,10 +77,11 @@ class TralisAPI {
 
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
+    this.conn.reloadAllSubscriptions = this.reloadAllSubscriptions;
     this.conn.setProjection(options.projection || 'epsg:3857');
 
     if (options.bbox) {
-      this.conn.setBbox(options.bbox);
+      this.conn.setBbox(options.bbox, this.reloadAllSubscriptions);
     }
   }
 
@@ -285,7 +286,7 @@ class TralisAPI {
   getStations(mode, bbox) {
     const stations = [];
     if (bbox) {
-      this.conn.setBbox(bbox);
+      this.conn.setBbox(bbox, this.reloadAllSubscriptions);
     }
     const params = {
       channel: `station${getModeSuffix(mode, TralisModes)}`,
@@ -318,7 +319,7 @@ class TralisAPI {
   subscribeStations(mode, bbox, onMessage) {
     this.unsubscribeStations();
     if (bbox) {
-      this.conn.setBbox(bbox);
+      this.conn.setBbox(bbox, this.reloadAllSubscriptions);
     }
     this.subscribe(`station${getModeSuffix(mode, TralisModes)}`, (data) => {
       if (data.content) {

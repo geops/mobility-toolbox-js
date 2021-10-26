@@ -100,7 +100,7 @@ describe('WebSocketConnector', () => {
         client.websocket.removeEventListener.mockReset();
         client.websocket.addEventListener.mockReset();
 
-        client.setBbox([0, 0, 0, 0]);
+        client.setBbox([0, 0, 0, 0], true);
 
         expect(client.subscriptions.length).toBe(3);
         expect(client.websocket.removeEventListener).toBeCalledTimes(3);

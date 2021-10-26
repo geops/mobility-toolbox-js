@@ -53,7 +53,7 @@ class WebSocketConnector {
     }
 
     if (this.currentBbox) {
-      this.setBbox(this.currentBbox);
+      this.setBbox(this.currentBbox, this.reloadAllSubscriptions);
     }
 
     [...this.subscriptions].forEach((s) => {
@@ -117,16 +117,18 @@ class WebSocketConnector {
    *  @param {Array<Array<number>>} coordinates array of coordinates
    * @private
    */
-  setBbox(coordinates) {
+  setBbox(coordinates, reloadAllSubscriptions) {
     /**
      * The BBOX for websocket responses
      * @type {Array<Array<number>>}
      */
     this.currentBbox = coordinates;
     this.send(`BBOX ${coordinates.join(' ')}`);
-    this.subscriptions.forEach((s) => {
-      this.get(s.params, s.cb, s.errorCb);
-    });
+    if (reloadAllSubscriptions) {
+      this.subscriptions.forEach((s) => {
+        this.get(s.params, s.cb, s.errorCb);
+      });
+    }
   }
 
   /**
