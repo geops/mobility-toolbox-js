@@ -491,8 +491,15 @@ class TralisAPI {
       this.conn.get(
         params,
         (data) => {
-          // Remove the delay from arrivalTime nnd departureTime
-          resolve(cleanStopTime(data.content && data.content[0]));
+          if (data.content && data.content.length) {
+            const content = data.content.map((stopSequence) => {
+              return cleanStopTime(stopSequence);
+            });
+
+            // Remove the delay from arrivalTime and departureTime
+            resolve(content);
+          }
+          resolve([]);
         },
         (err) => {
           reject(err);
