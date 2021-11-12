@@ -128,37 +128,8 @@ class TrackerLayer extends mixin(Layer) {
   renderTrajectories(noInterpolate) {
     const { width, height } = this.map.getCanvas();
     const center = this.map.getCenter();
-    // const extent = getSourceCoordinates(this.map, this.pixelRatio);
-    // const extent2 = this.map.getBounds();
-    // const bounds = [
-    //   ...fromLonLat([extent[0][0], extent[2][1]]),
-    //   ...fromLonLat([extent[1][0], extent[1][1]]),
-    // ];
-    // const bounds2 = extent2.toArray();
-    // const bounds3 = [...fromLonLat(bounds2[0]), ...fromLonLat(bounds2[1])];
-    // console.log(extent);
-    // const a = bounds[0];
-    // const b = bounds[1];
-    // const transform = compose(
-    //   create(),
-    //   center.lng,
-    //   center.lat,
-    //   1,
-    //   1,
-    //   (this.map.getBearing() * Math.PI) / 180,
-    //   -center.lng,
-    //   -center.lat,
-    // );
-    // composeCssTransform(
-    //   (renderedCenter[0] - center[0]) / resolution,
-    //   (center[1] - renderedCenter[1]) / resolution,
-    //   renderedResolution / resolution,
-    //   renderedResolution / resolution,
-    //   rotation - renderedRotation,
-    //   0,
-    //   0,
 
-    // turf
+    // We use turf here to have good transform.
     const leftBottom = this.map.unproject({
       x: 0,
       y: height / this.pixelRatio,
@@ -180,31 +151,21 @@ class TrackerLayer extends mixin(Layer) {
       },
     ).geometry.coordinates;
 
-    // ol
-    // const coord0 = apply(transform, [leftBottom.lng, leftBottom.lat]);
-    // const coord1 = apply(transform, [rightTop.lng, rightTop.lat]); // [...toLonLat(coord)]);
-    // console.log(
-    //   [extent[0][0], extent[1][1]],
-    //   coord0,
-    //   [extent[1][0], extent[0][1]],
-    //   coord1,
-    // );
     const bounds = [...fromLonLat(coord0), ...fromLonLat(coord1)];
     const xResolution = getWidth(bounds) / (width / this.pixelRatio);
     const yResolution = getHeight(bounds) / (height / this.pixelRatio);
     const res = Math.max(xResolution, yResolution);
-    // console.log(coord0, coord02);
-    // console.log(bounds2[0], px);
 
-    // Coordinate of trajectories are in mercator so we have to pass the propert resolution and center in mercator.
-    super.renderTrajectories(
-      [width / this.pixelRatio, height / this.pixelRatio],
-      fromLonLat([center.lng, center.lat]),
-      bounds,
-      res,
-      -(this.map.getBearing() * Math.PI) / 180,
-      noInterpolate,
-    );
+    // Coordinate of trajectories are in mercator so we have to pass the proper resolution and center in mercator.
+    const viewState = {
+      size: [width / this.pixelRatio, height / this.pixelRatio],
+      center: fromLonLat([center.lng, center.lat]),
+      extent: bounds,
+      resolution: res,
+      rotation: -(this.map.getBearing() * Math.PI) / 180,
+    };
+
+    super.renderTrajectories(viewState, noInterpolate);
   }
 
   /**

@@ -177,11 +177,13 @@ class TrackerLayer extends mixin(Layer) {
   renderTrajectories(noInterpolate) {
     const view = this.map.getView();
     super.renderTrajectories(
-      this.map.getSize(),
-      this.map.getView().getCenter(),
-      view.calculateExtent(),
-      view.getResolution(),
-      view.getRotation(),
+      {
+        size: this.map.getSize(),
+        center: this.map.getView().getCenter(),
+        extent: view.calculateExtent(),
+        resolution: view.getResolution(),
+        rotation: view.getRotation(),
+      },
       noInterpolate,
     );
   }

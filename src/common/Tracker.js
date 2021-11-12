@@ -141,23 +141,26 @@ export default class Tracker {
 
   /**
    * Draw all the trajectories available to the canvas.
-   * @param {Date} currTime The date to render.
-   * @param {number[2]} size Size ([width, height]) of the canvas to render.
-   * @param {number} resolution Which resolution of the map to render.
+   * @param {object} viewState The view state of the map.
+   * @param {number} [viewState.time=Date.now()] The time to display in ms.
+   * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
+   * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
+   * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
+   * @param {number} [viewState.rotation = 0] Rotation of the map to render.
+   * @param {number} viewState.resolution Resolution of the map to render.
    * @param {boolean} noInterpolate If true trajectories are not interpolated but
    *   drawn at the last known coordinate. Use this for performance optimization
    *   during map navigation.
    * @private
    */
-  renderTrajectories(
-    currTime = Date.now(),
-    size = [],
-    center,
-    extent,
-    resolution,
-    rotation = 0,
-    noInterpolate = false,
-  ) {
+  renderTrajectories(viewState, noInterpolate = false) {
+    const {
+      time = Date.now(),
+      size = [],
+      center,
+      resolution,
+      rotation = 0,
+    } = viewState;
     this.clear();
 
     const [width, height] = size;
@@ -222,7 +225,7 @@ export default class Tracker {
       if (traj.coordinate && (noInterpolate || !this.interpolate)) {
         coord = traj.coordinate;
       } else if (timeIntervals && timeIntervals.length > 1) {
-        const now = currTime - (timeOffset || 0);
+        const now = time - (timeOffset || 0);
         let start;
         let end;
         let startFrac;
