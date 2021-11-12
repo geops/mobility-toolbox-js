@@ -3,6 +3,7 @@ import { unByKey } from 'ol/Observable';
 import Source from 'ol/source/Source';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
+import GetVehicleAtCoordinateW from '../../common/workers/getVehicleAtCoordinate.worker';
 
 /**
  * Responsible for loading tracker data.
@@ -120,6 +121,7 @@ class TrackerLayer extends mixin(Layer) {
     if (!map) {
       return;
     }
+    this.getVehicleAtCoordinateWorker = new GetVehicleAtCoordinateW();
 
     super.init(map, {
       getPixelFromCoordinate: map.getPixelFromCoordinate.bind(map),
@@ -168,6 +170,14 @@ class TrackerLayer extends mixin(Layer) {
         }
       }),
     ];
+
+    this.getVehicleAtCoordinateWorker.onmessage = (e) => {
+      const [vehicle] = e.data;
+      // eslint-disable-next-line no-console
+      console.log(vehicle);
+      this.map.getTargetElement().style.cursor = vehicle ? 'pointer' : 'auto';
+      this.tracker.setHoverVehicleId(vehicle && vehicle.id);
+    };
   }
 
   /**
@@ -210,9 +220,23 @@ class TrackerLayer extends mixin(Layer) {
    * @returns {Array<ol/Feature~Feature>} Vehicle feature.
    * @override
    */
-  getVehiclesAtCoordinate(coordinate, nb) {
-    const resolution = this.map.getView().getResolution();
-    return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
+  getVehiclesAtCoordinate(coordinate) {
+    const res = this.map.getView().getResolution();
+    const trajectories = this.tracker.getTrajectories();
+    this.getVehicleAtCoordinateWorker.postMessage(
+      JSON.stringify([trajectories, coordinate, res]),
+    );
+    // const vehicles = [];
+    // for (let i = 0; i < (trajectories || []).length; i += 1) {
+    //   if (
+    //     trajectories[i].coordinate &&
+    //     containsCoordinate(ext, trajectories[i].coordinate)
+    //   ) {
+    //     vehicles.push(trajectories[i]);
+    //   }
+    // }
+
+    // return vehicles;
   }
 
   /**

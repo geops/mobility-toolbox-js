@@ -143,7 +143,8 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * @private
    */
   onMoveEnd() {
-    this.updateTrajectories();
+    this.onMove();
+    // this.updateTrajectories();
     if (this.selectedVehicleId && this.journeyId) {
       this.highlightTrajectory();
     }

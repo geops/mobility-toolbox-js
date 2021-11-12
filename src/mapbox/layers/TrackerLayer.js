@@ -2,6 +2,7 @@ import { toLonLat, fromLonLat } from 'ol/proj';
 import Layer from '../../common/layers/Layer';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import { getResolution } from '../utils';
+import GetVehicleAtCoordinateW from '../../common/workers/getVehicleAtCoordinate.worker';
 
 /**
  * Responsible for loading tracker data.
@@ -31,6 +32,7 @@ class TrackerLayer extends mixin(Layer) {
     if (!map) {
       return;
     }
+    this.getVehicleAtCoordinateWorker = new GetVehicleAtCoordinateW();
 
     const canvas = map.getCanvas();
 
@@ -105,9 +107,14 @@ class TrackerLayer extends mixin(Layer) {
    * @returns {Array<ol/Feature~Feature>} Array of vehicle.
    * @override
    */
-  getVehiclesAtCoordinate(coordinate, nb) {
-    const resolution = getResolution(this.map);
-    return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
+  getVehiclesAtCoordinate(coordinate) {
+    const res = getResolution(this.map);
+
+    // const ext = buffer([...coordinate, ...coordinate], 10 * res);
+    const trajectories = this.tracker.getTrajectories();
+    this.getVehicleAtCoordinateWorker.postMessage(
+      JSON.stringify([trajectories, coordinate, res]),
+    );
   }
 
   /**
