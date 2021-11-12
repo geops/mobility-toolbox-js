@@ -427,20 +427,6 @@ const TrackerLayerMixin = (Base) =>
 
       const renderTime = this.live ? Date.now() : this.time;
 
-      // Avoid useless render before the next tick.
-      if (
-        this.live &&
-        resolution === this.lastRenderResolution &&
-        rotation === this.lastRenderRotation &&
-        renderTime - this.lastRenderTime < this.updateTimeDelay
-      ) {
-        return false;
-      }
-
-      this.lastRenderTime = renderTime;
-      this.lastRenderResolution = resolution;
-      this.lastRenderRotation = rotation;
-
       this.tracker.renderTrajectories(
         renderTime,
         size,

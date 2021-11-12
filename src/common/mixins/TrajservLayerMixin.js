@@ -463,22 +463,29 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const z = Math.min(Math.floor(zoom || 1), 16);
       const hover = this.hoverVehicleId === id;
       const selected = this.selectedVehicleId === id;
-      const key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
+      let key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
+
+      // Calcul the radius of the circle
+      let radius = getRadius(type, z) * this.pixelRatio;
+      const isDisplayStrokeAndDelay = radius >= 7 * this.pixelRatio;
+      if (hover || selected) {
+        radius = isDisplayStrokeAndDelay
+          ? radius + 5 * this.pixelRatio
+          : 14 * this.pixelRatio;
+      }
+      const mustDrawText = radius > 10 * this.pixelRatio;
+
+      // Optimize the cache key, very important in high zoom level
+      if (!mustDrawText) {
+        key = `${z}${type}${color}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
+      }
 
       if (!this.styleCache[key]) {
-        let radius = getRadius(type, z) * this.pixelRatio;
-        const isDisplayStrokeAndDelay = radius >= 7 * this.pixelRatio;
-
         if (radius === 0) {
           this.styleCache[key] = null;
           return null;
         }
 
-        if (hover || selected) {
-          radius = isDisplayStrokeAndDelay
-            ? radius + 5 * this.pixelRatio
-            : 14 * this.pixelRatio;
-        }
         const margin = 1 * this.pixelRatio;
         const radiusDelay = radius + 2;
         const markerSize = radius * 2;
@@ -556,8 +563,8 @@ const TrajservLayerMixin = (TrackerLayer) =>
         ctx.restore();
 
         // Draw text in the circle
-        if (radius > 10) {
-          const fontSize = Math.max(radius, 10);
+        if (mustDrawText) {
+          const fontSize = Math.max(radius, 10 * this.pixelRatio);
           const textSize = getTextSize(ctx, markerSize, name, fontSize);
 
           // Draw a stroke to the text only if a provider provides realtime but we don't use it.
