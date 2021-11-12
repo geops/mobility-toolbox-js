@@ -191,35 +191,16 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
    * @private
+   * @inheritdoc
    */
-  renderTrajectoriesInternal(
-    size,
-    center,
-    extent,
-    resolution,
-    rotation,
-    noInterpolate,
-  ) {
+  renderTrajectoriesInternal(viewState, noInterpolate) {
     let isRendered = false;
 
-    isRendered = super.renderTrajectoriesInternal(
-      size,
-      center,
-      extent,
-      resolution,
-      rotation,
-      noInterpolate,
-    );
+    isRendered = super.renderTrajectoriesInternal(viewState, noInterpolate);
 
     // We update the current render state.
     if (isRendered) {
-      this.renderedViewState = {
-        size,
-        center,
-        extent,
-        resolution,
-        rotation,
-      };
+      this.renderedViewState = { ...viewState };
 
       if (this.transformContainer) {
         this.transformContainer.style.transform = '';

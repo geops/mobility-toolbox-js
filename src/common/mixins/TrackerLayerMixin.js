@@ -410,34 +410,27 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
+     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.
+     *
+     * @param {object} viewState The view state of the map.
+     * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
+     * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
+     * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
+     * @param {number} [viewState.rotation = 0] Rotation of the map to render.
+     * @param {number} viewState.resolution Resolution of the map to render.
+     * @param {boolean} noInterpolate If true trajectories are not interpolated but
+     *   drawn at the last known coordinate. Use this for performance optimization
+     *   during map navigation.
      * @private
      */
-    renderTrajectoriesInternal(
-      size,
-      center,
-      extent,
-      resolution,
-      rotation,
-      noInterpolate,
-    ) {
+    renderTrajectoriesInternal(viewState, noInterpolate) {
       if (!this.tracker) {
         return false;
       }
 
       const time = this.live ? Date.now() : this.time;
 
-      this.tracker.renderTrajectories(
-        {
-          time,
-          size,
-          center,
-          extent,
-          resolution,
-          rotation,
-        },
-        noInterpolate,
-      );
+      this.tracker.renderTrajectories({ ...viewState, time }, noInterpolate);
       return true;
     }
 
@@ -446,7 +439,6 @@ const TrackerLayerMixin = (Base) =>
      * This function must be overrided by children to provide the correct parameters.
      *
      * @param {object} viewState The view state of the map.
-     * @param {number} [viewState.time=Date.now()] The time to display in ms.
      * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
      * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
      * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
@@ -458,32 +450,16 @@ const TrackerLayerMixin = (Base) =>
      * @private
      */
     renderTrajectories(viewState, noInterpolate) {
-      const { size, center, extent, resolution, rotation } = viewState;
-
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
 
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
-          this.renderTrajectoriesInternal(
-            size,
-            center,
-            extent,
-            resolution,
-            rotation,
-            noInterpolate,
-          );
+          this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
       } else {
-        this.renderTrajectoriesInternal(
-          size,
-          center,
-          extent,
-          resolution,
-          rotation,
-          noInterpolate,
-        );
+        this.renderTrajectoriesInternal(viewState, noInterpolate);
       }
     }
 
