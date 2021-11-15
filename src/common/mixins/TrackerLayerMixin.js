@@ -8,13 +8,17 @@ import { timeSteps } from '../trackerConfig';
 /**
  * TrackerLayerInterface.
  *
- * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
- * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
- * @classproperty {function} style - Style of the vehicle.
- * @classproperty {FilterFunction} filter - Time speed.
- * @classproperty {function} sort - Set the filter for tracker features.
+ * @classproperty {string} hoverVehicleId - Id of the hovered vehicle.
+ * @classproperty {string} selectedVehicleId - Id of the selected vehicle.
+ * @classproperty {number} pixelRatio - Pixel ratio use to render the trajectories. Default to window.devicePixelRatio.
  * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
+ * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
+ * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
+ * @classproperty {function} sort - Sort the trajectories.
+ * @classproperty {function} style - Style of a trajectory.
+ * @classproperty {Date} time - Time used to display the trajectories. The setter manages a Date or a number in ms representing a Date. If `live` property is true. The setter does nothing..
+ * @classproperty {FilterFunction} filter - Filter the trajectories.
  */
 export class TrackerLayerInterface {
   /**
@@ -235,10 +239,17 @@ const TrackerLayerMixin = (Base) =>
         },
 
         /**
+         * Keep track of which trajectories are stored.
+         */
+        trajectories: {
+          get: () => (this.tracker && this.tracker.trajectories) || [],
+        },
+
+        /**
          * Keep track of which trajectories are currently drawn.
          */
         renderedTrajectories: {
-          get: () => this.tracker?.renderedTrajectories || [],
+          get: () => (this.tracker && this.tracker.renderedTrajectories) || [],
         },
 
         /**

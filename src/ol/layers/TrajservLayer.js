@@ -80,6 +80,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     /**
      * Array of ol events key, returned by on() or once().
      * @type {Array<ol/events~EventsKey>}
+     * @ignore
      */
     this.olEventsKeys = [
       ...this.olEventsKeys,
@@ -117,10 +118,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
       features.push(new Feature({ geometry: geom, ...vehicle }));
 
       if (features.length) {
-        /**
-         * Id of the selected vehicle
-         * @type {string}
-         */
+        /** @ignore */
         this.selectedVehicleId = features[0].get('id');
         /** @ignore */
         this.journeyId = features[0].get('journeyIdentifier');
@@ -214,6 +212,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
       /**
        * Array of station coordinates.
        * @type {Array<ol/coordinate~Coordinate>}
+       * @ignore
        */
       this.stationsCoords = [];
       trajStations.stations.forEach((station) => {

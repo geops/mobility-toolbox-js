@@ -269,6 +269,7 @@ export default class MapboxLayer extends Layer {
        */
       this.loaded = true;
 
+      /** @ignore */
       this.copyrights =
         this.copyrights || getMapboxMapCopyrights(this.mbMap) || [];
 

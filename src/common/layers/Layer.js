@@ -11,11 +11,11 @@ import { v4 as uuid } from 'uuid';
  *
  * @classproperty {string} name - Name of the layer
  * @classproperty {string} key - Identifier of the layer. Must be unique.
+ * @classproperty {string[]} copyrights - Array of copyrights.
  * @classproperty {boolean} isBaseLayer - Define if the layer is a base layer. Read-only.
  * @classproperty {boolean} isQueryable - Define if the layer can be queried. Read-only.
  * @classproperty {boolean} isReactSpatialLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
  * @classproperty {Layer[]} children - List of children.
- * @classproperty {String[]} copyrights - Array of copyrights.
  * @classproperty {boolean} visible - Define if the layer is visible or not.
  * @classproperty {number} hitTolerance - Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
  * @classproperty {Object} properties - Custom properties.
@@ -28,7 +28,7 @@ export default class Layer extends Observable {
    * @param {Object} options
    * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
    * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
-   * @param {string} [options.copyrights=undefined] Array of copyrights.
+   * @param {string[]} [options.copyrights=undefined] Array of copyrights.
    * @param {Array<Layer>} [options.children=[]] Sublayers.
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is visible on the map.
@@ -41,6 +41,7 @@ export default class Layer extends Observable {
     this.defineProperties({ isQueryable: true, ...options });
 
     if (options.copyrights) {
+      /** @ignore */
       this.copyrights = options.copyrights;
     }
 
@@ -263,7 +264,7 @@ export default class Layer extends Observable {
    * Request feature information for a given coordinate.
    * This function must be implemented by inheriting layers.
    *
-   * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[0], coordinate: null}}>} An empty response.
+   * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: null}}>} An empty response.
    */
   getFeatureInfoAtCoordinate() {
     // This layer returns no feature info.
