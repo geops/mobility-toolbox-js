@@ -82,8 +82,12 @@ class TrackerLayer extends mixin(Layer) {
       this.listeners.forEach((listener) => {
         unByKey(listener);
       });
-      this.map.removeLayer(this.key);
-      this.map.removeSource(this.key);
+      if (this.map.getLayer(this.key)) {
+        this.map.removeLayer(this.key);
+      }
+      if (this.map.getSource(this.key)) {
+        this.map.removeSource(this.key);
+      }
     }
     super.terminate();
   }
