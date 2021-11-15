@@ -23,6 +23,7 @@ export default class Tracker {
      * @type {Array<trajectory>}
      */
     this.pixelRatio = options.pixelRatio || window.devicePixelRatio || 1;
+
     /**
      * Array of trajectories.
      * @type {Array<trajectory>}

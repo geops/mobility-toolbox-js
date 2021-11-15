@@ -59,7 +59,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   stop() {
     if (this.map) {
-      this.map.off('click', this.onClick);
+      this.map.off('click', this.onMapClick);
       this.map.off('move', this.onMove);
       this.map.off('moveend', this.onMoveEnd);
     }
