@@ -141,13 +141,7 @@ export default class Tracker {
 
   /**
    * Draw all the trajectories available to the canvas.
-   * @param {object} viewState The view state of the map.
-   * @param {number} [viewState.time=Date.now()] The time to display in ms.
-   * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
-   * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
-   * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
-   * @param {number} [viewState.rotation = 0] Rotation of the map to render.
-   * @param {number} viewState.resolution Resolution of the map to render.
+   * @param {ViewState} viewState The view state of the map.
    * @param {boolean} noInterpolate If true trajectories are not interpolated but
    *   drawn at the last known coordinate. Use this for performance optimization
    *   during map navigation.
@@ -160,6 +154,7 @@ export default class Tracker {
       center,
       resolution,
       rotation = 0,
+      pixelRatio,
     } = viewState;
     this.clear();
 
@@ -170,8 +165,8 @@ export default class Tracker {
       (this.canvas.width !== width || this.canvas.height !== height)
     ) {
       [this.canvas.width, this.canvas.height] = [
-        width * this.pixelRatio,
-        height * this.pixelRatio,
+        width * pixelRatio,
+        height * pixelRatio,
       ];
     }
 
@@ -186,8 +181,8 @@ export default class Tracker {
       -center[1],
     );
 
-    this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
-    this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
+    this.canvas.style.width = `${this.canvas.width / pixelRatio}px`;
+    this.canvas.style.height = `${this.canvas.height / pixelRatio}px`;
 
     /**
      * Current resolution.
@@ -297,17 +292,13 @@ export default class Tracker {
         }
 
         px = px.map((p) => {
-          return p * this.pixelRatio;
+          return p * pixelRatio;
         });
 
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
         this.trajectories[i].rendered = true;
         this.renderedTrajectories.push(this.trajectories[i]);
-        const vehicleImg = this.style(
-          traj,
-          this.currResolution,
-          this.pixelRatio,
-        );
+        const vehicleImg = this.style(traj, viewState);
 
         if (!vehicleImg) {
           // eslint-disable-next-line no-continue

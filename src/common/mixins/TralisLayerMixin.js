@@ -44,7 +44,7 @@ export class TralisLayerInterface {
   /**
    * Add a feature to the tracker.
    * @param {number} id The feature id
-   * @param {Trajectory} traj Properties of the trajectory.
+   * @param {TralisTrajectory} traj Properties of the trajectory.
    * @param {boolean} [addOnTop=false] If true, the trajectory is added on top of
    *   the trajectory object. This affects the draw order. If addOnTop is
    *   true, the trajectory is drawn first and appears on bottom.
@@ -66,6 +66,16 @@ export class TralisLayerInterface {
    * @private
    */
   removeTrajectoryByAttribute(attributeName, value) {}
+
+  /**
+   * Define the style of the vehicle.
+   * Draw a blue circle with the id of the props parameter.
+   *
+   * @param {TralisTrajectory} trajectory  A trajectory
+   * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
+   * @private
+   */
+  defaultStyle(trajectory, viewState) {}
 }
 
 /**

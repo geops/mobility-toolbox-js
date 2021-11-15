@@ -190,6 +190,8 @@ class TrackerLayer extends mixin(Layer) {
         extent: view.calculateExtent(),
         resolution: view.getResolution(),
         rotation: view.getRotation(),
+        zoom: view.getZoom(),
+        pixelRatio: this.pixelRatio,
       },
       noInterpolate,
     );

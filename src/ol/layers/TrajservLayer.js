@@ -289,12 +289,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
-  /** @ignore */
-  defaultStyle(props) {
-    const zoom = this.map.getView().getZoom();
-    return super.defaultStyle(props, zoom);
-  }
-
   /**
    * Create a copy of the TrajservLayer.
    * @param {Object} newOptions Options to override

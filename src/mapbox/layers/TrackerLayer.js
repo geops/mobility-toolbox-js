@@ -166,7 +166,9 @@ class TrackerLayer extends mixin(Layer) {
       center: fromLonLat([center.lng, center.lat]),
       extent: bounds,
       resolution: res,
+      zoom: this.map.getZoom(),
       rotation: -(this.map.getBearing() * Math.PI) / 180,
+      pixelRatio: this.pixelRatio,
     };
 
     super.renderTrajectories(viewState, noInterpolate);

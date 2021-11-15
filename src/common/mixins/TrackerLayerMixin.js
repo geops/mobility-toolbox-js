@@ -79,14 +79,15 @@ export class TrackerLayerInterface {
   getRefreshTimeInMs(zoom) {}
 
   /**
-   * Define a default style of the vehicle.s
+   * Define a default style of vehicles.
    * Draw a blue circle with the id of the props parameter.
    *
-   * @param {Object} props Properties
+   * @param {Object} trajectory A trajectory
+   * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
    * @private
    */
   // eslint-disable-next-line no-unused-vars
-  defaultStyle(props) {}
+  defaultStyle(trajectory, viewState) {}
 }
 
 /**
@@ -327,7 +328,7 @@ const TrackerLayerMixin = (Base) =>
       super.init(map);
 
       this.tracker = new Tracker({
-        style: (props, r) => this.style(props, r),
+        style: (trajectory, viewState) => this.style(trajectory, viewState),
         ...this.initTrackerOptions,
         ...options,
       });
@@ -513,14 +514,10 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Define a default style of the vehicle.s
-     * Draw a blue circle with the id of the props parameter.
-     *
-     * @param {Object} props Properties
      * @private
      */
-    defaultStyle(props) {
-      const { id: text } = props;
+    defaultStyle(trajectory) {
+      const { id: text } = trajectory;
       if (this.styleCache[text]) {
         return this.styleCache[text];
       }

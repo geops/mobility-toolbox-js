@@ -144,12 +144,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
-  /** @ignore */
-  defaultStyle(props) {
-    const zoom = this.map.getZoom();
-    return super.defaultStyle(props, zoom);
-  }
-
   /**
    * Draw the trajectory as a line with points for each stop.
    * @param {Array} stationsCoords Array of station coordinates.

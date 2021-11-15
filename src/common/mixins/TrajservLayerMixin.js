@@ -92,12 +92,13 @@ export class TrajservLayerInterface {
 
   /**
    * Define the style of the vehicle.
-   * Draw a colored circle depending on train delay.
+   * Draw a circle depending on trajectory data.
    *
-   * @param {Object} props Properties
+   * @param {TrajservTrajectory} trajectory  A trajectory
+   * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
    * @private
    */
-  defaultStyle(props) {}
+  defaultStyle(trajectory, viewState) {}
 }
 
 const LINE_FILTER = 'publishedlinename';
@@ -419,7 +420,14 @@ const TrajservLayerMixin = (TrackerLayer) =>
         });
     }
 
-    defaultStyle(props, zoom) {
+    /**
+     * Define the style of the vehicle.
+     *
+     * @param {TrajservTrajectory} trajectory  A trajectory
+     * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
+     */
+    defaultStyle(trajectory, viewState) {
+      const { zoom } = viewState;
       const {
         type,
         name,
@@ -429,7 +437,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         delay,
         cancelled,
         operatorProvidesRealtime,
-      } = props;
+      } = trajectory;
       const z = Math.min(Math.floor(zoom || 1), 16);
       const hover = this.hoverVehicleId === id;
       const selected = this.selectedVehicleId === id;
