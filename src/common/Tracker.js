@@ -186,9 +186,6 @@ export default class Tracker {
       -center[1],
     );
 
-    this.canvas.style.left = '0px';
-    this.canvas.style.top = '0px';
-    this.canvas.style.transform = ``;
     this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
     this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
 

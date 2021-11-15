@@ -431,6 +431,7 @@ const TrackerLayerMixin = (Base) =>
       const time = this.live ? Date.now() : this.time;
 
       this.tracker.renderTrajectories({ ...viewState, time }, noInterpolate);
+
       return true;
     }
 

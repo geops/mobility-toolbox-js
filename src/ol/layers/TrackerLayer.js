@@ -2,7 +2,6 @@ import { Layer as OLLayer, Group } from 'ol/layer';
 import { unByKey } from 'ol/Observable';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
-
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
 
@@ -81,9 +80,13 @@ class TrackerLayer extends mixin(Layer) {
                   // Avoid having really big points when zooming fast.
                   this.tracker.clear();
                 } else {
+                  const pixelCenterRendered = this.map.getPixelFromCoordinate(
+                    renderedCenter,
+                  );
+                  const pixelCenter = this.map.getPixelFromCoordinate(center);
                   this.transformContainer.style.transform = composeCssTransform(
-                    (renderedCenter[0] - center[0]) / resolution,
-                    (center[1] - renderedCenter[1]) / resolution,
+                    pixelCenterRendered[0] - pixelCenter[0],
+                    pixelCenterRendered[1] - pixelCenter[1],
                     renderedResolution / resolution,
                     renderedResolution / resolution,
                     rotation - renderedRotation,
