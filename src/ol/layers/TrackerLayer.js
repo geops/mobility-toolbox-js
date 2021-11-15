@@ -38,6 +38,7 @@ class TrackerLayer extends mixin(Layer) {
         return this.tracker?.renderedTrajectories?.length <= 200;
       });
 
+    /** @ignore */
     this.olLayer =
       options.olLayer ||
       new Group({
@@ -117,7 +118,7 @@ class TrackerLayer extends mixin(Layer) {
     /**
      * Array of ol events key, returned by on() or once().
      * @type {Array<ol/events~EventsKey>}
-     * @private
+     * @ignore
      */
     this.olEventsKeys = []; // Be careful to not override this value in child classe.
   }
@@ -137,11 +138,13 @@ class TrackerLayer extends mixin(Layer) {
           /**
            * Current value of the zoom.
            * @type {number}
+           * @ignore
            */
           this.currentZoom = z;
 
           // This will restart the timeouts.
           // TODO maybe find a calculation a bit less approximative.
+          /** @ignore */
           this.requestIntervalSeconds = 200 / z || 1000;
         }
       }),
@@ -159,6 +162,8 @@ class TrackerLayer extends mixin(Layer) {
           this.map.getTargetElement().style.cursor = vehicle
             ? 'pointer'
             : 'auto';
+
+          /** @ignore */
           this.hoverVehicleId = id;
           this.renderTrajectories();
         }

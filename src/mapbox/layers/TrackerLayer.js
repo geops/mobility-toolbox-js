@@ -9,6 +9,7 @@ import { getSourceCoordinates, getMercatorResolution } from '../utils';
 /**
  * Responsible for loading tracker data.
  *
+ * @classproperty {mapboxgl.Map} map - The map where the layer is displayed.
  * @extends {Layer}
  * @implements {TrackerLayerInterface}
  */
@@ -255,6 +256,7 @@ class TrackerLayer extends mixin(Layer) {
     const id = vehicle && vehicle.id;
     if (this.hoverVehicleId !== id) {
       this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
+      /** @ignore */
       this.hoverVehicleId = id;
       // We doesn´t wait the next render, we force it.
       this.renderTrajectories();

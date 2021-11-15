@@ -14,6 +14,7 @@ import LayerCommon from '../../common/layers/Layer';
  *
  * @see <a href="/example/ol-map">Map example</a>
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
 class Layer extends LayerCommon {
