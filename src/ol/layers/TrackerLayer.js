@@ -31,7 +31,12 @@ class TrackerLayer extends mixin(Layer) {
      * It's useful to avoid rendering the map when the map is animating or interacting.
      * @type {function}
      */
-    this.renderWhenInteracting = options.renderWhenInteracting || (() => false);
+    this.renderWhenInteracting =
+      options.renderWhenInteracting ||
+      (() => {
+        // Render trajectories on each render frame when the number of trajectories is small.
+        return this.tracker?.renderedTrajectories?.length <= 200;
+      });
 
     this.olLayer =
       options.olLayer ||
@@ -67,7 +72,6 @@ class TrackerLayer extends mixin(Layer) {
                   resolution: renderedResolution,
                   rotation: renderedRotation,
                 } = this.renderedViewState;
-
                 if (
                   this.renderWhenInteracting &&
                   this.renderWhenInteracting(
