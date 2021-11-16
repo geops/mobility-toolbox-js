@@ -7,7 +7,7 @@
  */
 
 /**
- * @typedef {Object} Trajectory
+ * @typedef {Object} TrajservTrajectory
  * @property {string} id
  * @property {string} type
  * @property {string} name

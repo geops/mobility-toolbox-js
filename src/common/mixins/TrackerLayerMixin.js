@@ -27,7 +27,6 @@ export class TrackerLayerInterface {
    * @param {Object} options
    * @param {number} [options.width] Canvas's width.
    * @param {number} [options.height] Canvas's height.
-   * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
    */
   // eslint-disable-next-line no-unused-vars
   init(map, options) {}
@@ -84,14 +83,15 @@ export class TrackerLayerInterface {
   getRefreshTimeInMs(zoom) {}
 
   /**
-   * Define a default style of the vehicle.s
+   * Define a default style of vehicles.
    * Draw a blue circle with the id of the props parameter.
    *
-   * @param {Object} props Properties
+   * @param {Object} trajectory A trajectory
+   * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
    * @private
    */
   // eslint-disable-next-line no-unused-vars
-  defaultStyle(props) {}
+  defaultStyle(trajectory, viewState) {}
 }
 
 /**
@@ -331,7 +331,6 @@ const TrackerLayerMixin = (Base) =>
      * @param {bool} [options.interpolate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
      * @param {string} [options.hoverVehicleId] Id of the trajectory which is hovered.
      * @param {string} [options.selectedVehicleId] Id of the trajectory which is selected.
-     * @param {function} [options.getPixelFromCoordinate] Convert an EPSG:3857 coordinate to a canvas pixel (origin top-left).
      * @param {function} [options.filter] Function use to filter the features displayed.
      * @param {function} [options.sort] Function use to sort the features displayed.
      * @param {function} [options.style] Function use to style the features displayed.
@@ -340,7 +339,7 @@ const TrackerLayerMixin = (Base) =>
       super.init(map);
 
       this.tracker = new Tracker({
-        style: (props, r) => this.style(props, r),
+        style: (trajectory, viewState) => this.style(trajectory, viewState),
         ...this.initTrackerOptions,
         ...options,
       });
@@ -423,50 +422,57 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
+     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.
+     *
+     * @param {object} viewState The view state of the map.
+     * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
+     * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
+     * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
+     * @param {number} [viewState.rotation = 0] Rotation of the map to render.
+     * @param {number} viewState.resolution Resolution of the map to render.
+     * @param {boolean} noInterpolate If true trajectories are not interpolated but
+     *   drawn at the last known coordinate. Use this for performance optimization
+     *   during map navigation.
      * @private
      */
-    renderTrajectoriesInternal(size, resolution, rotation, noInterpolate) {
+    renderTrajectoriesInternal(viewState, noInterpolate) {
       if (!this.tracker) {
-        return;
+        return false;
       }
 
-      const renderTime = this.live ? Date.now() : this.time;
+      const time = this.live ? Date.now() : this.time;
 
-      this.tracker.renderTrajectories(
-        renderTime,
-        size,
-        resolution,
-        noInterpolate,
-      );
+      this.tracker.renderTrajectories({ ...viewState, time }, noInterpolate);
+
+      return true;
     }
 
     /**
      * Render the trajectories requesting an animation frame and cancelling the previous one.
      * This function must be overrided by children to provide the correct parameters.
+     *
+     * @param {object} viewState The view state of the map.
+     * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
+     * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
+     * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
+     * @param {number} [viewState.rotation = 0] Rotation of the map to render.
+     * @param {number} viewState.resolution Resolution of the map to render.
+     * @param {boolean} noInterpolate If true trajectories are not interpolated but
+     *   drawn at the last known coordinate. Use this for performance optimization
+     *   during map navigation.
      * @private
      */
-    renderTrajectories(size, resolution, rotation, noInterpolate) {
+    renderTrajectories(viewState, noInterpolate) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
 
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
-          this.renderTrajectoriesInternal(
-            size,
-            resolution,
-            rotation,
-            noInterpolate,
-          );
+          this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
       } else {
-        this.renderTrajectoriesInternal(
-          size,
-          resolution,
-          rotation,
-          noInterpolate,
-        );
+        this.renderTrajectoriesInternal(viewState, noInterpolate);
       }
     }
 
@@ -519,14 +525,10 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Define a default style of the vehicle.s
-     * Draw a blue circle with the id of the props parameter.
-     *
-     * @param {Object} props Properties
      * @private
      */
-    defaultStyle(props) {
-      const { id: text } = props;
+    defaultStyle(trajectory) {
+      const { id: text } = trajectory;
       if (this.styleCache[text]) {
         return this.styleCache[text];
       }

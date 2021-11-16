@@ -1,6 +1,7 @@
 import { Layer as OLLayer, Group } from 'ol/layer';
 import { unByKey } from 'ol/Observable';
 import Source from 'ol/source/Source';
+import { composeCssTransform } from 'ol/transform';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import Layer from './Layer';
 
@@ -26,18 +27,16 @@ class TrackerLayer extends mixin(Layer) {
     });
 
     /**
-     * Function to define  when allowing the render of trajectories depending on the zoom level. Default the fundtion return true.
+     * Boolean that defines if the layer is allow to renderTrajectories when the map is zooming, rotating or poanning true.
      * It's useful to avoid rendering the map when the map is animating or interacting.
      * @type {function}
      */
-    this.renderWhenZooming = options.renderWhenZooming || (() => true);
-
-    /**
-     * Function to define  when allowing the render of trajectories depending on the rotation. Default the fundtion return true.
-     * It's useful to avoid rendering the map when the map is animating or interacting.
-     * @type {function}
-     */
-    this.renderWhenRotating = options.renderWhenRotating || (() => true);
+    this.renderWhenInteracting =
+      options.renderWhenInteracting ||
+      (() => {
+        // Render trajectories on each render frame when the number of trajectories is small.
+        return this.tracker?.renderedTrajectories?.length <= 200;
+      });
 
     /** @ignore */
     this.olLayer =
@@ -50,46 +49,58 @@ class TrackerLayer extends mixin(Layer) {
               if (!this.tracker || !this.tracker.canvas) {
                 return null;
               }
-              const { zoom, center, rotation } = frameState.viewState;
-              const isZooming = zoom !== this.renderState.zoom;
-              const isRotating = zoom !== this.renderState.zoom;
-
-              if (isZooming || isRotating) {
-                this.renderState.zoom = zoom;
-                this.renderState.center = center;
-                this.renderState.rotation = rotation;
-                if (
-                  (isZooming && !this.renderWhenZooming(zoom)) ||
-                  (isRotating && !this.renderWhenRotating(rotation))
-                ) {
-                  this.tracker.clear();
-                  return this.tracker.canvas;
-                }
-                this.renderTrajectories(true);
-              } else if (
-                this.renderState.center[0] !== center[0] ||
-                this.renderState.center[1] !== center[1]
-              ) {
-                const px = this.map.getPixelFromCoordinate(center);
-                const oldPx = this.map.getPixelFromCoordinate(
-                  this.renderState.center,
-                );
-
-                // We move the canvas to avoid re render the trajectories
-                const oldLeft = parseFloat(this.tracker.canvas.style.left);
-                const oldTop = parseFloat(this.tracker.canvas.style.top);
-                this.tracker.canvas.style.left = `${
-                  oldLeft - (px[0] - oldPx[0])
-                }px`;
-                this.tracker.canvas.style.top = `${
-                  oldTop - (px[1] - oldPx[1])
-                }px`;
-
-                this.renderState.center = center;
-                this.renderState.rotation = rotation;
+              if (!this.container) {
+                this.container = document.createElement('div');
+                this.container.style.position = 'absolute';
+                this.container.style.width = '100%';
+                this.container.style.height = '100%';
+                this.transformContainer = document.createElement('div');
+                this.transformContainer.style.position = 'absolute';
+                this.transformContainer.style.width = '100%';
+                this.transformContainer.style.height = '100%';
+                this.container.appendChild(this.transformContainer);
+                this.tracker.canvas.style.position = 'absolute';
+                this.tracker.canvas.style.top = '0';
+                this.tracker.canvas.style.left = '0';
+                this.tracker.canvas.style.transformOrigin = 'top left';
+                this.transformContainer.appendChild(this.tracker.canvas);
               }
 
-              return this.tracker.canvas;
+              if (this.renderedViewState) {
+                const { center, resolution, rotation } = frameState.viewState;
+                const {
+                  center: renderedCenter,
+                  resolution: renderedResolution,
+                  rotation: renderedRotation,
+                } = this.renderedViewState;
+                if (
+                  this.renderWhenInteracting &&
+                  this.renderWhenInteracting(
+                    frameState.viewState,
+                    this.renderedViewState,
+                  )
+                ) {
+                  this.renderTrajectories(true);
+                } else if (renderedResolution / resolution >= 3) {
+                  // Avoid having really big points when zooming fast.
+                  this.tracker.clear();
+                } else {
+                  const pixelCenterRendered = this.map.getPixelFromCoordinate(
+                    renderedCenter,
+                  );
+                  const pixelCenter = this.map.getPixelFromCoordinate(center);
+                  this.transformContainer.style.transform = composeCssTransform(
+                    pixelCenterRendered[0] - pixelCenter[0],
+                    pixelCenterRendered[1] - pixelCenter[1],
+                    renderedResolution / resolution,
+                    renderedResolution / resolution,
+                    rotation - renderedRotation,
+                    0,
+                    0,
+                  );
+                }
+              }
+              return this.container;
             },
           }),
         ],
@@ -110,21 +121,6 @@ class TrackerLayer extends mixin(Layer) {
      * @ignore
      */
     this.olEventsKeys = []; // Be careful to not override this value in child classe.
-  }
-
-  /**
-   * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map A OpenLayers map.
-   * @private
-   */
-  init(map) {
-    if (!map) {
-      return;
-    }
-
-    super.init(map, {
-      getPixelFromCoordinate: map.getPixelFromCoordinate.bind(map),
-    });
   }
 
   /**
@@ -193,11 +189,37 @@ class TrackerLayer extends mixin(Layer) {
   renderTrajectories(noInterpolate) {
     const view = this.map.getView();
     super.renderTrajectories(
-      this.map.getSize(),
-      view.getResolution(),
-      view.getRotation(),
+      {
+        size: this.map.getSize(),
+        center: this.map.getView().getCenter(),
+        extent: view.calculateExtent(),
+        resolution: view.getResolution(),
+        rotation: view.getRotation(),
+        zoom: view.getZoom(),
+        pixelRatio: this.pixelRatio,
+      },
       noInterpolate,
     );
+  }
+
+  /**
+   * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
+   * @private
+   * @inheritdoc
+   */
+  renderTrajectoriesInternal(viewState, noInterpolate) {
+    let isRendered = false;
+
+    isRendered = super.renderTrajectoriesInternal(viewState, noInterpolate);
+
+    // We update the current render state.
+    if (isRendered) {
+      this.renderedViewState = { ...viewState };
+
+      if (this.transformContainer) {
+        this.transformContainer.style.transform = '';
+      }
+    }
   }
 
   /**

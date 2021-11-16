@@ -1,8 +1,11 @@
-import { toLonLat, fromLonLat } from 'ol/proj';
+import { fromLonLat } from 'ol/proj';
+import { unByKey } from 'ol/Observable';
+import { getWidth, getHeight } from 'ol/extent';
+import transformRotate from '@turf/transform-rotate';
+import { point } from '@turf/helpers';
 import Layer from '../../common/layers/Layer';
 import mixin from '../../common/mixins/TrackerLayerMixin';
-import { getResolution } from '../utils';
-
+import { getSourceCoordinates, getMercatorResolution } from '../utils';
 /**
  * Responsible for loading tracker data.
  *
@@ -17,9 +20,12 @@ class TrackerLayer extends mixin(Layer) {
     });
 
     /** @ignores */
-    this.onMapZoomEnd = this.onMapZoomEnd.bind(this);
+    this.onMove = this.onMove.bind(this);
+    this.onZoomEnd = this.onZoomEnd.bind(this);
+    this.onVisibilityChange = this.onVisibilityChange.bind(this);
+
     /** @ignores */
-    this.onMapMouseMove = this.onMapMouseMove.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
   }
 
   /**
@@ -28,7 +34,7 @@ class TrackerLayer extends mixin(Layer) {
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
    * @override
    */
-  init(map) {
+  init(map, beforeId) {
     if (!map) {
       return;
     }
@@ -38,12 +44,53 @@ class TrackerLayer extends mixin(Layer) {
     super.init(map, {
       width: canvas.width / this.pixelRatio,
       height: canvas.height / this.pixelRatio,
-      getPixelFromCoordinate: (coord) => {
-        const [lng, lat] = toLonLat(coord);
-        const { x, y } = this.map.project({ lng, lat });
-        return [x, y];
-      },
     });
+
+    const source = {
+      type: 'canvas',
+      canvas: this.tracker.canvas,
+      coordinates: getSourceCoordinates(map, this.pixelRatio),
+      // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
+      animate: true,
+      attribution: this.copyrights,
+    };
+
+    this.beforeId = beforeId;
+    this.layer = {
+      id: this.key,
+      type: 'raster',
+      source: this.key,
+      layout: {
+        visibility: this.visible ? 'visible' : 'none',
+      },
+      paint: {
+        'raster-opacity': 1,
+        'raster-fade-duration': 0,
+        'raster-resampling': 'nearest', // important otherwise it looks blurry
+      },
+    };
+    map.addSource(this.key, source);
+    map.addLayer(this.layer, this.beforeId);
+
+    this.listeners = [this.on('change:visible', this.onVisibilityChange)];
+  }
+
+  /**
+   * Remove listeners from the Mapbox Map.
+   */
+  terminate() {
+    if (this.map) {
+      this.listeners.forEach((listener) => {
+        unByKey(listener);
+      });
+      if (this.map.getLayer(this.key)) {
+        this.map.removeLayer(this.key);
+      }
+      if (this.map.getSource(this.key)) {
+        this.map.removeSource(this.key);
+      }
+    }
+    super.terminate();
   }
 
   /**
@@ -56,10 +103,11 @@ class TrackerLayer extends mixin(Layer) {
   start() {
     super.start();
 
-    this.map.on('zoomend', this.onMapZoomEnd);
+    this.map.on('move', this.onMove);
+    this.map.on('zoomend', this.onZoomEnd);
 
     if (this.isHoverActive) {
-      this.map.on('mousemove', this.onMapMouseMove);
+      this.map.on('mousemove', this.onMouseMove);
     }
   }
 
@@ -71,8 +119,9 @@ class TrackerLayer extends mixin(Layer) {
   stop() {
     super.stop();
     if (this.map) {
-      this.map.off('zoomend', this.onMapZoomEnd);
-      this.map.off('mousemove', this.onMapMouseMove);
+      this.map.off('move', this.onMove);
+      this.map.off('zoomend', this.onZoomEnd);
+      this.map.off('mousemove', this.onMouseMove);
     }
   }
 
@@ -82,13 +131,48 @@ class TrackerLayer extends mixin(Layer) {
    * @overrides
    */
   renderTrajectories(noInterpolate) {
-    const canvas = this.map.getCanvas();
-    super.renderTrajectories(
-      [canvas.width / this.pixelRatio, canvas.height / this.pixelRatio],
-      getResolution(this.map),
-      this.map.getBearing(),
-      noInterpolate,
-    );
+    const { width, height } = this.map.getCanvas();
+    const center = this.map.getCenter();
+
+    // We use turf here to have good transform.
+    const leftBottom = this.map.unproject({
+      x: 0,
+      y: height / this.pixelRatio,
+    }); // southWest
+    const rightTop = this.map.unproject({ x: width / this.pixelRatio, y: 0 }); // north east
+
+    const coord0 = transformRotate(
+      point([leftBottom.lng, leftBottom.lat]),
+      -this.map.getBearing(),
+      {
+        pivot: [center.lng, center.lat],
+      },
+    ).geometry.coordinates;
+    const coord1 = transformRotate(
+      point([rightTop.lng, rightTop.lat]),
+      -this.map.getBearing(),
+      {
+        pivot: [center.lng, center.lat],
+      },
+    ).geometry.coordinates;
+
+    const bounds = [...fromLonLat(coord0), ...fromLonLat(coord1)];
+    const xResolution = getWidth(bounds) / (width / this.pixelRatio);
+    const yResolution = getHeight(bounds) / (height / this.pixelRatio);
+    const res = Math.max(xResolution, yResolution);
+
+    // Coordinate of trajectories are in mercator so we have to pass the proper resolution and center in mercator.
+    const viewState = {
+      size: [width / this.pixelRatio, height / this.pixelRatio],
+      center: fromLonLat([center.lng, center.lat]),
+      extent: bounds,
+      resolution: res,
+      zoom: this.map.getZoom(),
+      rotation: -(this.map.getBearing() * Math.PI) / 180,
+      pixelRatio: this.pixelRatio,
+    };
+
+    super.renderTrajectories(viewState, noInterpolate);
   }
 
   /**
@@ -107,8 +191,36 @@ class TrackerLayer extends mixin(Layer) {
    * @override
    */
   getVehiclesAtCoordinate(coordinate, nb) {
-    const resolution = getResolution(this.map);
+    const resolution = getMercatorResolution(this.map);
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
+  }
+
+  onVisibilityChange() {
+    if (this.visible && !this.map.getLayer(this.key)) {
+      this.map.addLayer(this.layer, this.beforeId);
+    } else if (this.map.getLayer(this.key)) {
+      this.map.removeLayer(this.key);
+    }
+    // We can't use setLayoutProperty it triggers an error probably a bug in mapbox
+    // this.map.setLayoutProperty(
+    //   this.key,
+    //   'visibilty',
+    //   this.visible ? 'visible' : 'none',
+    // );
+  }
+
+  /**
+   * Callback on 'move' event.
+   *
+   * @private
+   */
+  onMove() {
+    const extent = getSourceCoordinates(this.map, this.pixelRatio);
+    const source = this.map.getSource(this.key);
+    if (source) {
+      source.setCoordinates(extent);
+    }
+    this.renderTrajectories();
   }
 
   /**
@@ -116,7 +228,7 @@ class TrackerLayer extends mixin(Layer) {
    *
    * @private
    */
-  onMapZoomEnd() {
+  onZoomEnd() {
     this.startUpdateTime(this.map.getZoom());
   }
 
@@ -126,7 +238,7 @@ class TrackerLayer extends mixin(Layer) {
    * @param {mapboxgl.MapMouseEvent} evt Map's mousemove event.
    * @private
    */
-  onMapMouseMove(evt) {
+  onMouseMove(evt) {
     if (
       this.map.isMoving() ||
       this.map.isRotating() ||

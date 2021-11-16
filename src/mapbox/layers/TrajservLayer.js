@@ -4,7 +4,6 @@ import { unByKey } from 'ol/Observable';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TrajservLayerMixin';
 import { getUTCTimeString } from '../../common/timeUtils';
-import { getSourceCoordinates, getResolution } from '../utils';
 
 /**
  * Responsible for loading and display data from a Trajserv service.
@@ -30,48 +29,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
     this.onMove = this.onMove.bind(this);
     this.onMoveEnd = this.onMoveEnd.bind(this);
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
-  }
-
-  /**
-   * Add the mapbox layer and source to the map.
-   *
-   * @param {mapboxgl.Map} map A Mapbox map.
-   * @param {String} beforeId See [mapboxgl.Map#addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.
-   */
-  init(map, beforeId) {
-    if (!map) {
-      return;
-    }
-
-    super.init(map);
-
-    const source = {
-      type: 'canvas',
-      canvas: this.tracker.canvas,
-      coordinates: getSourceCoordinates(map, this.pixelRatio),
-      // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
-      animate: true,
-      attribution: this.copyrights,
-    };
-
-    this.beforeId = beforeId;
-    this.layer = {
-      id: this.key,
-      type: 'raster',
-      source: this.key,
-      layout: {
-        visibility: this.visible ? 'visible' : 'none',
-      },
-      paint: {
-        'raster-opacity': 1,
-        'raster-fade-duration': 0,
-        'raster-resampling': 'nearest', // important otherwise it looks blurry
-      },
-    };
-    map.addSource(this.key, source);
-    map.addLayer(this.layer, this.beforeId);
-
-    this.listeners = [this.on('change:visible', this.onVisibilityChange)];
   }
 
   /**
@@ -102,40 +59,11 @@ class TrajservLayer extends mixin(TrackerLayer) {
 
   stop() {
     if (this.map) {
-      this.map.off('click', this.onClick);
+      this.map.off('click', this.onMapClick);
       this.map.off('move', this.onMove);
       this.map.off('moveend', this.onMoveEnd);
     }
     super.stop();
-  }
-
-  onVisibilityChange() {
-    if (this.visible && !this.map.getLayer(this.key)) {
-      this.map.addLayer(this.layer, this.beforeId);
-    } else if (this.map.getLayer(this.key)) {
-      this.map.removeLayer(this.key);
-    }
-    // We can't use setLayoutProperty it triggers an error probably a bug in mapbox
-    // this.map.setLayoutProperty(
-    //   this.key,
-    //   'visibilty',
-    //   this.visible ? 'visible' : 'none',
-    // );
-  }
-
-  /**
-   * Callback on 'move' event.
-   * @private
-   */
-  onMove() {
-    this.map
-      .getSource(this.key)
-      .setCoordinates(getSourceCoordinates(this.map, this.pixelRatio));
-    this.renderTrajectories(
-      undefined,
-      getResolution(this.map),
-      this.map.getBearing(),
-    );
   }
 
   /**
@@ -214,12 +142,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
       s: zoom < 10 ? 1 : 0,
       z: zoom,
     });
-  }
-
-  /** @ignore */
-  defaultStyle(props) {
-    const zoom = this.map.getZoom();
-    return super.defaultStyle(props, zoom);
   }
 
   /**
