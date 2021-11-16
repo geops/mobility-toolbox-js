@@ -98,16 +98,16 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.format = new GeoJSON();
     }
 
-    init(map) {
-      super.init(map);
+    start() {
+      super.start();
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
     }
 
-    terminate() {
+    stop() {
+      super.stop();
       this.api.unsubscribeTrajectory(this.onMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
-      super.terminate();
     }
 
     setMode(mode) {
