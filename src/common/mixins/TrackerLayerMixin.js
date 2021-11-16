@@ -2,6 +2,7 @@
 /* eslint-disable max-classes-per-file */
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
+import Feature from 'ol/Feature';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
 
@@ -494,7 +495,10 @@ const TrackerLayerMixin = (Base) =>
      * @returns {Array<ol/Feature~Feature>} Array of vehicle.
      */
     getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {
-      const ext = buffer([...coordinate, ...coordinate], 10 * resolution);
+      const ext = buffer(
+        [...coordinate, ...coordinate],
+        this.hitTolerance * resolution,
+      );
       const trajectories = this.tracker.getTrajectories();
       const vehicles = [];
       for (let i = 0; i < trajectories.length; i += 1) {
@@ -510,6 +514,33 @@ const TrackerLayerMixin = (Base) =>
       }
 
       return vehicles;
+    }
+
+    /**
+     * Request feature information for a given coordinate.
+     *
+     * @param {ol/coordinate~Coordinate} coordinate Coordinate.
+     * @param {Object} options Options See child classes to see which options are supported.
+     * @param {number} [options.resolution=1] The resolution of the map.
+     * @param {number} [options.nb=Infinity] The max number of vehicles to return.
+     * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: number[2]}} Promise with features, layer and coordinate.
+     */
+    getFeatureInfoAtCoordinate(coordinate, options = {}) {
+      const { resolution, nb } = options;
+
+      const vehicles = this.getVehiclesAtCoordinate(coordinate, resolution, nb);
+
+      return Promise.resolve({
+        layer: this,
+        features: vehicles.map((vehicle) => {
+          const feature = new Feature({
+            geometry: vehicle.geometry,
+          });
+          feature.setProperties({ ...vehicle });
+          return feature;
+        }),
+        coordinate,
+      });
     }
 
     /**

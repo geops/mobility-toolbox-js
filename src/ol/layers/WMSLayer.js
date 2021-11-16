@@ -43,9 +43,7 @@ class WMSLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate to request the information at.
-   * @returns {Promise<Object>} Promise with features, layer and coordinate
-   *  or null if no feature was hit.
-   * eslint-disable-next-line class-methods-use-this
+   * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: number[2]}} Promise with features, layer and coordinate.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     this.abortController.abort();

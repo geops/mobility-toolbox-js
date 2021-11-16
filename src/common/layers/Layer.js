@@ -264,9 +264,12 @@ export default class Layer extends Observable {
    * Request feature information for a given coordinate.
    * This function must be implemented by inheriting layers.
    *
+   * @param {ol/coordinate~Coordinate} coordinate Coordinate.
+   * @param {Object} options Some options. See child classes to see which are supported.
    * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: null}}>} An empty response.
    */
-  getFeatureInfoAtCoordinate() {
+  // eslint-disable-next-line no-unused-vars
+  getFeatureInfoAtCoordinate(coordinate, options) {
     // This layer returns no feature info.
     // The function is implemented by inheriting layers.
     return Promise.resolve({

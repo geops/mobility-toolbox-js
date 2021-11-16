@@ -242,6 +242,11 @@ class TrackerLayer extends mixin(Layer) {
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
+  getFeatureInfoAtCoordinate(coordinate) {
+    const resolution = this.map.getView().getResolution();
+    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+  }
+
   /**
    * Create a copy of the TrackerLayer.
    * @param {Object} newOptions Options to override

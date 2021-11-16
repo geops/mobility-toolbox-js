@@ -284,9 +284,7 @@ export default class Tracker {
       if (coord) {
         // We set the rotation of the trajectory (used by tralis).
         this.trajectories[i].coordinate = coord;
-        // console.log([...toLonLat(coord)]);
-        let px = apply(coordinateToPixelTransform, [...coord]); // [...toLonLat(coord)]);
-        // console.log(px);
+        let px = apply(coordinateToPixelTransform, [...coord]);
         if (!px) {
           // eslint-disable-next-line no-continue
           continue;
