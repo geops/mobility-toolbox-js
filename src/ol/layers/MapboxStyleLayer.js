@@ -16,6 +16,7 @@ import Layer from './Layer';
  *   styleLayersFilter: () => {},
  * });
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
 class MapboxStyleLayer extends Layer {
@@ -237,7 +238,7 @@ class MapboxStyleLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
-   * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: number[2]}} Promise with features, layer and coordinate.
+   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     const { mbMap } = this.mapboxLayer;

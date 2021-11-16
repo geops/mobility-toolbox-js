@@ -292,7 +292,7 @@ export default class Layer extends Observable {
    *
    * @param {ol/coordinate~Coordinate} coordinate Coordinate.
    * @param {Object} options Some options. See child classes to see which are supported.
-   * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: null}}>} An empty response.
+   * @returns {Promise<FeatureInfo>} An empty response.
    */
   // eslint-disable-next-line no-unused-vars
   getFeatureInfoAtCoordinate(coordinate, options) {

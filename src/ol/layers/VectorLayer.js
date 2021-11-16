@@ -3,13 +3,14 @@ import Layer from './Layer';
 /**
  * A class use to display vector data.
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
 class VectorLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.
-   * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: number[2]}} Promise with features, layer and coordinate.
+   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     let features = [];

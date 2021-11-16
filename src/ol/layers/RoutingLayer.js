@@ -54,6 +54,7 @@ const defaultStyleFunction = (feature, resolution) => {
 /**
  * A class use to display vector data.
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
 class RoutingLayer extends Layer {

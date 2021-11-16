@@ -19,9 +19,13 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
-    /** @ignores */
+    /** @ignore */
     this.onMove = this.onMove.bind(this);
+
+    /** @ignore */
     this.onZoomEnd = this.onZoomEnd.bind(this);
+
+    /** @ignore */
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 

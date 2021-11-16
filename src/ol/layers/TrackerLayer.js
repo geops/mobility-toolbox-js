@@ -7,6 +7,7 @@ import Layer from './Layer';
 /**
  * Responsible for loading tracker data.
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  * @implements {TrackerLayerInterface}
  */

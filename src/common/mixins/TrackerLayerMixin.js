@@ -527,7 +527,7 @@ const TrackerLayerMixin = (Base) =>
      * @param {Object} options Options See child classes to see which options are supported.
      * @param {number} [options.resolution=1] The resolution of the map.
      * @param {number} [options.nb=Infinity] The max number of vehicles to return.
-     * @returns {Promise<{layer: Layer, features: ol/Feature~Feature[], coordinate: number[2]}} Promise with features, layer and coordinate.
+     * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
      */
     getFeatureInfoAtCoordinate(coordinate, options = {}) {
       const { resolution, nb } = options;
