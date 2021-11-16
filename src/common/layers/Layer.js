@@ -42,8 +42,13 @@ export default class Layer extends Observable {
     super();
     this.defineProperties(options);
 
-    // Add click callback
-    const { onClick } = options;
+    // Add mouse event callbacks
+    const { onClick, onHover } = options;
+
+    if (onHover) {
+      this.onHover(onHover);
+    }
+
     if (onClick) {
       this.onClick(onClick);
     }

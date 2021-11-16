@@ -9,6 +9,7 @@ describe('Layer', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
     expect(layer).toBeInstanceOf(Layer);
   });
+
   test('should define default properties.', () => {
     const options = {
       name: 'Layer',
@@ -112,6 +113,18 @@ describe('Layer', () => {
     layer.removeChild('bla');
 
     expect(layer.getVisibleChildren().length).toBe(1);
+  });
+
+  test('should set onClick using constructor.', () => {
+    const fn = () => {};
+    const layer = new Layer({
+      name: 'Layer',
+      olLayer,
+      onClick: fn,
+      onHover: fn,
+    });
+    expect(layer.clickCallbacks[0]).toBe(fn);
+    expect(layer.hoverCallbacks[0]).toBe(fn);
   });
 
   test('should onClick throw error.', () => {

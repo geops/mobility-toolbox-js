@@ -63,7 +63,7 @@ class Layer extends LayerCommon {
   init(map) {
     super.init(map);
 
-    if (!this.map || !this.olLayer) {
+    if (!this.map) {
       return;
     }
 
@@ -88,7 +88,7 @@ class Layer extends LayerCommon {
     }
 
     // We set the copyright to the source used by the layer.
-    if (this.copyrights) {
+    if (this.copyrights && this.olLayer) {
       const attributions = this.copyrights || [];
       if (this.olLayer instanceof Group) {
         this.olLayer
@@ -97,7 +97,7 @@ class Layer extends LayerCommon {
           .forEach((layer) => {
             layer.getSource().setAttributions(attributions);
           });
-      } else {
+      } else if (this.olLayer.getSource) {
         this.olLayer.getSource().setAttributions(attributions);
       }
     }

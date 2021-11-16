@@ -12,7 +12,14 @@ export default () => {
     element.innerHTML = text;
   };
 
-  const onClick = (features) => {
+  const onHover = ({ layer, features }) => {
+    if (features.length) {
+      // eslint-disable-next-line no-param-reassign
+      layer.map.getTargetElement().style.cursor = 'pointer';
+    }
+  };
+
+  const onClick = ({ features }) => {
     if (features.length) {
       addText(features[0].get('name'));
     }
@@ -24,6 +31,10 @@ export default () => {
       center: [950690.34, 6003962.67],
       zoom: 20,
     }),
+  });
+
+  map.on('pointermove', () => {
+    map.getTargetElement().style.cursor = '';
   });
 
   const mapboxLayer = new MapboxLayer({
@@ -38,6 +49,7 @@ export default () => {
     styleLayer: {
       id: 'poi_with_icons',
     },
+    onHover,
     onClick,
   });
 
@@ -60,6 +72,7 @@ export default () => {
         ],
       }),
     }),
+    onHover,
     onClick,
   });
 
