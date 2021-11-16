@@ -33,23 +33,29 @@ export default class Layer extends Observable {
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is visible on the map.
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
-   * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
+   * @param {boolean} [options.isQueryable=true] If true this layer can be queried.
+   * @param {boolean} [options.isClickActive=true] If true feature information will be queried on click event. See inherited layers for more informations.
+   * @param {boolean} [options.isHoverActive=true] If true feature information will be queried on pointer move event. See inherited layers for more informations.
    * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
    */
-  constructor(options) {
+  constructor(options = {}) {
     super();
-    this.defineProperties({ isQueryable: true, ...options });
-
-    if (options.copyrights) {
-      /** @ignore */
-      this.copyrights = options.copyrights;
-    }
+    this.defineProperties(options);
 
     // Add click callback
     const { onClick } = options;
     if (onClick) {
       this.onClick(onClick);
     }
+
+    /** @ignore */
+    this.copyrights = options.copyrights || [];
+
+    /** @ignore */
+    this.onUserClickCallback = this.onUserClickCallback.bind(this);
+
+    /** @ignore */
+    this.onUserMoveCallback = this.onUserMoveCallback.bind(this);
   }
 
   /**
@@ -66,8 +72,15 @@ export default class Layer extends Observable {
       properties,
       isBaseLayer,
       isQueryable,
+      isClickActive,
+      isHoverActive,
       hitTolerance,
-    } = options;
+    } = {
+      isQueryable: true,
+      isClickActive: true,
+      isHoverActive: true,
+      ...options,
+    };
     const uid = uuid();
     const dfltName = name || uid;
     Object.defineProperties(this, {
@@ -86,6 +99,12 @@ export default class Layer extends Observable {
       },
       isQueryable: {
         value: !!isQueryable,
+      },
+      isClickActive: {
+        value: !!isClickActive,
+      },
+      isHoverActive: {
+        value: !!isHoverActive,
       },
       hitTolerance: {
         value: hitTolerance || 5,
@@ -122,9 +141,15 @@ export default class Layer extends Observable {
         writable: true,
       },
       /**
-       * Callback function when a user click on a vehicle.
+       * Callback function when a user click on a feature.
        */
       clickCallbacks: {
+        value: [],
+      },
+      /**
+       * Callback function when a user hover on a feature.
+       */
+      hoverCallbacks: {
         value: [],
       },
     });
@@ -214,6 +239,7 @@ export default class Layer extends Observable {
    * Checks whether the layer has child layers with visible set to True
    *
    * @returns {boolean} True if the layer has visible child layers
+   * @deprecated
    */
   hasVisibleChildren() {
     return !!this.hasChildren(true);
@@ -251,7 +277,7 @@ export default class Layer extends Observable {
     for (let i = 0; i < this.children.length; i += 1) {
       if (this.children[i].name === name) {
         this.children.splice(i, 1);
-        return;
+        break;
       }
     }
     this.dispatchEvent({
@@ -270,12 +296,17 @@ export default class Layer extends Observable {
    */
   // eslint-disable-next-line no-unused-vars
   getFeatureInfoAtCoordinate(coordinate, options) {
+    // eslint-disable-next-line no-console
+    console.error(
+      'getFeatureInfoAtCoordinate must be implemented by inheriting layers',
+    );
+
     // This layer returns no feature info.
     // The function is implemented by inheriting layers.
     return Promise.resolve({
       layer: this,
       features: [],
-      coordinate: null,
+      coordinate,
     });
   }
 
@@ -291,7 +322,7 @@ export default class Layer extends Observable {
         this.clickCallbacks.push(callback);
       }
     } else {
-      throw new Error('callback must be of type function.');
+      throw new Error('onClick callback must be of type function:', callback);
     }
   }
 
@@ -308,5 +339,86 @@ export default class Layer extends Observable {
         this.clickCallbacks.splice(idx, 1);
       }
     }
+  }
+
+  /**
+   * Function triggered when the user click the map.
+   * @private
+   */
+  onUserClickCallback(evt) {
+    const emptyFeatureInfo = {
+      features: [],
+      layer: this,
+      coordinate: evt.coordinate,
+      event: evt,
+    };
+
+    if (!this.isClickActive || !this.clickCallbacks.length) {
+      return Promise.resolve(emptyFeatureInfo);
+    }
+
+    return this.getFeatureInfoAtCoordinate(evt.coordinate)
+      .then((featureInfo) => {
+        this.clickCallbacks.forEach((callback) => callback(featureInfo));
+        return featureInfo;
+      })
+      .catch(() => {
+        return emptyFeatureInfo;
+      });
+  }
+
+  /**
+   * Listens to hover events on the layer.
+   * @param {function} callback Callback function, called with the clicked
+   *   features, the layer instance and the click event.
+   */
+  onHover(callback) {
+    if (typeof callback === 'function') {
+      if (!this.hoverCallbacks.includes(callback)) {
+        this.hoverCallbacks.push(callback);
+      }
+    } else {
+      throw new Error('callback must be of type function.');
+    }
+  }
+
+  /**
+   * Unlistens to hover events on the layer.
+   * @param {function} callback Callback function, called with the hovered
+   *   features, the layer instance and the click event.
+   */
+  unHover(callback) {
+    if (typeof callback === 'function') {
+      const idx = this.hoverCallbacks.indexOf(callback);
+      if (idx >= -1) {
+        this.hoverCallbacks.splice(idx, 1);
+      }
+    }
+  }
+
+  /**
+   * Function triggered when the user move the cursor.
+   * @private
+   */
+  onUserMoveCallback(evt) {
+    const emptyFeatureInfo = {
+      features: [],
+      layer: this,
+      coordinate: evt.coordinate,
+      event: evt,
+    };
+
+    if (!this.isHoverActive || !this.hoverCallbacks.length) {
+      return Promise.resolve(emptyFeatureInfo);
+    }
+
+    return this.getFeatureInfoAtCoordinate(evt.coordinate)
+      .then((featureInfo) => {
+        this.hoverCallbacks.forEach((callback) => callback(featureInfo));
+        return featureInfo;
+      })
+      .catch(() => {
+        return emptyFeatureInfo;
+      });
   }
 }

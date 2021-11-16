@@ -15,7 +15,6 @@ import { timeSteps } from '../trackerConfig';
  * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
  * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
- * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
  * @classproperty {function} sort - Sort the trajectories.
  * @classproperty {function} style - Style of a trajectory.
  * @classproperty {Date} time - Time used to display the trajectories. The setter manages a Date or a number in ms representing a Date. If `live` property is true. The setter does nothing..
@@ -104,14 +103,19 @@ export class TrackerLayerInterface {
  */
 const TrackerLayerMixin = (Base) =>
   class extends Base {
+    constructor(options) {
+      super({ hitTolerance: 10, ...options });
+      this.onFeatureHover = this.onFeatureHover.bind(this);
+      this.onFeatureClick = this.onFeatureClick.bind(this);
+    }
+
     /**
      * Define layer's properties.
      *
      * @ignore
      */
     defineProperties(options) {
-      const { isHoverActive, style, speed } = {
-        isHoverActive: true,
+      const { style, speed } = {
         ...options,
       };
 
@@ -150,14 +154,6 @@ const TrackerLayerMixin = (Base) =>
 
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
-
-        /**
-         * Active on hover effect.
-         */
-        isHoverActive: {
-          value: !!isHoverActive,
-          writable: true,
-        },
 
         /**
          * Style function used to render a vehicle.
@@ -384,6 +380,14 @@ const TrackerLayerMixin = (Base) =>
       this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
+
+      if (this.isClickActive) {
+        this.onClick(this.onFeatureClick);
+      }
+
+      if (this.isHoverActive) {
+        this.onHover(this.onFeatureHover);
+      }
     }
 
     /**
@@ -542,6 +546,22 @@ const TrackerLayerMixin = (Base) =>
         coordinate,
       });
     }
+
+    /**
+     * Define beahvior when a vehicle is clicked
+     * To be defined in child classes.
+     * @private
+     * @inheritdoc
+     */
+    onFeatureClick() {}
+
+    /**
+     * Define behavior when a vehicle is hovered
+     * To be defined in child classes.
+     * @private
+     * @inheritdoc
+     */
+    onFeatureHover() {}
 
     /**
      * Get the duration before the next update depending on zoom level.

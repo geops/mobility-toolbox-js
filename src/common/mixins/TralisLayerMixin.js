@@ -119,6 +119,47 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
     }
 
+    /**
+     * Apply the highlight style on hover.
+     *
+     * @private
+     * @inheritdoc
+     */
+    onFeatureHover(featureInfo) {
+      const {
+        features: [feature],
+      } = featureInfo;
+      let id = null;
+      if (feature) {
+        id = feature.get('train_id');
+      }
+      if (this.hoverVehicleId !== id) {
+        /** @ignore */
+        this.hoverVehicleId = id;
+        this.renderTrajectories();
+      }
+      super.onFeatureHover(featureInfo);
+    }
+
+    /**
+     * Display the complete trajectory of the vehicle.
+     *
+     * @private
+     * @inheritdoc
+     */
+    onFeatureClick(featureInfo) {
+      const {
+        features: [feature],
+      } = featureInfo;
+      if (feature) {
+        /** @ignore */
+        this.selectedVehicleId = feature.get('train_id');
+      } else {
+        this.selectedVehicleId = null;
+      }
+      super.onFeatureClick(featureInfo);
+    }
+
     onMessage(data) {
       if (!data.content) {
         return;

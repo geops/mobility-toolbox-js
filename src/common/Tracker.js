@@ -1,4 +1,3 @@
-import { unByKey } from 'ol/Observable';
 import GeomType from 'ol/geom/GeometryType';
 import { compose, apply, create } from 'ol/transform';
 
@@ -363,7 +362,6 @@ export default class Tracker {
    * @private
    */
   destroy() {
-    unByKey(this.olEventsKeys);
     this.renderedTrajectories = [];
     this.clear();
   }

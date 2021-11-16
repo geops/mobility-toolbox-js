@@ -174,33 +174,6 @@ class MapboxStyleLayer extends Layer {
         this.onLoad();
       }),
     );
-
-    // Listen to click events
-    this.olListenersKeys.push(
-      this.map.on('singleclick', (e) => {
-        if (!this.clickCallbacks.length) {
-          return;
-        }
-
-        this.getFeatureInfoAtCoordinate(e.coordinate)
-          .then((d) =>
-            this.callClickCallbacks(d.features, d.layer, d.coordinate),
-          )
-          .catch(() => this.callClickCallbacks([], this, e.coordinate));
-      }),
-    );
-  }
-
-  /**
-   * Call click callbacks with given parameters.
-   * This is done in a separate function for being able to modify the response.
-   * @param {Array<ol/Feature~Feature>} features
-   * @param {ol/layer/Layer~Layer} layer
-   * @param {ol/coordinate~Coordinate} coordinate
-   * @private
-   */
-  callClickCallbacks(features, layer, coordinate) {
-    this.clickCallbacks.forEach((c) => c(features, layer, coordinate));
   }
 
   /**

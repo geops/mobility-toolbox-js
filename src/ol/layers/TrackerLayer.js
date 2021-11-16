@@ -1,5 +1,4 @@
 import { Layer as OLLayer, Group } from 'ol/layer';
-import { unByKey } from 'ol/Observable';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import mixin from '../../common/mixins/TrackerLayerMixin';
@@ -35,7 +34,11 @@ class TrackerLayer extends mixin(Layer) {
       options.renderWhenInteracting ||
       (() => {
         // Render trajectories on each render frame when the number of trajectories is small.
-        return this.tracker?.renderedTrajectories?.length <= 200;
+        return (
+          this.tracker &&
+          this.tracker.renderedTrajectories &&
+          this.tracker.renderedTrajectories.length <= 200
+        );
       });
 
     /** @ignore */
@@ -114,71 +117,6 @@ class TrackerLayer extends mixin(Layer) {
       zoom: null,
       rotation: 0,
     };
-
-    /**
-     * Array of ol events key, returned by on() or once().
-     * @type {Array<ol/events~EventsKey>}
-     * @ignore
-     */
-    this.olEventsKeys = []; // Be careful to not override this value in child classe.
-  }
-
-  /**
-   * Trackerlayer is started.
-   * @private
-   */
-  start() {
-    super.start();
-
-    this.olEventsKeys = [
-      this.map.on('moveend', () => {
-        const z = this.map.getView().getZoom();
-
-        if (z !== this.currentZoom) {
-          /**
-           * Current value of the zoom.
-           * @type {number}
-           * @ignore
-           */
-          this.currentZoom = z;
-
-          // This will restart the timeouts.
-          // TODO maybe find a calculation a bit less approximative.
-          /** @ignore */
-          this.requestIntervalSeconds = 200 / z || 1000;
-        }
-      }),
-      this.map.on('pointermove', (evt) => {
-        if (
-          this.map.getView().getInteracting() ||
-          this.map.getView().getAnimating() ||
-          !this.isHoverActive
-        ) {
-          return;
-        }
-        const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
-        const id = vehicle && vehicle.id;
-        if (this.hoverVehicleId !== id) {
-          this.map.getTargetElement().style.cursor = vehicle
-            ? 'pointer'
-            : 'auto';
-
-          /** @ignore */
-          this.hoverVehicleId = id;
-          this.renderTrajectories();
-        }
-      }),
-    ];
-  }
-
-  /**
-   * Stop current layer.
-   * @private
-   */
-  stop() {
-    super.stop();
-    unByKey(this.olEventsKeys);
-    this.olEventsKeys = [];
   }
 
   /**
@@ -245,6 +183,32 @@ class TrackerLayer extends mixin(Layer) {
   getFeatureInfoAtCoordinate(coordinate) {
     const resolution = this.map.getView().getResolution();
     return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+  }
+
+  /**
+   * Update the cursor style when hovering a vehicle.
+   *
+   * @private
+   * @inheritdoc
+   */
+  onFeatureHover(featureInfo) {
+    super.onFeatureHover(featureInfo);
+    this.map.getTargetElement().style.cursor = featureInfo.features.length
+      ? 'pointer'
+      : 'auto';
+  }
+
+  /**
+   * Display the complete trajectory of the vehicle.
+   *
+   * @private
+   * @inheritdoc
+   */
+  onFeatureClick(featureInfo) {
+    super.onFeatureClick(featureInfo);
+    if (!featureInfo.features.length) {
+      this.vectorLayer.getSource().clear();
+    }
   }
 
   /**

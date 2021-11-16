@@ -1,4 +1,3 @@
-import { unByKey } from 'ol/Observable';
 import Layer from './Layer';
 
 /**
@@ -28,55 +27,6 @@ class VectorLayer extends Layer {
       layer: this,
       coordinate,
     });
-  }
-
-  /**
-   * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map
-   */
-  init(map) {
-    super.init(map);
-
-    if (!this.map) {
-      return;
-    }
-
-    /**
-     * ol click events key, returned by map.on('singleclick')
-     * @type {ol/events~EventsKey}
-     * @private
-     */
-    this.singleClickRef = this.map.on('singleclick', (e) => {
-      if (!this.clickCallbacks.length) {
-        return;
-      }
-
-      this.getFeatureInfoAtCoordinate(e.coordinate)
-        .then((d) => this.callClickCallbacks(d.features, d.layer, d.coordinate))
-        .catch(() => this.callClickCallbacks([], this, e.coordinate));
-    });
-  }
-
-  /**
-   * Call click callbacks with given parameters.
-   * This is done in a separate function for being able to modify the response.
-   * @param {Array<ol/Feature~Feature>} features
-   * @param {ol/layer/Layer~Layer} layer
-   * @param {ol/coordinate~Coordinate} coordinate
-   * @private
-   */
-  callClickCallbacks(features, layer, coordinate) {
-    this.clickCallbacks.forEach((c) => c(features, layer, coordinate));
-  }
-
-  /**
-   * Terminate what was initialized in init function. Remove layer, events...
-   */
-  terminate() {
-    super.terminate();
-    if (this.singleClickRef) {
-      unByKey(this.singleClickRef);
-    }
   }
 
   /**

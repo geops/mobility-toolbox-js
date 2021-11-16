@@ -19,8 +19,8 @@ describe('TrajservLayer', () => {
     onClick = jest.fn();
     layer = new TralisLayer({
       url: 'ws://localhost:1234',
-      onClick,
       apiKey: 'apiKey',
+      onClick,
     });
 
     olMap = new Map({
