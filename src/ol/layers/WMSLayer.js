@@ -8,7 +8,7 @@ import Layer from './Layer';
  */
 class WMSLayer extends Layer {
   /**
-   * @inheritdoc
+   * @override
    */
   constructor(options = {}) {
     super(options);

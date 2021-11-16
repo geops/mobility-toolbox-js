@@ -143,7 +143,7 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
    * @private
-   * @inheritdoc
+   * @override
    */
   renderTrajectoriesInternal(viewState, noInterpolate) {
     let isRendered = false;
@@ -189,7 +189,7 @@ class TrackerLayer extends mixin(Layer) {
    * Update the cursor style when hovering a vehicle.
    *
    * @private
-   * @inheritdoc
+   * @override
    */
   onFeatureHover(featureInfo) {
     super.onFeatureHover(featureInfo);
@@ -202,7 +202,7 @@ class TrackerLayer extends mixin(Layer) {
    * Display the complete trajectory of the vehicle.
    *
    * @private
-   * @inheritdoc
+   * @override
    */
   onFeatureClick(featureInfo) {
     super.onFeatureClick(featureInfo);

@@ -551,7 +551,7 @@ const TrackerLayerMixin = (Base) =>
      * Define beahvior when a vehicle is clicked
      * To be defined in child classes.
      * @private
-     * @inheritdoc
+     * @override
      */
     onFeatureClick() {}
 
@@ -559,7 +559,7 @@ const TrackerLayerMixin = (Base) =>
      * Define behavior when a vehicle is hovered
      * To be defined in child classes.
      * @private
-     * @inheritdoc
+     * @override
      */
     onFeatureHover() {}
 

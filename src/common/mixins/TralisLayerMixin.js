@@ -123,7 +123,7 @@ const TralisLayerMixin = (TrackerLayer) =>
      * Apply the highlight style on hover.
      *
      * @private
-     * @inheritdoc
+     * @override
      */
     onFeatureHover(featureInfo) {
       const {
@@ -145,7 +145,7 @@ const TralisLayerMixin = (TrackerLayer) =>
      * Display the complete trajectory of the vehicle.
      *
      * @private
-     * @inheritdoc
+     * @override
      */
     onFeatureClick(featureInfo) {
       const {
