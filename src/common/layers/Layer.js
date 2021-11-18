@@ -367,7 +367,10 @@ export default class Layer extends Observable {
 
     return this.getFeatureInfoAtCoordinate(evt.coordinate)
       .then((featureInfo) => {
-        this.clickCallbacks.forEach((callback) => callback(featureInfo));
+        const { features, layer, coordinate } = featureInfo;
+        this.clickCallbacks.forEach((callback) =>
+          callback(features, layer, coordinate),
+        );
         return featureInfo;
       })
       .catch(() => {
@@ -422,7 +425,10 @@ export default class Layer extends Observable {
 
     return this.getFeatureInfoAtCoordinate(evt.coordinate)
       .then((featureInfo) => {
-        this.hoverCallbacks.forEach((callback) => callback(featureInfo));
+        const { features, layer, coordinate } = featureInfo;
+        this.hoverCallbacks.forEach((callback) =>
+          callback({ features, layer, coordinate }),
+        );
         return featureInfo;
       })
       .catch(() => {

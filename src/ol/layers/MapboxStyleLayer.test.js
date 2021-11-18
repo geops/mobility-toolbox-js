@@ -80,7 +80,7 @@ describe('MapboxStyleLayer', () => {
     expect(onClick).toHaveBeenCalledTimes(0);
     await map.dispatchEvent(evt);
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledWith({ features, layer, coordinate });
+    expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
   });
 
   test('should call super class terminate function.', () => {

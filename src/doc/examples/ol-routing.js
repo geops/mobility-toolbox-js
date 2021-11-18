@@ -13,7 +13,6 @@ export default () => {
     url: `https://maps.geops.io/styles/base_bright_v2/style.json?key=${window.apiKey}`,
   });
 
-  // eslint-disable-next-line no-unused-vars
   const map = new Map({
     target: 'map',
     layers: [mapboxLayer],
