@@ -19,6 +19,22 @@ import mixin from '../../common/mixins/TralisLayerMixin';
  * @implements {TralisLayerInterface}
  */
 class TralisLayer extends mixin(TrackerLayer) {
+  init(map) {
+    super.init(map);
+    if (this.map) {
+      if (this.isUpdateBboxOnMoveEnd) {
+        this.olListenersKeys.push(
+          this.map.on('moveend', () => {
+            this.api.conn.setBbox([
+              ...this.map.getView().calculateExtent(),
+              Math.floor(this.map.getView().getZoom()),
+            ]);
+          }),
+        );
+      }
+    }
+  }
+
   /**
    * Create a copy of the TralisLayer.
    * @param {Object} newOptions Options to override

@@ -1,26 +1,37 @@
-import TileLayer from 'ol/layer/Tile';
-import OSMSource from 'ol/source/OSM';
 import View from 'ol/View';
-import { Map, Layer, TralisLayer } from '../../ol';
+import { fromLonLat } from 'ol/proj';
+import { Map, TralisLayer, MapboxLayer } from '../../ol';
 import 'ol/ol.css';
+import CopyrightControl from '../../ol/controls/CopyrightControl';
+import LINE_IMAGES from './assets/tralis-live-map';
 
 export default () => {
   const map = new Map({
     target: 'map',
     view: new View({
-      center: [1282278, 6128615],
-      zoom: 9,
+      center: fromLonLat([11.55, 48.14]),
+      zoom: 11,
     }),
+    controls: [new CopyrightControl()],
   });
-  const osm = new Layer({
-    olLayer: new TileLayer({
-      source: new OSMSource(),
-    }),
+
+  const layer = new MapboxLayer({
+    url: 'https://maps.geops.io/styles/travic_v2/style.json',
+    apiKey: window.apiKey,
   });
 
   const tracker = new TralisLayer({
-    url: '',
-    apiKey: '',
+    url: 'wss://api.geops.io/realtime-ws/dev/',
+    apiKey: window.apiKey,
+    bbox: [1152072, 6048052, 1433666, 6205578],
+    isUpdateBboxOnMoveEnd: true,
+    style: (props) => {
+      const img = new Image();
+      img.src = LINE_IMAGES[(props.line || {}).name || 'unknown'];
+      img.width = 25 * window.devicePixelRatio;
+      img.height = 25 * window.devicePixelRatio;
+      return img;
+    },
   });
 
   tracker.onClick(({ features: [feature] }) => {
@@ -30,6 +41,6 @@ export default () => {
     }
   });
 
-  map.addLayer(osm);
+  map.addLayer(layer);
   map.addLayer(tracker);
 };
