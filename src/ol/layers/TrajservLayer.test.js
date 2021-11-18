@@ -14,8 +14,8 @@ describe('TrajservLayer', () => {
 
     onClick = jest.fn();
     layer = new TrajservLayer({
-      onClick,
       apiKey: 'apiKey',
+      onClick,
     });
 
     olMap = new Map({
@@ -63,7 +63,6 @@ describe('TrajservLayer', () => {
   });
 
   test("map events should be called if zoom doesn't change", () => {
-    const spy = jest.spyOn(layer, 'onMapClick');
     const spy2 = jest.spyOn(layer, 'onMoveEnd');
 
     // Mock response for the following calls
@@ -75,18 +74,13 @@ describe('TrajservLayer', () => {
     // Start uses mockResponse
     layer.start();
 
-    const coordinate = [1, 2];
-    const evt = { type: 'singleclick', olMap, coordinate };
-    olMap.dispatchEvent(evt);
-    expect(spy).toHaveBeenCalledTimes(1);
-
     // dispatchEvent uses mockResponse
     const evt2 = { type: 'moveend', olMap };
-    // On the first movend requestIntervalInSec will be updated so it will unlistne the event then readd them.
-    olMap.dispatchEvent(evt2);
-    expect(spy2).toHaveBeenCalledTimes(0);
+    // On the first movend requestIntervalInSec will be updated so it will unlisten the event then read them.
     olMap.dispatchEvent(evt2);
     expect(spy2).toHaveBeenCalledTimes(1);
+    olMap.dispatchEvent(evt2);
+    expect(spy2).toHaveBeenCalledTimes(2);
   });
 
   test('should create a default api with default url.', () => {

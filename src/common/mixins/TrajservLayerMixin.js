@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 import qs from 'query-string';
+import { unByKey } from 'ol/Observable';
 import { getUTCDateString, getUTCTimeString } from '../timeUtils';
 import {
   getRadius,
@@ -17,7 +18,6 @@ import { TrajservAPI } from '../../api';
  * TrajservLayerInterface.
  *
  * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
- * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
  * @classproperty {function} style - Style of the vehicle.
  * @classproperty {FilterFunction} filter - Time speed.
  * @classproperty {function} sort - Set the filter for tracker features.
@@ -306,6 +306,50 @@ const TrajservLayerMixin = (TrackerLayer) =>
       this.stopUpdateTrajectories();
       this.abortFetchTrajectories();
       super.stop();
+    }
+
+    /**
+     * Apply the highlight style on hover.
+     *
+     * @private
+     * @override
+     */
+    onFeatureHover(featureInfo) {
+      const {
+        features: [feature],
+      } = featureInfo;
+      let id = null;
+      if (feature) {
+        id = feature.get('id');
+      }
+      if (this.hoverVehicleId !== id) {
+        /** @ignore */
+        this.hoverVehicleId = id;
+        this.renderTrajectories();
+      }
+      super.onFeatureHover(featureInfo);
+    }
+
+    /**
+     * Display the complete trajectory of the vehicle.
+     *
+     * @private
+     * @override
+     */
+    onFeatureClick(featureInfo) {
+      const {
+        features: [feature],
+      } = featureInfo;
+      if (feature) {
+        /** @ignore */
+        this.selectedVehicleId = feature.get('id');
+        /** @ignore */
+        this.journeyId = feature.get('journeyIdentifier');
+        this.updateTrajectoryStations(this.selectedVehicleId);
+      } else {
+        this.selectedVehicleId = null;
+      }
+      super.onFeatureClick(featureInfo);
     }
 
     updateFilters() {

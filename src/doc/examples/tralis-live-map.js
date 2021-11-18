@@ -26,5 +26,12 @@ export default () => {
     },
   });
 
+  tracker.onClick(({ features: [feature] }) => {
+    if (feature) {
+      // eslint-disable-next-line no-console
+      console.log(feature.getProperties());
+    }
+  });
+
   map.addLayer(tracker);
 };

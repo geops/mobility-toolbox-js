@@ -2,6 +2,7 @@
 /* eslint-disable max-classes-per-file */
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
+import Feature from 'ol/Feature';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
 
@@ -14,7 +15,6 @@ import { timeSteps } from '../trackerConfig';
  * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
  * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
- * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
  * @classproperty {function} sort - Sort the trajectories.
  * @classproperty {function} style - Style of a trajectory.
  * @classproperty {Date} time - Time used to display the trajectories. The setter manages a Date or a number in ms representing a Date. If `live` property is true. The setter does nothing..
@@ -103,14 +103,19 @@ export class TrackerLayerInterface {
  */
 const TrackerLayerMixin = (Base) =>
   class extends Base {
+    constructor(options) {
+      super({ hitTolerance: 10, ...options });
+      this.onFeatureHover = this.onFeatureHover.bind(this);
+      this.onFeatureClick = this.onFeatureClick.bind(this);
+    }
+
     /**
      * Define layer's properties.
      *
      * @ignore
      */
     defineProperties(options) {
-      const { isHoverActive, style, speed } = {
-        isHoverActive: true,
+      const { style, speed } = {
         ...options,
       };
 
@@ -149,14 +154,6 @@ const TrackerLayerMixin = (Base) =>
 
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
-
-        /**
-         * Active on hover effect.
-         */
-        isHoverActive: {
-          value: !!isHoverActive,
-          writable: true,
-        },
 
         /**
          * Style function used to render a vehicle.
@@ -383,6 +380,14 @@ const TrackerLayerMixin = (Base) =>
       this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
+
+      if (this.isClickActive) {
+        this.onClick(this.onFeatureClick);
+      }
+
+      if (this.isHoverActive) {
+        this.onHover(this.onFeatureHover);
+      }
     }
 
     /**
@@ -494,7 +499,10 @@ const TrackerLayerMixin = (Base) =>
      * @returns {Array<ol/Feature~Feature>} Array of vehicle.
      */
     getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {
-      const ext = buffer([...coordinate, ...coordinate], 10 * resolution);
+      const ext = buffer(
+        [...coordinate, ...coordinate],
+        this.hitTolerance * resolution,
+      );
       const trajectories = this.tracker.getTrajectories();
       const vehicles = [];
       for (let i = 0; i < trajectories.length; i += 1) {
@@ -511,6 +519,49 @@ const TrackerLayerMixin = (Base) =>
 
       return vehicles;
     }
+
+    /**
+     * Request feature information for a given coordinate.
+     *
+     * @param {ol/coordinate~Coordinate} coordinate Coordinate.
+     * @param {Object} options Options See child classes to see which options are supported.
+     * @param {number} [options.resolution=1] The resolution of the map.
+     * @param {number} [options.nb=Infinity] The max number of vehicles to return.
+     * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+     */
+    getFeatureInfoAtCoordinate(coordinate, options = {}) {
+      const { resolution, nb } = options;
+
+      const vehicles = this.getVehiclesAtCoordinate(coordinate, resolution, nb);
+
+      return Promise.resolve({
+        layer: this,
+        features: vehicles.map((vehicle) => {
+          const feature = new Feature({
+            geometry: vehicle.geometry,
+          });
+          feature.setProperties({ ...vehicle });
+          return feature;
+        }),
+        coordinate,
+      });
+    }
+
+    /**
+     * Define beahvior when a vehicle is clicked
+     * To be defined in child classes.
+     * @private
+     * @override
+     */
+    onFeatureClick() {}
+
+    /**
+     * Define behavior when a vehicle is hovered
+     * To be defined in child classes.
+     * @private
+     * @override
+     */
+    onFeatureHover() {}
 
     /**
      * Get the duration before the next update depending on zoom level.

@@ -98,16 +98,16 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.format = new GeoJSON();
     }
 
-    init(map) {
-      super.init(map);
+    start() {
+      super.start();
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
     }
 
-    terminate() {
+    stop() {
+      super.stop();
       this.api.unsubscribeTrajectory(this.onMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
-      super.terminate();
     }
 
     setMode(mode) {
@@ -117,6 +117,47 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.mode = mode;
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
+    }
+
+    /**
+     * Apply the highlight style on hover.
+     *
+     * @private
+     * @override
+     */
+    onFeatureHover(featureInfo) {
+      const {
+        features: [feature],
+      } = featureInfo;
+      let id = null;
+      if (feature) {
+        id = feature.get('train_id');
+      }
+      if (this.hoverVehicleId !== id) {
+        /** @ignore */
+        this.hoverVehicleId = id;
+        this.renderTrajectories();
+      }
+      super.onFeatureHover(featureInfo);
+    }
+
+    /**
+     * Display the complete trajectory of the vehicle.
+     *
+     * @private
+     * @override
+     */
+    onFeatureClick(featureInfo) {
+      const {
+        features: [feature],
+      } = featureInfo;
+      if (feature) {
+        /** @ignore */
+        this.selectedVehicleId = feature.get('train_id');
+      } else {
+        this.selectedVehicleId = null;
+      }
+      super.onFeatureClick(featureInfo);
     }
 
     onMessage(data) {

@@ -1,10 +1,11 @@
 import Feature from 'ol/Feature';
 import { transform as transformCoords } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
-import { Point, MultiPoint, LineString } from 'ol/geom';
+import { MultiPoint, LineString } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
+import { unByKey } from 'ol/Observable';
 import TrackerLayer from './TrackerLayer';
 import { getUTCTimeString } from '../../common/timeUtils';
 import { getBgColor } from '../../common/trackerConfig';
@@ -83,9 +84,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
      * @ignore
      */
     this.olEventsKeys = [
-      ...this.olEventsKeys,
-      this.map.on('singleclick', this.onMapClick.bind(this)),
-
       this.map.on('movestart', () => {
         this.abortFetchTrajectories();
       }),
@@ -93,11 +91,32 @@ class TrajservLayer extends mixin(TrackerLayer) {
     ];
   }
 
+  stop() {
+    unByKey(this.olEventsKeys);
+    super.stop();
+  }
+
   /**
    * Callback on 'moveend' event.
    * @private
    */
   onMoveEnd() {
+    const z = this.map.getView().getZoom();
+
+    if (z !== this.currentZoom) {
+      /**
+       * Current value of the zoom.
+       * @type {number}
+       * @ignore
+       */
+      this.currentZoom = z;
+
+      // This will restart the timeouts.
+      // TODO maybe find a calculation a bit less approximative.
+      /** @ignore */
+      this.requestIntervalSeconds = 200 / z || 1000;
+    }
+
     this.abortFetchTrajectories();
     if (
       !this.map.getView().getAnimating() &&
@@ -107,43 +126,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
     }
     if (this.selectedVehicleId && this.journeyId) {
       this.highlightTrajectory();
-    }
-  }
-
-  /**
-   * Callback on 'singleclick' event.
-   * @param {ol/MapEvent~MapEvent} evt
-   * @private
-   */
-  onMapClick(evt) {
-    if (!this.clickCallbacks.length) {
-      return;
-    }
-
-    const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
-    const features = [];
-
-    if (vehicle) {
-      const geom = vehicle.coordinate ? new Point(vehicle.coordinate) : null;
-      features.push(new Feature({ geometry: geom, ...vehicle }));
-
-      if (features.length) {
-        /** @ignore */
-        this.selectedVehicleId = features[0].get('id');
-        /** @ignore */
-        this.journeyId = features[0].get('journeyIdentifier');
-        this.updateTrajectoryStations(this.selectedVehicleId).then(
-          (trajStations) => {
-            this.clickCallbacks.forEach((callback) =>
-              callback({ ...vehicle, ...trajStations }, this, evt),
-            );
-          },
-        );
-      }
-    } else {
-      this.selectedVehicleId = null;
-      this.vectorLayer.getSource().clear();
-      this.clickCallbacks.forEach((callback) => callback(null, this, evt));
     }
   }
 
@@ -214,7 +196,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Fetch stations information with a trajectory ID
    * @param {number} trajId The ID of the trajectory
-   * @returns {Promise<TrajectoryStation[]>} A list of stations.
+   * @returns {Promise<Array<TrajectoryStation>>} A list of stations.
    * @private
    */
   updateTrajectoryStations(trajId) {

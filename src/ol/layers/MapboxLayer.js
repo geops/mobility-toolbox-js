@@ -18,6 +18,7 @@ import { getMapboxMapCopyrights, getMapboxStyleUrl } from '../../common/utils';
  *   apikey: 'yourApiKey',
  * });
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
 export default class MapboxLayer extends Layer {
@@ -145,9 +146,7 @@ export default class MapboxLayer extends Layer {
      */
     this.apiKeyName = options.apiKeyName || 'key';
 
-    /**
-     * @ignores
-     */
+    /** @ignore */
     this.updateAttribution = this.updateAttribution.bind(this);
   }
 
@@ -189,6 +188,7 @@ export default class MapboxLayer extends Layer {
 
   /**
    * Returns a style URL with apiKey & apiKeyName infos.
+   * @private
    */
   createStyleUrl() {
     return getMapboxStyleUrl(this.apiKey, this.apiKeyName, this.styleUrl);
@@ -295,6 +295,10 @@ export default class MapboxLayer extends Layer {
     this.mbMap.on('idle', this.updateAttribution);
   }
 
+  /**
+   * Update attributions of the source.
+   * @private
+   */
   updateAttribution(evt) {
     const newAttributions =
       this.copyrights || getMapboxMapCopyrights(evt.target) || [];
@@ -307,8 +311,7 @@ export default class MapboxLayer extends Layer {
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.
-   * @returns {Promise<Object>} Promise with features, layer and coordinate
-   *  or null if no feature was hit. The original Mapbox feature is available as a property named 'mapboxFeature'.
+   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate. The original Mapbox feature is available as a property named 'mapboxFeature'.
    */
   getFeatureInfoAtCoordinate(coordinate, options) {
     // Ignore the getFeatureInfo until the mapbox map is loaded

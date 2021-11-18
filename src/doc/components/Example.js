@@ -137,6 +137,7 @@ const Example = () => {
                   className={classes.editButton}
                   html={html}
                   js={js}
+                  extraFiles={{}}
                 />
               </Paper>
             </Grid>

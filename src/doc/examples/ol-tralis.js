@@ -23,6 +23,13 @@ export default () => {
     apiKey: '',
   });
 
+  tracker.onClick(({ features: [feature] }) => {
+    if (feature) {
+      // eslint-disable-next-line no-console
+      console.log(feature.getProperties());
+    }
+  });
+
   map.addLayer(osm);
   map.addLayer(tracker);
 };

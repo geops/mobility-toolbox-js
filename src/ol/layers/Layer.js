@@ -31,6 +31,7 @@ class Layer extends LayerCommon {
    * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
    * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
+   * @param {boolean} [options.isClickActive=true] If true feature information will be queried on 'singleclick' event. All results will be passed to function registered using `onClick` function. Default is true.
    */
   constructor(options) {
     super(options);
@@ -62,7 +63,7 @@ class Layer extends LayerCommon {
   init(map) {
     super.init(map);
 
-    if (!this.map || !this.olLayer) {
+    if (!this.map) {
       return;
     }
 
@@ -74,8 +75,20 @@ class Layer extends LayerCommon {
       }),
     );
 
+    if (this.isClickActive) {
+      this.olListenersKeys.push(
+        this.map.on('singleclick', this.onUserClickCallback),
+      );
+    }
+
+    if (this.isHoverActive) {
+      this.olListenersKeys.push(
+        this.map.on('pointermove', this.onUserMoveCallback),
+      );
+    }
+
     // We set the copyright to the source used by the layer.
-    if (this.copyrights) {
+    if (this.copyrights && this.olLayer) {
       const attributions = this.copyrights || [];
       if (this.olLayer instanceof Group) {
         this.olLayer
@@ -84,7 +97,7 @@ class Layer extends LayerCommon {
           .forEach((layer) => {
             layer.getSource().setAttributions(attributions);
           });
-      } else {
+      } else if (this.olLayer.getSource) {
         this.olLayer.getSource().setAttributions(attributions);
       }
     }

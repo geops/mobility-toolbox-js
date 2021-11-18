@@ -16,6 +16,7 @@ import Layer from './Layer';
  *   styleLayersFilter: () => {},
  * });
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
 class MapboxStyleLayer extends Layer {
@@ -174,33 +175,6 @@ class MapboxStyleLayer extends Layer {
         this.onLoad();
       }),
     );
-
-    // Listen to click events
-    this.olListenersKeys.push(
-      this.map.on('singleclick', (e) => {
-        if (!this.clickCallbacks.length) {
-          return;
-        }
-
-        this.getFeatureInfoAtCoordinate(e.coordinate)
-          .then((d) =>
-            this.callClickCallbacks(d.features, d.layer, d.coordinate),
-          )
-          .catch(() => this.callClickCallbacks([], this, e.coordinate));
-      }),
-    );
-  }
-
-  /**
-   * Call click callbacks with given parameters.
-   * This is done in a separate function for being able to modify the response.
-   * @param {Array<ol/Feature~Feature>} features
-   * @param {ol/layer/Layer~Layer} layer
-   * @param {ol/coordinate~Coordinate} coordinate
-   * @private
-   */
-  callClickCallbacks(features, layer, coordinate) {
-    this.clickCallbacks.forEach((c) => c(features, layer, coordinate));
   }
 
   /**
@@ -264,8 +238,7 @@ class MapboxStyleLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
-   * @returns {Promise<Object>} Promise with features, layer and coordinate
-   *  or null if no feature was hit.
+   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     const { mbMap } = this.mapboxLayer;

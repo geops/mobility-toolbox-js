@@ -41,6 +41,7 @@ describe('TrackerLayer', () => {
     );
 
     expect(spy).toHaveBeenCalledTimes(1);
+    document.body.removeChild(mapElement);
   });
 
   test('#onClick', () => {

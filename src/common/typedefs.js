@@ -14,3 +14,10 @@
  * @property {number} zoom A zoom level.
  * @property {number} pixelRatio A pixel ratio.
  */
+
+/**
+ * @typedef {Object} FeatureInfo
+ * @property {Layer} layer A layer.
+ * @property {ol/Feature~Feature[]} features  An array of features.
+ * @property {number[2]} coordinate The coordinate where to find the featue.
+ */

@@ -16,6 +16,7 @@ const getMapboxMapCopyrights = (map) => {
       const source = sourceCache.getSource();
       const attribution =
         source.attribution || (source.options && source.options.attribution);
+
       if (attribution) {
         copyrights = copyrights.concat(
           attribution.replace(/&copy;/g, '©').split(/(<a.*?<\/a>)/),

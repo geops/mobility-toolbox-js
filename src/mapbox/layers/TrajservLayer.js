@@ -25,7 +25,6 @@ import { getUTCTimeString } from '../../common/timeUtils';
 class TrajservLayer extends mixin(TrackerLayer) {
   constructor(options = {}) {
     super({ ...options });
-    this.onMapClick = this.onMapClick.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onMoveEnd = this.onMoveEnd.bind(this);
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
@@ -52,14 +51,12 @@ class TrajservLayer extends mixin(TrackerLayer) {
       return;
     }
     super.start();
-    this.map.on('click', this.onMapClick);
     this.map.on('move', this.onMove);
     this.map.on('moveend', this.onMoveEnd);
   }
 
   stop() {
     if (this.map) {
-      this.map.off('click', this.onMapClick);
       this.map.off('move', this.onMove);
       this.map.off('moveend', this.onMoveEnd);
     }
@@ -78,52 +75,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   }
 
   /**
-   * Callback on 'mouseclick' event.
-   * @param {mapboxgl.MapMouseEvent} evt
-   * @private
-   */
-  onMapClick(evt) {
-    if (!this.clickCallbacks.length) {
-      return;
-    }
-
-    const [vehicle] = this.getVehiclesAtCoordinate(
-      fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
-      1,
-    );
-
-    if (vehicle) {
-      /**
-       * Id of the selected vehicle
-       * @type {string}
-       */
-      this.selectedVehicleId = vehicle.id;
-      /** @ignore */
-      this.journeyId = vehicle.journeyIdentifier;
-      this.updateTrajectoryStations(this.selectedVehicleId).then(
-        (vehicleWithStations) => {
-          /**
-           * Array of station coordinates.
-           * @type {Array<Array<number>>} Array of coordinates.
-           */
-          this.stationsCoords = [];
-          vehicleWithStations.stations.forEach((station) => {
-            this.stationsCoords.push(fromLonLat(station.coordinates));
-          });
-          this.clickCallbacks.forEach((callback) =>
-            callback({ ...vehicle, ...vehicleWithStations }, this, evt),
-          );
-        },
-      );
-    } else {
-      this.selectedVehicleId = null;
-      this.clickCallbacks.forEach((callback) => callback(null, this, evt));
-    }
-  }
-
-  /**
-   * @override
-   * * Returns the URL parameters.
+   * Returns the URL parameters.
    * @param {Object} extraParams Extra parameters
    * @returns {Object}
    * @private

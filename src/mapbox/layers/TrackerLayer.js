@@ -3,7 +3,7 @@ import { unByKey } from 'ol/Observable';
 import { getWidth, getHeight } from 'ol/extent';
 import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
-import Layer from '../../common/layers/Layer';
+import Layer from './Layer';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
 /**
@@ -19,19 +19,21 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
-    /** @ignores */
+    /** @ignore */
     this.onMove = this.onMove.bind(this);
-    this.onZoomEnd = this.onZoomEnd.bind(this);
-    this.onVisibilityChange = this.onVisibilityChange.bind(this);
 
-    /** @ignores */
-    this.onMouseMove = this.onMouseMove.bind(this);
+    /** @ignore */
+    this.onZoomEnd = this.onZoomEnd.bind(this);
+
+    /** @ignore */
+    this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 
   /**
    * Initialize the layer.
    *
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
+   * @param {string} beforeId Layer's id before which we want to add the new layer.
    * @override
    */
   init(map, beforeId) {
@@ -52,7 +54,7 @@ class TrackerLayer extends mixin(Layer) {
       coordinates: getSourceCoordinates(map, this.pixelRatio),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
-      attribution: this.copyrights,
+      attribution: this.copyrights && this.copyrights.join(', '),
     };
 
     this.beforeId = beforeId;
@@ -105,10 +107,6 @@ class TrackerLayer extends mixin(Layer) {
 
     this.map.on('move', this.onMove);
     this.map.on('zoomend', this.onZoomEnd);
-
-    if (this.isHoverActive) {
-      this.map.on('mousemove', this.onMouseMove);
-    }
   }
 
   /**
@@ -121,8 +119,29 @@ class TrackerLayer extends mixin(Layer) {
     if (this.map) {
       this.map.off('move', this.onMove);
       this.map.off('zoomend', this.onZoomEnd);
-      this.map.off('mousemove', this.onMouseMove);
     }
+  }
+
+  /**
+   * Function triggered when the user click the map.
+   * @override
+   */
+  onUserClickCallback(evt) {
+    super.onUserClickCallback({
+      coordinate: fromLonLat(evt.lngLat.toArray()),
+      ...evt,
+    });
+  }
+
+  /**
+   * Function triggered when the user moves the cursor over the map.
+   * @override
+   */
+  onUserMoveCallback(evt) {
+    super.onUserMoveCallback({
+      coordinate: fromLonLat(evt.lngLat.toArray()),
+      ...evt,
+    });
   }
 
   /**
@@ -195,6 +214,11 @@ class TrackerLayer extends mixin(Layer) {
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
+  getFeatureInfoAtCoordinate(coordinate) {
+    const resolution = getMercatorResolution(this.map);
+    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+  }
+
   onVisibilityChange() {
     if (this.visible && !this.map.getLayer(this.key)) {
       this.map.addLayer(this.layer, this.beforeId);
@@ -233,34 +257,16 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * On mousemove, we detect if a vehicle is heovered then updates the cursor's style.
+   * Update the cursor style when hovering a vehicle.
    *
-   * @param {mapboxgl.MapMouseEvent} evt Map's mousemove event.
    * @private
+   * @override
    */
-  onMouseMove(evt) {
-    if (
-      this.map.isMoving() ||
-      this.map.isRotating() ||
-      this.map.isZooming() ||
-      !this.isHoverActive
-    ) {
-      this.map.getContainer().style.cursor = 'auto';
-      return;
-    }
-    const [vehicle] = this.getVehiclesAtCoordinate(
-      fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
-      1,
-    );
-
-    const id = vehicle && vehicle.id;
-    if (this.hoverVehicleId !== id) {
-      this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
-      /** @ignore */
-      this.hoverVehicleId = id;
-      // We doesn´t wait the next render, we force it.
-      this.renderTrajectories();
-    }
+  onFeatureHover(featureInfo) {
+    super.onFeatureHover(featureInfo);
+    this.map.getCanvasContainer().style.cursor = featureInfo.features.length
+      ? 'pointer'
+      : 'auto';
   }
 }
 

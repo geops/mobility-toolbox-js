@@ -90,7 +90,7 @@ const CodeSandboxButton = ({ html, js, extraFiles, ...props }) => {
 CodeSandboxButton.propTypes = {
   html: PropTypes.string,
   js: PropTypes.string,
-  extraFiles: PropTypes.shape(PropTypes.string),
+  extraFiles: PropTypes.shape(),
 };
 
 CodeSandboxButton.defaultProps = {
