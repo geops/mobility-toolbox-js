@@ -124,9 +124,9 @@ class WebSocketConnector {
      */
     this.currentBbox = coordinates;
     this.send(`BBOX ${coordinates.join(' ')}`);
-    this.subscriptions.forEach((s) => {
-      this.get(s.params, s.cb, s.errorCb);
-    });
+    // this.subscriptions.forEach((s) => {
+    //   this.get(s.params, s.cb, s.errorCb);
+    // });
   }
 
   /**
