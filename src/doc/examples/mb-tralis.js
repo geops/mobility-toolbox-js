@@ -21,7 +21,7 @@ export default () => {
     tracker.init(map, 'waterway-name');
   });
 
-  tracker.onClick(({ features: [feature] }) => {
+  tracker.onClick(([feature]) => {
     if (feature) {
       // eslint-disable-next-line no-console
       console.log(feature.getProperties());

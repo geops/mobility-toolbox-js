@@ -12,14 +12,14 @@ export default () => {
     element.innerHTML = text;
   };
 
-  const onHover = ({ layer, features }) => {
+  const onHover = (features, layer) => {
     if (features.length) {
       // eslint-disable-next-line no-param-reassign
       layer.map.getTargetElement().style.cursor = 'pointer';
     }
   };
 
-  const onClick = ({ features }) => {
+  const onClick = (features) => {
     if (features.length) {
       addText(features[0].get('name'));
     }
