@@ -54,7 +54,7 @@ class TrackerLayer extends mixin(Layer) {
       coordinates: getSourceCoordinates(map, this.pixelRatio),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
-      attribution: this.copyrights.join(', '),
+      attribution: this.copyrights && this.copyrights.join(', '),
     };
 
     this.beforeId = beforeId;

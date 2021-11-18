@@ -53,8 +53,11 @@ export default class Layer extends Observable {
       this.onClick(onClick);
     }
 
-    /** @ignore */
-    this.copyrights = options.copyrights || [];
+    // This if is very important if you remove it you break the copyright control.
+    if (options.copyrights) {
+      /** @ignore */
+      this.copyrights = options.copyrights;
+    }
 
     /** @ignore */
     this.onUserClickCallback = this.onUserClickCallback.bind(this);

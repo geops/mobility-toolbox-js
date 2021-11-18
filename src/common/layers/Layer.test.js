@@ -28,9 +28,9 @@ describe('Layer', () => {
     expect(layer.isHoverActive).toBe(true);
     expect(layer.hitTolerance).toBe(5);
     expect(layer.isReactSpatialLayer).toBe(true);
-    expect(layer.copyrights).toEqual([]);
+    expect(layer.copyrights).toBe();
     expect(layer.visible).toBe(true);
-    expect(layer.properties).toEqual({ copyrights: [] });
+    expect(layer.properties).toEqual({});
     expect(layer.map).toBe(undefined);
     expect(layer.clickCallbacks).toEqual([]);
     expect(layer.hoverCallbacks).toEqual([]);
