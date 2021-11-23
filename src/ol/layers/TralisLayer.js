@@ -1,4 +1,7 @@
 import GeoJSON from 'ol/format/GeoJSON';
+import Feature from 'ol/Feature';
+import { MultiPoint } from 'ol/geom';
+import { Style, Fill, Stroke, Circle } from 'ol/style';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
 
@@ -38,7 +41,7 @@ class TralisLayer extends mixin(TrackerLayer) {
         Math.floor(this.map.getView().getZoom()),
       ]);
     }
-    console.log(this.selectedVehicleId);
+
     if (this.selectedVehicleId) {
       this.highlightTrajectory();
     }
@@ -49,93 +52,82 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @private
    */
   highlightTrajectory() {
-    this.api
-      .getFullTrajectory(this.selectedVehicleId)
-      .then((geojson) => {
-        const features = format.readFeatures(geojson);
-        this.drawFullTrajectory(features);
-        // .then((traj) => {
-        //   const { p: multiLine, t, c } = traj;
-        //   const lineCoords = [];
-        //   multiLine.forEach((line) => {
-        //     line.forEach((point) => {
-        //       lineCoords.push([point.x, point.y]);
-        //     });
-        //   });
+    super.highlightTrajectory().then(({ stopSequence, fullTrajectory }) => {
+      const vectorSource = this.vectorLayer.getSource();
+      vectorSource.clear();
+      const color =
+        (stopSequence &&
+          stopSequence[0] &&
+          stopSequence[0].color &&
+          `#${stopSequence[0].color}`) ||
+        '#ff0000';
 
-        //   this.drawFullTrajectory(
-        //     this.stationsCoords,
-        //     new LineString(lineCoords),
-        //     c ? `#${c}` : getBgColor(t),
-        //   );
-      })
-      .catch(() => {
-        this.vectorLayer.getSource().clear();
-      });
-  }
+      // const lineColor = color ? `#${color}` : getBgColor(color);
+      // // Don't allow white lines, use red instead.
+      // const vehiculeColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
 
-  /**
-   * Draw the trajectory as a line with points for each stop.
-   * @param {Array} stationsCoords Array of station coordinates.
-   * @param {LineString|MultiLineString} lineGeometry A LineString or a MultiLineString.
-   * @param {string} color The color of the line.
-   * @private
-   */
-  drawFullTrajectory(features, stationsCoords, lineGeometry, color) {
-    // Don't allow white lines, use red instead.
-    // const vehiculeColor = /#ffffff/i.test(color) ? '#ff0000' : color;
-    const vectorSource = this.vectorLayer.getSource();
-    vectorSource.clear();
+      if (
+        stopSequence &&
+        stopSequence.stations &&
+        stopSequence.stations.length &&
+        stopSequence.stations[0].coordinate
+      ) {
+        console.log(stopSequence);
+        const geometry = new MultiPoint(
+          stopSequence.stations.map((station) => station.coordinates),
+        );
 
-    // if (stationsCoords) {
-    //   const geometry = new MultiPoint(stationsCoords);
-    //   const aboveStationsFeature = new Feature(geometry);
-    //   aboveStationsFeature.setStyle(
-    //     new Style({
-    //       zIndex: 1,
-    //       image: new Circle({
-    //         radius: 5,
-    //         fill: new Fill({
-    //           color: '#000000',
-    //         }),
-    //       }),
-    //     }),
-    //   );
-    //   const belowStationsFeature = new Feature(geometry);
-    //   belowStationsFeature.setStyle(
-    //     new Style({
-    //       zIndex: 4,
-    //       image: new Circle({
-    //         radius: 4,
-    //         fill: new Fill({
-    //           color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
-    //         }),
-    //       }),
-    //     }),
-    //   );
-    //   vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
-    // }
+        const aboveStationsFeature = new Feature(geometry);
+        aboveStationsFeature.setStyle(
+          new Style({
+            zIndex: 1,
+            image: new Circle({
+              radius: 5,
+              fill: new Fill({
+                color: '#000000',
+              }),
+            }),
+          }),
+        );
+        const belowStationsFeature = new Feature(geometry);
+        belowStationsFeature.setStyle(
+          new Style({
+            zIndex: 4,
+            image: new Circle({
+              radius: 4,
+              fill: new Fill({
+                color,
+              }),
+            }),
+          }),
+        );
+        vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
+      }
 
-    // const lineFeat = new Feature({
-    //   geometry: lineGeometry,
-    // });
-    // lineFeat.setStyle([
-    //   new Style({
-    //     zIndex: 2,
-    //     stroke: new Stroke({
-    //       color: '#000000',
-    //       width: 6,
-    //     }),
-    //   }),
-    //   new Style({
-    //     zIndex: 3,
-    //     stroke: new Stroke({
-    //       color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
-    //       width: 4,
-    //     }),
-    //   }),
-    // ]);
-    vectorSource.addFeatures(features);
+      if (fullTrajectory) {
+        const features = format.readFeatures(fullTrajectory);
+        const style = [
+          new Style({
+            zIndex: 2,
+            stroke: new Stroke({
+              color,
+              width: 6,
+            }),
+          }),
+          new Style({
+            zIndex: 3,
+            stroke: new Stroke({
+              color,
+              width: 4,
+            }),
+          }),
+        ];
+        features.forEach((feature) => {
+          feature.setStyle(style);
+        });
+        this.vectorLayer.getSource().addFeatures(features);
+      }
+    });
   }
 
   /**

@@ -82,11 +82,6 @@ class TralisAPI {
 
     this.conn.isSUBAllow = !this.isUpdateBboxOnMoveEnd;
     this.conn.isDELAllow = !this.isUpdateBboxOnMoveEnd;
-    console.log(
-      this.conn.isSUBAllow,
-      this.isUpdateBboxOnMoveEnd,
-      !this.isUpdateBboxOnMoveEnd,
-    );
 
     if (!this.isUpdateBboxOnMoveEnd) {
       this.conn.setProjection(options.projection || 'epsg:3857');

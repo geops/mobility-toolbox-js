@@ -208,7 +208,6 @@ class WebSocketConnector {
       // if (!newSubscr.quiet) {
       this.send(`GET ${reqStr}`);
 
-      console.log(this.isSUBAllow);
       if (this.isSUBAllow) {
         this.send(`SUB ${reqStr}`);
       }

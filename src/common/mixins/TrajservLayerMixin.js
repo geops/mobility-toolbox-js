@@ -338,7 +338,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
     onFeatureClick(features, layer, coordinate) {
       const [feature] = features;
       if (feature) {
-        console.log(feature);
         /** @ignore */
         this.selectedVehicleId = feature.get('id');
         /** @ignore */
@@ -393,9 +392,9 @@ const TrajservLayerMixin = (TrackerLayer) =>
             });
 
             const lineColor = color ? `#${color}` : getBgColor(t);
-            // Don't allow white lines, use red instead.
+            // Don't allow white lines, use black instead.
             const vehiculeColor = /#ffffff/i.test(lineColor)
-              ? '#ff0000'
+              ? '#000000'
               : lineColor;
 
             this.drawFullTrajectory(

@@ -153,10 +153,9 @@ const TralisLayerMixin = (TrackerLayer) =>
     onFeatureClick(features, layer, coordinate) {
       const [feature] = features;
       if (feature) {
-        console.log(feature);
         /** @ignore */
         this.selectedVehicleId = feature.get('train_id');
-        this.onFeatureSelected();
+        this.highlightTrajectory();
       } else {
         this.selectedVehicleId = null;
       }
@@ -204,7 +203,7 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @private
      * @override
      */
-    onFeatureSelected() {
+    highlightTrajectory() {
       // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
       // Then we combine them in one response and send them to inherited layers.
       const promises = [
@@ -213,7 +212,14 @@ const TralisLayerMixin = (TrackerLayer) =>
       ];
 
       return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
-        console.log(this.journeyId, stopSequence, fullTrajectory);
+        console.log(
+          `stopSequence for ${this.selectedVehicleId}:`,
+          stopSequence,
+        );
+        console.log(
+          `fullTrajectory for ${this.selectedVehicleId}:`,
+          fullTrajectory,
+        );
         const response = {
           stopSequence,
           fullTrajectory,
