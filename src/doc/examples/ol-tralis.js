@@ -15,9 +15,9 @@ export default () => {
     view: new View({
       // center: max,
       center: [831634, 5933959],
+      zoom: 13,
       // center: fromLonLat([7.841148, 47.996542]), // freiburg
       // center: fromLonLat([11.55, 48.14]), // munich
-      zoom: 11,
     }),
     controls: [new CopyrightControl()],
   });
