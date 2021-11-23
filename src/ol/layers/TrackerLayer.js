@@ -116,7 +116,7 @@ class TrackerLayer extends mixin(Layer) {
       });
 
     // We store the layer used to highlight the full Trajectory
-    this.vectorLayer = this.olLayer.getLayers().get(0);
+    this.vectorLayer = this.olLayer.getLayers().item(0);
 
     // Options the last render run did happen. If something changes
     // we have to render again

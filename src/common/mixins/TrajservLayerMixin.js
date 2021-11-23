@@ -339,6 +339,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
     onFeatureClick(features, layer, coordinate) {
       const [feature] = features;
       if (feature) {
+        console.log(feature);
         /** @ignore */
         this.selectedVehicleId = feature.get('id');
         /** @ignore */

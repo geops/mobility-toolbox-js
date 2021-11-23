@@ -153,8 +153,10 @@ const TralisLayerMixin = (TrackerLayer) =>
     onFeatureClick(features, layer, coordinate) {
       const [feature] = features;
       if (feature) {
+        console.log(feature);
         /** @ignore */
         this.selectedVehicleId = feature.get('train_id');
+        this.onFeatureSelected();
       } else {
         this.selectedVehicleId = null;
       }
@@ -193,6 +195,31 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (data.content) {
         this.removeTrajectoryByAttribute('train_id', data.content);
       }
+    }
+
+    /**
+     * When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+     * Then we combine them in one response and send them to inherited layers.
+     *
+     * @private
+     * @override
+     */
+    onFeatureSelected() {
+      // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+      // Then we combine them in one response and send them to inherited layers.
+      const promises = [
+        this.api.getStopSequence(this.selectedVehicleId, this.mode),
+        this.api.getFullTrajectory(this.selectedVehicleId, this.mode),
+      ];
+
+      return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
+        console.log(this.journeyId, stopSequence, fullTrajectory);
+        const response = {
+          stopSequence,
+          fullTrajectory,
+        };
+        return response;
+      });
     }
 
     addTrajectory(id, traj, addOnTop) {
