@@ -392,9 +392,9 @@ const TrajservLayerMixin = (TrackerLayer) =>
             });
 
             const lineColor = color ? `#${color}` : getBgColor(t);
-            // Don't allow white lines, use black instead.
+            // Don't allow white lines, use red instead.
             const vehiculeColor = /#ffffff/i.test(lineColor)
-              ? '#000000'
+              ? '#ff0000'
               : lineColor;
 
             this.drawFullTrajectory(

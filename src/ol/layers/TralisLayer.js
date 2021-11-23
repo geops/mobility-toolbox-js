@@ -60,7 +60,7 @@ class TralisLayer extends mixin(TrackerLayer) {
           stopSequence[0] &&
           stopSequence[0].color &&
           `#${stopSequence[0].color}`) ||
-        '#ff0000';
+        '#000000';
 
       // const lineColor = color ? `#${color}` : getBgColor(color);
       // // Don't allow white lines, use red instead.
