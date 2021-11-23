@@ -302,7 +302,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
     }
 
     stop() {
-      this.journeyId = null;
       this.stopUpdateTrajectories();
       this.abortFetchTrajectories();
       super.stop();
@@ -343,11 +342,71 @@ const TrajservLayerMixin = (TrackerLayer) =>
         this.selectedVehicleId = feature.get('id');
         /** @ignore */
         this.journeyId = feature.get('journeyIdentifier');
-        this.updateTrajectoryStations(this.selectedVehicleId);
+        this.highlightTrajectory();
       } else {
         this.selectedVehicleId = null;
+        this.journeyId = null;
       }
       super.onFeatureClick(features, layer, coordinate);
+    }
+
+    /**
+     * Highlight the trajectory of journey.
+     * @private
+     */
+    highlightTrajectory() {
+      const { selectedVehicleId, journeyId } = this;
+      const promises = [
+        // Fetch stations information with a trajectory id.
+        this.api.fetchTrajectoryStations(
+          this.getParams({
+            id: selectedVehicleId,
+            time: getUTCTimeString(new Date()),
+          }),
+        ),
+        // Full trajectory.
+        this.api.fetchTrajectoryById(
+          this.getParams({
+            id: journeyId,
+            time: getUTCTimeString(new Date()),
+          }),
+        ),
+      ];
+
+      Promise.all(promises)
+        .then(([trajStations, fullTraj]) => {
+          const stationsCoords = [];
+          if (trajStations) {
+            trajStations.stations.forEach((station) => {
+              stationsCoords.push(station.coordinates);
+            });
+          }
+
+          if (fullTraj) {
+            const { p: multiLine, t, c: color } = fullTraj;
+            const lineCoords = [];
+            multiLine.forEach((line) => {
+              line.forEach((point) => {
+                lineCoords.push([point.x, point.y]);
+              });
+            });
+
+            const lineColor = color ? `#${color}` : getBgColor(t);
+            // Don't allow white lines, use red instead.
+            const vehiculeColor = /#ffffff/i.test(lineColor)
+              ? '#ff0000'
+              : lineColor;
+
+            this.drawFullTrajectory(
+              stationsCoords,
+              lineCoords,
+              this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
+            );
+          }
+        })
+        .catch(() => {
+          this.drawFullTrajectory();
+        });
     }
 
     updateFilters() {
@@ -366,14 +425,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
       if (this.abortController) {
         this.abortController.abort();
       }
-    }
-
-    updateTrajectoryStations(trajId) {
-      const params = this.getParams({
-        id: trajId,
-        time: getUTCTimeString(new Date()),
-      });
-      return this.api.fetchTrajectoryStations(params);
     }
 
     getParams(extraParams = {}) {
@@ -461,6 +512,16 @@ const TrajservLayerMixin = (TrackerLayer) =>
           }
         });
     }
+
+    /**
+     * Draw the trajectory as a line with points for each stop.
+     *
+     * @param {Array} stationsCoords Array of station coordinates in EPSG:4326.
+     * @param {Array<ol/coordinate~Coordinate>} lineCoords A list of coordinates in EPSG:3857.
+     * @param {string} color The color of the line.
+     * @private
+     */
+    drawFullTrajectory(stationsCoords, lineCoords, color) {}
 
     /**
      * Define the style of the vehicle.
