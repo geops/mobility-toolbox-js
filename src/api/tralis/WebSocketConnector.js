@@ -48,20 +48,21 @@ class WebSocketConnector {
     /** @ignore */
     this.websocket = new WebSocket(url);
 
-    if (this.currentProj) {
-      this.setProjection(this.currentProj);
-    }
-
-    if (this.currentBbox) {
-      this.setBbox(this.currentBbox);
-    }
+    // if (this.currentProj) {
+    //   this.setProjection(this.currentProj);
+    // }
 
     [...this.subscriptions].forEach((s) => {
       this.subscribe(s.params, s.cb, s.errorCb, true);
     });
 
+    // if (this.currentBbox) {
+    //   this.setBbox(this.currentBbox);
+    // }
+
     // reconnect on close
-    this.websocket.onclose = () => {
+    this.websocket.onclose = (e) => {
+      console.log(e);
       window.clearTimeout(this.reconnectTimeout);
       /** @ignore */
       this.reconnectTimeout = window.setTimeout(() => this.connect(url), 100);
@@ -123,6 +124,8 @@ class WebSocketConnector {
      * @type {Array<Array<number>>}
      */
     this.currentBbox = coordinates;
+
+    console.log(`BBOX ${coordinates.join(' ')}`);
     this.send(`BBOX ${coordinates.join(' ')}`);
     // this.subscriptions.forEach((s) => {
     //   this.get(s.params, s.cb, s.errorCb);
@@ -143,6 +146,7 @@ class WebSocketConnector {
 
     const onMessage = (e) => {
       const data = JSON.parse(e.data);
+      console.log(`message`, data.source);
       let source = params.channel;
       source += params.args ? ` ${params.args}` : '';
 
@@ -150,6 +154,7 @@ class WebSocketConnector {
         data.source === source &&
         (!params.id || params.id === data.client_reference)
       ) {
+        console.log(`cb`);
         cb(data);
       }
     };
@@ -203,8 +208,9 @@ class WebSocketConnector {
     }
 
     if (!this.subscribed[reqStr]) {
-      this.send(`GET ${reqStr}`);
-      this.send(`SUB ${reqStr}`);
+      console.log(`SUB reqStr ${reqStr}`);
+      // this.send(`GET ${reqStr}`);
+      // this.send(`SUB ${reqStr}`);
       this.subscribed[reqStr] = true;
     }
   }

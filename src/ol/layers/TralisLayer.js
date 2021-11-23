@@ -25,6 +25,7 @@ class TralisLayer extends mixin(TrackerLayer) {
       if (this.isUpdateBboxOnMoveEnd) {
         this.olListenersKeys.push(
           this.map.on('moveend', () => {
+            console.log('ici');
             this.api.conn.setBbox([
               ...this.map.getView().calculateExtent(),
               Math.floor(this.map.getView().getZoom()),

@@ -95,6 +95,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.onMessage = this.onMessage.bind(this);
       this.onDeleteMessage = this.onDeleteMessage.bind(this);
       this.api = options.api || new TralisAPI(options);
+
       this.format = new GeoJSON();
 
       // This property will call api.setBbox on each movend event
@@ -214,6 +215,7 @@ const TralisLayerMixin = (TrackerLayer) =>
           this.tracker.trajectories.splice(idx, 1);
         }
       }
+      console.log(this.trajectories.length);
 
       this.updateTrajectories();
     }

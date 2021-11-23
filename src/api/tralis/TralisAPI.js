@@ -77,11 +77,11 @@ class TralisAPI {
 
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
-    this.conn.setProjection(options.projection || 'epsg:3857');
+    // this.conn.setProjection(options.projection || 'epsg:3857');
 
-    if (options.bbox) {
-      this.conn.setBbox(options.bbox);
-    }
+    // if (options.bbox) {
+    //   this.conn.setBbox(options.bbox);
+    // }
   }
 
   /**
