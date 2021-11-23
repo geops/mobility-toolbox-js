@@ -23,6 +23,9 @@ class TrackerLayer extends mixin(Layer) {
     this.onMove = this.onMove.bind(this);
 
     /** @ignore */
+    this.onMoveEnd = this.onMoveEnd.bind(this);
+
+    /** @ignore */
     this.onZoomEnd = this.onZoomEnd.bind(this);
 
     /** @ignore */
@@ -106,6 +109,7 @@ class TrackerLayer extends mixin(Layer) {
     super.start();
 
     this.map.on('move', this.onMove);
+    this.map.on('moveend', this.onMoveEnd);
     this.map.on('zoomend', this.onZoomEnd);
   }
 
@@ -118,6 +122,7 @@ class TrackerLayer extends mixin(Layer) {
     super.stop();
     if (this.map) {
       this.map.off('move', this.onMove);
+      this.map.off('moveend', this.onMoveEnd);
       this.map.off('zoomend', this.onZoomEnd);
     }
   }
@@ -248,13 +253,12 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * On zoomend we adjust the time interval of the update of vehicles positions.
+   * Callback on 'moveend' event.
    *
    * @private
    */
-  onZoomEnd() {
-    this.startUpdateTime(this.map.getZoom());
-  }
+  // eslint-disable-next-line class-methods-use-this
+  onMoveEnd() {}
 
   /**
    * Update the cursor style when hovering a vehicle.

@@ -120,6 +120,29 @@ class TrackerLayer extends mixin(Layer) {
     };
   }
 
+  init(map) {
+    super.init(map);
+    if (this.map) {
+      this.olListenersKeys.push(
+        this.map.on('moveend', (evt) => {
+          const view = this.map.getView();
+          if (view.getAnimating() || view.getInteracting()) {
+            return;
+          }
+          const zoom = view.getZoom();
+
+          // Update the interval between render updates
+          if (this.currentZoom !== zoom) {
+            this.onZoomEnd(evt);
+          }
+          this.currentZoom = zoom;
+
+          this.onMoveEnd(evt);
+        }),
+      );
+    }
+  }
+
   /**
    * Render the trajectories using current map's size, resolution and rotation.
    * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
@@ -149,7 +172,15 @@ class TrackerLayer extends mixin(Layer) {
   renderTrajectoriesInternal(viewState, noInterpolate) {
     let isRendered = false;
 
-    isRendered = super.renderTrajectoriesInternal(viewState, noInterpolate);
+    const blockRendering =
+      !this.renderWhenInteracting(viewState, this.renderedViewState) &&
+      (this.map.getView().getAnimating() ||
+        this.map.getView().getInteracting());
+
+    // Don't render the map when the map is animating or interacting.
+    isRendered = blockRendering
+      ? false
+      : super.renderTrajectoriesInternal(viewState, noInterpolate);
 
     // We update the current render state.
     if (isRendered) {
@@ -184,6 +215,28 @@ class TrackerLayer extends mixin(Layer) {
   getFeatureInfoAtCoordinate(coordinate) {
     const resolution = this.map.getView().getResolution();
     return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+  }
+
+  /**
+   * Function called on moveend event.
+   * To be defined in inherited classes
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event.
+   * @private
+   */
+  // eslint-disable-next-line no-unused-vars,class-methods-use-this
+  onMoveEnd(evt) {}
+
+  /**
+   * Function called on moveend event only when the zoom has changed.
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event.
+   * @private
+   * @override
+   */
+  // eslint-disable-next-line no-unused-vars
+  onZoomEnd(evt) {
+    super.onZoomEnd(evt);
   }
 
   /**

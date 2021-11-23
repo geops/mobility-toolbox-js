@@ -44,10 +44,8 @@ export class TrackerLayerInterface {
   /**
    * Start the timeout for the next update.
    * @private
-   * @param {number} zoom
    */
-  // eslint-disable-next-line no-unused-vars
-  startUpdateTime(zoom) {}
+  startUpdateTime() {}
 
   /**
    * Stop the clock.
@@ -427,6 +425,9 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
+     * 
+
+    /**
      * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.
      *
      * @param {object} viewState The view state of the map.
@@ -548,8 +549,20 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
+     * On zoomend we adjust the time interval of the update of vehicles positions.
+     *
+     * @param evt Event that triggered the function.
+     * @private
+     */
+    // eslint-disable-next-line no-unused-vars
+    onZoomEnd(evt) {
+      this.startUpdateTime();
+    }
+
+    /**
      * Define beahvior when a vehicle is clicked
      * To be defined in child classes.
+     *
      * @private
      * @override
      */
@@ -558,6 +571,7 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Define behavior when a vehicle is hovered
      * To be defined in child classes.
+     *
      * @private
      * @override
      */
@@ -565,6 +579,7 @@ const TrackerLayerMixin = (Base) =>
 
     /**
      * Get the duration before the next update depending on zoom level.
+     *
      * @private
      * @param {number} zoom
      */
@@ -572,6 +587,7 @@ const TrackerLayerMixin = (Base) =>
       const roundedZoom = Math.round(zoom);
       const timeStep = timeSteps[roundedZoom] || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
+      console.log(`Next render in ${nextTick} ms.`);
       return nextTick;
     }
 

@@ -19,20 +19,21 @@ import mixin from '../../common/mixins/TralisLayerMixin';
  * @implements {TralisLayerInterface}
  */
 class TralisLayer extends mixin(TrackerLayer) {
-  init(map) {
-    super.init(map);
-    if (this.map) {
-      if (this.isUpdateBboxOnMoveEnd) {
-        this.olListenersKeys.push(
-          this.map.on('moveend', () => {
-            console.log('ici');
-            this.api.conn.setBbox([
-              ...this.map.getView().calculateExtent(),
-              Math.floor(this.map.getView().getZoom()),
-            ]);
-          }),
-        );
-      }
+  /**
+   * Send the new BBOX to the websocket.
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event
+   * @private
+   * @override
+   */
+  onMoveEnd(evt) {
+    super.onMoveEnd(evt);
+
+    if (this.isUpdateBboxOnMoveEnd) {
+      this.api.conn.setBbox([
+        ...this.map.getView().calculateExtent(),
+        Math.floor(this.map.getView().getZoom()),
+      ]);
     }
   }
 

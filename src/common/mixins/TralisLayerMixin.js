@@ -91,7 +91,6 @@ const TralisLayerMixin = (TrackerLayer) =>
       super({ ...options });
       this.debug = options.debug;
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
-      this.refreshTimeInMs = 1000 / 30;
       this.onMessage = this.onMessage.bind(this);
       this.onDeleteMessage = this.onDeleteMessage.bind(this);
       this.api = options.api || new TralisAPI(options);
@@ -215,9 +214,8 @@ const TralisLayerMixin = (TrackerLayer) =>
           this.tracker.trajectories.splice(idx, 1);
         }
       }
-      console.log(this.trajectories.length);
 
-      this.updateTrajectories();
+      this.tracker.setTrajectories(this.trajectories);
     }
 
     removeTrajectory(id) {
@@ -236,15 +234,6 @@ const TralisLayerMixin = (TrackerLayer) =>
           break;
         }
       }
-    }
-
-    updateTrajectories() {
-      this.tracker.setTrajectories(this.trajectories);
-      this.renderTrajectories();
-    }
-
-    getRefreshTimeInMs() {
-      return this.refreshTimeInMs;
     }
   };
 

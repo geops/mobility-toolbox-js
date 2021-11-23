@@ -75,13 +75,18 @@ class TralisAPI {
     /** @ignore */
     this.prefix = options.prefix || '';
 
+    this.isUpdateBboxOnMoveEnd = options.isUpateBboxOnMoveEnd || false;
+
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
-    // this.conn.setProjection(options.projection || 'epsg:3857');
 
-    // if (options.bbox) {
-    //   this.conn.setBbox(options.bbox);
-    // }
+    if (!this.isUpdateBboxOnMoveEnd) {
+      this.conn.setProjection(options.projection || 'epsg:3857');
+
+      if (options.bbox) {
+        this.conn.setBbox(options.bbox);
+      }
+    }
   }
 
   /**
@@ -377,7 +382,12 @@ class TralisAPI {
    */
   subscribeTrajectory(mode, onMessage) {
     this.unsubscribeTrajectory(onMessage);
-    this.subscribe(`trajectory${getModeSuffix(mode, TralisModes)}`, onMessage);
+    this.subscribe(
+      `trajectory${getModeSuffix(mode, TralisModes)}`,
+      onMessage,
+      null,
+      this.isUpdateBboxOnMoveEnd,
+    );
   }
 
   /**

@@ -1,3 +1,4 @@
+import { transformExtent } from 'ol/proj';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
 
@@ -19,45 +20,28 @@ import mixin from '../../common/mixins/TralisLayerMixin';
  * @implements {TralisLayerInterface}
  */
 class TralisLayer extends mixin(TrackerLayer) {
-  constructor(options = {}) {
-    super({ ...options });
-
-    /** @ignore */
-    this.onMoveEnd = this.onMoveEnd.bind(this);
-  }
-
   /**
-   * Add listeners from the Mapbox Map.
+   * Send the new BBOX to the websocket.
    *
-   * @param {mapboxgl.Map} map
-   * @param {string} beforeId See [mapboxgl.Map#addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) beforeId documentation.
-   */
-  init(map, beforeId) {
-    super.init(map, beforeId);
-
-    if (!this.map) {
-      return;
-    }
-    this.map.on('moveend', this.onMoveEnd);
-  }
-
-  /**
-   * Remove listeners from the Mapbox Map.
-   */
-  terminate() {
-    if (this.map) {
-      this.map.off('moveend', this.onMoveEnd);
-    }
-    super.terminate();
-  }
-
-  /**
-   * Callback on 'moveend' event.
-   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event
    * @private
+   * @override
    */
-  onMoveEnd() {
-    this.updateTrajectories();
+  onMoveEnd(evt) {
+    super.onMoveEnd(evt);
+    console.log('onMoveEnd');
+
+    if (this.isUpdateBboxOnMoveEnd) {
+      const bounds = this.map.getBounds().toArray();
+      this.api.conn.setBbox([
+        ...transformExtent(
+          [...bounds[0], ...bounds[1]],
+          'EPSG:4326',
+          'EPSG:3857',
+        ),
+        Math.floor(this.map.getZoom() + 1),
+      ]);
+    }
   }
 }
 

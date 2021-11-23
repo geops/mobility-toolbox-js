@@ -13,16 +13,27 @@ export default () => {
     pitchWithRotate: false,
   });
 
+  const cache = {};
   const tracker = new TralisLayer({
+    // url: 'wss://tralis-tracker-api.geops.io/ws',
+    // isUpdateBboxOnMoveEnd: true,
     url: 'wss://api.geops.io/realtime-ws/v1/',
+    isUpdateBboxOnMoveEnd: false,
     apiKey: window.apiKey,
     bbox: [1152072, 6048052, 1433666, 6205578],
     style: (props) => {
-      const img = new Image();
-      img.src = LINE_IMAGES[(props.line || {}).name || 'unknown'];
-      img.width = 25 * window.devicePixelRatio;
-      img.height = 25 * window.devicePixelRatio;
-      return img;
+      let { name } = props.line || {};
+      if (!name || !LINE_IMAGES[name]) {
+        name = 'unknown';
+      }
+      if (!cache[name]) {
+        const img = new Image();
+        img.src = LINE_IMAGES[name];
+        img.width = 25 * window.devicePixelRatio;
+        img.height = 25 * window.devicePixelRatio;
+        cache[name] = img;
+      }
+      return cache[name];
     },
   });
 

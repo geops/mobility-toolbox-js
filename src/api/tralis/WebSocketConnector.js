@@ -52,17 +52,16 @@ class WebSocketConnector {
     //   this.setProjection(this.currentProj);
     // }
 
-    [...this.subscriptions].forEach((s) => {
-      this.subscribe(s.params, s.cb, s.errorCb, true);
-    });
+    // [...this.subscriptions].forEach((s) => {
+    //   this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
+    // });
 
     // if (this.currentBbox) {
     //   this.setBbox(this.currentBbox);
     // }
 
     // reconnect on close
-    this.websocket.onclose = (e) => {
-      console.log(e);
+    this.websocket.onclose = () => {
       window.clearTimeout(this.reconnectTimeout);
       /** @ignore */
       this.reconnectTimeout = window.setTimeout(() => this.connect(url), 100);
@@ -125,7 +124,6 @@ class WebSocketConnector {
      */
     this.currentBbox = coordinates;
 
-    console.log(`BBOX ${coordinates.join(' ')}`);
     this.send(`BBOX ${coordinates.join(' ')}`);
     // this.subscriptions.forEach((s) => {
     //   this.get(s.params, s.cb, s.errorCb);
@@ -146,7 +144,6 @@ class WebSocketConnector {
 
     const onMessage = (e) => {
       const data = JSON.parse(e.data);
-      console.log(`message`, data.source);
       let source = params.channel;
       source += params.args ? ` ${params.args}` : '';
 
@@ -154,7 +151,6 @@ class WebSocketConnector {
         data.source === source &&
         (!params.id || params.id === data.client_reference)
       ) {
-        console.log(`cb`);
         cb(data);
       }
     };
@@ -189,28 +185,27 @@ class WebSocketConnector {
    * @param {Object} params Parameters for the websocket get request
    * @param {function} cb callback on listen
    * @param {function} errorCb Callback on error
-   * @param {boolean} quiet if subscribe should be quiet
+   * @param {boolean} quiet if false, no GET or SUB requests are send, only the callback is registered.
    */
-  subscribe(params, cb, errorCb, quiet) {
+  subscribe(params, cb, errorCb, quiet = false) {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
     const reqStr = WebSocketConnector.getRequestString('', params);
 
-    if (!quiet) {
-      const index = this.subscriptions.findIndex((subcr) => {
-        return params.channel === subcr.params.channel && cb === subcr.cb;
-      });
-      const newSubscr = { params, cb, errorCb, onMessageCb, onErrorCb };
-      if (index > -1) {
-        this.subscriptions[index] = newSubscr;
-      } else {
-        this.subscriptions.push(newSubscr);
-      }
+    const index = this.subscriptions.findIndex((subcr) => {
+      return params.channel === subcr.params.channel && cb === subcr.cb;
+    });
+    const newSubscr = { params, cb, errorCb, onMessageCb, onErrorCb, quiet };
+    if (index > -1) {
+      this.subscriptions[index] = newSubscr;
+    } else {
+      this.subscriptions.push(newSubscr);
     }
 
     if (!this.subscribed[reqStr]) {
-      console.log(`SUB reqStr ${reqStr}`);
-      // this.send(`GET ${reqStr}`);
-      // this.send(`SUB ${reqStr}`);
+      if (!newSubscr.quiet) {
+        this.send(`GET ${reqStr}`);
+        this.send(`SUB ${reqStr}`);
+      }
       this.subscribed[reqStr] = true;
     }
   }
