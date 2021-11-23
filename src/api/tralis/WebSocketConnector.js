@@ -11,6 +11,9 @@ class WebSocketConnector {
     this.subscriptions = [];
     this.connect(url);
 
+    this.isSUBAllow = false;
+    this.isDELAllow = false;
+
     // keep websocket alive
     setInterval(() => {
       this.send('PING');
@@ -52,13 +55,13 @@ class WebSocketConnector {
     //   this.setProjection(this.currentProj);
     // }
 
-    // [...this.subscriptions].forEach((s) => {
-    //   this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
-    // });
+    [...this.subscriptions].forEach((s) => {
+      this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
+    });
 
-    // if (this.currentBbox) {
-    //   this.setBbox(this.currentBbox);
-    // }
+    if (this.currentBbox) {
+      this.setBbox(this.currentBbox);
+    }
 
     // reconnect on close
     this.websocket.onclose = () => {
@@ -202,10 +205,14 @@ class WebSocketConnector {
     }
 
     if (!this.subscribed[reqStr]) {
-      if (!newSubscr.quiet) {
-        this.send(`GET ${reqStr}`);
+      // if (!newSubscr.quiet) {
+      this.send(`GET ${reqStr}`);
+
+      console.log(this.isSUBAllow);
+      if (this.isSUBAllow) {
         this.send(`SUB ${reqStr}`);
       }
+
       this.subscribed[reqStr] = true;
     }
   }
@@ -239,7 +246,9 @@ class WebSocketConnector {
       this.subscribed[source] &&
       !this.subscriptions.find((s) => s.params.channel === source)
     ) {
-      this.send(`DEL ${source}`);
+      if (this.isDELAllow) {
+        this.send(`DEL ${source}`);
+      }
       this.subscribed[source] = false;
     }
   }

@@ -75,10 +75,18 @@ class TralisAPI {
     /** @ignore */
     this.prefix = options.prefix || '';
 
-    this.isUpdateBboxOnMoveEnd = options.isUpateBboxOnMoveEnd || false;
+    this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
 
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
+
+    this.conn.isSUBAllow = !this.isUpdateBboxOnMoveEnd;
+    this.conn.isDELAllow = !this.isUpdateBboxOnMoveEnd;
+    console.log(
+      this.conn.isSUBAllow,
+      this.isUpdateBboxOnMoveEnd,
+      !this.isUpdateBboxOnMoveEnd,
+    );
 
     if (!this.isUpdateBboxOnMoveEnd) {
       this.conn.setProjection(options.projection || 'epsg:3857');

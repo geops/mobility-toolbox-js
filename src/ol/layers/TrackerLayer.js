@@ -1,7 +1,9 @@
-import { Layer as OLLayer, Group } from 'ol/layer';
+import { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
+import { Vector as VectorSource } from 'ol/source';
 import mixin from '../../common/mixins/TrackerLayerMixin';
+
 import Layer from './Layer';
 
 /**
@@ -47,6 +49,9 @@ class TrackerLayer extends mixin(Layer) {
       options.olLayer ||
       new Group({
         layers: [
+          new VectorLayer({
+            source: new VectorSource({ features: [] }),
+          }),
           new OLLayer({
             source: new Source({}),
             render: (frameState) => {
@@ -109,6 +114,9 @@ class TrackerLayer extends mixin(Layer) {
           }),
         ],
       });
+
+    // We store the layer used to highlight the full Trajectory
+    this.vectorLayer = this.olLayer.getLayers().get(0);
 
     // Options the last render run did happen. If something changes
     // we have to render again
