@@ -72,7 +72,6 @@ class TralisLayer extends mixin(TrackerLayer) {
         stopSequence.stations.length &&
         stopSequence.stations[0].coordinate
       ) {
-        console.log(stopSequence);
         const geometry = new MultiPoint(
           stopSequence.stations.map((station) => station.coordinates),
         );
@@ -110,7 +109,7 @@ class TralisLayer extends mixin(TrackerLayer) {
           new Style({
             zIndex: 2,
             stroke: new Stroke({
-              color,
+              color: '#000000',
               width: 6,
             }),
           }),
