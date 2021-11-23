@@ -336,10 +336,8 @@ const TrajservLayerMixin = (TrackerLayer) =>
      * @private
      * @override
      */
-    onFeatureClick(featureInfo) {
-      const {
-        features: [feature],
-      } = featureInfo;
+    onFeatureClick(features, layer, coordinate) {
+      const [feature] = features;
       if (feature) {
         /** @ignore */
         this.selectedVehicleId = feature.get('id');
@@ -349,7 +347,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       } else {
         this.selectedVehicleId = null;
       }
-      super.onFeatureClick(featureInfo);
+      super.onFeatureClick(features, layer, coordinate);
     }
 
     updateFilters() {

@@ -205,9 +205,9 @@ class TrackerLayer extends mixin(Layer) {
    * @private
    * @override
    */
-  onFeatureClick(featureInfo) {
-    super.onFeatureClick(featureInfo);
-    if (!featureInfo.features.length) {
+  onFeatureClick(features, layer, coordinate) {
+    super.onFeatureClick(features, layer, coordinate);
+    if (!features.length && this.vectorLayer) {
       this.vectorLayer.getSource().clear();
     }
   }
