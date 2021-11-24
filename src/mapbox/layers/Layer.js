@@ -1,3 +1,4 @@
+import { unByKey } from 'ol/Observable';
 import LayerCommon from '../../common/layers/Layer';
 
 /**
@@ -27,12 +28,12 @@ class Layer extends LayerCommon {
       return;
     }
 
-    if (this.isClickActive) {
-      this.map.on('click', this.onUserClickCallback);
-    }
-
-    if (this.isHoverActive) {
-      this.map.on('mousemove', this.onUserMoveCallback);
+    if (this.isClickActive || this.isHoverActive) {
+      this.toggleVisibleListeners();
+      this.onChangeVisibleKey = this.on(
+        'change:visible',
+        this.toggleVisibleListeners,
+      );
     }
   }
 
@@ -40,6 +41,7 @@ class Layer extends LayerCommon {
     if (this.map) {
       this.map.off('mousemove', this.onUserMoveCallback);
       this.map.off('click', this.onUserClickCallback);
+      unByKey(this.onChangeVisibleKey);
     }
     super.terminate(map);
   }
@@ -58,6 +60,30 @@ class Layer extends LayerCommon {
    */
   onUserMoveCallback(evt) {
     super.onUserMoveCallback({ coordinate: evt.lngLat.toArray(), ...evt });
+  }
+
+  /**
+   * Toggle listeners needed when a layer is avisible or not.
+   * @private
+   */
+  toggleVisibleListeners() {
+    if (this.visible) {
+      if (this.isClickActive) {
+        this.map.on('click', this.onUserClickCallback);
+      }
+
+      if (this.isHoverActive) {
+        this.map.on('mousemove', this.onUserMoveCallback);
+      }
+    } else {
+      if (this.isClickActive) {
+        this.map.off('click', this.onUserClickCallback);
+      }
+
+      if (this.isHoverActive) {
+        this.map.off('mousemove', this.onUserMoveCallback);
+      }
+    }
   }
 
   /**

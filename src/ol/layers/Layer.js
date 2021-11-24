@@ -75,15 +75,10 @@ class Layer extends LayerCommon {
       }),
     );
 
-    if (this.isClickActive) {
+    if (this.isClickActive || this.isHoverActive) {
+      this.toggleVisibleListeners();
       this.olListenersKeys.push(
-        this.map.on('singleclick', this.onUserClickCallback),
-      );
-    }
-
-    if (this.isHoverActive) {
-      this.olListenersKeys.push(
-        this.map.on('pointermove', this.onUserMoveCallback),
+        this.on('change:visible', this.toggleVisibleListeners),
       );
     }
 
@@ -138,6 +133,42 @@ class Layer extends LayerCommon {
 
     if (this.olLayer) {
       this.olLayer.setVisible(this.visible);
+    }
+  }
+
+  /**
+   * Toggle listeners needed when a layer is avisible or not.
+   * @private
+   */
+  toggleVisibleListeners() {
+    // Remove previous event
+    if (this.isClickListenerKey && this.isHoverListenerKey) {
+      [this.isClickListenerKey, this.isHoverListenerKey].forEach((key) => {
+        const index = this.olListenersKeys.indexOf(key);
+        if (index > -1) {
+          this.olListenersKeys.splice(index, 1);
+        }
+        unByKey([this.isHoverListenerKey, this.isClickListenerKey]);
+      });
+    }
+
+    if (this.visible) {
+      if (this.isClickActive) {
+        this.isClickListenerKey = this.map.on(
+          'singleclick',
+          this.onUserClickCallback,
+        );
+      }
+      if (this.isHoverActive) {
+        this.isHoverListenerKey = this.map.on(
+          'pointermove',
+          this.onUserMoveCallback,
+        );
+      }
+      this.olListenersKeys.push(
+        this.isClickListenerKey,
+        this.isHoverListenerKey,
+      );
     }
   }
 

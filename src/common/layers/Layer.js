@@ -13,7 +13,9 @@ import { v4 as uuid } from 'uuid';
  * @classproperty {string} key - Identifier of the layer. Must be unique.
  * @classproperty {string[]} copyrights - Array of copyrights.
  * @classproperty {boolean} isBaseLayer - Define if the layer is a base layer. Read-only.
- * @classproperty {boolean} isQueryable - Define if the layer can be queried. Read-only.
+ * @classproperty {boolean} isQueryable - Define if the layer can be queried. If false, it will set isHoverActive and isClickActive to false. Read-only.
+ * @classproperty {boolean} isClickActive - If true feature information will be queried on user click event. See inherited layers for more informations. Read-only.
+ * @classproperty {boolean} isHoverActive - If true feature information will be queried on pointer move event. See inherited layers for more informations. Read-only.
  * @classproperty {boolean} isReactSpatialLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
  * @classproperty {Layer[]} children - List of children.
  * @classproperty {boolean} visible - Define if the layer is visible or not.
@@ -33,9 +35,9 @@ export default class Layer extends Observable {
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is visible on the map.
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
-   * @param {boolean} [options.isQueryable=true] If true this layer can be queried.
-   * @param {boolean} [options.isClickActive=true] If true feature information will be queried on click event. See inherited layers for more informations.
-   * @param {boolean} [options.isHoverActive=true] If true feature information will be queried on pointer move event. See inherited layers for more informations.
+   * @param {boolean} [options.isQueryable=true] Define if the layer can be queried. If false, it will also set isHoverActive and isClickActive to false. Read-only.
+   * @param {boolean} [options.isClickActive=true] If true feature information will be queried on click event. See inherited layers for more informations. Read-only.
+   * @param {boolean} [options.isHoverActive=true] If true feature information will be queried on pointer move event. See inherited layers for more informations. Read-only.
    * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
    */
   constructor(options = {}) {
@@ -109,10 +111,10 @@ export default class Layer extends Observable {
         value: !!isQueryable,
       },
       isClickActive: {
-        value: !!isClickActive,
+        value: !!isQueryable && !!isClickActive,
       },
       isHoverActive: {
-        value: !!isHoverActive,
+        value: !!isQueryable && !!isHoverActive,
       },
       hitTolerance: {
         value: hitTolerance || 5,
@@ -307,6 +309,7 @@ export default class Layer extends Observable {
     // eslint-disable-next-line no-console
     console.error(
       'getFeatureInfoAtCoordinate must be implemented by inheriting layers',
+      this.key,
     );
 
     // This layer returns no feature info.
@@ -427,7 +430,7 @@ export default class Layer extends Observable {
       .then((featureInfo) => {
         const { features, layer, coordinate } = featureInfo;
         this.hoverCallbacks.forEach((callback) =>
-          callback({ features, layer, coordinate }),
+          callback(features, layer, coordinate),
         );
         return featureInfo;
       })

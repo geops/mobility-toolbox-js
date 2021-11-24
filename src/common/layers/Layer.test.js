@@ -63,6 +63,21 @@ describe('Layer', () => {
     expect(layer.name).toEqual('Layer');
   });
 
+  test('should set isClickActive and isHoverActive to false if isQueryable is set to false.', () => {
+    const options = {
+      name: 'Layer',
+      isQueryable: false,
+      isClickActive: true,
+      isHoverActive: true,
+      olLayer,
+    };
+    const layer = new Layer(options);
+    expect(layer).toBeInstanceOf(Layer);
+    expect(layer.isQueryable).toBe(false);
+    expect(layer.isClickActive).toBe(false);
+    expect(layer.isHoverActive).toBe(false);
+  });
+
   test('should called terminate on initialization.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
     const spy = jest.spyOn(layer, 'terminate');
@@ -465,7 +480,13 @@ describe('Layer', () => {
         expect(spy).toHaveBeenCalledWith(evt.coordinate);
         expect(featureInfo).toBe(goodFeatureInfo);
         expect(fn).toHaveBeenCalledTimes(1);
+        expect(fn.mock.calls[0][0]).toBe(goodFeatureInfo.features);
+        expect(fn.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
+        expect(fn.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
         expect(fn2).toHaveBeenCalledTimes(1);
+        expect(fn2.mock.calls[0][0]).toBe(goodFeatureInfo.features);
+        expect(fn2.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
+        expect(fn2.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
         done();
       });
     });
@@ -599,7 +620,13 @@ describe('Layer', () => {
         expect(spy).toHaveBeenCalledWith(evt.coordinate);
         expect(featureInfo).toBe(goodFeatureInfo);
         expect(fn).toHaveBeenCalledTimes(1);
+        expect(fn.mock.calls[0][0]).toBe(goodFeatureInfo.features);
+        expect(fn.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
+        expect(fn.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
         expect(fn2).toHaveBeenCalledTimes(1);
+        expect(fn2.mock.calls[0][0]).toBe(goodFeatureInfo.features);
+        expect(fn2.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
+        expect(fn2.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
         done();
       });
     });
