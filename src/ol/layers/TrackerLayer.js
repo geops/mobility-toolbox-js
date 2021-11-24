@@ -53,6 +53,7 @@ class TrackerLayer extends mixin(Layer) {
               if (!this.tracker || !this.tracker.canvas) {
                 return null;
               }
+
               if (!this.container) {
                 this.container = document.createElement('div');
                 this.container.style.position = 'absolute';
@@ -118,6 +119,14 @@ class TrackerLayer extends mixin(Layer) {
       zoom: null,
       rotation: 0,
     };
+  }
+
+  /**
+   * Destroy the container of the tracker.
+   */
+  terminate() {
+    super.terminate();
+    this.container = null;
   }
 
   /**
