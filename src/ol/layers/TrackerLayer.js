@@ -58,6 +58,7 @@ class TrackerLayer extends mixin(Layer) {
               if (!this.tracker || !this.tracker.canvas) {
                 return null;
               }
+
               if (!this.container) {
                 this.container = document.createElement('div');
                 this.container.style.position = 'absolute';
@@ -149,6 +150,14 @@ class TrackerLayer extends mixin(Layer) {
         }),
       );
     }
+  }
+
+  /**
+   * Destroy the container of the tracker.
+   */
+  terminate() {
+    super.terminate();
+    this.container = null;
   }
 
   /**
@@ -253,9 +262,9 @@ class TrackerLayer extends mixin(Layer) {
    * @private
    * @override
    */
-  onFeatureHover(featureInfo) {
-    super.onFeatureHover(featureInfo);
-    this.map.getTargetElement().style.cursor = featureInfo.features.length
+  onFeatureHover(features, layer, coordinate) {
+    super.onFeatureHover(features, layer, coordinate);
+    this.map.getTargetElement().style.cursor = features.length
       ? 'pointer'
       : 'auto';
   }

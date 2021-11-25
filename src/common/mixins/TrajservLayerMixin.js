@@ -313,10 +313,8 @@ const TrajservLayerMixin = (TrackerLayer) =>
      * @private
      * @override
      */
-    onFeatureHover(featureInfo) {
-      const {
-        features: [feature],
-      } = featureInfo;
+    onFeatureHover(features, layer, coordinate) {
+      const [feature] = features;
       let id = null;
       if (feature) {
         id = feature.get('id');
@@ -326,7 +324,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         this.hoverVehicleId = id;
         this.renderTrajectories();
       }
-      super.onFeatureHover(featureInfo);
+      super.onFeatureHover(features, layer, coordinate);
     }
 
     /**

@@ -1,3 +1,5 @@
+const callbacks = {};
+
 /* eslint-disable class-methods-use-this */
 class Map {
   constructor(options) {
@@ -42,9 +44,29 @@ class Map {
 
   once() {}
 
-  on() {}
+  on(type, func) {
+    if (!callbacks[type]) {
+      callbacks[type] = [];
+    }
+    callbacks[type].push(func);
+  }
 
-  off() {}
+  off(type, func) {
+    if (!callbacks[type]) {
+      callbacks[type] = [];
+    }
+    const index = callbacks[type].indexOf(func);
+    if (index > -1) {
+      callbacks[type].splice(index, 1);
+    }
+  }
+
+  fire(type, evt) {
+    if (!callbacks[type]) {
+      callbacks[type] = [];
+    }
+    callbacks[type].forEach((callback) => callback(evt));
+  }
 
   loaded() {}
 

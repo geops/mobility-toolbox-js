@@ -128,10 +128,8 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @private
      * @override
      */
-    onFeatureHover(featureInfo) {
-      const {
-        features: [feature],
-      } = featureInfo;
+    onFeatureHover(features, layer, coordinate) {
+      const [feature] = features;
       let id = null;
       if (feature) {
         id = feature.get('train_id');
@@ -141,7 +139,7 @@ const TralisLayerMixin = (TrackerLayer) =>
         this.hoverVehicleId = id;
         this.renderTrajectories();
       }
-      super.onFeatureHover(featureInfo);
+      super.onFeatureHover(features, layer, coordinate);
     }
 
     /**

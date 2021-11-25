@@ -67,6 +67,128 @@ describe('Layer', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
+  test('should listen for click/hover events when layer is visible by default then should not when hidden.', async () => {
+    global.console.error = jest.fn();
+    const layer = new Layer({ name: 'Layer' });
+    expect(layer.visible).toBe(true);
+    const spy = jest.fn();
+    const spy2 = jest.fn();
+    layer.init(map);
+    layer.onHover(spy);
+    layer.onClick(spy2);
+    expect(spy).toHaveBeenCalledTimes(0);
+    expect(spy2).toHaveBeenCalledTimes(0);
+
+    await map.fire('mousemove', {
+      type: 'mousemove',
+      lngLat: { toArray: () => [0, 0] },
+      coordinate: [0, 0],
+    });
+    await map.fire('click', {
+      type: 'click',
+      lngLat: { toArray: () => [0, 0] },
+    });
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(1);
+    spy.mockReset();
+    spy2.mockReset();
+
+    layer.setVisible(false);
+    await map.fire('mousemove', {
+      type: 'mousemove',
+      lngLat: { toArray: () => [0, 0] },
+    });
+    await map.fire('click', {
+      type: 'click',
+      lngLat: { toArray: () => [0, 0] },
+    });
+    expect(spy).toHaveBeenCalledTimes(0);
+    expect(spy2).toHaveBeenCalledTimes(0);
+    global.console.error.mockRestore();
+  });
+
+  test('should not listen for click/hover events when layer is not visible by default then should not when visible.', async () => {
+    global.console.error = jest.fn();
+    const layer = new Layer({ name: 'Layer', visible: false });
+    expect(layer.visible).toBe(false);
+    const spy = jest.fn();
+    const spy2 = jest.fn();
+    layer.init(map);
+    layer.onHover(spy);
+    layer.onClick(spy2);
+    expect(spy).toHaveBeenCalledTimes(0);
+    expect(spy2).toHaveBeenCalledTimes(0);
+
+    await map.fire('mousemove', {
+      type: 'mousemove',
+      lngLat: { toArray: () => [0, 0] },
+      coordinate: [0, 0],
+    });
+    await map.fire('click', {
+      type: 'click',
+      lngLat: { toArray: () => [0, 0] },
+    });
+    expect(spy).toHaveBeenCalledTimes(0);
+    expect(spy2).toHaveBeenCalledTimes(0);
+    spy.mockReset();
+    spy2.mockReset();
+
+    layer.setVisible(true);
+    await map.fire('mousemove', {
+      type: 'mousemove',
+      lngLat: { toArray: () => [0, 0] },
+      coordinate: [0, 0],
+    });
+    await map.fire('click', {
+      type: 'click',
+      lngLat: { toArray: () => [0, 0] },
+    });
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(1);
+    global.console.error.mockRestore();
+  });
+
+  test.only('should not listen for click/hover events  after layer.terminate()', async () => {
+    global.console.error = jest.fn();
+    const layer = new Layer({ name: 'Layer', visible: true });
+    expect(layer.visible).toBe(true);
+    const spy = jest.fn();
+    const spy2 = jest.fn();
+    layer.init(map);
+    layer.onHover(spy);
+    layer.onClick(spy2);
+    expect(spy).toHaveBeenCalledTimes(0);
+    expect(spy2).toHaveBeenCalledTimes(0);
+
+    await map.fire('mousemove', {
+      type: 'mousemove',
+      lngLat: { toArray: () => [0, 0] },
+      coordinate: [0, 0],
+    });
+    await map.fire('click', {
+      type: 'click',
+      lngLat: { toArray: () => [0, 0] },
+    });
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(1);
+    spy.mockReset();
+    spy2.mockReset();
+
+    layer.terminate(map);
+    await map.fire('mousemove', {
+      type: 'mousemove',
+      lngLat: { toArray: () => [0, 0] },
+      coordinate: [0, 0],
+    });
+    await map.fire('click', {
+      type: 'click',
+      lngLat: { toArray: () => [0, 0] },
+    });
+    expect(spy).toHaveBeenCalledTimes(0);
+    expect(spy2).toHaveBeenCalledTimes(0);
+    global.console.error.mockRestore();
+  });
+
   test('should clone', () => {
     const layer = new Layer({
       name: 'Layer',
