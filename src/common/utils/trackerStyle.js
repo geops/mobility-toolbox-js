@@ -34,15 +34,31 @@ const style = (trajectory, viewState, trackerLayer) => {
     line = {};
   }
 
-  const { name = 'I', color = '000000' } = line;
-  let { text_color: textColor } = line;
+  const { name = 'I' } = line;
+  let { text_color: textColor, color } = line;
+
+  if (!color) {
+    color = '#000000';
+  }
+
   if (!textColor) {
     textColor = '#ffffff';
   }
+
+  // Make sure color used have a # at the start
+  if (color[0] !== '#') {
+    color = `#${color}`;
+  }
+
+  if (textColor[0] !== '#') {
+    textColor = `#${textColor}`;
+  }
+  console.log(color, textColor);
+
   const z = Math.min(Math.floor(zoom || 1), 16);
   const hover = hoverVehicleId === id;
   const selected = selectedVehicleId === id;
-  let key = `${z}${type}${name}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
+  let key = `${z}${type}${name}${color}${textColor}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
 
   // Calcul the radius of the circle
   let radius = getRadius(type, z) * pixelRatio;
@@ -115,7 +131,7 @@ const style = (trajectory, viewState, trackerLayer) => {
     if (useDelayStyle) {
       circleFillColor = getDelayColor(delay, cancelled);
     } else {
-      circleFillColor = `#${color}` || getBgColor(type);
+      circleFillColor = color || getBgColor(type);
     }
 
     ctx.save();

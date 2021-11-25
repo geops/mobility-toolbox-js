@@ -1,5 +1,4 @@
 import View from 'ol/View';
-import { fromLonLat } from 'ol/proj';
 import { Map, TralisLayer, MapboxLayer } from '../../ol';
 import 'ol/ol.css';
 import CopyrightControl from '../../ol/controls/CopyrightControl';
@@ -32,6 +31,7 @@ export default () => {
     apiKey: window.apiKey,
     // bbox: [1152072, 6048052, 1433666, 6205578],
     isUpdateBboxOnMoveEnd: true,
+    useDelayStyle: false,
     style: (obj, viewState) => {
       return trackerStyle(obj, viewState, tracker);
     },
