@@ -3,8 +3,15 @@
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
 import Feature from 'ol/Feature';
+import qs from 'query-string';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
+import createFilters from '../utils/createTrackerFilters';
+
+/* Permalink parameter used to filters vehicles */
+const LINE_FILTER = 'publishedlinename';
+const ROUTE_FILTER = 'tripnumber';
+const OPERATOR_FILTER = 'operator';
 
 /**
  * TrackerLayerInterface.
@@ -127,6 +134,13 @@ const TrackerLayerMixin = (Base) =>
         sort,
         time,
         live,
+      } = options;
+
+      let {
+        regexPublishedLineName,
+        publishedLineName,
+        tripNumber,
+        operator,
       } = options;
 
       const initTrackerOptions = {
@@ -314,6 +328,74 @@ const TrackerLayerMixin = (Base) =>
           default: false,
           writable: true,
         },
+
+        /**
+         * Filter properties used in combination with permalink parameters.
+         */
+        publishedLineName: {
+          get: () => {
+            return publishedLineName;
+          },
+          set: (newPublishedLineName) => {
+            publishedLineName = newPublishedLineName;
+            this.updateFilters();
+          },
+        },
+        tripNumber: {
+          get: () => {
+            return tripNumber;
+          },
+          set: (newTripNumber) => {
+            tripNumber = newTripNumber;
+            this.updateFilters();
+          },
+        },
+        operator: {
+          get: () => {
+            return operator;
+          },
+          set: (newOperator) => {
+            operator = newOperator;
+            this.updateFilters();
+          },
+        },
+        regexPublishedLineName: {
+          get: () => {
+            return regexPublishedLineName;
+          },
+          set: (newRegex) => {
+            regexPublishedLineName = newRegex;
+            this.updateFilters();
+          },
+        },
+
+        /**
+         * Style properties.
+         */
+        delayDisplay: {
+          value: options.delayDisplay || 300000,
+          writable: true,
+        },
+        delayOutlineColor: {
+          value: options.delayOutlineColor || '#000000',
+          writable: true,
+        },
+        useDelayStyle: {
+          value: options.useDelayStyle || false,
+          writable: true,
+        },
+
+        /**
+         * Debug properties.
+         */
+        // Not used anymore, but could be useful for debugging.
+        // showVehicleTraj: {
+        //   value:
+        //     options.showVehicleTraj !== undefined
+        //       ? options.showVehicleTraj
+        //       : true,
+        //   writable: true,
+        // },
       });
     }
 
@@ -375,6 +457,7 @@ const TrackerLayerMixin = (Base) =>
      */
     start() {
       this.stop();
+      this.updateFilters();
       this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
@@ -589,6 +672,22 @@ const TrackerLayerMixin = (Base) =>
       const nextTick = Math.max(25, timeStep / this.speed);
       console.log(`Next render in ${nextTick} ms.`);
       return nextTick;
+    }
+
+    /**
+     * Update filter provided by properties or permalink.
+     */
+    updateFilters() {
+      // Setting filters from the permalink if no values defined by the layer.
+      const parameters = qs.parse(window.location.search.toLowerCase());
+      // filter is the property in TrackerLayerMixin.
+      console.log(this.regexPublishedLineName);
+      this.filter = createFilters(
+        this.publishedLineName || parameters[LINE_FILTER],
+        this.tripNumber || parameters[ROUTE_FILTER],
+        this.operator || parameters[OPERATOR_FILTER],
+        this.regexPublishedLineName,
+      );
     }
 
     /**

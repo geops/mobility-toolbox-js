@@ -18,47 +18,43 @@ const style = (trajectory, viewState, trackerLayer) => {
     delayDisplay,
   } = trackerLayer;
 
-  const { zoom, pixelRatio } = viewState;
-
-  let { line = {} } = trajectory;
-
   const {
-    id,
-    delay,
-    type = 'Rail',
-    cancelled = false,
-    operatorProvidesRealtime = 'no',
-  } = trajectory;
+    zoom,
+    pixelRatio,
+    operator_provides_realtime_journey: operatorProvidesRealtime,
+  } = viewState;
+  let { line, type } = trajectory;
+  const { id, delay, cancelled = false } = trajectory;
+
+  if (!type) {
+    type = 'Rail';
+  }
 
   if (!line) {
     line = {};
   }
 
-  const { name = 'I' } = line;
-  let { text_color: textColor, color } = line;
+  let { name, text_color: textColor, color } = line;
 
-  if (!color) {
-    color = '#000000';
+  if (!name) {
+    name = 'I';
   }
-
+  // console.log(type);
   if (!textColor) {
-    textColor = '#ffffff';
+    textColor = '#000000';
   }
 
-  // Make sure color used have a # at the start
-  if (color[0] !== '#') {
+  if (color && color[0] !== '#') {
     color = `#${color}`;
   }
 
   if (textColor[0] !== '#') {
     textColor = `#${textColor}`;
   }
-  console.log(color, textColor);
 
   const z = Math.min(Math.floor(zoom || 1), 16);
   const hover = hoverVehicleId === id;
   const selected = selectedVehicleId === id;
-  let key = `${z}${type}${name}${color}${textColor}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
 
   // Calcul the radius of the circle
   let radius = getRadius(type, z) * pixelRatio;
@@ -71,8 +67,14 @@ const style = (trajectory, viewState, trackerLayer) => {
   const mustDrawText = radius > 10 * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  if (!mustDrawText) {
-    key = `${z}${type}${color}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
+  let key = `${z}${type}${color}${hover}${selected}${cancelled}${delay}`;
+
+  if (useDelayStyle) {
+    key += `${operatorProvidesRealtime}`;
+  }
+
+  if (mustDrawText) {
+    key += `${name}${textColor}`;
   }
 
   if (!styleCache[key]) {

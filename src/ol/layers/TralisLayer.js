@@ -52,6 +52,7 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @private
    */
   highlightTrajectory() {
+    console.log('ici');
     super.highlightTrajectory().then(({ stopSequence, fullTrajectory }) => {
       const vectorSource = this.vectorLayer.getSource();
       vectorSource.clear();
@@ -65,15 +66,12 @@ class TralisLayer extends mixin(TrackerLayer) {
       // const lineColor = color ? `#${color}` : getBgColor(color);
       // // Don't allow white lines, use red instead.
       // const vehiculeColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
-
-      if (
-        stopSequence &&
-        stopSequence.stations &&
-        stopSequence.stations.length &&
-        stopSequence.stations[0].coordinate
-      ) {
+      stopSequence.forEach((sequence) => {
+        if (!sequence.stations) {
+          return;
+        }
         const geometry = new MultiPoint(
-          stopSequence.stations.map((station) => station.coordinates),
+          sequence.stations.map((station) => station.coordinate),
         );
 
         const aboveStationsFeature = new Feature(geometry);
@@ -101,7 +99,7 @@ class TralisLayer extends mixin(TrackerLayer) {
           }),
         );
         vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
-      }
+      });
 
       if (fullTrajectory) {
         const features = format.readFeatures(fullTrajectory);
