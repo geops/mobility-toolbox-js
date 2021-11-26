@@ -670,7 +670,7 @@ const TrackerLayerMixin = (Base) =>
       const roundedZoom = Math.round(zoom);
       const timeStep = timeSteps[roundedZoom] || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
-      console.log(`Next render in ${nextTick} ms.`);
+      // console.log(`Next render in ${nextTick} ms.`);
       return nextTick;
     }
 
@@ -681,7 +681,6 @@ const TrackerLayerMixin = (Base) =>
       // Setting filters from the permalink if no values defined by the layer.
       const parameters = qs.parse(window.location.search.toLowerCase());
       // filter is the property in TrackerLayerMixin.
-      console.log(this.regexPublishedLineName);
       this.filter = createFilters(
         this.publishedLineName || parameters[LINE_FILTER],
         this.tripNumber || parameters[ROUTE_FILTER],

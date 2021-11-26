@@ -32,7 +32,7 @@ export default () => {
     // bbox: [1152072, 6048052, 1433666, 6205578],
     isUpdateBboxOnMoveEnd: true,
     useDelayStyle: true,
-    regexPublishedLineName: '^(S|R$|RE|PE|D|IRE|RB|TER)',
+    // regexPublishedLineName: '^(S|R$|RE|PE|D|IRE|RB|TER)',
     style: (obj, viewState) => {
       return trackerStyle(obj, viewState, tracker);
     },

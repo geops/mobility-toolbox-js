@@ -29,7 +29,6 @@ class TralisLayer extends mixin(TrackerLayer) {
    */
   onMoveEnd(evt) {
     super.onMoveEnd(evt);
-    console.log('onMoveEnd');
 
     if (this.isUpdateBboxOnMoveEnd) {
       const bounds = this.map.getBounds().toArray();

@@ -4,6 +4,7 @@ import { MultiPoint } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
+import { getBgColor } from '../../common/trackerConfig';
 
 const format = new GeoJSON();
 
@@ -52,20 +53,31 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @private
    */
   highlightTrajectory() {
-    console.log('ici');
     super.highlightTrajectory().then(({ stopSequence, fullTrajectory }) => {
       const vectorSource = this.vectorLayer.getSource();
       vectorSource.clear();
-      const color =
-        (stopSequence &&
-          stopSequence[0] &&
-          stopSequence[0].color &&
-          `#${stopSequence[0].color}`) ||
-        '#000000';
+      let lineColor = '#ffffff'; // white
 
-      // const lineColor = color ? `#${color}` : getBgColor(color);
-      // // Don't allow white lines, use red instead.
-      // const vehiculeColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
+      if (this.useDelayStyle) {
+        lineColor = '#a0a0a0'; // grey
+      } else {
+        // We get the color of the first feature.
+        if (fullTrajectory) {
+          const props = fullTrajectory.features[0].properties;
+          const { type } = props;
+          let { stroke } = props;
+
+          if (stroke && stroke[0] !== '#') {
+            stroke = `#${stroke}`;
+          }
+
+          lineColor = stroke || getBgColor(type);
+        }
+
+        // Don't allow white lines, use red instead.
+        lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
+      }
+
       stopSequence.forEach((sequence) => {
         if (!sequence.stations) {
           return;
@@ -93,7 +105,7 @@ class TralisLayer extends mixin(TrackerLayer) {
             image: new Circle({
               radius: 4,
               fill: new Fill({
-                color,
+                color: lineColor,
               }),
             }),
           }),
@@ -102,7 +114,6 @@ class TralisLayer extends mixin(TrackerLayer) {
       });
 
       if (fullTrajectory) {
-        const features = format.readFeatures(fullTrajectory);
         const style = [
           new Style({
             zIndex: 2,
@@ -114,11 +125,12 @@ class TralisLayer extends mixin(TrackerLayer) {
           new Style({
             zIndex: 3,
             stroke: new Stroke({
-              color,
+              color: lineColor,
               width: 4,
             }),
           }),
         ];
+        const features = format.readFeatures(fullTrajectory);
         features.forEach((feature) => {
           feature.setStyle(style);
         });

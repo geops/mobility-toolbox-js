@@ -39,7 +39,7 @@ const style = (trajectory, viewState, trackerLayer) => {
   if (!name) {
     name = 'I';
   }
-  // console.log(type);
+
   if (!textColor) {
     textColor = '#000000';
   }
