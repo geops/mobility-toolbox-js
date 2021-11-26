@@ -29,7 +29,8 @@
     "taffydb": "^2.7.3",
     "turf": "^3.0.14",
     "typeface-lato": "^0.0.75",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "worker-loader": "2.0.0"
   },
   "peerDependencies": {
     "mapbox-gl": "^1",
