@@ -9,14 +9,22 @@ import {
 
 const styleCache = {};
 
-const style = (trajectory, viewState, trackerLayer) => {
+/**
+ * A tracker style that take in account the delay.
+ *
+ * @param {*} trajectory The trajectory to render.
+ * @param {*} viewState The view state of the map.
+ * @param {*} options Some options to change the rendering
+ * @returns a canvas
+ */
+const style = (trajectory, viewState, options) => {
   const {
     hoverVehicleId,
     selectedVehicleId,
     useDelayStyle,
     delayOutlineColor,
     delayDisplay,
-  } = trackerLayer;
+  } = options;
 
   const {
     zoom,

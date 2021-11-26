@@ -2,11 +2,6 @@ import View from 'ol/View';
 import { Map, TralisLayer, MapboxLayer } from '../../ol';
 import 'ol/ol.css';
 import CopyrightControl from '../../ol/controls/CopyrightControl';
-import { trackerStyle } from '../../common/utils';
-// import LINE_IMAGES from './assets/tralis-live-map';
-
-// const min = [1254752.0378, 6115573.759];
-// const max = [1321443.345, 6148938.5219];
 
 export default () => {
   const map = new Map({
@@ -31,11 +26,8 @@ export default () => {
     apiKey: window.apiKey,
     // bbox: [1152072, 6048052, 1433666, 6205578],
     isUpdateBboxOnMoveEnd: true,
-    useDelayStyle: true,
+    // useDelayStyle: true,
     // regexPublishedLineName: '^(S|R$|RE|PE|D|IRE|RB|TER)',
-    style: (obj, viewState) => {
-      return trackerStyle(obj, viewState, tracker);
-    },
   });
 
   tracker.onClick(([feature]) => {

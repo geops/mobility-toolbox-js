@@ -165,11 +165,6 @@ const TralisLayerMixin = (TrackerLayer) =>
         return;
       }
 
-      // Temporary fix to avoid displaying old trains cached .
-      if (data.content.properties.mot) {
-        return;
-      }
-
       const feat = this.format.readFeature(data.content);
 
       feat.set('timeOffset', Date.now() - data.timestamp);

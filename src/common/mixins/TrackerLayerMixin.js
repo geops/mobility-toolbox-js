@@ -7,6 +7,7 @@ import qs from 'query-string';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
 import createFilters from '../utils/createTrackerFilters';
+import { delayTrackerStyle } from '../utils';
 
 /* Permalink parameter used to filters vehicles */
 const LINE_FILTER = 'publishedlinename';
@@ -692,29 +693,8 @@ const TrackerLayerMixin = (Base) =>
     /**
      * @private
      */
-    defaultStyle(trajectory) {
-      const { id: text } = trajectory;
-      if (this.styleCache[text]) {
-        return this.styleCache[text];
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = 200;
-      canvas.height = 15;
-      const ctx = canvas.getContext('2d');
-      ctx.arc(8, 8, 5, 0, 2 * Math.PI, false);
-      ctx.fillStyle = '#8ED6FF';
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
-      ctx.font = 'bold 12px arial';
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 3;
-      ctx.strokeText(text, 20, 10);
-      ctx.fillStyle = 'black';
-      ctx.fillText(text, 20, 10);
-      this.styleCache[text] = canvas;
-      return this.styleCache[text];
+    defaultStyle(trajectory, viewState) {
+      return delayTrackerStyle(trajectory, viewState, this);
     }
   };
 
