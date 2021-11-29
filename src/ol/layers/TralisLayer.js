@@ -2,6 +2,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import Feature from 'ol/Feature';
 import { MultiPoint } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
+import { intersects } from 'ol/extent';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
 import { getBgColor } from '../../common/trackerConfig';
@@ -26,8 +27,41 @@ const format = new GeoJSON();
  * @implements {TralisLayerInterface}
  */
 class TralisLayer extends mixin(TrackerLayer) {
+  mustNotBeDisplayed(trajectory, extent, zoom) {
+    return (
+      !intersects(
+        extent || this.map.getView().calculateExtent(),
+        trajectory.bounds,
+      ) ||
+      (trajectory.type !== 'rail' &&
+        (zoom || this.map.getView().getZoom()) < (this.minZoomNonTrain || 9))
+    );
+  }
+
   /**
-   * Send the new BBOX to the websocket.
+   * Send the current bbox to the websocket
+   */
+  setBbox() {
+    const extent = this.map.getView().calculateExtent();
+    const zoom = Math.floor(this.map.getView().getZoom());
+
+    // Purge trajectories:
+    // - which are outside the extent
+    // - when it's bus and zoom level is too low for them
+    // A bit hacky but it works.
+    for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
+      const trajectory = this.trajectories[i];
+      if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
+        const temp = [...this.trajectories];
+        temp.splice(i, 1);
+        this.tracker.setTrajectories(temp);
+      }
+    }
+    super.setBbox([...extent, zoom, this.tenant]);
+  }
+
+  /**
+   * On move end we update the websocket with the new bbox.
    *
    * @param {ol/MapEvent~MapEvent} evt Moveend event
    * @private
@@ -36,11 +70,8 @@ class TralisLayer extends mixin(TrackerLayer) {
   onMoveEnd(evt) {
     super.onMoveEnd(evt);
 
-    if (this.isUpdateBboxOnMoveEnd) {
-      this.api.conn.setBbox([
-        ...this.map.getView().calculateExtent(),
-        Math.floor(this.map.getView().getZoom()),
-      ]);
+    if (this.visible && this.isUpdateBboxOnMoveEnd) {
+      this.setBbox();
     }
 
     if (this.selectedVehicleId) {

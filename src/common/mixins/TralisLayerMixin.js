@@ -94,7 +94,8 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.onMessage = this.onMessage.bind(this);
       this.onDeleteMessage = this.onDeleteMessage.bind(this);
       this.api = options.api || new TralisAPI(options);
-
+      this.tenant = options.tenant || ''; // sbb,sbh or sbm
+      this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.format = new GeoJSON();
 
       // This property will call api.setBbox on each movend event
@@ -105,12 +106,23 @@ const TralisLayerMixin = (TrackerLayer) =>
       super.start();
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
+      this.setBbox();
     }
 
     stop() {
       super.stop();
       this.api.unsubscribeTrajectory(this.onMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
+    }
+
+    /**
+     * Send the bbox to the websocket. The child classe must send the bbox parameter.
+     */
+    setBbox(bbox) {
+      if (this.isUpdateBboxOnMoveEnd) {
+        // Clean trajectories before sending the new bbox
+        this.api.setBbox(bbox);
+      }
     }
 
     setMode(mode) {
@@ -180,12 +192,13 @@ const TralisLayerMixin = (TrackerLayer) =>
           point.transform('EPSG:4326', this.map.getView().getProjection());
           feat.setGeometry(point);
         }
-
-        this.addTrajectory(
-          feat.get('train_id'),
-          feat.getProperties(),
-          !feat.get('line'),
-        );
+        if (!this.mustNotBeDisplayed(feat.getProperties())) {
+          this.addTrajectory(
+            feat.get('train_id'),
+            feat.getProperties(),
+            !feat.get('line'),
+          );
+        }
       }
     }
 

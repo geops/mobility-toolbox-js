@@ -148,7 +148,7 @@ describe('Layer', () => {
     global.console.error.mockRestore();
   });
 
-  test.only('should not listen for click/hover events  after layer.terminate()', async () => {
+  test('should not listen for click/hover events  after layer.terminate()', async () => {
     global.console.error = jest.fn();
     const layer = new Layer({ name: 'Layer', visible: true });
     expect(layer.visible).toBe(true);
