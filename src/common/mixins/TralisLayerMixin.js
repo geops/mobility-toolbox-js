@@ -5,6 +5,7 @@
 /* eslint-disable max-classes-per-file */
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from 'ol/geom/Point';
+import { intersects } from 'ol/extent';
 import { TralisAPI, TralisModes } from '../../api';
 
 /**
@@ -135,6 +136,22 @@ const TralisLayerMixin = (TrackerLayer) =>
     }
 
     /**
+     * Determine if the trajectory must be removed or not added to the list
+     *
+     * @param {*} trajectory
+     * @param {*} extent
+     * @param {*} zoom
+     * @returns
+     * @ignore
+     */
+    mustNotBeDisplayed(trajectory, extent, zoom) {
+      return (
+        !intersects(extent, trajectory.bounds) ||
+        (trajectory.type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
+      );
+    }
+
+    /**
      * Apply the highlight style on hover.
      *
      * @private
@@ -224,10 +241,12 @@ const TralisLayerMixin = (TrackerLayer) =>
       ];
 
       return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
+        // eslint-disable-next-line no-console
         console.log(
           `stopSequence for ${this.selectedVehicleId}:`,
           stopSequence,
         );
+        // eslint-disable-next-line no-console
         console.log(
           `fullTrajectory for ${this.selectedVehicleId}:`,
           fullTrajectory,

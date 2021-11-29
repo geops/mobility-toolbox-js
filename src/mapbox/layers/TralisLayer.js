@@ -1,5 +1,3 @@
-import { transformExtent } from 'ol/proj';
-import { intersects } from 'ol/extent';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
 
@@ -22,30 +20,15 @@ import mixin from '../../common/mixins/TralisLayerMixin';
  */
 class TralisLayer extends mixin(TrackerLayer) {
   /**
-   * Determine if the trajectory must be removed form the list
+   * Determine if the trajectory must be removed or not added to the list
    *
-   * @param {*} trajectory
-   * @param {*} extent
-   * @param {*} zoom
-   * @returns
+   * @private
    */
   mustNotBeDisplayed(trajectory, extent, zoom) {
-    return (
-      !intersects(
-        extent ||
-          (() => {
-            const bounds = this.map.getBounds().toArray();
-            return transformExtent(
-              [...bounds[0], ...bounds[1]],
-              'EPSG:3857',
-              'EPSG:4326',
-            );
-          })(),
-        trajectory.bounds,
-      ) ||
-      (trajectory.type !== 'rail' &&
-        (zoom || Math.floor(this.map.getZoom() + 1)) <
-          (this.minZoomNonTrain || 9))
+    return super.mustNotBeDisplayed(
+      trajectory,
+      extent || this.getMercatorExtent(),
+      zoom || Math.floor(this.map.getZoom() + 1),
     );
   }
 
@@ -53,13 +36,8 @@ class TralisLayer extends mixin(TrackerLayer) {
    * Send the current bbox to the websocket
    */
   setBbox() {
-    const bounds = this.map.getBounds().toArray();
-    const extent = transformExtent(
-      [...bounds[0], ...bounds[1]],
-      'EPSG:3857',
-      'EPSG:4326',
-    );
-    const zoom = Math.floor(this.map.getZoom() + 1);
+    const extent = this.getMercatorExtent();
+    const zoom = Math.floor(this.getOlZoom());
 
     // Purge trajectories:
     // - which are outside the extent

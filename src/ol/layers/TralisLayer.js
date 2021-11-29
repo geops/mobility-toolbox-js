@@ -2,7 +2,6 @@ import GeoJSON from 'ol/format/GeoJSON';
 import Feature from 'ol/Feature';
 import { MultiPoint } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
-import { intersects } from 'ol/extent';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
 import { getBgColor } from '../../common/trackerConfig';
@@ -27,19 +26,23 @@ const format = new GeoJSON();
  * @implements {TralisLayerInterface}
  */
 class TralisLayer extends mixin(TrackerLayer) {
+  /**
+   * Determine if the trajectory must be removed or not added to the list
+   *
+   * @private
+   */
   mustNotBeDisplayed(trajectory, extent, zoom) {
-    return (
-      !intersects(
-        extent || this.map.getView().calculateExtent(),
-        trajectory.bounds,
-      ) ||
-      (trajectory.type !== 'rail' &&
-        (zoom || this.map.getView().getZoom()) < (this.minZoomNonTrain || 9))
+    return super.mustNotBeDisplayed(
+      trajectory,
+      extent || this.map.getView().calculateExtent(),
+      zoom || this.map.getView().getZoom(),
     );
   }
 
   /**
    * Send the current bbox to the websocket
+   *
+   * @private
    */
   setBbox() {
     const extent = this.map.getView().calculateExtent();
