@@ -12,6 +12,13 @@ export default () => {
     element.innerHTML = text;
   };
 
+  const onHover = (features, layer) => {
+    if (features.length) {
+      // eslint-disable-next-line no-param-reassign
+      layer.map.getTargetElement().style.cursor = 'pointer';
+    }
+  };
+
   const onClick = (features) => {
     if (features.length) {
       addText(features[0].get('name'));
@@ -26,6 +33,10 @@ export default () => {
     }),
   });
 
+  map.on('pointermove', () => {
+    map.getTargetElement().style.cursor = '';
+  });
+
   const mapboxLayer = new MapboxLayer({
     url: 'https://maps.geops.io/styles/base_bright_v2/style.json',
     apiKey: window.apiKey,
@@ -38,6 +49,7 @@ export default () => {
     styleLayer: {
       id: 'poi_with_icons',
     },
+    onHover,
     onClick,
   });
 
@@ -60,6 +72,7 @@ export default () => {
         ],
       }),
     }),
+    onHover,
     onClick,
   });
 

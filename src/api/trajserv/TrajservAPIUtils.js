@@ -1,6 +1,6 @@
 /**
  * Translate the response date object into a readable object.
- * @returns {array<Date>}
+ * @returns {Date[]}
  * @ignore
  */
 const translateDates = (dates = []) => {

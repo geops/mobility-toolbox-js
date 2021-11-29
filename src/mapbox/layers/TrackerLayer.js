@@ -3,12 +3,13 @@ import { unByKey } from 'ol/Observable';
 import { getWidth, getHeight } from 'ol/extent';
 import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
-import Layer from '../../common/layers/Layer';
+import Layer from './Layer';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
 /**
  * Responsible for loading tracker data.
  *
+ * @classproperty {mapboxgl.Map} map - The map where the layer is displayed.
  * @extends {Layer}
  * @implements {TrackerLayerInterface}
  */
@@ -18,19 +19,24 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
-    /** @ignores */
+    /** @ignore */
     this.onMove = this.onMove.bind(this);
-    this.onZoomEnd = this.onZoomEnd.bind(this);
-    this.onVisibilityChange = this.onVisibilityChange.bind(this);
 
-    /** @ignores */
-    this.onMouseMove = this.onMouseMove.bind(this);
+    /** @ignore */
+    this.onMoveEnd = this.onMoveEnd.bind(this);
+
+    /** @ignore */
+    this.onZoomEnd = this.onZoomEnd.bind(this);
+
+    /** @ignore */
+    this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 
   /**
    * Initialize the layer.
    *
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
+   * @param {string} beforeId Layer's id before which we want to add the new layer.
    * @override
    */
   init(map, beforeId) {
@@ -51,7 +57,7 @@ class TrackerLayer extends mixin(Layer) {
       coordinates: getSourceCoordinates(map, this.pixelRatio),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
-      attribution: this.copyrights,
+      attribution: this.copyrights && this.copyrights.join(', '),
     };
 
     this.beforeId = beforeId;
@@ -82,8 +88,12 @@ class TrackerLayer extends mixin(Layer) {
       this.listeners.forEach((listener) => {
         unByKey(listener);
       });
-      this.map.removeLayer(this.key);
-      this.map.removeSource(this.key);
+      if (this.map.getLayer(this.key)) {
+        this.map.removeLayer(this.key);
+      }
+      if (this.map.getSource(this.key)) {
+        this.map.removeSource(this.key);
+      }
     }
     super.terminate();
   }
@@ -99,11 +109,8 @@ class TrackerLayer extends mixin(Layer) {
     super.start();
 
     this.map.on('move', this.onMove);
+    this.map.on('moveend', this.onMoveEnd);
     this.map.on('zoomend', this.onZoomEnd);
-
-    if (this.isHoverActive) {
-      this.map.on('mousemove', this.onMouseMove);
-    }
   }
 
   /**
@@ -115,9 +122,31 @@ class TrackerLayer extends mixin(Layer) {
     super.stop();
     if (this.map) {
       this.map.off('move', this.onMove);
+      this.map.off('moveend', this.onMoveEnd);
       this.map.off('zoomend', this.onZoomEnd);
-      this.map.off('mousemove', this.onMouseMove);
     }
+  }
+
+  /**
+   * Function triggered when the user click the map.
+   * @override
+   */
+  onUserClickCallback(evt) {
+    super.onUserClickCallback({
+      coordinate: fromLonLat(evt.lngLat.toArray()),
+      ...evt,
+    });
+  }
+
+  /**
+   * Function triggered when the user moves the cursor over the map.
+   * @override
+   */
+  onUserMoveCallback(evt) {
+    super.onUserMoveCallback({
+      coordinate: fromLonLat(evt.lngLat.toArray()),
+      ...evt,
+    });
   }
 
   /**
@@ -128,37 +157,8 @@ class TrackerLayer extends mixin(Layer) {
   renderTrajectories(noInterpolate) {
     const { width, height } = this.map.getCanvas();
     const center = this.map.getCenter();
-    // const extent = getSourceCoordinates(this.map, this.pixelRatio);
-    // const extent2 = this.map.getBounds();
-    // const bounds = [
-    //   ...fromLonLat([extent[0][0], extent[2][1]]),
-    //   ...fromLonLat([extent[1][0], extent[1][1]]),
-    // ];
-    // const bounds2 = extent2.toArray();
-    // const bounds3 = [...fromLonLat(bounds2[0]), ...fromLonLat(bounds2[1])];
-    // console.log(extent);
-    // const a = bounds[0];
-    // const b = bounds[1];
-    // const transform = compose(
-    //   create(),
-    //   center.lng,
-    //   center.lat,
-    //   1,
-    //   1,
-    //   (this.map.getBearing() * Math.PI) / 180,
-    //   -center.lng,
-    //   -center.lat,
-    // );
-    // composeCssTransform(
-    //   (renderedCenter[0] - center[0]) / resolution,
-    //   (center[1] - renderedCenter[1]) / resolution,
-    //   renderedResolution / resolution,
-    //   renderedResolution / resolution,
-    //   rotation - renderedRotation,
-    //   0,
-    //   0,
 
-    // turf
+    // We use turf here to have good transform.
     const leftBottom = this.map.unproject({
       x: 0,
       y: height / this.pixelRatio,
@@ -180,31 +180,23 @@ class TrackerLayer extends mixin(Layer) {
       },
     ).geometry.coordinates;
 
-    // ol
-    // const coord0 = apply(transform, [leftBottom.lng, leftBottom.lat]);
-    // const coord1 = apply(transform, [rightTop.lng, rightTop.lat]); // [...toLonLat(coord)]);
-    // console.log(
-    //   [extent[0][0], extent[1][1]],
-    //   coord0,
-    //   [extent[1][0], extent[0][1]],
-    //   coord1,
-    // );
     const bounds = [...fromLonLat(coord0), ...fromLonLat(coord1)];
     const xResolution = getWidth(bounds) / (width / this.pixelRatio);
     const yResolution = getHeight(bounds) / (height / this.pixelRatio);
     const res = Math.max(xResolution, yResolution);
-    // console.log(coord0, coord02);
-    // console.log(bounds2[0], px);
 
-    // Coordinate of trajectories are in mercator so we have to pass the propert resolution and center in mercator.
-    super.renderTrajectories(
-      [width / this.pixelRatio, height / this.pixelRatio],
-      fromLonLat([center.lng, center.lat]),
-      bounds,
-      res,
-      -(this.map.getBearing() * Math.PI) / 180,
-      noInterpolate,
-    );
+    // Coordinate of trajectories are in mercator so we have to pass the proper resolution and center in mercator.
+    const viewState = {
+      size: [width / this.pixelRatio, height / this.pixelRatio],
+      center: fromLonLat([center.lng, center.lat]),
+      extent: bounds,
+      resolution: res,
+      zoom: this.map.getZoom(),
+      rotation: -(this.map.getBearing() * Math.PI) / 180,
+      pixelRatio: this.pixelRatio,
+    };
+
+    super.renderTrajectories(viewState, noInterpolate);
   }
 
   /**
@@ -225,6 +217,11 @@ class TrackerLayer extends mixin(Layer) {
   getVehiclesAtCoordinate(coordinate, nb) {
     const resolution = getMercatorResolution(this.map);
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
+  }
+
+  getFeatureInfoAtCoordinate(coordinate) {
+    const resolution = getMercatorResolution(this.map);
+    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
   }
 
   onVisibilityChange() {
@@ -256,42 +253,24 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
-   * On zoomend we adjust the time interval of the update of vehicles positions.
+   * Callback on 'moveend' event.
    *
    * @private
    */
-  onZoomEnd() {
-    this.startUpdateTime(this.map.getZoom());
-  }
+  // eslint-disable-next-line class-methods-use-this
+  onMoveEnd() {}
 
   /**
-   * On mousemove, we detect if a vehicle is heovered then updates the cursor's style.
+   * Update the cursor style when hovering a vehicle.
    *
-   * @param {mapboxgl.MapMouseEvent} evt Map's mousemove event.
    * @private
+   * @override
    */
-  onMouseMove(evt) {
-    if (
-      this.map.isMoving() ||
-      this.map.isRotating() ||
-      this.map.isZooming() ||
-      !this.isHoverActive
-    ) {
-      this.map.getContainer().style.cursor = 'auto';
-      return;
-    }
-    const [vehicle] = this.getVehiclesAtCoordinate(
-      fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
-      1,
-    );
-
-    const id = vehicle && vehicle.id;
-    if (this.hoverVehicleId !== id) {
-      this.map.getContainer().style.cursor = vehicle ? 'pointer' : 'auto';
-      this.hoverVehicleId = id;
-      // We doesn´t wait the next render, we force it.
-      this.renderTrajectories();
-    }
+  onFeatureHover(features, layer, coordinate) {
+    super.onFeatureHover(features, layer, coordinate);
+    this.map.getCanvasContainer().style.cursor = features.length
+      ? 'pointer'
+      : 'auto';
   }
 }
 

@@ -11,6 +11,9 @@ class WebSocketConnector {
     this.subscriptions = [];
     this.connect(url);
 
+    this.isSUBAllow = false;
+    this.isDELAllow = false;
+
     // keep websocket alive
     setInterval(() => {
       this.send('PING');
@@ -48,17 +51,17 @@ class WebSocketConnector {
     /** @ignore */
     this.websocket = new WebSocket(url);
 
-    if (this.currentProj) {
-      this.setProjection(this.currentProj);
-    }
+    // if (this.currentProj) {
+    //   this.setProjection(this.currentProj);
+    // }
+
+    [...this.subscriptions].forEach((s) => {
+      this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
+    });
 
     if (this.currentBbox) {
       this.setBbox(this.currentBbox);
     }
-
-    [...this.subscriptions].forEach((s) => {
-      this.subscribe(s.params, s.cb, s.errorCb, true);
-    });
 
     // reconnect on close
     this.websocket.onclose = () => {
@@ -123,10 +126,11 @@ class WebSocketConnector {
      * @type {Array<Array<number>>}
      */
     this.currentBbox = coordinates;
+
     this.send(`BBOX ${coordinates.join(' ')}`);
-    this.subscriptions.forEach((s) => {
-      this.get(s.params, s.cb, s.errorCb);
-    });
+    // this.subscriptions.forEach((s) => {
+    //   this.get(s.params, s.cb, s.errorCb);
+    // });
   }
 
   /**
@@ -184,27 +188,30 @@ class WebSocketConnector {
    * @param {Object} params Parameters for the websocket get request
    * @param {function} cb callback on listen
    * @param {function} errorCb Callback on error
-   * @param {boolean} quiet if subscribe should be quiet
+   * @param {boolean} quiet if false, no GET or SUB requests are send, only the callback is registered.
    */
-  subscribe(params, cb, errorCb, quiet) {
+  subscribe(params, cb, errorCb, quiet = false) {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
     const reqStr = WebSocketConnector.getRequestString('', params);
 
-    if (!quiet) {
-      const index = this.subscriptions.findIndex((subcr) => {
-        return params.channel === subcr.params.channel && cb === subcr.cb;
-      });
-      const newSubscr = { params, cb, errorCb, onMessageCb, onErrorCb };
-      if (index > -1) {
-        this.subscriptions[index] = newSubscr;
-      } else {
-        this.subscriptions.push(newSubscr);
-      }
+    const index = this.subscriptions.findIndex((subcr) => {
+      return params.channel === subcr.params.channel && cb === subcr.cb;
+    });
+    const newSubscr = { params, cb, errorCb, onMessageCb, onErrorCb, quiet };
+    if (index > -1) {
+      this.subscriptions[index] = newSubscr;
+    } else {
+      this.subscriptions.push(newSubscr);
     }
 
     if (!this.subscribed[reqStr]) {
+      // if (!newSubscr.quiet) {
       this.send(`GET ${reqStr}`);
-      this.send(`SUB ${reqStr}`);
+
+      if (this.isSUBAllow) {
+        this.send(`SUB ${reqStr}`);
+      }
+
       this.subscribed[reqStr] = true;
     }
   }
@@ -238,7 +245,9 @@ class WebSocketConnector {
       this.subscribed[source] &&
       !this.subscriptions.find((s) => s.params.channel === source)
     ) {
-      this.send(`DEL ${source}`);
+      if (this.isDELAllow) {
+        this.send(`DEL ${source}`);
+      }
       this.subscribed[source] = false;
     }
   }

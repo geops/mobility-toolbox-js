@@ -53,6 +53,14 @@ describe('TrackerLayer', () => {
     expect(layer.clickCallbacks.length).toBe(2);
   });
 
+  describe('#terminate', () => {
+    test('should set container to null', () => {
+      layer.container = 'foo';
+      layer.terminate();
+      expect(layer.container).toBe(null);
+    });
+  });
+
   test('should clone', () => {
     const clone = layer.clone({ name: 'clone' });
     expect(clone).not.toBe(layer);

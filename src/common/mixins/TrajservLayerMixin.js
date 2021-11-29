@@ -2,6 +2,7 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 import qs from 'query-string';
+import { unByKey } from 'ol/Observable';
 import { getUTCDateString, getUTCTimeString } from '../timeUtils';
 import {
   getRadius,
@@ -17,7 +18,6 @@ import { TrajservAPI } from '../../api';
  * TrajservLayerInterface.
  *
  * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
- * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
  * @classproperty {function} style - Style of the vehicle.
  * @classproperty {FilterFunction} filter - Time speed.
  * @classproperty {function} sort - Set the filter for tracker features.
@@ -92,81 +92,14 @@ export class TrajservLayerInterface {
 
   /**
    * Define the style of the vehicle.
-   * Draw a colored circle depending on train delay.
+   * Draw a circle depending on trajectory data.
    *
-   * @param {Object} props Properties
+   * @param {TrajservTrajectory} trajectory  A trajectory
+   * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
    * @private
    */
-  defaultStyle(props) {}
+  defaultStyle(trajectory, viewState) {}
 }
-
-const LINE_FILTER = 'publishedlinename';
-const ROUTE_FILTER = 'tripnumber';
-const OPERATOR_FILTER = 'operator';
-
-/**
- * Create a array of filter functions based on some parameters.
- * @param {string} line
- * @param {string} route
- * @param {string} operator
- * @param {string} regexLine
- * @private
- */
-const createFilters = (line, route, operator, regexLine) => {
-  const filterList = [];
-
-  if (!line && !route && !operator && !regexLine) {
-    return null;
-  }
-
-  if (regexLine) {
-    const regexLineList =
-      typeof regexLine === 'string' ? [regexLine] : regexLine;
-    const lineFilter = (t) =>
-      regexLineList.some((tr) => new RegExp(tr, 'i').test(t.name));
-    filterList.push(lineFilter);
-  }
-
-  if (line) {
-    const lineFiltersList = typeof line === 'string' ? line.split(',') : line;
-    const lineList = lineFiltersList.map((l) =>
-      l.replace(/\s+/g, '').toUpperCase(),
-    );
-    const lineFilter = (l) =>
-      lineList.some((filter) => filter === l.name.toUpperCase());
-    filterList.push(lineFilter);
-  }
-
-  if (route) {
-    const routes = typeof route === 'string' ? route.split(',') : route;
-    const routeList = routes.map((item) => parseInt(item, 10));
-    const routeFilter = (item) => {
-      const routeId = parseInt(item.routeIdentifier.split('.')[0], 10);
-      return routeList.some((id) => id === routeId);
-    };
-    filterList.push(routeFilter);
-  }
-
-  if (operator) {
-    const operatorList = typeof operator === 'string' ? [operator] : operator;
-    const operatorFilter = (t) =>
-      operatorList.some((op) => new RegExp(op, 'i').test(t.operator));
-    filterList.push(operatorFilter);
-  }
-
-  if (!filterList.length) {
-    return null;
-  }
-
-  return (t) => {
-    for (let i = 0; i < filterList.length; i += 1) {
-      if (!filterList[i](t)) {
-        return false;
-      }
-    }
-    return true;
-  };
-};
 
 /**
  * Mixin for TrajservLayerInterface.
@@ -197,12 +130,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
      */
     defineProperties(options) {
       super.defineProperties(options);
-      let {
-        regexPublishedLineName,
-        publishedLineName,
-        tripNumber,
-        operator,
-      } = options;
 
       let requestIntervalSeconds = 3;
       let defaultApi;
@@ -217,25 +144,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
         defaultApi = new TrajservAPI(apiOptions);
       }
       Object.defineProperties(this, {
-        showVehicleTraj: {
-          value:
-            options.showVehicleTraj !== undefined
-              ? options.showVehicleTraj
-              : true,
-          writable: true,
-        },
-        delayDisplay: {
-          value: options.delayDisplay || 300000,
-          writable: true,
-        },
-        delayOutlineColor: {
-          value: options.delayOutlineColor || '#000000',
-          writable: true,
-        },
-        useDelayStyle: {
-          value: options.useDelayStyle || false,
-          writable: true,
-        },
         requestIntervalSeconds: {
           get: () => {
             return requestIntervalSeconds;
@@ -250,42 +158,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
             }
           },
         },
-        publishedLineName: {
-          get: () => {
-            return publishedLineName;
-          },
-          set: (newPublishedLineName) => {
-            publishedLineName = newPublishedLineName;
-            this.updateFilters();
-          },
-        },
-        tripNumber: {
-          get: () => {
-            return tripNumber;
-          },
-          set: (newTripNumber) => {
-            tripNumber = newTripNumber;
-            this.updateFilters();
-          },
-        },
-        operator: {
-          get: () => {
-            return operator;
-          },
-          set: (newOperator) => {
-            operator = newOperator;
-            this.updateFilters();
-          },
-        },
-        regexPublishedLineName: {
-          get: () => {
-            return regexPublishedLineName;
-          },
-          set: (newRegex) => {
-            regexPublishedLineName = newRegex;
-            this.updateFilters();
-          },
-        },
+
         api: {
           value: options.api || defaultApi,
         },
@@ -314,36 +187,115 @@ const TrajservLayerMixin = (TrackerLayer) =>
     }
 
     stop() {
-      this.journeyId = null;
       this.stopUpdateTrajectories();
       this.abortFetchTrajectories();
       super.stop();
     }
 
-    updateFilters() {
-      // Setting filters from the permalink if no values defined by the layer.
-      const parameters = qs.parse(window.location.search.toLowerCase());
-      // filter is the property in TrackerLayerMixin.
-      this.filter = createFilters(
-        this.publishedLineName || parameters[LINE_FILTER],
-        this.tripNumber || parameters[ROUTE_FILTER],
-        this.operator || parameters[OPERATOR_FILTER],
-        this.regexPublishedLineName,
-      );
+    /**
+     * Apply the highlight style on hover.
+     *
+     * @private
+     * @override
+     */
+    onFeatureHover(features, layer, coordinate) {
+      const [feature] = features;
+      let id = null;
+      if (feature) {
+        id = feature.get('id');
+      }
+      if (this.hoverVehicleId !== id) {
+        /** @ignore */
+        this.hoverVehicleId = id;
+        this.renderTrajectories();
+      }
+      super.onFeatureHover(features, layer, coordinate);
+    }
+
+    /**
+     * Display the complete trajectory of the vehicle.
+     *
+     * @private
+     * @override
+     */
+    onFeatureClick(features, layer, coordinate) {
+      const [feature] = features;
+      if (feature) {
+        /** @ignore */
+        this.selectedVehicleId = feature.get('id');
+        /** @ignore */
+        this.journeyId = feature.get('journeyIdentifier');
+        this.highlightTrajectory();
+      } else {
+        this.selectedVehicleId = null;
+        this.journeyId = null;
+      }
+      super.onFeatureClick(features, layer, coordinate);
+    }
+
+    /**
+     * Highlight the trajectory of journey.
+     * @private
+     */
+    highlightTrajectory() {
+      const { selectedVehicleId, journeyId } = this;
+      const promises = [
+        // Fetch stations information with a trajectory id.
+        this.api.fetchTrajectoryStations(
+          this.getParams({
+            id: selectedVehicleId,
+            time: getUTCTimeString(new Date()),
+          }),
+        ),
+        // Full trajectory.
+        this.api.fetchTrajectoryById(
+          this.getParams({
+            id: journeyId,
+            time: getUTCTimeString(new Date()),
+          }),
+        ),
+      ];
+
+      Promise.all(promises)
+        .then(([trajStations, fullTraj]) => {
+          const stationsCoords = [];
+          if (trajStations) {
+            trajStations.stations.forEach((station) => {
+              stationsCoords.push(station.coordinates);
+            });
+          }
+
+          if (fullTraj) {
+            const { p: multiLine, t, c: color } = fullTraj;
+            const lineCoords = [];
+            multiLine.forEach((line) => {
+              line.forEach((point) => {
+                lineCoords.push([point.x, point.y]);
+              });
+            });
+
+            const lineColor = color ? `#${color}` : getBgColor(t);
+            // Don't allow white lines, use red instead.
+            const vehiculeColor = /#ffffff/i.test(lineColor)
+              ? '#ff0000'
+              : lineColor;
+
+            this.drawFullTrajectory(
+              stationsCoords,
+              lineCoords,
+              this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
+            );
+          }
+        })
+        .catch(() => {
+          this.drawFullTrajectory();
+        });
     }
 
     abortFetchTrajectories() {
       if (this.abortController) {
         this.abortController.abort();
       }
-    }
-
-    updateTrajectoryStations(trajId) {
-      const params = this.getParams({
-        id: trajId,
-        time: getUTCTimeString(new Date()),
-      });
-      return this.api.fetchTrajectoryStations(params);
     }
 
     getParams(extraParams = {}) {
@@ -449,7 +401,24 @@ const TrajservLayerMixin = (TrackerLayer) =>
       }
     }
 
-    defaultStyle(props, zoom) {
+    /**
+     * Draw the trajectory as a line with points for each stop.
+     *
+     * @param {Array} stationsCoords Array of station coordinates in EPSG:4326.
+     * @param {Array<ol/coordinate~Coordinate>} lineCoords A list of coordinates in EPSG:3857.
+     * @param {string} color The color of the line.
+     * @private
+     */
+    drawFullTrajectory(stationsCoords, lineCoords, color) {}
+
+    /**
+     * Define the style of the vehicle.
+     *
+     * @param {TrajservTrajectory} trajectory  A trajectory
+     * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
+     */
+    defaultStyle(trajectory, viewState) {
+      const { zoom } = viewState;
       const {
         type,
         name,
@@ -459,7 +428,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
         delay,
         cancelled,
         operatorProvidesRealtime,
-      } = props;
+      } = trajectory;
       const z = Math.min(Math.floor(zoom || 1), 16);
       const hover = this.hoverVehicleId === id;
       const selected = this.selectedVehicleId === id;

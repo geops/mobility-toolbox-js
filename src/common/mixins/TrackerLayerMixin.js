@@ -2,19 +2,31 @@
 /* eslint-disable max-classes-per-file */
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
+import Feature from 'ol/Feature';
+import qs from 'query-string';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
+import createFilters from '../utils/createTrackerFilters';
+import { delayTrackerStyle } from '../utils';
+
+/* Permalink parameter used to filters vehicles */
+const LINE_FILTER = 'publishedlinename';
+const ROUTE_FILTER = 'tripnumber';
+const OPERATOR_FILTER = 'operator';
 
 /**
  * TrackerLayerInterface.
  *
- * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
- * @classproperty {boolean} isHoverActive - Activate/deactivate pointer hover effect.
- * @classproperty {function} style - Style of the vehicle.
- * @classproperty {FilterFunction} filter - Time speed.
- * @classproperty {function} sort - Set the filter for tracker features.
+ * @classproperty {string} hoverVehicleId - Id of the hovered vehicle.
+ * @classproperty {string} selectedVehicleId - Id of the selected vehicle.
+ * @classproperty {number} pixelRatio - Pixel ratio use to render the trajectories. Default to window.devicePixelRatio.
  * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
+ * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
+ * @classproperty {function} sort - Sort the trajectories.
+ * @classproperty {function} style - Style of a trajectory.
+ * @classproperty {Date} time - Time used to display the trajectories. The setter manages a Date or a number in ms representing a Date. If `live` property is true. The setter does nothing..
+ * @classproperty {FilterFunction} filter - Filter the trajectories.
  */
 export class TrackerLayerInterface {
   /**
@@ -40,10 +52,8 @@ export class TrackerLayerInterface {
   /**
    * Start the timeout for the next update.
    * @private
-   * @param {number} zoom
    */
-  // eslint-disable-next-line no-unused-vars
-  startUpdateTime(zoom) {}
+  startUpdateTime() {}
 
   /**
    * Stop the clock.
@@ -79,14 +89,15 @@ export class TrackerLayerInterface {
   getRefreshTimeInMs(zoom) {}
 
   /**
-   * Define a default style of the vehicle.s
+   * Define a default style of vehicles.
    * Draw a blue circle with the id of the props parameter.
    *
-   * @param {Object} props Properties
+   * @param {Object} trajectory A trajectory
+   * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
    * @private
    */
   // eslint-disable-next-line no-unused-vars
-  defaultStyle(props) {}
+  defaultStyle(trajectory, viewState) {}
 }
 
 /**
@@ -98,14 +109,19 @@ export class TrackerLayerInterface {
  */
 const TrackerLayerMixin = (Base) =>
   class extends Base {
+    constructor(options) {
+      super({ hitTolerance: 10, ...options });
+      this.onFeatureHover = this.onFeatureHover.bind(this);
+      this.onFeatureClick = this.onFeatureClick.bind(this);
+    }
+
     /**
      * Define layer's properties.
      *
      * @ignore
      */
     defineProperties(options) {
-      const { isHoverActive, style, speed } = {
-        isHoverActive: true,
+      const { style, speed } = {
         ...options,
       };
 
@@ -119,6 +135,13 @@ const TrackerLayerMixin = (Base) =>
         sort,
         time,
         live,
+      } = options;
+
+      let {
+        regexPublishedLineName,
+        publishedLineName,
+        tripNumber,
+        operator,
       } = options;
 
       const initTrackerOptions = {
@@ -144,14 +167,6 @@ const TrackerLayerMixin = (Base) =>
 
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
-
-        /**
-         * Active on hover effect.
-         */
-        isHoverActive: {
-          value: !!isHoverActive,
-          writable: true,
-        },
 
         /**
          * Style function used to render a vehicle.
@@ -234,10 +249,17 @@ const TrackerLayerMixin = (Base) =>
         },
 
         /**
+         * Keep track of which trajectories are stored.
+         */
+        trajectories: {
+          get: () => (this.tracker && this.tracker.trajectories) || [],
+        },
+
+        /**
          * Keep track of which trajectories are currently drawn.
          */
         renderedTrajectories: {
-          get: () => this.tracker?.renderedTrajectories || [],
+          get: () => (this.tracker && this.tracker.renderedTrajectories) || [],
         },
 
         /**
@@ -307,6 +329,74 @@ const TrackerLayerMixin = (Base) =>
           default: false,
           writable: true,
         },
+
+        /**
+         * Filter properties used in combination with permalink parameters.
+         */
+        publishedLineName: {
+          get: () => {
+            return publishedLineName;
+          },
+          set: (newPublishedLineName) => {
+            publishedLineName = newPublishedLineName;
+            this.updateFilters();
+          },
+        },
+        tripNumber: {
+          get: () => {
+            return tripNumber;
+          },
+          set: (newTripNumber) => {
+            tripNumber = newTripNumber;
+            this.updateFilters();
+          },
+        },
+        operator: {
+          get: () => {
+            return operator;
+          },
+          set: (newOperator) => {
+            operator = newOperator;
+            this.updateFilters();
+          },
+        },
+        regexPublishedLineName: {
+          get: () => {
+            return regexPublishedLineName;
+          },
+          set: (newRegex) => {
+            regexPublishedLineName = newRegex;
+            this.updateFilters();
+          },
+        },
+
+        /**
+         * Style properties.
+         */
+        delayDisplay: {
+          value: options.delayDisplay || 300000,
+          writable: true,
+        },
+        delayOutlineColor: {
+          value: options.delayOutlineColor || '#000000',
+          writable: true,
+        },
+        useDelayStyle: {
+          value: options.useDelayStyle || false,
+          writable: true,
+        },
+
+        /**
+         * Debug properties.
+         */
+        // Not used anymore, but could be useful for debugging.
+        // showVehicleTraj: {
+        //   value:
+        //     options.showVehicleTraj !== undefined
+        //       ? options.showVehicleTraj
+        //       : true,
+        //   writable: true,
+        // },
       });
     }
 
@@ -327,7 +417,7 @@ const TrackerLayerMixin = (Base) =>
       super.init(map);
 
       this.tracker = new Tracker({
-        style: (props, r) => this.style(props, r),
+        style: (trajectory, viewState) => this.style(trajectory, viewState),
         ...this.initTrackerOptions,
         ...options,
       });
@@ -368,9 +458,18 @@ const TrackerLayerMixin = (Base) =>
      */
     start() {
       this.stop();
+      this.updateFilters();
       this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
+
+      if (this.isClickActive) {
+        this.onClick(this.onFeatureClick);
+      }
+
+      if (this.isHoverActive) {
+        this.onHover(this.onFeatureHover);
+      }
     }
 
     /**
@@ -410,72 +509,60 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
+     * 
+
+    /**
+     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.
+     *
+     * @param {object} viewState The view state of the map.
+     * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
+     * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
+     * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
+     * @param {number} [viewState.rotation = 0] Rotation of the map to render.
+     * @param {number} viewState.resolution Resolution of the map to render.
+     * @param {boolean} noInterpolate If true trajectories are not interpolated but
+     *   drawn at the last known coordinate. Use this for performance optimization
+     *   during map navigation.
      * @private
      */
-    renderTrajectoriesInternal(
-      size,
-      center,
-      extent,
-      resolution,
-      rotation,
-      noInterpolate,
-    ) {
+    renderTrajectoriesInternal(viewState, noInterpolate) {
       if (!this.tracker) {
         return false;
       }
 
-      const renderTime = this.live ? Date.now() : this.time;
+      const time = this.live ? Date.now() : this.time;
 
-      this.tracker.renderTrajectories(
-        renderTime,
-        size,
-        center,
-        extent,
-        resolution,
-        rotation,
-        noInterpolate,
-      );
+      this.tracker.renderTrajectories({ ...viewState, time }, noInterpolate);
+
       return true;
     }
 
     /**
      * Render the trajectories requesting an animation frame and cancelling the previous one.
      * This function must be overrided by children to provide the correct parameters.
+     *
+     * @param {object} viewState The view state of the map.
+     * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
+     * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
+     * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
+     * @param {number} [viewState.rotation = 0] Rotation of the map to render.
+     * @param {number} viewState.resolution Resolution of the map to render.
+     * @param {boolean} noInterpolate If true trajectories are not interpolated but
+     *   drawn at the last known coordinate. Use this for performance optimization
+     *   during map navigation.
      * @private
      */
-    renderTrajectories(
-      size,
-      center,
-      extent,
-      resolution,
-      rotation,
-      noInterpolate,
-    ) {
+    renderTrajectories(viewState, noInterpolate) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
       }
 
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
-          this.renderTrajectoriesInternal(
-            size,
-            center,
-            extent,
-            resolution,
-            rotation,
-            noInterpolate,
-          );
+          this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
       } else {
-        this.renderTrajectoriesInternal(
-          size,
-          center,
-          extent,
-          resolution,
-          rotation,
-          noInterpolate,
-        );
+        this.renderTrajectoriesInternal(viewState, noInterpolate);
       }
     }
 
@@ -497,7 +584,10 @@ const TrackerLayerMixin = (Base) =>
      * @returns {Array<ol/Feature~Feature>} Array of vehicle.
      */
     getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {
-      const ext = buffer([...coordinate, ...coordinate], 10 * resolution);
+      const ext = buffer(
+        [...coordinate, ...coordinate],
+        this.hitTolerance * resolution,
+      );
       const trajectories = this.tracker.getTrajectories();
       const vehicles = [];
       for (let i = 0; i < trajectories.length; i += 1) {
@@ -516,7 +606,64 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
+     * Request feature information for a given coordinate.
+     *
+     * @param {ol/coordinate~Coordinate} coordinate Coordinate.
+     * @param {Object} options Options See child classes to see which options are supported.
+     * @param {number} [options.resolution=1] The resolution of the map.
+     * @param {number} [options.nb=Infinity] The max number of vehicles to return.
+     * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+     */
+    getFeatureInfoAtCoordinate(coordinate, options = {}) {
+      const { resolution, nb } = options;
+
+      const vehicles = this.getVehiclesAtCoordinate(coordinate, resolution, nb);
+
+      return Promise.resolve({
+        layer: this,
+        features: vehicles.map((vehicle) => {
+          const feature = new Feature({
+            geometry: vehicle.geometry,
+          });
+          feature.setProperties({ ...vehicle });
+          return feature;
+        }),
+        coordinate,
+      });
+    }
+
+    /**
+     * On zoomend we adjust the time interval of the update of vehicles positions.
+     *
+     * @param evt Event that triggered the function.
+     * @private
+     */
+    // eslint-disable-next-line no-unused-vars
+    onZoomEnd(evt) {
+      this.startUpdateTime();
+    }
+
+    /**
+     * Define beahvior when a vehicle is clicked
+     * To be defined in child classes.
+     *
+     * @private
+     * @override
+     */
+    onFeatureClick() {}
+
+    /**
+     * Define behavior when a vehicle is hovered
+     * To be defined in child classes.
+     *
+     * @private
+     * @override
+     */
+    onFeatureHover() {}
+
+    /**
      * Get the duration before the next update depending on zoom level.
+     *
      * @private
      * @param {number} zoom
      */
@@ -524,39 +671,30 @@ const TrackerLayerMixin = (Base) =>
       const roundedZoom = Math.round(zoom);
       const timeStep = timeSteps[roundedZoom] || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
+      // console.log(`Next render in ${nextTick} ms.`);
       return nextTick;
     }
 
     /**
-     * Define a default style of the vehicle.s
-     * Draw a blue circle with the id of the props parameter.
-     *
-     * @param {Object} props Properties
+     * Update filter provided by properties or permalink.
+     */
+    updateFilters() {
+      // Setting filters from the permalink if no values defined by the layer.
+      const parameters = qs.parse(window.location.search.toLowerCase());
+      // filter is the property in TrackerLayerMixin.
+      this.filter = createFilters(
+        this.publishedLineName || parameters[LINE_FILTER],
+        this.tripNumber || parameters[ROUTE_FILTER],
+        this.operator || parameters[OPERATOR_FILTER],
+        this.regexPublishedLineName,
+      );
+    }
+
+    /**
      * @private
      */
-    defaultStyle(props) {
-      const { id: text } = props;
-      if (this.styleCache[text]) {
-        return this.styleCache[text];
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = 200;
-      canvas.height = 15;
-      const ctx = canvas.getContext('2d');
-      ctx.arc(8, 8, 5, 0, 2 * Math.PI, false);
-      ctx.fillStyle = '#8ED6FF';
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
-      ctx.font = 'bold 12px arial';
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 3;
-      ctx.strokeText(text, 20, 10);
-      ctx.fillStyle = 'black';
-      ctx.fillText(text, 20, 10);
-      this.styleCache[text] = canvas;
-      return this.styleCache[text];
+    defaultStyle(trajectory, viewState) {
+      return delayTrackerStyle(trajectory, viewState, this);
     }
   };
 

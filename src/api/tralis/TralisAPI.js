@@ -75,12 +75,20 @@ class TralisAPI {
     /** @ignore */
     this.prefix = options.prefix || '';
 
+    this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
+
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
-    this.conn.setProjection(options.projection || 'epsg:3857');
 
-    if (options.bbox) {
-      this.conn.setBbox(options.bbox);
+    this.conn.isSUBAllow = !this.isUpdateBboxOnMoveEnd;
+    this.conn.isDELAllow = !this.isUpdateBboxOnMoveEnd;
+
+    if (!this.isUpdateBboxOnMoveEnd) {
+      this.conn.setProjection(options.projection || 'epsg:3857');
+
+      if (options.bbox) {
+        this.conn.setBbox(options.bbox);
+      }
     }
   }
 
@@ -280,7 +288,7 @@ class TralisAPI {
    *
    * @param {TralisMode} mode Tralis mode.
    * @param {number[4]} bbox The extent where to request.
-   * @returns {Promise<Station[]>} An array of stations.
+   * @returns {Promise<Array<Station>>} An array of stations.
    */
   getStations(mode, bbox) {
     const stations = [];
@@ -377,7 +385,12 @@ class TralisAPI {
    */
   subscribeTrajectory(mode, onMessage) {
     this.unsubscribeTrajectory(onMessage);
-    this.subscribe(`trajectory${getModeSuffix(mode, TralisModes)}`, onMessage);
+    this.subscribe(
+      `trajectory${getModeSuffix(mode, TralisModes)}`,
+      onMessage,
+      null,
+      this.isUpdateBboxOnMoveEnd,
+    );
   }
 
   /**
@@ -436,7 +449,7 @@ class TralisAPI {
    *
    * @param {string[]} ids List of vehicles ids.
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<FullTrajectory[]>} Return an array of full trajectories.
+   * @returns {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
    */
   getFullTrajectories(ids, mode) {
     const promises = ids.map((id) => {
@@ -512,7 +525,7 @@ class TralisAPI {
    * Get a list of stops for a list of vehicles.
    *
    * @param {string[]} ids List of vehicles ids.
-   * @returns {Promise<StopSequence[]>} Return an array of stop sequences.
+   * @returns {Promise<Array<StopSequence>>} Return an array of stop sequences.
    */
   getStopSequences(ids) {
     const promises = ids.map((id) => {

@@ -12,19 +12,23 @@ const trackerRadiusMapping = {
 };
 
 /**
+ * Trajserv value: 'Tram',  'Subway / Metro / S-Bahn',  'Train', 'Bus', 'Ferry', 'Cable Car', 'Gondola', 'Funicular', 'Long distance bus', 'Rail',
+ * New endpoint use Rail instead of Train.
+ * New tracker values:  null, "tram", "subway", "rail", "bus", "ferry", "cablecar", "gondola", "funicular", "coach".
+ *
  * @ignore
  */
 export const types = [
-  'Tram',
-  'Subway / Metro / S-Bahn',
-  'Train',
-  'Bus',
-  'Ferry',
-  'Cable Car',
-  'Gondola',
-  'Funicular',
-  'Long distance bus',
-  'Rail', // New endpoint use Rail instead of Train.
+  /^Tram/i,
+  /^Subway( \/ Metro \/ S-Bahn)?/i,
+  /^Train/i,
+  /^Bus/i,
+  /^Ferry/i,
+  /^Cable ?Car/i,
+  /^Gondola/i,
+  /^Funicular/i,
+  /^(Long distance bus|coach)/i,
+  /^Rail/i, // New endpoint use Rail instead of Train.
 ];
 
 /**
@@ -89,10 +93,9 @@ export const timeSteps = [
 /**
  * @ignore
  */
-const getTypeIndex = (type) => {
+export const getTypeIndex = (type) => {
   if (typeof type === 'string') {
-    const matched = types.find((t) => new RegExp(type).test(t));
-    return types.indexOf(matched);
+    return types.findIndex((t) => t.test(type));
   }
   return type;
 };

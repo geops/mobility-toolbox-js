@@ -1,13 +1,11 @@
 import Feature from 'ol/Feature';
-import { transform as transformCoords } from 'ol/proj';
+import { fromLonLat } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
-import { Point, MultiPoint, LineString } from 'ol/geom';
+import { MultiPoint, LineString } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
-import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
+import { unByKey } from 'ol/Observable';
 import TrackerLayer from './TrackerLayer';
-import { getUTCTimeString } from '../../common/timeUtils';
-import { getBgColor } from '../../common/trackerConfig';
+
 import mixin from '../../common/mixins/TrajservLayerMixin';
 
 /**
@@ -29,45 +27,6 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  * @implements {TrajservLayerInterface}
  */
 class TrajservLayer extends mixin(TrackerLayer) {
-  constructor(options = {}) {
-    // We use a group to be able to add custom vector layer in extended class.
-    // For example TrajservLayer use a vectorLayer to display the complete trajectory.
-    super({
-      ...options,
-    });
-
-    /** @ignore */
-    this.vectorLayer = new VectorLayer({
-      source: new VectorSource({ features: [] }),
-    });
-    this.olLayer.getLayers().insertAt(0, this.vectorLayer);
-  }
-
-  /**
-   * Initialize the layer.
-   * @param {mapboxgl.Map} map the mapbox map.
-   * @override
-   */
-  init(map) {
-    if (!map) {
-      return;
-    }
-
-    map.addLayer(this.vectorLayer);
-    super.init(map);
-  }
-
-  /**
-   * Terminate the layer.
-   * @override
-   */
-  terminate() {
-    if (this.map) {
-      this.map.removeLayer(this.vectorLayer);
-    }
-    super.terminate();
-  }
-
   /**
    * Start the layer.
    * @override
@@ -80,11 +39,9 @@ class TrajservLayer extends mixin(TrackerLayer) {
     /**
      * Array of ol events key, returned by on() or once().
      * @type {Array<ol/events~EventsKey>}
+     * @ignore
      */
     this.olEventsKeys = [
-      ...this.olEventsKeys,
-      this.map.on('singleclick', this.onMapClick.bind(this)),
-
       this.map.on('movestart', () => {
         this.abortFetchTrajectories();
       }),
@@ -92,11 +49,32 @@ class TrajservLayer extends mixin(TrackerLayer) {
     ];
   }
 
+  stop() {
+    unByKey(this.olEventsKeys);
+    super.stop();
+  }
+
   /**
    * Callback on 'moveend' event.
    * @private
    */
   onMoveEnd() {
+    const z = this.map.getView().getZoom();
+
+    if (z !== this.currentZoom) {
+      /**
+       * Current value of the zoom.
+       * @type {number}
+       * @ignore
+       */
+      this.currentZoom = z;
+
+      // This will restart the timeouts.
+      // TODO maybe find a calculation a bit less approximative.
+      /** @ignore */
+      this.requestIntervalSeconds = 200 / z || 1000;
+    }
+
     this.abortFetchTrajectories();
     if (
       !this.map.getView().getAnimating() &&
@@ -104,66 +82,30 @@ class TrajservLayer extends mixin(TrackerLayer) {
     ) {
       this.updateTrajectories();
     }
+
     if (this.selectedVehicleId && this.journeyId) {
       this.highlightTrajectory();
     }
   }
 
   /**
-   * Callback on 'singleclick' event.
-   * @param {ol/MapEvent~MapEvent} evt
-   * @private
-   */
-  onMapClick(evt) {
-    if (!this.clickCallbacks.length) {
-      return;
-    }
-
-    const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
-    const features = [];
-
-    if (vehicle) {
-      const geom = vehicle.coordinate ? new Point(vehicle.coordinate) : null;
-      features.push(new Feature({ geometry: geom, ...vehicle }));
-
-      if (features.length) {
-        /**
-         * Id of the selected vehicle
-         * @type {string}
-         */
-        this.selectedVehicleId = features[0].get('id');
-        /** @ignore */
-        this.journeyId = features[0].get('journeyIdentifier');
-        this.updateTrajectoryStations(this.selectedVehicleId).then(
-          (trajStations) => {
-            this.clickCallbacks.forEach((callback) =>
-              callback({ ...vehicle, ...trajStations }, this, evt),
-            );
-          },
-        );
-      }
-    } else {
-      this.selectedVehicleId = null;
-      this.vectorLayer.getSource().clear();
-      this.clickCallbacks.forEach((callback) => callback(null, this, evt));
-    }
-  }
-
-  /**
    * Draw the trajectory as a line with points for each stop.
-   * @param {Array} stationsCoords Array of station coordinates.
-   * @param {LineString|MultiLineString} lineGeometry A LineString or a MultiLineString.
+   * @param {Array} stationsCoords Array of station coordinates in epsg:4326.
+   * @param {Array<ol/coordinate~Coordinate>} lineCoords A list of coordinates.
    * @param {string} color The color of the line.
    * @private
    */
-  drawFullTrajectory(stationsCoords, lineGeometry, color) {
-    // Don't allow white lines, use red instead.
-    const vehiculeColor = /#ffffff/i.test(color) ? '#ff0000' : color;
+  drawFullTrajectory(stationsCoords, lineCoords, color) {
     const vectorSource = this.vectorLayer.getSource();
     vectorSource.clear();
 
+    // Add station points
     if (stationsCoords) {
-      const geometry = new MultiPoint(stationsCoords);
+      const geometry = new MultiPoint(
+        stationsCoords.map((coords) => {
+          return fromLonLat(coords);
+        }),
+      );
       const aboveStationsFeature = new Feature(geometry);
       aboveStationsFeature.setStyle(
         new Style({
@@ -183,7 +125,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
           image: new Circle({
             radius: 4,
             fill: new Fill({
-              color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
+              color,
             }),
           }),
         }),
@@ -191,82 +133,29 @@ class TrajservLayer extends mixin(TrackerLayer) {
       vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
     }
 
-    const lineFeat = new Feature({
-      geometry: lineGeometry,
-    });
-    lineFeat.setStyle([
-      new Style({
-        zIndex: 2,
-        stroke: new Stroke({
-          color: '#000000',
-          width: 6,
-        }),
-      }),
-      new Style({
-        zIndex: 3,
-        stroke: new Stroke({
-          color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
-          width: 4,
-        }),
-      }),
-    ]);
-    vectorSource.addFeature(lineFeat);
-  }
-
-  /**
-   * Fetch stations information with a trajectory ID
-   * @param {number} trajId The ID of the trajectory
-   * @returns {Promise<TrajectoryStation[]>} A list of stations.
-   * @private
-   */
-  updateTrajectoryStations(trajId) {
-    return super.updateTrajectoryStations(trajId).then((trajStations) => {
-      /**
-       * Array of station coordinates.
-       * @type {Array<ol/coordinate~Coordinate>}
-       */
-      this.stationsCoords = [];
-      trajStations.stations.forEach((station) => {
-        this.stationsCoords.push(
-          transformCoords(station.coordinates, 'EPSG:4326', 'EPSG:3857'),
-        );
+    // Add line.
+    if (lineCoords) {
+      const lineFeat = new Feature({
+        geometry: new LineString(lineCoords),
       });
-
-      this.highlightTrajectory();
-      return trajStations;
-    });
-  }
-
-  /**
-   * Highlight the trajectory of journey.
-   * @private
-   */
-  highlightTrajectory() {
-    this.api
-      .fetchTrajectoryById(
-        this.getParams({
-          id: this.journeyId,
-          time: getUTCTimeString(new Date()),
+      lineFeat.setStyle([
+        new Style({
+          zIndex: 2,
+          stroke: new Stroke({
+            color: '#000000',
+            width: 6,
+          }),
         }),
-      )
-      .then((traj) => {
-        const { p: multiLine, t, c } = traj;
-        const lineCoords = [];
-        multiLine.forEach((line) => {
-          line.forEach((point) => {
-            lineCoords.push([point.x, point.y]);
-          });
-        });
-
-        this.drawFullTrajectory(
-          this.stationsCoords,
-          new LineString(lineCoords),
-          c ? `#${c}` : getBgColor(t),
-        );
-      })
-      .catch(() => {
-        this.vectorLayer.getSource().clear();
-      });
+        new Style({
+          zIndex: 3,
+          stroke: new Stroke({
+            color,
+            width: 4,
+          }),
+        }),
+      ]);
+      vectorSource.addFeature(lineFeat);
+    }
   }
 
   /**
@@ -287,12 +176,6 @@ class TrajservLayer extends mixin(TrackerLayer) {
       s: zoom < 10 ? 1 : 0,
       z: zoom,
     });
-  }
-
-  /** @ignore */
-  defaultStyle(props) {
-    const zoom = this.map.getView().getZoom();
-    return super.defaultStyle(props, zoom);
   }
 
   /**

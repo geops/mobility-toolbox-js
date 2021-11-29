@@ -44,7 +44,7 @@ export class TralisLayerInterface {
   /**
    * Add a feature to the tracker.
    * @param {number} id The feature id
-   * @param {Trajectory} traj Properties of the trajectory.
+   * @param {TralisTrajectory} traj Properties of the trajectory.
    * @param {boolean} [addOnTop=false] If true, the trajectory is added on top of
    *   the trajectory object. This affects the draw order. If addOnTop is
    *   true, the trajectory is drawn first and appears on bottom.
@@ -66,6 +66,16 @@ export class TralisLayerInterface {
    * @private
    */
   removeTrajectoryByAttribute(attributeName, value) {}
+
+  /**
+   * Define the style of the vehicle.
+   * Draw a blue circle with the id of the props parameter.
+   *
+   * @param {TralisTrajectory} trajectory  A trajectory
+   * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
+   * @private
+   */
+  defaultStyle(trajectory, viewState) {}
 }
 
 /**
@@ -81,24 +91,26 @@ const TralisLayerMixin = (TrackerLayer) =>
       super({ ...options });
       this.debug = options.debug;
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
-      this.trajectories = [];
-      this.refreshTimeInMs = 1000 / 30;
       this.onMessage = this.onMessage.bind(this);
       this.onDeleteMessage = this.onDeleteMessage.bind(this);
       this.api = options.api || new TralisAPI(options);
+
       this.format = new GeoJSON();
+
+      // This property will call api.setBbox on each movend event
+      this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
     }
 
-    init(map) {
-      super.init(map);
+    start() {
+      super.start();
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
     }
 
-    terminate() {
+    stop() {
+      super.stop();
       this.api.unsubscribeTrajectory(this.onMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
-      super.terminate();
     }
 
     setMode(mode) {
@@ -110,10 +122,49 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
     }
 
+    /**
+     * Apply the highlight style on hover.
+     *
+     * @private
+     * @override
+     */
+    onFeatureHover(features, layer, coordinate) {
+      const [feature] = features;
+      let id = null;
+      if (feature) {
+        id = feature.get('train_id');
+      }
+      if (this.hoverVehicleId !== id) {
+        /** @ignore */
+        this.hoverVehicleId = id;
+        this.renderTrajectories();
+      }
+      super.onFeatureHover(features, layer, coordinate);
+    }
+
+    /**
+     * Display the complete trajectory of the vehicle.
+     *
+     * @private
+     * @override
+     */
+    onFeatureClick(features, layer, coordinate) {
+      const [feature] = features;
+      if (feature) {
+        /** @ignore */
+        this.selectedVehicleId = feature.get('train_id');
+        this.highlightTrajectory();
+      } else {
+        this.selectedVehicleId = null;
+      }
+      super.onFeatureClick(features, layer, coordinate);
+    }
+
     onMessage(data) {
       if (!data.content) {
         return;
       }
+
       const feat = this.format.readFeature(data.content);
 
       feat.set('timeOffset', Date.now() - data.timestamp);
@@ -144,6 +195,38 @@ const TralisLayerMixin = (TrackerLayer) =>
       }
     }
 
+    /**
+     * When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+     * Then we combine them in one response and send them to inherited layers.
+     *
+     * @private
+     * @override
+     */
+    highlightTrajectory() {
+      // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+      // Then we combine them in one response and send them to inherited layers.
+      const promises = [
+        this.api.getStopSequence(this.selectedVehicleId, this.mode),
+        this.api.getFullTrajectory(this.selectedVehicleId, this.mode),
+      ];
+
+      return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
+        console.log(
+          `stopSequence for ${this.selectedVehicleId}:`,
+          stopSequence,
+        );
+        console.log(
+          `fullTrajectory for ${this.selectedVehicleId}:`,
+          fullTrajectory,
+        );
+        const response = {
+          stopSequence,
+          fullTrajectory,
+        };
+        return response;
+      });
+    }
+
     addTrajectory(id, traj, addOnTop) {
       const idx = this.trajectories.findIndex((t) => t.train_id === id);
       const { time_intervals: timeIntervals } = traj;
@@ -162,7 +245,7 @@ const TralisLayerMixin = (TrackerLayer) =>
         }
       }
 
-      this.updateTrajectories();
+      this.tracker.setTrajectories(this.trajectories);
     }
 
     removeTrajectory(id) {
@@ -181,15 +264,6 @@ const TralisLayerMixin = (TrackerLayer) =>
           break;
         }
       }
-    }
-
-    updateTrajectories() {
-      this.tracker.setTrajectories(this.trajectories);
-      this.renderTrajectories();
-    }
-
-    getRefreshTimeInMs() {
-      return this.refreshTimeInMs;
     }
   };
 

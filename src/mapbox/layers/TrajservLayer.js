@@ -3,7 +3,6 @@ import { buffer, getWidth } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TrajservLayerMixin';
-import { getUTCTimeString } from '../../common/timeUtils';
 
 /**
  * Responsible for loading and display data from a Trajserv service.
@@ -25,7 +24,6 @@ import { getUTCTimeString } from '../../common/timeUtils';
 class TrajservLayer extends mixin(TrackerLayer) {
   constructor(options = {}) {
     super({ ...options });
-    this.onMapClick = this.onMapClick.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onMoveEnd = this.onMoveEnd.bind(this);
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
@@ -52,14 +50,12 @@ class TrajservLayer extends mixin(TrackerLayer) {
       return;
     }
     super.start();
-    this.map.on('click', this.onMapClick);
     this.map.on('move', this.onMove);
     this.map.on('moveend', this.onMoveEnd);
   }
 
   stop() {
     if (this.map) {
-      this.map.off('click', this.onClick);
       this.map.off('move', this.onMove);
       this.map.off('moveend', this.onMoveEnd);
     }
@@ -78,52 +74,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   }
 
   /**
-   * Callback on 'mouseclick' event.
-   * @param {mapboxgl.MapMouseEvent} evt
-   * @private
-   */
-  onMapClick(evt) {
-    if (!this.clickCallbacks.length) {
-      return;
-    }
-
-    const [vehicle] = this.getVehiclesAtCoordinate(
-      fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
-      1,
-    );
-
-    if (vehicle) {
-      /**
-       * Id of the selected vehicle
-       * @type {string}
-       */
-      this.selectedVehicleId = vehicle.id;
-      /** @ignore */
-      this.journeyId = vehicle.journeyIdentifier;
-      this.updateTrajectoryStations(this.selectedVehicleId).then(
-        (vehicleWithStations) => {
-          /**
-           * Array of station coordinates.
-           * @type {Array<Array<number>>} Array of coordinates.
-           */
-          this.stationsCoords = [];
-          vehicleWithStations.stations.forEach((station) => {
-            this.stationsCoords.push(fromLonLat(station.coordinates));
-          });
-          this.clickCallbacks.forEach((callback) =>
-            callback({ ...vehicle, ...vehicleWithStations }, this, evt),
-          );
-        },
-      );
-    } else {
-      this.selectedVehicleId = null;
-      this.clickCallbacks.forEach((callback) => callback(null, this, evt));
-    }
-  }
-
-  /**
-   * @override
-   * * Returns the URL parameters.
+   * Returns the URL parameters.
    * @param {Object} extraParams Extra parameters
    * @returns {Object}
    * @private
@@ -144,107 +95,18 @@ class TrajservLayer extends mixin(TrackerLayer) {
     });
   }
 
-  /** @ignore */
-  defaultStyle(props) {
-    const zoom = this.map.getZoom();
-    return super.defaultStyle(props, zoom);
-  }
-
   /**
    * Draw the trajectory as a line with points for each stop.
-   * @param {Array} stationsCoords Array of station coordinates.
-   * @param {ol/geom/LineString~LineString|ol/geom/MultiLineString~MultiLineString} lineGeometry A LineString or a MultiLineString.
+   *
+   * @param {Array} stationsCoords Array of station coordinates in EPSG:4326.
+   * @param {Array<ol/coordinate~Coordinate>} lineCoords A list of coordinates in EPSG:3857.
    * @param {string} color The color of the line.
    * @private
    */
   // eslint-disable-next-line no-unused-vars,class-methods-use-this
-  drawFullTrajectory(stationsCoords, lineGeometry, color) {
+  drawFullTrajectory(stationsCoords, lineCoords, color) {
     // eslint-disable-next-line no-console
     console.log('to be implemented');
-    // Don't allow white lines, use red instead.
-    // const vehiculeColor = /#ffffff/i.test(color) ? '#ff0000' : color;
-    // const vectorSource = this.olLayer.getSource();
-    // vectorSource.clear();
-    // if (stationsCoords) {
-    //   const geometry = new MultiPoint(stationsCoords);
-    //   const aboveStationsFeature = new Feature(geometry);
-    //   aboveStationsFeature.setStyle(
-    //     new Style({
-    //       zIndex: 1,
-    //       image: new Circle({
-    //         radius: 5,
-    //         fill: new Fill({
-    //           color: '#000000',
-    //         }),
-    //       }),
-    //     }),
-    //   );
-    //   const belowStationsFeature = new Feature(geometry);
-    //   belowStationsFeature.setStyle(
-    //     new Style({
-    //       zIndex: 4,
-    //       image: new Circle({
-    //         radius: 4,
-    //         fill: new Fill({
-    //           color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
-    //         }),
-    //       }),
-    //     }),
-    //   );
-    //   vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
-    // }
-    // const lineFeat = new Feature({
-    //   geometry: lineGeometry,
-    // });
-    // lineFeat.setStyle([
-    //   new Style({
-    //     zIndex: 2,
-    //     stroke: new Stroke({
-    //       color: '#000000',
-    //       width: 6,
-    //     }),
-    //   }),
-    //   new Style({
-    //     zIndex: 3,
-    //     stroke: new Stroke({
-    //       color: this.useDelayStyle ? '#a0a0a0' : vehiculeColor,
-    //       width: 4,
-    //     }),
-    //   }),
-    // ]);
-    // vectorSource.addFeature(lineFeat);
-  }
-
-  /**
-   * Highlight the trajectory of journey.
-   * @param {String} journeyId The id of the journey.
-   * @private
-   */
-  highlightTrajectory(journeyId) {
-    this.api
-      .fetchTrajectoryById({
-        id: journeyId,
-        time: getUTCTimeString(new Date()),
-      })
-      // .then((traj) => {
-      // const { p: multiLine, t, c } = traj;
-      // const lineCoords = [];
-      // multiLine.forEach((line) => {
-      //   line.forEach((point) => {
-      //     lineCoords.push([point.x, point.y]);
-      //   });
-      // });
-      // this.drawFullTrajectory(
-      //   this.stationsCoords,
-      //   new LineString(lineCoords),
-      //   c ? `#${c}` : getBgColor(t),
-      // );
-      // })
-      .catch(() => {
-        if (this.map.getLayer('highlight-trajectory')) {
-          this.map.removeLayer('highlight-trajectory');
-        }
-      });
   }
 }
 

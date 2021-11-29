@@ -103,8 +103,8 @@ describe('WebSocketConnector', () => {
         client.setBbox([0, 0, 0, 0]);
 
         expect(client.subscriptions.length).toBe(3);
-        expect(client.websocket.removeEventListener).toBeCalledTimes(3);
-        expect(client.websocket.addEventListener).toBeCalledTimes(3);
+        expect(client.websocket.removeEventListener).toBeCalledTimes(0);
+        expect(client.websocket.addEventListener).toBeCalledTimes(0);
 
         client.unsubscribe('foo');
         expect(client.subscriptions.length).toBe(1);

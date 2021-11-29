@@ -1,4 +1,3 @@
-import { unByKey } from 'ol/Observable';
 import GeomType from 'ol/geom/GeometryType';
 import { compose, apply, create } from 'ol/transform';
 
@@ -23,6 +22,7 @@ export default class Tracker {
      * @type {Array<trajectory>}
      */
     this.pixelRatio = options.pixelRatio || window.devicePixelRatio || 1;
+
     /**
      * Array of trajectories.
      * @type {Array<trajectory>}
@@ -141,23 +141,21 @@ export default class Tracker {
 
   /**
    * Draw all the trajectories available to the canvas.
-   * @param {Date} currTime The date to render.
-   * @param {number[2]} size Size ([width, height]) of the canvas to render.
-   * @param {number} resolution Which resolution of the map to render.
+   * @param {ViewState} viewState The view state of the map.
    * @param {boolean} noInterpolate If true trajectories are not interpolated but
    *   drawn at the last known coordinate. Use this for performance optimization
    *   during map navigation.
    * @private
    */
-  renderTrajectories(
-    currTime = Date.now(),
-    size = [],
-    center,
-    extent,
-    resolution,
-    rotation = 0,
-    noInterpolate = false,
-  ) {
+  renderTrajectories(viewState, noInterpolate = false) {
+    const {
+      time = Date.now(),
+      size = [],
+      center,
+      resolution,
+      rotation = 0,
+      pixelRatio,
+    } = viewState;
     this.clear();
 
     const [width, height] = size;
@@ -167,8 +165,8 @@ export default class Tracker {
       (this.canvas.width !== width || this.canvas.height !== height)
     ) {
       [this.canvas.width, this.canvas.height] = [
-        width * this.pixelRatio,
-        height * this.pixelRatio,
+        width * pixelRatio,
+        height * pixelRatio,
       ];
     }
 
@@ -183,11 +181,8 @@ export default class Tracker {
       -center[1],
     );
 
-    this.canvas.style.left = '0px';
-    this.canvas.style.top = '0px';
-    this.canvas.style.transform = ``;
-    this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
-    this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
+    this.canvas.style.width = `${this.canvas.width / pixelRatio}px`;
+    this.canvas.style.height = `${this.canvas.height / pixelRatio}px`;
 
     /**
      * Current resolution.
@@ -222,7 +217,7 @@ export default class Tracker {
       if (traj.coordinate && (noInterpolate || !this.interpolate)) {
         coord = traj.coordinate;
       } else if (timeIntervals && timeIntervals.length > 1) {
-        const now = currTime - (timeOffset || 0);
+        const now = time - (timeOffset || 0);
         let start;
         let end;
         let startFrac;
@@ -288,26 +283,20 @@ export default class Tracker {
       if (coord) {
         // We set the rotation of the trajectory (used by tralis).
         this.trajectories[i].coordinate = coord;
-        // console.log([...toLonLat(coord)]);
-        let px = apply(coordinateToPixelTransform, [...coord]); // [...toLonLat(coord)]);
-        // console.log(px);
+        let px = apply(coordinateToPixelTransform, [...coord]);
         if (!px) {
           // eslint-disable-next-line no-continue
           continue;
         }
 
         px = px.map((p) => {
-          return p * this.pixelRatio;
+          return p * pixelRatio;
         });
 
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
         this.trajectories[i].rendered = true;
         this.renderedTrajectories.push(this.trajectories[i]);
-        const vehicleImg = this.style(
-          traj,
-          this.currResolution,
-          this.pixelRatio,
-        );
+        const vehicleImg = this.style(traj, viewState);
 
         if (!vehicleImg) {
           // eslint-disable-next-line no-continue
@@ -373,7 +362,6 @@ export default class Tracker {
    * @private
    */
   destroy() {
-    unByKey(this.olEventsKeys);
     this.renderedTrajectories = [];
     this.clear();
   }

@@ -20,4 +20,11 @@ export default () => {
   map.on('load', () => {
     tracker.init(map, 'waterway-name');
   });
+
+  tracker.onClick(([feature]) => {
+    if (feature) {
+      // eslint-disable-next-line no-console
+      console.log(feature.getProperties());
+    }
+  });
 };

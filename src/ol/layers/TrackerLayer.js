@@ -1,16 +1,39 @@
-import { Layer as OLLayer, Group } from 'ol/layer';
-import { unByKey } from 'ol/Observable';
+import { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import stringify from 'json-stringify-safe';
 
+import { Vector as VectorSource } from 'ol/source';
 import mixin from '../../common/mixins/TrackerLayerMixin';
+
 import Layer from './Layer';
 
 import Worker from '../../common/tracker.worker';
 
 const updateContainerTransform = (layer) => {
-  if (layer.workerFrameState) {
+  if (layer.renderedViewState) {
+    // const {
+    //   center,
+    //   resolution,
+    //   rotation,
+    // } = layer.mainThreadFrameState.viewState;
+    // const {
+    //   center: renderedCenter,
+    //   resolution: renderedResolution,
+    //   rotation: renderedRotation,
+    // } = layer.workerFrameState.viewState;
+
+    // // eslint-disable-next-line no-param-reassign
+    // layer.transformContainer.style.transform = composeCssTransform(
+    //   (renderedCenter[0] - center[0]) / resolution,
+    //   (center[1] - renderedCenter[1]) / resolution,
+    //   renderedResolution / resolution,
+    //   renderedResolution / resolution,
+    //   rotation - renderedRotation,
+    //   0,
+    //   0,
+    // );
+
     const {
       center,
       resolution,
@@ -20,12 +43,16 @@ const updateContainerTransform = (layer) => {
       center: renderedCenter,
       resolution: renderedResolution,
       rotation: renderedRotation,
-    } = layer.workerFrameState.viewState;
+    } = layer.renderedViewState;
+    const pixelCenterRendered = layer.map.getPixelFromCoordinate(
+      renderedCenter,
+    );
 
+    const pixelCenter = layer.map.getPixelFromCoordinate(center);
     // eslint-disable-next-line no-param-reassign
     layer.transformContainer.style.transform = composeCssTransform(
-      (renderedCenter[0] - center[0]) / resolution,
-      (center[1] - renderedCenter[1]) / resolution,
+      pixelCenterRendered[0] - pixelCenter[0],
+      pixelCenterRendered[1] - pixelCenter[1],
       renderedResolution / resolution,
       renderedResolution / resolution,
       rotation - renderedRotation,
@@ -38,6 +65,7 @@ const updateContainerTransform = (layer) => {
 /**
  * Responsible for loading tracker data.
  *
+ * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  * @implements {TrackerLayerInterface}
  */
@@ -80,7 +108,8 @@ class TrackerLayer extends mixin(Layer) {
           ) {
             return;
           }
-          const { imageData } = message.data;
+          const { imageData, nbRenderedTrajectories } = message.data;
+          this.nbRenderedTrajectories = nbRenderedTrajectories;
           that.canvas.width = imageData.width;
           that.canvas.height = imageData.height;
           this.canvas.style.transform = ``;
@@ -90,7 +119,7 @@ class TrackerLayer extends mixin(Layer) {
           }px`;
           that.canvas.getContext('2d').drawImage(imageData, 0, 0);
           // this.canvas.style.transform = message.data.transform;
-          that.workerFrameState = message.data.frameState;
+          that.renderedViewState = message.data.frameState.viewState;
           updateContainerTransform(that);
         });
         that.rendering = false;
@@ -102,18 +131,28 @@ class TrackerLayer extends mixin(Layer) {
      * It's useful to avoid rendering the map when the map is animating or interacting.
      * @type {function}
      */
-    this.renderWhenInteracting = options.renderWhenInteracting || (() => false);
+    this.renderWhenInteracting =
+      options.renderWhenInteracting ||
+      (() => {
+        // Render trajectories on each render frame when the number of trajectories is small.
+        return false;
+      });
 
+    /** @ignore */
     this.olLayer =
       options.olLayer ||
       new Group({
         layers: [
+          new VectorLayer({
+            source: new VectorSource({ features: [] }),
+          }),
           new OLLayer({
             source: new Source({}),
             render: (frameState) => {
               if (!this.tracker || !this.tracker.canvas) {
                 return null;
               }
+
               if (!this.container) {
                 this.container = document.createElement('div');
                 this.container.style.position = 'absolute';
@@ -126,22 +165,27 @@ class TrackerLayer extends mixin(Layer) {
                 this.container.appendChild(this.transformContainer);
                 this.canvas = document.createElement('canvas');
                 this.canvas.style.position = 'absolute';
+                this.canvas.style.top = '0';
                 this.canvas.style.left = '0';
                 this.canvas.style.transformOrigin = 'top left';
                 this.transformContainer.appendChild(this.canvas);
               }
               this.mainThreadFrameState = frameState;
-
-              if (this.workerFrameState) {
-                const { resolution } = this.mainThreadFrameState.viewState;
+              if (this.renderedViewState) {
+                const { resolution } = frameState.viewState;
                 const {
                   resolution: renderedResolution,
-                } = this.workerFrameState.viewState;
-
-                updateContainerTransform(this);
-
-                // Avoid having really big points when zooming fast.
-                if (this.canvas && renderedResolution / resolution >= 3) {
+                } = this.renderedViewState;
+                if (
+                  this.renderWhenInteracting &&
+                  this.renderWhenInteracting(
+                    frameState.viewState,
+                    this.renderedViewState,
+                  )
+                ) {
+                  this.renderTrajectories(true);
+                } else if (renderedResolution / resolution >= 3) {
+                  // Avoid having really big points when zooming fast.
                   const context = this.canvas.getContext('2d');
                   context.clearRect(
                     0,
@@ -149,20 +193,8 @@ class TrackerLayer extends mixin(Layer) {
                     this.canvas.width,
                     this.canvas.height,
                   );
-                }
-
-                if (
-                  !this.rendering &&
-                  this.renderWhenInteracting &&
-                  this.renderWhenInteracting(
-                    this.mainThreadFrameState,
-                    this.workerFrameState,
-                  )
-                ) {
-                  this.renderTrajectories(false);
-                } else if (this.rendering) {
-                  // eslint-disable-next-line no-param-reassign
-                  frameState.animate = true;
+                } else {
+                  updateContainerTransform(this);
                 }
               }
               return this.container;
@@ -170,6 +202,9 @@ class TrackerLayer extends mixin(Layer) {
           }),
         ],
       });
+
+    // We store the layer used to highlight the full Trajectory
+    this.vectorLayer = this.olLayer.getLayers().item(0);
 
     // Options the last render run did happen. If something changes
     // we have to render again
@@ -179,67 +214,37 @@ class TrackerLayer extends mixin(Layer) {
       zoom: null,
       rotation: 0,
     };
+  }
 
-    /**
-     * Array of ol events key, returned by on() or once().
-     * @type {Array<ol/events~EventsKey>}
-     * @private
-     */
-    this.olEventsKeys = []; // Be careful to not override this value in child classe.
+  init(map) {
+    super.init(map);
+    if (this.map) {
+      this.olListenersKeys.push(
+        this.map.on('moveend', (evt) => {
+          const view = this.map.getView();
+          if (view.getAnimating() || view.getInteracting()) {
+            return;
+          }
+          const zoom = view.getZoom();
+
+          // Update the interval between render updates
+          if (this.currentZoom !== zoom) {
+            this.onZoomEnd(evt);
+          }
+          this.currentZoom = zoom;
+
+          this.onMoveEnd(evt);
+        }),
+      );
+    }
   }
 
   /**
-   * Trackerlayer is started.
-   * @private
+   * Destroy the container of the tracker.
    */
-  start() {
-    super.start();
-
-    this.olEventsKeys = [
-      this.map.on('moveend', () => {
-        const z = this.map.getView().getZoom();
-
-        if (z !== this.currentZoom) {
-          /**
-           * Current value of the zoom.
-           * @type {number}
-           */
-          this.currentZoom = z;
-
-          // This will restart the timeouts.
-          // TODO maybe find a caluclation a bit less approximative one.
-          this.requestIntervalSeconds = 200 / z || 1000;
-        }
-      }),
-      // this.map.on('pointermove', (evt) => {
-      //   if (
-      //     this.map.getView().getInteracting() ||
-      //     this.map.getView().getAnimating() ||
-      //     !this.isHoverActive
-      //   ) {
-      //     return;
-      //   }
-      //   const [vehicle] = this.getVehiclesAtCoordinate(evt.coordinate, 1);
-      //   const id = vehicle && vehicle.id;
-      //   if (this.hoverVehicleId !== id) {
-      //     this.map.getTargetElement().style.cursor = vehicle
-      //       ? 'pointer'
-      //       : 'auto';
-      //     this.hoverVehicleId = id;
-      //     this.renderTrajectories();
-      //   }
-      // }),
-    ];
-  }
-
-  /**
-   * Stop current layer.
-   * @private
-   */
-  stop() {
-    super.stop();
-    unByKey(this.olEventsKeys);
-    this.olEventsKeys = [];
+  terminate() {
+    super.terminate();
+    this.container = null;
   }
 
   /**
@@ -250,11 +255,15 @@ class TrackerLayer extends mixin(Layer) {
   renderTrajectories(noInterpolate) {
     const view = this.map.getView();
     super.renderTrajectories(
-      this.map.getSize(),
-      view.getCenter(),
-      view.calculateExtent(),
-      view.getResolution(),
-      view.getRotation(),
+      {
+        size: this.map.getSize(),
+        center: this.map.getView().getCenter(),
+        extent: view.calculateExtent(),
+        resolution: view.getResolution(),
+        rotation: view.getRotation(),
+        zoom: view.getZoom(),
+        pixelRatio: this.pixelRatio,
+      },
       noInterpolate,
     );
   }
@@ -262,118 +271,55 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
    * @private
+   * @override
    */
-  renderTrajectoriesInternal(
-    size,
-    center,
-    extent,
-    resolution,
-    rotation,
-    noInterpolate,
-  ) {
-    if (this.worker) {
-      if (!this.tracker) {
-        return false;
-      }
-
-      const renderTime = this.live ? Date.now() : this.time;
-
-      if (
-        this.map.getView().getAnimating() ||
-        this.map.getView().getInteracting()
-      ) {
-        return false;
-      }
-      // // Avoid useless render before the next tick.
-      // if (
-      //   this.live
-      //   // center[0] === (this.lastRenderCenter || [])[0] &&
-      //   // center[1] === (this.lastRenderCenter || [])[1] &&
-      //   // resolution === this.lastRenderResolution &&
-      //   // rotation === this.lastRenderRotation
-      //   // !this.isFirstRender &&
-      //   // renderTime - this.lastRenderTime < 150
-      // ) {
-      //   console.log('la', this.updateTimeDelay);
-      //   return false;
-      // }
-
-      // if (this.firstRender && this.tracker.trajectories.length > 0) {
-      //   console.log('LA', this.mainThreadFrameState);
-      //   this.isFirstRender = false;
-      // }
-
-      // this.lastRenderCenter = center;
-      // this.lastRenderTime = renderTime;
-      // this.lastRenderResolution = resolution;
-      // this.lastRenderRotation = rotation;
-
-      if (this.mainThreadFrameState) {
-        this.rendering = true;
-        const frameState = { ...this.mainThreadFrameState };
-        delete frameState.layerStatesArray;
-        delete frameState.viewState.projection;
-        const {
-          // center, resolution, rotation,
-          zoom,
-        } = frameState.viewState;
-
-        if (
-          this.map.getView().getInteracting() ||
-          this.map.getView().getAnimating()
-        ) {
-          return false;
-        }
-
-        this.worker.postMessage({
-          action: 'render',
-          time: renderTime,
-          size,
-          center,
-          resolution,
-          extent,
-          zoom,
-          rotation,
-          pixelRatio: this.pixelRatio,
-          interpolate: !noInterpolate,
-          iconScale: this.iconScale,
-          hoverVehicleId: this.hoverVehicleId,
-          selectedVehicleId: this.selectedVehicleId,
-          delayDisplay: this.delayDisplay,
-          delayOutlineColor: this.delayOutlineColor,
-          useDelayStyle: this.useDelayStyle,
-          frameState: JSON.parse(stringify(frameState)),
-        });
-      }
-      return true;
-    }
-
+  renderTrajectoriesInternal(viewState, noInterpolate) {
     let isRendered = false;
 
-    isRendered = super.renderTrajectoriesInternal(
-      size,
-      center,
-      extent,
-      resolution,
-      rotation,
-      noInterpolate,
-    );
+    const blockRendering =
+      !this.renderWhenInteracting(viewState, this.renderedViewState) &&
+      (this.map.getView().getAnimating() ||
+        this.map.getView().getInteracting());
+    const { size, center, resolution, extent, rotation, zoom } = viewState;
 
-    // We update the current render state.
-    if (isRendered) {
-      this.renderedViewState = {
+    if (this.worker && this.mainThreadFrameState) {
+      const frameState = { ...this.mainThreadFrameState };
+      delete frameState.layerStatesArray;
+      delete frameState.viewState.projection;
+      this.worker.postMessage({
+        action: 'render',
+        time: this.time,
         size,
         center,
-        extent,
         resolution,
+        extent,
+        zoom,
         rotation,
-      };
+        pixelRatio: this.pixelRatio,
+        interpolate: !noInterpolate,
+        iconScale: this.iconScale,
+        hoverVehicleId: this.hoverVehicleId,
+        selectedVehicleId: this.selectedVehicleId,
+        delayDisplay: this.delayDisplay,
+        delayOutlineColor: this.delayOutlineColor,
+        useDelayStyle: this.useDelayStyle,
+        frameState: JSON.parse(stringify(frameState)),
+      });
+    } else {
+      // Don't render the map when the map is animating or interacting.
+      isRendered = blockRendering
+        ? false
+        : super.renderTrajectoriesInternal(viewState, noInterpolate);
 
-      if (this.transformContainer) {
-        this.transformContainer.style.transform = '';
+      // We update the current render state.
+      if (isRendered) {
+        this.renderedViewState = { ...viewState };
+
+        if (this.transformContainer) {
+          this.transformContainer.style.transform = '';
+        }
       }
     }
-    return isRendered;
   }
 
   /**
@@ -394,6 +340,59 @@ class TrackerLayer extends mixin(Layer) {
   getVehiclesAtCoordinate(coordinate, nb) {
     const resolution = this.map.getView().getResolution();
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
+  }
+
+  getFeatureInfoAtCoordinate(coordinate) {
+    const resolution = this.map.getView().getResolution();
+    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+  }
+
+  /**
+   * Function called on moveend event.
+   * To be defined in inherited classes
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event.
+   * @private
+   */
+  // eslint-disable-next-line no-unused-vars,class-methods-use-this
+  onMoveEnd(evt) {}
+
+  /**
+   * Function called on moveend event only when the zoom has changed.
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event.
+   * @private
+   * @override
+   */
+  // eslint-disable-next-line no-unused-vars
+  onZoomEnd(evt) {
+    super.onZoomEnd(evt);
+  }
+
+  /**
+   * Update the cursor style when hovering a vehicle.
+   *
+   * @private
+   * @override
+   */
+  onFeatureHover(features, layer, coordinate) {
+    super.onFeatureHover(features, layer, coordinate);
+    this.map.getTargetElement().style.cursor = features.length
+      ? 'pointer'
+      : 'auto';
+  }
+
+  /**
+   * Display the complete trajectory of the vehicle.
+   *
+   * @private
+   * @override
+   */
+  onFeatureClick(features, layer, coordinate) {
+    super.onFeatureClick(features, layer, coordinate);
+    if (!features.length && this.vectorLayer) {
+      this.vectorLayer.getSource().clear();
+    }
   }
 
   /**

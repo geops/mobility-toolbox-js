@@ -2,215 +2,15 @@ import { Point, LineString } from 'ol/geom';
 import GeomType from 'ol/geom/GeometryType';
 import stringify from 'json-stringify-safe';
 import { compose, apply, create } from 'ol/transform';
-import {
-  getDelayBgCanvas,
-  getDelayTextCanvas,
-  getCircleCanvas,
-  getTextCanvas,
-} from './trackerStyleConfig';
-import {
-  getRadius,
-  getDelayColor,
-  getDelayText,
-  getBgColor,
-  getTextColor,
-  getTextSize,
-} from './trackerConfig';
+import { delayTrackerStyle } from './utils';
 
 const debug = false;
 
 let trajectories = [];
-const styleCache = {};
-// const defaultStyle = (traj) => {
-//   // const { id: text } = traj;
-//   const text = 'la';
-//   if (styleCache[text]) {
-//     return styleCache[text];
-//   }
-//   const canvas = new OffscreenCanvas(15, 15);
-//   const ctx = canvas.getContext('2d');
-//   ctx.arc(8, 8, 5, 0, 2 * Math.PI, false);
-//   ctx.fillStyle = '#8ED6FF';
-//   ctx.fill();
-//   ctx.lineWidth = 3;
-//   ctx.strokeStyle = 'black';
-//   ctx.stroke();
-//   // ctx.font = 'bold 12px arial';
-//   // ctx.strokeStyle = 'white';
-//   // ctx.lineWidth = 3;
-//   // ctx.strokeText(text, 20, 10);
-//   // ctx.fillStyle = 'black';
-//   // ctx.fillText(text, 20, 10);
-//   styleCache[text] = canvas;
-//   return styleCache[text];
-// };
-let count = 0;
-const style = (
-  trajectory,
-  zoom,
-  pixelRatio,
-  hoverVehicleId,
-  selectedVehicleId,
-  delayDisplay,
-  delayOutlineColor,
-  useDelayStyle,
-  operatorProvidesRealtime,
-) => {
-  const { type, name, id, color, textColor, delay, cancelled } = trajectory;
-  const z = Math.min(Math.floor(zoom || 1), 16);
-  const hover = hoverVehicleId === id;
-  const selected = selectedVehicleId === id;
-  let key = `${z}${type}${name}${color}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
-
-  let radius = getRadius(type, z) * pixelRatio;
-  const mustDrawText = radius > 10 * pixelRatio;
-
-  if (!mustDrawText) {
-    key = `${z}${type}${color}${operatorProvidesRealtime}${delay}${hover}${selected}${cancelled}`;
-  }
-
-  if (!styleCache[key]) {
-    count += 1;
-    const isDisplayStrokeAndDelay = radius >= 7 * pixelRatio;
-
-    if (radius === 0) {
-      styleCache[key] = null;
-      return null;
-    }
-
-    if (hover || selected) {
-      radius = isDisplayStrokeAndDelay
-        ? radius + 5 * pixelRatio
-        : 14 * pixelRatio;
-    }
-    const margin = 1 * pixelRatio;
-    const radiusDelay = radius + 2;
-    const markerSize = radius * 2;
-    const textWidth = 100;
-    const size = (radiusDelay * 2 + margin * 2 + textWidth) * pixelRatio;
-    const canvas = new OffscreenCanvas(size, size);
-    // console.log('size: ', size);
-    const ctx = canvas.getContext('2d');
-    const origin = canvas.width / 2;
-
-    if (isDisplayStrokeAndDelay && delay !== null) {
-      // Draw circle delay background
-      const delayBg = getDelayBgCanvas(
-        origin,
-        radiusDelay,
-        getDelayColor(delay, cancelled),
-      );
-      ctx.drawImage(delayBg, 0, 0);
-    }
-
-    // Show delay if feature is hovered or if delay is above 5mins.
-    if (
-      isDisplayStrokeAndDelay &&
-      (hover || delay >= delayDisplay || cancelled)
-    ) {
-      // Draw delay text
-      const fontSize = Math.max(
-        cancelled ? 19 : 14,
-        Math.min(cancelled ? 19 : 17, radius * 1.2),
-      );
-      const delayText = getDelayTextCanvas(
-        textWidth,
-        getDelayText(delay, cancelled),
-        fontSize,
-        `bold ${fontSize}px arial, sans-serif`,
-        getDelayColor(delay, cancelled, true),
-        delayOutlineColor,
-        pixelRatio,
-      );
-      ctx.drawImage(
-        delayText,
-        origin + radiusDelay + margin,
-        origin - fontSize,
-      );
-    }
-
-    // Draw colored circle with black border
-    let circleFillColor;
-    if (useDelayStyle) {
-      circleFillColor = getDelayColor(delay, cancelled);
-    } else {
-      circleFillColor = color || getBgColor(type);
-    }
-
-    const hasStroke = isDisplayStrokeAndDelay || hover || selected;
-
-    const hasDash =
-      isDisplayStrokeAndDelay &&
-      useDelayStyle &&
-      delay === null &&
-      operatorProvidesRealtime === 'yes';
-
-    const circle = getCircleCanvas(
-      origin,
-      radius,
-      circleFillColor,
-      hasStroke,
-      hasDash,
-      pixelRatio,
-    );
-
-    ctx.drawImage(circle, 0, 0);
-
-    // Draw text in the circle
-    if (mustDrawText) {
-      const fontSize = Math.max(radius, 10);
-      const textSize = getTextSize(ctx, markerSize, name, fontSize);
-      const textColor2 = !useDelayStyle
-        ? textColor || getTextColor(type)
-        : '#000000';
-      const hasStroke2 =
-        useDelayStyle && delay === null && operatorProvidesRealtime === 'yes';
-
-      const text = getTextCanvas(
-        name,
-        origin,
-        textSize,
-        textColor2,
-        circleFillColor,
-        hasStroke2,
-        pixelRatio,
-      );
-
-      ctx.drawImage(text, 0, 0);
-      // Draw a stroke to the text only if a provider provides realtime but we don't use it.
-      // if (
-      //   useDelayStyle &&
-      //   delay === null &&
-      //   operatorProvidesRealtime === 'yes'
-      // ) {
-      //   ctx.save();
-      //   ctx.textBaseline = 'middle';
-      //   ctx.textAlign = 'center';
-      //   ctx.font = `bold ${textSize + 2}px Arial`;
-      //   ctx.strokeStyle = circleFillColor;
-      //   ctx.strokeText(name, origin, origin);
-      //   ctx.restore();
-      // }
-
-      // // Draw a text
-      // ctx.save();
-      // ctx.textBaseline = 'middle';
-      // ctx.textAlign = 'center';
-      // ctx.fillStyle = ;
-      // ctx.font = `bold ${textSize}px Arial`;
-      // ctx.strokeStyle = circleFillColor;
-      // ctx.strokeText(name, origin, origin);
-      // ctx.fillText(name, origin, origin);
-      // ctx.restore();
-    }
-
-    styleCache[key] = canvas;
-  }
-
-  return styleCache[key];
-};
 
 let renderTimeout;
+let count = 0;
+
 const render = (evt) => {
   // eslint-disable-next-line no-console
   if (debug) console.time('render');
@@ -369,15 +169,19 @@ const render = (evt) => {
         return p * pixelRatio;
       });
 
-      const vehicleImg = style(
+      const vehicleImg = delayTrackerStyle(
         traj,
-        zoom,
-        pixelRatio,
-        hoverVehicleId,
-        selectedVehicleId,
-        delayDisplay,
-        delayOutlineColor,
-        useDelayStyle,
+        {
+          zoom,
+          pixelRatio,
+        },
+        {
+          hoverVehicleId,
+          selectedVehicleId,
+          delayDisplay,
+          delayOutlineColor,
+          useDelayStyle,
+        },
       );
 
       if (!vehicleImg) {
