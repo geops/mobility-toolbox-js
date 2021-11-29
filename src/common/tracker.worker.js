@@ -196,7 +196,6 @@ const render = (evt) => {
       );
 
       if (!vehicleImg) {
-        console.log('ici');
         // eslint-disable-next-line no-continue
         continue;
       }
