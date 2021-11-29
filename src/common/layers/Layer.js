@@ -346,7 +346,7 @@ export default class Layer extends Observable {
   unClick(callback) {
     if (typeof callback === 'function') {
       const idx = this.clickCallbacks.indexOf(callback);
-      if (idx >= -1) {
+      if (idx > -1) {
         this.clickCallbacks.splice(idx, 1);
       }
     }
@@ -404,7 +404,7 @@ export default class Layer extends Observable {
   unHover(callback) {
     if (typeof callback === 'function') {
       const idx = this.hoverCallbacks.indexOf(callback);
-      if (idx >= -1) {
+      if (idx > -1) {
         this.hoverCallbacks.splice(idx, 1);
       }
     }
