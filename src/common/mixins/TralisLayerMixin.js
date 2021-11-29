@@ -183,7 +183,7 @@ const TralisLayerMixin = (TrackerLayer) =>
 
         this.addTrajectory(
           feat.get('train_id'),
-          feat.getProperties(),
+          data.content,
           !feat.get('line'),
         );
       }
@@ -246,6 +246,13 @@ const TralisLayerMixin = (TrackerLayer) =>
       }
 
       this.tracker.setTrajectories(this.trajectories);
+
+      if (this.worker) {
+        this.worker.postMessage({
+          action: 'sendData',
+          trajectories: this.trajectories,
+        });
+      }
     }
 
     removeTrajectory(id) {

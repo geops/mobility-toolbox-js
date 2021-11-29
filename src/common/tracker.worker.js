@@ -68,7 +68,18 @@ const render = (evt) => {
 
     // We simplify the traj object
     let { geometry } = traj;
-    const { coordinate, timeIntervals, timeOffset } = traj;
+    const { coordinate } = traj;
+    let { timeIntervals, timeOffset } = traj;
+
+    // Tralis retuirn a feature in Geojson format
+    if (traj.properties) {
+      if (traj.properties.time_intervals) {
+        timeIntervals = traj.properties.time_intervals;
+      }
+      if (traj.properties.time_offset) {
+        timeOffset = traj.properties.time_offset;
+      }
+    }
 
     if (Array.isArray(geometry.coordinates)) {
       if (geometry.type === 'Point') {
@@ -170,7 +181,7 @@ const render = (evt) => {
       });
 
       const vehicleImg = delayTrackerStyle(
-        traj,
+        traj.properties || traj,
         {
           zoom,
           pixelRatio,
@@ -185,6 +196,7 @@ const render = (evt) => {
       );
 
       if (!vehicleImg) {
+        console.log('ici');
         // eslint-disable-next-line no-continue
         continue;
       }
