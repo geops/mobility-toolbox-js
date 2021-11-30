@@ -15,8 +15,6 @@ export default () => {
 
   const cache = {};
   const tracker = new TralisLayer({
-    // url: 'wss://tralis-tracker-api.geops.io/ws',
-    // isUpdateBboxOnMoveEnd: true,
     url: 'wss://api.geops.io/realtime-ws/v1/',
     isUpdateBboxOnMoveEnd: false,
     apiKey: window.apiKey,

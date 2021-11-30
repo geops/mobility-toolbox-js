@@ -29,7 +29,7 @@ const map = new Map({
 
 const codeTracker = `
 const tracker = new TralisLayer({
-  url: 'https://api.geops.io/tracker/v1',
+  url: 'wss://tralis-tracker-api.geops.io/ws',
   apiKey: window.apiKey,
 });
 

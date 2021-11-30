@@ -25,6 +25,7 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
+ * @deprecated Use {@link TralisLayer} instead.
  */
 class TrajservLayer extends mixin(TrackerLayer) {
   /**

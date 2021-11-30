@@ -11,6 +11,7 @@ import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { CgArrowRight } from 'react-icons/cg';
 import TextField from '@material-ui/core/TextField';
 import { NavLink } from 'react-router-dom';
+import Markdown from 'react-markdown';
 import EXAMPLES from '../examples';
 
 const Card = withStyles({
@@ -160,7 +161,12 @@ export default () => {
                   <Box className={classes.container}>
                     <CardContent className={classes.cardContent}>
                       <Typography variant="h3">{ex.name}</Typography>
-                      <Typography>{ex.description}</Typography>
+                      <Typography>
+                        <Markdown
+                          className={classes.readme}
+                          source={ex.description || ''}
+                        />
+                      </Typography>
                     </CardContent>
                     <CardActions>
                       <Icon>

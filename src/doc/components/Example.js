@@ -95,7 +95,10 @@ const Example = () => {
           <Typography variant="h1" className="headline">
             {example.name}
           </Typography>
-          <Typography>{example.description}</Typography>
+          <Markdown
+            className={classes.readme}
+            source={example.description || ''}
+          />
           <Markdown className={classes.readme} source={readme || ''} />
         </Grid>
         <Grid item xs={12}>

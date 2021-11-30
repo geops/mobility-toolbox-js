@@ -23,6 +23,7 @@ import { TrajservAPI } from '../../api';
  * @classproperty {function} sort - Set the filter for tracker features.
  *
  * @extends {TrackerLayerInterface}
+ * @deprecated
  */
 export class TrajservLayerInterface {
   /**

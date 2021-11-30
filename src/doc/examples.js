@@ -15,22 +15,36 @@ import routingImg from './img/examples/routing.jpg';
 // are differents from the name of js and html files.
 export default [
   {
-    name: 'Simple map',
-    key: 'ol-map',
-    description: 'A simple map example.',
-    img: simpleMapImg,
-  },
-  {
     name: 'Live tracker with OpenLayers',
     key: 'ol-tracker',
-    description: 'Show moving trains in an OpenLayers map.',
+    description:
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
     img: liveTrackerOLImg,
   },
   {
     name: 'Live tracker with Mapbox',
     key: 'mb-tracker',
-    description: 'Show moving trains in a Mapbox map.',
+    description:
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
     img: liveTrackerMBImg,
+  },
+  {
+    name: 'Stop finder',
+    key: 'ol-stop-finder',
+    description:
+      'Use the [geOps Stops API](https://developer.geops.io/apis/stops/) for finding public transport stops.',
+    img: stopsImg,
+  },
+  {
+    name: 'Routing',
+    key: 'routing-control',
+    description:
+      'Use the [geOps Routing API](https://developer.geops.io/apis/routing/) to find the shortest route between 2 points.',
+    img: routingImg,
+    files: {
+      html: 'ol-routing.html',
+      js: 'ol-routing.js',
+    },
   },
   // {
   //   name: 'Live train positions for Munich',
@@ -57,6 +71,12 @@ export default [
   //   description: 'Show moving tramway in an Mapbox map.',
   //   img: liveTrackerOLImg,
   // },
+  {
+    name: 'Simple map',
+    key: 'ol-map',
+    description: 'A simple map example.',
+    img: simpleMapImg,
+  },
   {
     name: 'Mapbox layer',
     key: 'ol-mapbox-layer',
@@ -89,22 +109,5 @@ export default [
     description:
       'This example shows how to use the CopyrightControl component.',
     img: olCopyrightImg,
-  },
-  {
-    name: 'Stop finder',
-    key: 'ol-stop-finder',
-    description: 'Use the StopsAPI for finding public transport stops.',
-    img: stopsImg,
-  },
-  {
-    name: 'Routing',
-    key: 'routing-control',
-    description:
-      'Use the RoutingControl component to visualize routes on a map.',
-    img: routingImg,
-    files: {
-      html: 'ol-routing.html',
-      js: 'ol-routing.js',
-    },
   },
 ];
