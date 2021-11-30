@@ -7,7 +7,7 @@ import TrackerExample from './TrackerExample';
 const codeHtmlPage = `
 <html>
   <head>
-    <title>Real time map</title>
+    <title>Realtime map</title>
   </head>
   <body>
     <div id="map" style="height: 300px; width: 100%" />
@@ -16,7 +16,7 @@ const codeHtmlPage = `
 `;
 
 const codeMapObject = `
-import { Map, TrajservLayer } from 'mobility-toolbox-js/mapbox';
+import { Map, TralisLayer } from 'mobility-toolbox-js/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const map = new Map({
@@ -28,7 +28,7 @@ const map = new Map({
 `;
 
 const codeTracker = `
-const tracker = new TrajservLayer({
+const tracker = new TralisLayer({
   url: 'https://api.geops.io/tracker/v1',
   apiKey: window.apiKey,
 });
@@ -89,8 +89,8 @@ function Home() {
       <p>Add a map object with a vector tile layer.</p>
       <SyntaxHighlighter language="js" code={codeMapObject.trim()} />
       <p>
-        Finally, add the <i>TrajservLayer</i> for rendering real time vehicle
-        positions from our Real Time API. For more information about the backend
+        Finally, add the <i>TralisLayer</i> for rendering real time vehicle
+        positions from our Realtime API. For more information about the backend
         and for obtaining the required API-Key, visit our Developer Portal at{' '}
         <a target="_blank" rel="noreferrer" href="https://geops.io">
           https://geops.io
