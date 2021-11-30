@@ -20,7 +20,7 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
- * @deprecated Use {@link TralisLayer} instead.
+ * @deprecated
  */
 class TrajservLayer extends mixin(TrackerLayer) {
   constructor(options = {}) {
