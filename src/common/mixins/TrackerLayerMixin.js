@@ -671,7 +671,6 @@ const TrackerLayerMixin = (Base) =>
       const roundedZoom = Math.round(zoom);
       const timeStep = timeSteps[roundedZoom] || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
-      // console.log(`Next render in ${nextTick} ms.`);
       return nextTick;
     }
 

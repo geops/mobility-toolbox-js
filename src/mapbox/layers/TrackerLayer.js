@@ -219,9 +219,12 @@ class TrackerLayer extends mixin(Layer) {
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
-  getFeatureInfoAtCoordinate(coordinate) {
+  getFeatureInfoAtCoordinate(coordinate, options = {}) {
     const resolution = getMercatorResolution(this.map);
-    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+    return super.getFeatureInfoAtCoordinate(coordinate, {
+      resolution,
+      ...options,
+    });
   }
 
   onVisibilityChange() {

@@ -100,7 +100,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.format = new GeoJSON();
 
       // This property will call api.setBbox on each movend event
-      this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
+      this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || true;
     }
 
     start() {
@@ -241,16 +241,6 @@ const TralisLayerMixin = (TrackerLayer) =>
       ];
 
       return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
-        // eslint-disable-next-line no-console
-        console.log(
-          `stopSequence for ${this.selectedVehicleId}:`,
-          stopSequence,
-        );
-        // eslint-disable-next-line no-console
-        console.log(
-          `fullTrajectory for ${this.selectedVehicleId}:`,
-          fullTrajectory,
-        );
         const response = {
           stopSequence,
           fullTrajectory,

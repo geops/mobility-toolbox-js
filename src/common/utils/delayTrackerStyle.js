@@ -7,9 +7,6 @@ import {
   getTextSize,
 } from '../trackerConfig';
 
-const styleCache = {};
-const cacheDelayBg = {};
-
 const createCanvas = (width, height) => {
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -18,10 +15,10 @@ const createCanvas = (width, height) => {
 };
 
 // Draw circle delay background
+const cacheDelayBg = {};
 export const getDelayBgCanvas = (origin, radius, color) => {
   const key = `${origin}, ${radius}, ${color}`;
   if (!cacheDelayBg[key]) {
-    // console.log('cacheDelayBg');
     const canvas = createCanvas(origin * 2, origin * 2);
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
@@ -75,7 +72,6 @@ export const getCircleCanvas = (
 ) => {
   const key = `${origin}, ${radius}, ${color}, ${hasStroke},  ${hasDash}, ${pixelRatio}`;
   if (!cacheCircle[key]) {
-    // console.log('cacheDelayBg');
     const canvas = createCanvas(origin * 2, origin * 2);
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = color;
@@ -151,6 +147,7 @@ export const getTextCanvas = (
  * @param {*} options Some options to change the rendering
  * @returns a canvas
  */
+const styleCache = {};
 const style = (trajectory, viewState, options) => {
   const {
     hoverVehicleId,
@@ -209,7 +206,7 @@ const style = (trajectory, viewState, options) => {
   const mustDrawText = radius > 10 * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${z}${type}${color}${hover}${selected}${cancelled}${delay}`;
+  let key = `${radius}${type}${color}${hover}${selected}${cancelled}${delay}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}`;

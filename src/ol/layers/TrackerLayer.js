@@ -161,6 +161,20 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   /**
+   * Detect in the canvas if there is data to query at a specific coordinate.
+   * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test
+   * @returns
+   */
+  hasFeatureInfoAtCoordinate(coordinate) {
+    if (this.map && this.tracker && this.tracker.canvas) {
+      const context = this.tracker.canvas.getContext('2d');
+      const pixel = this.map.getPixelFromCoordinate(coordinate);
+      return !!context.getImageData(pixel[0], pixel[1], 1, 1).data[3];
+    }
+    return false;
+  }
+
+  /**
    * Render the trajectories using current map's size, resolution and rotation.
    * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
    * @overrides
@@ -229,9 +243,15 @@ class TrackerLayer extends mixin(Layer) {
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
-  getFeatureInfoAtCoordinate(coordinate) {
+  getFeatureInfoAtCoordinate(coordinate, options = {}) {
+    if (!this.hasFeatureInfoAtCoordinate(coordinate)) {
+      return Promise.resolve({ features: [], layer: this, coordinate });
+    }
     const resolution = this.map.getView().getResolution();
-    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+    return super.getFeatureInfoAtCoordinate(coordinate, {
+      resolution,
+      ...options,
+    });
   }
 
   /**

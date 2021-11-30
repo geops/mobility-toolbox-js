@@ -1,5 +1,5 @@
 import View from 'ol/View';
-import { Map, TrajservLayer, MapboxLayer } from '../../ol';
+import { Map, TralisLayer, MapboxLayer } from '../../ol';
 import 'ol/ol.css';
 import CopyrightControl from '../../ol/controls/CopyrightControl';
 
@@ -18,8 +18,8 @@ export default () => {
     apiKey: window.apiKey,
   });
 
-  const tracker = new TrajservLayer({
-    url: 'https://api.geops.io/tracker/v1',
+  const tracker = new TralisLayer({
+    url: 'wss://tralis-tracker-api.geops.io/ws',
     apiKey: window.apiKey,
   });
 

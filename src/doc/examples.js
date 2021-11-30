@@ -1,7 +1,7 @@
 import simpleMapImg from './img/examples/simple_map.jpg';
 import liveTrackerOLImg from './img/examples/live_tracker_ol.jpg';
 import liveTrackerMBImg from './img/examples/live_tracker_mb.jpg';
-import liveTrackerMunichImg from './img/examples/live_tracker_munich.jpg';
+// import liveTrackerMunichImg from './img/examples/live_tracker_munich.jpg';
 import mapboxImg from './img/examples/mapbox.jpg';
 import mapboxStyleImg from './img/examples/mapbox_style.jpg';
 import queryObjectsImg from './img/examples/query_objects.jpg';
@@ -9,7 +9,7 @@ import olCopyrightImg from './img/examples/ol-copyright.png';
 import stopsImg from './img/examples/stops.jpg';
 import routingImg from './img/examples/routing.jpg';
 
-const munichAssets = require('./examples/assets/tralis-live-map').default;
+// const munichAssets = require('./examples/assets/tralis-live-map').default;
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -32,25 +32,25 @@ export default [
     description: 'Show moving trains in a Mapbox map.',
     img: liveTrackerMBImg,
   },
-  {
-    name: 'Live train positions for Munich',
-    key: 'tralis-live-map',
-    description:
-      'Realtime vehicle positions and prognosis data based on scheduled times, realtime updates and GPS locations.',
-    img: liveTrackerMunichImg,
-    extraFiles: {
-      'assets/tralis-live-map/index.js': {
-        content: `export default ${JSON.stringify(munichAssets)};`,
-      },
-    },
-  },
+  // {
+  //   name: 'Live train positions for Munich',
+  //   key: 'tralis-live-map',
+  //   description:
+  //     'Realtime vehicle positions and prognosis data based on scheduled times, realtime updates and GPS locations.',
+  //   img: liveTrackerMunichImg,
+  //   extraFiles: {
+  //     'assets/tralis-live-map/index.js': {
+  //       content: `export default ${JSON.stringify(munichAssets)};`,
+  //     },
+  //   },
+  // },
   // These examples are used for the dbug of TralisLayer don't remove them pls.
-  {
-    name: 'Tralis tracker with OpenLayers',
-    key: 'ol-tralis',
-    description: 'Show moving tramway in an OpenLayers map.',
-    img: liveTrackerOLImg,
-  },
+  // {
+  //   name: 'Tralis tracker with OpenLayers',
+  //   key: 'ol-tralis',
+  //   description: 'Show moving tramway in an OpenLayers map.',
+  //   img: liveTrackerOLImg,
+  // },
   // {
   //   name: 'Tralis tracker with Mapbox',
   //   key: 'mapbox-tralis',
