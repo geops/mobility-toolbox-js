@@ -70,6 +70,14 @@ class RoutingControl extends Control {
           this.set('loading', newLoading);
         },
       },
+      modify: {
+        get: () => {
+          return this.get('modify');
+        },
+        set: (modify) => {
+          this.set('modify', modify);
+        },
+      },
     });
 
     /** @ignore */
@@ -77,6 +85,9 @@ class RoutingControl extends Control {
 
     /** @ignore */
     this.mot = options.mot || 'bus';
+
+    /** @ignore */
+    this.modify = options.modify !== false;
 
     /** @ignore */
     this.routingApiParams = options.routingApiParams || {};
@@ -497,6 +508,9 @@ class RoutingControl extends Control {
    * @private
    */
   addListeners() {
+    if (!this.modify) {
+      return;
+    }
     this.removeListeners();
     this.onMapClickKey = this.map.on('singleclick', this.onMapClick);
   }
@@ -529,7 +543,7 @@ class RoutingControl extends Control {
       // Add modify interaction, RoutingLayer and listeners
       this.map.addLayer(this.routingLayer);
       this.map.addInteraction(this.modifyInteraction);
-      this.modifyInteraction.setActive(true);
+      this.modifyInteraction.setActive(this.modify);
       this.addListeners();
     } else {
       // fall back to some default values if map is not available
