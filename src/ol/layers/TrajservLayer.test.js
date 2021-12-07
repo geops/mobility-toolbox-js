@@ -76,11 +76,10 @@ describe('TrajservLayer', () => {
 
     // dispatchEvent uses mockResponse
     const evt2 = { type: 'moveend', olMap };
-    // On the first movend requestIntervalInSec will be updated so it will unlisten the event then read them.
-    olMap.dispatchEvent(evt2);
-    expect(spy2).toHaveBeenCalledTimes(1);
     olMap.dispatchEvent(evt2);
     expect(spy2).toHaveBeenCalledTimes(2);
+    olMap.dispatchEvent(evt2);
+    expect(spy2).toHaveBeenCalledTimes(4);
   });
 
   test('should create a default api with default url.', () => {

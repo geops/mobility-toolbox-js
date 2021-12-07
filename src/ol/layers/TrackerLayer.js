@@ -1,7 +1,9 @@
-import { Layer as OLLayer, Group } from 'ol/layer';
+import { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
+import { Vector as VectorSource } from 'ol/source';
 import mixin from '../../common/mixins/TrackerLayerMixin';
+
 import Layer from './Layer';
 
 /**
@@ -47,6 +49,9 @@ class TrackerLayer extends mixin(Layer) {
       options.olLayer ||
       new Group({
         layers: [
+          new VectorLayer({
+            source: new VectorSource({ features: [] }),
+          }),
           new OLLayer({
             source: new Source({}),
             render: (frameState) => {
@@ -111,6 +116,9 @@ class TrackerLayer extends mixin(Layer) {
         ],
       });
 
+    // We store the layer used to highlight the full Trajectory
+    this.vectorLayer = this.olLayer.getLayers().item(0);
+
     // Options the last render run did happen. If something changes
     // we have to render again
     /** @ignore */
@@ -121,12 +129,49 @@ class TrackerLayer extends mixin(Layer) {
     };
   }
 
+  init(map) {
+    super.init(map);
+    if (this.map) {
+      this.olListenersKeys.push(
+        this.map.on('moveend', (evt) => {
+          const view = this.map.getView();
+          if (view.getAnimating() || view.getInteracting()) {
+            return;
+          }
+          const zoom = view.getZoom();
+
+          // Update the interval between render updates
+          if (this.currentZoom !== zoom) {
+            this.onZoomEnd(evt);
+          }
+          this.currentZoom = zoom;
+
+          this.onMoveEnd(evt);
+        }),
+      );
+    }
+  }
+
   /**
    * Destroy the container of the tracker.
    */
   terminate() {
     super.terminate();
     this.container = null;
+  }
+
+  /**
+   * Detect in the canvas if there is data to query at a specific coordinate.
+   * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test
+   * @returns
+   */
+  hasFeatureInfoAtCoordinate(coordinate) {
+    if (this.map && this.tracker && this.tracker.canvas) {
+      const context = this.tracker.canvas.getContext('2d');
+      const pixel = this.map.getPixelFromCoordinate(coordinate);
+      return !!context.getImageData(pixel[0], pixel[1], 1, 1).data[3];
+    }
+    return false;
   }
 
   /**
@@ -158,7 +203,15 @@ class TrackerLayer extends mixin(Layer) {
   renderTrajectoriesInternal(viewState, noInterpolate) {
     let isRendered = false;
 
-    isRendered = super.renderTrajectoriesInternal(viewState, noInterpolate);
+    const blockRendering =
+      !this.renderWhenInteracting(viewState, this.renderedViewState) &&
+      (this.map.getView().getAnimating() ||
+        this.map.getView().getInteracting());
+
+    // Don't render the map when the map is animating or interacting.
+    isRendered = blockRendering
+      ? false
+      : super.renderTrajectoriesInternal(viewState, noInterpolate);
 
     // We update the current render state.
     if (isRendered) {
@@ -190,9 +243,37 @@ class TrackerLayer extends mixin(Layer) {
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
-  getFeatureInfoAtCoordinate(coordinate) {
+  getFeatureInfoAtCoordinate(coordinate, options = {}) {
+    if (!this.hasFeatureInfoAtCoordinate(coordinate)) {
+      return Promise.resolve({ features: [], layer: this, coordinate });
+    }
     const resolution = this.map.getView().getResolution();
-    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+    return super.getFeatureInfoAtCoordinate(coordinate, {
+      resolution,
+      ...options,
+    });
+  }
+
+  /**
+   * Function called on moveend event.
+   * To be defined in inherited classes
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event.
+   * @private
+   */
+  // eslint-disable-next-line no-unused-vars,class-methods-use-this
+  onMoveEnd(evt) {}
+
+  /**
+   * Function called on moveend event only when the zoom has changed.
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event.
+   * @private
+   * @override
+   */
+  // eslint-disable-next-line no-unused-vars
+  onZoomEnd(evt) {
+    super.onZoomEnd(evt);
   }
 
   /**

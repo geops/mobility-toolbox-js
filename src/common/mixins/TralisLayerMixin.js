@@ -5,6 +5,7 @@
 /* eslint-disable max-classes-per-file */
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from 'ol/geom/Point';
+import { intersects } from 'ol/extent';
 import { TralisAPI, TralisModes } from '../../api';
 
 /**
@@ -91,23 +92,38 @@ const TralisLayerMixin = (TrackerLayer) =>
       super({ ...options });
       this.debug = options.debug;
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
-      this.refreshTimeInMs = 1000 / 30;
       this.onMessage = this.onMessage.bind(this);
       this.onDeleteMessage = this.onDeleteMessage.bind(this);
       this.api = options.api || new TralisAPI(options);
+      this.tenant = options.tenant || ''; // sbb,sbh or sbm
+      this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.format = new GeoJSON();
+
+      // This property will call api.setBbox on each movend event
+      this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || true;
     }
 
     start() {
       super.start();
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
+      this.setBbox();
     }
 
     stop() {
       super.stop();
       this.api.unsubscribeTrajectory(this.onMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
+    }
+
+    /**
+     * Send the bbox to the websocket. The child classe must send the bbox parameter.
+     */
+    setBbox(bbox) {
+      if (this.isUpdateBboxOnMoveEnd) {
+        // Clean trajectories before sending the new bbox
+        this.api.setBbox(bbox);
+      }
     }
 
     setMode(mode) {
@@ -117,6 +133,22 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.mode = mode;
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
+    }
+
+    /**
+     * Determine if the trajectory must be removed or not added to the list
+     *
+     * @param {*} trajectory
+     * @param {*} extent
+     * @param {*} zoom
+     * @returns
+     * @ignore
+     */
+    mustNotBeDisplayed(trajectory, extent, zoom) {
+      return (
+        !intersects(extent, trajectory.bounds) ||
+        (trajectory.type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
+      );
     }
 
     /**
@@ -150,6 +182,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (feature) {
         /** @ignore */
         this.selectedVehicleId = feature.get('train_id');
+        this.highlightTrajectory();
       } else {
         this.selectedVehicleId = null;
       }
@@ -160,6 +193,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (!data.content) {
         return;
       }
+
       const feat = this.format.readFeature(data.content);
 
       feat.set('timeOffset', Date.now() - data.timestamp);
@@ -175,12 +209,13 @@ const TralisLayerMixin = (TrackerLayer) =>
           point.transform('EPSG:4326', this.map.getView().getProjection());
           feat.setGeometry(point);
         }
-
-        this.addTrajectory(
-          feat.get('train_id'),
-          feat.getProperties(),
-          !feat.get('line'),
-        );
+        if (!this.mustNotBeDisplayed(feat.getProperties())) {
+          this.addTrajectory(
+            feat.get('train_id'),
+            feat.getProperties(),
+            !feat.get('line'),
+          );
+        }
       }
     }
 
@@ -188,6 +223,30 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (data.content) {
         this.removeTrajectoryByAttribute('train_id', data.content);
       }
+    }
+
+    /**
+     * When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+     * Then we combine them in one response and send them to inherited layers.
+     *
+     * @private
+     * @override
+     */
+    highlightTrajectory() {
+      // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+      // Then we combine them in one response and send them to inherited layers.
+      const promises = [
+        this.api.getStopSequence(this.selectedVehicleId, this.mode),
+        this.api.getFullTrajectory(this.selectedVehicleId, this.mode),
+      ];
+
+      return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
+        const response = {
+          stopSequence,
+          fullTrajectory,
+        };
+        return response;
+      });
     }
 
     addTrajectory(id, traj, addOnTop) {
@@ -208,7 +267,7 @@ const TralisLayerMixin = (TrackerLayer) =>
         }
       }
 
-      this.updateTrajectories();
+      this.tracker.setTrajectories(this.trajectories);
     }
 
     removeTrajectory(id) {
@@ -227,15 +286,6 @@ const TralisLayerMixin = (TrackerLayer) =>
           break;
         }
       }
-    }
-
-    updateTrajectories() {
-      this.tracker.setTrajectories(this.trajectories);
-      this.renderTrajectories();
-    }
-
-    getRefreshTimeInMs() {
-      return this.refreshTimeInMs;
     }
   };
 

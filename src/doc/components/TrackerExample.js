@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Map, TrajservLayer } from '../../mapbox';
+import { Map, TralisLayer } from '../../mapbox';
 
 const useStyles = makeStyles({
   root: {
@@ -22,9 +22,10 @@ const TrackerExample = () => {
       zoom: 12,
     });
 
-    const tracker = new TrajservLayer({
-      url: 'https://api.geops.io/tracker/v1',
+    const tracker = new TralisLayer({
+      url: 'wss://tralis-tracker-api.geops.io/ws',
       apiKey: window.apiKey,
+      isQueryable: false,
     });
 
     map.addLayer(tracker);

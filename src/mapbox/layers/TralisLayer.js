@@ -19,45 +19,54 @@ import mixin from '../../common/mixins/TralisLayerMixin';
  * @implements {TralisLayerInterface}
  */
 class TralisLayer extends mixin(TrackerLayer) {
-  constructor(options = {}) {
-    super({ ...options });
-
-    /** @ignore */
-    this.onMoveEnd = this.onMoveEnd.bind(this);
-  }
-
   /**
-   * Add listeners from the Mapbox Map.
-   *
-   * @param {mapboxgl.Map} map
-   * @param {string} beforeId See [mapboxgl.Map#addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) beforeId documentation.
-   */
-  init(map, beforeId) {
-    super.init(map, beforeId);
-
-    if (!this.map) {
-      return;
-    }
-    this.map.on('moveend', this.onMoveEnd);
-  }
-
-  /**
-   * Remove listeners from the Mapbox Map.
-   */
-  terminate() {
-    if (this.map) {
-      this.map.off('moveend', this.onMoveEnd);
-    }
-    super.terminate();
-  }
-
-  /**
-   * Callback on 'moveend' event.
+   * Determine if the trajectory must be removed or not added to the list
    *
    * @private
    */
-  onMoveEnd() {
-    this.updateTrajectories();
+  mustNotBeDisplayed(trajectory, extent, zoom) {
+    return super.mustNotBeDisplayed(
+      trajectory,
+      extent || this.getMercatorExtent(),
+      zoom || Math.floor(this.map.getZoom() + 1),
+    );
+  }
+
+  /**
+   * Send the current bbox to the websocket
+   */
+  setBbox() {
+    const extent = this.getMercatorExtent();
+    const zoom = Math.floor(this.getOlZoom());
+
+    // Purge trajectories:
+    // - which are outside the extent
+    // - when it's bus and zoom level is too low for them
+    for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
+      const trajectory = this.trajectories[i];
+      if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
+        const temp = [...this.trajectories];
+        temp.splice(i, 1);
+        this.tracker.setTrajectories(temp);
+      }
+    }
+
+    super.setBbox([...extent, zoom, this.tenant]);
+  }
+
+  /**
+   * Send the new BBOX to the websocket.
+   *
+   * @param {ol/MapEvent~MapEvent} evt Moveend event
+   * @private
+   * @override
+   */
+  onMoveEnd(evt) {
+    super.onMoveEnd(evt);
+
+    if (this.visible && this.isUpdateBboxOnMoveEnd) {
+      this.setBbox();
+    }
   }
 }
 

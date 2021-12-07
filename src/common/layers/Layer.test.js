@@ -434,7 +434,7 @@ describe('Layer', () => {
   });
 
   describe('#unClick()', () => {
-    test('removes function from clickCallbacks array', () => {
+    test.only('removes function from clickCallbacks array', () => {
       const layer = new Layer({
         name: 'Layer',
         olLayer,
@@ -445,6 +445,9 @@ describe('Layer', () => {
       expect(layer.clickCallbacks).toEqual([fn]);
       layer.onClick(fn2);
       expect(layer.clickCallbacks).toEqual([fn, fn2]);
+      layer.unClick(fn);
+      expect(layer.clickCallbacks).toEqual([fn2]);
+      // Make sure no callbacks are removed if the callback is not in the list.
       layer.unClick(fn);
       expect(layer.clickCallbacks).toEqual([fn2]);
     });
@@ -587,6 +590,9 @@ describe('Layer', () => {
       expect(layer.hoverCallbacks).toEqual([fn, fn2]);
       layer.unHover(fn);
       expect(layer.hoverCallbacks).toEqual([fn2]);
+      // Make sure no callbacks are removed if the callback is not in the list.
+      layer.unHover(fn);
+      expect(layer.clickCallbacks).toEqual([fn2]);
     });
   });
 

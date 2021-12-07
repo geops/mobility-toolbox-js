@@ -22,6 +22,18 @@ if (process.env.REACT_APP_LIB_MODE) {
       },
     },
     use: [
+      (neutrino) => {
+        neutrino.config.output
+          .globalObject('this') // will prevent `window`
+          .end()
+          .module.rule('worker')
+          .test(neutrino.regexFromExtensions(['worker.js']))
+          .use('worker')
+          .loader(require.resolve('worker-loader'))
+          .options({
+            // See: https://github.com/webpack-contrib/worker-loader#options
+          });
+      },
       library({
         name: 'mobility-toolbox-js',
         targets: {

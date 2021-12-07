@@ -3,8 +3,16 @@
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
 import Feature from 'ol/Feature';
+import qs from 'query-string';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
+import createFilters from '../utils/createTrackerFilters';
+import { delayTrackerStyle } from '../utils';
+
+/* Permalink parameter used to filters vehicles */
+const LINE_FILTER = 'publishedlinename';
+const ROUTE_FILTER = 'tripnumber';
+const OPERATOR_FILTER = 'operator';
 
 /**
  * TrackerLayerInterface.
@@ -44,10 +52,8 @@ export class TrackerLayerInterface {
   /**
    * Start the timeout for the next update.
    * @private
-   * @param {number} zoom
    */
-  // eslint-disable-next-line no-unused-vars
-  startUpdateTime(zoom) {}
+  startUpdateTime() {}
 
   /**
    * Stop the clock.
@@ -129,6 +135,13 @@ const TrackerLayerMixin = (Base) =>
         sort,
         time,
         live,
+      } = options;
+
+      let {
+        regexPublishedLineName,
+        publishedLineName,
+        tripNumber,
+        operator,
       } = options;
 
       const initTrackerOptions = {
@@ -316,6 +329,74 @@ const TrackerLayerMixin = (Base) =>
           default: false,
           writable: true,
         },
+
+        /**
+         * Filter properties used in combination with permalink parameters.
+         */
+        publishedLineName: {
+          get: () => {
+            return publishedLineName;
+          },
+          set: (newPublishedLineName) => {
+            publishedLineName = newPublishedLineName;
+            this.updateFilters();
+          },
+        },
+        tripNumber: {
+          get: () => {
+            return tripNumber;
+          },
+          set: (newTripNumber) => {
+            tripNumber = newTripNumber;
+            this.updateFilters();
+          },
+        },
+        operator: {
+          get: () => {
+            return operator;
+          },
+          set: (newOperator) => {
+            operator = newOperator;
+            this.updateFilters();
+          },
+        },
+        regexPublishedLineName: {
+          get: () => {
+            return regexPublishedLineName;
+          },
+          set: (newRegex) => {
+            regexPublishedLineName = newRegex;
+            this.updateFilters();
+          },
+        },
+
+        /**
+         * Style properties.
+         */
+        delayDisplay: {
+          value: options.delayDisplay || 300000,
+          writable: true,
+        },
+        delayOutlineColor: {
+          value: options.delayOutlineColor || '#000000',
+          writable: true,
+        },
+        useDelayStyle: {
+          value: options.useDelayStyle || false,
+          writable: true,
+        },
+
+        /**
+         * Debug properties.
+         */
+        // Not used anymore, but could be useful for debugging.
+        // showVehicleTraj: {
+        //   value:
+        //     options.showVehicleTraj !== undefined
+        //       ? options.showVehicleTraj
+        //       : true,
+        //   writable: true,
+        // },
       });
     }
 
@@ -377,6 +458,7 @@ const TrackerLayerMixin = (Base) =>
      */
     start() {
       this.stop();
+      this.updateFilters();
       this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
@@ -425,6 +507,9 @@ const TrackerLayerMixin = (Base) =>
         clearInterval(this.updateTimeInterval);
       }
     }
+
+    /**
+     * 
 
     /**
      * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.
@@ -548,8 +633,20 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
+     * On zoomend we adjust the time interval of the update of vehicles positions.
+     *
+     * @param evt Event that triggered the function.
+     * @private
+     */
+    // eslint-disable-next-line no-unused-vars
+    onZoomEnd(evt) {
+      this.startUpdateTime();
+    }
+
+    /**
      * Define beahvior when a vehicle is clicked
      * To be defined in child classes.
+     *
      * @private
      * @override
      */
@@ -558,6 +655,7 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Define behavior when a vehicle is hovered
      * To be defined in child classes.
+     *
      * @private
      * @override
      */
@@ -565,6 +663,7 @@ const TrackerLayerMixin = (Base) =>
 
     /**
      * Get the duration before the next update depending on zoom level.
+     *
      * @private
      * @param {number} zoom
      */
@@ -576,31 +675,25 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
+     * Update filter provided by properties or permalink.
+     */
+    updateFilters() {
+      // Setting filters from the permalink if no values defined by the layer.
+      const parameters = qs.parse(window.location.search.toLowerCase());
+      // filter is the property in TrackerLayerMixin.
+      this.filter = createFilters(
+        this.publishedLineName || parameters[LINE_FILTER],
+        this.tripNumber || parameters[ROUTE_FILTER],
+        this.operator || parameters[OPERATOR_FILTER],
+        this.regexPublishedLineName,
+      );
+    }
+
+    /**
      * @private
      */
-    defaultStyle(trajectory) {
-      const { id: text } = trajectory;
-      if (this.styleCache[text]) {
-        return this.styleCache[text];
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = 200;
-      canvas.height = 15;
-      const ctx = canvas.getContext('2d');
-      ctx.arc(8, 8, 5, 0, 2 * Math.PI, false);
-      ctx.fillStyle = '#8ED6FF';
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = 'black';
-      ctx.stroke();
-      ctx.font = 'bold 12px arial';
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 3;
-      ctx.strokeText(text, 20, 10);
-      ctx.fillStyle = 'black';
-      ctx.fillText(text, 20, 10);
-      this.styleCache[text] = canvas;
-      return this.styleCache[text];
+    defaultStyle(trajectory, viewState) {
+      return delayTrackerStyle(trajectory, viewState, this);
     }
   };
 

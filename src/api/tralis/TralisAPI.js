@@ -44,7 +44,7 @@ class TralisAPI {
    * @param {string} options.url Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    * @param {string} [options.prefix=''] Service prefix to specify tenant.
-   * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
+   * @param {string} [options.projection] The epsg code of the projection for features.
    * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY] The bounding box to receive data from.
    */
   constructor(options = {}) {
@@ -61,6 +61,12 @@ class TralisAPI {
     }
 
     /** @ignore */
+    this.bbox = options.bbox;
+
+    /** @ignore */
+    this.projection = options.projection || 'EPSG:3857';
+
+    /** @ignore */
     this.subscribedStationUic = null;
 
     /** @ignore */
@@ -75,13 +81,45 @@ class TralisAPI {
     /** @ignore */
     this.prefix = options.prefix || '';
 
+    this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
+
     /** @ignore */
     this.conn = new WebSocketConnector(wsUrl);
-    this.conn.setProjection(options.projection || 'epsg:3857');
 
-    if (options.bbox) {
-      this.conn.setBbox(options.bbox);
+    if (options.projection) {
+      this.setProjection(options.projection);
     }
+  }
+
+  /**
+   * Send the projection to use. Default to EPSG:3857.
+   *
+   * @param {string} epsgCode The EPSG code of the projection.
+   */
+  setProjection(epsgCode) {
+    this.conn.send(`PROJECTION ${epsgCode}`);
+  }
+
+  /**
+   * Send the bbox to the service, if the first time it will also subscribe to trajectory and deleted_vehicles channels.
+   *
+   * @param {number[5]} bbox The bounding box and the zoom level to receive data from.
+   */
+  setBbox(bbox) {
+    /**
+     * The BBOX for websocket responses
+     * @type {Array<number>}
+     */
+    this.bbox = bbox;
+    this.conn.send(`BBOX ${bbox.join(' ')}`);
+  }
+
+  /**
+   * Unsubscribe trajectory and deleted_vehicles channels. To resubscribe you have to set a new BBOX.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  reset() {
+    this.conn.send('RESET');
   }
 
   /**
@@ -98,7 +136,7 @@ class TralisAPI {
   }
 
   /**
-   * Unsubscribe to a channel.
+   * Unsubscribe both modes of a channel.
    *
    * @param {string} channel Name of the websocket channel to unsubscribe.
    * @param {string} [suffix=''] Suffix to add to the channel name.
@@ -377,7 +415,12 @@ class TralisAPI {
    */
   subscribeTrajectory(mode, onMessage) {
     this.unsubscribeTrajectory(onMessage);
-    this.subscribe(`trajectory${getModeSuffix(mode, TralisModes)}`, onMessage);
+    this.subscribe(
+      `trajectory${getModeSuffix(mode, TralisModes)}`,
+      onMessage,
+      null,
+      this.isUpdateBboxOnMoveEnd,
+    );
   }
 
   /**
@@ -399,6 +442,8 @@ class TralisAPI {
     this.subscribe(
       `deleted_vehicles${getModeSuffix(mode, TralisModes)}`,
       onMessage,
+      null,
+      this.isUpdateBboxOnMoveEnd,
     );
   }
 

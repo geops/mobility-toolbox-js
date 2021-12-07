@@ -3,8 +3,6 @@ import { fromLonLat } from 'ol/proj';
 import { buffer, getWidth } from 'ol/extent';
 import { MultiPoint, LineString } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
-import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
 import { unByKey } from 'ol/Observable';
 import TrackerLayer from './TrackerLayer';
 
@@ -27,47 +25,9 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
+ * @deprecated Use {@link TralisLayer} instead.
  */
 class TrajservLayer extends mixin(TrackerLayer) {
-  constructor(options = {}) {
-    // We use a group to be able to add custom vector layer in extended class.
-    // For example TrajservLayer use a vectorLayer to display the complete trajectory.
-    super({
-      ...options,
-    });
-
-    /** @ignore */
-    this.vectorLayer = new VectorLayer({
-      source: new VectorSource({ features: [] }),
-    });
-    this.olLayer.getLayers().insertAt(0, this.vectorLayer);
-  }
-
-  /**
-   * Initialize the layer.
-   * @param {mapboxgl.Map} map the mapbox map.
-   * @override
-   */
-  init(map) {
-    if (!map) {
-      return;
-    }
-
-    map.addLayer(this.vectorLayer);
-    super.init(map);
-  }
-
-  /**
-   * Terminate the layer.
-   * @override
-   */
-  terminate() {
-    if (this.map) {
-      this.map.removeLayer(this.vectorLayer);
-    }
-    super.terminate();
-  }
-
   /**
    * Start the layer.
    * @override

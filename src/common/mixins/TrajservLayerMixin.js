@@ -23,6 +23,7 @@ import { TrajservAPI } from '../../api';
  * @classproperty {function} sort - Set the filter for tracker features.
  *
  * @extends {TrackerLayerInterface}
+ * @deprecated
  */
 export class TrajservLayerInterface {
   /**
@@ -101,74 +102,6 @@ export class TrajservLayerInterface {
   defaultStyle(trajectory, viewState) {}
 }
 
-const LINE_FILTER = 'publishedlinename';
-const ROUTE_FILTER = 'tripnumber';
-const OPERATOR_FILTER = 'operator';
-
-/**
- * Create a array of filter functions based on some parameters.
- * @param {string} line
- * @param {string} route
- * @param {string} operator
- * @param {string} regexLine
- * @private
- */
-const createFilters = (line, route, operator, regexLine) => {
-  const filterList = [];
-
-  if (!line && !route && !operator && !regexLine) {
-    return null;
-  }
-
-  if (regexLine) {
-    const regexLineList =
-      typeof regexLine === 'string' ? [regexLine] : regexLine;
-    const lineFilter = (t) =>
-      regexLineList.some((tr) => new RegExp(tr, 'i').test(t.name));
-    filterList.push(lineFilter);
-  }
-
-  if (line) {
-    const lineFiltersList = typeof line === 'string' ? line.split(',') : line;
-    const lineList = lineFiltersList.map((l) =>
-      l.replace(/\s+/g, '').toUpperCase(),
-    );
-    const lineFilter = (l) =>
-      lineList.some((filter) => filter === l.name.toUpperCase());
-    filterList.push(lineFilter);
-  }
-
-  if (route) {
-    const routes = typeof route === 'string' ? route.split(',') : route;
-    const routeList = routes.map((item) => parseInt(item, 10));
-    const routeFilter = (item) => {
-      const routeId = parseInt(item.routeIdentifier.split('.')[0], 10);
-      return routeList.some((id) => id === routeId);
-    };
-    filterList.push(routeFilter);
-  }
-
-  if (operator) {
-    const operatorList = typeof operator === 'string' ? [operator] : operator;
-    const operatorFilter = (t) =>
-      operatorList.some((op) => new RegExp(op, 'i').test(t.operator));
-    filterList.push(operatorFilter);
-  }
-
-  if (!filterList.length) {
-    return null;
-  }
-
-  return (t) => {
-    for (let i = 0; i < filterList.length; i += 1) {
-      if (!filterList[i](t)) {
-        return false;
-      }
-    }
-    return true;
-  };
-};
-
 /**
  * Mixin for TrajservLayerInterface.
  *
@@ -185,12 +118,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
      */
     defineProperties(options) {
       super.defineProperties(options);
-      let {
-        regexPublishedLineName,
-        publishedLineName,
-        tripNumber,
-        operator,
-      } = options;
 
       let requestIntervalSeconds = 3;
       let defaultApi;
@@ -205,25 +132,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
         defaultApi = new TrajservAPI(apiOptions);
       }
       Object.defineProperties(this, {
-        showVehicleTraj: {
-          value:
-            options.showVehicleTraj !== undefined
-              ? options.showVehicleTraj
-              : true,
-          writable: true,
-        },
-        delayDisplay: {
-          value: options.delayDisplay || 300000,
-          writable: true,
-        },
-        delayOutlineColor: {
-          value: options.delayOutlineColor || '#000000',
-          writable: true,
-        },
-        useDelayStyle: {
-          value: options.useDelayStyle || false,
-          writable: true,
-        },
         requestIntervalSeconds: {
           get: () => {
             return requestIntervalSeconds;
@@ -238,42 +146,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
             }
           },
         },
-        publishedLineName: {
-          get: () => {
-            return publishedLineName;
-          },
-          set: (newPublishedLineName) => {
-            publishedLineName = newPublishedLineName;
-            this.updateFilters();
-          },
-        },
-        tripNumber: {
-          get: () => {
-            return tripNumber;
-          },
-          set: (newTripNumber) => {
-            tripNumber = newTripNumber;
-            this.updateFilters();
-          },
-        },
-        operator: {
-          get: () => {
-            return operator;
-          },
-          set: (newOperator) => {
-            operator = newOperator;
-            this.updateFilters();
-          },
-        },
-        regexPublishedLineName: {
-          get: () => {
-            return regexPublishedLineName;
-          },
-          set: (newRegex) => {
-            regexPublishedLineName = newRegex;
-            this.updateFilters();
-          },
-        },
+
         api: {
           value: options.api || defaultApi,
         },
@@ -405,18 +278,6 @@ const TrajservLayerMixin = (TrackerLayer) =>
         .catch(() => {
           this.drawFullTrajectory();
         });
-    }
-
-    updateFilters() {
-      // Setting filters from the permalink if no values defined by the layer.
-      const parameters = qs.parse(window.location.search.toLowerCase());
-      // filter is the property in TrackerLayerMixin.
-      this.filter = createFilters(
-        this.publishedLineName || parameters[LINE_FILTER],
-        this.tripNumber || parameters[ROUTE_FILTER],
-        this.operator || parameters[OPERATOR_FILTER],
-        this.regexPublishedLineName,
-      );
     }
 
     abortFetchTrajectories() {
