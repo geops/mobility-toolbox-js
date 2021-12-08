@@ -8,8 +8,7 @@ import BaseObject from 'ol/Object';
  *
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map which the control refers to.
  * @classproperty {boolean} active - Active the control.
- * @classproperty {function} render - Render function called whenever the control needs to be rerendered.
- * @classproperty {HTMLElement} element - The HTML element used to render the control. Read only.
+ * @classproperty {HTMLElement} element - The HTML element used to render the control.
  * @classproperty {HTMLElement} target - The HTML element where to render the element property. Default is the map's element. Read only.
  */
 class Control extends BaseObject {
@@ -20,7 +19,7 @@ class Control extends BaseObject {
    * @param {boolean} [options.active = true] Whether the control is active or not.
    * @param {HTMLElement} [options.element] The HTML element used to render the control.
    * @param {HTMLElement} [options.target] The HTML element where to render the element property. Default is the map's element.
-   * @param {HTMLElement} [options.render] Render function called whenever the control needs to be rerendered.
+   * @param {function} [options.render] Render function called whenever the control needs to be rerendered.
    */
   constructor(options = {}) {
     super(options);
@@ -40,7 +39,7 @@ class Control extends BaseObject {
   /**
    * Define control's properties.
    *
-   * @ignore
+   * @private
    */
   defineProperties(options) {
     const { target, element, render } = {
@@ -105,9 +104,7 @@ class Control extends BaseObject {
         writable: true,
       },
       render: {
-        /**
-         * @ignore
-         */
+        /** @ignore */
         value: render || this.render,
         writable: true,
       },
@@ -132,12 +129,15 @@ class Control extends BaseObject {
   /**
    * The default render function. It renders content in the HTML element.
    * To be defined in inherited classes.
+   *
+   * @private
    */
   render() {}
 
   /**
    * The default element to display if this.element is not defined.
    * To be defined in inherited classes.
+   *
    * @private
    */
   // eslint-disable-next-line class-methods-use-this
