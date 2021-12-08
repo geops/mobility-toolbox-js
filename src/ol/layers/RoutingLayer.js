@@ -43,7 +43,7 @@ const defaultStyleFunction = (feature, resolution) => {
   const maxResolution = feature.get('maxResolution');
   const inRange = resolution <= minResolution && resolution > maxResolution;
 
-  if (!inRange) {
+  if (minResolution && maxResolution && !inRange) {
     return null;
   }
   const mot = feature.get('mot');
