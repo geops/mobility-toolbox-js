@@ -98,8 +98,27 @@ const Example = () => {
           <Markdown
             className={classes.readme}
             source={example.description || ''}
+            renderers={{
+              // eslint-disable-next-line react/prop-types
+              link: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noreferrer">
+                  {children}
+                </a>
+              ),
+            }}
           />
-          <Markdown className={classes.readme} source={readme || ''} />
+          <Markdown
+            className={classes.readme}
+            source={readme || ''}
+            renderers={{
+              // eslint-disable-next-line react/prop-types
+              link: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noreferrer">
+                  {children}
+                </a>
+              ),
+            }}
+          />
         </Grid>
         <Grid item xs={12}>
           <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
