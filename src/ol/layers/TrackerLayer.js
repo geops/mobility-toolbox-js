@@ -169,7 +169,12 @@ class TrackerLayer extends mixin(Layer) {
     if (this.map && this.tracker && this.tracker.canvas) {
       const context = this.tracker.canvas.getContext('2d');
       const pixel = this.map.getPixelFromCoordinate(coordinate);
-      return !!context.getImageData(pixel[0], pixel[1], 1, 1).data[3];
+      return !!context.getImageData(
+        pixel[0] * this.pixelRatio,
+        pixel[1] * this.pixelRatio,
+        1,
+        1,
+      ).data[3];
     }
     return false;
   }
