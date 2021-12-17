@@ -3,7 +3,7 @@
 /* eslint-disable max-classes-per-file */
 import qs from 'query-string';
 import { unByKey } from 'ol/Observable';
-import { getUTCDateString, getUTCTimeString } from '../timeUtils';
+import { getUTCDateString, getUTCTimeString } from '../utils';
 import {
   getRadius,
   getBgColor,
