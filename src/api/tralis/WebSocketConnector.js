@@ -5,7 +5,7 @@
  * @private
  */
 class WebSocketConnector {
-  constructor(url) {
+  constructor() {
     /**
      * Array of subscriptions.
      * @type {Array<subscription>}
@@ -19,14 +19,6 @@ class WebSocketConnector {
      * @private
      */
     this.subscribed = {};
-
-    // Connect the websocket
-    this.connect(url);
-
-    // keep websocket alive
-    setInterval(() => {
-      this.send('PING');
-    }, 10000);
   }
 
   /**
@@ -61,16 +53,27 @@ class WebSocketConnector {
     /** @ignore */
     this.websocket = new WebSocket(url);
 
+    // Subscribe all previous subscriptions.
     [...this.subscriptions].forEach((s) => {
       this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
     });
 
-    // reconnect on close
+    // Reconnect on close
     this.websocket.onclose = () => {
+      window.clearInterval(this.pingInterval);
       window.clearTimeout(this.reconnectTimeout);
       /** @ignore */
       this.reconnectTimeout = window.setTimeout(() => this.connect(url), 100);
     };
+
+    /**
+     * Keep websocket alive
+     */
+    window.clearInterval(this.pingInterval);
+    /** @ignore */
+    this.pingInterval = setInterval(() => {
+      this.send('PING');
+    }, 10000);
   }
 
   /**
@@ -94,6 +97,9 @@ class WebSocketConnector {
    * @private
    */
   send(message) {
+    if (!this.websocket) {
+      return;
+    }
     const send = () => {
       this.websocket.send(message);
     };
@@ -130,11 +136,13 @@ class WebSocketConnector {
       }
     };
 
-    this.websocket.addEventListener('message', onMessage);
+    if (this.websocket) {
+      this.websocket.addEventListener('message', onMessage);
 
-    if (errorCb) {
-      this.websocket.addEventListener('error', errorCb);
-      this.websocket.addEventListener('close', errorCb);
+      if (errorCb) {
+        this.websocket.addEventListener('error', errorCb);
+        this.websocket.addEventListener('close', errorCb);
+      }
     }
 
     return { onMessageCb: onMessage, onErrorCb: errorCb };
@@ -148,6 +156,9 @@ class WebSocketConnector {
    * @private
    */
   unlisten(params, cb) {
+    if (!this.websocket) {
+      return;
+    }
     this.subscriptions
       .filter((s) => {
         return s.params.channel === params.channel && (!cb || s.cb === cb);
@@ -206,10 +217,12 @@ class WebSocketConnector {
     });
 
     toRemove.forEach(({ onMessageCb, onErrorCb }) => {
-      this.websocket.removeEventListener('message', onMessageCb);
-      if (onErrorCb) {
-        this.websocket.removeEventListener('error', onErrorCb);
-        this.websocket.removeEventListener('close', onErrorCb);
+      if (this.webSocket) {
+        this.websocket.removeEventListener('message', onMessageCb);
+        if (onErrorCb) {
+          this.websocket.removeEventListener('error', onErrorCb);
+          this.websocket.removeEventListener('close', onErrorCb);
+        }
       }
     });
 

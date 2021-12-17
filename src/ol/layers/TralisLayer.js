@@ -4,7 +4,7 @@ import { MultiPoint } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
-import { getBgColor } from '../../common/trackerConfig';
+import { getBgColor } from '../../common';
 
 const format = new GeoJSON();
 

@@ -44,27 +44,11 @@ class TralisAPI {
    * @param {string} options.url Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    * @param {string} [options.prefix=''] Service prefix to specify tenant.
-   * @param {string} [options.projection] The epsg code of the projection for features.
-   * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY] The bounding box to receive data from.
+   * @param {string} [options.projection] The epsg code of the projection for features. Default to EPSG:3857.
+   * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
    */
   constructor(options = {}) {
-    let wsUrl = null;
-
-    if (typeof options === 'string') {
-      wsUrl = options;
-    } else {
-      wsUrl = options.url;
-    }
-
-    if (options.apiKey) {
-      wsUrl = `${wsUrl}?key=${options.apiKey}`;
-    }
-
-    /** @ignore */
-    this.bbox = options.bbox;
-
-    /** @ignore */
-    this.projection = options.projection || 'EPSG:3857';
+    this.defineProperties(options);
 
     /** @ignore */
     this.subscribedStationUic = null;
@@ -82,12 +66,82 @@ class TralisAPI {
     this.prefix = options.prefix || '';
 
     this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
+  }
 
-    /** @ignore */
-    this.conn = new WebSocketConnector(wsUrl);
+  defineProperties(options) {
+    let opt = options;
 
-    if (options.projection) {
-      this.setProjection(options.projection);
+    if (typeof options === 'string') {
+      opt = { url: options };
+    }
+
+    const { apiKey } = opt;
+    let { url, projection, bbox } = opt;
+    let conn = null;
+
+    if (apiKey) {
+      url = `${url}?key=${apiKey}`;
+    }
+
+    Object.defineProperties(this, {
+      url: {
+        get: () => {
+          return url;
+        },
+        set: (newUrl) => {
+          url = newUrl;
+          this.createConnection();
+        },
+      },
+      projection: {
+        get: () => {
+          return projection;
+        },
+        set: (newProjection) => {
+          projection = newProjection;
+          this.conn.send(`PROJECTION ${projection}`);
+        },
+      },
+      bbox: {
+        get: () => {
+          return bbox;
+        },
+        set: (newBbox) => {
+          bbox = newBbox;
+          this.conn.send(`BBOX ${bbox.join(' ')}`);
+        },
+      },
+      conn: {
+        get: () => {
+          if (!conn) {
+            conn = this.createConnection();
+          }
+          return conn;
+        },
+        set: (newConnection) => {
+          conn = newConnection;
+        },
+      },
+    });
+  }
+
+  open() {
+    this.createConnection();
+  }
+  close() {
+    this.conn
+  }
+
+  /**
+   * Create the webscocket connection using the current url , projection and bbox.
+   */
+  createConnection() {
+    this.conn = new WebSocketConnector(this.url);
+    if (this.projection) {
+      this.conn.send(`PROJECTION ${this.projection}`);
+    }
+    if (this.bbox) {
+      this.conn.send(`BBOX ${this.bbox.join(' ')}`);
     }
   }
 
