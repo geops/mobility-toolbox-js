@@ -42,6 +42,9 @@ export default () => {
   document.getElementById('button').onclick = () => {
     tracker.setVisible(!tracker.visible);
   };
+  document.getElementById('close').onclick = () => {
+    tracker.api.websocket.close();
+  };
 
   map.addLayer(layer);
   map.addLayer(tracker);

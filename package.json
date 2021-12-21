@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
@@ -164,7 +164,7 @@
     ".": "./index.js",
     "./module": "./module.js",
     "./api": "./api/index.js",
-    "./common": "./common/*.js",
+    "./common/trackerConfig": "./common/trackerConfig.js",
     "./common/utils": "./common/utils/index.js",
     "./mapbox": "./mapbox/index.js",
     "./ol": "./ol/index.js"

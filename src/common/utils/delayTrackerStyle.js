@@ -44,7 +44,7 @@ export const getDelayTextCanvas = (
 ) => {
   const key = `${width}, ${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
   if (!cacheDelayText[key]) {
-    const canvas = createCanvas(width, fontSize + 8);
+    const canvas = createCanvas(width, fontSize + 8 * pixelRatio);
     const ctx = canvas.getContext('2d');
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -225,7 +225,6 @@ const style = (trajectory, viewState, options) => {
     const margin = 1 * pixelRatio;
     const radiusDelay = radius + 2;
     const markerSize = radius * 2;
-    const textWidth = 100;
     const size = radiusDelay * 2 + margin * 2 + 100 * pixelRatio; // add space for delay information
     const origin = size / 2;
 
@@ -249,24 +248,30 @@ const style = (trajectory, viewState, options) => {
       (hover || delay >= delayDisplay || cancelled)
     ) {
       // Draw delay text
-      const fontSize = Math.max(
-        cancelled ? 19 : 14,
-        Math.min(cancelled ? 19 : 17, radius * 1.2),
-      );
-      const delayText = getDelayTextCanvas(
-        textWidth,
-        getDelayText(delay, cancelled),
-        fontSize,
-        `bold ${fontSize}px arial, sans-serif`,
-        getDelayColor(delay, cancelled, true),
-        delayOutlineColor,
-        pixelRatio,
-      );
-      ctx.drawImage(
-        delayText,
-        origin + radiusDelay + margin,
-        origin - fontSize,
-      );
+      const fontSize =
+        Math.max(
+          cancelled ? 19 : 14,
+          Math.min(cancelled ? 19 : 17, radius * 1.2),
+        ) * pixelRatio;
+      const text = getDelayText(delay, cancelled);
+
+      if (text) {
+        const textWidth = text.length * fontSize;
+        const delayText = getDelayTextCanvas(
+          textWidth,
+          text,
+          fontSize,
+          `bold ${fontSize}px arial, sans-serif`,
+          getDelayColor(delay, cancelled, true),
+          delayOutlineColor,
+          pixelRatio,
+        );
+        ctx.drawImage(
+          delayText,
+          origin + radiusDelay + margin,
+          origin - fontSize,
+        );
+      }
     }
 
     // Draw colored circle with black border
