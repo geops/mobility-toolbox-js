@@ -255,21 +255,23 @@ const style = (trajectory, viewState, options) => {
         ) * pixelRatio;
       const text = getDelayText(delay, cancelled);
 
-      const textWidth = text.length * fontSize;
-      const delayText = getDelayTextCanvas(
-        textWidth,
-        text,
-        fontSize,
-        `bold ${fontSize}px arial, sans-serif`,
-        getDelayColor(delay, cancelled, true),
-        delayOutlineColor,
-        pixelRatio,
-      );
-      ctx.drawImage(
-        delayText,
-        origin + radiusDelay + margin,
-        origin - fontSize,
-      );
+      if (text) {
+        const textWidth = text.length * fontSize;
+        const delayText = getDelayTextCanvas(
+          textWidth,
+          text,
+          fontSize,
+          `bold ${fontSize}px arial, sans-serif`,
+          getDelayColor(delay, cancelled, true),
+          delayOutlineColor,
+          pixelRatio,
+        );
+        ctx.drawImage(
+          delayText,
+          origin + radiusDelay + margin,
+          origin - fontSize,
+        );
+      }
     }
 
     // Draw colored circle with black border
