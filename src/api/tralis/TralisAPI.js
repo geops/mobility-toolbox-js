@@ -21,7 +21,7 @@ export const TralisModes = {
 };
 
 /**
- * Access to Tralis service.
+ * This class provides convenience methods to access to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { TralisAPI } from 'mobility-toolbox-js/api';
@@ -41,8 +41,8 @@ class TralisAPI {
    * Constructor
    *
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
-   * @param {string} options.url Service url.
-   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} options.url Url to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
+   * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
    * @param {string} [options.prefix=''] Service prefix to specify tenant.
    * @param {string} [options.projection] The epsg code of the projection for features. Default to EPSG:3857.
    * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
@@ -77,7 +77,7 @@ class TralisAPI {
 
     const { apiKey } = opt;
     let { url, projection, bbox } = opt;
-    let conn = null;
+    const conn = new WebSocketConnector();
 
     if (apiKey) {
       url = `${url}?key=${apiKey}`;
@@ -90,7 +90,7 @@ class TralisAPI {
         },
         set: (newUrl) => {
           url = newUrl;
-          this.createConnection();
+          this.open();
         },
       },
       projection: {
@@ -98,8 +98,12 @@ class TralisAPI {
           return projection;
         },
         set: (newProjection) => {
-          projection = newProjection;
-          this.conn.send(`PROJECTION ${projection}`);
+          if (newProjection !== projection) {
+            projection = newProjection;
+            if (this.conn) {
+              this.conn.send(`PROJECTION ${projection}`);
+            }
+          }
         },
       },
       bbox: {
@@ -107,65 +111,68 @@ class TralisAPI {
           return bbox;
         },
         set: (newBbox) => {
-          bbox = newBbox;
-          this.conn.send(`BBOX ${bbox.join(' ')}`);
+          if (JSON.stringify(newBbox) !== JSON.stringify(bbox)) {
+            bbox = newBbox;
+            if (this.conn) {
+              this.conn.send(`BBOX ${bbox.join(' ')}`);
+            }
+          }
         },
       },
+      /**
+       * The websocket helper class to connect the websocket.
+       *
+       * @private
+       */
       conn: {
-        get: () => {
-          if (!conn) {
-            conn = this.createConnection();
-          }
-          return conn;
-        },
-        set: (newConnection) => {
-          conn = newConnection;
-        },
+        value: conn,
+        writable: true,
+      },
+      /**
+       * Interval between PING request in ms.
+       * If equal to 0,  no PING request are sent.
+       * @type {number}
+       * @private
+       */
+      pingIntervalMs: {
+        value: options.pingIntervalMs || 10000,
+        writable: true,
+      },
+      /**
+       * Timeout in ms after an automatic reconnection when the websoscket has been closed by the server.
+       * @type {number}
+       */
+      reconnectTimeoutMs: {
+        value: options.pingIntervalMs || 100,
+        writable: true,
       },
     });
   }
 
   open() {
-    this.createConnection();
+    this.close();
+    this.conn.connect(this.url);
+
+    // Register BBOX and PROJECTION messages on open.
+    if (this.conn.connecting) {
+      this.conn.websocket.addEventListener('open', () => {
+        this.onOpen();
+      });
+    } else {
+      this.onOpen();
+    }
+
+    // Register reconnection on close.
+    this.conn.websocket.onclose = () => {
+      this.onClose();
+    };
   }
+
+  /**
+   * Close the websocket connection without reconnection.
+   */
   close() {
-    this.conn
-  }
-
-  /**
-   * Create the webscocket connection using the current url , projection and bbox.
-   */
-  createConnection() {
-    this.conn = new WebSocketConnector(this.url);
-    if (this.projection) {
-      this.conn.send(`PROJECTION ${this.projection}`);
-    }
-    if (this.bbox) {
-      this.conn.send(`BBOX ${this.bbox.join(' ')}`);
-    }
-  }
-
-  /**
-   * Send the projection to use. Default to EPSG:3857.
-   *
-   * @param {string} epsgCode The EPSG code of the projection.
-   */
-  setProjection(epsgCode) {
-    this.conn.send(`PROJECTION ${epsgCode}`);
-  }
-
-  /**
-   * Send the bbox to the service, if the first time it will also subscribe to trajectory and deleted_vehicles channels.
-   *
-   * @param {number[5]} bbox The bounding box and the zoom level to receive data from.
-   */
-  setBbox(bbox) {
-    /**
-     * The BBOX for websocket responses
-     * @type {Array<number>}
-     */
-    this.bbox = bbox;
-    this.conn.send(`BBOX ${bbox.join(' ')}`);
+    this.conn.close();
   }
 
   /**
@@ -174,6 +181,47 @@ class TralisAPI {
   // eslint-disable-next-line class-methods-use-this
   reset() {
     this.conn.send('RESET');
+  }
+
+  /**
+   * Callback when the websocket is opened and ready.
+   * It applies the bbox and the projection.
+   */
+  onOpen() {
+    if (this.projection) {
+      this.conn.send(`PROJECTION ${this.projection}`);
+    }
+    if (this.bbox) {
+      this.conn.send(`BBOX ${this.bbox.join(' ')}`);
+    }
+
+    /**
+     * Keep websocket alive
+     */
+    if (this.pingIntervalMs) {
+      window.clearInterval(this.pingInterval);
+      /** @ignore */
+      this.pingInterval = setInterval(() => {
+        this.send('PING');
+      }, this.pingIntervalMs);
+    }
+  }
+
+  /**
+   * Callback when the websocket is closed by the server.
+   * It auto reconnects after a timeout.
+   */
+  onClose() {
+    window.clearTimeout(this.pingInterval);
+    window.clearTimeout(this.reconnectTimeout);
+
+    if (this.reconnectTimeoutMs) {
+      /** @ignore */
+      this.reconnectTimeout = window.setTimeout(
+        () => this.open(),
+        this.reconnectTimeoutMs,
+      );
+    }
   }
 
   /**
@@ -371,14 +419,10 @@ class TralisAPI {
    * Update the model's station list for a given mode and a bbox.
    *
    * @param {TralisMode} mode Tralis mode.
-   * @param {number[4]} bbox The extent where to request.
    * @returns {Promise<Array<Station>>} An array of stations.
    */
-  getStations(mode, bbox) {
+  getStations(mode) {
     const stations = [];
-    if (bbox) {
-      this.conn.setBbox(bbox);
-    }
     const params = {
       channel: `station${getModeSuffix(mode, TralisModes)}`,
     };
@@ -407,11 +451,8 @@ class TralisAPI {
    * @param {number[4]} bbox The extent where to request.
    * @param {function(station: Station)} onMessage Function called on each message of the channel.
    */
-  subscribeStations(mode, bbox, onMessage) {
+  subscribeStations(mode, onMessage) {
     this.unsubscribeStations();
-    if (bbox) {
-      this.conn.setBbox(bbox);
-    }
     this.subscribe(`station${getModeSuffix(mode, TralisModes)}`, (data) => {
       if (data.content) {
         onMessage(data.content);

@@ -43,7 +43,10 @@ export default () => {
     tracker.setVisible(!tracker.visible);
   };
   document.getElementById('close').onclick = () => {
-    tracker.api.websocket.close();
+    tracker.api.conn.websocket.close();
+  };
+  document.getElementById('bbox').onclick = () => {
+    tracker.api.conn.websocket.send(`BBOX ${tracker.api.bbox.join(' ')}`);
   };
 
   map.addLayer(layer);

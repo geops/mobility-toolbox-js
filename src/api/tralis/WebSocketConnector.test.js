@@ -4,28 +4,83 @@ import Connector from './WebSocketConnector';
 describe('WebSocketConnector', () => {
   describe('#constructor', () => {
     let server;
+    let server2;
 
     beforeEach(() => {
       server = new WS(`ws://foo:1234`);
+      server2 = new WS(`ws://foo:12345`);
     });
 
     afterEach(() => {
       server.close();
+      server2.close();
       WS.clean();
     });
 
-    test('#constructor', async () => {
-      const client = new Connector(`ws://foo:1234`);
-      await server.connected;
-      client.send('hello');
-      await expect(server).toReceiveMessage('hello');
-      expect(server).toHaveReceivedMessages(['hello']);
+    describe('#constructor', () => {
+      test("doesn't connect.", async () => {
+        const client = new Connector();
+        expect(client.websocket).toBe();
+        expect(client.closed).toBe(false);
+        expect(client.closing).toBe(false);
+        expect(client.connecting).toBe(false);
+        expect(client.open).toBe(false);
+      });
+    });
+
+    describe('#connect', () => {
+      test('create a new WebSocket.', async () => {
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
+        await server.connected;
+        client.send('hello');
+        await expect(server).toReceiveMessage('hello');
+        expect(server).toHaveReceivedMessages(['hello']);
+      });
+
+      test('close previous connection.', async () => {
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
+        await server.connected;
+        expect(client.websocket).toBeDefined();
+        const old = client.websocket;
+        expect(old.readyState).toBe(WebSocket.OPEN);
+        client.connect(`ws://foo:12345`);
+        expect(old.readyState).toBe(WebSocket.CLOSING);
+        expect(client.websocket.readyState).toBe(WebSocket.CONNECTING);
+      });
+
+      test('subscribe previous subscriptions on open', async () => {
+        const client = new Connector();
+        client.subscribe = jest.fn();
+        client.connect(`ws://foo:1234`);
+        await server.connected;
+        expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        const subsc = {
+          params: 'foo',
+          cb: () => {},
+          errorCb: () => {},
+          quiet: true,
+        };
+        client.subscriptions = [subsc];
+        client.connect(`ws://foo:12345`);
+        await server2.connected;
+        expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        expect(client.subscribe).toHaveBeenCalledTimes(1);
+        expect(client.subscribe).toHaveBeenCalledWith(
+          subsc.params,
+          subsc.cb,
+          subsc.errorCb,
+          subsc.quiet,
+        );
+      });
     });
 
     describe('#subscribe', () => {
-      test('adds subscrption to subscriptions array', async () => {
+      test('adds subscription to subscriptions array', async () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
         await server.connected;
         const params = { channel: 'bar', args: ['baz'], id: 'id' };
         const cb = jest.fn();
@@ -46,7 +101,8 @@ describe('WebSocketConnector', () => {
 
       test("doesn't duplicate subscriptions", async () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
         await server.connected;
         const params = { channel: 'bar', args: ['baz'], id: 'id' };
         const cb = jest.fn();
@@ -64,7 +120,8 @@ describe('WebSocketConnector', () => {
 
       test('send GET and SUB requests.', async () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
         client.send = jest.fn();
         const params = { channel: 'bar', args: ['baz'], id: 'id' };
         const cb = jest.fn();
@@ -78,7 +135,8 @@ describe('WebSocketConnector', () => {
 
       test('should register callback without sending GET and SUB requests (quiet=true).', async () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
         await server.connected;
         const params = { channel: 'bar', args: ['baz'], id: 'id' };
         const cb = jest.fn();
@@ -98,7 +156,8 @@ describe('WebSocketConnector', () => {
     describe('#unsubscribe', () => {
       test('should only unsubscribe the subscription using the good cb', async () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
         await server.connected;
         const params = { channel: 'foo', id: 'id' };
         const cb = jest.fn();
@@ -114,16 +173,19 @@ describe('WebSocketConnector', () => {
         client.unsubscribe('foo', cb);
         expect(client.subscriptions.length).toBe(1);
 
+        expect(cb).toHaveBeenCalledTimes(0);
+        expect(cb2).toHaveBeenCalledTimes(0);
         const obj = { source: 'foo', client_reference: 'id' };
         server.send(JSON.stringify(obj));
 
-        expect(cb).toHaveBeenCalledTimes(0);
         expect(cb2).toHaveBeenCalledTimes(1);
+        expect(cb).toHaveBeenCalledTimes(0);
       });
 
       test('should unsubscribe all subscriptions related to a channel', () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
         client.websocket.removeEventListener = jest.fn();
         client.websocket.addEventListener = jest.fn();
         const params = { channel: 'foo' };
@@ -145,9 +207,11 @@ describe('WebSocketConnector', () => {
         expect(client.subscriptions[0].cb).toBe(cb2);
       });
 
-      test('send DEL when there is no more unquiet subscriptions on the channel', () => {
+      test('send DEL when there is no more unquiet subscriptions on the channel', async () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
+        await server.connected;
         client.send = jest.fn();
         client.websocket.removeEventListener = jest.fn();
         client.websocket.addEventListener = jest.fn();
@@ -163,7 +227,8 @@ describe('WebSocketConnector', () => {
 
       test("doesn't send DEL when we unsubscribe a quiet channel", () => {
         // eslint-disable-next-line no-unused-vars
-        const client = new Connector(`ws://foo:1234`);
+        const client = new Connector();
+        client.connect(`ws://foo:1234`);
         client.send = jest.fn();
         client.websocket.removeEventListener = jest.fn();
         client.websocket.addEventListener = jest.fn();

@@ -59,12 +59,12 @@ export default [
   //   },
   // },
   // These examples are used for the dbug of TralisLayer don't remove them pls.
-  // {
-  //   name: 'Tralis tracker with OpenLayers',
-  //   key: 'ol-tralis',
-  //   description: 'Show moving tramway in an OpenLayers map.',
-  //   img: liveTrackerOLImg,
-  // },
+  {
+    name: 'Tralis tracker with OpenLayers',
+    key: 'ol-tralis',
+    description: 'Show moving tramway in an OpenLayers map.',
+    img: liveTrackerOLImg,
+  },
   // {
   //   name: 'Tralis tracker with Mapbox',
   //   key: 'mapbox-tralis',

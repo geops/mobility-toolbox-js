@@ -105,6 +105,7 @@ const TralisLayerMixin = (TrackerLayer) =>
 
     start() {
       super.start();
+      this.api.open();
       this.api.subscribeTrajectory(this.mode, this.onMessage);
       this.api.subscribeDeletedVehicles(this.mode, this.onDeleteMessage);
       this.setBbox();
@@ -112,6 +113,7 @@ const TralisLayerMixin = (TrackerLayer) =>
 
     stop() {
       super.stop();
+      this.api.close();
       this.api.unsubscribeTrajectory(this.onMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteMessage);
     }
@@ -122,7 +124,7 @@ const TralisLayerMixin = (TrackerLayer) =>
     setBbox(bbox) {
       if (this.isUpdateBboxOnMoveEnd) {
         // Clean trajectories before sending the new bbox
-        this.api.setBbox(bbox);
+        this.api.bbox = bbox;
       }
     }
 
