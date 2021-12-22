@@ -202,7 +202,7 @@ class TralisAPI {
       window.clearInterval(this.pingInterval);
       /** @ignore */
       this.pingInterval = setInterval(() => {
-        this.send('PING');
+        this.conn.send('PING');
       }, this.pingIntervalMs);
     }
   }
