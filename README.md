@@ -1,4 +1,6 @@
-# mobility-toolbox-js
+# scenwise-mobility-toolbox-js
+
+Extension of Geops Mobility Toolbox.
 
 Toolbox for JavaScript applications in the domains of mobility and logistics.
 The tools in this library have been inspired by many projects realized for public transport agencies, mobility providers and logistics companies.
