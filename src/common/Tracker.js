@@ -203,6 +203,8 @@ export default class Tracker {
     for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
       const traj = this.trajectories[i];
 
+      this.trajectories[i].rendered = false;
+
       // We simplify the traj object
       const { geometry, timeIntervals, timeOffset } = traj;
 
@@ -293,15 +295,25 @@ export default class Tracker {
           return p * pixelRatio;
         });
 
-        // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
-        this.trajectories[i].rendered = true;
-        this.renderedTrajectories.push(this.trajectories[i]);
-        const vehicleImg = this.style(traj, viewState);
+        if (
+          px[0] < 0 ||
+          px[0] > this.canvas.width ||
+          px[1] < 0 ||
+          px[1] > this.canvas.height
+        ) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
 
+        const vehicleImg = this.style(traj, viewState);
         if (!vehicleImg) {
           // eslint-disable-next-line no-continue
           continue;
         }
+
+        // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
+        this.trajectories[i].rendered = true;
+        this.renderedTrajectories.push(this.trajectories[i]);
 
         const imgWidth = vehicleImg.width;
         const imgHeight = vehicleImg.height;
