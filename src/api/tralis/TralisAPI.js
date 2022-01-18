@@ -448,7 +448,6 @@ class TralisAPI {
    * One message pro station.
    *
    * @param {TralisMode} mode Tralis mode.
-   * @param {number[4]} bbox The extent where to request.
    * @param {function(station: Station)} onMessage Function called on each message of the channel.
    */
   subscribeStations(mode, onMessage) {
