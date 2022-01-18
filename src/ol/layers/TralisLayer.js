@@ -83,11 +83,25 @@ class TralisLayer extends mixin(TrackerLayer) {
   }
 
   /**
+   * Callback when user clicks on the map.
+   * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
+   *
+   * @private
+   * @override
+   */
+  onFeatureClick(features, layer, coordinate) {
+    super.onFeatureClick(features, layer, coordinate);
+    if (this.selectedVehicleId) {
+      this.highlightTrajectory(this.selectedVehicleId);
+    }
+  }
+
+  /**
    * Highlight the trajectory of journey.
    * @private
    */
-  highlightTrajectory() {
-    super.highlightTrajectory().then(({ stopSequence, fullTrajectory }) => {
+  highlightTrajectory(id) {
+    this.getTrajectoryInfos(id).then(({ stopSequence, fullTrajectory }) => {
       const vectorSource = this.vectorLayer.getSource();
       vectorSource.clear();
       let lineColor = '#ffffff'; // white
