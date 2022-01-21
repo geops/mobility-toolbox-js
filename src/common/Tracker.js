@@ -123,7 +123,7 @@ export default class Tracker {
 
   /**
    * Return the trajectories.
-   * @returns {array<trajectory>} trajectories
+   * @return {array<trajectory>} trajectories
    */
   getTrajectories() {
     return this.trajectories || [];

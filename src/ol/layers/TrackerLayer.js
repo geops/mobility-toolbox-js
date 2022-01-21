@@ -240,7 +240,7 @@ class TrackerLayer extends mixin(Layer) {
    * Returns null when no vehicle is located at the given coordinates.
    * @param {ol/coordinate~Coordinate} coordinate
    * @param {number} nb Number of vehicles to return;
-   * @returns {Array<ol/Feature~Feature>} Vehicle feature.
+   * @return {Array<ol/Feature~Feature>} Vehicle feature.
    * @override
    */
   getVehiclesAtCoordinate(coordinate, nb) {
@@ -310,7 +310,7 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Create a copy of the TrackerLayer.
    * @param {Object} newOptions Options to override
-   * @returns {TrackerLayer} A TrackerLayer
+   * @return {TrackerLayer} A TrackerLayer
    */
   clone(newOptions) {
     return new TrackerLayer({ ...this.options, ...newOptions });

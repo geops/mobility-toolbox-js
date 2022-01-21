@@ -264,7 +264,7 @@ class TralisAPI {
    *
    * @param {Object} depObject The object containing departures by id.
    * @param {boolean} [sortByMinArrivalTime=false] If true sort departures by arrival time.
-   * @returns {Array<departure>} Return departures array.
+   * @return {Array<departure>} Return departures array.
    * @private
    */
   filterDepartures(depObject, sortByMinArrivalTime = false) {
@@ -396,7 +396,7 @@ class TralisAPI {
    *
    * @param {number} uic UIC of the station.
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<Station>} A station.
+   * @return {Promise<Station>} A station.
    */
   getStation(uic, mode) {
     const params = {
@@ -419,7 +419,7 @@ class TralisAPI {
    * Update the model's station list for a given mode and a bbox.
    *
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<Array<Station>>} An array of stations.
+   * @return {Promise<Array<Station>>} An array of stations.
    */
   getStations(mode) {
     const stations = [];
@@ -554,7 +554,7 @@ class TralisAPI {
    *
    * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<FullTrajectory>} Return a full trajectory.
+   * @return {Promise<FullTrajectory>} Return a full trajectory.
    */
   getFullTrajectory(id, mode) {
     const params = {
@@ -575,7 +575,7 @@ class TralisAPI {
    *
    * @param {string[]} ids List of vehicles ids.
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
+   * @return {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
    */
   getFullTrajectories(ids, mode) {
     const promises = ids.map((id) => {
@@ -620,7 +620,7 @@ class TralisAPI {
    * Get the list of stops for this vehicle.
    *
    * @param {string} id A vehicle id.
-   * @returns {Promise<StopSequence>} Returns a stop sequence object.
+   * @return {Promise<StopSequence>} Returns a stop sequence object.
    */
   getStopSequence(id) {
     const params = {
@@ -651,7 +651,7 @@ class TralisAPI {
    * Get a list of stops for a list of vehicles.
    *
    * @param {string[]} ids List of vehicles ids.
-   * @returns {Promise<Array<StopSequence>>} Return an array of stop sequences.
+   * @return {Promise<Array<StopSequence>>} Return an array of stop sequences.
    */
   getStopSequences(ids) {
     const promises = ids.map((id) => {

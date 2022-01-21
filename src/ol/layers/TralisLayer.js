@@ -190,7 +190,7 @@ class TralisLayer extends mixin(TrackerLayer) {
   /**
    * Create a copy of the TralisLayer.
    * @param {Object} newOptions Options to override
-   * @returns {TralisLayer} A TralisLayer
+   * @return {TralisLayer} A TralisLayer
    */
   clone(newOptions) {
     return new TralisLayer({ ...this.options, ...newOptions });

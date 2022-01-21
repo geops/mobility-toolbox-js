@@ -63,7 +63,6 @@ export class TralisLayerInterface {
    *
    * @param {TralisTrajectory} trajectory  A trajectory
    * @param {ViewState} viewState Map's view state (zoom, resolution, center, ...)
-   * @private
    */
   defaultStyle(trajectory, viewState) {}
 }
@@ -166,7 +165,7 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @param {TralisTrajectory} trajectory
      * @param {Array<number>} extent
      * @param {number} zoom
-     * @returns {boolean} if the trajectory must be displayed or not.
+     * @return {boolean} if the trajectory must be displayed or not.
      * @ignore
      */
     mustNotBeDisplayed(trajectory, extent, zoom) {

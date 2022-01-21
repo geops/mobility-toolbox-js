@@ -81,7 +81,7 @@ class RoutingLayer extends Layer {
   /**
    * Create a copy of the RoutingLayer.
    * @param {Object} newOptions Options to override
-   * @returns {RoutingLayer} A RoutingLayer
+   * @return {RoutingLayer} A RoutingLayer
    */
   clone(newOptions) {
     return new RoutingLayer({ ...this.options, ...newOptions });

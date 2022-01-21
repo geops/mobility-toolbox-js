@@ -145,7 +145,7 @@ export const getTextCanvas = (
  * @param {*} trajectory The trajectory to render.
  * @param {*} viewState The view state of the map.
  * @param {*} options Some options to change the rendering
- * @returns a canvas
+ * @return a canvas
  */
 const styleCache = {};
 const style = (trajectory, viewState, options) => {

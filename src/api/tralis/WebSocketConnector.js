@@ -82,7 +82,7 @@ class WebSocketConnector {
    * @param {string} params.channel Channel name
    * @param {string} [params.args] Request arguments
    * @param {Number} [params.id] Request identifier
-   * @returns {string} request string
+   * @return {string} request string
    * @private
    */
   static getRequestString(method, params) {
@@ -160,7 +160,7 @@ class WebSocketConnector {
    * @param {Object} params Parameters for the websocket get request
    * @param {function} cb callback on listen
    * @param {function} errorCb Callback on error
-   * @returns {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
+   * @return {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
    * @private
    */
   listen(params, cb, errorCb) {

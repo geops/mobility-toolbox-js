@@ -77,7 +77,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Returns the URL parameters.
    * @param {Object} extraParams Extra parameters
-   * @returns {Object}
+   * @return {Object}
    * @private
    */
   getParams(extraParams = {}) {
