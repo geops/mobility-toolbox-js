@@ -133,7 +133,7 @@ const TralisLayerMixin = (TrackerLayer) =>
         this.api.bbox = bbox;
 
         // Update FullTrahectors
-        const zoom = Math.floor(this.map.getView().getZoom());
+        const zoom = bbox[5];
 
         /* @ignore */
         this.generalizationLevel =
