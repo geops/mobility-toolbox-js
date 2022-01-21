@@ -554,11 +554,19 @@ class TralisAPI {
    *
    * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
+   * @param {string} generalizationLevel The generalization level to request. Can be one of '', 'gen5', 'gen10', 'gen30', 'gen100'.
    * @return {Promise<FullTrajectory>} Return a full trajectory.
    */
-  getFullTrajectory(id, mode) {
+  getFullTrajectory(id, mode, generalizationLevel) {
+    const channel = [`full_trajectory${getModeSuffix(mode, TralisModes)}`];
+    if ((!mode || mode === TralisModes.TOPOGRAPHIC) && generalizationLevel) {
+      channel.push(generalizationLevel);
+    }
+    if (id) {
+      channel.push(id);
+    }
     const params = {
-      channel: `full_trajectory${getModeSuffix(mode, TralisModes)}_${id}`,
+      channel: channel.join('_'),
     };
 
     return new Promise((resolve) => {
@@ -575,11 +583,12 @@ class TralisAPI {
    *
    * @param {string[]} ids List of vehicles ids.
    * @param {TralisMode} mode Tralis mode.
+   * @param {string} generalizationLevel The generalization level to request. Can be one of '', 'gen5', 'gen10', 'gen30', 'gen100'.
    * @return {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
    */
-  getFullTrajectories(ids, mode) {
+  getFullTrajectories(ids, mode, generalizationLevel) {
     const promises = ids.map((id) => {
-      return this.getFullTrajectory(id, mode);
+      return this.getFullTrajectory(id, mode, generalizationLevel);
     });
     return Promise.all(promises);
   }

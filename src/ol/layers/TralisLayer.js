@@ -78,7 +78,7 @@ class TralisLayer extends mixin(TrackerLayer) {
     }
 
     if (this.selectedVehicleId) {
-      this.highlightTrajectory();
+      this.highlightTrajectory(this.selectedVehicleId);
     }
   }
 

@@ -84,6 +84,20 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.format = new GeoJSON();
+      this.generalizationLevelByZoom = options.generalizationLevelByZoom || {
+        0: 'gen5',
+        1: 'gen5',
+        2: 'gen5',
+        3: 'gen5',
+        4: 'gen5',
+        5: 'gen5',
+        6: 'gen5',
+        7: 'gen5',
+        8: 'gen10',
+        9: 'gen30',
+        10: 'gen30',
+        11: 'gen100',
+      };
 
       // This property will call api.setBbox on each movend event
       this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || true;
@@ -117,6 +131,14 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (this.isUpdateBboxOnMoveEnd) {
         // Clean trajectories before sending the new bbox
         this.api.bbox = bbox;
+
+        // Update FullTrahectors
+        const zoom = Math.floor(this.map.getView().getZoom());
+
+        /* @ignore */
+        this.generalizationLevel =
+          this.generalizationLevelByZoom[zoom] ||
+          [...Object.values(this.generalizationLevelByZoom)].pop();
       }
     }
 
@@ -136,15 +158,14 @@ const TralisLayerMixin = (TrackerLayer) =>
      * Request the stopSequence and the fullTrajectory informations for a vehicle.
      *
      * @param {string} id The vehicle identifier (the  train_id property).
-     * @param {TralisMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.
      * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
      */
-    getTrajectoryInfos(vehicleId, mode) {
+    getTrajectoryInfos(id) {
       // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
       // Then we combine them in one response and send them to inherited layers.
       const promises = [
-        this.api.getStopSequence(vehicleId, mode || this.mode),
-        this.api.getFullTrajectory(vehicleId, mode || this.mode),
+        this.api.getStopSequence(id, this.mode),
+        this.api.getFullTrajectory(id, this.mode, this.generalizationLevel),
       ];
 
       return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
