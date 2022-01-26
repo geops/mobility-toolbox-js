@@ -38,8 +38,11 @@ export class TralisLayerInterface {
 
   /**
    * Set the Tralis api's bbox.
+   *
+   * @param {Array<number>} extent  Extent to request, [minX, minY, maxX, maxY, zoom].
+   * @param {number} zoom  Zoom level to request. Must be an integer.
    */
-  setBbox(bbox) {}
+  setBbox(extent, zoom) {}
 
   /**
    * Set the Tralis api's mode.
@@ -85,18 +88,20 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.format = new GeoJSON();
       this.generalizationLevelByZoom = options.generalizationLevelByZoom || {
-        0: 'gen5',
-        1: 'gen5',
-        2: 'gen5',
-        3: 'gen5',
-        4: 'gen5',
-        5: 'gen5',
-        6: 'gen5',
-        7: 'gen5',
-        8: 'gen10',
-        9: 'gen30',
-        10: 'gen30',
-        11: 'gen100',
+        0: 5,
+        1: 5,
+        2: 5,
+        3: 5,
+        4: 5,
+        5: 5,
+        6: 5,
+        7: 5,
+        8: 10,
+        9: 30,
+        10: 30,
+        11: 100,
+        12: 100,
+        13: 100,
       };
 
       // This property will call api.setBbox on each movend event
@@ -112,10 +117,15 @@ const TralisLayerMixin = (TrackerLayer) =>
     start() {
       super.start();
       this.api.open();
-      this.api.subscribeTrajectory(this.mode, this.onTrajectoryMessage);
+      this.api.subscribeTrajectory(
+        this.mode,
+        this.onTrajectoryMessage,
+        this.isUpdateBboxOnMoveEnd,
+      );
       this.api.subscribeDeletedVehicles(
         this.mode,
         this.onDeleteTrajectoryMessage,
+        this.isUpdateBboxOnMoveEnd,
       );
       this.setBbox();
     }
@@ -127,18 +137,37 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);
     }
 
-    setBbox(bbox) {
+    setBbox(extent, zoom) {
+      // Clean trajectories before sending the new bbox
+      // Purge trajectories:
+      // - which are outside the extent
+      // - when it's bus and zoom level is too low for them
+      for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
+        const trajectory = this.trajectories[i];
+        if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
+          const temp = [...this.trajectories];
+          temp.splice(i, 1);
+          this.tracker.setTrajectories(temp);
+        }
+      }
+
       if (this.isUpdateBboxOnMoveEnd) {
-        // Clean trajectories before sending the new bbox
-        this.api.bbox = bbox;
-
-        // Update FullTrahectors
-        const zoom = bbox[5];
-
         /* @ignore */
-        this.generalizationLevel =
-          this.generalizationLevelByZoom[zoom] ||
-          [...Object.values(this.generalizationLevelByZoom)].pop();
+        this.generalizationLevel = this.generalizationLevelByZoom[zoom];
+
+        const bbox = extent;
+
+        bbox.push(zoom);
+
+        if (this.tenant) {
+          bbox.push(`tenant=${this.tenant}`);
+        }
+
+        if (this.generalizationLevel) {
+          bbox.push(`gen=${this.generalizationLevel}`);
+        }
+
+        this.api.bbox = bbox;
       }
     }
 
@@ -147,10 +176,15 @@ const TralisLayerMixin = (TrackerLayer) =>
         return;
       }
       this.mode = mode;
-      this.api.subscribeTrajectory(this.mode, this.onTrajectoryMessage);
+      this.api.subscribeTrajectory(
+        this.mode,
+        this.onTrajectoryMessage,
+        this.isUpdateBboxOnMoveEnd,
+      );
       this.api.subscribeDeletedVehicles(
         this.mode,
         this.onDeleteTrajectoryMessage,
+        this.isUpdateBboxOnMoveEnd,
       );
     }
 
@@ -323,6 +357,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (this.selectedVehicleId !== id) {
         /** @ignore */
         this.selectedVehicleId = id;
+        this.selectedVehicle = feature;
         this.renderTrajectories();
       }
       super.onFeatureClick(features, layer, coordinate);

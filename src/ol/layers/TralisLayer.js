@@ -47,20 +47,7 @@ class TralisLayer extends mixin(TrackerLayer) {
   setBbox() {
     const extent = this.map.getView().calculateExtent();
     const zoom = Math.floor(this.map.getView().getZoom());
-
-    // Purge trajectories:
-    // - which are outside the extent
-    // - when it's bus and zoom level is too low for them
-    // A bit hacky but it works.
-    for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
-      const trajectory = this.trajectories[i];
-      if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
-        const temp = [...this.trajectories];
-        temp.splice(i, 1);
-        this.tracker.setTrajectories(temp);
-      }
-    }
-    super.setBbox([...extent, zoom, this.tenant]);
+    super.setBbox(extent, zoom);
   }
 
   /**

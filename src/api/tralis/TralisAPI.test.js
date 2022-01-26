@@ -38,10 +38,10 @@ describe('TralisAPI', () => {
         });
 
         test('using id and generalizationLevel param', (done) => {
-          tralisAPI.getFullTrajectory('foo', mode, 'genLevelFoo').then(() => {
+          tralisAPI.getFullTrajectory('foo', mode, 5).then(() => {
             expect(get.mock.calls.length).toBe(1);
             expect(get.mock.calls[0][0]).toEqual({
-              channel: 'full_trajectory_genLevelFoo_foo',
+              channel: 'full_trajectory_foo_gen5',
             });
             done();
           });
@@ -61,7 +61,7 @@ describe('TralisAPI', () => {
       });
       test("doesn't use generalizationLevel param", (done) => {
         tralisAPI
-          .getFullTrajectory('foo', TralisModes.SCHEMATIC, 'genLevelFoo')
+          .getFullTrajectory('foo', TralisModes.SCHEMATIC, 10)
           .then(() => {
             expect(get.mock.calls.length).toBe(1);
             expect(get.mock.calls[0][0]).toEqual({

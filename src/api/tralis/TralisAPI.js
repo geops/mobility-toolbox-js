@@ -64,8 +64,6 @@ class TralisAPI {
 
     /** @ignore */
     this.prefix = options.prefix || '';
-
-    this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
   }
 
   defineProperties(options) {
@@ -506,14 +504,15 @@ class TralisAPI {
    *
    * @param {TralisMode} mode Tralis mode.
    * @param {function(trajectory: TralisTrajectory)} onMessage Function called on each message of the channel.
+   * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
-  subscribeTrajectory(mode, onMessage) {
+  subscribeTrajectory(mode, onMessage, quiet = false) {
     this.unsubscribeTrajectory(onMessage);
     this.subscribe(
       `trajectory${getModeSuffix(mode, TralisModes)}`,
       onMessage,
       null,
-      this.isUpdateBboxOnMoveEnd,
+      quiet,
     );
   }
 
@@ -530,14 +529,15 @@ class TralisAPI {
    *
    * @param {TralisMode} mode Tralis mode.
    * @param {function(response: { content: Vehicle })} onMessage Function called on each message of the channel.
+   * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
-  subscribeDeletedVehicles(mode, onMessage) {
+  subscribeDeletedVehicles(mode, onMessage, quiet = false) {
     this.unsubscribeDeletedVehicles(onMessage);
     this.subscribe(
       `deleted_vehicles${getModeSuffix(mode, TralisModes)}`,
       onMessage,
       null,
-      this.isUpdateBboxOnMoveEnd,
+      quiet,
     );
   }
 
@@ -554,17 +554,19 @@ class TralisAPI {
    *
    * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
-   * @param {string} generalizationLevel The generalization level to request. Can be one of '', 'gen5', 'gen10', 'gen30', 'gen100'.
+   * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
    * @return {Promise<FullTrajectory>} Return a full trajectory.
    */
   getFullTrajectory(id, mode, generalizationLevel) {
     const channel = [`full_trajectory${getModeSuffix(mode, TralisModes)}`];
-    if ((!mode || mode === TralisModes.TOPOGRAPHIC) && generalizationLevel) {
-      channel.push(generalizationLevel);
-    }
     if (id) {
       channel.push(id);
     }
+
+    if ((!mode || mode === TralisModes.TOPOGRAPHIC) && generalizationLevel) {
+      channel.push(`gen${generalizationLevel}`);
+    }
+
     const params = {
       channel: channel.join('_'),
     };
