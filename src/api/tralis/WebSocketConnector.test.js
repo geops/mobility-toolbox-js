@@ -28,6 +28,31 @@ describe('WebSocketConnector', () => {
       });
     });
 
+    describe('#close', () => {
+      test('should close the websocket and clear some property', async () => {
+        // eslint-disable-next-line no-unused-vars
+        const client = new Connector();
+        const subsc2 = {
+          params: 'foo',
+          cb: () => {},
+          errorCb: () => {},
+          quiet: false,
+        };
+        client.subscriptions = [subsc2];
+        client.messagesOnOpen = ['GET foo'];
+        client.connect(`ws://foo:1234`);
+        client.websocket.addEventListener = jest.fn();
+        client.websocket.removeEventListener = jest.fn();
+        client.websocket.close = jest.fn();
+        await server.connected;
+        expect(client.websocket).toBeDefined();
+        expect(client.messagesOnOpen).toEqual(['GET foo']);
+        client.close();
+        expect(client.messagesOnOpen).toEqual([]);
+        expect(client.websocket).toBeNull();
+      });
+    });
+
     describe('#connect', () => {
       test('create a new WebSocket.', async () => {
         const client = new Connector();
@@ -50,29 +75,110 @@ describe('WebSocketConnector', () => {
         expect(client.websocket.readyState).toBe(WebSocket.CONNECTING);
       });
 
-      test('subscribe previous subscriptions on open', async () => {
+      test('call onOpen function', async () => {
+        const onOpen = jest.fn();
         const client = new Connector();
         client.subscribe = jest.fn();
-        client.connect(`ws://foo:1234`);
+        client.connect(`ws://foo:1234`, onOpen);
         await server.connected;
         expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        expect(onOpen).toHaveBeenCalledTimes(1);
+      });
+
+      test('subscribe previous subscriptions on open (quiet or not)', async () => {
+        const client = new Connector();
+        client.subscribe = jest.fn();
+        client.send = jest.fn();
         const subsc = {
           params: 'foo',
           cb: () => {},
           errorCb: () => {},
           quiet: true,
         };
-        client.subscriptions = [subsc];
+        const subsc2 = {
+          params: 'foo',
+          cb: () => {},
+          errorCb: () => {},
+          quiet: false,
+        };
+        client.subscriptions = [subsc, subsc2];
+
+        client.connect(`ws://foo:1234`);
+        await server.connected;
+        expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        expect(client.subscribe).toHaveBeenCalledTimes(2);
+        client.subscribe.mockReset();
+
         client.connect(`ws://foo:12345`);
         await server2.connected;
         expect(client.websocket.readyState).toBe(WebSocket.OPEN);
-        expect(client.subscribe).toHaveBeenCalledTimes(1);
+        expect(client.subscribe).toHaveBeenCalledTimes(2);
         expect(client.subscribe).toHaveBeenCalledWith(
           subsc.params,
           subsc.cb,
           subsc.errorCb,
           subsc.quiet,
         );
+      });
+
+      test('send GET and SUB for not quiet previous subscriptions', async () => {
+        const client = new Connector();
+        client.send = jest.fn();
+        const subsc = {
+          params: { channel: 'foo' },
+          cb: () => {},
+          errorCb: () => {},
+          quiet: false,
+        };
+        client.subscriptions = [subsc];
+
+        client.connect(`ws://foo:1234`);
+        client.websocket.addEventListener = jest.fn();
+        client.websocket.removeEventListener = jest.fn();
+        await server.connected;
+        expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        expect(client.send).toHaveBeenCalledTimes(2);
+        expect(client.send.mock.calls[0]).toEqual(['GET foo']);
+        expect(client.send.mock.calls[1]).toEqual(['SUB foo']);
+        client.send.mockReset();
+
+        client.connect(`ws://foo:12345`);
+        client.websocket.addEventListener = jest.fn();
+        client.websocket.removeEventListener = jest.fn();
+        await server2.connected;
+        expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        // not quiet subscriptions will send GET and SUB requests.
+        expect(client.send).toHaveBeenCalledTimes(2);
+        expect(client.send.mock.calls[0]).toEqual(['GET foo']);
+        expect(client.send.mock.calls[1]).toEqual(['SUB foo']);
+      });
+
+      test('doesn\t send GET and SUB for quiet previous subscriptions', async () => {
+        const client = new Connector();
+        client.send = jest.fn();
+        const subsc = {
+          params: { channel: 'foo' },
+          cb: () => {},
+          errorCb: () => {},
+          quiet: true,
+        };
+        client.subscriptions = [subsc];
+
+        client.connect(`ws://foo:1234`);
+        client.websocket.addEventListener = jest.fn();
+        client.websocket.removeEventListener = jest.fn();
+        await server.connected;
+        expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        expect(client.send).toHaveBeenCalledTimes(0);
+        client.send.mockReset();
+
+        client.connect(`ws://foo:12345`);
+        client.websocket.addEventListener = jest.fn();
+        client.websocket.removeEventListener = jest.fn();
+        await server2.connected;
+        expect(client.websocket.readyState).toBe(WebSocket.OPEN);
+        // not quiet subscriptions will send GET and SUB requests.
+        expect(client.send).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -199,7 +305,11 @@ describe('WebSocketConnector', () => {
         client.subscribe(params2, cb2);
         expect(client.subscriptions.length).toBe(3);
         expect(client.websocket.removeEventListener).toBeCalledTimes(2);
-        expect(client.websocket.addEventListener).toBeCalledTimes(9);
+        expect(
+          client.websocket.addEventListener.mock.calls.filter(
+            (c) => c[0] === 'message',
+          ).length,
+        ).toBe(5);
 
         client.unsubscribe('foo');
         expect(client.subscriptions.length).toBe(1);

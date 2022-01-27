@@ -44,10 +44,14 @@ class TralisLayer extends mixin(TrackerLayer) {
    *
    * @private
    */
-  setBbox() {
-    const extent = this.map.getView().calculateExtent();
-    const zoom = Math.floor(this.map.getView().getZoom());
-    super.setBbox(extent, zoom);
+  setBbox(extent, zoom) {
+    let newExtent = extent;
+    let newZoom = zoom;
+    if (!newExtent && this.isUpdateBboxOnMoveEnd) {
+      newExtent = extent || this.map.getView().calculateExtent();
+      newZoom = Math.floor(this.map.getView().getZoom());
+    }
+    super.setBbox(newExtent, newZoom);
   }
 
   /**
@@ -64,7 +68,12 @@ class TralisLayer extends mixin(TrackerLayer) {
       this.setBbox();
     }
 
-    if (this.selectedVehicleId) {
+    if (
+      this.visible &&
+      this.isUpdateBboxOnMoveEnd &&
+      this.isClickActive &&
+      this.selectedVehicleId
+    ) {
       this.highlightTrajectory(this.selectedVehicleId);
     }
   }

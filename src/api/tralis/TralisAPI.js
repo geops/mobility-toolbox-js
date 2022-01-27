@@ -64,6 +64,9 @@ class TralisAPI {
 
     /** @ignore */
     this.prefix = options.prefix || '';
+
+    /** @ignore */
+    this.onOpen = this.onOpen.bind(this);
   }
 
   defineProperties(options) {
@@ -149,16 +152,8 @@ class TralisAPI {
 
   open() {
     this.close();
-    this.conn.connect(this.url);
-
-    // Register BBOX and PROJECTION messages on open.
-    if (this.conn.connecting) {
-      this.conn.websocket.addEventListener('open', () => {
-        this.onOpen();
-      });
-    } else {
-      this.onOpen();
-    }
+    // Register BBOX and PROJECTION messages must be send before previous subscriptions.
+    this.conn.connect(this.url, this.onOpen);
 
     // Register reconnection on close.
     this.conn.websocket.onclose = () => {

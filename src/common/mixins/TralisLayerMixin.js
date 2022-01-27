@@ -105,7 +105,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       };
 
       // This property will call api.setBbox on each movend event
-      this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || true;
+      this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd !== false;
 
       // Bind callbacks
       this.onTrajectoryMessage = this.onTrajectoryMessage.bind(this);
@@ -127,14 +127,18 @@ const TralisLayerMixin = (TrackerLayer) =>
         this.onDeleteTrajectoryMessage,
         this.isUpdateBboxOnMoveEnd,
       );
-      this.setBbox();
+
+      if (this.isUpdateBboxOnMoveEnd) {
+        // Update the bbox on each move end
+        this.setBbox();
+      }
     }
 
     stop() {
       super.stop();
-      this.api.close();
       this.api.unsubscribeTrajectory(this.onTrajectoryMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);
+      this.api.close();
     }
 
     setBbox(extent, zoom) {
@@ -151,24 +155,23 @@ const TralisLayerMixin = (TrackerLayer) =>
         }
       }
 
+      const bbox = [...extent];
+
       if (this.isUpdateBboxOnMoveEnd) {
-        /* @ignore */
-        this.generalizationLevel = this.generalizationLevelByZoom[zoom];
-
-        const bbox = extent;
-
         bbox.push(zoom);
 
         if (this.tenant) {
           bbox.push(`tenant=${this.tenant}`);
         }
 
+        /* @ignore */
+        this.generalizationLevel = this.generalizationLevelByZoom[zoom];
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
-
-        this.api.bbox = bbox;
       }
+
+      this.api.bbox = bbox;
     }
 
     setMode(mode) {

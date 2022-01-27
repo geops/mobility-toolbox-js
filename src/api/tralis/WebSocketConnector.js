@@ -95,9 +95,11 @@ class WebSocketConnector {
   /**
    * (Re)connect the websocket.
    *
+   * @param {strin} url Websocket url.
+   * @param {function} onOpen Callback called when the websocket connection is opened and before subscriptions of previous subscriptions.
    * @private
    */
-  connect(url) {
+  connect(url, onOpen = () => {}) {
     if (this.websocket && !this.closed) {
       this.websocket.close();
     }
@@ -107,9 +109,11 @@ class WebSocketConnector {
 
     if (!this.open) {
       this.websocket.addEventListener('open', () => {
+        onOpen();
         this.subscribePreviousSubscriptions();
       });
     } else {
+      onOpen();
       this.subscribePreviousSubscriptions();
     }
   }
@@ -124,6 +128,7 @@ class WebSocketConnector {
       this.websocket.onclose = null;
       this.websocket.close();
       this.websocket = null;
+      this.messagesOnOpen = [];
     }
   }
 
@@ -147,6 +152,9 @@ class WebSocketConnector {
         this.websocket.addEventListener('open', () => {
           this.messagesOnOpen = [];
           send();
+        });
+        this.websocket.addEventListener('close', () => {
+          this.messagesOnOpen = [];
         });
       }
     } else if (!this.messagesOnOpen.includes(message)) {
@@ -260,7 +268,6 @@ class WebSocketConnector {
         this.send(`GET ${reqStr}`);
         this.send(`SUB ${reqStr}`);
       }
-
       this.subscribed[reqStr] = true;
     }
   }
@@ -307,6 +314,13 @@ class WebSocketConnector {
    * After an auto reconnection we need to re-subscribe to the channels.
    */
   subscribePreviousSubscriptions() {
+    // Before to subscribe previous subscriptions we make sure they
+    // are all defined as unsubscribed, because this code is asynchrone
+    // and a subscription could have been added in between.
+    Object.keys(this.subscribed).forEach((key) => {
+      this.subscribed[key] = false;
+    });
+
     // Subscribe all previous subscriptions.
     [...this.subscriptions].forEach((s) => {
       this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
