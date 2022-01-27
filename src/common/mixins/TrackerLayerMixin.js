@@ -75,7 +75,7 @@ export class TrackerLayerInterface {
    * @param {number[2]} coordinate A coordinate ([x,y]).
    * @param {number} [resolution=1] The resolution of the map.
    * @param {number} [nb=Infinity] nb The max number of vehicles to return.
-   * @returns {Array<ol/Feature~Feature>} Array of vehicles.
+   * @return {Array<ol/Feature~Feature>} Array of vehicles.
    */
   // eslint-disable-next-line no-unused-vars
   getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {}
@@ -509,9 +509,6 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * 
-
-    /**
      * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.
      *
      * @param {object} viewState The view state of the map.
@@ -569,7 +566,7 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Get vehicle.
      * @param {function} filterFc A function use to filter results.
-     * @returns {Array<Object>} Array of vehicle.
+     * @return {Array<Object>} Array of vehicle.
      */
     getVehicle(filterFc) {
       return this.tracker.getTrajectories().filter(filterFc);
@@ -581,7 +578,7 @@ const TrackerLayerMixin = (Base) =>
      * @param {number[2]} coordinate A coordinate ([x,y]).
      * @param {number} [resolution=1] The resolution of the map.
      * @param {number} [nb=Infinity] The max number of vehicles to return.
-     * @returns {Array<ol/Feature~Feature>} Array of vehicle.
+     * @return {Array<ol/Feature~Feature>} Array of vehicle.
      */
     getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {
       const ext = buffer(
@@ -612,7 +609,7 @@ const TrackerLayerMixin = (Base) =>
      * @param {Object} options Options See child classes to see which options are supported.
      * @param {number} [options.resolution=1] The resolution of the map.
      * @param {number} [options.nb=Infinity] The max number of vehicles to return.
-     * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
      */
     getFeatureInfoAtCoordinate(coordinate, options = {}) {
       const { resolution, nb } = options;

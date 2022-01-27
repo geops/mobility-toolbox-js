@@ -44,23 +44,14 @@ class TralisLayer extends mixin(TrackerLayer) {
    *
    * @private
    */
-  setBbox() {
-    const extent = this.map.getView().calculateExtent();
-    const zoom = Math.floor(this.map.getView().getZoom());
-
-    // Purge trajectories:
-    // - which are outside the extent
-    // - when it's bus and zoom level is too low for them
-    // A bit hacky but it works.
-    for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
-      const trajectory = this.trajectories[i];
-      if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
-        const temp = [...this.trajectories];
-        temp.splice(i, 1);
-        this.tracker.setTrajectories(temp);
-      }
+  setBbox(extent, zoom) {
+    let newExtent = extent;
+    let newZoom = zoom;
+    if (!newExtent && this.isUpdateBboxOnMoveEnd) {
+      newExtent = extent || this.map.getView().calculateExtent();
+      newZoom = Math.floor(this.map.getView().getZoom());
     }
-    super.setBbox([...extent, zoom, this.tenant]);
+    super.setBbox(newExtent, newZoom);
   }
 
   /**
@@ -77,8 +68,27 @@ class TralisLayer extends mixin(TrackerLayer) {
       this.setBbox();
     }
 
+    if (
+      this.visible &&
+      this.isUpdateBboxOnMoveEnd &&
+      this.isClickActive &&
+      this.selectedVehicleId
+    ) {
+      this.highlightTrajectory(this.selectedVehicleId);
+    }
+  }
+
+  /**
+   * Callback when user clicks on the map.
+   * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
+   *
+   * @private
+   * @override
+   */
+  onFeatureClick(features, layer, coordinate) {
+    super.onFeatureClick(features, layer, coordinate);
     if (this.selectedVehicleId) {
-      this.highlightTrajectory();
+      this.highlightTrajectory(this.selectedVehicleId);
     }
   }
 
@@ -86,8 +96,8 @@ class TralisLayer extends mixin(TrackerLayer) {
    * Highlight the trajectory of journey.
    * @private
    */
-  highlightTrajectory() {
-    super.highlightTrajectory().then(({ stopSequence, fullTrajectory }) => {
+  highlightTrajectory(id) {
+    this.getTrajectoryInfos(id).then(({ stopSequence, fullTrajectory }) => {
       const vectorSource = this.vectorLayer.getSource();
       vectorSource.clear();
       let lineColor = '#ffffff'; // white
@@ -176,7 +186,7 @@ class TralisLayer extends mixin(TrackerLayer) {
   /**
    * Create a copy of the TralisLayer.
    * @param {Object} newOptions Options to override
-   * @returns {TralisLayer} A TralisLayer
+   * @return {TralisLayer} A TralisLayer
    */
   clone(newOptions) {
     return new TralisLayer({ ...this.options, ...newOptions });

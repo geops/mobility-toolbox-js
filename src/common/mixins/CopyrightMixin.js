@@ -9,7 +9,7 @@ export class CopyrightInterface {
   /**
    * Return an array of layer's copyright.
    *
-   * @returns {String[]} A list of copyrights to render.
+   * @return {String[]} A list of copyrights to render.
    */
   getCopyrights() {}
 }

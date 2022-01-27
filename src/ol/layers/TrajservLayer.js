@@ -163,7 +163,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * @override
    * * Returns the URL parameters.
    * @param {Object} extraParams Extra parameters
-   * @returns {Object}
+   * @return {Object}
    * @private
    */
   getParams(extraParams = {}) {
@@ -182,7 +182,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Create a copy of the TrajservLayer.
    * @param {Object} newOptions Options to override
-   * @returns {TrajservLayer} A TrajservLayer
+   * @return {TrajservLayer} A TrajservLayer
    */
   clone(newOptions) {
     return new TrajservLayer({ ...this.options, ...newOptions });

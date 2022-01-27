@@ -175,7 +175,7 @@ class Layer extends LayerCommon {
   /**
    * Create a copy of the Layer.
    * @param {Object} newOptions Options to override
-   * @returns {Layer} A Layer
+   * @return {Layer} A Layer
    */
   clone(newOptions) {
     return new Layer({ ...this.options, ...newOptions });

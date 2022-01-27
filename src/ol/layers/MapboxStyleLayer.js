@@ -238,7 +238,7 @@ class MapboxStyleLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
-   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+   * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     const { mbMap } = this.mapboxLayer;
@@ -405,7 +405,7 @@ class MapboxStyleLayer extends Layer {
   /**
    * Create a copy of the MapboxStyleLayer.
    * @param {Object} newOptions Options to override.
-   * @returns {MapboxStyleLayer} A MapboxStyleLayer.
+   * @return {MapboxStyleLayer} A MapboxStyleLayer.
    */
   clone(newOptions) {
     return new MapboxStyleLayer({ ...this.options, ...newOptions });

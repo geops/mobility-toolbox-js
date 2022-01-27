@@ -35,23 +35,14 @@ class TralisLayer extends mixin(TrackerLayer) {
   /**
    * Send the current bbox to the websocket
    */
-  setBbox() {
-    const extent = this.getMercatorExtent();
-    const zoom = Math.floor(this.getOlZoom());
-
-    // Purge trajectories:
-    // - which are outside the extent
-    // - when it's bus and zoom level is too low for them
-    for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
-      const trajectory = this.trajectories[i];
-      if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
-        const temp = [...this.trajectories];
-        temp.splice(i, 1);
-        this.tracker.setTrajectories(temp);
-      }
+  setBbox(extent, zoom) {
+    let newExtent = extent;
+    let newZoom = zoom;
+    if (!newExtent && this.isUpdateBboxOnMoveEnd) {
+      newExtent = extent || this.getMercatorExtent();
+      newZoom = Math.floor(this.getOlZoom());
     }
-
-    super.setBbox([...extent, zoom, this.tenant]);
+    super.setBbox(newExtent, newZoom);
   }
 
   /**
