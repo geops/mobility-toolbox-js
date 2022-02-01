@@ -398,6 +398,28 @@ const TrackerLayerMixin = (Base) =>
         //   writable: true,
         // },
       });
+
+      // When we use the delay style we want to display delayed train on top by default
+      if (this.useDelayStyle && !this.sort) {
+        this.sort = (traj1, traj2) => {
+          if (traj1.delay === null && traj2.delay !== null) {
+            return 1;
+          }
+          if (traj2.delay === null && traj1.delay !== null) {
+            return -1;
+          }
+
+          // We put cancelled train inbetween green and yellow trains
+          // >=180000ms corresponds to yellow train
+          if (traj1.cancelled && !traj2.cancelled) {
+            return traj2.delay < 180000 ? -1 : 1;
+          }
+          if (traj2.cancelled && !traj1.cancelled) {
+            return traj1.delay < 180000 ? 1 : -1;
+          }
+          return traj2.delay - traj1.delay;
+        };
+      }
     }
 
     /**

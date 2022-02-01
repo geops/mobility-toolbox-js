@@ -17,7 +17,6 @@ export default () => {
     url: 'https://maps.geops.io/styles/base_bright_v2/style.json',
     apiKey: window.apiKey,
   });
-
   const tracker = new TralisLayer({
     url: 'wss://tralis-tracker-api.geops.io/ws',
     apiKey: window.apiKey,
