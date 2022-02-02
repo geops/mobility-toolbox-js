@@ -61,7 +61,7 @@
     "eslint-plugin-react": "7.28.0",
     "eslint-plugin-react-hooks": "4.3.0",
     "fixpack": "4.0.0",
-    "husky": "4.2.5",
+    "husky": "7.0.4",
     "jest": "26.6.3",
     "jest-canvas-mock": "2.3.1",
     "jest-fetch-mock": "3.0.3",
@@ -102,6 +102,7 @@
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
+    "prepare": "husky install",
     "publish:beta": "yarn publish:public --tag beta",
     "publish:public": "yarn version && git push origin HEAD && yarn build && cd build && yarn publish",
     "start": "yarn doc && webpack-dev-server --mode development --open",
@@ -168,14 +169,6 @@
     "./common/utils": "./common/utils/index.js",
     "./mapbox": "./mapbox/index.js",
     "./ol": "./ol/index.js"
-  },
-  "husky": {
-    "hooks": {
-      "post-checkout": "yarn install --frozen-lockfile",
-      "post-merge": "yarn install --frozen-lockfile",
-      "post-rebase": "yarn install --frozen-lockfile",
-      "pre-commit": "CI=true lint-staged   "
-    }
   },
   "keywords": [
     "mobility",
