@@ -35,14 +35,11 @@ class TrackerLayer extends mixin(Layer) {
      */
     this.renderWhenInteracting =
       options.renderWhenInteracting ||
-      (() => {
+      (() =>
         // Render trajectories on each render frame when the number of trajectories is small.
-        return (
-          this.tracker &&
-          this.tracker.renderedTrajectories &&
-          this.tracker.renderedTrajectories.length <= 200
-        );
-      });
+        this.tracker &&
+        this.tracker.renderedTrajectories &&
+        this.tracker.renderedTrajectories.length <= 200);
 
     /** @ignore */
     this.olLayer =
@@ -95,9 +92,8 @@ class TrackerLayer extends mixin(Layer) {
                   // Avoid having really big points when zooming fast.
                   this.tracker.clear();
                 } else {
-                  const pixelCenterRendered = this.map.getPixelFromCoordinate(
-                    renderedCenter,
-                  );
+                  const pixelCenterRendered =
+                    this.map.getPixelFromCoordinate(renderedCenter);
                   const pixelCenter = this.map.getPixelFromCoordinate(center);
                   this.transformContainer.style.transform = composeCssTransform(
                     pixelCenterRendered[0] - pixelCenter[0],

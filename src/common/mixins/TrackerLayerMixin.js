@@ -137,12 +137,8 @@ const TrackerLayerMixin = (Base) =>
         live,
       } = options;
 
-      let {
-        regexPublishedLineName,
-        publishedLineName,
-        tripNumber,
-        operator,
-      } = options;
+      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
+        options;
 
       const initTrackerOptions = {
         pixelRatio: pixelRatio || window.devicePixelRatio || 1,
@@ -266,11 +262,10 @@ const TrackerLayerMixin = (Base) =>
          * Id of the hovered vehicle.
          */
         hoverVehicleId: {
-          get: () => {
-            return this.tracker
+          get: () =>
+            this.tracker
               ? this.tracker.hoverVehicleId
-              : this.initTrackerOptions.hoverVehicleId;
-          },
+              : this.initTrackerOptions.hoverVehicleId,
           set: (newHoverVehicleId) => {
             if (this.tracker) {
               this.tracker.hoverVehicleId = newHoverVehicleId;
@@ -334,36 +329,28 @@ const TrackerLayerMixin = (Base) =>
          * Filter properties used in combination with permalink parameters.
          */
         publishedLineName: {
-          get: () => {
-            return publishedLineName;
-          },
+          get: () => publishedLineName,
           set: (newPublishedLineName) => {
             publishedLineName = newPublishedLineName;
             this.updateFilters();
           },
         },
         tripNumber: {
-          get: () => {
-            return tripNumber;
-          },
+          get: () => tripNumber,
           set: (newTripNumber) => {
             tripNumber = newTripNumber;
             this.updateFilters();
           },
         },
         operator: {
-          get: () => {
-            return operator;
-          },
+          get: () => operator,
           set: (newOperator) => {
             operator = newOperator;
             this.updateFilters();
           },
         },
         regexPublishedLineName: {
-          get: () => {
-            return regexPublishedLineName;
-          },
+          get: () => regexPublishedLineName,
           set: (newRegex) => {
             regexPublishedLineName = newRegex;
             this.updateFilters();

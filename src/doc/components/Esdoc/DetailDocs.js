@@ -27,7 +27,7 @@ import DeprecatedHTML from './DeprecatedHTML';
  * @return {IceCap} detail output.
  * @private
  */
-const DetailDocs = ({ docs, title }) => {
+function DetailDocs({ docs, title }) {
   return (
     <>
       <h2 data-ice="title">{title}</h2>
@@ -277,5 +277,5 @@ const DetailDocs = ({ docs, title }) => {
       })}
     </>
   );
-};
+}
 export default React.memo(DetailDocs);

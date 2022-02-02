@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
+import { Outlet, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { geopsTheme, Header, Footer } from '@geops/geops-ui';
 import Examples from './components/Examples';
 import Example from './components/Example';
@@ -29,14 +29,17 @@ const useStyles = makeStyles({
 const tabs = [
   {
     label: 'Home',
+    component: Link,
     to: '/home',
   },
   {
     label: 'API',
+    component: Link,
     to: '/api',
   },
   {
     label: 'Examples',
+    component: Link,
     to: '/examples',
   },
   {
@@ -45,42 +48,69 @@ const tabs = [
   },
 ];
 
-const App = () => {
+function Main() {
+  return (
+    <ThemeProvider theme={geopsTheme}>
+      <Header title="mobility-toolbox-js" tabs={tabs} />
+      <Outlet />
+      <Footer />
+    </ThemeProvider>
+  );
+}
+
+function App() {
   const classes = useStyles();
 
   return (
-    <ThemeProvider theme={geopsTheme}>
-      <Router>
-        <Header title="mobility-toolbox-js" tabs={tabs} />
-        <Route exact path="/">
-          <Container className={classes.content}>
-            <Redirect to="/home" />
-          </Container>
+    <Routes>
+      <Route path="/" element={<Main />}>
+        <Route index element={<Navigate to="/home" />} />
+        <Route
+          index
+          path="/home"
+          element={
+            <Container className={classes.content}>
+              <Home />
+            </Container>
+          }
+        />
+        <Route
+          path="/examples"
+          element={
+            <Container className={classes.content}>
+              <Examples />
+            </Container>
+          }
+        />
+        <Route
+          path="/example/:exampleKey"
+          element={
+            <Container className={classes.content}>
+              <Example />
+            </Container>
+          }
+        />
+        <Route path="/api">
+          <Route
+            index
+            element={
+              <Container className={classes.documentation} maxWidth={false}>
+                <Documentation />
+              </Container>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <Container className={classes.documentation} maxWidth={false}>
+                <Documentation />
+              </Container>
+            }
+          />
         </Route>
-        <Route exact path="/examples">
-          <Container className={classes.content}>
-            <Examples />
-          </Container>
-        </Route>
-        <Route path="/example/:exampleKey">
-          <Container className={classes.content}>
-            <Example />
-          </Container>
-        </Route>
-        <Route exact path="/home">
-          <Container className={classes.content}>
-            <Home />
-          </Container>
-        </Route>
-        <Route path="/api/:path*">
-          <Container className={classes.documentation} maxWidth={false}>
-            <Documentation />
-          </Container>
-        </Route>
-        <Footer />
-      </Router>
-    </ThemeProvider>
+      </Route>
+    </Routes>
   );
-};
+}
 
 export default App;

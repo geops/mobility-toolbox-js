@@ -48,9 +48,7 @@ class Control extends BaseObject {
 
     Object.defineProperties(this, {
       active: {
-        get: () => {
-          return this.get('active');
-        },
+        get: () => this.get('active'),
         set: (newActive) => {
           this.set('active', newActive);
           if (newActive) {
@@ -62,9 +60,7 @@ class Control extends BaseObject {
         },
       },
       map: {
-        get: () => {
-          return this.get('map');
-        },
+        get: () => this.get('map'),
         set: (map) => {
           // Remove previous node.
           if (this.map && this.element && this.element.parentNode) {

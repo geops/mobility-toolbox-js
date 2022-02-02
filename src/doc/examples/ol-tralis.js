@@ -44,9 +44,13 @@ export default () => {
   };
   document.getElementById('close').onclick = () => {
     tracker.api.conn.websocket.close();
+    window.lastWs = tracker.api.conn.websocket;
   };
   document.getElementById('bbox').onclick = () => {
     tracker.api.conn.websocket.send(`BBOX ${tracker.api.bbox.join(' ')}`);
+  };
+  document.getElementById('terminate').onclick = () => {
+    tracker.api.conn.websocket.terminate();
   };
 
   map.addLayer(layer);

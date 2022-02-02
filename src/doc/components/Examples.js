@@ -10,7 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { CgArrowRight } from 'react-icons/cg';
 import TextField from '@material-ui/core/TextField';
-import { NavLink } from 'react-router-dom';
 import Markdown from 'react-markdown';
 import EXAMPLES from '../examples';
 
@@ -112,74 +111,74 @@ fetch('https://developer.geops.io/publickey')
     }
   });
 
-export default () => {
+function Examples() {
   const classes = useStyles();
   const [filter, setFilter] = useState('');
   const [raisedExampe, setRaisedExample] = useState(null);
   const filteredExamples = filterExamples(filter, EXAMPLES);
 
   return (
-    <>
-      <Grid container spacing={3}>
-        <Grid item xs={12} className={classes.filterField}>
-          <Typography variant="h1" className={classes.header}>
-            Examples
-          </Typography>
-          <TextField
-            placeholder="Filter..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-        </Grid>
-        {!filteredExamples.length && (
-          <Grid item xs={12}>
-            Nothing found.
-          </Grid>
-        )}
-        {filteredExamples.map((ex) => (
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            lg={4}
-            container
-            className={classes.example}
-            key={ex.key}
-          >
-            <NavLink to={`/example/${ex.key}`} className={classes.exampleLink}>
-              <div className={classes.cardWrapper}>
-                <div className={classes.cardOverlay} />
-                <Card
-                  raised={ex === raisedExampe}
-                  className={classes.card}
-                  onMouseOver={() => setRaisedExample(ex)}
-                  onMouseOut={() => setRaisedExample(null)}
-                  onFocus={() => setRaisedExample(ex)}
-                  onBlur={() => setRaisedExample(null)}
-                >
-                  <CardMedia image={ex.img} />
-                  <Box className={classes.container}>
-                    <CardContent className={classes.cardContent}>
-                      <Typography variant="h3">{ex.name}</Typography>
-                      <Typography>
-                        <Markdown
-                          className={classes.readme}
-                          source={ex.description || ''}
-                        />
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Icon>
-                        <CgArrowRight />
-                      </Icon>
-                    </CardActions>
-                  </Box>
-                </Card>
-              </div>
-            </NavLink>
-          </Grid>
-        ))}
+    <Grid container spacing={3}>
+      <Grid item xs={12} className={classes.filterField}>
+        <Typography variant="h1" className={classes.header}>
+          Examples
+        </Typography>
+        <TextField
+          placeholder="Filter..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
       </Grid>
-    </>
+      {!filteredExamples.length && (
+        <Grid item xs={12}>
+          Nothing found.
+        </Grid>
+      )}
+      {filteredExamples.map((ex) => (
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          lg={4}
+          container
+          className={classes.example}
+          key={ex.key}
+        >
+          <a href={`/example/${ex.key}`} className={classes.exampleLink}>
+            <div className={classes.cardWrapper}>
+              <div className={classes.cardOverlay} />
+              <Card
+                raised={ex === raisedExampe}
+                className={classes.card}
+                onMouseOver={() => setRaisedExample(ex)}
+                onMouseOut={() => setRaisedExample(null)}
+                onFocus={() => setRaisedExample(ex)}
+                onBlur={() => setRaisedExample(null)}
+              >
+                <CardMedia image={ex.img} />
+                <Box className={classes.container}>
+                  <CardContent className={classes.cardContent}>
+                    <Typography variant="h3">{ex.name}</Typography>
+                    <Typography>
+                      <Markdown
+                        className={classes.readme}
+                        source={ex.description || ''}
+                      />
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Icon>
+                      <CgArrowRight />
+                    </Icon>
+                  </CardActions>
+                </Box>
+              </Card>
+            </div>
+          </a>
+        </Grid>
+      ))}
+    </Grid>
   );
-};
+}
+
+export default Examples;

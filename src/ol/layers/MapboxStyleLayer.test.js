@@ -110,12 +110,8 @@ describe('MapboxStyleLayer', () => {
   describe('#getFeatureInfoAtCoordinate()', () => {
     beforeEach(() => {
       source.init(map);
-      source.mbMap.isStyleLoaded = jest.fn(() => {
-        return true;
-      });
-      source.mbMap.getSource = jest.fn(() => {
-        return true;
-      });
+      source.mbMap.isStyleLoaded = jest.fn(() => true);
+      source.mbMap.getSource = jest.fn(() => true);
     });
     afterEach(() => {
       source.mbMap.getSource.mockRestore();
@@ -123,45 +119,37 @@ describe('MapboxStyleLayer', () => {
     });
 
     test('should request features on layers ids from styleLayers property', () => {
-      source.mbMap.getStyle = jest.fn(() => {
-        return { layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }] };
-      });
+      source.mbMap.getStyle = jest.fn(() => ({
+        layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }],
+      }));
       layer.init(map);
-      layer.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
-        return Promise.resolve({ features: [] });
-      });
+      layer.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
+        Promise.resolve({ features: [] }),
+      );
       layer.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
-      expect(
-        layer.mapboxLayer.getFeatureInfoAtCoordinate,
-      ).toHaveBeenCalledWith([0, 0], { layers: ['layer'], validate: false });
+      expect(layer.mapboxLayer.getFeatureInfoAtCoordinate).toHaveBeenCalledWith(
+        [0, 0],
+        { layers: ['layer'], validate: false },
+      );
       layer.mapboxLayer.getFeatureInfoAtCoordinate.mockRestore();
       source.mbMap.getStyle.mockRestore();
     });
 
     test('should request features on layers ids from styleLayersFilter property', () => {
-      source.mbMap.getStyle = jest.fn(() => {
-        return {
-          layers: [
-            { id: 'foo' },
-            { id: 'layer' },
-            { id: 'bar' },
-            { id: 'foo2' },
-          ],
-        };
-      });
+      source.mbMap.getStyle = jest.fn(() => ({
+        layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }, { id: 'foo2' }],
+      }));
       const layer2 = new MapboxStyleLayer({
         name: 'mapbox layer',
         visible: true,
         mapboxLayer: source,
         styleLayer,
-        styleLayersFilter: ({ id }) => {
-          return /foo/.test(id);
-        },
+        styleLayersFilter: ({ id }) => /foo/.test(id),
       });
       layer2.init(map);
-      layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
-        return Promise.resolve({ features: [] });
-      });
+      layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
+        Promise.resolve({ features: [] }),
+      );
       layer2.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
       expect(
         layer2.mapboxLayer.getFeatureInfoAtCoordinate,
@@ -174,33 +162,27 @@ describe('MapboxStyleLayer', () => {
     });
 
     test('should request features on layers ids from queryRenderedLayersFilter property', () => {
-      source.mbMap.getStyle = jest.fn(() => {
-        return {
-          layers: [
-            { id: 'foo' },
-            { id: 'bar2' },
-            { id: 'layer' },
-            { id: 'bar' },
-            { id: 'foo2' },
-          ],
-        };
-      });
+      source.mbMap.getStyle = jest.fn(() => ({
+        layers: [
+          { id: 'foo' },
+          { id: 'bar2' },
+          { id: 'layer' },
+          { id: 'bar' },
+          { id: 'foo2' },
+        ],
+      }));
       const layer2 = new MapboxStyleLayer({
         name: 'mapbox layer',
         visible: true,
         mapboxLayer: source,
         styleLayer,
-        styleLayersFilter: ({ id }) => {
-          return /foo/.test(id);
-        },
-        queryRenderedLayersFilter: ({ id }) => {
-          return /bar/.test(id);
-        },
+        styleLayersFilter: ({ id }) => /foo/.test(id),
+        queryRenderedLayersFilter: ({ id }) => /bar/.test(id),
       });
       layer2.init(map);
-      layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
-        return Promise.resolve({ features: [] });
-      });
+      layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
+        Promise.resolve({ features: [] }),
+      );
       layer2.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
       expect(
         layer2.mapboxLayer.getFeatureInfoAtCoordinate,

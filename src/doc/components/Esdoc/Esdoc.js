@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Esdoc = ({ path }) => {
+function Esdoc({ path }) {
   const classes = useStyles();
 
   if (!path) {
@@ -58,6 +58,6 @@ const Esdoc = ({ path }) => {
       </Hidden>
     </div>
   );
-};
+}
 
 export default React.memo(Esdoc);

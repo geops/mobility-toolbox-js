@@ -36,6 +36,12 @@ const tracker = new TralisLayer({
 map.addLayer(tracker);
 `;
 
+function MarkdownHeading({ ...props }) {
+  // eslint-disable-next-line react/prop-types
+  const { level, children } = props;
+  return <Typography variant={`h${level}`}>{children}</Typography>;
+}
+
 function Home() {
   const [source, setSource] = useState(null);
   useEffect(() => {
@@ -51,11 +57,6 @@ function Home() {
   if (!source) {
     return null;
   }
-
-  const MarkdownHeading = ({ ...props }) => {
-    const { level, children } = props;
-    return <Typography variant={`h${level}`}>{children}</Typography>;
-  };
 
   const renderers = {
     heading: MarkdownHeading,

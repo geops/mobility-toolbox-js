@@ -10,7 +10,7 @@ import DocLinkHTML from './DocLinkHTML';
  * @returns {string} extends chain links html.
  * @private
  */
-const ExtendsChainHTML = ({ doc }) => {
+function ExtendsChainHTML({ doc }) {
   if (!doc._custom_extends_chains) return '';
   if (doc.extends.length > 1) return '';
 
@@ -28,5 +28,5 @@ const ExtendsChainHTML = ({ doc }) => {
       </div>
     </div>
   );
-};
+}
 export default React.memo(ExtendsChainHTML);

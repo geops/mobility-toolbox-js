@@ -32,7 +32,7 @@ const showInheritedHref = (memberof, parentMemberOf) => {
  * @return {IceCap} summary output.
  * @protected
  */
-const SummaryDoc = ({
+function SummaryDoc({
   docs,
   // eslint-disable-next-line no-unused-vars
   title,
@@ -40,7 +40,7 @@ const SummaryDoc = ({
   kindIcon = false,
   memberof,
   style,
-}) => {
+}) {
   const showInherited = useMemo(() => {
     if (docs.length === 0) return null;
     return ['member', 'method'].includes(docs[0].kind);
@@ -156,5 +156,5 @@ const SummaryDoc = ({
       </tbody>
     </table>
   );
-};
+}
 export default React.memo(SummaryDoc);

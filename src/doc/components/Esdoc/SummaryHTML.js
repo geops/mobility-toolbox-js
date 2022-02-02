@@ -14,13 +14,7 @@ const accessValues = ['public', 'protected', 'private'];
  * @returns {string} html of inherited method/member from ancestor classes.
  * @private
  */
-const SummaryHTML = ({
-  doc,
-  kind,
-  title,
-  isStatic = true,
-  inherited = false,
-}) => {
+function SummaryHTML({ doc, kind, title, isStatic = true, inherited = false }) {
   const accessDocs = useMemo(() => {
     const classDocs = _findAccessDocs(doc, kind, isStatic);
 
@@ -98,5 +92,5 @@ const SummaryHTML = ({
       })}
     </>
   );
-};
+}
 export default SummaryHTML;

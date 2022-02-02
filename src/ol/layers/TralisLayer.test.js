@@ -87,9 +87,7 @@ describe('TrajservLayer', () => {
       url: 'ws://localhost:1234',
       apiKey: 'apiKey',
       useDelayStyle: true,
-      sort: () => {
-        return -1; // reverse the array
-      },
+      sort: () => -1, // reverse the array
     });
     expect(laye).toBeInstanceOf(TralisLayer);
     expect(laye.useDelayStyle).toBe(true);

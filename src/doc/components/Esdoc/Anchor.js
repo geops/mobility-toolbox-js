@@ -24,7 +24,7 @@ const propTypes = {
  * @return {node} Scrollchor or <a> element
  * @private
  */
-const Anchor = ({ path, children, ...other }) => {
+function Anchor({ path, children, ...other }) {
   const pathElements = path.split('#');
   if (pathElements[0] === window.location.pathname) {
     const anchor = pathElements[1];
@@ -50,7 +50,7 @@ const Anchor = ({ path, children, ...other }) => {
       {children}
     </a>
   );
-};
+}
 
 Anchor.propTypes = propTypes;
 

@@ -13,7 +13,7 @@ import DocLinkHTML from './DocLinkHTML';
  * @returns {string} html link. if doc does not override ancestor method, returns empty.
  * @private
  */
-const OverrideMethod = ({ doc }) => {
+function OverrideMethod({ doc }) {
   const parentDoc = _findByName(doc.memberof)[0];
   if (!parentDoc) return '';
   if (!parentDoc._custom_extends_chains) return '';
@@ -39,6 +39,6 @@ const OverrideMethod = ({ doc }) => {
   }
 
   return null;
-};
+}
 
 export default React.memo(OverrideMethod);

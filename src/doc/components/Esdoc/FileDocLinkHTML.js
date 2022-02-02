@@ -13,7 +13,7 @@ import { _find, _getURL } from './DocBuilderUtils';
  * @returns {string} html of link.
  * @private
  */
-const FileDocLinkHTML = ({ doc, text }) => {
+function FileDocLinkHTML({ doc, text }) {
   if (!doc) return null;
 
   if (text === 'source' && doc.memberof) {
@@ -56,5 +56,5 @@ const FileDocLinkHTML = ({ doc, text }) => {
       <a href={`${_getURL(fileDoc)}#lineNumber${doc.lineNumber}`}>{text}</a>
     </span>
   );
-};
+}
 export default React.memo(FileDocLinkHTML);

@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Example = () => {
+function Example() {
   const classes = useStyles();
   const { exampleKey } = useParams((params) => params);
   const example = EXAMPLES.find((e) => e.key === exampleKey);
@@ -149,6 +149,6 @@ const Example = () => {
       </Grid>
     </div>
   );
-};
+}
 
 export default React.memo(Example);

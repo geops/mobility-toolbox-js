@@ -456,14 +456,12 @@ describe('Layer', () => {
   describe('#onUserClickCallback()', () => {
     const evt = { type: 'signleclick', coordinate: [0, 0] };
 
-    const getFeatureInfo = (layer, features = []) => {
-      return {
-        features,
-        layer,
-        coordinate: evt.coordinate,
-        event: evt,
-      };
-    };
+    const getFeatureInfo = (layer, features = []) => ({
+      features,
+      layer,
+      coordinate: evt.coordinate,
+      event: evt,
+    });
 
     test('calls click callback functions', (done) => {
       const layer = new Layer({
@@ -599,14 +597,12 @@ describe('Layer', () => {
   describe('#onUserMoveCallback()', () => {
     const evt = { type: 'pointermove', coordinate: [0, 0] };
 
-    const getFeatureInfo = (layer, features = []) => {
-      return {
-        features,
-        layer,
-        coordinate: evt.coordinate,
-        event: evt,
-      };
-    };
+    const getFeatureInfo = (layer, features = []) => ({
+      features,
+      layer,
+      coordinate: evt.coordinate,
+      event: evt,
+    });
 
     test('calls hover callback functions', (done) => {
       const layer = new Layer({

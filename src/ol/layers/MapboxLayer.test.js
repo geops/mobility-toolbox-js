@@ -112,12 +112,8 @@ describe('MapboxLayer', () => {
         apiKeyName: 'apiKey',
       });
       layer1.init(map);
-      layer1.mbMap.isStyleLoaded = jest.fn(() => {
-        return true;
-      });
-      layer1.mbMap.getSource = jest.fn(() => {
-        return true;
-      });
+      layer1.mbMap.isStyleLoaded = jest.fn(() => true);
+      layer1.mbMap.getSource = jest.fn(() => true);
     });
 
     afterEach(() => {
@@ -135,12 +131,8 @@ describe('MapboxLayer', () => {
         source: 'barr',
         sourceLayer: 'fooo',
       };
-      layer1.mbMap.project = jest.fn((coord) => {
-        return { x: coord[0], y: coord[1] };
-      });
-      layer1.mbMap.queryRenderedFeatures = jest.fn(() => {
-        return [mapboxFeature];
-      });
+      layer1.mbMap.project = jest.fn((coord) => ({ x: coord[0], y: coord[1] }));
+      layer1.mbMap.queryRenderedFeatures = jest.fn(() => [mapboxFeature]);
       layer1.getFeatureInfoAtCoordinate([0, 0], {}).then((featureInfo) => {
         expect(featureInfo.features[0].get('mapboxFeature')).toBe(
           mapboxFeature,
@@ -152,9 +144,10 @@ describe('MapboxLayer', () => {
     });
     describe('should use hitTolerance property', () => {
       beforeEach(() => {
-        layer1.mbMap.project = jest.fn((coord) => {
-          return { x: coord[0], y: coord[1] };
-        });
+        layer1.mbMap.project = jest.fn((coord) => ({
+          x: coord[0],
+          y: coord[1],
+        }));
       });
 
       afterEach(() => {

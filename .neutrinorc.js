@@ -1,8 +1,7 @@
-const airbnb = require('@neutrinojs/airbnb');
 const react = require('@neutrinojs/react');
 const library = require('@neutrinojs/library');
-const jest = require('@neutrinojs/jest');
 const copy = require('@neutrinojs/copy');
+const jest = require('@neutrinojs/jest');
 const styles = require('@neutrinojs/style-loader');
 const merge = require('deepmerge');
 const path = require('path');
@@ -55,6 +54,9 @@ if (process.env.REACT_APP_LIB_MODE) {
         snapshotSerializers: ['jest-serializer-html'],
         setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
         globalSetup: './global-setup.js',
+        transformIgnorePatterns: [
+          '/node_modules/(?!(ol|ol-mapbox-style|geotiff)/).*/',
+        ],
       }),
       (neutrino) => {
         if (process.env.NODE_ENV === 'test') {
@@ -72,7 +74,6 @@ if (process.env.REACT_APP_LIB_MODE) {
             );
         }
       },
-      webpackDevServer,
       copy({
         patterns: [
           {
@@ -153,7 +154,6 @@ if (process.env.REACT_APP_LIB_MODE) {
           ],
         },
       }),
-      jest(),
       webpackDevServer,
       copy({
         patterns: [

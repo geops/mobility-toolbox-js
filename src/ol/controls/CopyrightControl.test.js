@@ -29,13 +29,12 @@ const getOLTileLayer = () => {
   return layer;
 };
 
-const getLayer = (copyrights, visible = true) => {
-  return new Layer({
+const getLayer = (copyrights, visible = true) =>
+  new Layer({
     visible,
     copyrights,
     olLayer: getOLTileLayer(),
   });
-};
 
 describe('CopyrightControl', () => {
   let map;

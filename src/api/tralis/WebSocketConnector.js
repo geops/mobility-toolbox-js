@@ -13,35 +13,31 @@ class WebSocketConnector {
   defineProperties() {
     Object.defineProperties(this, {
       closed: {
-        get: () => {
-          return !!(
+        get: () =>
+          !!(
             this.websocket &&
             this.websocket.readyState === this.websocket.CLOSED
-          );
-        },
+          ),
       },
       closing: {
-        get: () => {
-          return !!(
+        get: () =>
+          !!(
             this.websocket &&
             this.websocket.readyState === this.websocket.CLOSING
-          );
-        },
+          ),
       },
       connecting: {
-        get: () => {
-          return !!(
+        get: () =>
+          !!(
             this.websocket &&
             this.websocket.readyState === this.websocket.CONNECTING
-          );
-        },
+          ),
       },
       open: {
-        get: () => {
-          return !!(
+        get: () =>
+          !!(
             this.websocket && this.websocket.readyState === this.websocket.OPEN
-          );
-        },
+          ),
       },
       /**
        * Array of message to send on open.
@@ -212,9 +208,9 @@ class WebSocketConnector {
       return;
     }
     this.subscriptions
-      .filter((s) => {
-        return s.params.channel === params.channel && (!cb || s.cb === cb);
-      })
+      .filter(
+        (s) => s.params.channel === params.channel && (!cb || s.cb === cb),
+      )
       .forEach(({ onMessageCb, onErrorCb }) => {
         if (this.websocket) {
           this.websocket.removeEventListener('message', onMessageCb);
@@ -253,9 +249,9 @@ class WebSocketConnector {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
     const reqStr = WebSocketConnector.getRequestString('', params);
 
-    const index = this.subscriptions.findIndex((subcr) => {
-      return params.channel === subcr.params.channel && cb === subcr.cb;
-    });
+    const index = this.subscriptions.findIndex(
+      (subcr) => params.channel === subcr.params.channel && cb === subcr.cb,
+    );
     const newSubscr = { params, cb, errorCb, onMessageCb, onErrorCb, quiet };
     if (index > -1) {
       this.subscriptions[index] = newSubscr;
@@ -279,9 +275,9 @@ class WebSocketConnector {
    * @private
    */
   unsubscribe(source, cb) {
-    const toRemove = this.subscriptions.filter((s) => {
-      return s.params.channel === source && (!cb || s.cb === cb);
-    });
+    const toRemove = this.subscriptions.filter(
+      (s) => s.params.channel === source && (!cb || s.cb === cb),
+    );
 
     toRemove.forEach(({ onMessageCb, onErrorCb }) => {
       if (this.websocket) {

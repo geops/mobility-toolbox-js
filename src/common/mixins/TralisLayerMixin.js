@@ -58,7 +58,7 @@ export class TralisLayerInterface {
    * @param {TralisMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.
    * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
    */
-  getTrajectoryInfos(vehicleId, mode) {}
+  getTrajectoryInfos(id, mode) {}
 
   /**
    * Define the style of the vehicle.
@@ -109,9 +109,8 @@ const TralisLayerMixin = (TrackerLayer) =>
 
       // Bind callbacks
       this.onTrajectoryMessage = this.onTrajectoryMessage.bind(this);
-      this.onDeleteTrajectoryMessage = this.onDeleteTrajectoryMessage.bind(
-        this,
-      );
+      this.onDeleteTrajectoryMessage =
+        this.onDeleteTrajectoryMessage.bind(this);
     }
 
     start() {
