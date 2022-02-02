@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
   content: {
     padding: theme.spacing(1),
     paddingBottom: 115,
-    margin: 'auto',
+    margin: '0 auto',
     maxWidth: '740px',
   },
   navWrapper: {
