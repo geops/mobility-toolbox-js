@@ -132,7 +132,7 @@ function ClassDoc({ doc }) {
           <ExperimentalHTML doc={doc} />
         </div>
         <div className="description">
-          <Markdown source={doc.description} />
+          <Markdown>{doc.description}</Markdown>
         </div>
         {/* TODO
         <div className="decorator" data-ice="decorator">

@@ -2,7 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 import React from 'react';
 import PropTypes from 'prop-types';
-import Scrollchor from 'react-scrollchor';
+import { Scrollchor } from 'react-scrollchor';
 
 const propTypes = {
   /**

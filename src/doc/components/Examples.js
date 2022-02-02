@@ -160,10 +160,9 @@ function Examples() {
                   <CardContent className={classes.cardContent}>
                     <Typography variant="h3">{ex.name}</Typography>
                     <Typography>
-                      <Markdown
-                        className={classes.readme}
-                        source={ex.description || ''}
-                      />
+                      <Markdown className={classes.readme}>
+                        {ex.description || ''}
+                      </Markdown>
                     </Typography>
                   </CardContent>
                   <CardActions>

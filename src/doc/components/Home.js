@@ -64,7 +64,7 @@ function Home() {
 
   return (
     <>
-      <Markdown source={source} renderers={renderers} />
+      <Markdown renderers={renderers}>{source}</Markdown>
       <br />
       <h2>Quick Start</h2>
       <TrackerExample />

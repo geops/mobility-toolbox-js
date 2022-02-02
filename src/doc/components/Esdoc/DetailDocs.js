@@ -144,7 +144,7 @@ function DetailDocs({ docs, title }) {
                           `(nullable: ${doc.return.nullable})`}
                       </td>
                       <td className="return-desc" data-ice="returnDescription">
-                        <Markdown source={doc.return.description} />
+                        <Markdown>{doc.return.description}</Markdown>
                       </td>
                     </tr>
                   </tbody>
@@ -173,7 +173,7 @@ function DetailDocs({ docs, title }) {
                             </p>
                           </td>
                           <td data-ice="emitDesc">
-                            <Markdown source={emitDoc.description} />
+                            <Markdown>{emitDoc.description}</Markdown>
                           </td>
                         </tr>
                       );
@@ -196,7 +196,7 @@ function DetailDocs({ docs, title }) {
                             </p>
                           </td>
                           <td data-ice="listenDesc">
-                            <Markdown source={listenDoc.description} />
+                            <Markdown>{listenDoc.description}</Markdown>
                           </td>
                         </tr>
                       );
@@ -219,7 +219,7 @@ function DetailDocs({ docs, title }) {
                             </p>
                           </td>
                           <td data-ice="throwDesc">
-                            <Markdown source={exceptionDoc.description} />
+                            <Markdown>{exceptionDoc.description}</Markdown>
                           </td>
                         </tr>
                       );

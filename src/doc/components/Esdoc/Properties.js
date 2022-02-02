@@ -76,7 +76,7 @@ function Properties({ properties = [], title = 'Properties:' }) {
                   )}
                 </td>
                 <td data-ice="description">
-                  <Markdown source={prop.description} />
+                  <Markdown>{prop.description}</Markdown>
                 </td>
               </tr>
             );

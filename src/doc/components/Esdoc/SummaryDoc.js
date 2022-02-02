@@ -127,7 +127,7 @@ function SummaryDoc({
                     </div>
 
                     <div data-ice="description">
-                      <Markdown source={doc.description} />
+                      <Markdown>{doc.description}</Markdown>
                     </div>
                     <div data-ice="inherited">
                       {showInherited
