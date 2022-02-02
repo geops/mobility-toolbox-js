@@ -2,28 +2,26 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "1.6.6-beta.1",
+  "version": "1.6.6-beta.2",
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
-    "@geops/geops-ui": "0.1.12",
+    "@geops/geops-ui": "0.1.13",
     "@material-ui/core": "4.12.3",
     "@material-ui/icons": "4.11.2",
     "@material-ui/styles": "4.11.4",
     "@turf/helpers": "^6.5.0",
     "@turf/transform-rotate": "^6.5.0",
     "codesandbox": "2.2.3",
-    "es6-mixin": "^0.3.0",
     "path": "^0.12.7",
     "prop-types": "15.8.1",
     "query-string": "^6.13.0",
-    "react": "^16.13.1",
+    "react": "17.0.2",
     "react-app-polyfill": "^1.0.6",
-    "react-dom": "^16.13.1",
+    "react-dom": "17.0.2",
     "react-icons": "4.3.1",
     "react-markdown": "^4.3.1",
-    "react-router": "^5.2.0",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "6",
     "react-scrollchor": "^6.0.0",
     "react-syntax-highlighter": "15.4.5",
     "taffydb": "^2.7.3",
@@ -36,10 +34,13 @@
     "ol": "^6"
   },
   "devDependencies": {
+    "@babel/core": "7.16.5",
     "@babel/eslint-parser": "7.16.5",
     "@babel/plugin-transform-runtime": "7.16.10",
+    "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "7.16.7",
     "@neutrinojs/copy": "9.5.0",
+    "@neutrinojs/jest": "^9.5.0",
     "@neutrinojs/library": "9.5.0",
     "@neutrinojs/react": "9.5.0",
     "autoprefixer": "9.7.6",
@@ -66,7 +67,6 @@
     "jest-fetch-mock": "3.0.3",
     "jest-serializer-html": "7.1.0",
     "jest-websocket-mock": "2.3.0",
-    "jsdoc": "3.6.10",
     "lint-staged": "10.2.9",
     "mapbox-gl": "^1",
     "mock-socket": "9.1.2",
@@ -106,7 +106,7 @@
     "publish:public": "yarn version && git push origin HEAD && yarn build && cd build && yarn publish",
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "start:examples": "webpack-dev-server --mode development --open",
-    "test": "REACT_APP_LIB_MODE=1 jest --env=jsdom --transformIgnorePatterns \"/node_modules/(?!(ol|ol-mapbox-style)/).*/\"",
+    "test": "REACT_APP_LIB_MODE=1 jest",
     "test:watch": "yarn test --watchAll"
   },
   "browserslist": {
@@ -176,23 +176,6 @@
       "post-rebase": "yarn install --frozen-lockfile",
       "pre-commit": "CI=true lint-staged   "
     }
-  },
-  "jest": {
-    "testRegex": "src/.*.test.js$",
-    "coveragePathIgnorePatterns": [
-      "src/doc/"
-    ],
-    "coverageReporters": [
-      "text",
-      "html"
-    ],
-    "snapshotSerializers": [
-      "jest-serializer-html"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.js"
-    ],
-    "globalSetup": "./global-setup.js"
   },
   "keywords": [
     "mobility",
