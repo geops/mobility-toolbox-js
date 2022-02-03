@@ -86,18 +86,14 @@ class TralisAPI {
 
     Object.defineProperties(this, {
       url: {
-        get: () => {
-          return url;
-        },
+        get: () => url,
         set: (newUrl) => {
           url = newUrl;
           this.open();
         },
       },
       projection: {
-        get: () => {
-          return projection;
-        },
+        get: () => projection,
         set: (newProjection) => {
           if (newProjection !== projection) {
             projection = newProjection;
@@ -108,9 +104,7 @@ class TralisAPI {
         },
       },
       bbox: {
-        get: () => {
-          return bbox;
-        },
+        get: () => bbox,
         set: (newBbox) => {
           if (JSON.stringify(newBbox) !== JSON.stringify(bbox)) {
             bbox = newBbox;
@@ -234,20 +228,19 @@ class TralisAPI {
    * Unsubscribe both modes of a channel.
    *
    * @param {string} channel Name of the websocket channel to unsubscribe.
-   * @param {string} [suffix=''] Suffix to add to the channel name.
+   * @param {string} suffix Suffix to add to the channel name.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(channel, suffix = '', cb) {
+  unsubscribe(channel, suffix, cb) {
     this.conn.unsubscribe(
       `${channel}${getModeSuffix(TralisModes.SCHEMATIC, TralisModes)}${suffix}`,
       cb,
     );
     this.conn.unsubscribe(
-      `${channel}${getModeSuffix(
-        TralisModes.TOPOGRAPHIC,
-        TralisModes,
-      )}${suffix}`,
+      `${channel}${getModeSuffix(TralisModes.TOPOGRAPHIC, TralisModes)}${
+        suffix || ''
+      }`,
       cb,
     );
   }
@@ -323,7 +316,7 @@ class TralisAPI {
    * @param {Boolean} sortByMinArrivalTime Sort by minimum arrival time
    * @param {function(departures:Departure[])} onMessage Function called on each message of the channel.
    */
-  subscribeDepartures(stationId, sortByMinArrivalTime = false, onMessage) {
+  subscribeDepartures(stationId, sortByMinArrivalTime, onMessage) {
     window.clearTimeout(this.departureUpdateTimeout);
     this.unsubscribeDepartures();
     this.subscribedStationUic = stationId;
@@ -342,7 +335,7 @@ class TralisAPI {
           this.departureUpdateTimeout = window.setTimeout(() => {
             const departures = this.filterDepartures(
               departureObject,
-              sortByMinArrivalTime,
+              sortByMinArrivalTime || false,
             );
             onMessage(departures);
           }, 100);
@@ -584,9 +577,9 @@ class TralisAPI {
    * @return {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
    */
   getFullTrajectories(ids, mode, generalizationLevel) {
-    const promises = ids.map((id) => {
-      return this.getFullTrajectory(id, mode, generalizationLevel);
-    });
+    const promises = ids.map((id) =>
+      this.getFullTrajectory(id, mode, generalizationLevel),
+    );
     return Promise.all(promises);
   }
 
@@ -637,9 +630,9 @@ class TralisAPI {
         params,
         (data) => {
           if (data.content && data.content.length) {
-            const content = data.content.map((stopSequence) => {
-              return cleanStopTime(stopSequence);
-            });
+            const content = data.content.map((stopSequence) =>
+              cleanStopTime(stopSequence),
+            );
 
             // Remove the delay from arrivalTime and departureTime
             resolve(content);
@@ -660,9 +653,7 @@ class TralisAPI {
    * @return {Promise<Array<StopSequence>>} Return an array of stop sequences.
    */
   getStopSequences(ids) {
-    const promises = ids.map((id) => {
-      return this.getStopSequence(id);
-    });
+    const promises = ids.map((id) => this.getStopSequence(id));
     return Promise.all(promises);
   }
 
@@ -680,9 +671,9 @@ class TralisAPI {
       `stopsequence_${id}`,
       (data) => {
         if (data.content && data.content.length) {
-          const content = data.content.map((stopSequence) => {
-            return cleanStopTime(stopSequence);
-          });
+          const content = data.content.map((stopSequence) =>
+            cleanStopTime(stopSequence),
+          );
 
           // Remove the delay from arrivalTime and departureTime
           onMessage(content);

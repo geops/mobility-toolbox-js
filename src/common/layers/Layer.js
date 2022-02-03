@@ -130,14 +130,12 @@ export default class Layer extends Observable {
         writable: true,
       },
       copyrights: {
-        get: () => {
-          return this.get('copyrights');
-        },
+        get: () => this.get('copyrights'),
         set: (newCopyrights) => {
           const arrValue = !Array.isArray(newCopyrights)
             ? [newCopyrights]
             : newCopyrights;
-          return this.set('copyrights', arrValue);
+          this.set('copyrights', arrValue);
         },
       },
       visible: {
@@ -376,9 +374,7 @@ export default class Layer extends Observable {
         );
         return featureInfo;
       })
-      .catch(() => {
-        return emptyFeatureInfo;
-      });
+      .catch(() => emptyFeatureInfo);
   }
 
   /**
@@ -434,8 +430,6 @@ export default class Layer extends Observable {
         );
         return featureInfo;
       })
-      .catch(() => {
-        return emptyFeatureInfo;
-      });
+      .catch(() => emptyFeatureInfo);
   }
 }

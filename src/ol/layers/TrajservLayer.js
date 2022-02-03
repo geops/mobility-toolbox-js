@@ -103,9 +103,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     // Add station points
     if (stationsCoords) {
       const geometry = new MultiPoint(
-        stationsCoords.map((coords) => {
-          return fromLonLat(coords);
-        }),
+        stationsCoords.map((coords) => fromLonLat(coords)),
       );
       const aboveStationsFeature = new Feature(geometry);
       aboveStationsFeature.setStyle(

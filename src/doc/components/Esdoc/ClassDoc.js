@@ -30,7 +30,7 @@ const useStyles = makeStyles({
  * @returns {IceCap} built output.
  * @private
  */
-const ClassDoc = ({ doc }) => {
+function ClassDoc({ doc }) {
   const classes = useStyles();
   if (!doc) {
     return null;
@@ -132,7 +132,7 @@ const ClassDoc = ({ doc }) => {
           <ExperimentalHTML doc={doc} />
         </div>
         <div className="description">
-          <Markdown source={doc.description} />
+          <Markdown>{doc.description}</Markdown>
         </div>
         {/* TODO
         <div className="decorator" data-ice="decorator">
@@ -267,6 +267,6 @@ const ClassDoc = ({ doc }) => {
       </div>
     </div>
   );
-};
+}
 
 export default React.memo(ClassDoc);

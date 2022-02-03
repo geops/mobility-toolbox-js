@@ -11,7 +11,7 @@ const useStyles = makeStyles({
   },
 });
 
-const TrackerExample = () => {
+function TrackerExample() {
   const classes = useStyles();
 
   useEffect(() => {
@@ -32,6 +32,6 @@ const TrackerExample = () => {
   }, []);
 
   return <div id="map" className={classes.root} />;
-};
+}
 
 export default TrackerExample;

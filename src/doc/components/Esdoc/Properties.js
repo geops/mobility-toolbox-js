@@ -12,7 +12,7 @@ import TypeDocLinkHTML from './TypeDocLinkHTML';
  * @return {IceCap} built properties output.
  * @private
  */
-const Properties = ({ properties = [], title = 'Properties:' }) => {
+function Properties({ properties = [], title = 'Properties:' }) {
   return (
     <div data-ice="properties">
       <h4 data-ice="title">{title}</h4>
@@ -76,7 +76,7 @@ const Properties = ({ properties = [], title = 'Properties:' }) => {
                   )}
                 </td>
                 <td data-ice="description">
-                  <Markdown source={prop.description} />
+                  <Markdown>{prop.description}</Markdown>
                 </td>
               </tr>
             );
@@ -85,5 +85,5 @@ const Properties = ({ properties = [], title = 'Properties:' }) => {
       </table>
     </div>
   );
-};
+}
 export default React.memo(Properties);

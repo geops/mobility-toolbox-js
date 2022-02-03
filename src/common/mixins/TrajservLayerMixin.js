@@ -133,9 +133,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       }
       Object.defineProperties(this, {
         requestIntervalSeconds: {
-          get: () => {
-            return requestIntervalSeconds;
-          },
+          get: () => requestIntervalSeconds,
           set: (newRequestIntervalSeconds) => {
             if (newRequestIntervalSeconds !== requestIntervalSeconds) {
               requestIntervalSeconds = newRequestIntervalSeconds;

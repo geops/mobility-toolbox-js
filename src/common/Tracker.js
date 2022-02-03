@@ -291,9 +291,7 @@ export default class Tracker {
           continue;
         }
 
-        px = px.map((p) => {
-          return p * pixelRatio;
-        });
+        px = px.map((p) => p * pixelRatio);
 
         if (
           px[0] < 0 ||

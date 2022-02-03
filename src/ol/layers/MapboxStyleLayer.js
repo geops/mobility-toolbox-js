@@ -110,9 +110,7 @@ class MapboxStyleLayer extends Layer {
 
     if (!this.styleLayersFilter && this.styleLayers) {
       const ids = this.styleLayers.map((s) => s.id);
-      this.styleLayersFilter = (styleLayer) => {
-        return ids.includes(styleLayer.id);
-      };
+      this.styleLayersFilter = (styleLayer) => ids.includes(styleLayer.id);
     }
   }
 
@@ -265,12 +263,9 @@ class MapboxStyleLayer extends Layer {
         validate: false,
       })
       .then((featureInfo) => {
-        const features = featureInfo.features.filter((feature) => {
-          return this.featureInfoFilter(
-            feature,
-            this.map.getView().getResolution(),
-          );
-        });
+        const features = featureInfo.features.filter((feature) =>
+          this.featureInfoFilter(feature, this.map.getView().getResolution()),
+        );
         this.highlight(features);
         return { ...featureInfo, features, layer: this };
       });
@@ -300,10 +295,10 @@ class MapboxStyleLayer extends Layer {
    * @param {boolean} state Is the feature hovered
    * @private
    */
-  setHoverState(features = [], state) {
+  setHoverState(features, state) {
     const { mbMap } = this.mapboxLayer;
 
-    if (!mbMap) {
+    if (!features || !mbMap) {
       return;
     }
 
@@ -350,11 +345,12 @@ class MapboxStyleLayer extends Layer {
    */
   highlight(features = []) {
     // Filter out selected features
-    const filtered = this.highlightedFeatures.filter((feature) => {
-      return !this.selectedFeatures
-        .map((feat) => feat.getId())
-        .includes(feature.getId());
-    });
+    const filtered = this.highlightedFeatures.filter(
+      (feature) =>
+        !this.selectedFeatures
+          .map((feat) => feat.getId())
+          .includes(feature.getId()),
+    );
 
     // Remove previous highlight
     this.setHoverState(filtered, false);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { useRouteMatch, useLocation } from 'react-router';
+import { useParams, useLocation } from 'react-router-dom';
 import Esdoc from './Esdoc/Esdoc';
 
 const useStyles = makeStyles({
@@ -17,24 +17,24 @@ const useStyles = makeStyles({
   },
 });
 
-const Documentation = () => {
+function Documentation() {
   const classes = useStyles();
-  const match = useRouteMatch();
+  const params = useParams();
   const { hash } = useLocation();
   const [path, setPath] = useState('identifiers%20html');
 
   useEffect(() => {
-    const matchPath = match.params.path;
+    const matchPath = (params || {})['*'];
     if (matchPath) {
       setPath(matchPath.replace(/ /g, '.') + hash);
     }
-  }, [match, hash]);
+  }, [params, hash]);
 
   return (
     <div className={classes.root}>
       <Esdoc path={path} />
     </div>
   );
-};
+}
 
 export default React.memo(Documentation);

@@ -51,9 +51,7 @@ class TrajservAPI extends API {
   fetchTrajectories(params, abortController = {}) {
     return this.fetch(`/trajectory_collection`, params, {
       signal: abortController.signal,
-    }).then((data) => {
-      return translateTrajCollResponse(data.features);
-    });
+    }).then((data) => translateTrajCollResponse(data.features));
   }
 
   /**
@@ -66,9 +64,7 @@ class TrajservAPI extends API {
   fetchTrajectoryStations(params, abortController = {}) {
     return this.fetch(`/trajstations`, params, {
       signal: abortController.signal,
-    }).then((data) => {
-      return translateTrajStationsResp(data);
-    });
+    }).then((data) => translateTrajStationsResp(data));
   }
 }
 

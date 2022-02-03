@@ -10,7 +10,7 @@ import DocLinkHTML from './DocLinkHTML';
  * @returns {string} html of in-direct subclass links.
  * @private
  */
-const IndirectSubclassHTML = ({ doc }) => {
+function IndirectSubclassHTML({ doc }) {
   if (!doc._custom_indirect_subclasses) return '';
 
   return (
@@ -26,5 +26,5 @@ const IndirectSubclassHTML = ({ doc }) => {
       </div>
     </div>
   );
-};
+}
 export default React.memo(IndirectSubclassHTML);

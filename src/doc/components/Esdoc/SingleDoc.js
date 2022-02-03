@@ -13,7 +13,7 @@ import DetailHTML from './DetailHTML';
  * @returns {string} html of single output
  * @private
  */
-const SingleDoc = ({ kind }) => {
+function SingleDoc({ kind }) {
   const title = kind.replace(/^(\w)/, (c) => c.toUpperCase());
   return (
     <>
@@ -26,6 +26,6 @@ const SingleDoc = ({ kind }) => {
       </div>
     </>
   );
-};
+}
 
 export default React.memo(SingleDoc);

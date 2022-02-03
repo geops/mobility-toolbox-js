@@ -67,27 +67,8 @@ export const textColors = [
  * @ignore
  */
 export const timeSteps = [
-  100000,
-  50000,
-  40000,
-  30000,
-  20000,
-  15000,
-  10000,
-  5000,
-  2000,
-  1000,
-  400,
-  300,
-  250,
-  180,
-  90,
-  60,
-  50,
-  50,
-  50,
-  50,
-  50,
+  100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400, 300,
+  250, 180, 90, 60, 50, 50, 50, 50, 50,
 ];
 
 /**
@@ -103,9 +84,9 @@ export const getTypeIndex = (type) => {
 /**
  * @ignore
  */
-export const getRadius = (type = 0, zoom) => {
+export const getRadius = (type, zoom) => {
   try {
-    const typeIdx = getTypeIndex(type);
+    const typeIdx = getTypeIndex(type || 0);
     return trackerRadiusMapping[typeIdx][zoom];
   } catch (e) {
     return 1;
