@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "1.7.1-beta.1",
+  "version": "1.7.0",
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
@@ -104,7 +104,7 @@
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
     "prepare": "husky install",
     "publish:beta": "HUSKY=0 yarn publish:public --tag beta",
-    "publish:public": "HUSKY=0 yarn version && git push origin HEAD && yarn build && cd build && yarn publish",
+    "publish:public": "HUSKY=0 yarn version && git push origin HEAD && yarn build && cd build && HUSKY=0 yarn publish",
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "start:examples": "webpack-dev-server --mode development --open",
     "test": "REACT_APP_LIB_MODE=1 jest",
