@@ -13,9 +13,9 @@ const removeDuplicate = (array) => {
     str.toLowerCase(),
   );
   const uniqueLowerCaseValues = [...new Set(lowerCasesValues)];
-  const uniqueValues = uniqueLowerCaseValues.map((uniqueStr) => {
-    return arrWithoutEmptyValues.find((str) => str.toLowerCase() === uniqueStr);
-  });
+  const uniqueValues = uniqueLowerCaseValues.map((uniqueStr) =>
+    arrWithoutEmptyValues.find((str) => str.toLowerCase() === uniqueStr),
+  );
   return uniqueValues;
 };
 

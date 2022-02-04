@@ -59,7 +59,7 @@ describe('TrajservLayer', () => {
     expect(layer.clickCallbacks.length).toBe(2);
   });
 
-  test.only('#unClick', () => {
+  test('#unClick', () => {
     const foo = () => {};
     const bar = () => {};
     layer.onClick(foo);

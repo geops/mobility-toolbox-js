@@ -15,7 +15,5 @@ ctx.strokeStyle = 'black';
 ctx.stroke();
 ctx.lineWidth = 3;
 
-const style = () => {
-  return canvas;
-};
+const style = () => canvas;
 export default style;

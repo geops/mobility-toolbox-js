@@ -20,6 +20,7 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
+ * @deprecated
  */
 class TrajservLayer extends mixin(TrackerLayer) {
   constructor(options = {}) {
@@ -76,7 +77,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Returns the URL parameters.
    * @param {Object} extraParams Extra parameters
-   * @returns {Object}
+   * @return {Object}
    * @private
    */
   getParams(extraParams = {}) {

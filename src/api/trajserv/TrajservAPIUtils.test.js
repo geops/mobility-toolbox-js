@@ -2,7 +2,7 @@ import { translateTrajStationsResp } from './TrajservAPIUtils';
 
 describe('TrajservAPIUtils', () => {
   describe('#translateTrajStationsResp', () => {
-    test.only("should success even if data doesn't have all properties set", () => {
+    test("should success even if data doesn't have all properties set", () => {
       const empty = {
         backgroundColor: undefined,
         bicyclesAllowed: false,

@@ -26,6 +26,9 @@ export default () => {
     apiKey: window.apiKey,
     // bbox: [1152072, 6048052, 1433666, 6205578],
     isUpdateBboxOnMoveEnd: true,
+    visible: true,
+    tenant: 'sbb',
+    // projection: 'EPSG:3857',
     // useDelayStyle: true,
     // regexPublishedLineName: '^(S|R$|RE|PE|D|IRE|RB|TER)',
   });
@@ -36,6 +39,19 @@ export default () => {
       console.log(feature.getProperties());
     }
   });
+  document.getElementById('button').onclick = () => {
+    tracker.setVisible(!tracker.visible);
+  };
+  document.getElementById('close').onclick = () => {
+    tracker.api.conn.websocket.close();
+    window.lastWs = tracker.api.conn.websocket;
+  };
+  document.getElementById('bbox').onclick = () => {
+    tracker.api.conn.websocket.send(`BBOX ${tracker.api.bbox.join(' ')}`);
+  };
+  document.getElementById('terminate').onclick = () => {
+    tracker.api.conn.websocket.terminate();
+  };
 
   map.addLayer(layer);
   map.addLayer(tracker);

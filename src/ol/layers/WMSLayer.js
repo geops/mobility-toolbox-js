@@ -23,7 +23,7 @@ class WMSLayer extends Layer {
   /**
    * Get features infos' Url.
    * @param {ol/coordinate~Coordinate} coord
-   * @returns {ol/layer/Layer~Layer}
+   * @return {ol/layer/Layer~Layer}
    */
   getFeatureInfoUrl(coord) {
     const projection = this.map.getView().getProjection();
@@ -43,7 +43,7 @@ class WMSLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate to request the information at.
-   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+   * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     this.abortController.abort();
@@ -70,7 +70,7 @@ class WMSLayer extends Layer {
   /**
    * Create a copy of the WMSLayer.
    * @param {Object} newOptions Options to override
-   * @returns {WMSLayer} A WMSLayer
+   * @return {WMSLayer} A WMSLayer
    */
   clone(newOptions) {
     return new WMSLayer({ ...this.options, ...newOptions });

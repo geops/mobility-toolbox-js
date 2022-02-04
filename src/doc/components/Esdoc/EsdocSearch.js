@@ -12,7 +12,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const EsdocSearch = () => {
+function EsdocSearch() {
   const searchIndex = _getSearchIndex();
   const classes = useStyles();
   const [filter, setFilter] = useState('');
@@ -77,5 +77,5 @@ const EsdocSearch = () => {
       </ul>
     </div>
   );
-};
+}
 export default EsdocSearch;

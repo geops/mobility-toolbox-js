@@ -1,6 +1,6 @@
 /**
  * Translate the response date object into a readable object.
- * @returns {Date[]}
+ * @return {Date[]}
  * @ignore
  */
 const translateDates = (dates = []) => {
@@ -19,7 +19,7 @@ const translateDates = (dates = []) => {
 
 /**
  * Translate the trajstations response into a readable object.
- * @returns {Object} returns a readable object
+ * @return {Object} returns a readable object
  * @private
  */
 export const translateTrajStationsResp = (data) => {
@@ -123,7 +123,7 @@ export const translateTrajStationsResp = (data) => {
 
 /**
  * Translate the trajectory_collection response into a js usable object.
- * @returns {Array} returns an array of trajectories.
+ * @return {Array} returns an array of trajectories.
  * @ignore
  */
 export const translateTrajCollResponse = (features = []) => {

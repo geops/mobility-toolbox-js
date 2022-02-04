@@ -1,4 +1,4 @@
-import { Map, TrajservLayer } from '../../mapbox';
+import { Map, TralisLayer } from '../../mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 export default () => {
@@ -12,8 +12,8 @@ export default () => {
     pitchWithRotate: false,
   });
 
-  const tracker = new TrajservLayer({
-    url: 'https://api.geops.io/tracker/v1',
+  const tracker = new TralisLayer({
+    url: 'wss://tralis-tracker-api.geops.io/ws',
     apiKey: window.apiKey,
   });
 

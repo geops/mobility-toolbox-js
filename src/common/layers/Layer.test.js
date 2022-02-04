@@ -434,7 +434,7 @@ describe('Layer', () => {
   });
 
   describe('#unClick()', () => {
-    test('removes function from clickCallbacks array', () => {
+    test.only('removes function from clickCallbacks array', () => {
       const layer = new Layer({
         name: 'Layer',
         olLayer,
@@ -447,20 +447,21 @@ describe('Layer', () => {
       expect(layer.clickCallbacks).toEqual([fn, fn2]);
       layer.unClick(fn);
       expect(layer.clickCallbacks).toEqual([fn2]);
+      // Make sure no callbacks are removed if the callback is not in the list.
+      layer.unClick(fn);
+      expect(layer.clickCallbacks).toEqual([fn2]);
     });
   });
 
   describe('#onUserClickCallback()', () => {
     const evt = { type: 'signleclick', coordinate: [0, 0] };
 
-    const getFeatureInfo = (layer, features = []) => {
-      return {
-        features,
-        layer,
-        coordinate: evt.coordinate,
-        event: evt,
-      };
-    };
+    const getFeatureInfo = (layer, features = []) => ({
+      features,
+      layer,
+      coordinate: evt.coordinate,
+      event: evt,
+    });
 
     test('calls click callback functions', (done) => {
       const layer = new Layer({
@@ -587,20 +588,21 @@ describe('Layer', () => {
       expect(layer.hoverCallbacks).toEqual([fn, fn2]);
       layer.unHover(fn);
       expect(layer.hoverCallbacks).toEqual([fn2]);
+      // Make sure no callbacks are removed if the callback is not in the list.
+      layer.unHover(fn);
+      expect(layer.clickCallbacks).toEqual([fn2]);
     });
   });
 
   describe('#onUserMoveCallback()', () => {
     const evt = { type: 'pointermove', coordinate: [0, 0] };
 
-    const getFeatureInfo = (layer, features = []) => {
-      return {
-        features,
-        layer,
-        coordinate: evt.coordinate,
-        event: evt,
-      };
-    };
+    const getFeatureInfo = (layer, features = []) => ({
+      features,
+      layer,
+      coordinate: evt.coordinate,
+      event: evt,
+    });
 
     test('calls hover callback functions', (done) => {
       const layer = new Layer({

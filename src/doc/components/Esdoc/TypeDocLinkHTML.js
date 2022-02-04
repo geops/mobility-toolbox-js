@@ -15,7 +15,7 @@ import DocLinkHTML from './DocLinkHTML';
  * @private
  * @todo re-implement with parser combinator.
  */
-const TypeDocLinkHTML = ({ typeName }) => {
+function TypeDocLinkHTML({ typeName }) {
   // e.g. number[]
   let matched = typeName.match(/^(.*?)\[\]$/);
   if (matched) {
@@ -214,7 +214,7 @@ const TypeDocLinkHTML = ({ typeName }) => {
       const typeLinks = typeNames.map((v) => <DocLinkHTML longname={v} />);
       return (
         <>
-          {`...(`}
+          ...(
           {typeLinks.map((comp, idx) => {
             return (
               <React.Fragment key={idx}>
@@ -223,7 +223,7 @@ const TypeDocLinkHTML = ({ typeName }) => {
               </React.Fragment>
             );
           })}
-          {`)`}
+          )
         </>
       );
     }
@@ -244,6 +244,6 @@ const TypeDocLinkHTML = ({ typeName }) => {
     );
   }
   return <DocLinkHTML longname={typeName} />;
-};
+}
 
 export default React.memo(TypeDocLinkHTML);

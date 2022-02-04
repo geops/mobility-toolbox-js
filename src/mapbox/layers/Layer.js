@@ -1,4 +1,5 @@
 import { unByKey } from 'ol/Observable';
+import { transformExtent } from 'ol/proj';
 import LayerCommon from '../../common/layers/Layer';
 
 /**
@@ -87,9 +88,28 @@ class Layer extends LayerCommon {
   }
 
   /**
+   * Returns the current extent in mercator coordinates.
+   */
+  getMercatorExtent() {
+    const bounds = this.map.getBounds().toArray();
+    return transformExtent(
+      [...bounds[0], ...bounds[1]],
+      'EPSG:4326',
+      'EPSG:3857',
+    );
+  }
+
+  /**
+   * Returns the equivalent zoom in Openlayers.
+   */
+  getOlZoom() {
+    return this.map.getZoom() + 1;
+  }
+
+  /**
    * Create a copy of the Layer.
    * @param {Object} newOptions Options to override
-   * @returns {Layer} A Layer
+   * @return {Layer} A Layer
    */
   clone(newOptions) {
     return new Layer({ ...this.options, ...newOptions });

@@ -1,5 +1,5 @@
 import View from 'ol/View';
-import { Map, TralisLayer, MapboxLayer } from '../../ol';
+import { Map, TrajservLayer, MapboxLayer } from '../../ol';
 import 'ol/ol.css';
 import CopyrightControl from '../../ol/controls/CopyrightControl';
 
@@ -7,8 +7,8 @@ export default () => {
   const map = new Map({
     target: 'map',
     view: new View({
-      center: [955156.2377088447, 6096616.996190854],
-      zoom: 7,
+      center: [831634, 5933959],
+      zoom: 13,
     }),
     controls: [new CopyrightControl()],
   });
@@ -17,8 +17,9 @@ export default () => {
     url: 'https://maps.geops.io/styles/base_bright_v2/style.json',
     apiKey: window.apiKey,
   });
-  const tracker = new TralisLayer({
-    url: 'wss://tralis-tracker-api.geops.io/ws',
+
+  const tracker = new TrajservLayer({
+    url: 'https://api.geops.io/tracker/v1',
     apiKey: window.apiKey,
   });
 

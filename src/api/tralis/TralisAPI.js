@@ -21,7 +21,7 @@ export const TralisModes = {
 };
 
 /**
- * Access to Tralis service.
+ * This class provides convenience methods to access to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { TralisAPI } from 'mobility-toolbox-js/api';
@@ -41,24 +41,14 @@ class TralisAPI {
    * Constructor
    *
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
-   * @param {string} options.url Service url.
-   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} options.url Url to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
+   * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
    * @param {string} [options.prefix=''] Service prefix to specify tenant.
-   * @param {string} [options.projection='epsg:3857'] The epsg code of the projection for features.
-   * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY] The bounding box to receive data from.
+   * @param {string} [options.projection] The epsg code of the projection for features. Default to EPSG:3857.
+   * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
    */
   constructor(options = {}) {
-    let wsUrl = null;
-
-    if (typeof options === 'string') {
-      wsUrl = options;
-    } else {
-      wsUrl = options.url;
-    }
-
-    if (options.apiKey) {
-      wsUrl = `${wsUrl}?key=${options.apiKey}`;
-    }
+    this.defineProperties(options);
 
     /** @ignore */
     this.subscribedStationUic = null;
@@ -78,17 +68,148 @@ class TralisAPI {
     this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
 
     /** @ignore */
-    this.conn = new WebSocketConnector(wsUrl);
+    this.onOpen = this.onOpen.bind(this);
+  }
 
-    this.conn.isSUBAllow = !this.isUpdateBboxOnMoveEnd;
-    this.conn.isDELAllow = !this.isUpdateBboxOnMoveEnd;
+  defineProperties(options) {
+    let opt = options;
 
-    if (!this.isUpdateBboxOnMoveEnd) {
-      this.conn.setProjection(options.projection || 'epsg:3857');
+    if (typeof options === 'string') {
+      opt = { url: options };
+    }
 
-      if (options.bbox) {
-        this.conn.setBbox(options.bbox);
-      }
+    const { apiKey } = opt;
+    let { url, projection, bbox } = opt;
+    const conn = new WebSocketConnector();
+
+    if (apiKey) {
+      url = `${url || 'wss://tralis-tracker-api.geops.io/ws'}?key=${apiKey}`;
+    }
+
+    Object.defineProperties(this, {
+      url: {
+        get: () => url,
+        set: (newUrl) => {
+          url = newUrl;
+          this.open();
+        },
+      },
+      projection: {
+        get: () => projection,
+        set: (newProjection) => {
+          if (newProjection !== projection) {
+            projection = newProjection;
+            if (this.conn) {
+              this.conn.send(`PROJECTION ${projection}`);
+            }
+          }
+        },
+      },
+      bbox: {
+        get: () => bbox,
+        set: (newBbox) => {
+          if (JSON.stringify(newBbox) !== JSON.stringify(bbox)) {
+            bbox = newBbox;
+            if (this.conn) {
+              this.conn.send(`BBOX ${bbox.join(' ')}`);
+            }
+          }
+        },
+      },
+      /**
+       * The websocket helper class to connect the websocket.
+       *
+       * @private
+       */
+      conn: {
+        value: conn,
+        writable: true,
+      },
+      /**
+       * Interval between PING request in ms.
+       * If equal to 0,  no PING request are sent.
+       * @type {number}
+       * @private
+       */
+      pingIntervalMs: {
+        value: options.pingIntervalMs || 10000,
+        writable: true,
+      },
+      /**
+       * Timeout in ms after an automatic reconnection when the websoscket has been closed by the server.
+       * @type {number}
+       */
+      reconnectTimeoutMs: {
+        value: options.pingIntervalMs || 100,
+        writable: true,
+      },
+    });
+  }
+
+  open() {
+    this.close();
+    // Register BBOX and PROJECTION messages must be send before previous subscriptions.
+    this.conn.connect(this.url, this.onOpen);
+
+    // Register reconnection on close.
+    this.conn.websocket.onclose = () => {
+      this.onClose();
+    };
+  }
+
+  /**
+   * Close the websocket connection without reconnection.
+   */
+  close() {
+    this.conn.close();
+  }
+
+  /**
+   * Unsubscribe trajectory and deleted_vehicles channels. To resubscribe you have to set a new BBOX.
+   */
+  // eslint-disable-next-line class-methods-use-this
+  reset() {
+    this.conn.send('RESET');
+  }
+
+  /**
+   * Callback when the websocket is opened and ready.
+   * It applies the bbox and the projection.
+   */
+  onOpen() {
+    if (this.projection) {
+      this.conn.send(`PROJECTION ${this.projection}`);
+    }
+    if (this.bbox) {
+      this.conn.send(`BBOX ${this.bbox.join(' ')}`);
+    }
+
+    /**
+     * Keep websocket alive
+     */
+    if (this.pingIntervalMs) {
+      window.clearInterval(this.pingInterval);
+      /** @ignore */
+      this.pingInterval = setInterval(() => {
+        this.conn.send('PING');
+      }, this.pingIntervalMs);
+    }
+  }
+
+  /**
+   * Callback when the websocket is closed by the server.
+   * It auto reconnects after a timeout.
+   */
+  onClose() {
+    window.clearTimeout(this.pingInterval);
+    window.clearTimeout(this.reconnectTimeout);
+
+    if (this.reconnectTimeoutMs) {
+      /** @ignore */
+      this.reconnectTimeout = window.setTimeout(
+        () => this.open(),
+        this.reconnectTimeoutMs,
+      );
     }
   }
 
@@ -106,23 +227,22 @@ class TralisAPI {
   }
 
   /**
-   * Unsubscribe to a channel.
+   * Unsubscribe both modes of a channel.
    *
    * @param {string} channel Name of the websocket channel to unsubscribe.
-   * @param {string} [suffix=''] Suffix to add to the channel name.
+   * @param {string} suffix Suffix to add to the channel name.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(channel, suffix = '', cb) {
+  unsubscribe(channel, suffix, cb) {
     this.conn.unsubscribe(
       `${channel}${getModeSuffix(TralisModes.SCHEMATIC, TralisModes)}${suffix}`,
       cb,
     );
     this.conn.unsubscribe(
-      `${channel}${getModeSuffix(
-        TralisModes.TOPOGRAPHIC,
-        TralisModes,
-      )}${suffix}`,
+      `${channel}${getModeSuffix(TralisModes.TOPOGRAPHIC, TralisModes)}${
+        suffix || ''
+      }`,
       cb,
     );
   }
@@ -132,7 +252,7 @@ class TralisAPI {
    *
    * @param {Object} depObject The object containing departures by id.
    * @param {boolean} [sortByMinArrivalTime=false] If true sort departures by arrival time.
-   * @returns {Array<departure>} Return departures array.
+   * @return {Array<departure>} Return departures array.
    * @private
    */
   filterDepartures(depObject, sortByMinArrivalTime = false) {
@@ -198,7 +318,7 @@ class TralisAPI {
    * @param {Boolean} sortByMinArrivalTime Sort by minimum arrival time
    * @param {function(departures:Departure[])} onMessage Function called on each message of the channel.
    */
-  subscribeDepartures(stationId, sortByMinArrivalTime = false, onMessage) {
+  subscribeDepartures(stationId, sortByMinArrivalTime, onMessage) {
     window.clearTimeout(this.departureUpdateTimeout);
     this.unsubscribeDepartures();
     this.subscribedStationUic = stationId;
@@ -217,7 +337,7 @@ class TralisAPI {
           this.departureUpdateTimeout = window.setTimeout(() => {
             const departures = this.filterDepartures(
               departureObject,
-              sortByMinArrivalTime,
+              sortByMinArrivalTime || false,
             );
             onMessage(departures);
           }, 100);
@@ -264,7 +384,7 @@ class TralisAPI {
    *
    * @param {number} uic UIC of the station.
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<Station>} A station.
+   * @return {Promise<Station>} A station.
    */
   getStation(uic, mode) {
     const params = {
@@ -287,14 +407,10 @@ class TralisAPI {
    * Update the model's station list for a given mode and a bbox.
    *
    * @param {TralisMode} mode Tralis mode.
-   * @param {number[4]} bbox The extent where to request.
-   * @returns {Promise<Array<Station>>} An array of stations.
+   * @return {Promise<Array<Station>>} An array of stations.
    */
-  getStations(mode, bbox) {
+  getStations(mode) {
     const stations = [];
-    if (bbox) {
-      this.conn.setBbox(bbox);
-    }
     const params = {
       channel: `station${getModeSuffix(mode, TralisModes)}`,
     };
@@ -320,14 +436,10 @@ class TralisAPI {
    * One message pro station.
    *
    * @param {TralisMode} mode Tralis mode.
-   * @param {number[4]} bbox The extent where to request.
    * @param {function(station: Station)} onMessage Function called on each message of the channel.
    */
-  subscribeStations(mode, bbox, onMessage) {
+  subscribeStations(mode, onMessage) {
     this.unsubscribeStations();
-    if (bbox) {
-      this.conn.setBbox(bbox);
-    }
     this.subscribe(`station${getModeSuffix(mode, TralisModes)}`, (data) => {
       if (data.content) {
         onMessage(data.content);
@@ -382,14 +494,15 @@ class TralisAPI {
    *
    * @param {TralisMode} mode Tralis mode.
    * @param {function(trajectory: TralisTrajectory)} onMessage Function called on each message of the channel.
+   * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
-  subscribeTrajectory(mode, onMessage) {
+  subscribeTrajectory(mode, onMessage, quiet = false) {
     this.unsubscribeTrajectory(onMessage);
     this.subscribe(
       `trajectory${getModeSuffix(mode, TralisModes)}`,
       onMessage,
       null,
-      this.isUpdateBboxOnMoveEnd,
+      quiet,
     );
   }
 
@@ -406,12 +519,15 @@ class TralisAPI {
    *
    * @param {TralisMode} mode Tralis mode.
    * @param {function(response: { content: Vehicle })} onMessage Function called on each message of the channel.
+   * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
-  subscribeDeletedVehicles(mode, onMessage) {
+  subscribeDeletedVehicles(mode, onMessage, quiet = false) {
     this.unsubscribeDeletedVehicles(onMessage);
     this.subscribe(
       `deleted_vehicles${getModeSuffix(mode, TralisModes)}`,
       onMessage,
+      null,
+      quiet,
     );
   }
 
@@ -428,11 +544,21 @@ class TralisAPI {
    *
    * @param {string} id A vehicle id.
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<FullTrajectory>} Return a full trajectory.
+   * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
+   * @return {Promise<FullTrajectory>} Return a full trajectory.
    */
-  getFullTrajectory(id, mode) {
+  getFullTrajectory(id, mode, generalizationLevel) {
+    const channel = [`full_trajectory${getModeSuffix(mode, TralisModes)}`];
+    if (id) {
+      channel.push(id);
+    }
+
+    if ((!mode || mode === TralisModes.TOPOGRAPHIC) && generalizationLevel) {
+      channel.push(`gen${generalizationLevel}`);
+    }
+
     const params = {
-      channel: `full_trajectory${getModeSuffix(mode, TralisModes)}_${id}`,
+      channel: channel.join('_'),
     };
 
     return new Promise((resolve) => {
@@ -449,12 +575,13 @@ class TralisAPI {
    *
    * @param {string[]} ids List of vehicles ids.
    * @param {TralisMode} mode Tralis mode.
-   * @returns {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
+   * @param {string} generalizationLevel The generalization level to request. Can be one of '', 'gen5', 'gen10', 'gen30', 'gen100'.
+   * @return {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
    */
-  getFullTrajectories(ids, mode) {
-    const promises = ids.map((id) => {
-      return this.getFullTrajectory(id, mode);
-    });
+  getFullTrajectories(ids, mode, generalizationLevel) {
+    const promises = ids.map((id) =>
+      this.getFullTrajectory(id, mode, generalizationLevel),
+    );
     return Promise.all(promises);
   }
 
@@ -494,7 +621,7 @@ class TralisAPI {
    * Get the list of stops for this vehicle.
    *
    * @param {string} id A vehicle id.
-   * @returns {Promise<StopSequence>} Returns a stop sequence object.
+   * @return {Promise<StopSequence>} Returns a stop sequence object.
    */
   getStopSequence(id) {
     const params = {
@@ -505,9 +632,9 @@ class TralisAPI {
         params,
         (data) => {
           if (data.content && data.content.length) {
-            const content = data.content.map((stopSequence) => {
-              return cleanStopTime(stopSequence);
-            });
+            const content = data.content.map((stopSequence) =>
+              cleanStopTime(stopSequence),
+            );
 
             // Remove the delay from arrivalTime and departureTime
             resolve(content);
@@ -525,12 +652,10 @@ class TralisAPI {
    * Get a list of stops for a list of vehicles.
    *
    * @param {string[]} ids List of vehicles ids.
-   * @returns {Promise<Array<StopSequence>>} Return an array of stop sequences.
+   * @return {Promise<Array<StopSequence>>} Return an array of stop sequences.
    */
   getStopSequences(ids) {
-    const promises = ids.map((id) => {
-      return this.getStopSequence(id);
-    });
+    const promises = ids.map((id) => this.getStopSequence(id));
     return Promise.all(promises);
   }
 
@@ -548,9 +673,9 @@ class TralisAPI {
       `stopsequence_${id}`,
       (data) => {
         if (data.content && data.content.length) {
-          const content = data.content.map((stopSequence) => {
-            return cleanStopTime(stopSequence);
-          });
+          const content = data.content.map((stopSequence) =>
+            cleanStopTime(stopSequence),
+          );
 
           // Remove the delay from arrivalTime and departureTime
           onMessage(content);

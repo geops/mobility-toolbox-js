@@ -75,7 +75,7 @@ export class TrackerLayerInterface {
    * @param {number[2]} coordinate A coordinate ([x,y]).
    * @param {number} [resolution=1] The resolution of the map.
    * @param {number} [nb=Infinity] nb The max number of vehicles to return.
-   * @returns {Array<ol/Feature~Feature>} Array of vehicles.
+   * @return {Array<ol/Feature~Feature>} Array of vehicles.
    */
   // eslint-disable-next-line no-unused-vars
   getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {}
@@ -137,12 +137,8 @@ const TrackerLayerMixin = (Base) =>
         live,
       } = options;
 
-      let {
-        regexPublishedLineName,
-        publishedLineName,
-        tripNumber,
-        operator,
-      } = options;
+      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
+        options;
 
       const initTrackerOptions = {
         pixelRatio: pixelRatio || window.devicePixelRatio || 1,
@@ -266,11 +262,10 @@ const TrackerLayerMixin = (Base) =>
          * Id of the hovered vehicle.
          */
         hoverVehicleId: {
-          get: () => {
-            return this.tracker
+          get: () =>
+            this.tracker
               ? this.tracker.hoverVehicleId
-              : this.initTrackerOptions.hoverVehicleId;
-          },
+              : this.initTrackerOptions.hoverVehicleId,
           set: (newHoverVehicleId) => {
             if (this.tracker) {
               this.tracker.hoverVehicleId = newHoverVehicleId;
@@ -334,36 +329,28 @@ const TrackerLayerMixin = (Base) =>
          * Filter properties used in combination with permalink parameters.
          */
         publishedLineName: {
-          get: () => {
-            return publishedLineName;
-          },
+          get: () => publishedLineName,
           set: (newPublishedLineName) => {
             publishedLineName = newPublishedLineName;
             this.updateFilters();
           },
         },
         tripNumber: {
-          get: () => {
-            return tripNumber;
-          },
+          get: () => tripNumber,
           set: (newTripNumber) => {
             tripNumber = newTripNumber;
             this.updateFilters();
           },
         },
         operator: {
-          get: () => {
-            return operator;
-          },
+          get: () => operator,
           set: (newOperator) => {
             operator = newOperator;
             this.updateFilters();
           },
         },
         regexPublishedLineName: {
-          get: () => {
-            return regexPublishedLineName;
-          },
+          get: () => regexPublishedLineName,
           set: (newRegex) => {
             regexPublishedLineName = newRegex;
             this.updateFilters();
@@ -398,6 +385,28 @@ const TrackerLayerMixin = (Base) =>
         //   writable: true,
         // },
       });
+
+      // When we use the delay style we want to display delayed train on top by default
+      if (this.useDelayStyle && !this.sort) {
+        this.sort = (traj1, traj2) => {
+          if (traj1.delay === null && traj2.delay !== null) {
+            return 1;
+          }
+          if (traj2.delay === null && traj1.delay !== null) {
+            return -1;
+          }
+
+          // We put cancelled train inbetween green and yellow trains
+          // >=180000ms corresponds to yellow train
+          if (traj1.cancelled && !traj2.cancelled) {
+            return traj2.delay < 180000 ? -1 : 1;
+          }
+          if (traj2.cancelled && !traj1.cancelled) {
+            return traj1.delay < 180000 ? 1 : -1;
+          }
+          return traj2.delay - traj1.delay;
+        };
+      }
     }
 
     /**
@@ -569,7 +578,7 @@ const TrackerLayerMixin = (Base) =>
     /**
      * Get vehicle.
      * @param {function} filterFc A function use to filter results.
-     * @returns {Array<Object>} Array of vehicle.
+     * @return {Array<Object>} Array of vehicle.
      */
     getVehicle(filterFc) {
       return this.tracker.getTrajectories().filter(filterFc);
@@ -581,7 +590,7 @@ const TrackerLayerMixin = (Base) =>
      * @param {number[2]} coordinate A coordinate ([x,y]).
      * @param {number} [resolution=1] The resolution of the map.
      * @param {number} [nb=Infinity] The max number of vehicles to return.
-     * @returns {Array<ol/Feature~Feature>} Array of vehicle.
+     * @return {Array<ol/Feature~Feature>} Array of vehicle.
      */
     getVehiclesAtCoordinate(coordinate, resolution = 1, nb = Infinity) {
       const ext = buffer(
@@ -612,7 +621,7 @@ const TrackerLayerMixin = (Base) =>
      * @param {Object} options Options See child classes to see which options are supported.
      * @param {number} [options.resolution=1] The resolution of the map.
      * @param {number} [options.nb=Infinity] The max number of vehicles to return.
-     * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
      */
     getFeatureInfoAtCoordinate(coordinate, options = {}) {
       const { resolution, nb } = options;

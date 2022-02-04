@@ -10,7 +10,7 @@ class VectorLayer extends Layer {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.
-   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+   * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
    */
   getFeatureInfoAtCoordinate(coordinate) {
     let features = [];
@@ -33,7 +33,7 @@ class VectorLayer extends Layer {
   /**
    * Create a copy of the VectorLayer.
    * @param {Object} newOptions Options to override
-   * @returns {VectorLayer} A VectorLayer
+   * @return {VectorLayer} A VectorLayer
    */
   clone(newOptions) {
     return new VectorLayer({ ...this.options, ...newOptions });

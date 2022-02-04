@@ -20,19 +20,19 @@ export class MapInterface {
 
   /**
    * Returns the HTML element of the map.
-   * @returns {HTMLElement}
+   * @return {HTMLElement}
    */
   getContainer() {}
 
   /**
    * Returns a list of mobility layers.
-   * @returns {Layer[]}
+   * @return {Layer[]}
    */
   getMobilityLayers() {}
 
   /**
    * Returns a list of mobility controls.
-   * @returns {Control[]}
+   * @return {Control[]}
    */
   getMobilityControls() {}
 }

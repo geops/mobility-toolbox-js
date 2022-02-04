@@ -3,7 +3,7 @@
 /* eslint-disable max-classes-per-file */
 import qs from 'query-string';
 import { unByKey } from 'ol/Observable';
-import { getUTCDateString, getUTCTimeString } from '../timeUtils';
+import { getUTCDateString, getUTCTimeString } from '../utils';
 import {
   getRadius,
   getBgColor,
@@ -23,6 +23,7 @@ import { TrajservAPI } from '../../api';
  * @classproperty {function} sort - Set the filter for tracker features.
  *
  * @extends {TrackerLayerInterface}
+ * @deprecated
  */
 export class TrajservLayerInterface {
   /**
@@ -67,7 +68,7 @@ export class TrajservLayerInterface {
   /**
    * Returns the URL parameters.
    * @param {Object} extraParams Extra parameters
-   * @returns {Object}
+   * @return {Object}
    * @private
    */
   getParams(extraParams = {}) {}
@@ -145,9 +146,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       }
       Object.defineProperties(this, {
         requestIntervalSeconds: {
-          get: () => {
-            return requestIntervalSeconds;
-          },
+          get: () => requestIntervalSeconds,
           set: (newRequestIntervalSeconds) => {
             if (newRequestIntervalSeconds !== requestIntervalSeconds) {
               requestIntervalSeconds = newRequestIntervalSeconds;

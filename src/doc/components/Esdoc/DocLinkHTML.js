@@ -13,7 +13,7 @@ import { _findByName, _getURL } from './DocBuilderUtils';
  * @returns {string} html of link.
  * @private
  */
-const DocLinkHTML = ({ longname, text = null, inner = false, kind = null }) => {
+function DocLinkHTML({ longname, text = null, inner = false, kind = null }) {
   if (!longname) return '';
 
   if (typeof longname !== 'string') throw new Error(JSON.stringify(longname));
@@ -58,5 +58,5 @@ const DocLinkHTML = ({ longname, text = null, inner = false, kind = null }) => {
     );
   }
   return <span>{text}</span>;
-};
+}
 export default React.memo(DocLinkHTML);

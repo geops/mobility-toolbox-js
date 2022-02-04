@@ -7,9 +7,6 @@ import {
   getTextSize,
 } from '../trackerConfig';
 
-const styleCache = {};
-const cacheDelayBg = {};
-
 const createCanvas = (width, height) => {
   return new OffscreenCanvas(width, height);
   // const canvas = document.createElement('canvas');
@@ -19,10 +16,10 @@ const createCanvas = (width, height) => {
 };
 
 // Draw circle delay background
+const cacheDelayBg = {};
 export const getDelayBgCanvas = (origin, radius, color) => {
   const key = `${origin}, ${radius}, ${color}`;
   if (!cacheDelayBg[key]) {
-    // console.log('cacheDelayBg');
     const canvas = createCanvas(origin * 2, origin * 2);
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
@@ -48,7 +45,7 @@ export const getDelayTextCanvas = (
 ) => {
   const key = `${width}, ${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
   if (!cacheDelayText[key]) {
-    const canvas = createCanvas(width, fontSize + 8);
+    const canvas = createCanvas(width, fontSize + 8 * pixelRatio);
     const ctx = canvas.getContext('2d');
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -76,7 +73,6 @@ export const getCircleCanvas = (
 ) => {
   const key = `${origin}, ${radius}, ${color}, ${hasStroke},  ${hasDash}, ${pixelRatio}`;
   if (!cacheCircle[key]) {
-    // console.log('cacheDelayBg');
     const canvas = createCanvas(origin * 2, origin * 2);
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = color;
@@ -150,8 +146,9 @@ export const getTextCanvas = (
  * @param {*} trajectory The trajectory to render.
  * @param {*} viewState The view state of the map.
  * @param {*} options Some options to change the rendering
- * @returns a canvas
+ * @return a canvas
  */
+const styleCache = {};
 const style = (trajectory, viewState, options) => {
   const {
     hoverVehicleId,
@@ -210,7 +207,7 @@ const style = (trajectory, viewState, options) => {
   const mustDrawText = radius > 10 * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${z}${type}${color}${hover}${selected}${cancelled}${delay}`;
+  let key = `${radius}${type}${color}${hover}${selected}${cancelled}${delay}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}`;
@@ -229,7 +226,6 @@ const style = (trajectory, viewState, options) => {
     const margin = 1 * pixelRatio;
     const radiusDelay = radius + 2;
     const markerSize = radius * 2;
-    const textWidth = 100;
     const size = radiusDelay * 2 + margin * 2 + 100 * pixelRatio; // add space for delay information
     const origin = size / 2;
 
@@ -253,24 +249,30 @@ const style = (trajectory, viewState, options) => {
       (hover || delay >= delayDisplay || cancelled)
     ) {
       // Draw delay text
-      const fontSize = Math.max(
-        cancelled ? 19 : 14,
-        Math.min(cancelled ? 19 : 17, radius * 1.2),
-      );
-      const delayText = getDelayTextCanvas(
-        textWidth,
-        getDelayText(delay, cancelled),
-        fontSize,
-        `bold ${fontSize}px arial, sans-serif`,
-        getDelayColor(delay, cancelled, true),
-        delayOutlineColor,
-        pixelRatio,
-      );
-      ctx.drawImage(
-        delayText,
-        origin + radiusDelay + margin,
-        origin - fontSize,
-      );
+      const fontSize =
+        Math.max(
+          cancelled ? 19 : 14,
+          Math.min(cancelled ? 19 : 17, radius * 1.2),
+        ) * pixelRatio;
+      const text = getDelayText(delay, cancelled);
+
+      if (text) {
+        const textWidth = text.length * fontSize;
+        const delayText = getDelayTextCanvas(
+          textWidth,
+          text,
+          fontSize,
+          `bold ${fontSize}px arial, sans-serif`,
+          getDelayColor(delay, cancelled, true),
+          delayOutlineColor,
+          pixelRatio,
+        );
+        ctx.drawImage(
+          delayText,
+          origin + radiusDelay + margin,
+          origin - fontSize,
+        );
+      }
     }
 
     // Draw colored circle with black border

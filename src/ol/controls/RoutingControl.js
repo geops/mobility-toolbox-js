@@ -34,11 +34,12 @@ const getFlatCoordinatesFromSegments = (segmentArray) => {
  * @classproperty {string} apiKey - Key used for RoutingApi requests.
  * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
  * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).
- * @classproperty {Array.<Array<graph="osm", minZoom=0, maxZoom=99>>} graphs - Array of routing graphs and min/max zoom levels.
+ * @classproperty {Array.<Array<graph="osm", minZoom=0, maxZoom=99>>} graphs - Array of routing graphs and min/max zoom levels. If you use the control in combination with the [geOps Maps API](https://developer.geops.io/apis/maps/), you may want to use the optimal level of generalizations: "[['gen4', 0, 8], ['gen3', 8, 9], ['gen2', 9, 11], ['gen1', 11, 13], ['osm', 13, 99]]"
  * @classproperty {string} mot - Mean of transport to be used for routing.
  * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.
  * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.
  * @classproperty {function} onRouteError - Callback on error.
+ * @classproperty {boolean} loading - True if the control is requesting the backend.
  * @see <a href="/example/ol-routing">Openlayers routing example</a>
  *
  * @extends {Control}
@@ -50,9 +51,7 @@ class RoutingControl extends Control {
 
     Object.defineProperties(this, {
       mot: {
-        get: () => {
-          return this.get('mot');
-        },
+        get: () => this.get('mot'),
         set: (newMot) => {
           if (newMot) {
             this.set('mot', newMot);
@@ -63,14 +62,21 @@ class RoutingControl extends Control {
         },
       },
       loading: {
-        get: () => {
-          return this.get('loading');
-        },
+        get: () => this.get('loading'),
         set: (newLoading) => {
           this.set('loading', newLoading);
         },
       },
+      modify: {
+        get: () => this.get('modify'),
+        set: (modify) => {
+          this.set('modify', modify);
+        },
+      },
     });
+
+    /** True if the control is requesting the backend. */
+    this.loading = false;
 
     /** @ignore */
     this.graphs = options.graphs || [['osm', 0, 99]];
@@ -79,13 +85,16 @@ class RoutingControl extends Control {
     this.mot = options.mot || 'bus';
 
     /** @ignore */
+    this.modify = options.modify !== false;
+
+    /** @ignore */
     this.routingApiParams = options.routingApiParams || {};
 
     /** @ignore */
     this.cacheStationData = {};
 
     /** @ignore */
-    this.abortController = new AbortController();
+    this.abortControllers = [];
 
     /** @ignore */
     this.apiKey = options.apiKey;
@@ -100,6 +109,7 @@ class RoutingControl extends Control {
     this.stopsApiUrl =
       options.stopsApiUrl || 'https://api.geops.io/stops/v1/lookup/';
 
+    /** @ignore */
     this.api = new RoutingAPI({
       url: options.url,
       apiKey: this.apiKey,
@@ -111,6 +121,7 @@ class RoutingControl extends Control {
       options.routingLayer ||
       new RoutingLayer({
         name: 'routing-layer',
+        style: options.style,
       });
 
     /** @ignore */
@@ -126,19 +137,29 @@ class RoutingControl extends Control {
         console.error(error);
       });
 
+    /** @ignore */
     this.viaPoints = [];
     this.onMapClick = this.onMapClick.bind(this);
     this.onModifyEnd = this.onModifyEnd.bind(this);
     this.onModifyStart = this.onModifyStart.bind(this);
+
+    /** @ignore */
     this.apiChangeListener = () => this.drawRoute();
+
+    /** @ignore */
     this.createModifyInteraction();
   }
 
+  /**
+   * Calculate at which resolutions corresponds each generalizations.
+   *
+   * @private
+   */
   static getGraphsResolutions(graphs, map) {
     const view = map.getView();
     return graphs.map(([, minZoom, maxZoom]) => [
       view.getResolutionForZoom(minZoom),
-      view.getResolutionForZoom((maxZoom || minZoom) + 1),
+      view.getResolutionForZoom(maxZoom || minZoom + 1),
     ]);
   }
 
@@ -223,8 +244,6 @@ class RoutingControl extends Control {
     if (this.viaPoints.length < 2) {
       return null;
     }
-    this.abortController.abort();
-    this.abortController = new AbortController();
 
     const formattedViaPoints = this.viaPoints.map((viaPoint) => {
       if (Array.isArray(viaPoint)) {
@@ -242,13 +261,15 @@ class RoutingControl extends Control {
     this.routingLayer.olLayer.getSource().clear();
 
     // Create point features for the viaPoints
-    this.viaPoints.forEach((viaPoint, idx) => {
-      return this.drawViaPoint(viaPoint, idx);
-    });
+    this.viaPoints.forEach((viaPoint, idx) => this.drawViaPoint(viaPoint, idx));
 
     return Promise.all(
-      this.graphs.map(([graph], index) =>
-        this.api
+      this.graphs.map(([graph], index) => {
+        if (this.abortControllers[graph]) {
+          this.abortControllers[graph].abort();
+        }
+        this.abortControllers[graph] = new AbortController();
+        return this.api
           .route(
             {
               graph,
@@ -260,7 +281,7 @@ class RoutingControl extends Control {
               'coord-punish': 1000.0,
               ...this.routingApiParams,
             },
-            this.abortController,
+            this.abortControllers[graph],
           )
           .then((featureCollection) => {
             this.segments = this.format.readFeatures(featureCollection);
@@ -317,11 +338,16 @@ class RoutingControl extends Control {
               target: this,
             });
             this.onRouteError(error, this);
-          }),
-      ),
+          });
+      }),
     );
   }
 
+  /**
+   * Draw a via point.
+   *
+   * @private
+   */
   drawViaPoint(viaPoint, idx) {
     const pointFeature = new Feature();
     pointFeature.set('viaPointIdx', idx);
@@ -406,6 +432,7 @@ class RoutingControl extends Control {
       .filter((feat) => feat.getGeometry() instanceof Point) || [])[0];
 
     // Write object with modify info
+    /** @ignore */
     this.initialRouteDrag = {
       viaPoint,
       oldRoute: route && route.clone(),
@@ -442,10 +469,13 @@ class RoutingControl extends Control {
     return this.addViaPoint(coord, segmentIndex + 1);
   }
 
+  /**
+   * Define a default element.
+   *
+   * @private
+   */
   createDefaultElement() {
-    /**
-     * Define a default element.
-     */
+    /** @ignore */
     this.element = document.createElement('button');
     this.element.id = 'ol-toggle-routing';
     this.element.innerHTML = 'Toggle Route Control';
@@ -497,7 +527,11 @@ class RoutingControl extends Control {
    * @private
    */
   addListeners() {
+    if (!this.modify) {
+      return;
+    }
     this.removeListeners();
+    /** @ignore */
     this.onMapClickKey = this.map.on('singleclick', this.onMapClick);
   }
 
@@ -529,7 +563,7 @@ class RoutingControl extends Control {
       // Add modify interaction, RoutingLayer and listeners
       this.map.addLayer(this.routingLayer);
       this.map.addInteraction(this.modifyInteraction);
-      this.modifyInteraction.setActive(true);
+      this.modifyInteraction.setActive(this.modify);
       this.addListeners();
     } else {
       // fall back to some default values if map is not available

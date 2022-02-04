@@ -130,14 +130,12 @@ export default class Layer extends Observable {
         writable: true,
       },
       copyrights: {
-        get: () => {
-          return this.get('copyrights');
-        },
+        get: () => this.get('copyrights'),
         set: (newCopyrights) => {
           const arrValue = !Array.isArray(newCopyrights)
             ? [newCopyrights]
             : newCopyrights;
-          return this.set('copyrights', arrValue);
+          this.set('copyrights', arrValue);
         },
       },
       visible: {
@@ -186,7 +184,7 @@ export default class Layer extends Observable {
    * Get a layer property.
    *
    * @param {string} name Property name.
-   * @returns {property} Property
+   * @return {property} Property
    */
   get(name) {
     return this.properties[name];
@@ -239,7 +237,7 @@ export default class Layer extends Observable {
   /**
    * Returns an array with visible child layers
    *
-   * @returns {Layer[]} Visible children
+   * @return {Layer[]} Visible children
    */
   getVisibleChildren() {
     return this.children.filter((child) => child.visible);
@@ -248,7 +246,7 @@ export default class Layer extends Observable {
   /**
    * Checks whether the layer has child layers with visible set to True
    *
-   * @returns {boolean} True if the layer has visible child layers
+   * @return {boolean} True if the layer has visible child layers
    * @deprecated
    */
   hasVisibleChildren() {
@@ -259,7 +257,7 @@ export default class Layer extends Observable {
    * Checks whether the layer has any child layers with visible equal to the input parameter
    *
    * @param {boolean} visible The state to check the childlayers against
-   * @returns {boolean} True if the layer has children with the given visibility
+   * @return {boolean} True if the layer has children with the given visibility
    */
   hasChildren(visible) {
     return !!this.children.find((child) => child.visible === visible);
@@ -302,7 +300,7 @@ export default class Layer extends Observable {
    *
    * @param {ol/coordinate~Coordinate} coordinate Coordinate.
    * @param {Object} options Some options. See child classes to see which are supported.
-   * @returns {Promise<FeatureInfo>} An empty response.
+   * @return {Promise<FeatureInfo>} An empty response.
    */
   // eslint-disable-next-line no-unused-vars
   getFeatureInfoAtCoordinate(coordinate, options) {
@@ -346,7 +344,7 @@ export default class Layer extends Observable {
   unClick(callback) {
     if (typeof callback === 'function') {
       const idx = this.clickCallbacks.indexOf(callback);
-      if (idx >= -1) {
+      if (idx > -1) {
         this.clickCallbacks.splice(idx, 1);
       }
     }
@@ -376,9 +374,7 @@ export default class Layer extends Observable {
         );
         return featureInfo;
       })
-      .catch(() => {
-        return emptyFeatureInfo;
-      });
+      .catch(() => emptyFeatureInfo);
   }
 
   /**
@@ -404,7 +400,7 @@ export default class Layer extends Observable {
   unHover(callback) {
     if (typeof callback === 'function') {
       const idx = this.hoverCallbacks.indexOf(callback);
-      if (idx >= -1) {
+      if (idx > -1) {
         this.hoverCallbacks.splice(idx, 1);
       }
     }
@@ -434,8 +430,6 @@ export default class Layer extends Observable {
         );
         return featureInfo;
       })
-      .catch(() => {
-        return emptyFeatureInfo;
-      });
+      .catch(() => emptyFeatureInfo);
   }
 }

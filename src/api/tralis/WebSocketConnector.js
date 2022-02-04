@@ -1,34 +1,84 @@
 /**
- * Class use to facilitate connection to a WebSocket
+ * Class used to facilitate connection to a WebSocket and
+ * also to manage properly messages send to the WebSocket.
+ * This class must not contain any specific implementation.
+ *
  * @private
  */
 class WebSocketConnector {
-  constructor(url) {
-    /**
-     * Array of subscriptions.
-     * @type {Array<subscription>}
-     */
-    this.subscriptions = [];
-    this.connect(url);
+  constructor() {
+    this.defineProperties();
+  }
 
-    this.isSUBAllow = false;
-    this.isDELAllow = false;
+  defineProperties() {
+    Object.defineProperties(this, {
+      closed: {
+        get: () =>
+          !!(
+            this.websocket &&
+            this.websocket.readyState === this.websocket.CLOSED
+          ),
+      },
+      closing: {
+        get: () =>
+          !!(
+            this.websocket &&
+            this.websocket.readyState === this.websocket.CLOSING
+          ),
+      },
+      connecting: {
+        get: () =>
+          !!(
+            this.websocket &&
+            this.websocket.readyState === this.websocket.CONNECTING
+          ),
+      },
+      open: {
+        get: () =>
+          !!(
+            this.websocket && this.websocket.readyState === this.websocket.OPEN
+          ),
+      },
+      /**
+       * Array of message to send on open.
+       * @type {Array<string>}
+       * @private
+       */
+      messagesOnOpen: {
+        value: [],
+        writable: true,
+      },
+      /**
+       * Array of subscriptions.
+       * @type {Array<subscription>}
+       * @private
+       */
+      subscriptions: {
+        value: [],
+        writable: true,
+      },
 
-    // keep websocket alive
-    setInterval(() => {
-      this.send('PING');
-    }, 10000);
-    this.subscribed = {};
+      /**
+       * List of channels subscribed.
+       * @type {Array<subscription>}
+       * @private
+       */
+      subscribed: {
+        value: {},
+        writable: true,
+      },
+    });
   }
 
   /**
    * Get the websocket request string.
+   *
    * @param {string} method Request mehtod {GET, SUB}.
    * @param {Object} params Request parameters.
    * @param {string} params.channel Channel name
    * @param {string} [params.args] Request arguments
    * @param {Number} [params.id] Request identifier
-   * @returns {string} request string
+   * @return {string} request string
    * @private
    */
   static getRequestString(method, params) {
@@ -40,39 +90,141 @@ class WebSocketConnector {
 
   /**
    * (Re)connect the websocket.
-   * @param {string} url url to connect to
+   *
+   * @param {strin} url Websocket url.
+   * @param {function} onOpen Callback called when the websocket connection is opened and before subscriptions of previous subscriptions.
    * @private
    */
-  connect(url) {
-    if (this.websocket && this.websocket.readyState !== this.websocket.CLOSED) {
+  connect(url, onOpen = () => {}) {
+    if (this.websocket && !this.closed) {
       this.websocket.close();
     }
 
     /** @ignore */
     this.websocket = new WebSocket(url);
 
-    // if (this.currentProj) {
-    //   this.setProjection(this.currentProj);
-    // }
+    if (!this.open) {
+      this.websocket.addEventListener('open', () => {
+        onOpen();
+        this.subscribePreviousSubscriptions();
+      });
+    } else {
+      onOpen();
+      this.subscribePreviousSubscriptions();
+    }
+  }
 
-    [...this.subscriptions].forEach((s) => {
-      this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
-    });
+  /**
+   * Close the websocket definitively.
+   *
+   * @private
+   */
+  close() {
+    if (this.websocket) {
+      this.websocket.onclose = null;
+      this.websocket.close();
+      this.websocket = null;
+      this.messagesOnOpen = [];
+    }
+  }
 
-    if (this.currentBbox) {
-      this.setBbox(this.currentBbox);
+  /**
+   * Sends a message to the websocket.
+   *
+   * @param {message} message Message to send.
+   * @private
+   */
+  send(message) {
+    if (!this.websocket) {
+      return;
+    }
+    const send = () => {
+      this.websocket.send(message);
+    };
+    if (!this.open) {
+      // This 'if' avoid sending 2 identical BBOX message on open,
+      if (!this.messagesOnOpen.includes(message)) {
+        this.messagesOnOpen.push(message);
+        this.websocket.addEventListener('open', () => {
+          this.messagesOnOpen = [];
+          send();
+        });
+        this.websocket.addEventListener('close', () => {
+          this.messagesOnOpen = [];
+        });
+      }
+    } else if (!this.messagesOnOpen.includes(message)) {
+      send();
+    }
+  }
+
+  /**
+   * Listen to websocket messages.
+   *
+   * @param {Object} params Parameters for the websocket get request
+   * @param {function} cb callback on listen
+   * @param {function} errorCb Callback on error
+   * @return {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
+   * @private
+   */
+  listen(params, cb, errorCb) {
+    // Remove the previous identical callback
+    this.unlisten(params, cb);
+
+    const onMessage = (evt) => {
+      const data = JSON.parse(evt.data);
+      let source = params.channel;
+      source += params.args ? ` ${params.args}` : '';
+
+      if (
+        data.source === source &&
+        (!params.id || params.id === data.client_reference)
+      ) {
+        cb(data);
+      }
+    };
+
+    if (this.websocket) {
+      this.websocket.addEventListener('message', onMessage);
+
+      if (errorCb) {
+        this.websocket.addEventListener('error', errorCb);
+        this.websocket.addEventListener('close', errorCb);
+      }
     }
 
-    // reconnect on close
-    this.websocket.onclose = () => {
-      window.clearTimeout(this.reconnectTimeout);
-      /** @ignore */
-      this.reconnectTimeout = window.setTimeout(() => this.connect(url), 100);
-    };
+    return { onMessageCb: onMessage, onErrorCb: errorCb };
+  }
+
+  /**
+   * Unlisten websocket messages.
+   *
+   * @param {Object} params Parameters for the websocket get request.
+   * @param {function} cb Callback used when listen.
+   * @private
+   */
+  unlisten(params, cb) {
+    if (!this.websocket) {
+      return;
+    }
+    this.subscriptions
+      .filter(
+        (s) => s.params.channel === params.channel && (!cb || s.cb === cb),
+      )
+      .forEach(({ onMessageCb, onErrorCb }) => {
+        if (this.websocket) {
+          this.websocket.removeEventListener('message', onMessageCb);
+          if (onErrorCb) {
+            this.websocket.removeEventListener('error', onErrorCb);
+            this.websocket.removeEventListener('close', onErrorCb);
+          }
+        }
+      });
   }
 
   /**
    * Sends a get request to the websocket.
+   *
    * @param {Object} params Parameters for the websocket get request
    * @param {function} cb callback on listen
    * @param {function} errorCb Callback on error
@@ -85,118 +237,21 @@ class WebSocketConnector {
   }
 
   /**
-   * Sends a message to the websocket.
-   * @param {message} message Message to send.
-   * @private
-   */
-  send(message) {
-    const send = () => {
-      this.websocket.send(message);
-    };
-
-    if (this.websocket.readyState === WebSocket.CONNECTING) {
-      this.websocket.addEventListener('open', send);
-    } else {
-      send();
-    }
-  }
-
-  /**
-   * Set the projection for websocket responses.
-   * @param {string} value projection value to be set
-   * @private
-   */
-  setProjection(value) {
-    /**
-     * The projection for websocket responses
-     * @type {string}
-     */
-    this.currentProj = value;
-    this.send(`PROJECTION ${value}`);
-  }
-
-  /**
-   * Set the BBOX for websocket responses.
-   *  @param {Array<Array<number>>} coordinates array of coordinates
-   * @private
-   */
-  setBbox(coordinates) {
-    /**
-     * The BBOX for websocket responses
-     * @type {Array<Array<number>>}
-     */
-    this.currentBbox = coordinates;
-
-    this.send(`BBOX ${coordinates.join(' ')}`);
-    // this.subscriptions.forEach((s) => {
-    //   this.get(s.params, s.cb, s.errorCb);
-    // });
-  }
-
-  /**
-   * Listen to websocket responses.
-   * @private
-   * @param {Object} params Parameters for the websocket get request
-   * @param {function} cb callback on listen
-   * @param {function} errorCb Callback on error
-   * @returns {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
-   */
-  listen(params, cb, errorCb) {
-    // Remove the previous identical callback
-    this.unlisten(params, cb);
-
-    const onMessage = (e) => {
-      const data = JSON.parse(e.data);
-      let source = params.channel;
-      source += params.args ? ` ${params.args}` : '';
-
-      if (
-        data.source === source &&
-        (!params.id || params.id === data.client_reference)
-      ) {
-        cb(data);
-      }
-    };
-
-    this.websocket.addEventListener('message', onMessage);
-
-    if (errorCb) {
-      this.websocket.addEventListener('error', errorCb);
-      this.websocket.addEventListener('close', errorCb);
-    }
-
-    return { onMessageCb: onMessage, onErrorCb: errorCb };
-  }
-
-  unlisten(params, cb) {
-    this.subscriptions
-      .filter((s) => {
-        return s.params.channel === params.channel && (!cb || s.cb === cb);
-      })
-      .forEach(({ onMessageCb, onErrorCb }) => {
-        this.websocket.removeEventListener('message', onMessageCb);
-        if (onErrorCb) {
-          this.websocket.removeEventListener('error', onErrorCb);
-          this.websocket.removeEventListener('close', onErrorCb);
-        }
-      });
-  }
-
-  /**
    * Subscribe to a given channel.
-   * @private
+   *
    * @param {Object} params Parameters for the websocket get request
    * @param {function} cb callback on listen
    * @param {function} errorCb Callback on error
    * @param {boolean} quiet if false, no GET or SUB requests are send, only the callback is registered.
+   * @private
    */
   subscribe(params, cb, errorCb, quiet = false) {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
     const reqStr = WebSocketConnector.getRequestString('', params);
 
-    const index = this.subscriptions.findIndex((subcr) => {
-      return params.channel === subcr.params.channel && cb === subcr.cb;
-    });
+    const index = this.subscriptions.findIndex(
+      (subcr) => params.channel === subcr.params.channel && cb === subcr.cb,
+    );
     const newSubscr = { params, cb, errorCb, onMessageCb, onErrorCb, quiet };
     if (index > -1) {
       this.subscriptions[index] = newSubscr;
@@ -205,13 +260,10 @@ class WebSocketConnector {
     }
 
     if (!this.subscribed[reqStr]) {
-      // if (!newSubscr.quiet) {
-      this.send(`GET ${reqStr}`);
-
-      if (this.isSUBAllow) {
+      if (!newSubscr.quiet) {
+        this.send(`GET ${reqStr}`);
         this.send(`SUB ${reqStr}`);
       }
-
       this.subscribed[reqStr] = true;
     }
   }
@@ -223,33 +275,54 @@ class WebSocketConnector {
    * @private
    */
   unsubscribe(source, cb) {
-    this.subscriptions
-      .filter((s) => {
-        return s.params.channel === source && (!cb || s.cb === cb);
-      })
-      .forEach(({ onMessageCb, onErrorCb }) => {
+    const toRemove = this.subscriptions.filter(
+      (s) => s.params.channel === source && (!cb || s.cb === cb),
+    );
+
+    toRemove.forEach(({ onMessageCb, onErrorCb }) => {
+      if (this.websocket) {
         this.websocket.removeEventListener('message', onMessageCb);
         if (onErrorCb) {
           this.websocket.removeEventListener('error', onErrorCb);
           this.websocket.removeEventListener('close', onErrorCb);
         }
-      });
+      }
+    });
 
     this.subscriptions = this.subscriptions.filter(
       (s) => s.params.channel !== source || (cb && s.cb !== cb),
     );
 
-    // If there is no more subscriptions to this channel we DEL it.
+    // If there is no more subscriptions to this channel, and the removed subscriptions didn't register quietly,
+    // we DEL it.
     if (
       source &&
       this.subscribed[source] &&
-      !this.subscriptions.find((s) => s.params.channel === source)
+      !this.subscriptions.find((s) => s.params.channel === source) &&
+      toRemove.find((subscr) => !subscr.quiet)
     ) {
       if (this.isDELAllow) {
         this.send(`DEL ${source}`);
       }
       this.subscribed[source] = false;
     }
+  }
+
+  /**
+   * After an auto reconnection we need to re-subscribe to the channels.
+   */
+  subscribePreviousSubscriptions() {
+    // Before to subscribe previous subscriptions we make sure they
+    // are all defined as unsubscribed, because this code is asynchrone
+    // and a subscription could have been added in between.
+    Object.keys(this.subscribed).forEach((key) => {
+      this.subscribed[key] = false;
+    });
+
+    // Subscribe all previous subscriptions.
+    [...this.subscriptions].forEach((s) => {
+      this.subscribe(s.params, s.cb, s.errorCb, s.quiet);
+    });
   }
 }
 

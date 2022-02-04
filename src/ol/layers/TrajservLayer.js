@@ -25,6 +25,7 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
  *
  * @extends {TrackerLayer}
  * @implements {TrajservLayerInterface}
+ * @deprecated Use {@link TralisLayer} instead.
  */
 class TrajservLayer extends mixin(TrackerLayer) {
   /**
@@ -102,9 +103,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
     // Add station points
     if (stationsCoords) {
       const geometry = new MultiPoint(
-        stationsCoords.map((coords) => {
-          return fromLonLat(coords);
-        }),
+        stationsCoords.map((coords) => fromLonLat(coords)),
       );
       const aboveStationsFeature = new Feature(geometry);
       aboveStationsFeature.setStyle(
@@ -162,7 +161,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
    * @override
    * * Returns the URL parameters.
    * @param {Object} extraParams Extra parameters
-   * @returns {Object}
+   * @return {Object}
    * @private
    */
   getParams(extraParams = {}) {
@@ -181,7 +180,7 @@ class TrajservLayer extends mixin(TrackerLayer) {
   /**
    * Create a copy of the TrajservLayer.
    * @param {Object} newOptions Options to override
-   * @returns {TrajservLayer} A TrajservLayer
+   * @return {TrajservLayer} A TrajservLayer
    */
   clone(newOptions) {
     return new TrajservLayer({ ...this.options, ...newOptions });

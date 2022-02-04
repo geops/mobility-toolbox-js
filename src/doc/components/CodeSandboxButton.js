@@ -10,7 +10,7 @@ const useStyles = makeStyles({
   },
 });
 
-const CodeSandboxButton = ({ html, js, extraFiles, ...props }) => {
+function CodeSandboxButton({ html, js, extraFiles, ...props }) {
   const classes = useStyles();
 
   if (!html || !js) {
@@ -85,7 +85,7 @@ const CodeSandboxButton = ({ html, js, extraFiles, ...props }) => {
       </Button>
     </form>
   );
-};
+}
 
 CodeSandboxButton.propTypes = {
   html: PropTypes.string,

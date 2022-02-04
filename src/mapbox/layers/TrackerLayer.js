@@ -211,7 +211,7 @@ class TrackerLayer extends mixin(Layer) {
    *
    * @param {Array<number>} coordinate
    * @param {number} nb Number of vehicles to return;
-   * @returns {Array<ol/Feature~Feature>} Array of vehicle.
+   * @return {Array<ol/Feature~Feature>} Array of vehicle.
    * @override
    */
   getVehiclesAtCoordinate(coordinate, nb) {
@@ -219,9 +219,12 @@ class TrackerLayer extends mixin(Layer) {
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
-  getFeatureInfoAtCoordinate(coordinate) {
+  getFeatureInfoAtCoordinate(coordinate, options = {}) {
     const resolution = getMercatorResolution(this.map);
-    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+    return super.getFeatureInfoAtCoordinate(coordinate, {
+      resolution,
+      ...options,
+    });
   }
 
   onVisibilityChange() {

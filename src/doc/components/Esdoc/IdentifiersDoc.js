@@ -13,7 +13,7 @@ import { escapeURLHash } from './DocBuilderUtils';
  * @return {IceCap} built output.
  * @private
  */
-const IdentifiersDoc = ({ docs }) => {
+function IdentifiersDoc({ docs }) {
   // traverse docs and create Map<dirPath, doc[]>
   const dirDocs = new Map();
   const kinds = ['class', 'interface', 'function', 'variable'];
@@ -108,6 +108,6 @@ const IdentifiersDoc = ({ docs }) => {
       </div>
     </>
   );
-};
+}
 
 export default React.memo(IdentifiersDoc);

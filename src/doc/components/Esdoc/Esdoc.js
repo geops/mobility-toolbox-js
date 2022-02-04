@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
   content: {
     padding: theme.spacing(1),
     paddingBottom: 115,
-    margin: 'auto',
+    margin: '0 auto',
     maxWidth: '740px',
   },
   navWrapper: {
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Esdoc = ({ path }) => {
+function Esdoc({ path }) {
   const classes = useStyles();
 
   if (!path) {
@@ -58,6 +58,6 @@ const Esdoc = ({ path }) => {
       </Hidden>
     </div>
   );
-};
+}
 
 export default React.memo(Esdoc);

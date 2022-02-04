@@ -11,7 +11,7 @@ import DocLinkHTML from './DocLinkHTML';
 /**
  * See InhertiedSummaryHTML component.
  */
-const InheritedSummaryDoc = ({ longname, kind }) => {
+function InheritedSummaryDoc({ longname, kind }) {
   const [open, setOpen] = useState('closed');
   const superDoc = _find({ longname })[0];
 
@@ -45,21 +45,19 @@ const InheritedSummaryDoc = ({ longname, kind }) => {
   });
 
   const title = (
-    <>
-      <span
-        onClick={toggle}
-        onKeyPress={(evt) => {
-          if (evt.which === 13) {
-            toggle();
-          }
-        }}
-        role="button"
-        tabIndex="0"
-      >
-        <span className={`toggle ${open}`} /> From {superDoc.kind}{' '}
-        <DocLinkHTML longname={longname} text={superDoc.name} />
-      </span>
-    </>
+    <span
+      onClick={toggle}
+      onKeyPress={(evt) => {
+        if (evt.which === 13) {
+          toggle();
+        }
+      }}
+      role="button"
+      tabIndex="0"
+    >
+      <span className={`toggle ${open}`} /> From {superDoc.kind}{' '}
+      <DocLinkHTML longname={longname} text={superDoc.name} />
+    </span>
   );
   return (
     <SummaryDoc
@@ -68,5 +66,5 @@ const InheritedSummaryDoc = ({ longname, kind }) => {
       style={{ display: open === 'opened' ? 'block' : 'none' }}
     />
   );
-};
+}
 export default React.memo(InheritedSummaryDoc);

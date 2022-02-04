@@ -36,7 +36,7 @@ class TrajservAPI extends API {
    *
    * @param {GetTrajectoryByIdParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajectorybyid).
    * @param {AbortController} abortController Abort controller used to cancel the request.
-   * @returns {Promise<TrajservTrajectory>} A trajectory.
+   * @return {Promise<TrajservTrajectory>} A trajectory.
    */
   fetchTrajectoryById(params, abortController = {}) {
     return this.fetch(`/trajectorybyid`, params, {
@@ -70,14 +70,12 @@ class TrajservAPI extends API {
    *
    * @param {GetTrajectoriesParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajectory_collection).
    * @param {AbortController} abortController Abort controller used to cancel the request.
-   * @returns {Promise<Array<Trajectory>>} A list of trajectories.
+   * @return {Promise<Array<Trajectory>>} A list of trajectories.
    */
   fetchTrajectories(params, abortController = {}) {
     return this.fetch(`/trajectory_collection`, params, {
       signal: abortController.signal,
-    }).then((data) => {
-      return translateTrajCollResponse(data.features);
-    });
+    }).then((data) => translateTrajCollResponse(data.features));
   }
 
   /**
@@ -85,14 +83,12 @@ class TrajservAPI extends API {
    *
    * @param {GetTrajectoryStationsParams} params Request parameters. See [Realtime service documentation](https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajstations).
    * @param {AbortController} abortController Abort controller used to cancel the request.
-   * @returns {Promise<Array<TrajectoryStation>>} A list of stations.
+   * @return {Promise<Array<TrajectoryStation>>} A list of stations.
    */
   fetchTrajectoryStations(params, abortController = {}) {
     return this.fetch(`/trajstations`, params, {
       signal: abortController.signal,
-    }).then((data) => {
-      return translateTrajStationsResp(data);
-    });
+    }).then((data) => translateTrajStationsResp(data));
   }
 }
 

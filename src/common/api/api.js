@@ -29,9 +29,9 @@ class API extends BaseObject {
    * Append the apiKey before sending the request.
    * @ignore
    */
-  fetch(path = '', params = {}, config) {
+  fetch(path, params, config) {
     // Clean requets parameters, removing undefined and null values.
-    const urlParams = { ...params, key: this.apiKey };
+    const urlParams = { ...(params || {}), key: this.apiKey };
     const clone = { ...urlParams };
     Object.keys(urlParams).forEach(
       (key) =>
@@ -43,20 +43,21 @@ class API extends BaseObject {
         new Error(`No apiKey defined for request to ${this.url}`),
       );
     }
-    return fetch(`${this.url}${path}?${qs.stringify(clone)}`, config).then(
-      (response) => {
-        try {
-          return response.json().then((data) => {
-            if (data.error) {
-              throw new Error(data.error);
-            }
-            return data;
-          });
-        } catch (err) {
-          return Promise.reject(new Error(err));
-        }
-      },
-    );
+    return fetch(
+      `${this.url}${path || ''}?${qs.stringify(clone)}`,
+      config,
+    ).then((response) => {
+      try {
+        return response.json().then((data) => {
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          return data;
+        });
+      } catch (err) {
+        return Promise.reject(new Error(err));
+      }
+    });
   }
 }
 

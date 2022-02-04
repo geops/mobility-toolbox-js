@@ -2,7 +2,6 @@ import { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import stringify from 'json-stringify-safe';
-
 import { Vector as VectorSource } from 'ol/source';
 import mixin from '../../common/mixins/TrackerLayerMixin';
 
@@ -12,42 +11,15 @@ import Worker from '../../common/tracker.worker';
 
 const updateContainerTransform = (layer) => {
   if (layer.renderedViewState) {
-    // const {
-    //   center,
-    //   resolution,
-    //   rotation,
-    // } = layer.mainThreadFrameState.viewState;
-    // const {
-    //   center: renderedCenter,
-    //   resolution: renderedResolution,
-    //   rotation: renderedRotation,
-    // } = layer.workerFrameState.viewState;
-
-    // // eslint-disable-next-line no-param-reassign
-    // layer.transformContainer.style.transform = composeCssTransform(
-    //   (renderedCenter[0] - center[0]) / resolution,
-    //   (center[1] - renderedCenter[1]) / resolution,
-    //   renderedResolution / resolution,
-    //   renderedResolution / resolution,
-    //   rotation - renderedRotation,
-    //   0,
-    //   0,
-    // );
-
-    const {
-      center,
-      resolution,
-      rotation,
-    } = layer.mainThreadFrameState.viewState;
+    const { center, resolution, rotation } =
+      layer.mainThreadFrameState.viewState;
     const {
       center: renderedCenter,
       resolution: renderedResolution,
       rotation: renderedRotation,
     } = layer.renderedViewState;
-    const pixelCenterRendered = layer.map.getPixelFromCoordinate(
-      renderedCenter,
-    );
-
+    const pixelCenterRendered =
+      layer.map.getPixelFromCoordinate(renderedCenter);
     const pixelCenter = layer.map.getPixelFromCoordinate(center);
     // eslint-disable-next-line no-param-reassign
     layer.transformContainer.style.transform = composeCssTransform(
@@ -58,6 +30,8 @@ const updateContainerTransform = (layer) => {
       rotation - renderedRotation,
       0,
       0,
+      this.canvas.width,
+      this.canvas.height,
     );
   }
 };
@@ -133,10 +107,11 @@ class TrackerLayer extends mixin(Layer) {
      */
     this.renderWhenInteracting =
       options.renderWhenInteracting ||
-      (() => {
+      (() =>
         // Render trajectories on each render frame when the number of trajectories is small.
-        return false;
-      });
+        this.tracker &&
+        this.tracker.renderedTrajectories &&
+        this.tracker.renderedTrajectories.length <= 200);
 
     /** @ignore */
     this.olLayer =
@@ -173,9 +148,8 @@ class TrackerLayer extends mixin(Layer) {
               this.mainThreadFrameState = frameState;
               if (this.renderedViewState) {
                 const { resolution } = frameState.viewState;
-                const {
-                  resolution: renderedResolution,
-                } = this.renderedViewState;
+                const { resolution: renderedResolution } =
+                  this.renderedViewState;
                 if (
                   this.renderWhenInteracting &&
                   this.renderWhenInteracting(
@@ -186,13 +160,22 @@ class TrackerLayer extends mixin(Layer) {
                   this.renderTrajectories(true);
                 } else if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
-                  const context = this.canvas.getContext('2d');
-                  context.clearRect(
-                    0,
-                    0,
-                    this.canvas.width,
-                    this.canvas.height,
-                  );
+                  this.tracker.clear();
+                  // } else {
+                  //   const pixelCenterRendered =
+                  //     this.map.getPixelFromCoordinate(renderedCenter);
+                  //   const pixelCenter = this.map.getPixelFromCoordinate(center);
+                  //   this.transformContainer.style.transform = composeCssTransform(
+                  //     pixelCenterRendered[0] - pixelCenter[0],
+                  //     pixelCenterRendered[1] - pixelCenter[1],
+                  //     renderedResolution / resolution,
+                  //     renderedResolution / resolution,
+                  //     rotation - renderedRotation,
+                  //     0,
+                  //     0,
+                  //     this.canvas.width,
+                  //     this.canvas.height,
+                  //   );
                 } else {
                   updateContainerTransform(this);
                 }
@@ -245,6 +228,25 @@ class TrackerLayer extends mixin(Layer) {
   terminate() {
     super.terminate();
     this.container = null;
+  }
+
+  /**
+   * Detect in the canvas if there is data to query at a specific coordinate.
+   * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test
+   * @returns
+   */
+  hasFeatureInfoAtCoordinate(coordinate) {
+    if (this.map && this.tracker && this.tracker.canvas) {
+      const context = this.tracker.canvas.getContext('2d');
+      const pixel = this.map.getPixelFromCoordinate(coordinate);
+      return !!context.getImageData(
+        pixel[0] * this.pixelRatio,
+        pixel[1] * this.pixelRatio,
+        1,
+        1,
+      ).data[3];
+    }
+    return false;
   }
 
   /**
@@ -334,7 +336,7 @@ class TrackerLayer extends mixin(Layer) {
    * Returns null when no vehicle is located at the given coordinates.
    * @param {ol/coordinate~Coordinate} coordinate
    * @param {number} nb Number of vehicles to return;
-   * @returns {Array<ol/Feature~Feature>} Vehicle feature.
+   * @return {Array<ol/Feature~Feature>} Vehicle feature.
    * @override
    */
   getVehiclesAtCoordinate(coordinate, nb) {
@@ -342,9 +344,15 @@ class TrackerLayer extends mixin(Layer) {
     return super.getVehiclesAtCoordinate(coordinate, resolution, nb);
   }
 
-  getFeatureInfoAtCoordinate(coordinate) {
+  getFeatureInfoAtCoordinate(coordinate, options = {}) {
+    if (!this.hasFeatureInfoAtCoordinate(coordinate)) {
+      return Promise.resolve({ features: [], layer: this, coordinate });
+    }
     const resolution = this.map.getView().getResolution();
-    return super.getFeatureInfoAtCoordinate(coordinate, { resolution });
+    return super.getFeatureInfoAtCoordinate(coordinate, {
+      resolution,
+      ...options,
+    });
   }
 
   /**
@@ -398,7 +406,7 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Create a copy of the TrackerLayer.
    * @param {Object} newOptions Options to override
-   * @returns {TrackerLayer} A TrackerLayer
+   * @return {TrackerLayer} A TrackerLayer
    */
   clone(newOptions) {
     return new TrackerLayer({ ...this.options, ...newOptions });
