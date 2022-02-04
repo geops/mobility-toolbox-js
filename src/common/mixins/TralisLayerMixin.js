@@ -145,14 +145,14 @@ const TralisLayerMixin = (TrackerLayer) =>
       // Purge trajectories:
       // - which are outside the extent
       // - when it's bus and zoom level is too low for them
-      for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
-        const trajectory = this.trajectories[i];
-        if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
-          const temp = [...this.trajectories];
-          temp.splice(i, 1);
-          this.tracker.setTrajectories(temp);
-        }
-      }
+      // for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
+      //   const trajectory = this.trajectories[i];
+      //   if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
+      //     const temp = [...this.trajectories];
+      //     temp.splice(i, 1);
+      //     this.tracker.setTrajectories(temp);
+      //   }
+      // }
 
       const bbox = [...extent];
 
@@ -241,26 +241,13 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @private
      */
     addTrajectory(traj, addOnTop) {
-      const idx = this.trajectories.findIndex(
-        (t) => t.train_id === traj.train_id,
-      );
-      const { time_intervals: timeIntervals } = traj;
-
-      // Properties needed to display the vehicle.
-      const trajectory = { ...traj, id: traj.train_id, timeIntervals };
-      if (addOnTop) {
-        this.trajectories.unshift(trajectory);
-        if (idx !== -1) {
-          this.tracker.trajectories.splice(idx + 1, 1);
-        }
-      } else {
-        this.trajectories.push(trajectory);
-        if (idx !== -1) {
-          this.tracker.trajectories.splice(idx, 1);
-        }
+      if (this.worker) {
+        // console.log('addTrajectory', traj.train_id);
+        this.worker.postMessage({
+          action: 'addTrajectory',
+          trajectory: traj,
+        });
       }
-
-      this.tracker.setTrajectories(this.trajectories);
     }
 
     /**
@@ -269,11 +256,11 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @private
      */
     removeTrajectory(id) {
-      for (let i = 0, len = this.trajectories.length; i < len; i += 1) {
-        if (this.trajectories[i].train_id === id) {
-          this.trajectories.splice(i, 1);
-          break;
-        }
+      if (this.worker) {
+        this.worker.postMessage({
+          action: 'removeTrajectory',
+          trajectoryId: id,
+        });
       }
     }
 
@@ -287,25 +274,12 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (!data.content) {
         return;
       }
-
-      const feat = this.format.readFeature(data.content);
-
-      feat.set('timeOffset', Date.now() - data.timestamp);
+      const trajectory = { ...data.content };
+      trajectory.properties.timeOffset = Date.now() - data.timestamp;
 
       // ignore old events [SBAHNM-97]
-      if (feat.get('time_since_update') >= 0) {
-        if (
-          this.debug &&
-          this.mode === TralisModes.TOPOGRAPHIC &&
-          feat.get('raw_coordinates')
-        ) {
-          const point = new Point(feat.get('raw_coordinates'));
-          point.transform('EPSG:4326', this.map.getView().getProjection());
-          feat.setGeometry(point);
-        }
-        if (!this.mustNotBeDisplayed(feat.getProperties())) {
-          this.addTrajectory(feat.getProperties(), !feat.get('line'));
-        }
+      if (trajectory.properties.time_since_update >= 0) {
+        this.addTrajectory(trajectory);
       }
     }
 

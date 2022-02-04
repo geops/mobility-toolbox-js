@@ -158,13 +158,14 @@ const style = (trajectory, viewState, options) => {
     delayDisplay,
   } = options;
 
+  const { zoom, pixelRatio } = viewState;
+  let { line, type } = trajectory.properties;
   const {
-    zoom,
-    pixelRatio,
+    train_id: id,
+    delay,
+    cancelled = false,
     operator_provides_realtime_journey: operatorProvidesRealtime,
-  } = viewState;
-  let { line, type } = trajectory;
-  const { id, delay, cancelled = false } = trajectory;
+  } = trajectory.properties;
 
   if (!type) {
     type = 'Rail';
@@ -193,8 +194,8 @@ const style = (trajectory, viewState, options) => {
   }
 
   const z = Math.min(Math.floor(zoom || 1), 16);
-  const hover = hoverVehicleId === id;
-  const selected = selectedVehicleId === id;
+  const hover = hoverVehicleId && hoverVehicleId === id;
+  const selected = selectedVehicleId && selectedVehicleId === id;
 
   // Calcul the radius of the circle
   let radius = getRadius(type, z) * pixelRatio;
@@ -204,6 +205,7 @@ const style = (trajectory, viewState, options) => {
       ? radius + 5 * pixelRatio
       : 14 * pixelRatio;
   }
+
   const mustDrawText = radius > 10 * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level

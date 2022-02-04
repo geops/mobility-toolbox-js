@@ -30,8 +30,8 @@ const updateContainerTransform = (layer) => {
       rotation - renderedRotation,
       0,
       0,
-      this.canvas.width,
-      this.canvas.height,
+      layer.canvas.width,
+      layer.canvas.height,
     );
   }
 };
@@ -69,33 +69,39 @@ class TrackerLayer extends mixin(Layer) {
         that.map.render();
       } else if (that.canvas && message.data.action === 'rendered') {
         if (
-          that.map.getView().getInteracting() ||
-          that.map.getView().getAnimating()
+          !that.renderWhenInteracting(
+            that.mainThreadFrameState.viewState,
+            that.renderedViewState,
+          ) &&
+          (that.map.getView().getInteracting() ||
+            that.map.getView().getAnimating())
         ) {
           return;
         }
-        // Worker provies a new render frame
-        requestAnimationFrame(() => {
-          if (
-            that.map.getView().getInteracting() ||
-            that.map.getView().getAnimating()
-          ) {
-            return;
-          }
-          const { imageData, nbRenderedTrajectories } = message.data;
-          this.nbRenderedTrajectories = nbRenderedTrajectories;
-          that.canvas.width = imageData.width;
-          that.canvas.height = imageData.height;
-          this.canvas.style.transform = ``;
-          this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
-          this.canvas.style.height = `${
-            this.canvas.height / this.pixelRatio
-          }px`;
-          that.canvas.getContext('2d').drawImage(imageData, 0, 0);
-          // this.canvas.style.transform = message.data.transform;
-          that.renderedViewState = message.data.frameState.viewState;
-          updateContainerTransform(that);
-        });
+        // Worker provides a new render frame
+        // requestAnimationFrame(() => {
+        //   if (
+        //     !that.renderWhenInteracting(
+        //       that.mainThreadFrameState.viewState,
+        //       that.renderedViewState,
+        //     ) &&
+        //     (that.map.getView().getInteracting() ||
+        //       that.map.getView().getAnimating())
+        //   ) {
+        //     return;
+        //   }
+        const { imageData, nbRenderedTrajectories } = message.data;
+        this.nbRenderedTrajectories = nbRenderedTrajectories;
+        that.canvas.width = imageData.width;
+        that.canvas.height = imageData.height;
+        this.canvas.style.transform = ``;
+        this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
+        this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
+        // this.canvas.style.transform = message.data.transform;
+        that.renderedViewState = message.data.frameState.viewState;
+        updateContainerTransform(that);
+        that.canvas.getContext('2d').drawImage(imageData, 0, 0);
+        // });
         that.rendering = false;
       }
     };
@@ -109,9 +115,7 @@ class TrackerLayer extends mixin(Layer) {
       options.renderWhenInteracting ||
       (() =>
         // Render trajectories on each render frame when the number of trajectories is small.
-        this.tracker &&
-        this.tracker.renderedTrajectories &&
-        this.tracker.renderedTrajectories.length <= 200);
+        this.nbRenderedTrajectories < 200);
 
     /** @ignore */
     this.olLayer =
@@ -160,7 +164,10 @@ class TrackerLayer extends mixin(Layer) {
                   this.renderTrajectories(true);
                 } else if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
-                  this.tracker.clear();
+                  this.canvas
+                    .getContext('2d')
+                    .clearRect(0, 0, this.canvas.width, this.canvas.height);
+
                   // } else {
                   //   const pixelCenterRendered =
                   //     this.map.getPixelFromCoordinate(renderedCenter);
