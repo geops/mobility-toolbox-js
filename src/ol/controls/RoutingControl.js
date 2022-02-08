@@ -10,6 +10,22 @@ import RoutingAPI from '../../api/routing/RoutingAPI';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
 
+// Examples for a single hop:
+// basel sbb a station named "basel sbb"
+// ZUE, station "Zürich HB" by its common abbreviation
+// Zürich Hauptbahnhof or HBF Zürich are all valid synonyms für "Zürich HB"
+// @47.37811,8.53935 a station at position 47.37811, 8.53935
+// @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
+// zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
+const REGEX_VIA_POINT =
+  /^([^@$!]*)(@([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
+
+// Examples for a single hop:
+//
+// !8596126 a station with id 8596126
+// !8596126$4 a station with id 8596126
+const REGEX_VIA_POINT_STATION_ID = /^!([^$]*)(\$?([a-zA-Z0-9]{0,2}))$/;
+
 const getFlatCoordinatesFromSegments = (segmentArray) => {
   const coords = [];
   segmentArray.forEach((seg) => {
@@ -37,6 +53,8 @@ const getFlatCoordinatesFromSegments = (segmentArray) => {
  * @classproperty {Array.<Array<graph="osm", minZoom=0, maxZoom=99>>} graphs - Array of routing graphs and min/max zoom levels. If you use the control in combination with the [geOps Maps API](https://developer.geops.io/apis/maps/), you may want to use the optimal level of generalizations: "[['gen4', 0, 8], ['gen3', 8, 9], ['gen2', 9, 11], ['gen1', 11, 13], ['osm', 13, 99]]"
  * @classproperty {string} mot - Mean of transport to be used for routing.
  * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.
+ * @classproperty {object} snapToClosestStation - If true, the routing will snap the coordinate to the closest station. Default to false.
+ * @classproperty {boolean} useRawViaPoints - Experimental property. Wen true, it allows the user to add via points using different kind of string. See "via" parameter defined by the [geOps Routing API](https://developer.geops.io/apis/routing/). Default to false, only array of coordinates and station's id are supported as via points.
  * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.
  * @classproperty {function} onRouteError - Callback on error.
  * @classproperty {boolean} loading - True if the control is requesting the backend.
@@ -91,6 +109,12 @@ class RoutingControl extends Control {
     this.routingApiParams = options.routingApiParams || {};
 
     /** @ignore */
+    this.useRawViaPoints = options.useRawViaPoints || false;
+
+    /** @ignore */
+    this.snapToClosestStation = options.snapToClosestStation || false;
+
+    /** @ignore */
     this.cacheStationData = {};
 
     /** @ignore */
@@ -106,8 +130,7 @@ class RoutingControl extends Control {
     this.segments = [];
 
     /** @ignore */
-    this.stopsApiUrl =
-      options.stopsApiUrl || 'https://api.geops.io/stops/v1/lookup/';
+    this.stopsApiUrl = options.stopsApiUrl || 'https://api.geops.io/stops/v1/';
 
     /** @ignore */
     this.api = new RoutingAPI({
@@ -139,8 +162,14 @@ class RoutingControl extends Control {
 
     /** @ignore */
     this.viaPoints = [];
+
+    /** @ignore */
     this.onMapClick = this.onMapClick.bind(this);
+
+    /** @ignore */
     this.onModifyEnd = this.onModifyEnd.bind(this);
+
+    /** @ignore */
     this.onModifyStart = this.onModifyStart.bind(this);
 
     /** @ignore */
@@ -173,9 +202,18 @@ class RoutingControl extends Control {
    * @param {number} index Integer representing the index of the added viaPoint.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
    */
-  addViaPoint(coordinates, index = this.viaPoints.length, overwrite = 0) {
+  addViaPoint(
+    coordinatesOrString,
+    index = this.viaPoints.length,
+    overwrite = 0,
+  ) {
+    // Via point could be:
+    // - a coordinates array
+    // - an object with coordinates, track and useClosestStation properties
+    // - string used as it is
+    // - a station id
     /* Add/Insert/Overwrite viapoint and redraw route */
-    this.viaPoints.splice(index, overwrite, coordinates);
+    this.viaPoints.splice(index, overwrite, coordinatesOrString);
     this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',
@@ -247,12 +285,15 @@ class RoutingControl extends Control {
 
     const formattedViaPoints = this.viaPoints.map((viaPoint) => {
       if (Array.isArray(viaPoint)) {
+        const projection = this.map.getView().getProjection();
         // viaPoint is a coordinate
         // Coordinates need to be reversed as required by the backend RoutingAPI
-        return [toLonLat(viaPoint)[1], toLonLat(viaPoint)[0]];
+        const [lon, lat] = toLonLat(viaPoint, projection);
+        return this.snapToClosestStation ? [`@${lat}`, lon] : [lat, lon];
       }
-      // viaPoint is a UID
-      return `!${viaPoint}`;
+
+      // viaPoint is a string to use as it is
+      return this.useRawViaPoints ? viaPoint : `!${viaPoint}`;
     });
 
     this.loading = true;
@@ -344,36 +385,102 @@ class RoutingControl extends Control {
   }
 
   /**
-   * Draw a via point.
+   * Draw a via point. This function can parse all the possibiliti
    *
    * @private
    */
   drawViaPoint(viaPoint, idx) {
     const pointFeature = new Feature();
     pointFeature.set('viaPointIdx', idx);
+
+    // The via point is a coordinate using the current map's projection
     if (Array.isArray(viaPoint)) {
       pointFeature.setGeometry(new Point(viaPoint));
-      return this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      return Promise.resolve(pointFeature);
     }
-    return fetch(
-      `${this.stopsApiUrl}${viaPoint.split('$')[0]}?key=${this.stopsApiKey}`,
-    )
-      .then((res) => res.json())
-      .then((stationData) => {
-        const { coordinates } = stationData.features[0].geometry;
-        this.cacheStationData[viaPoint] = fromLonLat(coordinates);
-        pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
-        this.routingLayer.olLayer.getSource().addFeature(pointFeature);
-      })
-      .catch((error) => {
-        // Dispatch error event and execute error function
-        this.dispatchEvent({
-          type: 'error',
-          target: this,
+
+    // Possibility to parse:
+    //
+    // !8596126 a station with id 8596126
+    // !8596126$4 a station with id 8596126
+    if (!this.useRawViaPoints || REGEX_VIA_POINT_STATION_ID.test(viaPoint)) {
+      let stationId;
+      let track;
+      if (this.useRawViaPoints) {
+        [, stationId, , track] = REGEX_VIA_POINT_STATION_ID.exec(viaPoint);
+      } else {
+        [stationId, track] = viaPoint.split('$');
+      }
+
+      return fetch(
+        `${this.stopsApiUrl}lookup/${stationId}?key=${this.stopsApiKey}`,
+      )
+        .then((res) => res.json())
+        .then((stationData) => {
+          const { coordinates } = stationData.features[0].geometry;
+          this.cacheStationData[viaPoint] = fromLonLat(coordinates);
+          pointFeature.set('viaPointTrack', track);
+          pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
+          this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+          return pointFeature;
+        })
+        .catch((error) => {
+          // Dispatch error event and execute error function
+          this.dispatchEvent({
+            type: 'error',
+            target: this,
+          });
+          this.onRouteError(error, this);
+          this.loading = false;
         });
-        this.onRouteError(error, this);
-        this.loading = false;
-      });
+    }
+
+    // Only when this.useRawViaPoints is true. It will parse the via point to find some name, id, track coordinates.
+
+    // Possibility to parse:
+    //
+    // @47.37811,8.53935 a station at position 47.37811, 8.53935
+    // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
+    // zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
+    const [, stationName, , lat, lon, , track] = REGEX_VIA_POINT.exec(viaPoint);
+
+    if (lon && lat) {
+      const coordinates = fromLonLat(
+        [parseFloat(lon), parseFloat(lat)],
+        this.map.getView().getProjection(),
+      );
+      pointFeature.set('viaPointTrack', track);
+      pointFeature.setGeometry(new Point(coordinates));
+      this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      return Promise.resolve(pointFeature);
+    }
+
+    if (stationName) {
+      return fetch(
+        `${this.stopsApiUrl}?key=${this.stopsApiKey}&q=${stationName}&limit=1`,
+      )
+        .then((res) => res.json())
+        .then((stationData) => {
+          const { coordinates } = stationData.features[0].geometry;
+          this.cacheStationData[viaPoint] = fromLonLat(coordinates);
+          pointFeature.set('viaPointTrack', track);
+          pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
+          this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+          return pointFeature;
+        })
+        .catch((error) => {
+          // Dispatch error event and execute error function
+          this.dispatchEvent({
+            type: 'error',
+            target: this,
+          });
+          this.onRouteError(error, this);
+          this.loading = false;
+          return null;
+        });
+    }
+    return Promise.resolve(null);
   }
 
   /**

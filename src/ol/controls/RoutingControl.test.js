@@ -99,10 +99,10 @@ describe('RoutingControl', () => {
       .then(() => {
         // Should use correct URL
         expect(fetch.mock.calls[0][0]).toEqual(
-          'https://foo.ch/a4dca961d199ff76?key=foo',
+          'https://foo.ch/lookup/a4dca961d199ff76?key=foo',
         );
         expect(fetch.mock.calls[1][0]).toEqual(
-          'https://foo.ch/e3666f03cba06b2b?key=foo',
+          'https://foo.ch/lookup/e3666f03cba06b2b?key=foo',
         );
         expect(fetch.mock.calls[2][0]).toEqual(
           'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=gen5&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
