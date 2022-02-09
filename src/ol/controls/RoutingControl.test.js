@@ -1,5 +1,6 @@
 import fetch from 'jest-fetch-mock';
 import View from 'ol/View';
+import qs from 'query-string';
 import Map from '../Map';
 import RoutingControl from './RoutingControl';
 
@@ -38,6 +39,8 @@ describe('RoutingControl', () => {
   test('should be activate by default', () => {
     const control = new RoutingControl();
     expect(control.active).toBe(true);
+    expect(control.snapToClosestStation).toBe(false);
+    expect(control.useRawViaPoints).toBe(false);
   });
 
   test('launch routing and add features', (done) => {
@@ -145,5 +148,69 @@ describe('RoutingControl', () => {
       expect(data).toEqual([undefined]);
       done();
     });
+  });
+
+  test('calls routing api with @ before the coordinates when snapToClosestStation is true', (done) => {
+    fetch.mockResponses(
+      [JSON.stringify(RoutingControlStation1), { status: 200 }],
+      [JSON.stringify(global.fetchRouteResponse), { status: 200 }],
+    );
+
+    const control = new RoutingControl({
+      apiKey: 'foo',
+      snapToClosestStation: true,
+    });
+    control.map = map;
+    expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
+    control.viaPoints = [
+      [950476.4055933182, 6003322.253698345],
+      [950389.0813034325, 6003656.659274571],
+      'e3666f03cba06b2b',
+    ];
+    control
+      .drawRoute(control.viaPoints)
+      .then(() => {
+        const params = qs.parseUrl(fetch.mock.calls[1][0]).query;
+        expect(params.via).toBe(
+          '@47.3739194713294,8.538274823394632|@47.37595378493421,8.537490375951839|!e3666f03cba06b2b',
+        );
+        done();
+      })
+      .catch(() => {});
+  });
+
+  test('calls routing api with raw via points', (done) => {
+    fetch.mockResponses(
+      [JSON.stringify(RoutingControlStation1), { status: 200 }],
+      [JSON.stringify(RoutingControlStation2), { status: 200 }],
+      [JSON.stringify(global.fetchRouteResponse), { status: 200 }],
+    );
+
+    const control = new RoutingControl({
+      apiKey: 'foo',
+      useRawViaPoints: true,
+    });
+    control.map = map;
+    expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
+    control.viaPoints = [
+      '46.2,7.1',
+      '@46.2,7.1',
+      '@46.2,7$1',
+      'station name$2', // will send a stops request fo the station name
+      'station name@46.2,7', // will use the coordinate
+      'stationname@46.2,7.7$3', // will use the coordinate
+      '!stationid', // will send a stops lookup request fo the station id
+      [950389, 6003656],
+    ];
+    control
+      .drawRoute(control.viaPoints)
+      .then(() => {
+        const params = qs.parseUrl(fetch.mock.calls[2][0]).query;
+        expect(params.via).toBe(
+          '46.2,7.1|@46.2,7.1|@46.2,7$1|station name$2|station name@46.2,7|stationname@46.2,7.7$3|!stationid|47.375949774398805,8.537489645590679',
+        );
+        done();
+      })
+      .catch(() => {});
   });
 });

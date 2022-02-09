@@ -18,7 +18,12 @@ import RoutingLayer from '../layers/RoutingLayer';
 // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
 // zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
 const REGEX_VIA_POINT =
-  /^([^@$!]*)(@([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
+  /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
+
+// Examples for a single hop:
+//
+// 47.37811,8.53935 a position 47.37811, 8.53935
+const REGEX_VIA_POINT_COORD = /^([\d.]+),([\d.]+)$/;
 
 // Examples for a single hop:
 //
@@ -207,11 +212,6 @@ class RoutingControl extends Control {
     index = this.viaPoints.length,
     overwrite = 0,
   ) {
-    // Via point could be:
-    // - a coordinates array
-    // - an object with coordinates, track and useClosestStation properties
-    // - string used as it is
-    // - a station id
     /* Add/Insert/Overwrite viapoint and redraw route */
     this.viaPoints.splice(index, overwrite, coordinatesOrString);
     this.drawRoute();
@@ -385,7 +385,7 @@ class RoutingControl extends Control {
   }
 
   /**
-   * Draw a via point. This function can parse all the possibiliti
+   * Draw a via point. This function can parse all the possibilitiies
    *
    * @private
    */
@@ -436,8 +436,24 @@ class RoutingControl extends Control {
         });
     }
 
-    // Only when this.useRawViaPoints is true. It will parse the via point to find some name, id, track coordinates.
+    // Only when this.useRawViaPoints is true.
+    // Possibility to parse:
+    //
+    // 47.37811,8.53935 a position 47.37811, 8.53935
+    if (this.useRawViaPoints && REGEX_VIA_POINT_COORD.test(viaPoint)) {
+      const [lat, lon] = REGEX_VIA_POINT_COORD.exec(viaPoint);
+      const coordinates = fromLonLat(
+        [parseFloat(lon), parseFloat(lat)],
+        this.map.getView().getProjection(),
+      );
+      pointFeature.setGeometry(new Point(coordinates));
+      this.routingLayer.olLayer.getSource().addFeature(pointFeature);
+      return Promise.resolve(pointFeature);
+    }
 
+    // Only when this.useRawViaPoints is true.
+    // It will parse the via point to find some name, id, track coordinates.
+    //
     // Possibility to parse:
     //
     // @47.37811,8.53935 a station at position 47.37811, 8.53935
