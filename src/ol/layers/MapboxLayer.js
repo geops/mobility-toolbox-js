@@ -311,7 +311,7 @@ export default class MapboxLayer extends Layer {
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.
-   * @returns {Promise<FeatureInfo>} Promise with features, layer and coordinate. The original Mapbox feature is available as a property named 'mapboxFeature'.
+   * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate. The original Mapbox feature is available as a property named 'mapboxFeature'.
    */
   getFeatureInfoAtCoordinate(coordinate, options) {
     // Ignore the getFeatureInfo until the mapbox map is loaded
@@ -375,7 +375,7 @@ export default class MapboxLayer extends Layer {
   /**
    * Create a copy of the MapboxLayer.
    * @param {Object} newOptions Options to override
-   * @returns {MapboxLayer} A MapboxLayer
+   * @return {MapboxLayer} A MapboxLayer
    */
   clone(newOptions) {
     return new MapboxLayer({ ...this.options, ...newOptions });

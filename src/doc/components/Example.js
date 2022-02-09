@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Example = () => {
+function Example() {
   const classes = useStyles();
   const { exampleKey } = useParams((params) => params);
   const example = EXAMPLES.find((e) => e.key === exampleKey);
@@ -95,11 +95,10 @@ const Example = () => {
           <Typography variant="h1" className="headline">
             {example.name}
           </Typography>
-          <Markdown
-            className={classes.readme}
-            source={example.description || ''}
-          />
-          <Markdown className={classes.readme} source={readme || ''} />
+          <Markdown className={classes.readme}>
+            {example.description || ''}
+          </Markdown>
+          <Markdown className={classes.readme}>{readme || ''}</Markdown>
         </Grid>
         <Grid item xs={12}>
           <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
@@ -149,6 +148,6 @@ const Example = () => {
       </Grid>
     </div>
   );
-};
+}
 
 export default React.memo(Example);

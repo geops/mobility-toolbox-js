@@ -145,7 +145,7 @@ export const getTextCanvas = (
  * @param {*} trajectory The trajectory to render.
  * @param {*} viewState The view state of the map.
  * @param {*} options Some options to change the rendering
- * @returns a canvas
+ * @return a canvas
  */
 const styleCache = {};
 const style = (trajectory, viewState, options) => {
@@ -157,13 +157,14 @@ const style = (trajectory, viewState, options) => {
     delayDisplay,
   } = options;
 
-  const {
-    zoom,
-    pixelRatio,
-    operator_provides_realtime_journey: operatorProvidesRealtime,
-  } = viewState;
+  const { zoom, pixelRatio } = viewState;
   let { line, type } = trajectory;
-  const { id, delay, cancelled = false } = trajectory;
+  const {
+    id,
+    delay,
+    cancelled = false,
+    operator_provides_realtime_journey: operatorProvidesRealtime,
+  } = trajectory;
 
   if (!type) {
     type = 'Rail';

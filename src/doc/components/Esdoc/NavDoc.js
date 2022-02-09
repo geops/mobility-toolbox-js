@@ -14,7 +14,7 @@ import DocLinkHTML from './DocLinkHTML';
  * @return {IceCap} navigation output.
  * @private
  */
-const NavDoc = () => {
+function NavDoc() {
   const kinds = ['class', 'function', 'variable']; // , 'typedef', 'external'];
 
   // we display only public doc and not externals, feel free to reactivate them if you want.
@@ -107,6 +107,6 @@ const NavDoc = () => {
       </ul>
     </div>
   );
-};
+}
 
 export default React.memo(NavDoc);

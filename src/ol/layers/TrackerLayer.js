@@ -35,14 +35,11 @@ class TrackerLayer extends mixin(Layer) {
      */
     this.renderWhenInteracting =
       options.renderWhenInteracting ||
-      (() => {
+      (() =>
         // Render trajectories on each render frame when the number of trajectories is small.
-        return (
-          this.tracker &&
-          this.tracker.renderedTrajectories &&
-          this.tracker.renderedTrajectories.length <= 200
-        );
-      });
+        this.tracker &&
+        this.tracker.renderedTrajectories &&
+        this.tracker.renderedTrajectories.length <= 200);
 
     /** @ignore */
     this.olLayer =
@@ -95,9 +92,8 @@ class TrackerLayer extends mixin(Layer) {
                   // Avoid having really big points when zooming fast.
                   this.tracker.clear();
                 } else {
-                  const pixelCenterRendered = this.map.getPixelFromCoordinate(
-                    renderedCenter,
-                  );
+                  const pixelCenterRendered =
+                    this.map.getPixelFromCoordinate(renderedCenter);
                   const pixelCenter = this.map.getPixelFromCoordinate(center);
                   this.transformContainer.style.transform = composeCssTransform(
                     pixelCenterRendered[0] - pixelCenter[0],
@@ -240,7 +236,7 @@ class TrackerLayer extends mixin(Layer) {
    * Returns null when no vehicle is located at the given coordinates.
    * @param {ol/coordinate~Coordinate} coordinate
    * @param {number} nb Number of vehicles to return;
-   * @returns {Array<ol/Feature~Feature>} Vehicle feature.
+   * @return {Array<ol/Feature~Feature>} Vehicle feature.
    * @override
    */
   getVehiclesAtCoordinate(coordinate, nb) {
@@ -310,7 +306,7 @@ class TrackerLayer extends mixin(Layer) {
   /**
    * Create a copy of the TrackerLayer.
    * @param {Object} newOptions Options to override
-   * @returns {TrackerLayer} A TrackerLayer
+   * @return {TrackerLayer} A TrackerLayer
    */
   clone(newOptions) {
     return new TrackerLayer({ ...this.options, ...newOptions });

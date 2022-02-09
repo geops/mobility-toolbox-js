@@ -12,12 +12,12 @@ import DocLinkHTML from './DocLinkHTML';
  * @returns {string} html links.
  * @private
  */
-const DocsLinkHTML = ({
+function DocsLinkHTML({
   longnames,
   text = null,
   inner = false,
   separator = '\n',
-}) => {
+}) {
   if (!longnames) return '';
   if (!longnames.length) return '';
 
@@ -34,5 +34,5 @@ const DocsLinkHTML = ({
       ))}
     </ul>
   );
-};
+}
 export default React.memo(DocsLinkHTML);

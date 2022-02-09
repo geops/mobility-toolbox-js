@@ -2,12 +2,12 @@
 import React from 'react';
 import NavDoc from './NavDoc';
 
-const EsdocNavigation = () => {
+function EsdocNavigation() {
   return (
     <div className="navigation">
       <NavDoc />
     </div>
   );
-};
+}
 
 export default React.memo(EsdocNavigation);

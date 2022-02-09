@@ -8,7 +8,7 @@ import DocLinkHTML from './DocLinkHTML';
  * @param {DocObject} doc - target class doc.
  * @return {string} mixin extends html.
  */
-const MixinClassesHTML = ({ doc }) => {
+function MixinClassesHTML({ doc }) {
   if (!doc.extends) return '';
   if (doc.extends.length <= 1) return '';
 
@@ -25,5 +25,5 @@ const MixinClassesHTML = ({ doc }) => {
       </div>
     </div>
   );
-};
+}
 export default React.memo(MixinClassesHTML);

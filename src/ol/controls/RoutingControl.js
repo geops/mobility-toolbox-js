@@ -51,9 +51,7 @@ class RoutingControl extends Control {
 
     Object.defineProperties(this, {
       mot: {
-        get: () => {
-          return this.get('mot');
-        },
+        get: () => this.get('mot'),
         set: (newMot) => {
           if (newMot) {
             this.set('mot', newMot);
@@ -64,17 +62,13 @@ class RoutingControl extends Control {
         },
       },
       loading: {
-        get: () => {
-          return this.get('loading');
-        },
+        get: () => this.get('loading'),
         set: (newLoading) => {
           this.set('loading', newLoading);
         },
       },
       modify: {
-        get: () => {
-          return this.get('modify');
-        },
+        get: () => this.get('modify'),
         set: (modify) => {
           this.set('modify', modify);
         },
@@ -267,9 +261,7 @@ class RoutingControl extends Control {
     this.routingLayer.olLayer.getSource().clear();
 
     // Create point features for the viaPoints
-    this.viaPoints.forEach((viaPoint, idx) => {
-      return this.drawViaPoint(viaPoint, idx);
-    });
+    this.viaPoints.forEach((viaPoint, idx) => this.drawViaPoint(viaPoint, idx));
 
     return Promise.all(
       this.graphs.map(([graph], index) => {

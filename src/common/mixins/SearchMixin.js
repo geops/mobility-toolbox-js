@@ -27,7 +27,7 @@ export class SearchInterface {
    *
    * @param {String} query The query to search for.
    * @param {AbortController} abortController Abort controller used to cancel the request.
-   * @returns {Promise<Array<GeoJSONFeature>>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
+   * @return {Promise<Array<GeoJSONFeature>>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
   // eslint-disable-next-line no-unused-vars
   search(query, abortController) {}

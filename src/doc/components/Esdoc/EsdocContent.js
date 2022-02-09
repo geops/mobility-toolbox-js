@@ -18,7 +18,7 @@ docs = _resolveNecessary(docs);
 docs = _resolveIgnore(docs);
 docs = _resolveLink(docs);
 
-const EsdocContent = ({ path }) => {
+function EsdocContent({ path }) {
   let doc;
 
   if (!path) {
@@ -46,6 +46,6 @@ const EsdocContent = ({ path }) => {
       {firstPath === 'function' && <SingleDoc kind={firstPath} />}
     </div>
   );
-};
+}
 
 export default React.memo(EsdocContent);
