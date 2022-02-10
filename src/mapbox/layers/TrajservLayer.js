@@ -25,6 +25,7 @@ import mixin from '../../common/mixins/TrajservLayerMixin';
 class TrajservLayer extends mixin(TrackerLayer) {
   constructor(options = {}) {
     super({ ...options });
+    this.locationBBox = options.locationBBox;
     this.onMove = this.onMove.bind(this);
     this.onMoveEnd = this.onMoveEnd.bind(this);
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
@@ -82,6 +83,10 @@ class TrajservLayer extends mixin(TrackerLayer) {
    */
   getParams(extraParams = {}) {
     const bounds = this.map.getBounds().toArray();
+    bounds[0][0] = (bounds[0][0] < this.locationBBox.southWestBound[0]) ? this.locationBBox.southWestBound[0] : (this.locationBBox.northEastBound[0] < bounds[0][0]) ? this.locationBBox.northEastBound[0] : bounds[0][0];
+    bounds[0][1] = (bounds[0][1] < this.locationBBox.southWestBound[1]) ? this.locationBBox.southWestBound[1] : (this.locationBBox.northEastBound[1] < bounds[0][1]) ? this.locationBBox.northEastBound[1] : bounds[0][1];
+    bounds[1][0] = (bounds[1][0] < this.locationBBox.southWestBound[0]) ? this.locationBBox.southWestBound[0] : (this.locationBBox.northEastBound[0] < bounds[1][0]) ? this.locationBBox.northEastBound[0] : bounds[1][0];
+    bounds[1][1] = (bounds[1][1] < this.locationBBox.southWestBound[1]) ? this.locationBBox.southWestBound[1] : (this.locationBBox.northEastBound[1] < bounds[1][1]) ? this.locationBBox.northEastBound[1] : bounds[1][1];
     const southWest = fromLonLat(bounds[0]);
     const northEast = fromLonLat(bounds[1]);
     const ext = [...southWest, ...northEast];
