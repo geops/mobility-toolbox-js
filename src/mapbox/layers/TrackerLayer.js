@@ -66,7 +66,7 @@ class TrackerLayer extends mixin(Layer) {
       type: 'raster',
       source: this.key,
       layout: {
-        visibility: this.visible ? 'visible' : 'none',
+        visibility: 'none',
       },
       paint: {
         'raster-opacity': 1,
