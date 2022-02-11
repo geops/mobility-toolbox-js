@@ -23,7 +23,6 @@ export default () => {
   });
 
   map.addControl(control);
-
   control.addViaPoint([950476.4055933182, 6003322.253698345]);
   control.addViaPoint([950389.0813034325, 6003656.659274571]);
   control.addViaPoint('29563461696e881d');
