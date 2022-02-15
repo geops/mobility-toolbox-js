@@ -6,6 +6,7 @@
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from 'ol/geom/Point';
 import { intersects } from 'ol/extent';
+import { fromLonLat } from 'ol/proj';
 import { TralisAPI, TralisModes } from '../../api';
 
 /**
@@ -145,13 +146,9 @@ const TralisLayerMixin = (TrackerLayer) =>
       // Purge trajectories:
       // - which are outside the extent
       // - when it's bus and zoom level is too low for them
-      for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
-        const trajectory = this.trajectories[i];
-        if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
-          const temp = [...this.trajectories];
-          temp.splice(i, 1);
-          this.tracker.setTrajectories(temp);
-        }
+      const keys = Object.keys(this.trajectories);
+      for (let i = keys.length - 1; i >= 0; i -= 1) {
+        this.purgeTrajectory(this.trajectories[keys[i]], extent, zoom);
       }
 
       const bbox = [...extent];
@@ -225,11 +222,16 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @return {boolean} if the trajectory must be displayed or not.
      * @ignore
      */
-    mustNotBeDisplayed(trajectory, extent, zoom) {
-      return (
-        !intersects(extent, trajectory.bounds) ||
-        (trajectory.type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
-      );
+    purgeTrajectory(trajectory, extent, zoom) {
+      const { type, bounds, train_id: id } = trajectory.properties;
+      if (
+        !intersects(extent, bounds) ||
+        (type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
+      ) {
+        this.removeTrajectory(id);
+        return true;
+      }
+      return false;
     }
 
     /**
@@ -240,42 +242,37 @@ const TralisLayerMixin = (TrackerLayer) =>
      *   true, the trajectory is drawn first and appears on bottom.
      * @private
      */
-    addTrajectory(traj, addOnTop) {
-      const idx = this.trajectories.findIndex(
-        (t) => t.train_id === traj.train_id,
-      );
-      const { time_intervals: timeIntervals } = traj;
+    addTrajectory(trajectory, addOnTop) {
+      // console.time(`addTrajectory${traj.train_id}`);
+      this.trajectories[trajectory.properties.train_id] = trajectory;
+      // const idx = this.trajectories.findIndex(
+      //   (t) => t.train_id === traj.train_id,
+      // );
+      // const { time_intervals: timeIntervals } = traj;
 
-      // Properties needed to display the vehicle.
-      const trajectory = { ...traj, id: traj.train_id, timeIntervals };
-      if (addOnTop) {
-        this.trajectories.unshift(trajectory);
-        if (idx !== -1) {
-          this.tracker.trajectories.splice(idx + 1, 1);
-        }
-      } else {
-        this.trajectories.push(trajectory);
-        if (idx !== -1) {
-          this.tracker.trajectories.splice(idx, 1);
-        }
-      }
-
-      this.tracker.setTrajectories(this.trajectories);
+      // // Properties needed to display the vehicle.
+      // const trajectory = { ...traj, id: traj.train_id, timeIntervals };
+      // if (addOnTop) {
+      //   this.trajectories.unshift(trajectory);
+      //   if (idx !== -1) {
+      //     this.tracker.trajectories.splice(idx + 1, 1);
+      //   }
+      // } else {
+      //   this.trajectories.push(trajectory);
+      //   if (idx !== -1) {
+      //     this.tracker.trajectories.splice(idx, 1);
+      //   }
+      // }
+      // console.timeEnd(`addTrajectory${traj.train_id}`);
     }
 
-    /**
-     * Remove a trajectory using its id.
-     * @param {number} id The trajectory's train_id property of the trajectory to remove
-     * @private
-     */
     removeTrajectory(id) {
-      for (let i = 0, len = this.trajectories.length; i < len; i += 1) {
-        if (this.trajectories[i].train_id === id) {
-          this.trajectories.splice(i, 1);
-          break;
-        }
-      }
+      delete this.trajectories[id];
     }
+
+    // getRefreshTimeInMs() {
+    //   return 5000;
+    // }
 
     /**
      * Callback on websocket's trajectory channel events.
@@ -287,26 +284,46 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (!data.content) {
         return;
       }
+      const trajectory = data.content;
 
-      const feat = this.format.readFeature(data.content);
-
-      feat.set('timeOffset', Date.now() - data.timestamp);
+      const {
+        geometry,
+        properties: {
+          train_id: id,
+          time_since_update: timeSinceUpdate,
+          raw_coordinates: rawCoordinates,
+        },
+      } = trajectory;
 
       // ignore old events [SBAHNM-97]
-      if (feat.get('time_since_update') >= 0) {
-        if (
-          this.debug &&
-          this.mode === TralisModes.TOPOGRAPHIC &&
-          feat.get('raw_coordinates')
-        ) {
-          const point = new Point(feat.get('raw_coordinates'));
-          point.transform('EPSG:4326', this.map.getView().getProjection());
-          feat.setGeometry(point);
-        }
-        if (!this.mustNotBeDisplayed(feat.getProperties())) {
-          this.addTrajectory(feat.getProperties(), !feat.get('line'));
-        }
+      if (timeSinceUpdate < 0) {
+        return;
       }
+
+      // console.time(`onTrajectoryMessage${data.content.properties.train_id}`);
+      if (this.purgeTrajectory(trajectory)) {
+        return;
+      }
+
+      if (
+        this.debug &&
+        this.mode === TralisModes.TOPOGRAPHIC &&
+        rawCoordinates
+      ) {
+        trajectory.properties.olGeometry = {
+          type: 'Point',
+          coordinates: fromLonLat(
+            rawCoordinates,
+            this.map.getView().getProjection(),
+          ),
+        };
+      } else {
+        trajectory.properties.olGeometry = this.format.readGeometry(geometry);
+      }
+
+      trajectory.properties.timeOffset = Date.now() - data.timestamp;
+      this.addTrajectory(trajectory);
+      // console.timeEnd(`onTrajectoryMessage${data.content.properties.train_id}`);
     }
 
     /**
@@ -317,9 +334,11 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @override
      */
     onDeleteTrajectoryMessage(data) {
-      if (data.content) {
-        this.removeTrajectory(data.content);
+      if (!data.content) {
+        return;
       }
+
+      this.removeTrajectory(data.content);
     }
 
     /**

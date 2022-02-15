@@ -2,7 +2,6 @@
 /* eslint-disable max-classes-per-file */
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
-import Feature from 'ol/Feature';
 import qs from 'query-string';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
@@ -540,7 +539,11 @@ const TrackerLayerMixin = (Base) =>
 
       const time = this.live ? Date.now() : this.time;
 
-      this.tracker.renderTrajectories({ ...viewState, time }, noInterpolate);
+      this.tracker.renderTrajectories(
+        this.trajectories,
+        { ...viewState, time },
+        noInterpolate,
+      );
 
       return true;
     }
@@ -580,7 +583,7 @@ const TrackerLayerMixin = (Base) =>
      * @return {Array<Object>} Array of vehicle.
      */
     getVehicle(filterFc) {
-      return this.tracker.getTrajectories().filter(filterFc);
+      return Object.values(this.trajectories).filter(filterFc);
     }
 
     /**
@@ -596,12 +599,12 @@ const TrackerLayerMixin = (Base) =>
         [...coordinate, ...coordinate],
         this.hitTolerance * resolution,
       );
-      const trajectories = this.tracker.getTrajectories();
+      const trajectories = Object.values(this.trajectories);
       const vehicles = [];
       for (let i = 0; i < trajectories.length; i += 1) {
         if (
-          trajectories[i].coordinate &&
-          containsCoordinate(ext, trajectories[i].coordinate)
+          trajectories[i].properties.coordinate &&
+          containsCoordinate(ext, trajectories[i].properties.coordinate)
         ) {
           vehicles.push(trajectories[i]);
         }
@@ -629,13 +632,7 @@ const TrackerLayerMixin = (Base) =>
 
       return Promise.resolve({
         layer: this,
-        features: vehicles.map((vehicle) => {
-          const feature = new Feature({
-            geometry: vehicle.geometry,
-          });
-          feature.setProperties({ ...vehicle });
-          return feature;
-        }),
+        features: vehicles.map((vehicle) => this.format.readFeature(vehicle)),
         coordinate,
       });
     }

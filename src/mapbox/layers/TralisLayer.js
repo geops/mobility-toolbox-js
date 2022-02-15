@@ -24,8 +24,8 @@ class TralisLayer extends mixin(TrackerLayer) {
    *
    * @private
    */
-  mustNotBeDisplayed(trajectory, extent, zoom) {
-    return super.mustNotBeDisplayed(
+  purgeTrajectory(trajectory, extent, zoom) {
+    return super.purgeTrajectory(
       trajectory,
       extent || this.getMercatorExtent(),
       zoom || Math.floor(this.map.getZoom() + 1),

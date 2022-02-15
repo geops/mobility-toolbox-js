@@ -110,26 +110,6 @@ export default class Tracker {
   }
 
   /**
-   * Define the trajectories.
-   * @param {array<ol/Feature~Feature>} trajectories
-   */
-  setTrajectories(trajectories = []) {
-    if (this.sort) {
-      trajectories.sort(this.sort);
-    }
-
-    this.trajectories = trajectories;
-  }
-
-  /**
-   * Return the trajectories.
-   * @return {array<trajectory>} trajectories
-   */
-  getTrajectories() {
-    return this.trajectories || [];
-  }
-
-  /**
    * Clear the canvas.
    * @private
    */
@@ -147,7 +127,7 @@ export default class Tracker {
    *   during map navigation.
    * @private
    */
-  renderTrajectories(viewState, noInterpolate = false) {
+  renderTrajectories(trajectories, viewState, noInterpolate = false) {
     const {
       time = Date.now(),
       size = [],
@@ -199,14 +179,22 @@ export default class Tracker {
     let selectedVehicleHeight;
 
     this.renderedTrajectories = [];
+    const keys = Object.keys(this.trajectories);
 
-    for (let i = (this.trajectories || []).length - 1; i >= 0; i -= 1) {
-      const traj = this.trajectories[i];
+    for (let i = (keys || []).length - 1; i >= 0; i -= 1) {
+      const key = keys[i];
+      const traj = this.trajectories[key];
 
-      this.trajectories[i].rendered = false;
+      this.trajectories[keys[i]].properties.rendered = false;
 
       // We simplify the traj object
-      const { geometry, timeIntervals, timeOffset } = traj;
+      const {
+        train_id: id,
+        time_intervals: timeIntervals,
+        timeOffset,
+        olGeometry: geometry,
+        coordinate,
+      } = traj.properties;
 
       if (this.filter && !this.filter(traj, i, this.trajectories)) {
         // eslint-disable-next-line no-continue
@@ -216,8 +204,8 @@ export default class Tracker {
       let coord = null;
       let rotationIcon;
 
-      if (traj.coordinate && (noInterpolate || !this.interpolate)) {
-        coord = traj.coordinate;
+      if (coordinate && (noInterpolate || !this.interpolate)) {
+        coord = coordinate;
       } else if (timeIntervals && timeIntervals.length > 1) {
         const now = time - (timeOffset || 0);
         let start;
@@ -255,10 +243,6 @@ export default class Tracker {
 
             coord = geometry.getCoordinateAt(geomFrac);
 
-            // We set the rotation and the timeFraction of the trajectory (used by tralis).
-            this.trajectories[i].rotation = rotationIcon;
-            this.trajectories[i].endFraction = timeFrac;
-
             // It happens that the now date was some ms before the first timeIntervals we have.
           } else if (now < timeIntervals[0][0]) {
             [[, , rotationIcon]] = timeIntervals;
@@ -278,13 +262,13 @@ export default class Tracker {
         }
         // We set the rotation and the timeFraction of the trajectory (used by tralis).
         // if rotation === null that seems there is no rotation available.
-        this.trajectories[i].rotation = rotationIcon;
-        this.trajectories[i].endFraction = timeFrac || 0;
+        this.trajectories[key].rotation = rotationIcon;
+        this.trajectories[key].endFraction = timeFrac || 0;
       }
 
       if (coord) {
         // We set the rotation of the trajectory (used by tralis).
-        this.trajectories[i].coordinate = coord;
+        this.trajectories[key].properties.coordinate = coord;
         let px = apply(coordinateToPixelTransform, [...coord]);
         if (!px) {
           // eslint-disable-next-line no-continue
@@ -310,16 +294,13 @@ export default class Tracker {
         }
 
         // Trajectory with pixel (i.e. within map extent) will be in renderedTrajectories.
-        this.trajectories[i].rendered = true;
-        this.renderedTrajectories.push(this.trajectories[i]);
+        this.trajectories[key].properties.rendered = true;
+        this.renderedTrajectories.push(this.trajectories[key]);
 
         const imgWidth = vehicleImg.width;
         const imgHeight = vehicleImg.height;
 
-        if (
-          this.hoverVehicleId !== traj.id &&
-          this.selectedVehicleId !== traj.id
-        ) {
+        if (this.hoverVehicleId !== id && this.selectedVehicleId !== id) {
           this.canvasContext.drawImage(
             vehicleImg,
             px[0] - imgWidth / 2,
@@ -328,7 +309,8 @@ export default class Tracker {
             imgHeight,
           );
         }
-        if (this.hoverVehicleId === traj.id) {
+
+        if (this.hoverVehicleId && this.hoverVehicleId === id) {
           // Store the canvas to draw it at the end
           hoverVehicleImg = vehicleImg;
           hoverVehiclePx = px;
@@ -336,7 +318,7 @@ export default class Tracker {
           hoverVehicleHeight = imgHeight;
         }
 
-        if (this.selectedVehicleId === traj.id) {
+        if (this.selectedVehicleId && this.selectedVehicleId === id) {
           // Store the canvas to draw it at the end
           selectedVehicleImg = vehicleImg;
           selectedVehiclePx = px;
