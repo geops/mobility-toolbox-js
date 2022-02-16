@@ -17,8 +17,7 @@ import RoutingLayer from '../layers/RoutingLayer';
 // @47.37811,8.53935 a station at position 47.37811, 8.53935
 // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
 // zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
-const REGEX_VIA_POINT =
-  /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
+const REGEX_VIA_POINT = /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
 
 // Examples for a single hop:
 //
@@ -256,12 +255,28 @@ class RoutingControl extends Control {
    */
   reset() {
     // Clear viaPoints and source
+    this.cancelDrawRoute();
     this.viaPoints = [];
     this.routingLayer.olLayer.getSource().clear();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
     });
+  }
+
+  /**
+   * Aborts drawing a route
+   * @private
+   */
+  cancelDrawRoute() {
+    this.routingLayer.olLayer.getSource().clear();
+    this.graphs.forEach(([graph]) => {
+      if (this.abortControllers[graph]) {
+        this.abortControllers[graph].abort();
+      }
+      this.abortControllers[graph] = new AbortController();
+    });
+    this.loading = false;
   }
 
   /**
@@ -272,15 +287,15 @@ class RoutingControl extends Control {
    * @private
    */
   drawRoute() {
+    this.cancelDrawRoute();
     /* Calls RoutingAPI to draw a route using the viaPoints array */
+    if (!this.viaPoints.length) {
+      return null;
+    }
+
     if (this.viaPoints.length === 1) {
-      // Clear source
-      this.routingLayer.olLayer.getSource().clear();
       // Add point for first node
       return this.drawViaPoint(this.viaPoints[0], 0);
-    }
-    if (this.viaPoints.length < 2) {
-      return null;
     }
 
     const formattedViaPoints = this.viaPoints.map((viaPoint) => {
@@ -366,6 +381,7 @@ class RoutingControl extends Control {
             routeFeature.set('minResolution', this.graphsResolutions[index][0]);
             routeFeature.set('maxResolution', this.graphsResolutions[index][1]);
             this.routingLayer.olLayer.getSource().addFeature(routeFeature);
+            this.loading = false;
           })
           .catch((error) => {
             if (error.name === 'AbortError') {
