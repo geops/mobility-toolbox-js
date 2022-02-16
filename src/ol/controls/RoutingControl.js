@@ -17,8 +17,7 @@ import RoutingLayer from '../layers/RoutingLayer';
 // @47.37811,8.53935 a station at position 47.37811, 8.53935
 // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
 // zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
-const REGEX_VIA_POINT =
-  /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
+const REGEX_VIA_POINT = /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
 
 // Examples for a single hop:
 //
@@ -288,8 +287,9 @@ class RoutingControl extends Control {
    * @private
    */
   drawRoute() {
-    this.cancelDrawRoute();
     /* Calls RoutingAPI to draw a route using the viaPoints array */
+    this.cancelDrawRoute();
+
     if (!this.viaPoints.length) {
       return null;
     }
