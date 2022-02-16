@@ -17,7 +17,8 @@ import RoutingLayer from '../layers/RoutingLayer';
 // @47.37811,8.53935 a station at position 47.37811, 8.53935
 // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
 // zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
-const REGEX_VIA_POINT = /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
+const REGEX_VIA_POINT =
+  /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
 
 // Examples for a single hop:
 //
@@ -281,9 +282,8 @@ class RoutingControl extends Control {
 
     // Abort Stops API requests
     this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]?.abort();
-    this.abortControllers[
-      STOP_FETCH_ABORT_CONTROLLER_KEY
-    ] = new AbortController();
+    this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY] =
+      new AbortController();
 
     this.loading = false;
   }
