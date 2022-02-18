@@ -37,9 +37,8 @@ class TrackerLayer extends mixin(Layer) {
       options.renderWhenInteracting ||
       (() =>
         // Render trajectories on each render frame when the number of trajectories is small.
-        this.tracker &&
-        this.tracker.renderedTrajectories &&
-        this.tracker.renderedTrajectories.length <= 200);
+        ((this.renderState && this.renderState.nbTrajectoriesRendered) || 0) <
+        200);
 
     /** @ignore */
     this.olLayer =

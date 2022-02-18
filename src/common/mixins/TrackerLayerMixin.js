@@ -3,6 +3,7 @@
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
 import qs from 'query-string';
+import throttle from 'lodash.throttle';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
 import createFilters from '../utils/createTrackerFilters';
@@ -112,6 +113,13 @@ const TrackerLayerMixin = (Base) =>
       super({ hitTolerance: 10, ...options });
       this.onFeatureHover = this.onFeatureHover.bind(this);
       this.onFeatureClick = this.onFeatureClick.bind(this);
+      this.renderTrajectoriesInternal =
+        this.renderTrajectoriesInternal.bind(this);
+
+      this.throttleRenderTajectories = throttle(
+        this.renderTrajectoriesInternal,
+        30,
+      );
     }
 
     /**
@@ -120,14 +128,13 @@ const TrackerLayerMixin = (Base) =>
      * @ignore
      */
     defineProperties(options) {
-      const { style, speed } = {
-        ...options,
-      };
-
       // Tracker options use to build the tracker.
+      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
+        options;
       const {
+        style,
+        speed,
         pixelRatio,
-        interpolate,
         hoverVehicleId,
         selectedVehicleId,
         filter,
@@ -136,16 +143,7 @@ const TrackerLayerMixin = (Base) =>
         live,
       } = options;
 
-      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
-        options;
-
       const initTrackerOptions = {
-        pixelRatio: pixelRatio || window.devicePixelRatio || 1,
-        interpolate,
-        hoverVehicleId,
-        selectedVehicleId,
-        filter,
-        sort,
         style,
       };
 
@@ -186,30 +184,16 @@ const TrackerLayerMixin = (Base) =>
          * Function to filter which vehicles to display.
          */
         filter: {
-          get: () =>
-            this.tracker ? this.tracker.filter : this.initTrackerOptions.filter,
-          set: (newFilter) => {
-            if (this.tracker) {
-              this.tracker.filter = newFilter;
-            } else {
-              this.initTrackerOptions.filter = newFilter;
-            }
-          },
+          value: filter,
+          writable: true,
         },
 
         /**
          * Function to sort the vehicles to display.
          */
         sort: {
-          get: () =>
-            this.tracker ? this.tracker.sort : this.initTrackerOptions.sort,
-          set: (newSort) => {
-            if (this.tracker) {
-              this.tracker.sort = newSort;
-            } else {
-              this.initTrackerOptions.sort = newSort;
-            }
-          },
+          value: sort,
+          writable: true,
         },
 
         /**
@@ -247,7 +231,8 @@ const TrackerLayerMixin = (Base) =>
          * Keep track of which trajectories are stored.
          */
         trajectories: {
-          get: () => (this.tracker && this.tracker.trajectories) || [],
+          value: {},
+          writable: true,
         },
 
         /**
@@ -261,51 +246,24 @@ const TrackerLayerMixin = (Base) =>
          * Id of the hovered vehicle.
          */
         hoverVehicleId: {
-          get: () =>
-            this.tracker
-              ? this.tracker.hoverVehicleId
-              : this.initTrackerOptions.hoverVehicleId,
-          set: (newHoverVehicleId) => {
-            if (this.tracker) {
-              this.tracker.hoverVehicleId = newHoverVehicleId;
-            } else {
-              this.initTrackerOptions.hoverVehicleId = newHoverVehicleId;
-            }
-          },
+          value: hoverVehicleId,
+          writable: true,
         },
 
         /**
          * Id of the selected vehicle.
          */
         selectedVehicleId: {
-          get: () =>
-            this.tracker
-              ? this.tracker.selectedVehicleId
-              : this.initTrackerOptions.selectedVehicleId,
-          set: (newSelectedVehicleId) => {
-            if (this.tracker) {
-              this.tracker.selectedVehicleId = newSelectedVehicleId;
-            } else {
-              this.initTrackerOptions.selectedVehicleId = newSelectedVehicleId;
-            }
-          },
+          value: selectedVehicleId,
+          writable: true,
         },
 
         /**
-         * Pixel ratio use for the rendering. Default to window.devicePixelRatio.
+         * Id of the selected vehicle.
          */
         pixelRatio: {
-          get: () =>
-            this.tracker
-              ? this.tracker.pixelRatio
-              : this.initTrackerOptions.pixelRatio,
-          set: (newPixelRatio) => {
-            if (this.tracker) {
-              this.tracker.pixelRatio = newPixelRatio;
-            } else {
-              this.initTrackerOptions.pixelRatio = newPixelRatio;
-            }
-          },
+          value: pixelRatio || 1,
+          writable: true,
         },
 
         /**
@@ -388,22 +346,24 @@ const TrackerLayerMixin = (Base) =>
       // When we use the delay style we want to display delayed train on top by default
       if (this.useDelayStyle && !this.sort) {
         this.sort = (traj1, traj2) => {
-          if (traj1.delay === null && traj2.delay !== null) {
+          const props1 = traj1.properties;
+          const props2 = traj2.properties;
+          if (props1.delay === null && props2.delay !== null) {
             return 1;
           }
-          if (traj2.delay === null && traj1.delay !== null) {
+          if (props2.delay === null && props1.delay !== null) {
             return -1;
           }
 
           // We put cancelled train inbetween green and yellow trains
           // >=180000ms corresponds to yellow train
-          if (traj1.cancelled && !traj2.cancelled) {
-            return traj2.delay < 180000 ? -1 : 1;
+          if (props1.cancelled && !props2.cancelled) {
+            return props2.delay < 180000 ? -1 : 1;
           }
-          if (traj2.cancelled && !traj1.cancelled) {
-            return traj1.delay < 180000 ? 1 : -1;
+          if (props2.cancelled && !props1.cancelled) {
+            return props1.delay < 180000 ? 1 : -1;
           }
-          return traj2.delay - traj1.delay;
+          return props2.delay - props1.delay;
         };
       }
 
@@ -453,7 +413,7 @@ const TrackerLayerMixin = (Base) =>
       this.stop();
       unByKey(this.visibilityRef);
       if (this.tracker) {
-        this.tracker.destroy();
+        this.clear();
         this.tracker = null;
       }
       super.terminate();
@@ -536,15 +496,35 @@ const TrackerLayerMixin = (Base) =>
       if (!this.tracker) {
         return false;
       }
+      // console.log('icic');
 
       const time = this.live ? Date.now() : this.time;
 
-      this.tracker.renderTrajectories(
-        this.trajectories,
-        { ...viewState, time },
-        noInterpolate,
+      const trajectories = Object.values(this.trajectories);
+
+      // console.time('sort');
+      if (this.sort) {
+        trajectories.sort(this.sort);
+      }
+      // console.timeEnd('sort');
+      window.trajectories = trajectories;
+
+      // console.time('render');
+      this.renderState = this.tracker.renderTrajectories(
+        trajectories,
+        { ...viewState, pixelRatio: this.pixelRatio, time },
+        {
+          noInterpolate,
+          hoverVehicleId: this.hoverVehicleId,
+          selectedVehicleId: this.selectedVehicleId,
+          iconScale: this.iconScale,
+          delayDisplay: this.delayDisplay,
+          delayOutlineColor: this.delayOutlineColor,
+          useDelayStyle: this.useDelayStyle,
+        },
       );
 
+      // console.timeEnd('render');
       return true;
     }
 
@@ -566,6 +546,7 @@ const TrackerLayerMixin = (Base) =>
     renderTrajectories(viewState, noInterpolate) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
+        this.requestId = null;
       }
 
       if (this.useRequestAnimationFrame) {
@@ -573,7 +554,7 @@ const TrackerLayerMixin = (Base) =>
           this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
       } else {
-        this.renderTrajectoriesInternal(viewState, noInterpolate);
+        this.throttleRenderTajectories(viewState, noInterpolate);
       }
     }
 

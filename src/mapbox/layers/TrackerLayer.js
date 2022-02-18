@@ -261,7 +261,9 @@ class TrackerLayer extends mixin(Layer) {
    * @private
    */
   // eslint-disable-next-line class-methods-use-this
-  onMoveEnd() {}
+  onMoveEnd() {
+    this.renderTrajectories();
+  }
 
   /**
    * Update the cursor style when hovering a vehicle.

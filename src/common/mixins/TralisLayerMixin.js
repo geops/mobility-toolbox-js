@@ -237,33 +237,14 @@ const TralisLayerMixin = (TrackerLayer) =>
     /**
      * Add a trajectory to the tracker.
      * @param {TralisTrajectory} trajectory The trajectory to add.
-     * @param {boolean} [addOnTop=false] If true, the trajectory is added on top of
-     *   the trajectory object. This affects the draw order. If addOnTop is
-     *   true, the trajectory is drawn first and appears on bottom.
      * @private
      */
-    addTrajectory(trajectory, addOnTop) {
-      // console.time(`addTrajectory${traj.train_id}`);
+    addTrajectory(trajectory) {
+      if (this.filter && !this.filter(trajectory)) {
+        return;
+      }
       this.trajectories[trajectory.properties.train_id] = trajectory;
-      // const idx = this.trajectories.findIndex(
-      //   (t) => t.train_id === traj.train_id,
-      // );
-      // const { time_intervals: timeIntervals } = traj;
-
-      // // Properties needed to display the vehicle.
-      // const trajectory = { ...traj, id: traj.train_id, timeIntervals };
-      // if (addOnTop) {
-      //   this.trajectories.unshift(trajectory);
-      //   if (idx !== -1) {
-      //     this.tracker.trajectories.splice(idx + 1, 1);
-      //   }
-      // } else {
-      //   this.trajectories.push(trajectory);
-      //   if (idx !== -1) {
-      //     this.tracker.trajectories.splice(idx, 1);
-      //   }
-      // }
-      // console.timeEnd(`addTrajectory${traj.train_id}`);
+      this.renderTrajectories();
     }
 
     removeTrajectory(id) {
