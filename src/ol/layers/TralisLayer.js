@@ -1,6 +1,4 @@
 import GeoJSON from 'ol/format/GeoJSON';
-import Feature from 'ol/Feature';
-import { MultiPoint } from 'ol/geom';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
@@ -97,16 +95,25 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @private
    */
   highlightTrajectory(id) {
-    this.getTrajectoryInfos(id).then(({ stopSequence, fullTrajectory }) => {
-      const vectorSource = this.vectorLayer.getSource();
-      vectorSource.clear();
-      let lineColor = '#ffffff'; // white
+    this.api
+      .getFullTrajectory(id, this.mode, this.generalizationLevel)
+      .then((fullTrajectory) => {
+        const vectorSource = this.vectorLayer.getSource();
+        vectorSource.clear();
 
-      if (this.useDelayStyle) {
-        lineColor = '#a0a0a0'; // grey
-      } else {
-        // We get the color of the first feature.
-        if (fullTrajectory) {
+        if (
+          !fullTrajectory ||
+          !fullTrajectory.features ||
+          !fullTrajectory.features.length
+        ) {
+          return;
+        }
+
+        let lineColor = '#ffffff'; // white
+
+        if (this.useDelayStyle) {
+          lineColor = '#a0a0a0'; // grey
+        } else {
           const props = fullTrajectory.features[0].properties;
           const { type } = props;
           let { stroke } = props;
@@ -116,51 +123,19 @@ class TralisLayer extends mixin(TrackerLayer) {
           }
 
           lineColor = stroke || getBgColor(type);
+
+          // Don't allow white lines, use red instead.
+          lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
         }
-
-        // Don't allow white lines, use red instead.
-        lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
-      }
-
-      stopSequence.forEach((sequence) => {
-        if (!sequence.stations) {
-          return;
-        }
-        const geometry = new MultiPoint(
-          sequence.stations.map((station) => station.coordinate),
-        );
-
-        const aboveStationsFeature = new Feature(geometry);
-        aboveStationsFeature.setStyle(
+        const style = [
           new Style({
-            zIndex: 1,
+            zIndex: 2,
             image: new Circle({
               radius: 5,
               fill: new Fill({
                 color: '#000000',
               }),
             }),
-          }),
-        );
-        const belowStationsFeature = new Feature(geometry);
-        belowStationsFeature.setStyle(
-          new Style({
-            zIndex: 4,
-            image: new Circle({
-              radius: 4,
-              fill: new Fill({
-                color: lineColor,
-              }),
-            }),
-          }),
-        );
-        vectorSource.addFeatures([aboveStationsFeature, belowStationsFeature]);
-      });
-
-      if (fullTrajectory) {
-        const style = [
-          new Style({
-            zIndex: 2,
             stroke: new Stroke({
               color: '#000000',
               width: 6,
@@ -168,19 +143,25 @@ class TralisLayer extends mixin(TrackerLayer) {
           }),
           new Style({
             zIndex: 3,
+            image: new Circle({
+              radius: 4,
+              fill: new Fill({
+                color: lineColor,
+              }),
+            }),
             stroke: new Stroke({
               color: lineColor,
               width: 4,
             }),
           }),
         ];
+        this.vectorLayer.setStyle(style);
         const features = format.readFeatures(fullTrajectory);
         features.forEach((feature) => {
           feature.setStyle(style);
         });
         this.vectorLayer.getSource().addFeatures(features);
-      }
-    });
+      });
   }
 
   /**
