@@ -407,6 +407,9 @@ const TrackerLayerMixin = (Base) =>
           return traj2.delay - traj1.delay;
         };
       }
+
+      // Update filter function based on convenient properties
+      this.updateFilters();
     }
 
     /**
@@ -467,7 +470,6 @@ const TrackerLayerMixin = (Base) =>
      */
     start() {
       this.stop();
-      this.updateFilters();
       this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
@@ -686,13 +688,21 @@ const TrackerLayerMixin = (Base) =>
     updateFilters() {
       // Setting filters from the permalink if no values defined by the layer.
       const parameters = qs.parse(window.location.search.toLowerCase());
-      // filter is the property in TrackerLayerMixin.
-      this.filter = createFilters(
-        this.publishedLineName || parameters[LINE_FILTER],
-        this.tripNumber || parameters[ROUTE_FILTER],
-        this.operator || parameters[OPERATOR_FILTER],
-        this.regexPublishedLineName,
-      );
+      const publishedName = this.publishedLineName || parameters[LINE_FILTER];
+      const tripNumber = this.tripNumber || parameters[ROUTE_FILTER];
+      const operator = this.operator || parameters[OPERATOR_FILTER];
+      const { regexPublishedLineName } = this;
+
+      // Only overrides filter function if one of this property exists.
+      if (publishedName || tripNumber || operator || regexPublishedLineName) {
+        // filter is the property in TrackerLayerMixin.
+        this.filter = createFilters(
+          publishedName,
+          tripNumber,
+          operator,
+          regexPublishedLineName,
+        );
+      }
     }
 
     /**

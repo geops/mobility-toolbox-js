@@ -31,6 +31,8 @@ const REGEX_VIA_POINT_COORD = /^([\d.]+),([\d.]+)$/;
 // !8596126$4 a station with id 8596126
 const REGEX_VIA_POINT_STATION_ID = /^!([^$]*)(\$?([a-zA-Z0-9]{0,2}))$/;
 
+const STOP_FETCH_ABORT_CONTROLLER_KEY = 'stop-fetch';
+
 const getFlatCoordinatesFromSegments = (segmentArray) => {
   const coords = [];
   segmentArray.forEach((seg) => {
@@ -256,12 +258,34 @@ class RoutingControl extends Control {
    */
   reset() {
     // Clear viaPoints and source
+    this.abortRequests();
     this.viaPoints = [];
     this.routingLayer.olLayer.getSource().clear();
     this.dispatchEvent({
       type: 'change:route',
       target: this,
     });
+  }
+
+  /**
+   * Aborts viapoint and route requests
+   * @private
+   */
+  abortRequests() {
+    // Abort Routing API requests
+    this.graphs.forEach(([graph]) => {
+      if (this.abortControllers[graph]) {
+        this.abortControllers[graph].abort();
+      }
+      this.abortControllers[graph] = new AbortController();
+    });
+
+    // Abort Stops API requests
+    this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]?.abort();
+    this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY] =
+      new AbortController();
+
+    this.loading = false;
   }
 
   /**
@@ -273,14 +297,20 @@ class RoutingControl extends Control {
    */
   drawRoute() {
     /* Calls RoutingAPI to draw a route using the viaPoints array */
-    if (this.viaPoints.length === 1) {
-      // Clear source
-      this.routingLayer.olLayer.getSource().clear();
-      // Add point for first node
-      return this.drawViaPoint(this.viaPoints[0], 0);
-    }
-    if (this.viaPoints.length < 2) {
+    this.abortRequests();
+    this.routingLayer.olLayer.getSource().clear();
+
+    if (!this.viaPoints.length) {
       return null;
+    }
+
+    if (this.viaPoints.length === 1) {
+      // Add point for first node
+      return this.drawViaPoint(
+        this.viaPoints[0],
+        0,
+        this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY],
+      );
     }
 
     const formattedViaPoints = this.viaPoints.map((viaPoint) => {
@@ -302,14 +332,16 @@ class RoutingControl extends Control {
     this.routingLayer.olLayer.getSource().clear();
 
     // Create point features for the viaPoints
-    this.viaPoints.forEach((viaPoint, idx) => this.drawViaPoint(viaPoint, idx));
+    this.viaPoints.forEach((viaPoint, idx) =>
+      this.drawViaPoint(
+        viaPoint,
+        idx,
+        this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY],
+      ),
+    );
 
     return Promise.all(
       this.graphs.map(([graph], index) => {
-        if (this.abortControllers[graph]) {
-          this.abortControllers[graph].abort();
-        }
-        this.abortControllers[graph] = new AbortController();
         return this.api
           .route(
             {
@@ -366,6 +398,7 @@ class RoutingControl extends Control {
             routeFeature.set('minResolution', this.graphsResolutions[index][0]);
             routeFeature.set('maxResolution', this.graphsResolutions[index][1]);
             this.routingLayer.olLayer.getSource().addFeature(routeFeature);
+            this.loading = false;
           })
           .catch((error) => {
             if (error.name === 'AbortError') {
@@ -379,6 +412,7 @@ class RoutingControl extends Control {
               target: this,
             });
             this.onRouteError(error, this);
+            this.loading = false;
           });
       }),
     );
@@ -389,7 +423,7 @@ class RoutingControl extends Control {
    *
    * @private
    */
-  drawViaPoint(viaPoint, idx) {
+  drawViaPoint(viaPoint, idx, abortController) {
     const pointFeature = new Feature();
     pointFeature.set('viaPointIdx', idx);
 
@@ -415,6 +449,7 @@ class RoutingControl extends Control {
 
       return fetch(
         `${this.stopsApiUrl}lookup/${stationId}?key=${this.stopsApiKey}`,
+        { signal: abortController.signal },
       )
         .then((res) => res.json())
         .then((stationData) => {
@@ -426,6 +461,10 @@ class RoutingControl extends Control {
           return pointFeature;
         })
         .catch((error) => {
+          if (error.name === 'AbortError') {
+            // Ignore abort error
+            return;
+          }
           // Dispatch error event and execute error function
           this.dispatchEvent({
             type: 'error',
@@ -475,6 +514,7 @@ class RoutingControl extends Control {
     if (stationName) {
       return fetch(
         `${this.stopsApiUrl}?key=${this.stopsApiKey}&q=${stationName}&limit=1`,
+        { signal: abortController.signal },
       )
         .then((res) => res.json())
         .then((stationData) => {
