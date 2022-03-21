@@ -38,6 +38,11 @@ class MapboxStyleLayer extends Layer {
     this.mapboxLayer = options.mapboxLayer;
 
     /**
+     * Define if the layer has data to display in the current mapbox layer.
+     */
+    this.disabled = false;
+
+    /**
      * Function to filter features to be displayed.
      * @type {function}
      * @private
@@ -230,6 +235,13 @@ class MapboxStyleLayer extends Layer {
 
     if (this.addDynamicFilters) {
       this.addDynamicFilters();
+    }
+
+    const { mbMap } = this.mapboxLayer;
+    const style = mbMap.getStyle();
+    if (style && this.styleLayersFilter) {
+      const styles = style.layers.filter(this.styleLayersFilter);
+      this.disabled = !styles.length;
     }
   }
 

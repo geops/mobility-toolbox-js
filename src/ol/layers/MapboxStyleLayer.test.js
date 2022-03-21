@@ -107,6 +107,55 @@ describe('MapboxStyleLayer', () => {
     expect(clone).toBeInstanceOf(MapboxStyleLayer);
   });
 
+  test('should add layer on load', () => {
+    const style = { layers: [] };
+    layer.mapboxLayer.mbMap = {
+      getStyle: () => style,
+      getSource: () => ({}),
+      getLayer: () => null,
+      setLayoutProperty: () => null,
+      addLayer: (styleLayerr) => style.layers.push(styleLayerr),
+    };
+    layer.onLoad();
+    expect(style.layers[0]).toBe(styleLayer);
+  });
+
+  describe('should set disabled property to false on load', () => {
+    test('when layer uses styleLayer property', () => {
+      const styles = { layers: [] };
+      layer.mapboxLayer.mbMap = {
+        getStyle: () => styles,
+        getSource: () => ({}),
+        getLayer: () => null,
+        setLayoutProperty: () => null,
+        addLayer: (styleLayerr) => styles.layers.push(styleLayerr),
+      };
+      expect(layer).toBeInstanceOf(MapboxStyleLayer);
+      layer.onLoad();
+      expect(layer.disabled).toBe(false);
+    });
+  });
+
+  describe('should set disabled property to true on load', () => {
+    test('when layer uses styleLayersFilter property', () => {
+      const styles = { layers: [styleLayer] };
+      const layer2 = new MapboxStyleLayer({
+        name: 'mapbox layer',
+        mapboxLayer: source,
+        styleLayersFilter: () => false,
+      });
+      layer2.mapboxLayer.mbMap = {
+        getStyle: () => styles,
+        getSource: () => ({}),
+        getLayer: () => null,
+        setLayoutProperty: () => null,
+        addLayer: () => ({}),
+      };
+      layer2.onLoad();
+      expect(layer2.disabled).toBe(true);
+    });
+  });
+
   describe('#getFeatureInfoAtCoordinate()', () => {
     beforeEach(() => {
       source.init(map);
