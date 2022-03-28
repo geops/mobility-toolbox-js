@@ -73,6 +73,8 @@ export default class Tracker {
    * Draw all the trajectories available to the canvas.
    * @param {ViewState} trajectories An array of trajectories.
    * @param {ViewState} viewState The view state of the map.
+   * @param {boolean} options.hoverVehicleId The id of the vehicle to highlight.
+   * @param {boolean} options.selectedVehicleId The id of the vehicle to select.
    * @param {boolean} options.noInterpolate If true trajectories are not interpolated but
    *   drawn at the last known coordinate. Use this for performance optimization
    *   during map navigation.

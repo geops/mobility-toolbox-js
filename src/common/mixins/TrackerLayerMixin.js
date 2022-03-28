@@ -118,7 +118,7 @@ const TrackerLayerMixin = (Base) =>
 
       this.throttleRenderTajectories = throttle(
         this.renderTrajectoriesInternal,
-        30,
+        50,
       );
     }
 
