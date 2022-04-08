@@ -25,8 +25,8 @@ export default class Tracker {
      * @type {Canvas}
      */
     this.canvas = options.canvas || document.createElement('canvas');
-    this.canvas.width = options.width * this.pixelRatio;
-    this.canvas.height = options.height * this.pixelRatio;
+    this.canvas.width = options.width * (options.pixelRatio || 1);
+    this.canvas.height = options.height * (options.pixelRatio || 1);
     this.canvas.setAttribute(
       'style',
       [

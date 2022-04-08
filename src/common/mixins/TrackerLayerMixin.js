@@ -3,6 +3,7 @@
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
 import qs from 'query-string';
+import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
@@ -22,6 +23,8 @@ const OPERATOR_FILTER = 'operator';
  * @classproperty {number} pixelRatio - Pixel ratio use to render the trajectories. Default to window.devicePixelRatio.
  * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
+ * @classproperty {boolean} useThrottle - If true, encapsulates the renderTrajectories calls in a throttle function. Experimental.
+ * @classproperty {boolean} useDebounce - If true, encapsulates the renderTrajectories calls in a debounce function. Experimental.
  * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
  * @classproperty {function} sort - Sort the trajectories.
  * @classproperty {function} style - Style of a trajectory.
@@ -116,9 +119,16 @@ const TrackerLayerMixin = (Base) =>
       this.renderTrajectoriesInternal =
         this.renderTrajectoriesInternal.bind(this);
 
-      this.throttleRenderTajectories = throttle(
+      this.throttleRenderTrajectories = debounce(
         this.renderTrajectoriesInternal,
         50,
+        { leading: true, trailing: true },
+      );
+
+      this.debounceRenderTrajectories = debounce(
+        this.renderTrajectoriesInternal,
+        50,
+        { leading: true, trailing: true, maxWait: 1000 },
       );
     }
 
@@ -262,7 +272,7 @@ const TrackerLayerMixin = (Base) =>
          * Id of the selected vehicle.
          */
         pixelRatio: {
-          value: pixelRatio || 1,
+          value: pixelRatio || window.devicePixelRatio || 1,
           writable: true,
         },
 
@@ -278,6 +288,22 @@ const TrackerLayerMixin = (Base) =>
          * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame.
          */
         useRequestAnimationFrame: {
+          default: false,
+          writable: true,
+        },
+
+        /**
+         * If true, encapsulates the renderTrajectories calls in a throttle function.
+         */
+        useThrottle: {
+          default: false,
+          writable: true,
+        },
+
+        /**
+         * If true, encapsulates the renderTrajectories calls in a debounce function.
+         */
+        useDebounce: {
           default: false,
           writable: true,
         },
@@ -509,7 +535,9 @@ const TrackerLayerMixin = (Base) =>
       // console.timeEnd('sort');
       window.trajectories = trajectories;
 
+      // console.log('render', trajectories.length);
       // console.time('render');
+      // console.log('pixelRatio', this.pixelRatio);
       this.renderState = this.tracker.renderTrajectories(
         trajectories,
         { ...viewState, pixelRatio: this.pixelRatio, time },
@@ -553,8 +581,12 @@ const TrackerLayerMixin = (Base) =>
         this.requestId = requestAnimationFrame(() => {
           this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
-      } else {
+      } else if (this.useThrottle) {
         this.throttleRenderTajectories(viewState, noInterpolate);
+      } else if (this.useDebounce) {
+        this.debounceRenderTajectories(viewState, noInterpolate);
+      } else {
+        this.renderTrajectoriesInternal(viewState, noInterpolate);
       }
     }
 
