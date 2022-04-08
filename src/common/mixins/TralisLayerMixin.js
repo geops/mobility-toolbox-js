@@ -211,7 +211,7 @@ const TralisLayerMixin = (TrackerLayer) =>
     }
 
     /**
-     * Determine if the trajectory must be rendered or not.
+     * Determine if the trajectory is useless and should be removed from the list or not.
      * By default, this function exclude vehicles:
      *  - that have their trajectory outside the current extent and
      *  - that are not a train and zoom level is lower than layer's minZoomNonTrain property.
