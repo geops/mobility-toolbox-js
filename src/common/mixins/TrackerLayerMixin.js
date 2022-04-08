@@ -119,7 +119,7 @@ const TrackerLayerMixin = (Base) =>
       this.renderTrajectoriesInternal =
         this.renderTrajectoriesInternal.bind(this);
 
-      this.throttleRenderTrajectories = debounce(
+      this.throttleRenderTrajectories = throttle(
         this.renderTrajectoriesInternal,
         50,
         { leading: true, trailing: true },
@@ -128,7 +128,7 @@ const TrackerLayerMixin = (Base) =>
       this.debounceRenderTrajectories = debounce(
         this.renderTrajectoriesInternal,
         50,
-        { leading: true, trailing: true, maxWait: 1000 },
+        { leading: true, trailing: true, maxWait: 5000 },
       );
     }
 
@@ -288,7 +288,7 @@ const TrackerLayerMixin = (Base) =>
          * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame.
          */
         useRequestAnimationFrame: {
-          default: false,
+          value: options.useRequestAnimationFrame || false,
           writable: true,
         },
 
@@ -296,7 +296,7 @@ const TrackerLayerMixin = (Base) =>
          * If true, encapsulates the renderTrajectories calls in a throttle function.
          */
         useThrottle: {
-          default: false,
+          value: options.useThrottle || false,
           writable: true,
         },
 
@@ -304,7 +304,7 @@ const TrackerLayerMixin = (Base) =>
          * If true, encapsulates the renderTrajectories calls in a debounce function.
          */
         useDebounce: {
-          default: false,
+          value: options.useDebounce || false,
           writable: true,
         },
 
@@ -522,7 +522,6 @@ const TrackerLayerMixin = (Base) =>
       if (!this.tracker) {
         return false;
       }
-      // console.log('icic');
 
       const time = this.live ? Date.now() : this.time;
 
@@ -535,9 +534,7 @@ const TrackerLayerMixin = (Base) =>
       // console.timeEnd('sort');
       window.trajectories = trajectories;
 
-      // console.log('render', trajectories.length);
       // console.time('render');
-      // console.log('pixelRatio', this.pixelRatio);
       this.renderState = this.tracker.renderTrajectories(
         trajectories,
         { ...viewState, pixelRatio: this.pixelRatio, time },
@@ -582,9 +579,9 @@ const TrackerLayerMixin = (Base) =>
           this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
       } else if (this.useThrottle) {
-        this.throttleRenderTajectories(viewState, noInterpolate);
+        this.throttleRenderTrajectories(viewState, noInterpolate);
       } else if (this.useDebounce) {
-        this.debounceRenderTajectories(viewState, noInterpolate);
+        this.debounceRenderTrajectories(viewState, noInterpolate);
       } else {
         this.renderTrajectoriesInternal(viewState, noInterpolate);
       }

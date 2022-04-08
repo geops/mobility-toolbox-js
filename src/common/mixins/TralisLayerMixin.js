@@ -302,9 +302,9 @@ const TralisLayerMixin = (TrackerLayer) =>
         trajectory.properties.olGeometry = this.format.readGeometry(geometry);
       }
 
+      // TODO Make sure the timeOffset is useful. May be we can remove it.
       trajectory.properties.timeOffset = Date.now() - data.timestamp;
       this.addTrajectory(trajectory);
-      // console.timeEnd(`onTrajectoryMessage${data.content.properties.train_id}`);
     }
 
     /**

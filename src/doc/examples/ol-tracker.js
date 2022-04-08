@@ -20,6 +20,7 @@ export default () => {
   const tracker = new TralisLayer({
     url: 'wss://tralis-tracker-api.geops.io/ws',
     apiKey: window.apiKey,
+    useDebounce: true,
   });
 
   tracker.onClick(([feature]) => {

@@ -22,20 +22,39 @@ const getVehiclePosition = (now, trajectory, noInterpolate) => {
   } else if (geometry.getType() === GeomType.POINT) {
     coord = geometry.getCoordinates();
   } else if (geometry.getType() === GeomType.LINE_STRING) {
-    const intervals = timeIntervals || [];
-    // Search the time interval.
-    for (let j = 0; j < intervals.length - 1; j += 1) {
-      // Rotation only available in tralis layer.
-      const [start, startFrac] = intervals[j];
-      const [end, endFrac] = intervals[j + 1];
+    const intervals = timeIntervals || [[]];
+    const firstInterval = intervals[0];
+    const lastInterval = intervals[intervals.length - 1];
 
-      if (start <= now && now <= end) {
-        // interpolate position inside the time interval.
-        const timeFrac = Math.min((now - start) / (end - start), 1);
-        const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;
-        coord = geometry.getCoordinateAt(geomFrac);
-        [, , rotation] = intervals[j];
-        break;
+    // Between the last time interval of a trajectory event and the beginning
+    // of the new trajectory event, there is few seconds, can be 6 to 30
+    // seconds (that's why the vehicle jumps sometimes).
+    // So we make the choice here to display the last (or the first) position
+    // of an trajectory event instead of removing them, if the current date is
+    // outside the time intervals we display the vehicle at the last (or first) position known.
+    if (now < firstInterval[0]) {
+      // Display first position known.
+      [[, , rotation]] = firstInterval;
+      coord = geometry.getFirstCoordinate();
+    } else if (now > lastInterval[0]) {
+      // Display last position known.
+      [, , rotation] = lastInterval;
+      coord = geometry.getLastCoordinate();
+    } else {
+      // Interpolate position using time intervals.
+      for (let j = 0; j < intervals.length - 1; j += 1) {
+        // Rotation only available in tralis layer.
+        const [start, startFrac] = intervals[j];
+        const [end, endFrac] = intervals[j + 1];
+
+        if (start <= now && now <= end) {
+          // interpolate position inside the time interval.
+          const timeFrac = Math.min((now - start) / (end - start), 1);
+          const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;
+          coord = geometry.getCoordinateAt(geomFrac);
+          [, , rotation] = intervals[j];
+          break;
+        }
       }
     }
   } else {
