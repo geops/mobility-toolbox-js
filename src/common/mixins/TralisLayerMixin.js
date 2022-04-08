@@ -244,25 +244,24 @@ const TralisLayerMixin = (TrackerLayer) =>
         return;
       }
 
+      this.trajectories[trajectory.properties.train_id] = trajectory;
+      this.renderTrajectories();
+
       if (this.worker) {
         this.worker.postMessage({
           action: 'addTrajectory',
           trajectory,
         });
-      } else {
-        this.trajectories[trajectory.properties.train_id] = trajectory;
-        this.renderTrajectories();
       }
     }
 
     removeTrajectory(id) {
+      delete this.trajectories[id];
       if (this.worker) {
         this.worker.postMessage({
           action: 'removeTrajectory',
           trajectoryId: id,
         });
-      } else {
-        delete this.trajectories[id];
       }
     }
 

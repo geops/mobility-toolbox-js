@@ -25,26 +25,24 @@ export default class Tracker {
      * @type {Canvas}
      */
     this.canvas = options.canvas || document.createElement('canvas');
+
     this.canvas.width = options.width * (options.pixelRatio || 1);
     this.canvas.height = options.height * (options.pixelRatio || 1);
-    this.canvas.setAttribute(
-      'style',
-      [
-        'position: absolute',
-        'top: 0',
-        'bottom: 0',
-        `width: ${options.width}px`,
-        `height: ${options.height}px`,
-        'pointer-events: none',
-        'visibility: visible',
-        'margin-top: inherit', // for scrolling behavior.
-      ].join(';'),
-    );
-    /**
-     * 2d drawing context on the canvas.
-     * @type {CanvasRenderingContext2D}
-     */
-    this.canvasContext = this.canvas.getContext('2d');
+    if (this.canvas.setAttribute) {
+      this.canvas.setAttribute(
+        'style',
+        [
+          'position: absolute',
+          'top: 0',
+          'bottom: 0',
+          `width: ${options.width}px`,
+          `height: ${options.height}px`,
+          'pointer-events: none',
+          'visibility: visible',
+          'margin-top: inherit', // for scrolling behavior.
+        ].join(';'),
+      );
+    }
   }
 
   /**
@@ -118,8 +116,11 @@ export default class Tracker {
       -center[1],
     );
 
-    canvas.style.width = `${canvas.width / pixelRatio}px`;
-    canvas.style.height = `${canvas.height / pixelRatio}px`;
+    // Offscreen canvas has not style attribute
+    if (canvas.style) {
+      canvas.style.width = `${canvas.width / pixelRatio}px`;
+      canvas.style.height = `${canvas.height / pixelRatio}px`;
+    }
 
     let hoverVehicleImg;
     let hoverVehiclePx;

@@ -266,7 +266,7 @@ class TrackerLayer extends mixin(Layer) {
     const blockRendering =
       this.map.getView().getAnimating() || this.map.getView().getInteracting();
 
-    if (this.worker && this.mainThreadFrameState) {
+    if (!blockRendering && this.worker && this.mainThreadFrameState) {
       const frameState = { ...this.mainThreadFrameState };
       delete frameState.layerStatesArray;
       delete frameState.viewState.projection;
@@ -284,7 +284,7 @@ class TrackerLayer extends mixin(Layer) {
           useDelayStyle: this.useDelayStyle,
         },
       });
-    } else {
+    } else if (!this.worker) {
       // Don't render the map when the map is animating or interacting.
       isRendered = blockRendering
         ? false
