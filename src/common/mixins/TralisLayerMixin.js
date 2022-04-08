@@ -6,6 +6,7 @@
 import GeoJSON from 'ol/format/GeoJSON';
 import Point from 'ol/geom/Point';
 import { intersects } from 'ol/extent';
+import { fromLonLat } from 'ol/proj';
 import { TralisAPI, TralisModes } from '../../api';
 
 /**
@@ -145,14 +146,10 @@ const TralisLayerMixin = (TrackerLayer) =>
       // Purge trajectories:
       // - which are outside the extent
       // - when it's bus and zoom level is too low for them
-      // for (let i = this.trajectories.length - 1; i >= 0; i -= 1) {
-      //   const trajectory = this.trajectories[i];
-      //   if (this.mustNotBeDisplayed(trajectory, extent, zoom)) {
-      //     const temp = [...this.trajectories];
-      //     temp.splice(i, 1);
-      //     this.tracker.setTrajectories(temp);
-      //   }
-      // }
+      const keys = Object.keys(this.trajectories);
+      for (let i = keys.length - 1; i >= 0; i -= 1) {
+        this.purgeTrajectory(this.trajectories[keys[i]], extent, zoom);
+      }
 
       const bbox = [...extent];
 
@@ -214,7 +211,7 @@ const TralisLayerMixin = (TrackerLayer) =>
     }
 
     /**
-     * Determine if the trajectory must be rendered or not.
+     * Determine if the trajectory is useless and should be removed from the list or not.
      * By default, this function exclude vehicles:
      *  - that have their trajectory outside the current extent and
      *  - that are not a train and zoom level is lower than layer's minZoomNonTrain property.
@@ -225,44 +222,53 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @return {boolean} if the trajectory must be displayed or not.
      * @ignore
      */
-    mustNotBeDisplayed(trajectory, extent, zoom) {
-      return (
-        !intersects(extent, trajectory.bounds) ||
-        (trajectory.type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
-      );
+    purgeTrajectory(trajectory, extent, zoom) {
+      const { type, bounds, train_id: id } = trajectory.properties;
+      if (
+        !intersects(extent, bounds) ||
+        (type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
+      ) {
+        this.removeTrajectory(id);
+        return true;
+      }
+      return false;
     }
 
     /**
      * Add a trajectory to the tracker.
      * @param {TralisTrajectory} trajectory The trajectory to add.
-     * @param {boolean} [addOnTop=false] If true, the trajectory is added on top of
-     *   the trajectory object. This affects the draw order. If addOnTop is
-     *   true, the trajectory is drawn first and appears on bottom.
      * @private
      */
-    addTrajectory(traj, addOnTop) {
+    addTrajectory(trajectory) {
+      if (this.filter && !this.filter(trajectory)) {
+        return;
+      }
+
       if (this.worker) {
-        // console.log('addTrajectory', traj.train_id);
         this.worker.postMessage({
           action: 'addTrajectory',
-          trajectory: traj,
+          trajectory,
         });
+      } else {
+        this.trajectories[trajectory.properties.train_id] = trajectory;
+        this.renderTrajectories();
       }
     }
 
-    /**
-     * Remove a trajectory using its id.
-     * @param {number} id The trajectory's train_id property of the trajectory to remove
-     * @private
-     */
     removeTrajectory(id) {
       if (this.worker) {
         this.worker.postMessage({
           action: 'removeTrajectory',
           trajectoryId: id,
         });
+      } else {
+        delete this.trajectories[id];
       }
     }
+
+    // getRefreshTimeInMs() {
+    //   return 5000;
+    // }
 
     /**
      * Callback on websocket's trajectory channel events.
@@ -274,13 +280,47 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (!data.content) {
         return;
       }
-      const trajectory = { ...data.content };
-      trajectory.properties.timeOffset = Date.now() - data.timestamp;
+      const trajectory = data.content;
+
+      const {
+        geometry,
+        properties: {
+          train_id: id,
+          time_since_update: timeSinceUpdate,
+          raw_coordinates: rawCoordinates,
+        },
+      } = trajectory;
 
       // ignore old events [SBAHNM-97]
-      if (trajectory.properties.time_since_update >= 0) {
-        this.addTrajectory(trajectory);
+      if (timeSinceUpdate < 0) {
+        return;
       }
+
+      // console.time(`onTrajectoryMessage${data.content.properties.train_id}`);
+      if (this.purgeTrajectory(trajectory)) {
+        return;
+      }
+
+      if (
+        this.debug &&
+        this.mode === TralisModes.TOPOGRAPHIC &&
+        rawCoordinates
+      ) {
+        trajectory.properties.olGeometry = {
+          type: 'Point',
+          coordinates: fromLonLat(
+            rawCoordinates,
+            this.map.getView().getProjection(),
+          ),
+        };
+      } else if (!this.worker) {
+        // We can't pass the olGeometry to the worker because it's not serializable.
+        trajectory.properties.olGeometry = this.format.readGeometry(geometry);
+      }
+
+      // TODO Make sure the timeOffset is useful. May be we can remove it.
+      trajectory.properties.timeOffset = Date.now() - data.timestamp;
+      this.addTrajectory(trajectory);
     }
 
     /**
@@ -291,9 +331,11 @@ const TralisLayerMixin = (TrackerLayer) =>
      * @override
      */
     onDeleteTrajectoryMessage(data) {
-      if (data.content) {
-        this.removeTrajectory(data.content);
+      if (!data.content) {
+        return;
       }
+
+      this.removeTrajectory(data.content);
     }
 
     /**

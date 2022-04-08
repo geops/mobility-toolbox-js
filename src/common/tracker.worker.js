@@ -1,8 +1,7 @@
 import stringify from 'json-stringify-safe';
 import { compose, apply, create } from 'ol/transform';
 import GeoJSON from 'ol/format/GeoJSON';
-import { delayTrackerStyle } from './utils';
-import interpolatePosition from './interpolate';
+import { delayTrackerStyle, getVehiclePosition } from './utils';
 
 const debug = false;
 
@@ -10,6 +9,7 @@ const trajectories = {};
 let renderTimeout;
 let count = 0;
 const format = new GeoJSON();
+let canvas;
 
 const render = (evt) => {
   // eslint-disable-next-line no-console
@@ -17,31 +17,32 @@ const render = (evt) => {
   // eslint-disable-next-line no-console
   if (debug) console.log('render', evt.data.frameState);
   count = 0;
-  let nbRenderedTrajectories = 0;
-  const { frameState } = evt.data;
+  const { frameState, viewState, options } = evt.data;
+
   const {
     time = Date.now(),
     size = [],
     center,
     resolution,
-    zoom,
     rotation = 0,
     pixelRatio,
-    interpolate = true,
+  } = viewState;
+  const {
     iconScale,
+    noInterpolate = false,
     hoverVehicleId,
     selectedVehicleId,
-    delayDisplay,
-    delayOutlineColor,
-    useDelayStyle,
-  } = evt.data;
+  } = options;
 
-  const canvas = new OffscreenCanvas(
-    size[0] * pixelRatio,
-    size[1] * pixelRatio,
-  );
+  if (!canvas) {
+    canvas = new OffscreenCanvas(size[0] * pixelRatio, size[1] * pixelRatio);
+  }
 
-  const canvasContext = canvas.getContext('2d');
+  const context = canvas.getContext('2d');
+  const [width, height] = size;
+  if (width && height && (canvas.width !== width || canvas.height !== height)) {
+    [canvas.width, canvas.height] = [width * pixelRatio, height * pixelRatio];
+  }
 
   const coordinateToPixelTransform = compose(
     create(),
@@ -54,6 +55,9 @@ const render = (evt) => {
     -center[1],
   );
 
+  // canvas.style.width = `${canvas.width / pixelRatio}px`;
+  // canvas.style.height = `${canvas.height / pixelRatio}px`;
+
   let hoverVehicleImg;
   let hoverVehiclePx;
   let hoverVehicleWidth;
@@ -62,52 +66,33 @@ const render = (evt) => {
   let selectedVehiclePx;
   let selectedVehicleWidth;
   let selectedVehicleHeight;
+  let nbRendered = 0;
 
   const keys = Object.keys(trajectories);
   for (let i = (keys || []).length - 1; i >= 0; i -= 1) {
     const trajectory = trajectories[keys[i]];
-    const {
-      geometry,
-      properties: {
-        coordinate,
-        time_intervals: timeIntervals,
-        time_offset: timeOffset,
-        train_id: trainId,
-      },
-    } = trajectory;
 
-    let coord = null;
-    let rotationIcon = null;
-    let endFraction = 0;
+    // We simplify the trajectory object
+    const { train_id: id, timeOffset } = trajectory.properties;
 
-    if (coordinate && !interpolate) {
-      coord = coordinate;
-    } else if (timeIntervals && timeIntervals.length > 1) {
-      const interpolated = interpolatePosition(
-        time - (timeOffset || 0),
-        geometry,
-        timeIntervals,
-      );
+    // We set the rotation and the timeFraction of the trajectory (used by tralis).
+    // if rotation === null that seems there is no rotation available.
+    const { coord, rotation: rotationIcon } = getVehiclePosition(
+      time - (timeOffset || 0),
+      trajectory,
+      noInterpolate,
+    );
 
-      // We set the rotation and the timeFraction of the trajectory (used by tralis).
-      // if rotation === null that seems there is no rotation available.
-      coord = interpolated.coord;
-      rotationIcon = interpolated.rotation;
-      endFraction = interpolated.timeFrac;
-    }
+    // We store  the current vehicle position to the trajectory.
+    trajectories[keys[i]].properties.coordinate = coord;
+    trajectories[keys[i]].properties.rotation = rotationIcon;
 
     if (!coord) {
       // eslint-disable-next-line no-continue
       continue;
     }
 
-    // We apply the result of interpolation (or not) to the trajectory.
-    trajectories[keys[i]].coordinate = coord;
-    trajectories[keys[i]].rotation = rotationIcon;
-    trajectories[keys[i]].endFraction = endFraction;
-
-    let px = apply(coordinateToPixelTransform, [...coord]); // [...toLonLat(coord)]);
-
+    let px = apply(coordinateToPixelTransform, [...coord]);
     if (!px) {
       // eslint-disable-next-line no-continue
       continue;
@@ -125,31 +110,14 @@ const render = (evt) => {
       continue;
     }
 
-    px = px.map((p) => {
-      return p * pixelRatio;
-    });
-
-    const vehicleImg = delayTrackerStyle(
-      trajectory,
-      {
-        zoom,
-        pixelRatio,
-      },
-      {
-        hoverVehicleId,
-        selectedVehicleId,
-        delayDisplay,
-        delayOutlineColor,
-        useDelayStyle,
-      },
-    );
+    const vehicleImg = delayTrackerStyle(trajectory, viewState, options);
 
     if (!vehicleImg) {
       // eslint-disable-next-line no-continue
       continue;
     }
 
-    nbRenderedTrajectories += 1;
+    nbRendered += 1;
 
     let imgWidth = vehicleImg.width;
     let imgHeight = vehicleImg.height;
@@ -159,8 +127,8 @@ const render = (evt) => {
       imgWidth = Math.floor(imgWidth * iconScale);
     }
 
-    if (hoverVehicleId !== trainId && selectedVehicleId !== trainId) {
-      canvasContext.drawImage(
+    if (hoverVehicleId !== id && selectedVehicleId !== id) {
+      context.drawImage(
         vehicleImg,
         px[0] - imgWidth / 2,
         px[1] - imgHeight / 2,
@@ -168,7 +136,7 @@ const render = (evt) => {
         imgHeight,
       );
     }
-    if (hoverVehicleId === trainId) {
+    if (hoverVehicleId === id) {
       // Store the canvas to draw it at the end
       hoverVehicleImg = vehicleImg;
       hoverVehiclePx = px;
@@ -176,7 +144,7 @@ const render = (evt) => {
       hoverVehicleHeight = imgHeight;
     }
 
-    if (selectedVehicleId === trainId) {
+    if (selectedVehicleId === id) {
       // Store the canvas to draw it at the end
       selectedVehicleImg = vehicleImg;
       selectedVehiclePx = px;
@@ -186,7 +154,7 @@ const render = (evt) => {
   }
 
   if (selectedVehicleImg) {
-    canvasContext.drawImage(
+    context.drawImage(
       selectedVehicleImg,
       selectedVehiclePx[0] - selectedVehicleWidth / 2,
       selectedVehiclePx[1] - selectedVehicleHeight / 2,
@@ -196,7 +164,7 @@ const render = (evt) => {
   }
 
   if (hoverVehicleImg) {
-    canvasContext.drawImage(
+    context.drawImage(
       hoverVehicleImg,
       hoverVehiclePx[0] - hoverVehicleWidth / 2,
       hoverVehiclePx[1] - hoverVehicleHeight / 2,
@@ -218,7 +186,7 @@ const render = (evt) => {
       action: 'rendered',
       imageData,
       // transform: rendererTransform,
-      nbRenderedTrajectories,
+      nbRenderedTrajectories: nbRendered,
       frameState: JSON.parse(stringify(state)),
     },
     [imageData],
@@ -232,8 +200,10 @@ self.onmessage = (evt) => {
   if (evt.data.action === 'addTrajectory') {
     const { trajectory } = evt.data;
     const id = trajectory.properties.train_id;
-    const geometry = format.readGeometry(trajectory.geometry);
-    trajectories[id] = { ...evt.data.trajectory, geometry };
+    trajectories[id] = trajectory;
+    trajectories[id].properties.olGeometry = format.readGeometry(
+      trajectory.geometry,
+    );
     return;
   }
 

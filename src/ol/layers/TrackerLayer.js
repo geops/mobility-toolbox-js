@@ -69,12 +69,8 @@ class TrackerLayer extends mixin(Layer) {
         that.map.render();
       } else if (that.canvas && message.data.action === 'rendered') {
         if (
-          !that.renderWhenInteracting(
-            that.mainThreadFrameState.viewState,
-            that.renderedViewState,
-          ) &&
-          (that.map.getView().getInteracting() ||
-            that.map.getView().getAnimating())
+          that.map.getView().getInteracting() ||
+          that.map.getView().getAnimating()
         ) {
           return;
         }
@@ -105,17 +101,6 @@ class TrackerLayer extends mixin(Layer) {
         that.rendering = false;
       }
     };
-
-    /**
-     * Boolean that defines if the layer is allow to renderTrajectories when the map is zooming, rotating or poanning true.
-     * It's useful to avoid rendering the map when the map is animating or interacting.
-     * @type {function}
-     */
-    this.renderWhenInteracting =
-      options.renderWhenInteracting ||
-      (() =>
-        // Render trajectories on each render frame when the number of trajectories is small.
-        this.nbRenderedTrajectories < 200);
 
     /** @ignore */
     this.olLayer =
@@ -154,15 +139,8 @@ class TrackerLayer extends mixin(Layer) {
                 const { resolution } = frameState.viewState;
                 const { resolution: renderedResolution } =
                   this.renderedViewState;
-                if (
-                  this.renderWhenInteracting &&
-                  this.renderWhenInteracting(
-                    frameState.viewState,
-                    this.renderedViewState,
-                  )
-                ) {
-                  this.renderTrajectories(true);
-                } else if (renderedResolution / resolution >= 3) {
+
+                if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
                   this.canvas
                     .getContext('2d')
@@ -286,10 +264,7 @@ class TrackerLayer extends mixin(Layer) {
     let isRendered = false;
 
     const blockRendering =
-      !this.renderWhenInteracting(viewState, this.renderedViewState) &&
-      (this.map.getView().getAnimating() ||
-        this.map.getView().getInteracting());
-    const { size, center, resolution, extent, rotation, zoom } = viewState;
+      this.map.getView().getAnimating() || this.map.getView().getInteracting();
 
     if (this.worker && this.mainThreadFrameState) {
       const frameState = { ...this.mainThreadFrameState };
@@ -297,22 +272,17 @@ class TrackerLayer extends mixin(Layer) {
       delete frameState.viewState.projection;
       this.worker.postMessage({
         action: 'render',
-        time: this.time,
-        size,
-        center,
-        resolution,
-        extent,
-        zoom,
-        rotation,
-        pixelRatio: this.pixelRatio,
-        interpolate: !noInterpolate,
-        iconScale: this.iconScale,
-        hoverVehicleId: this.hoverVehicleId,
-        selectedVehicleId: this.selectedVehicleId,
-        delayDisplay: this.delayDisplay,
-        delayOutlineColor: this.delayOutlineColor,
-        useDelayStyle: this.useDelayStyle,
         frameState: JSON.parse(stringify(frameState)),
+        viewState,
+        options: {
+          noInterpolate,
+          iconScale: this.iconScale,
+          hoverVehicleId: this.hoverVehicleId,
+          selectedVehicleId: this.selectedVehicleId,
+          delayDisplay: this.delayDisplay,
+          delayOutlineColor: this.delayOutlineColor,
+          useDelayStyle: this.useDelayStyle,
+        },
       });
     } else {
       // Don't render the map when the map is animating or interacting.

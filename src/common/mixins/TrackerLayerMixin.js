@@ -2,8 +2,9 @@
 /* eslint-disable max-classes-per-file */
 import { buffer, containsCoordinate } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
-import Feature from 'ol/Feature';
 import qs from 'query-string';
+import debounce from 'lodash.debounce';
+import throttle from 'lodash.throttle';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
 import createFilters from '../utils/createTrackerFilters';
@@ -22,6 +23,8 @@ const OPERATOR_FILTER = 'operator';
  * @classproperty {number} pixelRatio - Pixel ratio use to render the trajectories. Default to window.devicePixelRatio.
  * @classproperty {boolean} live - If true, the layer will always use Date.now() to render trajectories. Default to true.
  * @classproperty {boolean} useRequestAnimationFrame - If true, encapsulates the renderTrajectories calls in a requestAnimationFrame. Experimental.
+ * @classproperty {boolean} useThrottle - If true, encapsulates the renderTrajectories calls in a throttle function. Experimental.
+ * @classproperty {boolean} useDebounce - If true, encapsulates the renderTrajectories calls in a debounce function. Experimental.
  * @classproperty {boolean} isTrackerLayer - Property for duck typing since `instanceof` is not working when the instance was created on different bundles.
  * @classproperty {function} sort - Sort the trajectories.
  * @classproperty {function} style - Style of a trajectory.
@@ -113,6 +116,20 @@ const TrackerLayerMixin = (Base) =>
       super({ hitTolerance: 10, ...options });
       this.onFeatureHover = this.onFeatureHover.bind(this);
       this.onFeatureClick = this.onFeatureClick.bind(this);
+      this.renderTrajectoriesInternal =
+        this.renderTrajectoriesInternal.bind(this);
+
+      this.throttleRenderTrajectories = throttle(
+        this.renderTrajectoriesInternal,
+        50,
+        { leading: false, trailing: true },
+      );
+
+      this.debounceRenderTrajectories = debounce(
+        this.renderTrajectoriesInternal,
+        50,
+        { leading: true, trailing: true, maxWait: 5000 },
+      );
     }
 
     /**
@@ -121,14 +138,13 @@ const TrackerLayerMixin = (Base) =>
      * @ignore
      */
     defineProperties(options) {
-      const { style, speed } = {
-        ...options,
-      };
-
       // Tracker options use to build the tracker.
+      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
+        options;
       const {
+        style,
+        speed,
         pixelRatio,
-        interpolate,
         hoverVehicleId,
         selectedVehicleId,
         filter,
@@ -137,16 +153,7 @@ const TrackerLayerMixin = (Base) =>
         live,
       } = options;
 
-      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
-        options;
-
       const initTrackerOptions = {
-        pixelRatio: pixelRatio || window.devicePixelRatio || 1,
-        interpolate,
-        hoverVehicleId,
-        selectedVehicleId,
-        filter,
-        sort,
         style,
       };
 
@@ -187,30 +194,16 @@ const TrackerLayerMixin = (Base) =>
          * Function to filter which vehicles to display.
          */
         filter: {
-          get: () =>
-            this.tracker ? this.tracker.filter : this.initTrackerOptions.filter,
-          set: (newFilter) => {
-            if (this.tracker) {
-              this.tracker.filter = newFilter;
-            } else {
-              this.initTrackerOptions.filter = newFilter;
-            }
-          },
+          value: filter,
+          writable: true,
         },
 
         /**
          * Function to sort the vehicles to display.
          */
         sort: {
-          get: () =>
-            this.tracker ? this.tracker.sort : this.initTrackerOptions.sort,
-          set: (newSort) => {
-            if (this.tracker) {
-              this.tracker.sort = newSort;
-            } else {
-              this.initTrackerOptions.sort = newSort;
-            }
-          },
+          value: sort,
+          writable: true,
         },
 
         /**
@@ -248,7 +241,8 @@ const TrackerLayerMixin = (Base) =>
          * Keep track of which trajectories are stored.
          */
         trajectories: {
-          get: () => (this.tracker && this.tracker.trajectories) || [],
+          value: {},
+          writable: true,
         },
 
         /**
@@ -262,51 +256,24 @@ const TrackerLayerMixin = (Base) =>
          * Id of the hovered vehicle.
          */
         hoverVehicleId: {
-          get: () =>
-            this.tracker
-              ? this.tracker.hoverVehicleId
-              : this.initTrackerOptions.hoverVehicleId,
-          set: (newHoverVehicleId) => {
-            if (this.tracker) {
-              this.tracker.hoverVehicleId = newHoverVehicleId;
-            } else {
-              this.initTrackerOptions.hoverVehicleId = newHoverVehicleId;
-            }
-          },
+          value: hoverVehicleId,
+          writable: true,
         },
 
         /**
          * Id of the selected vehicle.
          */
         selectedVehicleId: {
-          get: () =>
-            this.tracker
-              ? this.tracker.selectedVehicleId
-              : this.initTrackerOptions.selectedVehicleId,
-          set: (newSelectedVehicleId) => {
-            if (this.tracker) {
-              this.tracker.selectedVehicleId = newSelectedVehicleId;
-            } else {
-              this.initTrackerOptions.selectedVehicleId = newSelectedVehicleId;
-            }
-          },
+          value: selectedVehicleId,
+          writable: true,
         },
 
         /**
-         * Pixel ratio use for the rendering. Default to window.devicePixelRatio.
+         * Id of the selected vehicle.
          */
         pixelRatio: {
-          get: () =>
-            this.tracker
-              ? this.tracker.pixelRatio
-              : this.initTrackerOptions.pixelRatio,
-          set: (newPixelRatio) => {
-            if (this.tracker) {
-              this.tracker.pixelRatio = newPixelRatio;
-            } else {
-              this.initTrackerOptions.pixelRatio = newPixelRatio;
-            }
-          },
+          value: pixelRatio || window.devicePixelRatio || 1,
+          writable: true,
         },
 
         /**
@@ -321,7 +288,23 @@ const TrackerLayerMixin = (Base) =>
          * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame.
          */
         useRequestAnimationFrame: {
-          default: false,
+          value: options.useRequestAnimationFrame || false,
+          writable: true,
+        },
+
+        /**
+         * If true, encapsulates the renderTrajectories calls in a throttle function. Default to true.
+         */
+        useThrottle: {
+          value: options.useThrottle || true,
+          writable: true,
+        },
+
+        /**
+         * If true, encapsulates the renderTrajectories calls in a debounce function.
+         */
+        useDebounce: {
+          value: options.useDebounce || false,
           writable: true,
         },
 
@@ -389,24 +372,30 @@ const TrackerLayerMixin = (Base) =>
       // When we use the delay style we want to display delayed train on top by default
       if (this.useDelayStyle && !this.sort) {
         this.sort = (traj1, traj2) => {
-          if (traj1.delay === null && traj2.delay !== null) {
+          const props1 = traj1.properties;
+          const props2 = traj2.properties;
+
+          if (props1.delay === null && props2.delay !== null) {
             return 1;
           }
-          if (traj2.delay === null && traj1.delay !== null) {
+          if (props2.delay === null && props1.delay !== null) {
             return -1;
           }
 
           // We put cancelled train inbetween green and yellow trains
           // >=180000ms corresponds to yellow train
-          if (traj1.cancelled && !traj2.cancelled) {
-            return traj2.delay < 180000 ? -1 : 1;
+          if (props1.cancelled && !props2.cancelled) {
+            return props2.delay < 180000 ? -1 : 1;
           }
-          if (traj2.cancelled && !traj1.cancelled) {
-            return traj1.delay < 180000 ? 1 : -1;
+          if (props2.cancelled && !props1.cancelled) {
+            return props1.delay < 180000 ? 1 : -1;
           }
-          return traj2.delay - traj1.delay;
+          return props2.delay - props1.delay;
         };
       }
+
+      // Update filter function based on convenient properties
+      this.updateFilters();
     }
 
     /**
@@ -451,7 +440,7 @@ const TrackerLayerMixin = (Base) =>
       this.stop();
       unByKey(this.visibilityRef);
       if (this.tracker) {
-        this.tracker.destroy();
+        this.clear();
         this.tracker = null;
       }
       super.terminate();
@@ -467,7 +456,6 @@ const TrackerLayerMixin = (Base) =>
      */
     start() {
       this.stop();
-      this.updateFilters();
       this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
@@ -541,8 +529,32 @@ const TrackerLayerMixin = (Base) =>
 
       const time = this.live ? Date.now() : this.time;
 
-      this.tracker.renderTrajectories({ ...viewState, time }, noInterpolate);
+      const trajectories = Object.values(this.trajectories);
 
+      // console.time('sort');
+      if (this.sort) {
+        trajectories.sort(this.sort);
+      }
+      // console.timeEnd('sort');
+      window.trajectories = trajectories;
+
+      // console.time('render');
+      this.renderState = this.tracker.renderTrajectories(
+        trajectories,
+        { ...viewState, pixelRatio: this.pixelRatio, time },
+        {
+          noInterpolate,
+          hoverVehicleId: this.hoverVehicleId,
+          selectedVehicleId: this.selectedVehicleId,
+          iconScale: this.iconScale,
+          delayDisplay: this.delayDisplay,
+          delayOutlineColor: this.delayOutlineColor,
+          useDelayStyle: this.useDelayStyle,
+        },
+      );
+      this.isRendering = false;
+
+      // console.timeEnd('render');
       return true;
     }
 
@@ -564,12 +576,17 @@ const TrackerLayerMixin = (Base) =>
     renderTrajectories(viewState, noInterpolate) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
+        this.requestId = null;
       }
 
       if (this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
           this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
+      } else if (this.useDebounce) {
+        this.debounceRenderTrajectories(viewState, noInterpolate);
+      } else if (this.useThrottle) {
+        this.throttleRenderTrajectories(viewState, noInterpolate);
       } else {
         this.renderTrajectoriesInternal(viewState, noInterpolate);
       }
@@ -581,7 +598,7 @@ const TrackerLayerMixin = (Base) =>
      * @return {Array<Object>} Array of vehicle.
      */
     getVehicle(filterFc) {
-      return this.tracker.getTrajectories().filter(filterFc);
+      return Object.values(this.trajectories).filter(filterFc);
     }
 
     /**
@@ -597,12 +614,12 @@ const TrackerLayerMixin = (Base) =>
         [...coordinate, ...coordinate],
         this.hitTolerance * resolution,
       );
-      const trajectories = this.tracker.getTrajectories();
+      const trajectories = Object.values(this.trajectories);
       const vehicles = [];
       for (let i = 0; i < trajectories.length; i += 1) {
         if (
-          trajectories[i].coordinate &&
-          containsCoordinate(ext, trajectories[i].coordinate)
+          trajectories[i].properties.coordinate &&
+          containsCoordinate(ext, trajectories[i].properties.coordinate)
         ) {
           vehicles.push(trajectories[i]);
         }
@@ -630,13 +647,7 @@ const TrackerLayerMixin = (Base) =>
 
       return Promise.resolve({
         layer: this,
-        features: vehicles.map((vehicle) => {
-          const feature = new Feature({
-            geometry: vehicle.geometry,
-          });
-          feature.setProperties({ ...vehicle });
-          return feature;
-        }),
+        features: vehicles.map((vehicle) => this.format.readFeature(vehicle)),
         coordinate,
       });
     }
@@ -690,13 +701,21 @@ const TrackerLayerMixin = (Base) =>
     updateFilters() {
       // Setting filters from the permalink if no values defined by the layer.
       const parameters = qs.parse(window.location.search.toLowerCase());
-      // filter is the property in TrackerLayerMixin.
-      this.filter = createFilters(
-        this.publishedLineName || parameters[LINE_FILTER],
-        this.tripNumber || parameters[ROUTE_FILTER],
-        this.operator || parameters[OPERATOR_FILTER],
-        this.regexPublishedLineName,
-      );
+      const publishedName = this.publishedLineName || parameters[LINE_FILTER];
+      const tripNumber = this.tripNumber || parameters[ROUTE_FILTER];
+      const operator = this.operator || parameters[OPERATOR_FILTER];
+      const { regexPublishedLineName } = this;
+
+      // Only overrides filter function if one of this property exists.
+      if (publishedName || tripNumber || operator || regexPublishedLineName) {
+        // filter is the property in TrackerLayerMixin.
+        this.filter = createFilters(
+          publishedName,
+          tripNumber,
+          operator,
+          regexPublishedLineName,
+        );
+      }
     }
 
     /**

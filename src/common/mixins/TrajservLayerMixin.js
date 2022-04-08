@@ -201,7 +201,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const [feature] = features;
       let id = null;
       if (feature) {
-        id = feature.get('id');
+        id = feature.get('train_id');
       }
       if (this.hoverVehicleId !== id) {
         /** @ignore */
@@ -221,7 +221,7 @@ const TrajservLayerMixin = (TrackerLayer) =>
       const [feature] = features;
       if (feature) {
         /** @ignore */
-        this.selectedVehicleId = feature.get('id');
+        this.selectedVehicleId = feature.get('train_id');
         /** @ignore */
         this.journeyId = feature.get('journeyIdentifier');
         this.highlightTrajectory();
@@ -380,7 +380,15 @@ const TrajservLayerMixin = (TrackerLayer) =>
           throw err;
         })
         .then((trajectories) => {
-          this.onReceiveTrajectories(trajectories);
+          // Don't set trajectories when the user has aborted the request.
+          if (trajectories) {
+            if (this.worker) {
+            this.onReceiveTrajectories(trajectories);
+            } else {
+              this.trajectories = trajectories;
+              this.renderTrajectories();
+            }
+          }
         });
     }
 

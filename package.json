@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "1.7.1-beta.2",
+  "version": "1.7.8-beta.1",
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
@@ -14,6 +14,8 @@
     "@turf/transform-rotate": "^6.5.0",
     "codesandbox": "2.2.3",
     "json-stringify-safe": "^5.0.1",
+    "lodash.debounce": "4.0.8",
+    "lodash.throttle": "4.1.1",
     "path": "^0.12.7",
     "prop-types": "15.8.1",
     "query-string": "7.1.0",
