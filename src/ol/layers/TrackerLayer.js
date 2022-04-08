@@ -28,18 +28,6 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
-    /**
-     * Boolean that defines if the layer is allow to renderTrajectories when the map is zooming, rotating or poanning true.
-     * It's useful to avoid rendering the map when the map is animating or interacting.
-     * @type {function}
-     */
-    this.renderWhenInteracting =
-      options.renderWhenInteracting ||
-      (() =>
-        // Render trajectories on each render frame when the number of trajectories is small.
-        ((this.renderState && this.renderState.nbTrajectoriesRendered) || 0) <
-        200);
-
     /** @ignore */
     this.olLayer =
       options.olLayer ||
