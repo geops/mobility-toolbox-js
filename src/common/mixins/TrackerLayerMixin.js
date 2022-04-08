@@ -456,7 +456,6 @@ const TrackerLayerMixin = (Base) =>
      */
     start() {
       this.stop();
-      this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
 
@@ -490,8 +489,9 @@ const TrackerLayerMixin = (Base) =>
     stop() {
       this.stopUpdateTime();
       if (this.tracker) {
-        this.tracker.setVisible(false);
-        this.tracker.clear();
+        const { canvas } = this.tracker;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
 
@@ -535,7 +535,7 @@ const TrackerLayerMixin = (Base) =>
       // console.timeEnd('sort');
       window.trajectories = trajectories;
 
-      // console.time('render');
+      console.time('render');
       this.renderState = this.tracker.renderTrajectories(
         trajectories,
         { ...viewState, pixelRatio: this.pixelRatio, time },
@@ -549,9 +549,8 @@ const TrackerLayerMixin = (Base) =>
           useDelayStyle: this.useDelayStyle,
         },
       );
-      this.isRendering = false;
 
-      // console.timeEnd('render');
+      console.timeEnd('render');
       return true;
     }
 

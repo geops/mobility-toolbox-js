@@ -70,7 +70,9 @@ class TrackerLayer extends mixin(Layer) {
 
                 if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
-                  this.tracker.clear();
+                  const { canvas } = this.tracker;
+                  const context = canvas.getContext('2d');
+                  context.clearRect(0, 0, canvas.width, canvas.height);
                 } else {
                   const pixelCenterRendered =
                     this.map.getPixelFromCoordinate(renderedCenter);
