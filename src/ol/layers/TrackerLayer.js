@@ -79,15 +79,8 @@ class TrackerLayer extends mixin(Layer) {
                   resolution: renderedResolution,
                   rotation: renderedRotation,
                 } = this.renderedViewState;
-                if (
-                  this.renderWhenInteracting &&
-                  this.renderWhenInteracting(
-                    frameState.viewState,
-                    this.renderedViewState,
-                  )
-                ) {
-                  this.renderTrajectories(true);
-                } else if (renderedResolution / resolution >= 3) {
+
+                if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
                   this.tracker.clear();
                 } else {
@@ -204,9 +197,7 @@ class TrackerLayer extends mixin(Layer) {
     let isRendered = false;
 
     const blockRendering =
-      !this.renderWhenInteracting(viewState, this.renderedViewState) &&
-      (this.map.getView().getAnimating() ||
-        this.map.getView().getInteracting());
+      this.map.getView().getAnimating() || this.map.getView().getInteracting();
 
     // Don't render the map when the map is animating or interacting.
     isRendered = blockRendering

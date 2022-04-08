@@ -73,7 +73,7 @@ describe('TrajservLayer', () => {
     expect(laye.sort).toBe(fn);
   });
 
-  test('should set a default sort function if useDelayStyle is used.', () => {
+  test.only('should set a default sort function if useDelayStyle is used.', () => {
     const laye = new TralisLayer({
       url: 'ws://localhost:1234',
       apiKey: 'apiKey',
