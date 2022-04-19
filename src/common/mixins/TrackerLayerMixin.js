@@ -415,7 +415,7 @@ const TrackerLayerMixin = (Base) =>
       super.init(map);
 
       this.tracker = new Tracker({
-        style: (trajectory, viewState) => this.style(trajectory, viewState),
+        style: (...args) => this.style(...args),
         ...this.initTrackerOptions,
         ...options,
       });
