@@ -535,7 +535,7 @@ const TrackerLayerMixin = (Base) =>
       // console.timeEnd('sort');
       window.trajectories = trajectories;
 
-      console.time('render');
+      // console.time('render');
       this.renderState = this.tracker.renderTrajectories(
         trajectories,
         { ...viewState, pixelRatio: this.pixelRatio, time },
@@ -550,7 +550,7 @@ const TrackerLayerMixin = (Base) =>
         },
       );
 
-      console.timeEnd('render');
+      // console.timeEnd('render');
       return true;
     }
 
@@ -575,13 +575,13 @@ const TrackerLayerMixin = (Base) =>
         this.requestId = null;
       }
 
-      if (this.useRequestAnimationFrame) {
+      if (!noInterpolate && this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
           this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
-      } else if (this.useDebounce) {
+      } else if (!noInterpolate && this.useDebounce) {
         this.debounceRenderTrajectories(viewState, noInterpolate);
-      } else if (this.useThrottle) {
+      } else if (!noInterpolate && this.useThrottle) {
         this.throttleRenderTrajectories(viewState, noInterpolate);
       } else {
         this.renderTrajectoriesInternal(viewState, noInterpolate);
@@ -687,6 +687,21 @@ const TrackerLayerMixin = (Base) =>
       const roundedZoom = Math.round(zoom);
       const timeStep = timeSteps[roundedZoom] || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
+
+      // TODO: see if this should go elsewhere.
+      if (this.useThrottle) {
+        this.throttleRenderTrajectories = throttle(
+          this.renderTrajectoriesInternal,
+          Math.min(nextTick, 500),
+          { leading: true, trailing: true },
+        );
+      } else if (this.useDebounce) {
+        this.debounceRenderTrajectories = debounce(
+          this.renderTrajectoriesInternal,
+          Math.min(nextTick, 500),
+          { leading: true, trailing: true, maxWait: 5000 },
+        );
+      }
       return nextTick;
     }
 

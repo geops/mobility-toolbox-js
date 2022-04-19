@@ -338,7 +338,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (this.hoverVehicleId !== id) {
         /** @ignore */
         this.hoverVehicleId = id;
-        this.renderTrajectories();
+        this.renderTrajectories(true);
       }
       super.onFeatureHover(features, layer, coordinate);
     }
@@ -360,7 +360,7 @@ const TralisLayerMixin = (TrackerLayer) =>
         /** @ignore */
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
-        this.renderTrajectories();
+        this.renderTrajectories(true);
       }
       super.onFeatureClick(features, layer, coordinate);
     }
