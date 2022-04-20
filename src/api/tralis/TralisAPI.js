@@ -77,7 +77,7 @@ class TralisAPI {
     }
 
     const { apiKey } = opt;
-    let { url, projection, bbox, buffer = [100, 200] } = opt;
+    let { url, projection, bbox, buffer = [100, 100] } = opt;
     const conn = new WebSocketConnector();
 
     if (apiKey) {
