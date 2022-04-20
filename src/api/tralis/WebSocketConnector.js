@@ -172,16 +172,27 @@ class WebSocketConnector {
     this.unlisten(params, cb);
 
     const onMessage = (evt) => {
-      const data = JSON.parse(evt.data);
+      let data = {};
+      try {
+        data = JSON.parse(evt.data);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('WebSocket: unable to parse JSON data', err, evt.data);
+      }
       let source = params.channel;
       source += params.args ? ` ${params.args}` : '';
 
-      if (
-        data.source === source &&
-        (!params.id || params.id === data.client_reference)
-      ) {
-        cb(data);
-      }
+      // Buffer channel message return a list of other channels to propagate to proper callbacks.
+      const contents = Array.isArray(data.content) ? data.content : [data];
+      contents.forEach((content) => {
+        // Because of backend optimization, the last content is null.
+        if (
+          content?.source === source &&
+          (!params.id || params.id === data.client_reference)
+        ) {
+          cb(content);
+        }
+      });
     };
 
     if (this.websocket) {

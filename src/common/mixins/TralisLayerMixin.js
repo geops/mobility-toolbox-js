@@ -168,6 +168,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       }
 
       this.api.bbox = bbox;
+      this.api.buffer = [100, 10];
     }
 
     setMode(mode) {
