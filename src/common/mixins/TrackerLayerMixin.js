@@ -687,20 +687,24 @@ const TrackerLayerMixin = (Base) =>
       const roundedZoom = Math.round(zoom);
       const timeStep = timeSteps[roundedZoom] || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
-
+      const nextThrottleTick = Math.min(nextTick, 500);
       // TODO: see if this should go elsewhere.
       if (this.useThrottle) {
         this.throttleRenderTrajectories = throttle(
           this.renderTrajectoriesInternal,
-          Math.min(nextTick, 500),
+          nextThrottleTick,
           { leading: true, trailing: true },
         );
       } else if (this.useDebounce) {
         this.debounceRenderTrajectories = debounce(
           this.renderTrajectoriesInternal,
-          Math.min(nextTick, 500),
+          nextThrottleTick,
           { leading: true, trailing: true, maxWait: 5000 },
         );
+      }
+      if (this.api?.buffer) {
+        const [, size] = this.api.buffer;
+        this.api.buffer = [nextThrottleTick, size];
       }
       return nextTick;
     }
