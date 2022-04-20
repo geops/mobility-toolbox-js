@@ -183,7 +183,7 @@ class WebSocketConnector {
       source += params.args ? ` ${params.args}` : '';
 
       // Buffer channel message return a list of other channels to propagate to proper callbacks.
-      const contents = Array.isArray(data.content) ? data.content : [data];
+      const contents = data.source === 'buffer' ? data.content : [data];
       contents.forEach((content) => {
         // Because of backend optimization, the last content is null.
         if (
