@@ -440,7 +440,9 @@ const TrackerLayerMixin = (Base) =>
       this.stop();
       unByKey(this.visibilityRef);
       if (this.tracker) {
-        this.clear();
+        const { canvas } = this.tracker;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
         this.tracker = null;
       }
       super.terminate();
