@@ -34,7 +34,7 @@ const getVehiclePosition = (now, trajectory, noInterpolate) => {
     // outside the time intervals we display the vehicle at the last (or first) position known.
     if (now < firstInterval[0]) {
       // Display first position known.
-      [[, , rotation]] = firstInterval;
+      [, , rotation] = firstInterval;
       coord = geometry.getFirstCoordinate();
     } else if (now > lastInterval[0]) {
       // Display last position known.

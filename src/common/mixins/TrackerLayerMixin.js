@@ -415,7 +415,7 @@ const TrackerLayerMixin = (Base) =>
       super.init(map);
 
       this.tracker = new Tracker({
-        style: (trajectory, viewState) => this.style(trajectory, viewState),
+        style: (...args) => this.style(...args),
         ...this.initTrackerOptions,
         ...options,
       });
@@ -440,7 +440,9 @@ const TrackerLayerMixin = (Base) =>
       this.stop();
       unByKey(this.visibilityRef);
       if (this.tracker) {
-        this.clear();
+        const { canvas } = this.tracker;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
         this.tracker = null;
       }
       super.terminate();
@@ -456,7 +458,6 @@ const TrackerLayerMixin = (Base) =>
      */
     start() {
       this.stop();
-      this.tracker.setVisible(true);
       this.renderTrajectories();
       this.startUpdateTime();
 
@@ -490,8 +491,9 @@ const TrackerLayerMixin = (Base) =>
     stop() {
       this.stopUpdateTime();
       if (this.tracker) {
-        this.tracker.setVisible(false);
-        this.tracker.clear();
+        const { canvas } = this.tracker;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
 
@@ -552,7 +554,6 @@ const TrackerLayerMixin = (Base) =>
           useDelayStyle: this.useDelayStyle,
         },
       );
-      this.isRendering = false;
 
       // console.timeEnd('render');
       return true;
@@ -579,13 +580,13 @@ const TrackerLayerMixin = (Base) =>
         this.requestId = null;
       }
 
-      if (this.useRequestAnimationFrame) {
+      if (!noInterpolate && this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
           this.renderTrajectoriesInternal(viewState, noInterpolate);
         });
-      } else if (this.useDebounce) {
+      } else if (!noInterpolate && this.useDebounce) {
         this.debounceRenderTrajectories(viewState, noInterpolate);
-      } else if (this.useThrottle) {
+      } else if (!noInterpolate && this.useThrottle) {
         this.throttleRenderTrajectories(viewState, noInterpolate);
       } else {
         this.renderTrajectoriesInternal(viewState, noInterpolate);
@@ -691,7 +692,25 @@ const TrackerLayerMixin = (Base) =>
       const roundedZoom = Math.round(zoom);
       const timeStep = timeSteps[roundedZoom] || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
-      // console.log(`Next render in ${nextTick} ms.`);
+      const nextThrottleTick = Math.min(nextTick, 500);
+      // TODO: see if this should go elsewhere.
+      if (this.useThrottle) {
+        this.throttleRenderTrajectories = throttle(
+          this.renderTrajectoriesInternal,
+          nextThrottleTick,
+          { leading: true, trailing: true },
+        );
+      } else if (this.useDebounce) {
+        this.debounceRenderTrajectories = debounce(
+          this.renderTrajectoriesInternal,
+          nextThrottleTick,
+          { leading: true, trailing: true, maxWait: 5000 },
+        );
+      }
+      if (this.api?.buffer) {
+        const [, size] = this.api.buffer;
+        this.api.buffer = [nextThrottleTick, size];
+      }
       return nextTick;
     }
 

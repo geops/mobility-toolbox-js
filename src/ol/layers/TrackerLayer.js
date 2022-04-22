@@ -133,6 +133,7 @@ class TrackerLayer extends mixin(Layer) {
                 this.canvas.style.left = '0';
                 this.canvas.style.transformOrigin = 'top left';
                 this.transformContainer.appendChild(this.canvas);
+                this.context = this.canvas.getContext('2d');
               }
               this.mainThreadFrameState = frameState;
               if (this.renderedViewState) {
@@ -142,25 +143,12 @@ class TrackerLayer extends mixin(Layer) {
 
                 if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
-                  this.canvas
-                    .getContext('2d')
-                    .clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-                  // } else {
-                  //   const pixelCenterRendered =
-                  //     this.map.getPixelFromCoordinate(renderedCenter);
-                  //   const pixelCenter = this.map.getPixelFromCoordinate(center);
-                  //   this.transformContainer.style.transform = composeCssTransform(
-                  //     pixelCenterRendered[0] - pixelCenter[0],
-                  //     pixelCenterRendered[1] - pixelCenter[1],
-                  //     renderedResolution / resolution,
-                  //     renderedResolution / resolution,
-                  //     rotation - renderedRotation,
-                  //     0,
-                  //     0,
-                  //     this.canvas.width,
-                  //     this.canvas.height,
-                  //   );
+                  this.context.clearRect(
+                    0,
+                    0,
+                    this.canvas.width,
+                    this.canvas.height,
+                  );
                 } else {
                   updateContainerTransform(this);
                 }
