@@ -103,7 +103,7 @@ const filterExamples = (str, examples) => {
 };
 
 // Get the public api key
-fetch('https://developer.geops.io/publickey')
+fetch('https://backend.developer.geops.io/publickey')
   .then((response) => response.json())
   .then((data) => {
     if (data && data.success) {
