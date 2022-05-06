@@ -85,7 +85,7 @@ function App() {
         <Route
           path="/example/:exampleKey"
           element={
-            <Container className={classes.content}>
+            <Container className={classes.content} maxWidth={false}>
               <Example />
             </Container>
           }
