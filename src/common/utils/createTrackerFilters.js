@@ -18,7 +18,10 @@ const createFilters = (line, route, operator, regexLine) => {
     const regexLineList =
       typeof regexLine === 'string' ? [regexLine] : regexLine;
     const lineFilter = (item) => {
-      const name = item.name || (item.line && item.line.name) || '';
+      const name =
+        item.properties.name ||
+        (item.properties.line && item.properties.line.name) ||
+        '';
       if (!name) {
         return false;
       }
@@ -35,15 +38,12 @@ const createFilters = (line, route, operator, regexLine) => {
       l.replace(/\s+/g, '').toUpperCase(),
     );
     const lineFilter = (item) => {
-      const name = (
-        item.name ||
-        (item.line && item.line.name) ||
-        ''
-      ).toUpperCase();
-      if (!name) {
+      const { line: linee, name } = item.properties;
+      const lineName = (name || (linee && linee.name) || '').toUpperCase();
+      if (!lineName) {
         return false;
       }
-      return lineList.includes(name);
+      return lineList.includes(lineName);
     };
     filterList.push(lineFilter);
   }
@@ -52,7 +52,10 @@ const createFilters = (line, route, operator, regexLine) => {
     const routes = typeof route === 'string' ? route.split(',') : route;
     const routeList = routes.map((item) => parseInt(item, 10));
     const routeFilter = (item) => {
-      const routeId = parseInt(item.routeIdentifier.split('.')[0], 10);
+      const routeId = parseInt(
+        item.properties.routeIdentifier.split('.')[0],
+        10,
+      );
       return routeList.includes(routeId);
     };
     filterList.push(routeFilter);
@@ -61,7 +64,9 @@ const createFilters = (line, route, operator, regexLine) => {
   if (operator) {
     const operatorList = typeof operator === 'string' ? [operator] : operator;
     const operatorFilter = (item) =>
-      operatorList.some((op) => new RegExp(op, 'i').test(item.operator));
+      operatorList.some((op) =>
+        new RegExp(op, 'i').test(item.properties.operator),
+      );
     filterList.push(operatorFilter);
   }
 

@@ -77,7 +77,7 @@ class TralisAPI {
     }
 
     const { apiKey } = opt;
-    let { url, projection, bbox } = opt;
+    let { url, projection, bbox, buffer = [100, 100] } = opt;
     const conn = new WebSocketConnector();
 
     if (apiKey) {
@@ -110,6 +110,17 @@ class TralisAPI {
             bbox = newBbox;
             if (this.conn) {
               this.conn.send(`BBOX ${bbox.join(' ')}`);
+            }
+          }
+        },
+      },
+      buffer: {
+        get: () => buffer,
+        set: (newBuffer) => {
+          if (JSON.stringify(newBuffer) !== JSON.stringify(buffer)) {
+            buffer = newBuffer;
+            if (this.conn) {
+              this.conn.send(`BUFFER ${buffer.join(' ')}`);
             }
           }
         },
@@ -178,8 +189,13 @@ class TralisAPI {
     if (this.projection) {
       this.conn.send(`PROJECTION ${this.projection}`);
     }
+
     if (this.bbox) {
       this.conn.send(`BBOX ${this.bbox.join(' ')}`);
+    }
+
+    if (this.buffer) {
+      this.conn.send(`BUFFER ${this.buffer.join(' ')}`);
     }
 
     /**

@@ -28,19 +28,6 @@ class TrackerLayer extends mixin(Layer) {
       ...options,
     });
 
-    /**
-     * Boolean that defines if the layer is allow to renderTrajectories when the map is zooming, rotating or poanning true.
-     * It's useful to avoid rendering the map when the map is animating or interacting.
-     * @type {function}
-     */
-    this.renderWhenInteracting =
-      options.renderWhenInteracting ||
-      (() =>
-        // Render trajectories on each render frame when the number of trajectories is small.
-        this.tracker &&
-        this.tracker.renderedTrajectories &&
-        this.tracker.renderedTrajectories.length <= 200);
-
     /** @ignore */
     this.olLayer =
       options.olLayer ||
@@ -80,17 +67,12 @@ class TrackerLayer extends mixin(Layer) {
                   resolution: renderedResolution,
                   rotation: renderedRotation,
                 } = this.renderedViewState;
-                if (
-                  this.renderWhenInteracting &&
-                  this.renderWhenInteracting(
-                    frameState.viewState,
-                    this.renderedViewState,
-                  )
-                ) {
-                  this.renderTrajectories(true);
-                } else if (renderedResolution / resolution >= 3) {
+
+                if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
-                  this.tracker.clear();
+                  const { canvas } = this.tracker;
+                  const context = canvas.getContext('2d');
+                  context.clearRect(0, 0, canvas.width, canvas.height);
                 } else {
                   const pixelCenterRendered =
                     this.map.getPixelFromCoordinate(renderedCenter);
@@ -205,9 +187,7 @@ class TrackerLayer extends mixin(Layer) {
     let isRendered = false;
 
     const blockRendering =
-      !this.renderWhenInteracting(viewState, this.renderedViewState) &&
-      (this.map.getView().getAnimating() ||
-        this.map.getView().getInteracting());
+      this.map.getView().getAnimating() || this.map.getView().getInteracting();
 
     // Don't render the map when the map is animating or interacting.
     isRendered = blockRendering

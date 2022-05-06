@@ -158,13 +158,13 @@ const style = (trajectory, viewState, options) => {
   } = options;
 
   const { zoom, pixelRatio } = viewState;
-  let { line, type } = trajectory;
+  let { line, type } = trajectory.properties;
   const {
-    id,
+    train_id: id,
     delay,
     cancelled = false,
     operator_provides_realtime_journey: operatorProvidesRealtime,
-  } = trajectory;
+  } = trajectory.properties;
 
   if (!type) {
     type = 'Rail';
@@ -193,8 +193,8 @@ const style = (trajectory, viewState, options) => {
   }
 
   const z = Math.min(Math.floor(zoom || 1), 16);
-  const hover = hoverVehicleId === id;
-  const selected = selectedVehicleId === id;
+  const hover = hoverVehicleId && hoverVehicleId === id;
+  const selected = selectedVehicleId && selectedVehicleId === id;
 
   // Calcul the radius of the circle
   let radius = getRadius(type, z) * pixelRatio;

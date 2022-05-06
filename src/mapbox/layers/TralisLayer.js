@@ -20,12 +20,12 @@ import mixin from '../../common/mixins/TralisLayerMixin';
  */
 class TralisLayer extends mixin(TrackerLayer) {
   /**
-   * Determine if the trajectory must be removed or not added to the list
+   * Remove the trajectory form the list if necessary.
    *
    * @private
    */
-  mustNotBeDisplayed(trajectory, extent, zoom) {
-    return super.mustNotBeDisplayed(
+  purgeTrajectory(trajectory, extent, zoom) {
+    return super.purgeTrajectory(
       trajectory,
       extent || this.getMercatorExtent(),
       zoom || Math.floor(this.map.getZoom() + 1),
