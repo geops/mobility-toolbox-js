@@ -62,6 +62,7 @@ class TrackerLayer extends mixin(Layer) {
 
     // Worker that render trajectories.
     this.worker = new Worker();
+
     // Worker messaging and actions
     this.worker.onmessage = (message) => {
       if (message.data.action === 'requestRender') {
@@ -90,9 +91,9 @@ class TrackerLayer extends mixin(Layer) {
         this.nbRenderedTrajectories = nbRenderedTrajectories;
         that.canvas.width = imageData.width;
         that.canvas.height = imageData.height;
-        this.canvas.style.transform = ``;
-        this.canvas.style.width = `${this.canvas.width / this.pixelRatio}px`;
-        this.canvas.style.height = `${this.canvas.height / this.pixelRatio}px`;
+        that.canvas.style.transform = ``;
+        that.canvas.style.width = `${that.canvas.width / that.pixelRatio}px`;
+        that.canvas.style.height = `${that.canvas.height / that.pixelRatio}px`;
         // this.canvas.style.transform = message.data.transform;
         that.renderedViewState = message.data.frameState.viewState;
         updateContainerTransform(that);

@@ -312,9 +312,7 @@ class WebSocketConnector {
       !this.subscriptions.find((s) => s.params.channel === source) &&
       toRemove.find((subscr) => !subscr.quiet)
     ) {
-      if (this.isDELAllow) {
-        this.send(`DEL ${source}`);
-      }
+      this.send(`DEL ${source}`);
       this.subscribed[source] = false;
     }
   }

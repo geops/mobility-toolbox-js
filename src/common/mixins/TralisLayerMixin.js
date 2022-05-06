@@ -245,7 +245,6 @@ const TralisLayerMixin = (TrackerLayer) =>
       }
 
       this.trajectories[trajectory.properties.train_id] = trajectory;
-      this.renderTrajectories();
 
       if (this.worker) {
         this.worker.postMessage({
@@ -253,16 +252,21 @@ const TralisLayerMixin = (TrackerLayer) =>
           trajectory,
         });
       }
+      
+      this.renderTrajectories();
     }
 
     removeTrajectory(id) {
       delete this.trajectories[id];
+
       if (this.worker) {
         this.worker.postMessage({
           action: 'removeTrajectory',
           trajectoryId: id,
         });
       }
+      
+      this.renderTrajectories();
     }
 
     // getRefreshTimeInMs() {
