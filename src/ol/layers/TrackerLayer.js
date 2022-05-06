@@ -30,8 +30,6 @@ const updateContainerTransform = (layer) => {
       rotation - renderedRotation,
       0,
       0,
-      layer.canvas.width,
-      layer.canvas.height,
     );
   }
 };
@@ -66,6 +64,7 @@ class TrackerLayer extends mixin(Layer) {
     // Worker messaging and actions
     this.worker.onmessage = (message) => {
       if (message.data.action === 'requestRender') {
+        console.log('icci');
         // Worker requested a new render frame
         that.map.render();
       } else if (that.canvas && message.data.action === 'rendered') {
@@ -94,7 +93,6 @@ class TrackerLayer extends mixin(Layer) {
         that.canvas.style.transform = ``;
         that.canvas.style.width = `${that.canvas.width / that.pixelRatio}px`;
         that.canvas.style.height = `${that.canvas.height / that.pixelRatio}px`;
-        // this.canvas.style.transform = message.data.transform;
         that.renderedViewState = message.data.frameState.viewState;
         updateContainerTransform(that);
         that.canvas.getContext('2d').drawImage(imageData, 0, 0);

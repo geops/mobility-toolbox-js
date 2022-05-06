@@ -65,8 +65,6 @@ class TralisAPI {
     /** @ignore */
     this.prefix = options.prefix || '';
 
-    this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd || false;
-
     /** @ignore */
     this.onOpen = this.onOpen.bind(this);
   }

@@ -508,9 +508,6 @@ const TrackerLayerMixin = (Base) =>
     }
 
     /**
-     * 
-
-    /**
      * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.
      *
      * @param {object} viewState The view state of the map.
