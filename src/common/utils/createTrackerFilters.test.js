@@ -1,24 +1,30 @@
 import createTrackerFilters from './createTrackerFilters';
 
 const u1 = {
-  routeIdentifier: '001.000827.004:7',
-  operator: 'FoO',
-  line: {
-    name: 'U1',
+  properties: {
+    routeIdentifier: '001.000827.004:7',
+    operator: 'FoO',
+    line: {
+      name: 'U1',
+    },
   },
 };
 const ireta = {
-  routeIdentifier: '0022.000827.004:7',
-  operator: 'BAR',
-  line: {
-    name: 'IRETA',
+  properties: {
+    routeIdentifier: '0022.000827.004:7',
+    operator: 'BAR',
+    line: {
+      name: 'IRETA',
+    },
   },
 };
 const arb = {
-  routeIdentifier: '00333.000827.004:7',
-  operator: 'qux',
-  line: {
-    name: 'ARB',
+  properties: {
+    routeIdentifier: '00333.000827.004:7',
+    operator: 'qux',
+    line: {
+      name: 'ARB',
+    },
   },
 };
 

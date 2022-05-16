@@ -14,7 +14,7 @@ export default () => {
   });
 
   const layer = new MapboxLayer({
-    url: 'https://maps.geops.io/styles/base_bright_v2/style.json',
+    url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
   const tracker = new TralisLayer({
