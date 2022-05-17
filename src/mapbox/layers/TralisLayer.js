@@ -58,6 +58,112 @@ class TralisLayer extends mixin(TrackerLayer) {
     if (this.visible && this.isUpdateBboxOnMoveEnd) {
       this.setBbox();
     }
+
+    if (
+      this.visible &&
+      this.isUpdateBboxOnMoveEnd &&
+      this.isClickActive &&
+      this.selectedVehicleId
+    ) {
+      this.highlightTrajectory(this.selectedVehicleId);
+    }
+  }
+
+  /**
+   * Callback when user clicks on the map.
+   * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
+   *
+   * @private
+   * @override
+   */
+   onFeatureClick(features, layer, coordinate) {
+    super.onFeatureClick(features, layer, coordinate);
+    if (this.selectedVehicleId) {
+      this.highlightTrajectory(this.selectedVehicleId);
+    }
+  }
+
+  /**
+   * Highlight the trajectory of journey.
+   * @private
+   */
+  highlightTrajectory(id) {
+    this.api
+      .getFullTrajectory(id, this.mode, this.generalizationLevel)
+      .then((fullTrajectory) => {
+        const vectorSource = this.vectorLayer.getSource();
+        vectorSource.clear();
+
+        if (
+          !fullTrajectory ||
+          !fullTrajectory.features ||
+          !fullTrajectory.features.length
+        ) {
+          return;
+        }
+
+        let lineColor = '#ffffff'; // white
+
+        if (this.useDelayStyle) {
+          lineColor = '#a0a0a0'; // grey
+        } else {
+          const props = fullTrajectory.features[0].properties;
+          const { type } = props;
+          let { stroke } = props;
+
+          if (stroke && stroke[0] !== '#') {
+            stroke = `#${stroke}`;
+          }
+
+          lineColor = stroke || getBgColor(type);
+
+          // Don't allow white lines, use red instead.
+          lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
+        }
+        const style = [
+          new Style({
+            zIndex: 2,
+            image: new Circle({
+              radius: 5,
+              fill: new Fill({
+                color: '#000000',
+              }),
+            }),
+            stroke: new Stroke({
+              color: '#000000',
+              width: 6,
+            }),
+          }),
+          new Style({
+            zIndex: 3,
+            image: new Circle({
+              radius: 4,
+              fill: new Fill({
+                color: lineColor,
+              }),
+            }),
+            stroke: new Stroke({
+              color: lineColor,
+              width: 4,
+            }),
+          }),
+        ];
+        this.vectorLayer.setStyle(style);
+        const features = format.readFeatures(fullTrajectory);
+        features.forEach((feature) => {
+          feature.setStyle(style);
+        });
+        this.vectorLayer.getSource().addFeatures(features);
+      });
+  }
+
+  /**
+   * Create a copy of the TralisLayer.
+   * @param {Object} newOptions Options to override
+   * @return {TralisLayer} A TralisLayer
+   */
+  clone(newOptions) {
+    return new TralisLayer({ ...this.options, ...newOptions });
   }
 }
 

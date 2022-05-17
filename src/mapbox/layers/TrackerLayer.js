@@ -275,6 +275,15 @@ class TrackerLayer extends mixin(Layer) {
       ? 'pointer'
       : 'auto';
   }
+
+  /**
+   * Create a copy of the TrackerLayer.
+   * @param {Object} newOptions Options to override
+   * @return {TrackerLayer} A TrackerLayer
+   */
+   clone(newOptions) {
+    return new TrackerLayer({ ...this.options, ...newOptions });
+  }
 }
 
 export default TrackerLayer;
