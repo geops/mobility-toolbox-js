@@ -252,7 +252,7 @@ class TrackerLayer extends mixin(Layer) {
     if (source) {
       source.setCoordinates(extent);
     }
-    
+    this.renderTrajectories();
   }
 
   /**
@@ -261,9 +261,7 @@ class TrackerLayer extends mixin(Layer) {
    * @private
    */
   // eslint-disable-next-line class-methods-use-this
-  onMoveEnd() {
-    this.renderTrajectories();
-  }
+  onMoveEnd() {}
 
   /**
    * Update the cursor style when hovering a vehicle.
