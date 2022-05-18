@@ -78,6 +78,14 @@ class TrackerLayer extends mixin(Layer) {
     map.addLayer(this.layer, this.beforeId);
 
     this.listeners = [this.on('change:visible', this.onVisibilityChange)];
+
+    this.trajecLineLayer = {
+      id: "trajectoryLine",
+      type: "line",
+      source: "selectedLineTraject"
+    }
+    map.addSource("selectedLineTraject", {type: "FeatureCollection", features: []})
+    map.addLayer(this.trajecLineLayer, this.key)
   }
 
   /**
