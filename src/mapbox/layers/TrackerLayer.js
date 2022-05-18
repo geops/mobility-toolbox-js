@@ -88,6 +88,7 @@ class TrackerLayer extends mixin(Layer) {
     map.addLayer(this.trajecLineLayer, this.key)
 
     console.log(map.getSource("selectedLineTraject"))
+    console.log(map.getLayer("trajectoryLine"))
   }
 
   /**
