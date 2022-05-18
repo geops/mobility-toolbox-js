@@ -84,7 +84,7 @@ class TrackerLayer extends mixin(Layer) {
       type: "line",
       source: "selectedLineTraject"
     }
-    map.addSource("selectedLineTraject", {type: "FeatureCollection", features: []})
+    map.addSource("selectedLineTraject", {type: "geojson", data: []})
     map.addLayer(this.trajecLineLayer, this.key)
 
     console.log(map.getSource("selectedLineTraject"))
