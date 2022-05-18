@@ -91,69 +91,71 @@ class TralisLayer extends mixin(TrackerLayer) {
     this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((fullTrajectory) => {
-        const vectorSource = this.vectorLayer.getSource();
-        vectorSource.clear();
 
-        if (
-          !fullTrajectory ||
-          !fullTrajectory.features ||
-          !fullTrajectory.features.length
-        ) {
-          return;
-        }
+        console.log(fullTrajectory)
+        // const vectorSource = this.vectorLayer.getSource();
+        // vectorSource.clear();
 
-        let lineColor = '#ffffff'; // white
+        // if (
+        //   !fullTrajectory ||
+        //   !fullTrajectory.features ||
+        //   !fullTrajectory.features.length
+        // ) {
+        //   return;
+        // }
 
-        if (this.useDelayStyle) {
-          lineColor = '#a0a0a0'; // grey
-        } else {
-          const props = fullTrajectory.features[0].properties;
-          const { type } = props;
-          let { stroke } = props;
+        // let lineColor = '#ffffff'; // white
 
-          if (stroke && stroke[0] !== '#') {
-            stroke = `#${stroke}`;
-          }
+        // if (this.useDelayStyle) {
+        //   lineColor = '#a0a0a0'; // grey
+        // } else {
+        //   const props = fullTrajectory.features[0].properties;
+        //   const { type } = props;
+        //   let { stroke } = props;
 
-          lineColor = stroke || getBgColor(type);
+        //   if (stroke && stroke[0] !== '#') {
+        //     stroke = `#${stroke}`;
+        //   }
 
-          // Don't allow white lines, use red instead.
-          lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
-        }
-        const style = [
-          new Style({
-            zIndex: 2,
-            image: new Circle({
-              radius: 5,
-              fill: new Fill({
-                color: '#000000',
-              }),
-            }),
-            stroke: new Stroke({
-              color: '#000000',
-              width: 6,
-            }),
-          }),
-          new Style({
-            zIndex: 3,
-            image: new Circle({
-              radius: 4,
-              fill: new Fill({
-                color: lineColor,
-              }),
-            }),
-            stroke: new Stroke({
-              color: lineColor,
-              width: 4,
-            }),
-          }),
-        ];
-        this.vectorLayer.setStyle(style);
-        const features = format.readFeatures(fullTrajectory);
-        features.forEach((feature) => {
-          feature.setStyle(style);
-        });
-        this.vectorLayer.getSource().addFeatures(features);
+        //   lineColor = stroke || getBgColor(type);
+
+        //   // Don't allow white lines, use red instead.
+        //   lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
+        // }
+        // const style = [
+        //   new Style({
+        //     zIndex: 2,
+        //     image: new Circle({
+        //       radius: 5,
+        //       fill: new Fill({
+        //         color: '#000000',
+        //       }),
+        //     }),
+        //     stroke: new Stroke({
+        //       color: '#000000',
+        //       width: 6,
+        //     }),
+        //   }),
+        //   new Style({
+        //     zIndex: 3,
+        //     image: new Circle({
+        //       radius: 4,
+        //       fill: new Fill({
+        //         color: lineColor,
+        //       }),
+        //     }),
+        //     stroke: new Stroke({
+        //       color: lineColor,
+        //       width: 4,
+        //     }),
+        //   }),
+        // ];
+        // this.vectorLayer.setStyle(style);
+        // const features = format.readFeatures(fullTrajectory);
+        // features.forEach((feature) => {
+        //   feature.setStyle(style);
+        // });
+        // this.vectorLayer.getSource().addFeatures(features);
       });
   }
 
