@@ -102,6 +102,12 @@ class TrackerLayer extends mixin(Layer) {
       if (this.map.getSource(this.key)) {
         this.map.removeSource(this.key);
       }
+      if (this.map.getLayer("trajectoryLine")) {
+        this.map.removeLayer("trajectoryLine")
+      }
+      if (this.map.getSource("selectedLineTraject")) {
+        this.map.removeSource("selectedLineTraject")
+      }
     }
     super.terminate();
   }
