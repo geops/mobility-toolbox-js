@@ -252,7 +252,7 @@ class TrackerLayer extends mixin(Layer) {
     if (source) {
       source.setCoordinates(extent);
     }
-    this.renderTrajectories();
+    this.renderTrajectories(true);
   }
 
   /**
