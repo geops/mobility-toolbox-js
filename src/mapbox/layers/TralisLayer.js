@@ -92,6 +92,7 @@ class TralisLayer extends mixin(TrackerLayer) {
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((fullTrajectory) => {
         this.map.getSource("selectedLineTraject").setData(fullTrajectory)
+        console.log(this.map.getSource("selectedLineTraject"))
       })
   }
 
