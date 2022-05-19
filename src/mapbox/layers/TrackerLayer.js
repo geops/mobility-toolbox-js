@@ -82,7 +82,11 @@ class TrackerLayer extends mixin(Layer) {
     this.trajecLineLayer = {
       id: "trajectoryLine",
       type: "line",
-      source: "selectedLineTraject"
+      source: "selectedLineTraject",
+      paint: {
+        "line-color": "#00ffff",
+        "line-width": 20
+      }
     }
     map.addSource("selectedLineTraject", {type: "geojson", data: []})
     map.addLayer(this.trajecLineLayer, this.key)
