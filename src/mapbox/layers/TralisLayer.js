@@ -94,10 +94,10 @@ class TralisLayer extends mixin(TrackerLayer) {
         delete fullTrajectory["properties"]
         fullTrajectory.features[0].geometry.geometries.forEach(element => {
           for (const coord of element.coordinates) {
-            console.log(coord)
+            coord = [coord[0] / 100000, coord[1] / 100000]
           }
         });
-        // console.log(JSON.stringify(fullTrajectory))
+        console.log(JSON.stringify(fullTrajectory))
         this.map.getSource("selectedLineTraject").setData(fullTrajectory)
         // console.log(this.map.getSource("selectedLineTraject"))
         // console.log(this.map.getLayer("trajectoryLine"))
