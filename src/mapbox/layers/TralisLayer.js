@@ -95,7 +95,7 @@ class TralisLayer extends mixin(TrackerLayer) {
         fullTrajectory.features[0].geometry.geometries.forEach(element => {
           const newCoords = []
           for (const coord of element.coordinates) {
-            newCoords.push([coord[0] / 100000, coord[1] / 100000 - 16])
+            newCoords.push(Object.values(this.map.unproject([coord[0] / 100000, coord[1] / 100000], 0)))
           }
           element.coordinates = newCoords
         });
