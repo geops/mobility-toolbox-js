@@ -1,5 +1,6 @@
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
+import { toLonLat } from 'ol/proj';
 
 /**
  * Responsible for loading and display data from a Tralis service.
@@ -95,7 +96,7 @@ class TralisLayer extends mixin(TrackerLayer) {
         fullTrajectory.features[0].geometry.geometries.forEach(element => {
           const newCoords = []
           for (const coord of element.coordinates) {
-            newCoords.push(Object.values([coord[0] / 100000, coord[1] / 100000]))
+            newCoords.push(toLonLat(coord))
           }
           element.coordinates = newCoords
         });
