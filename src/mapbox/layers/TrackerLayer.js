@@ -91,7 +91,8 @@ class TrackerLayer extends mixin(Layer) {
     this.trajectStopsLayer = {
       id: "trajectoryStops",
       type: "circle",
-      source: "selectedLineTraject"
+      source: "selectedLineTraject",
+      filter: ["==", ["geometry-type"], "MultiPoint"]
     }
 
     map.addSource("selectedLineTraject", {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}})
