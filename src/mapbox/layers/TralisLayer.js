@@ -1,6 +1,7 @@
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
 import { toLonLat } from 'ol/proj';
+import { getTypeIndex } from '../../common/trackerConfig';
 
 /**
  * Responsible for loading and display data from a Tralis service.
@@ -93,7 +94,12 @@ class TralisLayer extends mixin(TrackerLayer) {
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((fullTrajectory) => {
         // delete fullTrajectory["properties"]
-        const props = fullTrajectory.features[0].properties
+        const stroke = fullTrajectory.features[0].properties.stroke
+        if (stroke && stroke[0] !== '#') {
+          fullTrajectory.features[0].properties.stroke = `#${stroke}`;
+        }
+        const type = fullTrajectory.features[0].properties.type
+        fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
         fullTrajectory.features[0].geometry.geometries.forEach(element => {
           const newCoords = []
           for (const coord of element.coordinates) {

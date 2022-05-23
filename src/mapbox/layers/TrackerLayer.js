@@ -84,9 +84,24 @@ class TrackerLayer extends mixin(Layer) {
       type: "line",
       source: "selectedLineTraject",
       paint: {
-        "line-color": ["get", "stroke"],
         "line-width": 2,
-        "line-gap-width": 1
+        "line-gap-width": 1,
+        "line-color": ["case",
+          ["!=", ["get", "stroke"], null], ["get", "stroke"],
+          ["match", ["get", "typeIdx"],
+            0, '#ffb400',
+            1, '#ff5400',
+            2, '#ff8080',
+            3, '#ea0000',
+            4, '#3000ff',
+            5, '#ffb400',
+            6, '#41a27b',
+            7, '#00d237',
+            8, '#b5b5b5',
+            9, '#ff8080',
+            '#ff0000'
+          ]
+        ]
       },
       filter: ['==', ["geometry-type"], 'LineString']
     }
@@ -96,9 +111,23 @@ class TrackerLayer extends mixin(Layer) {
       type: "circle",
       source: "selectedLineTraject",
       paint: {
-        'circle-color': ["get", "stroke"],
         'circle-radius': 5,
-        'circle-stroke-opacity': 1
+        'circle-color': ["case",
+          ["!=", ["get", "stroke"], null], ["get", "stroke"],
+          ["match", ["get", "typeIdx"],
+            0, '#ffb400',
+            1, '#ff5400',
+            2, '#ff8080',
+            3, '#ea0000',
+            4, '#3000ff',
+            5, '#ffb400',
+            6, '#41a27b',
+            7, '#00d237',
+            8, '#b5b5b5',
+            9, '#ff8080',
+            '#ff0000'
+          ]
+        ]
       },
       filter: ['==', ["geometry-type"], 'Point']
     }
