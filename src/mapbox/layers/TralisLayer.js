@@ -92,7 +92,7 @@ class TralisLayer extends mixin(TrackerLayer) {
     this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((fullTrajectory) => {
-        delete fullTrajectory["properties"]
+        //delete fullTrajectory["properties"]
         fullTrajectory.features[0].geometry.geometries.forEach(element => {
           const newCoords = []
           for (const coord of element.coordinates) {
