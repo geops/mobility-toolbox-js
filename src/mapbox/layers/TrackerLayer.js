@@ -84,7 +84,7 @@ class TrackerLayer extends mixin(Layer) {
       type: "line",
       source: "selectedLineTraject",
       paint: {
-        "line-color": "#00ffff"
+        "line-color": ["get", "stroke"]
       }
     }
 
@@ -118,6 +118,9 @@ class TrackerLayer extends mixin(Layer) {
       }
       if (this.map.getLayer("trajectoryLine")) {
         this.map.removeLayer("trajectoryLine")
+      }
+      if (this.map.getLayer("trajectStopsLayer")) {
+        this.map.removeLayer("trajectStopsLayer")
       }
       if (this.map.getSource("selectedLineTraject")) {
         this.map.removeSource("selectedLineTraject")
