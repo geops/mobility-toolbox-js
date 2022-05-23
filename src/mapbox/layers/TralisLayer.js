@@ -60,14 +60,14 @@ class TralisLayer extends mixin(TrackerLayer) {
       this.setBbox();
     }
 
-    if (
-      this.visible &&
-      this.isUpdateBboxOnMoveEnd &&
-      this.isClickActive &&
-      this.selectedVehicleId
-    ) {
-      this.highlightTrajectory(this.selectedVehicleId);
-    }
+    // if (
+    //   this.visible &&
+    //   this.isUpdateBboxOnMoveEnd &&
+    //   this.isClickActive &&
+    //   this.selectedVehicleId
+    // ) {
+    //   this.highlightTrajectory(this.selectedVehicleId);
+    // }
   }
 
   /**
