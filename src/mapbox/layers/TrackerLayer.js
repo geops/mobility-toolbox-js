@@ -92,6 +92,10 @@ class TrackerLayer extends mixin(Layer) {
       id: "trajectoryStops",
       type: "circle",
       source: "selectedLineTraject",
+      paint: {
+        'circle-radius': 6,
+        'circle-color': '#B42222'
+      },
       filter: ['==', '$type', 'MultiPoint']
     }
 
