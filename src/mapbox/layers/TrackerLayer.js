@@ -84,7 +84,9 @@ class TrackerLayer extends mixin(Layer) {
       type: "line",
       source: "selectedLineTraject",
       paint: {
-        "line-color": ["get", "stroke"]
+        "line-color": ["get", "stroke"],\
+        "line-width": 4,
+        "line-gap-width": 1
       },
       filter: ['==', ["geometry-type"], 'LineString']
     }
@@ -94,8 +96,9 @@ class TrackerLayer extends mixin(Layer) {
       type: "circle",
       source: "selectedLineTraject",
       paint: {
-        'circle-radius': 6,
-        'circle-color': '#B42222'
+        'circle-color': ["get", "stroke"],
+        'circle-radius': 4,
+        'circle-stroke-opacity': 1
       },
       filter: ['==', ["geometry-type"], 'Point']
     }
