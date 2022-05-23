@@ -85,7 +85,8 @@ class TrackerLayer extends mixin(Layer) {
       source: "selectedLineTraject",
       paint: {
         "line-color": ["get", "stroke"]
-      }
+      },
+      filter: ['==', '$type', 'LineString']
     }
 
     this.trajectStopsLayer = {
