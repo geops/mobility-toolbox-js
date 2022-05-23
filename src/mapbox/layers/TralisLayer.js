@@ -93,13 +93,14 @@ class TralisLayer extends mixin(TrackerLayer) {
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((fullTrajectory) => {
         //delete fullTrajectory["properties"]
+        const props = fullTrajectory.features[0].properties
         fullTrajectory.features[0].geometry.geometries.forEach(element => {
           const newCoords = []
           for (const coord of element.coordinates) {
             newCoords.push(toLonLat(coord))
           }
           element.coordinates = newCoords
-          fullTrajectory.features.push(element)
+          fullTrajectory.features.push({type: "Feature", geometry: element, properties: props})
         });
         fullTrajectory.features.shift()
 
