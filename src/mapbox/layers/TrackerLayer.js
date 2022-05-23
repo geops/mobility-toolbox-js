@@ -86,7 +86,7 @@ class TrackerLayer extends mixin(Layer) {
       paint: {
         "line-color": ["get", "stroke"]
       },
-      filter: ['==', '$type', 'LineString']
+      filter: ['==', ["geometry-type"], 'LineString']
     }
 
     this.trajectStopsLayer = {
@@ -97,7 +97,7 @@ class TrackerLayer extends mixin(Layer) {
         'circle-radius': 6,
         'circle-color': '#B42222'
       },
-      filter: ['==', '$type', 'MultiPoint']
+      filter: ['==', ["geometry-type"], 'MultiPoint']
     }
 
     map.addSource("selectedLineTraject", {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}})
