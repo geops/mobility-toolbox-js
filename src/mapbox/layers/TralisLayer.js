@@ -107,10 +107,8 @@ class TralisLayer extends mixin(TrackerLayer) {
           }
           element.coordinates = newCoords
         });
-        console.log(JSON.stringify(fullTrajectory))
+        // console.log(JSON.stringify(fullTrajectory))
         this.map.getSource("selectedLineTraject").setData(fullTrajectory)
-        // console.log(this.map.getSource("selectedLineTraject"))
-        // console.log(this.map.getLayer("trajectoryLine"))
       })
   }
 
