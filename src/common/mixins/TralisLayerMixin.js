@@ -21,6 +21,7 @@ export class TralisLayerInterface {
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    * @param {boolean} [options.debug=false] Display additional debug informations.
    * @param {TralisMode} [options.mode=TralisMode.TOPOGRAPHIC] Tralis's Mode.
+   * @param {number} [options.minZoomInterpolation=8] Minimal zoom when trains positions start to be interpolated.
    * @param {number} [options.minZoomNonTrain=9] Minimal zoom when non trains vehicles are allowed to be displayed.
    */
   constructor(options = {}) {}
@@ -87,6 +88,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.api = options.api || new TralisAPI(options);
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
+      this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
       this.format = new GeoJSON();
       this.generalizationLevelByZoom = options.generalizationLevelByZoom || {
         0: 5,
@@ -112,6 +114,27 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.onTrajectoryMessage = this.onTrajectoryMessage.bind(this);
       this.onDeleteTrajectoryMessage =
         this.onDeleteTrajectoryMessage.bind(this);
+      this.onDocumentVisibilityChange =
+        this.onDocumentVisibilityChange.bind(this);
+    }
+
+    init(map) {
+      super.init(map);
+
+      // To avoid browser hanging when the tab is not visible for a certain amount of time,
+      // We stop the rendering and the websocket when hide and start again when show.
+      document.addEventListener(
+        'visibilitychange',
+        this.onDocumentVisibilityChange,
+      );
+    }
+
+    terminate() {
+      document.removeEventListener(
+        'visibilitychange',
+        this.onDocumentVisibilityChange,
+      );
+      super.terminate();
     }
 
     start() {
@@ -254,6 +277,16 @@ const TralisLayerMixin = (TrackerLayer) =>
     // getRefreshTimeInMs() {
     //   return 5000;
     // }
+    onDocumentVisibilityChange() {
+      if (!this.visible) {
+        return;
+      }
+      if (document.hidden) {
+        this.stop();
+      } else {
+        this.start();
+      }
+    }
 
     /**
      * Callback on websocket's trajectory channel events.

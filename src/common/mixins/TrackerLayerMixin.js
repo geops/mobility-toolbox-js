@@ -542,7 +542,8 @@ const TrackerLayerMixin = (Base) =>
         trajectories,
         { ...viewState, pixelRatio: this.pixelRatio, time },
         {
-          noInterpolate,
+          noInterpolate:
+            viewState.zoom < this.minZoomInterpolation ? true : noInterpolate,
           hoverVehicleId: this.hoverVehicleId,
           selectedVehicleId: this.selectedVehicleId,
           iconScale: this.iconScale,
