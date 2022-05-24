@@ -93,7 +93,6 @@ class TralisLayer extends mixin(TrackerLayer) {
     this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((fullTrajectory) => {
-        // delete fullTrajectory["properties"]
         const stroke = fullTrajectory.features[0].properties.stroke
         if (stroke && stroke[0] !== '#') {
           fullTrajectory.features[0].properties.stroke = `#${stroke}`;
@@ -107,7 +106,6 @@ class TralisLayer extends mixin(TrackerLayer) {
           }
           element.coordinates = newCoords
         });
-        // console.log(JSON.stringify(fullTrajectory))
         this.map.getSource("selectedLineTraject").setData(fullTrajectory)
       })
   }
