@@ -98,7 +98,6 @@ export default class Tracker {
 
       // We simplify the trajectory object
       const { train_id: id, timeOffset } = trajectory.properties;
-
       // We set the rotation and the timeFraction of the trajectory (used by tralis).
       // if rotation === null that seems there is no rotation available.
       const { coord, rotation: rotationIcon } = getVehiclePosition(

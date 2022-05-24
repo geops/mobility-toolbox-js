@@ -5,7 +5,8 @@ import GeomType from 'ol/geom/GeometryType';
  *
  * @param {number} now Current date to interpolate a position with. In ms.
  * @param {TralisTrajectory} trajectory The trajectory to interpolate.
-@returns
+ * @param {boolean} noInterpolate If true, the vehicle position is not interpolated on each render but only once.
+ * @returns
  */
 const getVehiclePosition = (now, trajectory, noInterpolate) => {
   const {
