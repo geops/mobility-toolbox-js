@@ -79,13 +79,12 @@ class TrackerLayer extends mixin(Layer) {
 
     this.listeners = [this.on('change:visible', this.onVisibilityChange)];
 
-    this.trajecLineLayer = {
+    this.trajectLineLayer = {
       id: "trajectoryLine",
       type: "line",
       source: "selectedLineTraject",
       paint: {
-        "line-width": 2,
-        "line-gap-width": 1,
+        "line-width": 4,
         "line-color": ["case",
           ["!=", ["get", "stroke"], null], ["get", "stroke"],
           ["match", ["get", "typeIdx"],
@@ -106,12 +105,22 @@ class TrackerLayer extends mixin(Layer) {
       filter: ['==', ["geometry-type"], 'LineString']
     }
 
+    this.trajectLineLayerBorder = {
+      id: "trajectoryLineBorder",
+      type: "line",
+      source: "selectedLineTraject",
+      paint: {
+        "line-width": 6,
+      },
+      filter: ['==', ["geometry-type"], 'LineString']
+    }
+
     this.trajectStopsLayer = {
       id: "trajectoryStops",
       type: "circle",
       source: "selectedLineTraject",
       paint: {
-        'circle-radius': 5,
+        'circle-radius': 4,
         'circle-color': ["case",
           ["!=", ["get", "stroke"], null], ["get", "stroke"],
           ["match", ["get", "typeIdx"],
@@ -132,9 +141,21 @@ class TrackerLayer extends mixin(Layer) {
       filter: ['==', ["geometry-type"], 'Point']
     }
 
+    this.trajectStopsLayerBorder = {
+      id: "trajectoryStopsBorder",
+      type: "circle",
+      source: "selectedLineTraject",
+      paint: {
+        'circle-radius': 5,
+      },
+      filter: ['==', ["geometry-type"], 'Point']
+    }
+
     map.addSource("selectedLineTraject", {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}})
-    map.addLayer(this.trajecLineLayer, this.key)
+    map.addLayer(this.trajectLineLayer, this.key)
+    map.addLayer(this.trajectLineLayerBorder, "trajectoryLine")
     map.addLayer(this.trajectStopsLayer, this.key)
+    map.addLayer(this.trajectStopsLayerBorder, "trajectoryStops")
   }
 
   /**
@@ -154,8 +175,14 @@ class TrackerLayer extends mixin(Layer) {
       if (this.map.getLayer("trajectoryLine")) {
         this.map.removeLayer("trajectoryLine")
       }
-      if (this.map.getLayer("trajectStopsLayer")) {
-        this.map.removeLayer("trajectStopsLayer")
+      if (this.map.getLayer("trajectoryLineBorder")) {
+        this.map.removeLayer("trajectoryLineBorder")
+      }
+      if (this.map.getLayer("trajectoryStops")) {
+        this.map.removeLayer("trajectoryStops")
+      }
+      if (this.map.getLayer("trajectoryStopsBorder")) {
+        this.map.removeLayer("trajectoryStopsBorder")
       }
       if (this.map.getSource("selectedLineTraject")) {
         this.map.removeSource("selectedLineTraject")
