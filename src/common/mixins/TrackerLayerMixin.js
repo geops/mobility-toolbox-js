@@ -535,7 +535,6 @@ const TrackerLayerMixin = (Base) =>
         trajectories.sort(this.sort);
       }
       // console.timeEnd('sort');
-      window.trajectories = trajectories;
 
       // console.time('render');
       this.renderState = this.tracker.renderTrajectories(
