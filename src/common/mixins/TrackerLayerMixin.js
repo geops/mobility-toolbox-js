@@ -272,7 +272,9 @@ const TrackerLayerMixin = (Base) =>
          * Id of the selected vehicle.
          */
         pixelRatio: {
-          value: pixelRatio || window.devicePixelRatio || 1,
+          value:
+            pixelRatio ||
+            (typeof window !== 'undefined' ? window.devicePixelRatio : 1),
           writable: true,
         },
 
