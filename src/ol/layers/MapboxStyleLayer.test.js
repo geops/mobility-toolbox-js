@@ -1,8 +1,8 @@
 import OlMap from 'ol/Map';
 import View from 'ol/View';
-import { Map } from 'maplibre-gl';
+import gllib from 'maplibre-gl';
 import Layer from './Layer';
-import MapboxLayer from './MapboxLayer';
+import MaplibreLayer from './MaplibreLayer';
 import MapboxStyleLayer from './MapboxStyleLayer';
 
 let source;
@@ -17,7 +17,7 @@ const styleLayer = {
 describe('MapboxStyleLayer', () => {
   beforeEach(() => {
     onClick = jest.fn();
-    source = new MapboxLayer({
+    source = new MaplibreLayer({
       name: 'Layer',
       apiKey: false,
     });
@@ -48,7 +48,7 @@ describe('MapboxStyleLayer', () => {
   test('should initalized mapbox map.', () => {
     source.init(map);
     layer.init(map);
-    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(Map);
+    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(gllib.Map);
   });
 
   test('should add onClick callback.', () => {

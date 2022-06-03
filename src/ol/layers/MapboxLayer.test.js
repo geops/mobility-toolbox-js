@@ -1,6 +1,6 @@
 import OlMap from 'ol/Map';
 import View from 'ol/View';
-import { Map } from 'mapbox-gl';
+import gllib from 'mapbox-gl';
 import MapboxLayer from './MapboxLayer';
 
 let layer;
@@ -37,7 +37,7 @@ describe('MapboxLayer', () => {
 
     test('should initalized mapbox map and warn the user if there is no api key defined.', () => {
       layer.init(map);
-      expect(layer.mbMap).toBeInstanceOf(Map);
+      expect(layer.mbMap).toBeInstanceOf(gllib.Map);
       expect(consoleOutput[0]).toBe(
         'No apiKey is defined for request to foo.com/styles',
       );
@@ -102,7 +102,7 @@ describe('MapboxLayer', () => {
     });
   });
 
-  describe.only('#getFeatureInfoAtCoordinate()', () => {
+  describe('#getFeatureInfoAtCoordinate()', () => {
     let layer1;
     beforeEach(() => {
       layer1 = new MapboxLayer({
@@ -117,8 +117,8 @@ describe('MapboxLayer', () => {
     });
 
     afterEach(() => {
-      // layer1.mbMap.getSource.mockRestore();
-      // layer1.mbMap.isStyleLoaded.mockRestore();
+      layer1.mbMap.getSource.mockRestore();
+      layer1.mbMap.isStyleLoaded.mockRestore();
     });
 
     test('should set the mapboxFeature as a property', (done) => {
@@ -151,8 +151,8 @@ describe('MapboxLayer', () => {
       });
 
       afterEach(() => {
-        // layer1.mbMap.project.mockRestore();
-        // layer1.mbMap.queryRenderedFeatures.mockRestore();
+        layer1.mbMap.project.mockRestore();
+        layer1.mbMap.queryRenderedFeatures.mockRestore();
       });
 
       test('when hitTolerance is not set', (done) => {
