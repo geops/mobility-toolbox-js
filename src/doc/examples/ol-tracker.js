@@ -1,5 +1,5 @@
 import View from 'ol/View';
-import { Map, TralisLayer, MapboxLayer } from '../../ol';
+import { Map, TralisLayer, MaplibreLayer } from '../../ol';
 import 'ol/ol.css';
 import CopyrightControl from '../../ol/controls/CopyrightControl';
 
@@ -13,7 +13,7 @@ export default () => {
     controls: [new CopyrightControl()],
   });
 
-  const layer = new MapboxLayer({
+  const layer = new MaplibreLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
