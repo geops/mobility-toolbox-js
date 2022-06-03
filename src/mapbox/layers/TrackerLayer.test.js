@@ -1,4 +1,4 @@
-import maplibre from 'maplibre-gl';
+import { Map } from 'maplibre-gl';
 import { toLonLat } from 'ol/proj';
 import TrackerLayer from './TrackerLayer';
 
@@ -32,7 +32,7 @@ describe('TrackerLayer', () => {
     document.body.appendChild(mapElement);
 
     layer.init(
-      new maplibre.Map({
+      new Map({
         container: document.getElementById('map'),
         style: `path/to/style`,
         center: toLonLat([831634, 5933959]),

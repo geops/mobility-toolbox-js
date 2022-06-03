@@ -1,4 +1,4 @@
-import maplibre from 'maplibre-gl';
+import { Map } from 'maplibre-gl';
 import fetch from 'jest-fetch-mock';
 import { toLonLat } from 'ol/proj';
 import TrajservLayer from './TrajservLayer';
@@ -39,7 +39,7 @@ describe('TrajservLayer', () => {
     document.body.appendChild(mapElement);
 
     layer.init(
-      new maplibre.Map({
+      new Map({
         container: document.getElementById('map'),
         style: `path/to/style`,
         center: toLonLat([831634, 5933959]),

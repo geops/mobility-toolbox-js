@@ -1,6 +1,6 @@
-import Map from 'ol/Map';
+import OlMap from 'ol/Map';
 import View from 'ol/View';
-import maplibre from 'maplibre-gl';
+import { Map } from 'maplibre-gl';
 import Layer from './Layer';
 import MapboxLayer from './MapboxLayer';
 import MapboxStyleLayer from './MapboxStyleLayer';
@@ -28,7 +28,7 @@ describe('MapboxStyleLayer', () => {
       styleLayer,
       onClick,
     });
-    map = new Map({
+    map = new OlMap({
       target: document.createElement('div'),
       view: new View({ center: [0, 0] }),
     });
@@ -48,7 +48,7 @@ describe('MapboxStyleLayer', () => {
   test('should initalized mapbox map.', () => {
     source.init(map);
     layer.init(map);
-    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(maplibre.Map);
+    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(Map);
   });
 
   test('should add onClick callback.', () => {
