@@ -173,7 +173,7 @@ export default class MaplibreLayer extends Layer {
       interactive: false,
       trackResize: false,
       attributionControl: false,
-      ...(this.options.maplibreOptions || {}),
+      ...(this.options.mlMapOptions || {}),
     });
 
     this.mbMap.once('load', () => {
