@@ -71,11 +71,11 @@ function Home() {
       <p>
         This example shows how to draw real time vehicle positions on a{' '}
         <a
-          href="https://docs.mapbox.com/mapbox-gl-js/"
+          href="https://maplibre.org/maplibre-gl-js-docs/"
           rel="noreferrer"
           target="_blank"
         >
-          Mapbox GL JS
+          Maplibre GL JS
         </a>{' '}
         map. Check out the{' '}
         <a href="/example/ol-tracker">Live Tracker with OpenLayers</a> example
