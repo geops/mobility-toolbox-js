@@ -1,5 +1,5 @@
 import { Map, CopyrightControl } from '../../mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
   // Define a custom copyright

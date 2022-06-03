@@ -17,7 +17,7 @@ const codeHtmlPage = `
 
 const codeMapObject = `
 import { Map, TralisLayer } from 'mobility-toolbox-js/mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 const map = new Map({
   container: 'map',

@@ -1,5 +1,5 @@
 import { Map, TralisLayer } from '../../mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
   const map = new Map({

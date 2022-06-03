@@ -1,6 +1,6 @@
 import Map from 'ol/Map';
 import View from 'ol/View';
-import mapboxgl from 'mapbox-gl';
+import maplibre from 'maplibre-gl';
 import Layer from './Layer';
 import MapboxLayer from './MapboxLayer';
 import MapboxStyleLayer from './MapboxStyleLayer';
@@ -48,7 +48,7 @@ describe('MapboxStyleLayer', () => {
   test('should initalized mapbox map.', () => {
     source.init(map);
     layer.init(map);
-    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(mapboxgl.Map);
+    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(maplibre.Map);
   });
 
   test('should add onClick callback.', () => {

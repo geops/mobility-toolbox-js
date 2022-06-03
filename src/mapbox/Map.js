@@ -1,4 +1,4 @@
-import { Map as MBMap } from 'mapbox-gl';
+import { Map as MBMap } from 'maplibre-gl';
 import Layer from '../common/layers/Layer';
 import mixin from '../common/mixins/MapMixin';
 import CopyrightControl from './controls/CopyrightControl';

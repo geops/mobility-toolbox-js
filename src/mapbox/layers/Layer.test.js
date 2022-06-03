@@ -1,4 +1,4 @@
-import mapboxgl from 'mapbox-gl';
+import maplibre from 'maplibre-gl';
 import { toLonLat } from 'ol/proj';
 import Layer from './Layer';
 
@@ -16,7 +16,7 @@ describe('Layer', () => {
     style.height = '400px';
     mapElement.setAttribute('id', 'map');
     document.body.appendChild(mapElement);
-    map = new mapboxgl.Map({
+    map = new maplibre.Map({
       container: document.getElementById('map'),
       style: `path/to/style`,
       center: toLonLat([831634, 5933959]),

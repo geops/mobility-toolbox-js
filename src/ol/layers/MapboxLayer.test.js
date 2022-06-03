@@ -1,6 +1,6 @@
 import Map from 'ol/Map';
 import View from 'ol/View';
-import mapboxgl from 'mapbox-gl';
+import maplibre from 'maplibre-gl';
 import MapboxLayer from './MapboxLayer';
 
 let layer;
@@ -37,7 +37,7 @@ describe('MapboxLayer', () => {
 
     test('should initalized mapbox map and warn the user if there is no api key defined.', () => {
       layer.init(map);
-      expect(layer.mbMap).toBeInstanceOf(mapboxgl.Map);
+      expect(layer.mbMap).toBeInstanceOf(maplibre.Map);
       expect(consoleOutput[0]).toBe(
         'No apiKey is defined for request to foo.com/styles',
       );

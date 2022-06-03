@@ -38,7 +38,7 @@ function CodeSandboxButton({ html, js, extraFiles, ...props }) {
             build: 'parcel build index.html',
           },
           dependencies: {
-            'mapbox-gl': '1.11.1',
+            'maplibre-gl': '2',
             'mobility-toolbox-js': 'latest',
             ol: '6.3.1',
             'query-string': '6.13.1',
