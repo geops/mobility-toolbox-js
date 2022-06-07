@@ -356,13 +356,17 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (feature) {
         id = feature.get('train_id');
       }
+      this.previousVehicleId = this.selectedVehicleId
       if (this.selectedVehicleId !== id) {
         /** @ignore */
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
         this.renderTrajectories();
+        super.onFeatureClick(features, layer, coordinate);
+      } else {
+        this.clear()
       }
-      super.onFeatureClick(features, layer, coordinate);
+      
     }
   };
 

@@ -90,24 +90,29 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @private
    */
   highlightTrajectory(id) {
-    this.api
-      .getFullTrajectory(id, this.mode, this.generalizationLevel)
-      .then((fullTrajectory) => {
-        const stroke = fullTrajectory.features[0].properties.stroke
-        if (stroke && stroke[0] !== '#') {
-          fullTrajectory.features[0].properties.stroke = `#${stroke}`;
-        }
-        const type = fullTrajectory.features[0].properties.type
-        fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
-        fullTrajectory.features[0].geometry.geometries.forEach(element => {
-          const newCoords = []
-          for (const coord of element.coordinates) {
-            newCoords.push(toLonLat(coord))
+    if (this.selectedVehicleId === this.previousVehicleId) {
+      this.map.getSource("selectedLineTraject").setData({"type": "FeatureCollection", "features": []})
+    }
+    else {
+      this.api
+        .getFullTrajectory(id, this.mode, this.generalizationLevel)
+        .then((fullTrajectory) => {
+          const stroke = fullTrajectory.features[0].properties.stroke
+          if (stroke && stroke[0] !== '#') {
+            fullTrajectory.features[0].properties.stroke = `#${stroke}`;
           }
-          element.coordinates = newCoords
-        });
-        this.map.getSource("selectedLineTraject").setData(fullTrajectory)
-      })
+          const type = fullTrajectory.features[0].properties.type
+          fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
+          fullTrajectory.features[0].geometry.geometries.forEach(element => {
+            const newCoords = []
+            for (const coord of element.coordinates) {
+              newCoords.push(toLonLat(coord))
+            }
+            element.coordinates = newCoords
+          });
+          this.map.getSource("selectedLineTraject").setData(fullTrajectory)
+        })
+    }
   }
 
   /**
