@@ -362,10 +362,10 @@ const TralisLayerMixin = (TrackerLayer) =>
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
         this.renderTrajectories();
-        super.onFeatureClick(features, layer, coordinate);
       } else {
         this.clear()
       }
+      super.onFeatureClick(features, layer, coordinate);
       
     }
   };
