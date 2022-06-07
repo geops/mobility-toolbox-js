@@ -20,6 +20,9 @@ class TrackerLayer extends mixin(Layer) {
     });
 
     /** @ignore */
+    this.onLoad = this.onLoad.bind(this);
+
+    /** @ignore */
     this.onMove = this.onMove.bind(this);
 
     /** @ignore */
@@ -51,7 +54,7 @@ class TrackerLayer extends mixin(Layer) {
       height: canvas.height / this.pixelRatio,
     });
 
-    const source = {
+    this.source = {
       type: 'canvas',
       canvas: this.tracker.canvas,
       coordinates: getSourceCoordinates(map, this.pixelRatio),
@@ -74,8 +77,12 @@ class TrackerLayer extends mixin(Layer) {
         'raster-resampling': 'nearest', // important otherwise it looks blurry
       },
     };
-    map.addSource(this.key, source);
-    map.addLayer(this.layer, this.beforeId);
+
+    if (map.isStyleLoaded()) {
+      this.onLoad();
+    }
+
+    this.map.on('load', this.onLoad);
 
     this.listeners = [this.on('change:visible', this.onVisibilityChange)];
   }
@@ -85,6 +92,8 @@ class TrackerLayer extends mixin(Layer) {
    */
   terminate() {
     if (this.map) {
+      this.map.off('load', this.onLoad);
+
       this.listeners.forEach((listener) => {
         unByKey(listener);
       });
@@ -124,6 +133,15 @@ class TrackerLayer extends mixin(Layer) {
       this.map.off('move', this.onMove);
       this.map.off('moveend', this.onMoveEnd);
       this.map.off('zoomend', this.onZoomEnd);
+    }
+  }
+
+  onLoad() {
+    if (!this.map.getSource(this.key)) {
+      this.map.addSource(this.key, this.source);
+    }
+    if (!this.map.getLayer(this.key)) {
+      this.map.addLayer(this.layer, this.beforeId);
     }
   }
 

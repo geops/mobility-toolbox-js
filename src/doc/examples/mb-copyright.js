@@ -1,7 +1,17 @@
-import { Map, CopyrightControl } from '../../mapbox';
+import { Map } from 'maplibre-gl';
+import { CopyrightControl } from '../../mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
+  // Define the map
+  const map = new Map({
+    container: 'map',
+    style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
+    center: [7.47, 46.95],
+    zoom: 12,
+    attributionControl: false,
+  });
+
   // Define a custom copyright
   const control = new CopyrightControl({
     target: document.getElementById('copyright'),
@@ -13,26 +23,15 @@ export default () => {
     },
   });
 
-  const map = new Map({
-    container: 'map',
-    style: 'https://maps.geops.io/styles/travic_v2/style.json',
-    apiKey: window.apiKey,
-    center: [7.47, 46.95],
-    zoom: 12,
-    touchPitch: false,
-    pitchWithRotate: false,
-    dragRotate: false,
-    touchZoomRotate: false,
-    attributionControl: false,
-    controls: [control],
-  });
+  // Attach the control to the map
+  control.map = map;
 
   // Add example button to toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {
-    if (control.element.parentNode) {
-      map.removeControl(control);
+    if (control.map) {
+      control.map = null;
     } else {
-      map.addControl(control);
+      control.map = map;
     }
   });
 };

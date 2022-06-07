@@ -1,7 +1,7 @@
 import View from 'ol/View';
-import { Map, TralisLayer, MapboxLayer } from '../../ol';
+import Map from 'ol/Map';
+import { TralisLayer, MapboxLayer, CopyrightControl } from '../../ol';
 import 'ol/ol.css';
-import CopyrightControl from '../../ol/controls/CopyrightControl';
 
 export default () => {
   const map = new Map({
@@ -13,13 +13,17 @@ export default () => {
       // center: fromLonLat([7.841148, 47.996542]), // freiburg
       // center: fromLonLat([11.55, 48.14]), // munich
     }),
-    controls: [new CopyrightControl()],
+    controls: [],
   });
+
+  const control = new CopyrightControl();
+  control.map = map;
 
   const layer = new MapboxLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
+  layer.init(map);
 
   const tracker = new TralisLayer({
     url: 'wss://tralis-tracker-api.geops.io/ws',
@@ -32,7 +36,7 @@ export default () => {
     // useDelayStyle: true,
     // regexPublishedLineName: '^(S|R$|RE|PE|D|IRE|RB|TER)',
   });
-
+  tracker.init(map);
   tracker.onClick(([feature]) => {
     if (feature) {
       // eslint-disable-next-line no-console
@@ -52,7 +56,4 @@ export default () => {
   document.getElementById('terminate').onclick = () => {
     tracker.api.conn.websocket.terminate();
   };
-
-  map.addLayer(layer);
-  map.addLayer(tracker);
 };

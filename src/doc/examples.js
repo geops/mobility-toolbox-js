@@ -1,4 +1,3 @@
-import simpleMapImg from './img/examples/simple_map.jpg';
 import liveTrackerOLImg from './img/examples/live_tracker_ol.jpg';
 import liveTrackerMBImg from './img/examples/live_tracker_mb.jpg';
 // import liveTrackerMunichImg from './img/examples/live_tracker_munich.jpg';
@@ -72,21 +71,16 @@ export default [
   //   img: liveTrackerOLImg,
   // },
   {
-    name: 'Simple map',
-    key: 'ol-map',
-    description: 'A simple map example.',
-    img: simpleMapImg,
-  },
-  {
     name: 'Mapbox layer',
     key: 'ol-mapbox-layer',
-    description: 'Display a Mapbox layer on an OpenLayers map.',
+    description: 'Display a Mapbox style on an OpenLayers map.',
     img: mapboxImg,
   },
   {
     name: 'Mapbox Style layer',
     key: 'ol-mapbox-style-layer',
-    description: 'Display a mapbox style layer on an OpenLayers map.',
+    description:
+      'Display/hide a set of layers of a Mapbox style on an OpenLayers map.',
     img: mapboxStyleImg,
   },
   {

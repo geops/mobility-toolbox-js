@@ -6,7 +6,8 @@ import { getMapboxMapCopyrights } from '../../common/utils';
  * Display layer's copyrights.
  *
  * @example
- * import { Map, CopyrightControl } from 'mobility-toolbox-js/mapbox';
+ * import { Map } from 'mapbox-gl';
+ * import { CopyrightControl } from 'mobility-toolbox-js/mapbox';
  *
  * const map = new Map({
  *   container: 'map',
@@ -15,6 +16,9 @@ import { getMapboxMapCopyrights } from '../../common/utils';
  *     new CopyrightControl()
  *   ]
  * });
+ *
+ * const control = new CopyrightControl();
+ * control.map = map;
  *
  *
  * @see <a href="/example/mb-copyright">Mapbox copyright example</a>

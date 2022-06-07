@@ -1,6 +1,6 @@
 import { Map } from 'maplibre-gl';
 import { toLonLat } from 'ol/proj';
-import { TralisLayer } from '../../mapbox';
+import { TralisLayer, CopyrightControl } from '../../mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
@@ -10,7 +10,11 @@ export default () => {
     apiKey: window.apiKey,
     center: toLonLat([1282278, 6128615]),
     zoom: 9,
+    attributionControl: false,
   });
+
+  const control = new CopyrightControl();
+  control.map = map;
 
   const tracker = new TralisLayer({
     url: '',

@@ -3,55 +3,59 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import { Polygon } from 'ol/geom';
 import View from 'ol/View';
-import { Map, MapboxLayer, MapboxStyleLayer, VectorLayer } from '../../ol';
+import Map from 'ol/Map';
+import {
+  MaplibreLayer,
+  MapboxStyleLayer,
+  VectorLayer,
+  CopyrightControl,
+} from '../../ol';
 import 'ol/ol.css';
 
 export default () => {
-  const addText = (text) => {
-    const element = document.getElementById('content');
-    element.innerHTML = text;
-  };
-
-  const onHover = (features, layer) => {
-    if (features.length) {
-      // eslint-disable-next-line no-param-reassign
-      layer.map.getTargetElement().style.cursor = 'pointer';
-    }
-  };
-
-  const onClick = (features) => {
-    if (features.length) {
-      addText(features[0].get('name'));
-    }
-  };
-
   const map = new Map({
     target: 'map',
     view: new View({
       center: [950690.34, 6003962.67],
       zoom: 20,
     }),
+    controls: [],
   });
+
+  // Add copyright control
+  const control = new CopyrightControl();
+  control.map = map;
 
   map.on('pointermove', () => {
     map.getTargetElement().style.cursor = '';
   });
 
-  const mapboxLayer = new MapboxLayer({
+  const onHover = ([feature]) => {
+    if (feature) {
+      map.getTargetElement().style.cursor = 'pointer';
+    }
+  };
+
+  const onClick = ([feature]) => {
+    if (feature) {
+      document.getElementById('content').innerHTML = feature.get('name');
+    }
+  };
+
+  const mapboxLayer = new MaplibreLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
+  mapboxLayer.init(map);
 
   const poiLayer = new MapboxStyleLayer({
-    name: 'poi layer',
     visible: true,
     mapboxLayer,
-    styleLayer: {
-      id: 'poi_with_icons',
-    },
+    styleLayersFilter: ({ id }) => /^poi_named/.test(id),
     onHover,
     onClick,
   });
+  poiLayer.init(map);
 
   const vectorLayer = new VectorLayer({
     olLayer: new OLVectorLayer({
@@ -75,8 +79,5 @@ export default () => {
     onHover,
     onClick,
   });
-
-  map.addLayer(mapboxLayer);
-  map.addLayer(poiLayer);
-  map.addLayer(vectorLayer);
+  vectorLayer.init(map);
 };

@@ -114,7 +114,7 @@ export default class MapboxLayer extends Layer {
           }
         }
 
-        return canvas;
+        return this.mbMap.getContainer();
       },
     });
 
@@ -187,6 +187,22 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
+   * Terminate what was initialized in init function. Remove layer, events...
+   */
+  terminate() {
+    if (this.mbMap) {
+      this.mbMap.off('idle', this.updateAttribution);
+      // Some asynchrone repaints are triggered even if the mbMap has been removed,
+      // to avoid display of errors we set an empty function.
+      this.mbMap.triggerRepaint = () => {};
+      this.mbMap.remove();
+      this.mbMap = null;
+    }
+    this.loaded = false;
+    super.terminate();
+  }
+
+  /**
    * Returns a style URL with apiKey & apiKeyName infos.
    * @private
    */
@@ -227,28 +243,23 @@ export default class MapboxLayer extends Layer {
       y = 0;
     }
 
-    const style = this.createStyleUrl();
-    try {
-      /**
-       * A mapbox map
-       * @type {mapboxgl.Map}
-       */
-      this.mbMap = new Map({
-        style,
-        attributionControl: false,
-        boxZoom: false,
-        center: toLonLat([x, y]),
-        container: this.map.getTargetElement(),
-        interactive: false,
-        fadeDuration:
-          'fadeDuration' in this.options ? this.options.fadeDuration : 300,
-        // Needs to be true to able to export the canvas, but could lead to performance issue on mobile.
-        preserveDrawingBuffer: this.options.preserveDrawingBuffer || false,
-      });
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed creating mapbox map: ', err);
-    }
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.width = '100%';
+    container.style.height = '100%';
+
+    /**
+     * A mapbox map
+     * @type {mapboxgl.Map}
+     */
+    this.mbMap = new Map({
+      style: this.createStyleUrl(),
+      container,
+      interactive: false,
+      trackResize: false,
+      attributionControl: false,
+      ...(this.options.mapOptions || {}),
+    });
 
     // Options the last render run did happen. If something changes
     // we have to render again
@@ -263,6 +274,7 @@ export default class MapboxLayer extends Layer {
     };
 
     this.mbMap.once('load', () => {
+      this.mbMap.resize();
       /**
        * Is the map loaded.
        * @type {boolean}
@@ -270,8 +282,7 @@ export default class MapboxLayer extends Layer {
       this.loaded = true;
 
       /** @ignore */
-      this.copyrights =
-        this.copyrights || getMapboxMapCopyrights(this.mbMap) || [];
+      this.copyrights = getMapboxMapCopyrights(this.mbMap) || [];
 
       this.olLayer.getSource().setAttributions(this.copyrights);
 
@@ -300,9 +311,9 @@ export default class MapboxLayer extends Layer {
    * @private
    */
   updateAttribution(evt) {
-    const newAttributions =
-      this.copyrights || getMapboxMapCopyrights(evt.target) || [];
+    const newAttributions = getMapboxMapCopyrights(evt.target) || [];
     if (this.copyrights.toString() !== newAttributions.toString()) {
+      this.copyrights = newAttributions;
       this.olLayer.getSource().setAttributions(newAttributions);
     }
   }
@@ -354,22 +365,6 @@ export default class MapboxLayer extends Layer {
       features,
       coordinate,
     });
-  }
-
-  /**
-   * Terminate what was initialized in init function. Remove layer, events...
-   */
-  terminate() {
-    if (this.mbMap) {
-      this.mbMap.off('idle', this.updateAttribution);
-      // Some asynchrone repaints are triggered even if the mbMap has been removed,
-      // to avoid display of errors we set an empty function.
-      this.mbMap.triggerRepaint = () => {};
-      this.mbMap.remove();
-      this.mbMap = null;
-    }
-    this.loaded = false;
-    super.terminate();
   }
 
   /**

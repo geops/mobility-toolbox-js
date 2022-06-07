@@ -126,6 +126,22 @@ export default class MaplibreLayer extends Layer {
   }
 
   /**
+   * Terminate what was initialized in init function. Remove layer, events...
+   */
+  terminate() {
+    if (this.mbMap) {
+      this.mbMap.off('idle', this.updateAttribution);
+      // Some asynchrone repaints are triggered even if the mbMap has been removed,
+      // to avoid display of errors we set an empty function.
+      this.mbMap.triggerRepaint = () => {};
+      this.mbMap.remove();
+      this.mbMap = null;
+    }
+    this.loaded = false;
+    super.terminate();
+  }
+
+  /**
    * Returns a style URL with apiKey & apiKeyName infos.
    * @private
    */
@@ -197,12 +213,8 @@ export default class MaplibreLayer extends Layer {
    * @private
    */
   updateAttribution(evt) {
-    const newAttributions =
-      this.copyrights || getMapboxMapCopyrights(evt.target) || [];
-    if (
-      this.olLayer.getSource().getAttributions()?.toString() !==
-      newAttributions.toString()
-    ) {
+    const newAttributions = getMapboxMapCopyrights(evt.target) || [];
+    if (this.copyrights?.toString() !== newAttributions.toString()) {
       this.copyrights = newAttributions;
       this.olLayer.getSource().setAttributions(newAttributions);
     }
@@ -255,22 +267,6 @@ export default class MaplibreLayer extends Layer {
       features,
       coordinate,
     });
-  }
-
-  /**
-   * Terminate what was initialized in init function. Remove layer, events...
-   */
-  terminate() {
-    if (this.mbMap) {
-      this.mbMap.off('idle', this.updateAttribution);
-      // Some asynchrone repaints are triggered even if the mbMap has been removed,
-      // to avoid display of errors we set an empty function.
-      this.mbMap.triggerRepaint = () => {};
-      this.mbMap.remove();
-      this.mbMap = null;
-    }
-    this.loaded = false;
-    super.terminate();
   }
 
   /**

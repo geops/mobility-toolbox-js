@@ -125,7 +125,7 @@ const SearchMixin = (Base) =>
         display: 'none',
         position: 'absolute',
         right: '0',
-        padding: '10px',
+        padding: '0 10px',
         fontSize: '200%',
         cursor: 'pointer',
       });

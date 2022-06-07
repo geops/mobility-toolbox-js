@@ -1,7 +1,7 @@
 import fetch from 'jest-fetch-mock';
 import View from 'ol/View';
 import qs from 'query-string';
-import Map from '../Map';
+import Map from 'ol/Map';
 import RoutingControl from './RoutingControl';
 
 import RoutingControlStation1 from './snapshots/RoutingControlStation1.json';
@@ -43,7 +43,7 @@ describe('RoutingControl', () => {
     expect(control.useRawViaPoints).toBe(false);
   });
 
-  test('launch routing and add features', (done) => {
+  test.only('launch routing and add features', (done) => {
     fetch.mockResponseOnce(JSON.stringify(global.fetchRouteResponse));
 
     const control = new RoutingControl({

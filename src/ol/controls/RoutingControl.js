@@ -45,14 +45,16 @@ const getFlatCoordinatesFromSegments = (segmentArray) => {
  * Display a route of a specified mean of transport.
  *
  * @example
- * import { Map, RoutingControl } from 'mobility-toolbox-js/ol';
+ * import { Map } from 'ol';
+ * import { RoutingControl } from 'mobility-toolbox-js/ol';
  *
  * const map = new Map({
- *   target: 'map',
- *   controls: [
- *     new RoutingControl()
- *   ]
+ *   target: 'map'
  * });
+ *
+ * const control = new RoutingControl();
+ *
+ * control.map = map
  *
  * @classproperty {string} apiKey - Key used for RoutingApi requests.
  * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
@@ -724,7 +726,7 @@ class RoutingControl extends Control {
       this.map.removeInteraction(this.modifyInteraction);
 
       // Add modify interaction, RoutingLayer and listeners
-      this.map.addLayer(this.routingLayer);
+      this.routingLayer.init(this.map);
       this.map.addInteraction(this.modifyInteraction);
       this.modifyInteraction.setActive(this.modify);
       this.addListeners();
@@ -738,7 +740,7 @@ class RoutingControl extends Control {
   deactivate() {
     if (this.map) {
       // Remove modify interaction, RoutingLayer, listeners and viaPoints
-      this.map.removeLayer(this.routingLayer.olLayer);
+      this.routingLayer.terminate(this.map);
       this.map.removeInteraction(this.modifyInteraction);
       this.removeListeners();
       this.reset();

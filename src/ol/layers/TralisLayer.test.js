@@ -10,7 +10,7 @@ let onClick;
 let olMap;
 let server;
 
-describe('TrajservLayer', () => {
+describe('TralisLayer', () => {
   beforeEach(() => {
     server = new WS('ws://localhost:1234');
     global.fetch = fetch;

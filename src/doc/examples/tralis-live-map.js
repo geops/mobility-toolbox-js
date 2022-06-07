@@ -1,4 +1,5 @@
-import { Map, TralisLayer } from '../../mapbox';
+import { Map } from 'mapbox-gl';
+import { TralisLayer, CopyrightControl } from '../../mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import LINE_IMAGES from './assets/tralis-live-map';
 
@@ -11,7 +12,11 @@ export default () => {
     zoom: 10,
     touchPitch: false,
     pitchWithRotate: false,
+    attributionControl: false,
   });
+
+  const control = new CopyrightControl();
+  control.map = map;
 
   const cache = {};
   const tracker = new TralisLayer({
@@ -42,5 +47,5 @@ export default () => {
     }
   });
 
-  map.addLayer(tracker);
+  tracker.init(map);
 };

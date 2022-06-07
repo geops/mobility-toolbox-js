@@ -52,13 +52,12 @@ describe('Layer', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  test('should call terminate when the layer is removed.', () => {
+  test('should remove the layer when we call terminate.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
     const spy = jest.spyOn(layer, 'terminate');
     layer.init(map);
-    map.addLayer(olLayer);
     expect(spy).toHaveBeenCalledTimes(1);
-    map.removeLayer(olLayer);
+    layer.terminate(map);
     expect(spy).toHaveBeenCalledTimes(2);
   });
 

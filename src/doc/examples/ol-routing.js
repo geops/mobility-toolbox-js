@@ -1,28 +1,32 @@
 import View from 'ol/View';
-import { Map, MapboxLayer } from '../../ol';
-import RoutingControl from '../../ol/controls/RoutingControl';
+import Map from 'ol/Map';
+import { MaplibreLayer, CopyrightControl, RoutingControl } from '../../ol';
 import 'ol/ol.css';
 
 export default () => {
-  const control = new RoutingControl({
-    element: document.createElement('div'),
-    apiKey: `${window.apiKey}`,
-  });
-
-  const mapboxLayer = new MapboxLayer({
-    url: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
-  });
-
   const map = new Map({
     target: 'map',
-    layers: [mapboxLayer],
     view: new View({
       center: [950690.34, 6003962.67],
       zoom: 15,
     }),
+    controls: [],
   });
 
-  map.addControl(control);
+  const mapboxLayer = new MaplibreLayer({
+    url: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
+  });
+  mapboxLayer.init(map);
+
+  const copyright = new CopyrightControl();
+  copyright.map = map;
+
+  const control = new RoutingControl({
+    element: document.createElement('div'),
+    apiKey: `${window.apiKey}`,
+  });
+  control.map = map;
+
   control.addViaPoint([950476.4055933182, 6003322.253698345]);
   control.addViaPoint([950389.0813034325, 6003656.659274571]);
   control.addViaPoint('29563461696e881d');

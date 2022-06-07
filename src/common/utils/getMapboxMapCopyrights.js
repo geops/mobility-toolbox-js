@@ -11,6 +11,7 @@ const getMapboxMapCopyrights = (map) => {
   }
   const { sourceCaches } = map.style;
   let copyrights = [];
+
   Object.values(sourceCaches).forEach((sourceCache) => {
     if (sourceCache.used) {
       const source = sourceCache.getSource();

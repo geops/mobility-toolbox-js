@@ -16,7 +16,8 @@ const codeHtmlPage = `
 `;
 
 const codeMapObject = `
-import { Map, TralisLayer } from 'mobility-toolbox-js/mapbox';
+import { Map } from 'maplibre-gl;
+import { TralisLayer } from 'mobility-toolbox-js/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const map = new Map({
@@ -33,7 +34,7 @@ const tracker = new TralisLayer({
   apiKey: window.apiKey,
 });
 
-map.addLayer(tracker);
+tracker.init(map);
 `;
 
 function MarkdownHeading({ ...props }) {
@@ -87,7 +88,7 @@ function Home() {
       </p>
       <p>First, create a HTML page with an empty map container.</p>
       <SyntaxHighlighter language="html" code={codeHtmlPage.trim()} />
-      <p>Add a map object with a vector tile layer.</p>
+      <p>Create a Maplibre map.</p>
       <SyntaxHighlighter language="js" code={codeMapObject.trim()} />
       <p>
         Finally, add the <i>TralisLayer</i> for rendering real time vehicle
