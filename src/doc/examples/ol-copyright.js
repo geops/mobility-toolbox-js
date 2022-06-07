@@ -10,7 +10,7 @@ export default () => {
       center: [0, 0],
       zoom: 1,
     }),
-    // controls: [],
+    controls: [],
   });
 
   // Define a custom rendering for the copyright
