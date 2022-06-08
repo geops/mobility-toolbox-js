@@ -80,9 +80,7 @@ class TralisLayer extends mixin(TrackerLayer) {
    */
    onFeatureClick(features, layer, coordinate) {
     super.onFeatureClick(features, layer, coordinate);
-    if (this.selectedVehicleId) {
-      this.highlightTrajectory(this.selectedVehicleId);
-    }
+    this.highlightTrajectory(this.selectedVehicleId);
   }
 
   /**
@@ -90,14 +88,10 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @private
    */
   highlightTrajectory(id) {
-    if (this.selectedVehicleId === this.previousVehicleId) {
-      console.log("same as  previous")
+    if (!this.selectedVehicleId) {
       this.map.getSource("selectedLineTraject").setData({"type": "FeatureCollection", "features": []})
     }
     else {
-      console.log("different")
-      console.log(this.selectedVehicleId)
-      console.log(this.previousVehicleId)
       this.api
         .getFullTrajectory(id, this.mode, this.generalizationLevel)
         .then((fullTrajectory) => {
