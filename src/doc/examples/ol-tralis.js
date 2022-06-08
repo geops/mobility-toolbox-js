@@ -22,7 +22,7 @@ export default () => {
   });
 
   const tracker = new TralisLayer({
-    url: 'wss://tralis-tracker-api.geops.io/ws',
+    url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
     // bbox: [1152072, 6048052, 1433666, 6205578],
     isUpdateBboxOnMoveEnd: true,
