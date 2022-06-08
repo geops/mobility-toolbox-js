@@ -152,16 +152,32 @@ describe('Layer', () => {
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 
-    await map.dispatchEvent({ type: 'pointermove', map, coordinate: [0, 0] });
-    await map.dispatchEvent({ type: 'singleclick', map, coordinate: [0, 0] });
+    await map.dispatchEvent({
+      type: 'pointermove',
+      map,
+      coordinate: [0, 0],
+    });
+    await map.dispatchEvent({
+      type: 'singleclick',
+      map,
+      coordinate: [0, 0],
+    });
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy2).toHaveBeenCalledTimes(1);
     spy.mockReset();
     spy2.mockReset();
 
     layer.terminate(map);
-    await map.dispatchEvent({ type: 'pointermove', map, coordinate: [0, 0] });
-    await map.dispatchEvent({ type: 'singleclick', map, coordinate: [0, 0] });
+    await map.dispatchEvent({
+      type: 'pointermove',
+      map,
+      coordinate: [0, 0],
+    });
+    await map.dispatchEvent({
+      type: 'singleclick',
+      map,
+      coordinate: [0, 0],
+    });
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
     global.console.error.mockRestore();

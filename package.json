@@ -169,7 +169,7 @@
     "./module": "./module.js",
     "./api": "./api/index.js",
     "./common/trackerConfig": "./common/trackerConfig.js",
-    "./common/utils": "./common/utils/index.js",
+    "./utils": "./common/utils/index.js",
     "./mapbox": "./mapbox/index.js",
     "./ol": "./ol/index.js"
   },

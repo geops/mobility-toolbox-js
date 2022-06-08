@@ -1,7 +1,6 @@
 import View from 'ol/View';
 import Map from 'ol/Map';
 import { TralisLayer, MapboxLayer, CopyrightControl } from '../../ol';
-import 'ol/ol.css';
 
 export default () => {
   const map = new Map({
@@ -33,7 +32,6 @@ export default () => {
     visible: true,
     tenant: 'sbb',
     // projection: 'EPSG:3857',
-    // useDelayStyle: true,
     // regexPublishedLineName: '^(S|R$|RE|PE|D|IRE|RB|TER)',
   });
   tracker.init(map);

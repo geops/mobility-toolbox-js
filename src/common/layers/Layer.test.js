@@ -27,7 +27,7 @@ describe('Layer', () => {
     expect(layer.isClickActive).toBe(true);
     expect(layer.isHoverActive).toBe(true);
     expect(layer.hitTolerance).toBe(5);
-    expect(layer.isReactSpatialLayer).toBe(true);
+    expect(layer.isMobilityLayer).toBe(true);
     expect(layer.copyrights).toBe();
     expect(layer.visible).toBe(true);
     expect(layer.properties).toEqual({});
@@ -115,19 +115,6 @@ describe('Layer', () => {
     });
     expect(layer.getVisibleChildren().length).toBe(1);
     expect(layer.hasVisibleChildren()).toBe(true);
-    expect(layer.hasChildren(false)).toBe(true);
-
-    layer.addChild(
-      new Layer({
-        name: 'bla',
-      }),
-    );
-
-    expect(layer.getVisibleChildren().length).toBe(2);
-
-    layer.removeChild('bla');
-
-    expect(layer.getVisibleChildren().length).toBe(1);
   });
 
   test('should set onClick using constructor.', () => {
@@ -289,97 +276,6 @@ describe('Layer', () => {
         children: [layerHidden],
       });
       expect(layer.hasVisibleChildren()).toEqual(false);
-    });
-  });
-
-  describe('#hasVisibleChildren()', () => {
-    test('should return true for visible children.', () => {
-      const layerVisible = { visible: true };
-      const layerVisible2 = { visible: true };
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerHidden, layerVisible2],
-      });
-      expect(layer.hasChildren(true)).toEqual(true);
-    });
-
-    test('should return true  with hidden children.', () => {
-      const layerVisible = { visible: true };
-      const layerVisible2 = { visible: true };
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerHidden, layerVisible2],
-      });
-      expect(layer.hasChildren(false)).toEqual(true);
-    });
-
-    test('should return false with hidden children.', () => {
-      const layerVisible = { visible: true };
-      const layerVisible2 = { visible: true };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerVisible2],
-      });
-      expect(layer.hasChildren(false)).toEqual(false);
-    });
-  });
-
-  describe('#addChild()', () => {
-    test('add a child.', () => {
-      const layerVisible = { visible: true };
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      expect(layer.children).toEqual([]);
-      layer.addChild(layerVisible);
-      expect(layer.children).toEqual([layerVisible]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({
-        type: 'change:children',
-        target: layer,
-      });
-      spy.mockReset();
-      layer.addChild(layerHidden);
-      expect(layer.children).toEqual([layerHidden, layerVisible]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({
-        type: 'change:children',
-        target: layer,
-      });
-    });
-  });
-
-  describe('#removeChild()', () => {
-    test('removes a child using the name', () => {
-      const layerVisible = { name: 'foo', visible: true };
-      const layerHidden = { name: 'bar', visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerHidden],
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      expect(layer.children).toEqual([layerVisible, layerHidden]);
-      layer.removeChild('foo');
-      expect(layer.children).toEqual([layerHidden]);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({
-        type: 'change:children',
-        target: layer,
-      });
     });
   });
 
@@ -575,7 +471,7 @@ describe('Layer', () => {
   });
 
   describe('#unHover()', () => {
-    test.only('removes function from clickCallbacks array', () => {
+    test('removes function from clickCallbacks array', () => {
       const layer = new Layer({
         name: 'Layer',
         olLayer,

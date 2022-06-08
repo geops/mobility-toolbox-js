@@ -43,7 +43,7 @@ describe('RoutingControl', () => {
     expect(control.useRawViaPoints).toBe(false);
   });
 
-  test.only('launch routing and add features', (done) => {
+  test('launch routing and add features', (done) => {
     fetch.mockResponseOnce(JSON.stringify(global.fetchRouteResponse));
 
     const control = new RoutingControl({

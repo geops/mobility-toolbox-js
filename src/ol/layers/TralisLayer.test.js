@@ -69,51 +69,7 @@ describe('TralisLayer', () => {
       sort: fn,
     });
     expect(laye).toBeInstanceOf(TralisLayer);
-    expect(laye.useDelayStyle).toBe(false);
     expect(laye.sort).toBe(fn);
-  });
-
-  test.only('should set a default sort function if useDelayStyle is used.', () => {
-    const laye = new TralisLayer({
-      url: 'ws://localhost:1234',
-      apiKey: 'apiKey',
-      useDelayStyle: true,
-    });
-    expect(laye).toBeInstanceOf(TralisLayer);
-    expect(laye.useDelayStyle).toBe(true);
-    expect(laye.sort).toBeDefined();
-    const red = { properties: { delay: 1000000 } };
-    const yellow = { properties: { delay: 180000 } };
-    const green2 = { properties: { delay: 178990 } };
-    const green = { properties: { delay: 0 } };
-    const gray = { properties: { delay: null } };
-    const cancelled = { properties: { cancelled: true, delay: 3000000 } };
-
-    const trajectories = [gray, green, yellow, red, green2, cancelled];
-    trajectories.sort(laye.sort);
-    expect(trajectories).toEqual([red, yellow, cancelled, green2, green, gray]);
-  });
-
-  test('should override the default sort function when useDelayStyle is used.', () => {
-    const laye = new TralisLayer({
-      url: 'ws://localhost:1234',
-      apiKey: 'apiKey',
-      useDelayStyle: true,
-      sort: () => -1, // reverse the array
-    });
-    expect(laye).toBeInstanceOf(TralisLayer);
-    expect(laye.useDelayStyle).toBe(true);
-    expect(laye.sort).toBeDefined();
-    const red = { delay: 1000000 };
-    const yellow = { delay: 180000 };
-    const green2 = { delay: 178990 };
-    const green = { delay: 0 };
-    const gray = { delay: null };
-    const cancelled = { cancelled: true, delay: 3000000 };
-
-    const trajectories = [gray, green, yellow, red, green2, cancelled];
-    trajectories.sort(laye.sort);
-    expect(trajectories).toEqual([cancelled, green2, red, yellow, green, gray]);
   });
 
   test('should use filter function.', () => {
@@ -121,11 +77,9 @@ describe('TralisLayer', () => {
     const laye = new TralisLayer({
       url: 'ws://localhost:1234',
       apiKey: 'apiKey',
-      useDelayStyle: true,
       filter: fn, // reverse the array
     });
     expect(laye).toBeInstanceOf(TralisLayer);
-    expect(laye.useDelayStyle).toBe(true);
     expect(laye.filter).toBe(fn);
   });
 
@@ -134,12 +88,10 @@ describe('TralisLayer', () => {
     const laye = new TralisLayer({
       url: 'ws://localhost:1234',
       apiKey: 'apiKey',
-      useDelayStyle: true,
       filter: fn, // reverse the array
       publishedLineName: '.*',
     });
     expect(laye).toBeInstanceOf(TralisLayer);
-    expect(laye.useDelayStyle).toBe(true);
     expect(laye.filter).not.toBe(fn);
   });
 });
