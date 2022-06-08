@@ -91,9 +91,11 @@ class TralisLayer extends mixin(TrackerLayer) {
    */
   highlightTrajectory(id) {
     if (this.selectedVehicleId === this.previousVehicleId) {
+      console.log("same as  previous")
       this.map.getSource("selectedLineTraject").setData({"type": "FeatureCollection", "features": []})
     }
     else {
+      console.log("different")
       this.api
         .getFullTrajectory(id, this.mode, this.generalizationLevel)
         .then((fullTrajectory) => {
