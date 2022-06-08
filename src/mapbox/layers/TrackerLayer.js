@@ -321,6 +321,8 @@ class TrackerLayer extends mixin(Layer) {
   }
 
   onVisibilityChange() {
+    console.log(this.visible)
+    console.log(this.map.getLayer(this.key))
     if (this.visible && !this.map.getLayer(this.key)) {
       this.map.addLayer(this.layer, this.beforeId);
       this.map.addLayer("trajectoryLine");
