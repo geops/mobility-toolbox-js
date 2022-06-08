@@ -96,6 +96,8 @@ class TralisLayer extends mixin(TrackerLayer) {
     }
     else {
       console.log("different")
+      console.log(this.selectedVehicleId)
+      console.log(this.previousVehicleId)
       this.api
         .getFullTrajectory(id, this.mode, this.generalizationLevel)
         .then((fullTrajectory) => {
