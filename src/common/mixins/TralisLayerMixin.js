@@ -356,7 +356,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       if (feature) {
         id = feature.get('train_id');
       }
-      this.previousVehicleId = this.selectedVehicleId == null? this.previousVehicleId: this.selectedVehicle
+      this.previousVehicleId = this.selectedVehicleId == null? this.previousVehicleId: this.selectedVehicleId
       if (this.selectedVehicleId !== id) {
         /** @ignore */
         this.selectedVehicleId = id;
