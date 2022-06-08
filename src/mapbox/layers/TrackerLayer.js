@@ -323,8 +323,16 @@ class TrackerLayer extends mixin(Layer) {
   onVisibilityChange() {
     if (this.visible && !this.map.getLayer(this.key)) {
       this.map.addLayer(this.layer, this.beforeId);
+      this.map.addLayer("trajectoryLine");
+      this.map.addLayer("trajectoryLineBorder");
+      this.map.addLayer("trajectoryStops");
+      this.map.addLayer("trajectoryStopsBorder");
     } else if (this.map.getLayer(this.key)) {
       this.map.removeLayer(this.key);
+      this.map.removeLayer("trajectoryLine");
+      this.map.removeLayer("trajectoryLineBorder");
+      this.map.removeLayer("trajectoryStops");
+      this.map.removeLayer("trajectoryStopsBorder");
     }
     // We can't use setLayoutProperty it triggers an error probably a bug in mapbox
     // this.map.setLayoutProperty(
