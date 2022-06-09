@@ -78,6 +78,84 @@ class TrackerLayer extends mixin(Layer) {
     map.addLayer(this.layer, this.beforeId);
 
     this.listeners = [this.on('change:visible', this.onVisibilityChange)];
+
+    this.trajectLineLayer = {
+      id: "trajectoryLine",
+      type: "line",
+      source: "selectedLineTraject",
+      paint: {
+        "line-width": 4,
+        "line-color": ["case",
+          ["!=", ["get", "stroke"], null], ["get", "stroke"],
+          ["match", ["get", "typeIdx"],
+            0, '#ffb400',
+            1, '#ff5400',
+            2, '#ff8080',
+            3, '#ea0000',
+            4, '#3000ff',
+            5, '#ffb400',
+            6, '#41a27b',
+            7, '#00d237',
+            8, '#b5b5b5',
+            9, '#ff8080',
+            '#ff0000'
+          ]
+        ]
+      },
+      filter: ['==', ["geometry-type"], 'LineString']
+    }
+
+    this.trajectLineLayerBorder = {
+      id: "trajectoryLineBorder",
+      type: "line",
+      source: "selectedLineTraject",
+      paint: {
+        "line-width": 6,
+      },
+      filter: ['==', ["geometry-type"], 'LineString']
+    }
+
+    this.trajectStopsLayer = {
+      id: "trajectoryStops",
+      type: "circle",
+      source: "selectedLineTraject",
+      paint: {
+        'circle-radius': 4,
+        'circle-color': ["case",
+          ["!=", ["get", "stroke"], null], ["get", "stroke"],
+          ["match", ["get", "typeIdx"],
+            0, '#ffb400',
+            1, '#ff5400',
+            2, '#ff8080',
+            3, '#ea0000',
+            4, '#3000ff',
+            5, '#ffb400',
+            6, '#41a27b',
+            7, '#00d237',
+            8, '#b5b5b5',
+            9, '#ff8080',
+            '#ff0000'
+          ]
+        ]
+      },
+      filter: ['==', ["geometry-type"], 'Point']
+    }
+
+    this.trajectStopsLayerBorder = {
+      id: "trajectoryStopsBorder",
+      type: "circle",
+      source: "selectedLineTraject",
+      paint: {
+        'circle-radius': 5,
+      },
+      filter: ['==', ["geometry-type"], 'Point']
+    }
+
+    map.addSource("selectedLineTraject", {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}})
+    map.addLayer(this.trajectLineLayer, this.key)
+    map.addLayer(this.trajectLineLayerBorder, "trajectoryLine")
+    map.addLayer(this.trajectStopsLayer, "trajectoryLine")
+    map.addLayer(this.trajectStopsLayerBorder, "trajectoryStops")
   }
 
   /**
@@ -93,6 +171,21 @@ class TrackerLayer extends mixin(Layer) {
       }
       if (this.map.getSource(this.key)) {
         this.map.removeSource(this.key);
+      }
+      if (this.map.getLayer("trajectoryLine")) {
+        this.map.removeLayer("trajectoryLine")
+      }
+      if (this.map.getLayer("trajectoryLineBorder")) {
+        this.map.removeLayer("trajectoryLineBorder")
+      }
+      if (this.map.getLayer("trajectoryStops")) {
+        this.map.removeLayer("trajectoryStops")
+      }
+      if (this.map.getLayer("trajectoryStopsBorder")) {
+        this.map.removeLayer("trajectoryStopsBorder")
+      }
+      if (this.map.getSource("selectedLineTraject")) {
+        this.map.removeSource("selectedLineTraject")
       }
     }
     super.terminate();
@@ -230,8 +323,16 @@ class TrackerLayer extends mixin(Layer) {
   onVisibilityChange() {
     if (this.visible && !this.map.getLayer(this.key)) {
       this.map.addLayer(this.layer, this.beforeId);
+      this.map.addLayer("trajectoryLine");
+      this.map.addLayer("trajectoryLineBorder");
+      this.map.addLayer("trajectoryStops");
+      this.map.addLayer("trajectoryStopsBorder");
     } else if (this.map.getLayer(this.key)) {
       this.map.removeLayer(this.key);
+      this.map.removeLayer("trajectoryLine");
+      this.map.removeLayer("trajectoryLineBorder");
+      this.map.removeLayer("trajectoryStops");
+      this.map.removeLayer("trajectoryStopsBorder");
     }
     // We can't use setLayoutProperty it triggers an error probably a bug in mapbox
     // this.map.setLayoutProperty(
@@ -276,6 +377,15 @@ class TrackerLayer extends mixin(Layer) {
     this.map.getCanvasContainer().style.cursor = features.length
       ? 'pointer'
       : 'auto';
+  }
+
+  /**
+   * Create a copy of the TrackerLayer.
+   * @param {Object} newOptions Options to override
+   * @return {TrackerLayer} A TrackerLayer
+   */
+   clone(newOptions) {
+    return new TrackerLayer({ ...this.options, ...newOptions });
   }
 }
 

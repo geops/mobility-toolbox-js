@@ -1,5 +1,7 @@
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
+import { toLonLat } from 'ol/proj';
+import { getTypeIndex } from '../../common/trackerConfig';
 
 /**
  * Responsible for loading and display data from a Tralis service.
@@ -58,6 +60,66 @@ class TralisLayer extends mixin(TrackerLayer) {
     if (this.visible && this.isUpdateBboxOnMoveEnd) {
       this.setBbox();
     }
+
+    // if (
+    //   this.visible &&
+    //   this.isUpdateBboxOnMoveEnd &&
+    //   this.isClickActive &&
+    //   this.selectedVehicleId
+    // ) {
+    //   this.highlightTrajectory(this.selectedVehicleId);
+    // }
+  }
+
+  /**
+   * Callback when user clicks on the map.
+   * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
+   *
+   * @private
+   * @override
+   */
+   onFeatureClick(features, layer, coordinate) {
+    super.onFeatureClick(features, layer, coordinate);
+    this.highlightTrajectory(this.selectedVehicleId);
+  }
+
+  /**
+   * Highlight the trajectory of journey.
+   * @private
+   */
+  highlightTrajectory(id) {
+    if (!this.selectedVehicleId) {
+      this.map.getSource("selectedLineTraject").setData({"type": "FeatureCollection", "features": []})
+    }
+    else {
+      this.api
+        .getFullTrajectory(id, this.mode, this.generalizationLevel)
+        .then((fullTrajectory) => {
+          const stroke = fullTrajectory.features[0].properties.stroke
+          if (stroke && stroke[0] !== '#') {
+            fullTrajectory.features[0].properties.stroke = `#${stroke}`;
+          }
+          const type = fullTrajectory.features[0].properties.type
+          fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
+          fullTrajectory.features[0].geometry.geometries.forEach(element => {
+            const newCoords = []
+            for (const coord of element.coordinates) {
+              newCoords.push(toLonLat(coord))
+            }
+            element.coordinates = newCoords
+          });
+          this.map.getSource("selectedLineTraject").setData(fullTrajectory)
+        })
+    }
+  }
+
+  /**
+   * Create a copy of the TralisLayer.
+   * @param {Object} newOptions Options to override
+   * @return {TralisLayer} A TralisLayer
+   */
+  clone(newOptions) {
+    return new TralisLayer({ ...this.options, ...newOptions });
   }
 }
 
