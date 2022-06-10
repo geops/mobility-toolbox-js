@@ -3,7 +3,7 @@ import Tile from 'ol/Tile';
 import TileLayer from 'ol/layer/Tile';
 import TileSource from 'ol/source/Tile';
 import { createXYZ } from 'ol/tilegrid';
-import Map from '../Map';
+import { Map } from 'ol';
 import Layer from '../layers/Layer';
 import CopyrightControl from './CopyrightControl';
 
@@ -48,8 +48,8 @@ describe('CopyrightControl', () => {
         center: [0, 0],
         zoom: 0,
       }),
-      layers: [getLayer(true, 'bar')],
     });
+    getLayer(true, 'bar').init(map);
     map.setSize([200, 200]);
     map.renderSync();
   });
@@ -70,7 +70,7 @@ describe('CopyrightControl', () => {
     const control = new CopyrightControl();
     control.map = map;
     expect(control.element.innerHTML).toBe('');
-    map.addLayer(getLayer('copyright'));
+    getLayer('copyright').init(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright');
   });
@@ -79,7 +79,7 @@ describe('CopyrightControl', () => {
     const control = new CopyrightControl();
     control.map = map;
     expect(control.element.innerHTML).toBe('');
-    map.addLayer(getLayer(['copyright 1', 'copyright 2']));
+    getLayer(['copyright 1', 'copyright 2']).init(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright 1 | copyright 2');
   });
@@ -88,9 +88,9 @@ describe('CopyrightControl', () => {
     const control = new CopyrightControl();
     control.map = map;
     expect(control.element.innerHTML).toBe('');
-    map.addLayer(getLayer(['copyright 1', 'copyright 2']));
-    map.addLayer(getLayer('copyright 1'));
-    map.addLayer(getLayer(['copyright 2']));
+    getLayer(['copyright 1', 'copyright 2']).init(map);
+    getLayer('copyright 1').init(map);
+    getLayer(['copyright 2']).init(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright 1 | copyright 2');
   });
@@ -100,9 +100,9 @@ describe('CopyrightControl', () => {
     control.map = map;
     expect(control.element.innerHTML).toBe('');
     const layer1 = getLayer('copyright hidden', false);
+    layer1.init(map);
     const layer2 = getLayer('copyright', true);
-    map.addLayer(layer1);
-    map.addLayer(layer2);
+    layer2.init(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright');
 
@@ -115,7 +115,7 @@ describe('CopyrightControl', () => {
   });
 
   test('should activate the control on construction then deactivate it', () => {
-    map.addLayer(getLayer('copyright 1'));
+    getLayer('copyright 1').init(map);
     const control = new CopyrightControl({ active: true });
     control.map = map;
     map.renderSync();
@@ -133,12 +133,12 @@ describe('CopyrightControl', () => {
   });
 
   test('should deactivate the control on constrcution then activate it', () => {
-    map.addLayer(getLayer('copyright 1'));
+    getLayer('copyright 1').init(map);
     const control = new CopyrightControl({ active: false });
     control.map = map;
     map.renderSync();
 
-    expect(control.element.parentNode).toBe(map.getContainer());
+    expect(control.element.parentNode).toBe(map.getTargetElement());
 
     // Should be activated by default.
     expect(control.active).toBe(false);
@@ -152,14 +152,14 @@ describe('CopyrightControl', () => {
   });
 
   test('should add copyrights in the map container element then remove it.', () => {
-    map.addLayer(getLayer('copyright value'));
+    getLayer('copyright value').init(map);
     map.renderSync();
 
     const control = new CopyrightControl();
 
     // Add control
     control.map = map;
-    expect(control.element.parentNode).toBe(map.getContainer());
+    expect(control.element.parentNode).toBe(map.getTargetElement());
 
     // Remove control
     control.map = null;
@@ -167,7 +167,7 @@ describe('CopyrightControl', () => {
   });
 
   test('should add copyrights in the target element then remove it.', () => {
-    map.addLayer(getLayer(['copyright value']));
+    getLayer(['copyright value']).init(map);
     map.renderSync();
 
     const target = document.createElement('div');
@@ -200,7 +200,7 @@ describe('CopyrightControl', () => {
       },
     });
     control.map = map;
-    map.addLayer(getLayer(['copyright 1', 'copyright 2', 'copyright 3']));
+    getLayer(['copyright 1', 'copyright 2', 'copyright 3']).init(map);
     map.renderSync();
 
     // Add control

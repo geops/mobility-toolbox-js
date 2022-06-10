@@ -1,7 +1,7 @@
-import { Map } from 'mapbox-gl/dist/mapbox-gl-unminified';
+import { Map } from 'maplibre-gl';
 import { toLonLat } from 'ol/proj';
-import { TralisLayer } from '../../mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { TralisLayer, CopyrightControl } from '../../mapbox';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
   const map = new Map({
@@ -10,7 +10,11 @@ export default () => {
     apiKey: window.apiKey,
     center: toLonLat([1282278, 6128615]),
     zoom: 9,
+    attributionControl: false,
   });
+
+  const control = new CopyrightControl();
+  control.map = map;
 
   const tracker = new TralisLayer({
     url: '',

@@ -52,13 +52,12 @@ describe('Layer', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  test('should call terminate when the layer is removed.', () => {
+  test('should remove the layer when we call terminate.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
     const spy = jest.spyOn(layer, 'terminate');
     layer.init(map);
-    map.addLayer(olLayer);
     expect(spy).toHaveBeenCalledTimes(1);
-    map.removeLayer(olLayer);
+    layer.terminate(map);
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
@@ -153,16 +152,32 @@ describe('Layer', () => {
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 
-    await map.dispatchEvent({ type: 'pointermove', map, coordinate: [0, 0] });
-    await map.dispatchEvent({ type: 'singleclick', map, coordinate: [0, 0] });
+    await map.dispatchEvent({
+      type: 'pointermove',
+      map,
+      coordinate: [0, 0],
+    });
+    await map.dispatchEvent({
+      type: 'singleclick',
+      map,
+      coordinate: [0, 0],
+    });
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy2).toHaveBeenCalledTimes(1);
     spy.mockReset();
     spy2.mockReset();
 
     layer.terminate(map);
-    await map.dispatchEvent({ type: 'pointermove', map, coordinate: [0, 0] });
-    await map.dispatchEvent({ type: 'singleclick', map, coordinate: [0, 0] });
+    await map.dispatchEvent({
+      type: 'pointermove',
+      map,
+      coordinate: [0, 0],
+    });
+    await map.dispatchEvent({
+      type: 'singleclick',
+      map,
+      coordinate: [0, 0],
+    });
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
     global.console.error.mockRestore();

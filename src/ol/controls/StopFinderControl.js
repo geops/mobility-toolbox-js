@@ -6,16 +6,18 @@ import mixin from '../../common/mixins/SearchMixin';
  * Search stations.
  *
  * @example
- * import { Map, StopFinderControl } from 'mobility-toolbox-js/ol';
+ * import { Map } from 'ol';
+ * import { StopFinderControl } from 'mobility-toolbox-js/ol';
  *
  * const map = new Map({
  *   target: 'map',
- *   controls: [
- *     new StopFinderControl({
- *       apiKey: [yourApiKey]
- *     })
- *   ]
  * });
+ *
+ * const control = new StopFinderControl({
+ *   apiKey: [yourApiKey]
+ * });
+ *
+ * control.map = map;
  *
  *
  * @see <a href="/example/ol-search">Openlayers search example</a>

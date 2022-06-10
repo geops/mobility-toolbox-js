@@ -3,7 +3,7 @@ import ImageLayer from 'ol/layer/Image';
 import ImageWMS from 'ol/source/ImageWMS';
 import fetch from 'jest-fetch-mock';
 import qs from 'query-string';
-import Map from '../Map';
+import Map from 'ol/Map';
 import WMSLayer from './WMSLayer';
 
 describe('WMSLayer', () => {
@@ -23,9 +23,13 @@ describe('WMSLayer', () => {
         }),
       }),
     });
-    map.addLayer(layer);
+    layer.init(map);
     fetch.mockResponseOnce(JSON.stringify({ features: [] }));
     global.fetch = fetch;
+  });
+
+  afterEach(() => {
+    layer.terminate();
   });
 
   test('should initialize.', () => {

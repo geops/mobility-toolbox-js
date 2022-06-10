@@ -74,7 +74,10 @@ class Control extends BaseObject {
 
           if (this.map) {
             // Add new node
-            const targett = this.target || this.map.getContainer();
+            const targett =
+              this.target ||
+              (this.map.getTargetElement && this.map.getTargetElement()) ||
+              (this.map.getContainer && this.map.getContainer());
 
             if (!this.element) {
               this.createDefaultElement();

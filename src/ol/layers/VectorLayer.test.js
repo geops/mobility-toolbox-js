@@ -3,7 +3,7 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
-import Map from '../Map';
+import Map from 'ol/Map';
 import VectorLayer from './VectorLayer';
 
 const feature1 = new Feature({

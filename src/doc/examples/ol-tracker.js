@@ -1,7 +1,6 @@
-import View from 'ol/View';
-import { Map, TralisLayer, MapboxLayer } from '../../ol';
+import { Map, View } from 'ol';
+import { TralisLayer, MaplibreLayer, CopyrightControl } from '../../ol';
 import 'ol/ol.css';
-import CopyrightControl from '../../ol/controls/CopyrightControl';
 
 export default () => {
   const map = new Map({
@@ -10,17 +9,23 @@ export default () => {
       center: [831634, 5933959],
       zoom: 13,
     }),
-    controls: [new CopyrightControl()],
+    controls: [],
   });
 
-  const layer = new MapboxLayer({
+  const control = new CopyrightControl();
+  control.map = map;
+
+  const layer = new MaplibreLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
+  layer.init(map);
+
   const tracker = new TralisLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
   });
+  tracker.init(map);
 
   tracker.onClick(([feature]) => {
     if (feature) {
@@ -28,7 +33,4 @@ export default () => {
       console.log(feature.getProperties());
     }
   });
-
-  map.addLayer(layer);
-  map.addLayer(tracker);
 };

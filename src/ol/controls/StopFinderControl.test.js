@@ -1,6 +1,6 @@
 import fetch from 'jest-fetch-mock';
 import View from 'ol/View';
-import Map from '../Map';
+import Map from 'ol/Map';
 import StopFinderControl from './StopFinderControl';
 
 describe('StopFinderControl', () => {

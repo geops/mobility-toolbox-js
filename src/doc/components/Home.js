@@ -16,8 +16,9 @@ const codeHtmlPage = `
 `;
 
 const codeMapObject = `
-import { Map, TralisLayer } from 'mobility-toolbox-js/mapbox';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { Map } from 'maplibre-gl;
+import { TralisLayer } from 'mobility-toolbox-js/mapbox';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 const map = new Map({
   container: 'map',
@@ -33,7 +34,7 @@ const tracker = new TralisLayer({
   apiKey: window.apiKey,
 });
 
-map.addLayer(tracker);
+tracker.init(map);
 `;
 
 function MarkdownHeading({ ...props }) {
@@ -71,11 +72,11 @@ function Home() {
       <p>
         This example shows how to draw real time vehicle positions on a{' '}
         <a
-          href="https://docs.mapbox.com/mapbox-gl-js/"
+          href="https://maplibre.org/maplibre-gl-js-docs/"
           rel="noreferrer"
           target="_blank"
         >
-          Mapbox GL JS
+          Maplibre GL JS
         </a>{' '}
         map. Check out the{' '}
         <a href="/example/ol-tracker">Live Tracker with OpenLayers</a> example
@@ -87,7 +88,7 @@ function Home() {
       </p>
       <p>First, create a HTML page with an empty map container.</p>
       <SyntaxHighlighter language="html" code={codeHtmlPage.trim()} />
-      <p>Add a map object with a vector tile layer.</p>
+      <p>Create a Maplibre map.</p>
       <SyntaxHighlighter language="js" code={codeMapObject.trim()} />
       <p>
         Finally, add the <i>TralisLayer</i> for rendering real time vehicle

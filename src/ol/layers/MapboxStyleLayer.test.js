@@ -1,8 +1,8 @@
-import Map from 'ol/Map';
+import OlMap from 'ol/Map';
 import View from 'ol/View';
-import mapboxgl from 'mapbox-gl';
+import gllib from 'maplibre-gl';
 import Layer from './Layer';
-import MapboxLayer from './MapboxLayer';
+import MaplibreLayer from './MaplibreLayer';
 import MapboxStyleLayer from './MapboxStyleLayer';
 
 let source;
@@ -17,7 +17,7 @@ const styleLayer = {
 describe('MapboxStyleLayer', () => {
   beforeEach(() => {
     onClick = jest.fn();
-    source = new MapboxLayer({
+    source = new MaplibreLayer({
       name: 'Layer',
       apiKey: false,
     });
@@ -28,10 +28,19 @@ describe('MapboxStyleLayer', () => {
       styleLayer,
       onClick,
     });
-    map = new Map({
+    map = new OlMap({
       target: document.createElement('div'),
       view: new View({ center: [0, 0] }),
     });
+  });
+
+  afterEach(() => {
+    if (layer.map) {
+      layer.terminate(map);
+    }
+    if (source.map) {
+      source.terminate(map);
+    }
   });
 
   test('should be instanced.', () => {
@@ -43,12 +52,15 @@ describe('MapboxStyleLayer', () => {
   test('should not initalized mapbox map.', () => {
     layer.init();
     expect(layer.mbMap).toBe();
+    layer.terminate();
   });
 
   test('should initalized mapbox map.', () => {
     source.init(map);
     layer.init(map);
-    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(mapboxgl.Map);
+    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(gllib.Map);
+    layer.terminate();
+    source.terminate();
   });
 
   test('should add onClick callback.', () => {
@@ -61,6 +73,7 @@ describe('MapboxStyleLayer', () => {
     const spy = jest.spyOn(layer, 'terminate');
     layer.init();
     expect(spy).toHaveBeenCalledTimes(1);
+    layer.terminate(map);
   });
 
   test('should return coordinates, features and a layer instance.', async () => {
@@ -70,6 +83,8 @@ describe('MapboxStyleLayer', () => {
     expect(data.coordinate).toEqual([50, 50]);
     expect(data.features).toEqual([]);
     expect(data.layer).toBeInstanceOf(MapboxStyleLayer);
+    layer.terminate(map);
+    source.terminate(map);
   });
 
   test('should call onClick callback', async () => {
@@ -81,6 +96,7 @@ describe('MapboxStyleLayer', () => {
     await map.dispatchEvent(evt);
     expect(onClick).toHaveBeenCalledTimes(1);
     expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
+    layer.terminate();
   });
 
   test('should call super class terminate function.', () => {

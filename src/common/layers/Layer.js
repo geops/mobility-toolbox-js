@@ -16,7 +16,7 @@ import { v4 as uuid } from 'uuid';
  * @classproperty {boolean} isQueryable - Define if the layer can be queried. If false, it will set isHoverActive and isClickActive to false. Read-only.
  * @classproperty {boolean} isClickActive - If true feature information will be queried on user click event. See inherited layers for more informations. Read-only.
  * @classproperty {boolean} isHoverActive - If true feature information will be queried on pointer move event. See inherited layers for more informations. Read-only.
- * @classproperty {boolean} isReactSpatialLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
+ * @classproperty {boolean} isMobilityLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
  * @classproperty {Layer[]} children - List of children.
  * @classproperty {boolean} visible - Define if the layer is visible or not.
  * @classproperty {number} hitTolerance - Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
@@ -109,12 +109,15 @@ export default class Layer extends Observable {
       },
       isQueryable: {
         value: !!isQueryable,
+        writable: true,
       },
       isClickActive: {
         value: !!isQueryable && !!isClickActive,
+        writable: true,
       },
       isHoverActive: {
         value: !!isQueryable && !!isHoverActive,
+        writable: true,
       },
       hitTolerance: {
         value: hitTolerance || 5,
@@ -122,7 +125,7 @@ export default class Layer extends Observable {
       },
       // Custom property for duck typing since `instanceof` is not working
       // when the instance was created on different bundles.
-      isReactSpatialLayer: {
+      isMobilityLayer: {
         value: true,
       },
       children: {
@@ -197,11 +200,13 @@ export default class Layer extends Observable {
    * @param {string} value Value.
    */
   set(name, value) {
-    this.properties[name] = value;
-    this.dispatchEvent({
-      type: `change:${name}`,
-      target: this,
-    });
+    if (value !== this.properties[name]) {
+      this.properties[name] = value;
+      this.dispatchEvent({
+        type: `change:${name}`,
+        target: this,
+      });
+    }
   }
 
   /**
@@ -250,48 +255,7 @@ export default class Layer extends Observable {
    * @deprecated
    */
   hasVisibleChildren() {
-    return !!this.hasChildren(true);
-  }
-
-  /**
-   * Checks whether the layer has any child layers with visible equal to the input parameter
-   *
-   * @param {boolean} visible The state to check the childlayers against
-   * @return {boolean} True if the layer has children with the given visibility
-   */
-  hasChildren(visible) {
-    return !!this.children.find((child) => child.visible === visible);
-  }
-
-  /**
-   * Add a child layer
-   *
-   * @param {Layer} layer Add a child layer
-   */
-  addChild(layer) {
-    this.children.unshift(layer);
-    this.dispatchEvent({
-      type: `change:children`,
-      target: this,
-    });
-  }
-
-  /**
-   * Removes a child layer by layer name
-   *
-   * @param {string} name Layer's name
-   */
-  removeChild(name) {
-    for (let i = 0; i < this.children.length; i += 1) {
-      if (this.children[i].name === name) {
-        this.children.splice(i, 1);
-        break;
-      }
-    }
-    this.dispatchEvent({
-      type: `change:children`,
-      target: this,
-    });
+    return !!this.children.find((child) => child.visible === true);
   }
 
   /**
@@ -309,6 +273,11 @@ export default class Layer extends Observable {
       'getFeatureInfoAtCoordinate must be implemented by inheriting layers',
       this.key,
     );
+
+    // No response so we modify the properties accordingly, to avoid spaming the console.
+    this.isQueryable = false;
+    // this.isClickActive = false;
+    // this.isHoverActive = false;
 
     // This layer returns no feature info.
     // The function is implemented by inheriting layers.

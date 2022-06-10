@@ -7,7 +7,7 @@ let layer;
 let onClick;
 let olMap;
 
-describe('TrajservLayer', () => {
+describe('RoutingLayer', () => {
   beforeEach(() => {
     global.fetch = fetch;
     fetch.resetMocks();

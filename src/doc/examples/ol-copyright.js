@@ -1,9 +1,19 @@
-import View from 'ol/View';
-import { Map, MapboxLayer, CopyrightControl } from '../../ol';
+import { Map, View } from 'ol';
+import { MaplibreLayer, CopyrightControl } from '../../ol';
 import 'ol/ol.css';
 
 export default () => {
-  // Define a custom copyright
+  // Define the map
+  const map = new Map({
+    target: 'map',
+    view: new View({
+      center: [0, 0],
+      zoom: 1,
+    }),
+    controls: [],
+  });
+
+  // Define a custom rendering for the copyright
   const control = new CopyrightControl({
     target: document.getElementById('copyright'),
     element: document.createElement('div'),
@@ -14,27 +24,20 @@ export default () => {
     },
   });
 
-  const mapboxLayer = new MapboxLayer({
+  // Attach to the map
+  control.map = map;
+
+  // Define the Mapbox style to display
+  const mapboxLayer = new MaplibreLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
 
-  const map = new Map({
-    target: 'map',
-    controls: [control],
-    layers: [mapboxLayer],
-    view: new View({
-      center: [950690.34, 6003962.67],
-      zoom: 15,
-    }),
-  });
+  // Display the Mapbox style on the map
+  mapboxLayer.init(map);
 
-  // Add example button to toggle the copyright control.
+  // Toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {
-    if (control.element.parentNode) {
-      map.removeControl(control);
-    } else {
-      map.addControl(control);
-    }
+    control.map = control.map ? null : map;
   });
 };

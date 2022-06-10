@@ -10,19 +10,6 @@ describe('trackerConfig', () => {
       expect(getTypeIndex(undefined)).toBe(undefined);
     });
 
-    test('find good index for old trajserv values', () => {
-      expect(getTypeIndex('Tram')).toBe(0);
-      expect(getTypeIndex('Subway / Metro / S-Bahn')).toBe(1);
-      expect(getTypeIndex('Train')).toBe(2);
-      expect(getTypeIndex('Bus')).toBe(3);
-      expect(getTypeIndex('Ferry')).toBe(4);
-      expect(getTypeIndex('Cable Car')).toBe(5);
-      expect(getTypeIndex('Gondola')).toBe(6);
-      expect(getTypeIndex('Funicular')).toBe(7);
-      expect(getTypeIndex('Long distance bus')).toBe(8);
-      expect(getTypeIndex('Rail')).toBe(9);
-    });
-
     test('find good index for new tracker values', () => {
       expect(getTypeIndex('tram')).toBe(0);
       expect(getTypeIndex('subway')).toBe(1);

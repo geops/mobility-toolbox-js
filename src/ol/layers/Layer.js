@@ -67,6 +67,10 @@ class Layer extends LayerCommon {
       return;
     }
 
+    if (this.map && this.olLayer) {
+      this.map.addLayer(this.olLayer);
+    }
+
     this.olListenersKeys.push(
       this.map.getLayers().on('remove', (evt) => {
         if (evt.element === this.olLayer) {
@@ -103,6 +107,11 @@ class Layer extends LayerCommon {
    */
   terminate() {
     unByKey(this.olListenersKeys);
+
+    if (this.map && this.olLayer) {
+      this.map.removeLayer(this.olLayer);
+    }
+
     super.terminate();
   }
 

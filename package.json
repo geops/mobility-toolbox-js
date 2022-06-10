@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "1.7.10",
+  "version": "2.0.0-beta.1",
   "main": "index.js",
   "module": "module.js",
   "dependencies": {
@@ -33,6 +33,7 @@
   },
   "peerDependencies": {
     "mapbox-gl": "^1",
+    "maplibre-gl": "^1",
     "ol": "^6"
   },
   "devDependencies": {
@@ -71,13 +72,14 @@
     "jest-websocket-mock": "2.3.0",
     "lint-staged": "12.3.3",
     "mapbox-gl": "1.13.2",
+    "maplibre-gl": "2.1.9",
     "mock-socket": "9.1.2",
     "neutrino": "9.5.0",
-    "node-sass": "4.14.1",
     "ol": "6.12.0",
     "postcss": "8.3.3",
     "postcss-loader": "3.0.0",
     "prettier": "2.5.1",
+    "sass": "1.52.2",
     "sass-loader": "8.0.2",
     "sort-json": "2.0.0",
     "start-server-and-test": "1.14.0",
@@ -167,7 +169,7 @@
     "./module": "./module.js",
     "./api": "./api/index.js",
     "./common/trackerConfig": "./common/trackerConfig.js",
-    "./common/utils": "./common/utils/index.js",
+    "./utils": "./common/utils/index.js",
     "./mapbox": "./mapbox/index.js",
     "./ol": "./ol/index.js"
   },

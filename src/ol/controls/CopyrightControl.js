@@ -7,14 +7,14 @@ import removeDuplicate from '../../common/utils/removeDuplicate';
  * Display layer's copyrights.
  *
  * @example
- * import { Map, CopyrightControl } from 'mobility-toolbox-js/ol';
+ * import { Map } from 'ol';
+ * import { CopyrightControl } from 'mobility-toolbox-js/ol';
  *
  * const map = new Map({
  *   target: 'map',
- *   controls: [
- *     new CopyrightControl()
- *   ]
  * });
+ * const control = new CopyrightControl();
+ * control.map = map
  *
  *
  * @see <a href="/example/ol-copyright">Openlayers copyright example</a>

@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { Map, TralisLayer } from '../../mapbox';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { Map } from 'maplibre-gl';
+import { TralisLayer } from '../../mapbox';
 
 const useStyles = makeStyles({
   root: {
@@ -28,7 +29,7 @@ function TrackerExample() {
       isQueryable: false,
     });
 
-    map.addLayer(tracker);
+    tracker.init(map);
   }, []);
 
   return <div id="map" className={classes.root} />;
