@@ -81,7 +81,7 @@ class TralisAPI {
     const conn = new WebSocketConnector();
 
     if (apiKey) {
-      url = `${url || 'wss://tralis-tracker-api.geops.io/ws'}?key=${apiKey}`;
+      url = `${url || 'wss://api.geops.io/tracker-ws/v1/'}?key=${apiKey}`;
     }
 
     Object.defineProperties(this, {

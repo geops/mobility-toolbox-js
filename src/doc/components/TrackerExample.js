@@ -23,7 +23,7 @@ function TrackerExample() {
     });
 
     const tracker = new TralisLayer({
-      url: 'wss://tralis-tracker-api.geops.io/ws',
+      url: 'wss://api.geops.io/tracker-ws/v1/',
       apiKey: window.apiKey,
       isQueryable: false,
     });
