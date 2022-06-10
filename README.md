@@ -8,13 +8,16 @@ The tools in this library have been inspired by many projects realized for publi
 [![Netlify Status](https://api.netlify.com/api/v1/badges/b368ab18-9dbf-416c-91f6-a82076b02c10/deploy-status)](https://app.netlify.com/sites/mobility-toolbox-js/deploys)
 
 ## Main Features
+
 * Display [real-time vehicle positions and prognosis data](http://tracker.geops.ch/) on a map.
 * Search for [stops and stations](https://maps2.trafimage.ch) all over the world.
 * Get [precise geographic courses](https://geops.github.io/geops-routing-demo/) for all modes of transport.
 * Generate beautiful maps for public transport, mobility and logistics
 
 ## Documentation and examples
-Visit https://mobility-toolbox-js.geops.io
+
+Visit https://master--mobility-toolbox-js.netlify.app/
 
 ## Version 1.x.x
+
 The master branch is now open for the version 2 development. The version 1 is still available in [1.x.x](https://github.com/geops/mobility-toolbox-js/tree/1.x.x) branch.
