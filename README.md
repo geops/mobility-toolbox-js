@@ -17,4 +17,4 @@ The tools in this library have been inspired by many projects realized for publi
 Visit https://mobility-toolbox-js.geops.io
 
 ## Version 1.x.x
-The master branch is now open for the version 2 development. The version 1 is still available in 1.x.x branch.
+The master branch is now open for the version 2 development. The version 1 is still available in [1.x.x](https://github.com/geops/mobility-toolbox-js/tree/1.x.x) branch.
