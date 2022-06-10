@@ -1,5 +1,11 @@
 import { Map, View } from 'ol';
-import { TralisLayer, MaplibreLayer, CopyrightControl } from '../../ol';
+import {
+  TralisLayer,
+  MaplibreLayer,
+  CopyrightControl,
+  trackerDelayStyle,
+} from '../../ol';
+import { sortByDelay } from '../../common/utils';
 import 'ol/ol.css';
 
 export default () => {
@@ -24,6 +30,8 @@ export default () => {
   const tracker = new TralisLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
+    style: trackerDelayStyle,
+    sort: sortByDelay,
   });
   tracker.init(map);
 
