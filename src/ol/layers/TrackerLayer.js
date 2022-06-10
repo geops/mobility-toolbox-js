@@ -111,7 +111,7 @@ class TrackerLayer extends mixin(Layer) {
     super.init(map);
     if (this.map) {
       this.olListenersKeys.push(
-        this.map.on('moveend', (evt) => {
+        this.map.on(['moveend', 'change:target'], (evt) => {
           const view = this.map.getView();
           if (view.getAnimating() || view.getInteracting()) {
             return;
