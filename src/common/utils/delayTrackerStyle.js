@@ -158,13 +158,17 @@ const style = (trajectory, viewState, options) => {
   } = options;
 
   const { zoom, pixelRatio } = viewState;
-  let { line, type } = trajectory.properties;
+  let { line, type, cancelled } = trajectory.properties;
   const {
     train_id: id,
     delay,
-    cancelled = false,
+    state,
     operator_provides_realtime_journey: operatorProvidesRealtime,
   } = trajectory.properties;
+
+  // In the future, the cancelled property will be removed we still managed it
+  // until the backend change is on prod.
+  cancelled = cancelled === true || state === 'JOURNEY_CANCELLED';
 
   if (!type) {
     type = 'Rail';
