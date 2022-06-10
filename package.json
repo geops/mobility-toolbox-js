@@ -106,7 +106,7 @@
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
-    "publish:beta": "HUSKY=0 yarn version && git push origin HEAD && yarn build && cd build && HUSKY=0 yarn publish --beta",
+    "publish:beta": "HUSKY=0 yarn version && git push origin HEAD && yarn build && cd build && HUSKY=0 yarn publish --tag beta",
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "start:examples": "webpack-dev-server --mode development --open",
     "test": "REACT_APP_LIB_MODE=1 jest",
