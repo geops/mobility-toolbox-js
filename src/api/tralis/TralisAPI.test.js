@@ -9,7 +9,7 @@ describe('TralisAPI', () => {
       cb({ content: 'content' });
     });
     tralisAPI = new TralisAPI();
-    tralisAPI.conn = {
+    tralisAPI.wsApi = {
       get,
     };
   });

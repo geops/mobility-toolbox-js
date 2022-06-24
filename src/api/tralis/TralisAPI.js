@@ -1,4 +1,4 @@
-import WebSocketConnector from './WebSocketConnector';
+import WebSocketAPI from '../../common/api/WebSocketAPI';
 import {
   getModeSuffix,
   cleanStopTime,
@@ -78,7 +78,7 @@ class TralisAPI {
 
     const { apiKey } = opt;
     let { url, projection, bbox, buffer = [100, 100] } = opt;
-    const conn = new WebSocketConnector();
+    const wsApi = new WebSocketAPI();
 
     if (apiKey) {
       url = `${url || 'wss://api.geops.io/tracker-ws/v1/'}?key=${apiKey}`;
@@ -97,8 +97,8 @@ class TralisAPI {
         set: (newProjection) => {
           if (newProjection !== projection) {
             projection = newProjection;
-            if (this.conn) {
-              this.conn.send(`PROJECTION ${projection}`);
+            if (this.wsApi) {
+              this.wsApi.send(`PROJECTION ${projection}`);
             }
           }
         },
@@ -108,8 +108,8 @@ class TralisAPI {
         set: (newBbox) => {
           if (JSON.stringify(newBbox) !== JSON.stringify(bbox)) {
             bbox = newBbox;
-            if (this.conn) {
-              this.conn.send(`BBOX ${bbox.join(' ')}`);
+            if (this.wsApi) {
+              this.wsApi.send(`BBOX ${bbox.join(' ')}`);
             }
           }
         },
@@ -119,8 +119,8 @@ class TralisAPI {
         set: (newBuffer) => {
           if (JSON.stringify(newBuffer) !== JSON.stringify(buffer)) {
             buffer = newBuffer;
-            if (this.conn) {
-              this.conn.send(`BUFFER ${buffer.join(' ')}`);
+            if (this.wsApi) {
+              this.wsApi.send(`BUFFER ${buffer.join(' ')}`);
             }
           }
         },
@@ -130,8 +130,8 @@ class TralisAPI {
        *
        * @private
        */
-      conn: {
-        value: conn,
+      wsApi: {
+        value: wsApi,
         writable: true,
       },
       /**
@@ -158,10 +158,10 @@ class TralisAPI {
   open() {
     this.close();
     // Register BBOX and PROJECTION messages must be send before previous subscriptions.
-    this.conn.connect(this.url, this.onOpen);
+    this.wsApi.connect(this.url, this.onOpen);
 
     // Register reconnection on close.
-    this.conn.websocket.onclose = () => {
+    this.wsApi.websocket.onclose = () => {
       this.onClose();
     };
   }
@@ -170,7 +170,7 @@ class TralisAPI {
    * Close the websocket connection without reconnection.
    */
   close() {
-    this.conn.close();
+    this.wsApi.close();
   }
 
   /**
@@ -178,7 +178,7 @@ class TralisAPI {
    */
   // eslint-disable-next-line class-methods-use-this
   reset() {
-    this.conn.send('RESET');
+    this.wsApi.send('RESET');
   }
 
   /**
@@ -187,15 +187,15 @@ class TralisAPI {
    */
   onOpen() {
     if (this.projection) {
-      this.conn.send(`PROJECTION ${this.projection}`);
+      this.wsApi.send(`PROJECTION ${this.projection}`);
     }
 
     if (this.bbox) {
-      this.conn.send(`BBOX ${this.bbox.join(' ')}`);
+      this.wsApi.send(`BBOX ${this.bbox.join(' ')}`);
     }
 
     if (this.buffer) {
-      this.conn.send(`BUFFER ${this.buffer.join(' ')}`);
+      this.wsApi.send(`BUFFER ${this.buffer.join(' ')}`);
     }
 
     /**
@@ -205,7 +205,7 @@ class TralisAPI {
       window.clearInterval(this.pingInterval);
       /** @ignore */
       this.pingInterval = setInterval(() => {
-        this.conn.send('PING');
+        this.wsApi.send('PING');
       }, this.pingIntervalMs);
     }
   }
@@ -237,7 +237,7 @@ class TralisAPI {
    * @private
    */
   subscribe(channel, onSuccess, onError, quiet = false) {
-    this.conn.subscribe({ channel }, onSuccess, onError, quiet);
+    this.wsApi.subscribe({ channel }, onSuccess, onError, quiet);
   }
 
   /**
@@ -249,11 +249,11 @@ class TralisAPI {
    * @private
    */
   unsubscribe(channel, suffix, cb) {
-    this.conn.unsubscribe(
+    this.wsApi.unsubscribe(
       `${channel}${getModeSuffix(TralisModes.SCHEMATIC, TralisModes)}${suffix}`,
       cb,
     );
-    this.conn.unsubscribe(
+    this.wsApi.unsubscribe(
       `${channel}${getModeSuffix(TralisModes.TOPOGRAPHIC, TralisModes)}${
         suffix || ''
       }`,
@@ -407,7 +407,7 @@ class TralisAPI {
     };
 
     return new Promise((resolve, reject) => {
-      this.conn.get(params, (data) => {
+      this.wsApi.get(params, (data) => {
         if (data.content) {
           resolve(data.content);
         } else {
@@ -430,7 +430,7 @@ class TralisAPI {
     };
     window.clearTimeout(this.stationUpdateTimeout);
     return new Promise((resolve, reject) => {
-      this.conn.get(params, (data) => {
+      this.wsApi.get(params, (data) => {
         if (data.content) {
           stations.push(data.content);
           window.clearTimeout(this.stationUpdateTimeout);
@@ -576,7 +576,7 @@ class TralisAPI {
     };
 
     return new Promise((resolve) => {
-      this.conn.get(params, (data) => {
+      this.wsApi.get(params, (data) => {
         if (data.content) {
           resolve(data.content);
         }
@@ -642,7 +642,7 @@ class TralisAPI {
       channel: `stopsequence_${id}`,
     };
     return new Promise((resolve, reject) => {
-      this.conn.get(
+      this.wsApi.get(
         params,
         (data) => {
           if (data.content && data.content.length) {

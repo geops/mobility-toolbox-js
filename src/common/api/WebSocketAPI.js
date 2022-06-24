@@ -5,7 +5,7 @@
  *
  * @private
  */
-class WebSocketConnector {
+class WebSocketApi {
   constructor() {
     this.defineProperties();
   }
@@ -242,7 +242,7 @@ class WebSocketConnector {
    * @private
    */
   get(params, cb, errorCb) {
-    const reqStr = WebSocketConnector.getRequestString('GET', params);
+    const reqStr = WebSocketApi.getRequestString('GET', params);
     this.send(reqStr);
     this.listen(params, cb, errorCb);
   }
@@ -258,7 +258,7 @@ class WebSocketConnector {
    */
   subscribe(params, cb, errorCb, quiet = false) {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
-    const reqStr = WebSocketConnector.getRequestString('', params);
+    const reqStr = WebSocketApi.getRequestString('', params);
 
     const index = this.subscriptions.findIndex(
       (subcr) => params.channel === subcr.params.channel && cb === subcr.cb,
@@ -335,4 +335,4 @@ class WebSocketConnector {
   }
 }
 
-export default WebSocketConnector;
+export default WebSocketApi;

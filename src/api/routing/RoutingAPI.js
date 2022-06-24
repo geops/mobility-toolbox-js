@@ -1,4 +1,4 @@
-import API from '../../common/api/api';
+import HttpAPI from '../../common/api/HttpAPI';
 
 /**
  * Access to the [Routing service](https://developer.geops.io/apis/routing).
@@ -11,7 +11,7 @@ import API from '../../common/api/api';
  * });
  *
  */
-class RoutingAPI extends API {
+class RoutingAPI extends HttpAPI {
   /**
    * Constructor
    *

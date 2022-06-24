@@ -1,9 +1,9 @@
 import fetch from 'jest-fetch-mock';
-import API from './api';
+import API from './HttpAPI';
 
 let api;
 
-describe('API', () => {
+describe('HttpAPI', () => {
   beforeEach(() => {
     global.fetch = fetch;
     fetch.resetMocks();

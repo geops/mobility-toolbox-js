@@ -7,7 +7,7 @@ import BaseObject from 'ol/Object';
  * @example
  * import { API } from 'mobility-toolbox-js/api';
  *
- * const api = new API({
+ * const api = new HttpApi({
  *   url: [yourUrl],
  *   apiKey: [yourApiKey]
  * });
@@ -15,7 +15,7 @@ import BaseObject from 'ol/Object';
  * @classproperty {string} url Url of the service.
  * @classproperty {string} apiKey Api key to access the service.
  */
-class API extends BaseObject {
+class HttpApi extends BaseObject {
   constructor(options = {}) {
     super();
     /** @ignore */
@@ -61,4 +61,4 @@ class API extends BaseObject {
   }
 }
 
-export default API;
+export default HttpApi;

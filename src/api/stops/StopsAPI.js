@@ -1,4 +1,4 @@
-import API from '../../common/api/api';
+import HttpAPI from '../../common/api/HttpAPI';
 
 /**
  * Access to the [Stops service](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
@@ -12,7 +12,7 @@ import API from '../../common/api/api';
  * });
  *
  */
-class StopsAPI extends API {
+class StopsAPI extends HttpAPI {
   /**
    * Constructor
    *
