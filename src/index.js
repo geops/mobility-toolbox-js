@@ -1,23 +1,10 @@
-import {
-  Layer as olLayer,
-  WMSLayer as olWMSLayer,
-  MapboxLayer as olMapboxLayer,
-  TralisLayer as olTralisLayer,
-  VectorLayer as olVectorLayer,
-} from './ol';
-import { TralisLayer as mbTralisLayer } from './mapbox';
+import * as ol from './ol';
+import * as mapbox from './mapbox';
 
-const exports = {
-  mapbox: {
-    TralisLayer: mbTralisLayer,
-  },
-  ol: {
-    Layer: olLayer,
-    WMSLayer: olWMSLayer,
-    MapboxLayer: olMapboxLayer,
-    TralisLayer: olTralisLayer,
-    VectorLayer: olVectorLayer,
-  },
+export * as ol from './ol';
+export * as mapbox from './mapbox';
+
+export default {
+  ol,
+  mapbox,
 };
-
-export default exports;

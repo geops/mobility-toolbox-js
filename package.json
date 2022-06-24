@@ -2,9 +2,14 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0",
+  "version": "2.0.0-beta.12",
   "main": "index.js",
-  "module": "module.js",
+  "exports": {
+    ".": "./index.js",
+    "./api": "./api/index.js",
+    "./mapbox": "./mapbox/index.js",
+    "./ol": "./ol/index.js"
+  },
   "dependencies": {
     "@geops/geops-ui": "0.1.13",
     "@material-ui/core": "4.12.3",
@@ -51,6 +56,7 @@
     "autoprefixer": "9.7.6",
     "cypress": "9.4.1",
     "deepmerge": "4.2.2",
+    "esbuild": "^0.14.47",
     "esdoc": "1.1.0",
     "esdoc-ecmascript-proposal-plugin": "1.0.0",
     "esdoc-publish-html-plugin": "1.1.2",
@@ -97,19 +103,25 @@
   },
   "scripts": {
     "apidoc": "esdoc",
-    "build": "yarn lib",
+    "build": "yarn esbuild",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "cy:test": "start-server-and-test start http://localhost:5000 'cypress run'",
     "doc": "yarn apidoc && cp apidoc/index.json src/doc/components/Esdoc/ && webpack --mode production",
     "doc:dev": "yarn apidoc && webpack --mode development",
+    "esbuild": "rm -rf build && yarn esbuild:all && yarn esbuild:iife && cp README.md build/ && cp package.json build/",
+    "esbuild:all": "esbuild src/index.js src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
+    "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
+    "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
+    "esbuild:iife:minify": "yarn esbuild:iife:base --minify --outfile=build/mbt.min.js",
+    "esbuild:iife:unminify": "yarn esbuild:iife:base --outfile=build/mbt.js",
     "format": "prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix",
     "lib": "REACT_APP_LIB_MODE=1  webpack --mode production",
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
-    "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && git push --tags && HUSKY=0 yarn publish --tag beta",
+    "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags ",
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
     "publish:public": "yarn release && git push origin HEAD && yarn run build && cd build && git push --tags && yarn publish",
     "publish:public:dryrun": "yarn release --dry-run",
@@ -170,15 +182,6 @@
       }
     }
   },
-  "exports": {
-    ".": "./index.js",
-    "./module": "./module.js",
-    "./api": "./api/index.js",
-    "./common/trackerConfig": "./common/trackerConfig.js",
-    "./utils": "./common/utils/index.js",
-    "./mapbox": "./mapbox/index.js",
-    "./ol": "./ol/index.js"
-  },
   "keywords": [
     "mobility",
     "toolbox"
@@ -191,7 +194,7 @@
       "yarn test --bail --findRelatedTests"
     ],
     "package.json": [
-      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
+      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop exports --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
     ],
     "src/**/*.{css,scss}": [
       "stylelint --fix"

@@ -4,8 +4,8 @@ import {
   MaplibreLayer,
   CopyrightControl,
   trackerDelayStyle,
+  sortByDelay,
 } from '../../ol';
-import { sortByDelay } from '../../common/utils';
 import 'ol/ol.css';
 
 export default () => {
