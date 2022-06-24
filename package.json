@@ -123,7 +123,6 @@
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
     "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags ",
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
-    "publish:public": "yarn release && git push origin HEAD && yarn run build && cd build && git push --tags && yarn publish",
     "publish:public:dryrun": "yarn release --dry-run",
     "release": "standard-version",
     "start": "yarn doc && webpack-dev-server --mode development --open",
