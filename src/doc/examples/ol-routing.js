@@ -19,7 +19,7 @@ export default () => {
   mapboxLayer.attachToMap(map);
 
   const copyright = new CopyrightControl();
-  copyright.map = map;
+  copyright.attachToMap(map);
 
   const control = new RoutingControl({
     element: document.createElement('div'),

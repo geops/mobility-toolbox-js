@@ -22,8 +22,8 @@ class RoutingAPI extends API {
    */
   constructor(options = {}) {
     super({
+      url: 'https://api.geops.io/routing/v1/',
       ...options,
-      url: options.url || 'https://api.geops.io/routing/v1/',
     });
   }
 

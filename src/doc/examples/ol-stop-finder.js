@@ -14,12 +14,12 @@ export default () => {
   });
 
   const copyright = new CopyrightControl();
-  copyright.map = map;
+  copyright.attachToMap(map);
 
   const stopFinder = new StopFinderControl({
     apiKey: window.apiKey,
   });
-  stopFinder.map = map;
+  stopFinder.attachToMap(map);
 
   const mapboxLayer = new MapboxLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
