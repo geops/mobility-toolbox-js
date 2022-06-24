@@ -107,8 +107,8 @@ export default class MaplibreLayer extends Layer {
    * Initialize the layer and listen to feature clicks.
    * @param {ol/Map~Map} map
    */
-  init(map) {
-    super.init(map);
+  attachToMap(map) {
+    super.attachToMap(map);
 
     if (!this.map) {
       return;
@@ -128,7 +128,7 @@ export default class MaplibreLayer extends Layer {
   /**
    * Terminate what was initialized in init function. Remove layer, events...
    */
-  terminate() {
+  detachFromMap() {
     if (this.mbMap) {
       this.mbMap.off('idle', this.updateAttribution);
       // Some asynchrone repaints are triggered even if the mbMap has been removed,
@@ -138,7 +138,7 @@ export default class MaplibreLayer extends Layer {
       this.mbMap = null;
     }
     this.loaded = false;
-    super.terminate();
+    super.detachFromMap();
   }
 
   /**

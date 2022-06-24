@@ -14,7 +14,7 @@ export default () => {
   });
 
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   const tracker = new TralisLayer({
     url: '',
@@ -22,7 +22,7 @@ export default () => {
   });
 
   map.on('load', () => {
-    tracker.init(map, 'waterway-name');
+    tracker.attachToMap(map, 'waterway-name');
   });
 
   tracker.onClick(([feature]) => {

@@ -19,13 +19,13 @@ export default () => {
   });
 
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   const layer = new MaplibreLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
-  layer.init(map);
+  layer.attachToMap(map);
 
   const tracker = new TralisLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
@@ -33,7 +33,7 @@ export default () => {
     style: trackerDelayStyle,
     sort: sortByDelay,
   });
-  tracker.init(map);
+  tracker.attachToMap(map);
 
   tracker.onClick(([feature]) => {
     if (feature) {

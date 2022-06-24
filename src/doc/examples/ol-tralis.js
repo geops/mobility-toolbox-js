@@ -16,13 +16,13 @@ export default () => {
   });
 
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   const layer = new MapboxLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
-  layer.init(map);
+  layer.attachToMap(map);
 
   const tracker = new TralisLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
@@ -34,7 +34,7 @@ export default () => {
     // projection: 'EPSG:3857',
     // regexPublishedLineName: '^(S|R$|RE|PE|D|IRE|RB|TER)',
   });
-  tracker.init(map);
+  tracker.attachToMap(map);
   tracker.onClick(([feature]) => {
     if (feature) {
       // eslint-disable-next-line no-console
@@ -52,6 +52,6 @@ export default () => {
     tracker.api.conn.websocket.send(`BBOX ${tracker.api.bbox.join(' ')}`);
   };
   document.getElementById('terminate').onclick = () => {
-    tracker.api.conn.websocket.terminate();
+    tracker.api.conn.websocket.detachFromMap();
   };
 };

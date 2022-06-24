@@ -17,7 +17,7 @@ import mixin from '../../common/mixins/SearchMixin';
  *   apiKey: [yourApiKey]
  * });
  *
- * control.map = map;
+ * control.attachToMap(map);
  *
  *
  * @see <a href="/example/ol-search">Openlayers search example</a>

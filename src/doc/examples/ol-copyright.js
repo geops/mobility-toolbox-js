@@ -25,7 +25,7 @@ export default () => {
   });
 
   // Attach to the map
-  control.map = map;
+  control.attachToMap(map);
 
   // Define the Mapbox style to display
   const mapboxLayer = new MaplibreLayer({
@@ -34,7 +34,7 @@ export default () => {
   });
 
   // Display the Mapbox style on the map
-  mapboxLayer.init(map);
+  mapboxLayer.attachToMap(map);
 
   // Toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {

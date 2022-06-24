@@ -34,7 +34,7 @@ const tracker = new TralisLayer({
   apiKey: window.apiKey,
 });
 
-tracker.init(map);
+tracker.attachToMap(map);
 `;
 
 function MarkdownHeading({ ...props }) {

@@ -24,14 +24,14 @@ export default () => {
   });
 
   // Attach the control to the map
-  control.map = map;
+  control.attachToMap(map);
 
   // Add example button to toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {
     if (control.map) {
-      control.map = null;
+      control.detachFromMap();
     } else {
-      control.map = map;
+      control.attachToMap(map);
     }
   });
 };

@@ -111,6 +111,20 @@ class Control extends BaseObject {
   }
 
   /**
+   * Attach the control to the map. Add events, html element ...
+   */
+  attachToMap(map) {
+    this.map = map;
+  }
+
+  /**
+   * Detach the control From the map. Remove events, html element ..
+   */
+  detachFromMap() {
+    this.map = null;
+  }
+
+  /**
    * Add listeners then renders the control.
    * To be defined in inherited classes.
    */

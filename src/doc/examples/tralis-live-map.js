@@ -16,7 +16,7 @@ export default () => {
   });
 
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   const cache = {};
   const tracker = new TralisLayer({
@@ -47,5 +47,5 @@ export default () => {
     }
   });
 
-  tracker.init(map);
+  tracker.attachToMap(map);
 };

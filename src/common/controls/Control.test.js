@@ -45,7 +45,7 @@ describe('Control', () => {
     expect(spy2).toBeCalledTimes(2);
     expect(spy3).toBeCalledTimes(1);
 
-    control.map = null;
+    control.detachFromMap();
     expect(target.childNodes[0]).toBe();
     expect(spy1).toBeCalledTimes(1);
     expect(spy2).toBeCalledTimes(3);
@@ -68,7 +68,7 @@ describe('Control', () => {
     expect(spy2).toBeCalledTimes(2);
     expect(spy3).toBeCalledTimes(1);
 
-    control.map = null;
+    control.detachFromMap();
     expect(target.childNodes[0]).toBe();
     expect(spy1).toBeCalledTimes(1);
     expect(spy2).toBeCalledTimes(3);

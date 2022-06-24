@@ -15,7 +15,7 @@ export default () => {
 
   // Add copyright control
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   // Define the Mapbox style to display
   const layer = new MaplibreLayer({
@@ -24,5 +24,5 @@ export default () => {
   });
 
   // Display the Mapbox style on the map
-  layer.init(map);
+  layer.attachToMap(map);
 };

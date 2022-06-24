@@ -80,8 +80,8 @@ describe('Layer', () => {
 
   test('should called terminate on initialization.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap();
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -158,7 +158,7 @@ describe('Layer', () => {
     expect(layer.copyright).toEqual('&copy; OSM Contributors');
   });
 
-  describe('#init()', () => {
+  describe('#attachToMap()', () => {
     test('should set map.', () => {
       const layer = new Layer({
         name: 'Layer',
@@ -167,7 +167,7 @@ describe('Layer', () => {
 
       expect(layer.map).toBe(undefined);
       const obj = {};
-      layer.init(obj);
+      layer.attachToMap(obj);
       expect(layer.map).toBe(obj);
     });
 
@@ -176,8 +176,8 @@ describe('Layer', () => {
         name: 'Layer',
         olLayer,
       });
-      const spy = jest.spyOn(layer, 'terminate');
-      layer.init();
+      const spy = jest.spyOn(layer, 'detachFromMap');
+      layer.attachToMap();
       expect(spy).toHaveBeenCalledTimes(1);
     });
   });

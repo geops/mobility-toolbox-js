@@ -120,8 +120,8 @@ class TralisLayer extends mixin(Layer) {
     };
   }
 
-  init(map) {
-    super.init(map);
+  attachToMap(map) {
+    super.attachToMap(map);
     if (this.map) {
       this.olListenersKeys.push(
         this.map.on(['moveend', 'change:target'], (evt) => {
@@ -146,8 +146,8 @@ class TralisLayer extends mixin(Layer) {
   /**
    * Destroy the container of the tracker.
    */
-  terminate() {
-    super.terminate();
+  detachFromMap() {
+    super.detachFromMap();
     this.container = null;
   }
 

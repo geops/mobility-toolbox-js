@@ -14,7 +14,7 @@ import removeDuplicate from '../../common/utils/removeDuplicate';
  *   target: 'map',
  * });
  * const control = new CopyrightControl();
- * control.map = map
+ * control.attachToMap(map)
  *
  *
  * @see <a href="/example/ol-copyright">Openlayers copyright example</a>

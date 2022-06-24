@@ -54,7 +54,7 @@ const getFlatCoordinatesFromSegments = (segmentArray) => {
  *
  * const control = new RoutingControl();
  *
- * control.map = map
+ * control.attachToMap(map)
  *
  * @classproperty {string} apiKey - Key used for RoutingApi requests.
  * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
@@ -726,7 +726,7 @@ class RoutingControl extends Control {
       this.map.removeInteraction(this.modifyInteraction);
 
       // Add modify interaction, RoutingLayer and listeners
-      this.routingLayer.init(this.map);
+      this.routingLayer.attachToMap(this.map);
       this.map.addInteraction(this.modifyInteraction);
       this.modifyInteraction.setActive(this.modify);
       this.addListeners();
@@ -740,7 +740,7 @@ class RoutingControl extends Control {
   deactivate() {
     if (this.map) {
       // Remove modify interaction, RoutingLayer, listeners and viaPoints
-      this.routingLayer.terminate(this.map);
+      this.routingLayer.detachFromMap(this.map);
       this.map.removeInteraction(this.modifyInteraction);
       this.removeListeners();
       this.reset();

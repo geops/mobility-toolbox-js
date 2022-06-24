@@ -31,12 +31,12 @@ describe('MapboxLayer', () => {
     });
 
     test('should not initalized mapbox map.', () => {
-      layer.init();
+      layer.attachToMap();
       expect(layer.mbMap).toBe();
     });
 
     test('should initalized mapbox map and warn the user if there is no api key defined.', () => {
-      layer.init(map);
+      layer.attachToMap(map);
       expect(layer.mbMap).toBeInstanceOf(gllib.Map);
       expect(consoleOutput[0]).toBe(
         'No apiKey is defined for request to foo.com/styles',
@@ -44,8 +44,8 @@ describe('MapboxLayer', () => {
     });
 
     test('should called terminate on initalization.', () => {
-      const spy = jest.spyOn(layer, 'terminate');
-      layer.init();
+      const spy = jest.spyOn(layer, 'detachFromMap');
+      layer.attachToMap();
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
@@ -76,7 +76,7 @@ describe('MapboxLayer', () => {
     });
 
     test('should not initalized mapbox map.', () => {
-      layer.init();
+      layer.attachToMap();
       expect(layer.mbMap).toBe();
     });
 
@@ -86,7 +86,7 @@ describe('MapboxLayer', () => {
         url: styleUrl,
         apiKey: 'apiKeyVal',
       });
-      layer1.init(map);
+      layer1.attachToMap(map);
       expect(layer1.mbMap.options.style).toBe('foo.com/styles?key=apiKeyVal');
     });
 
@@ -97,7 +97,7 @@ describe('MapboxLayer', () => {
         apiKey: 'test',
         apiKeyName: 'apiKey',
       });
-      layer1.init(map);
+      layer1.attachToMap(map);
       expect(layer1.mbMap.options.style).toBe('foo.com/styles?apiKey=test');
     });
   });
@@ -111,7 +111,7 @@ describe('MapboxLayer', () => {
         apiKey: 'test',
         apiKeyName: 'apiKey',
       });
-      layer1.init(map);
+      layer1.attachToMap(map);
       layer1.mbMap.isStyleLoaded = jest.fn(() => true);
       layer1.mbMap.getSource = jest.fn(() => true);
     });

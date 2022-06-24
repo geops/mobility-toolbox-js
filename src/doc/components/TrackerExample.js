@@ -29,7 +29,7 @@ function TrackerExample() {
       isQueryable: false,
     });
 
-    tracker.init(map);
+    tracker.attachToMap(map);
   }, []);
 
   return <div id="map" className={classes.root} />;

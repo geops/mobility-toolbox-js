@@ -171,8 +171,8 @@ export default class Layer extends Observable {
    *
    * @param {ol/Map~Map|mapboxgl.Map} map A map.
    */
-  init(map) {
-    this.terminate();
+  attachToMap(map) {
+    this.detachFromMap();
     /** @ignore */
     this.map = map;
   }
@@ -181,7 +181,7 @@ export default class Layer extends Observable {
    * Terminate what was initialized in init function. Remove layer, events...
    */
   // eslint-disable-next-line class-methods-use-this
-  terminate() {}
+  detachFromMap() {}
 
   /**
    * Get a layer property.

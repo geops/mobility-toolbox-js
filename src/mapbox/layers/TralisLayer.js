@@ -53,14 +53,14 @@ class TralisLayer extends mixin(Layer) {
    * @param {string} beforeId Layer's id before which we want to add the new layer.
    * @override
    */
-  init(map, beforeId) {
+  attachToMap(map, beforeId) {
     if (!map) {
       return;
     }
 
     const canvas = map.getCanvas();
 
-    super.init(map, {
+    super.attachToMap(map, {
       width: canvas.width / this.pixelRatio,
       height: canvas.height / this.pixelRatio,
     });
@@ -101,7 +101,7 @@ class TralisLayer extends mixin(Layer) {
   /**
    * Remove listeners from the Mapbox Map.
    */
-  terminate() {
+  detachFromMap() {
     if (this.map) {
       this.map.off('load', this.onLoad);
 
@@ -115,7 +115,7 @@ class TralisLayer extends mixin(Layer) {
         this.map.removeSource(this.key);
       }
     }
-    super.terminate();
+    super.detachFromMap();
   }
 
   /**
