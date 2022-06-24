@@ -57,7 +57,8 @@ const SearchMixin = (Base) =>
       this.abortController = new AbortController();
     }
 
-    render(suggestions = []) {
+    render(featureCollection) {
+      const suggestions = featureCollection?.features || [];
       if (!this.suggestionsElt) {
         return;
       }

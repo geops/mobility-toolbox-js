@@ -19,14 +19,14 @@ describe('StopsAPI', () => {
         .search({
           q: 'Bern',
         })
-        .then((features) => {
+        .then((featureCollection) => {
           // Correct url
           expect(fetch.mock.calls[0][0]).toEqual(
             'https://api.geops.io/stops/v1/?key=apiKey&q=Bern',
           );
 
           // Correct search result
-          expect(features[0].properties.name).toEqual('Bern');
+          expect(featureCollection.features[0].properties.name).toEqual('Bern');
           done();
         });
     });
