@@ -2,9 +2,15 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.9",
+  "version": "2.0.0-beta.10",
   "main": "index.js",
   "module": "esm.js",
+  "exports": {
+    ".": "./index.js",
+    "./api": "./api/index.js",
+    "./mapbox": "./mapbox/index.js",
+    "./ol": "./ol/index.js"
+  },
   "dependencies": {
     "@geops/geops-ui": "0.1.13",
     "@material-ui/core": "4.12.3",
@@ -105,6 +111,21 @@
     "cy:test": "start-server-and-test start http://localhost:5000 'cypress run'",
     "doc": "yarn apidoc && cp apidoc/index.json src/doc/components/Esdoc/ && webpack --mode production",
     "doc:dev": "yarn apidoc && webpack --mode development",
+    "esbuild": "yarn esbuild:all && yarn esbuild:esm && yarn esbuild:iife",
+    "esbuild:all": "esbuild src/index.js src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
+    "esbuild:esm": "yarn esbuild:esm:unminify && yarn esbuild:esm:minify",
+    "esbuild:esm:base": "esbuild src/index.js --bundle --sourcemap --target=chrome100 --format=esm --external:mapbox-gl --external:ol --external:maplibre-gl",
+    "esbuild:esm:minify": "yarn esbuild:esm:base --minify --outfile=build/esm.min.js ",
+    "esbuild:esm:ol": "yarn esbuild:esm:ol:unminify && yarn esbuild:esm:ol:minify",
+    "esbuild:esm:ol:base": "esbuild src/ol/index.js --bundle --sourcemap --target=chrome100 --format=esm --external:mapbox-gl --external:ol --external:maplibre-gl",
+    "esbuild:esm:ol:minify": "yarn esbuild:esm:ol:base --minify --outfile=build/esm-ol.min.js ",
+    "esbuild:esm:ol:unminify": "yarn esbuild:esm:ol:base --outfile=build/esm-ol.js",
+    "esbuild:esm:unminify": "yarn esbuild:esm:base --outfile=build/esm.js",
+    "esbuild:file": "npx esbuild src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
+    "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
+    "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
+    "esbuild:iife:minify": "yarn esbuild:iife:base --minify --outfile=build/mbt.min.js",
+    "esbuild:iife:unminify": "yarn esbuild:iife:base --outfile=build/mbt.js",
     "format": "prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix",
     "lib": "REACT_APP_LIB_MODE=1  webpack --mode production",
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
@@ -118,22 +139,7 @@
     "start": "yarn doc && webpack-dev-server --mode development --open",
     "start:examples": "webpack-dev-server --mode development --open",
     "test": "REACT_APP_LIB_MODE=1 jest",
-    "test:watch": "yarn test --watchAll",
-    "esbuild": "yarn esbuild:all && yarn esbuild:esm && yarn esbuild:iife",
-    "esbuild:all": "esbuild src/index.js src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
-    "esbuild:esm": "yarn esbuild:esm:unminify && yarn esbuild:esm:minify",
-    "esbuild:esm:base": "esbuild src/index.js --bundle --sourcemap --target=chrome100 --format=esm --external:mapbox-gl --external:ol --external:maplibre-gl",
-    "esbuild:esm:unminify": "yarn esbuild:esm:base --outfile=build/esm.js",
-    "esbuild:esm:minify": "yarn esbuild:esm:base --minify --outfile=build/esm.min.js ",
-    "esbuild:esm:ol": "yarn esbuild:esm:ol:unminify && yarn esbuild:esm:ol:minify",
-    "esbuild:esm:ol:base": "esbuild src/ol/index.js --bundle --sourcemap --target=chrome100 --format=esm --external:mapbox-gl --external:ol --external:maplibre-gl",
-    "esbuild:esm:ol:unminify": "yarn esbuild:esm:ol:base --outfile=build/esm-ol.js",
-    "esbuild:esm:ol:minify": "yarn esbuild:esm:ol:base --minify --outfile=build/esm-ol.min.js ",
-    "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
-    "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
-    "esbuild:iife:minify": "yarn esbuild:iife:base --minify --outfile=build/mbt.min.js",
-    "esbuild:iife:unminify": "yarn esbuild:iife:base --outfile=build/mbt.js",
-    "esbuild:file": "npx esbuild src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx"
+    "test:watch": "yarn test --watchAll"
   },
   "browserslist": {
     "production": [
@@ -185,12 +191,6 @@
         "version": "detect"
       }
     }
-  },
-  "exports": {
-    ".": "./index.js",
-    "./api": "./api/index.js",
-    "./mapbox": "./mapbox/index.js",
-    "./ol": "./ol/index.js"
   },
   "keywords": [
     "mobility",
