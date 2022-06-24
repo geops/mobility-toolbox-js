@@ -124,11 +124,11 @@ class MapboxStyleLayer extends Layer {
    * @param {mapboxgl.Map} map the mapbox map.
    * @override
    */
-  init(map) {
+  attachToMap(map) {
     if (!this.mapboxLayer.map) {
-      this.mapboxLayer.init(map);
+      this.mapboxLayer.attachToMap(map);
     }
-    super.init(map);
+    super.attachToMap(map);
 
     if (!this.map) {
       return;
@@ -141,7 +141,7 @@ class MapboxStyleLayer extends Layer {
       // relaunch the initialisation when it's the case.
       this.olListenersKeys.push(
         this.map.on('change:target', () => {
-          this.init(map);
+          this.attachToMap(map);
         }),
       );
 
@@ -179,13 +179,13 @@ class MapboxStyleLayer extends Layer {
    * @param {mapboxgl.Map} map the mapbox map.
    * @override
    */
-  terminate(map) {
+  detachFromMap(map) {
     const { mbMap } = this.mapboxLayer;
     if (mbMap) {
       mbMap.off('load', this.onLoad);
       this.removeStyleLayers();
     }
-    super.terminate(map);
+    super.detachFromMap(map);
   }
 
   /** @ignore */

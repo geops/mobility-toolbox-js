@@ -15,7 +15,7 @@ export default () => {
 
   // Add copyright control
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   // Define the Mapbox style to display
   const mapboxLayer = new MaplibreLayer({
@@ -24,7 +24,7 @@ export default () => {
   });
 
   // Display the style on the map
-  mapboxLayer.init(map);
+  mapboxLayer.attachToMap(map);
 
   // Define the list of Mapbox style layers representing the pois.
   const poiLayer = new MapboxStyleLayer({
@@ -33,7 +33,7 @@ export default () => {
   });
 
   // Display the pois on the map
-  poiLayer.init(map);
+  poiLayer.attachToMap(map);
 
   // Toggle pois visibility
   document.getElementById('button').addEventListener('click', (evt) => {

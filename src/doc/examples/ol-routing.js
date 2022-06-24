@@ -16,7 +16,7 @@ export default () => {
   const mapboxLayer = new MaplibreLayer({
     url: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
   });
-  mapboxLayer.init(map);
+  mapboxLayer.attachToMap(map);
 
   const copyright = new CopyrightControl();
   copyright.map = map;
@@ -25,7 +25,7 @@ export default () => {
     element: document.createElement('div'),
     apiKey: `${window.apiKey}`,
   });
-  control.map = map;
+  control.attachToMap(map);
 
   control.addViaPoint([950476.4055933182, 6003322.253698345]);
   control.addViaPoint([950389.0813034325, 6003656.659274571]);

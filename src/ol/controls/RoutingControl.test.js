@@ -50,7 +50,7 @@ describe('RoutingControl', () => {
       url: 'https://foo.ch',
       apiKey: 'foo',
     });
-    control.map = map;
+    control.attachToMap(map);
     expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
     control.viaPoints = [
       [950476.4055933182, 6003322.253698345],
@@ -95,7 +95,7 @@ describe('RoutingControl', () => {
         ['osm', 14, 99],
       ],
     });
-    control.map = map;
+    control.attachToMap(map);
     control.viaPoints = ['a4dca961d199ff76', 'e3666f03cba06b2b'];
     control
       .drawRoute(control.viaPoints)
@@ -136,7 +136,7 @@ describe('RoutingControl', () => {
       url: 'https://foo.ch',
       apiKey: 'foo',
     });
-    control.map = map;
+    control.attachToMap(map);
     control.viaPoints = [
       [950476.4055933182, 6003322.253698345],
       [950389.0813034325, 6003656.659274571],
@@ -160,7 +160,7 @@ describe('RoutingControl', () => {
       apiKey: 'foo',
       snapToClosestStation: true,
     });
-    control.map = map;
+    control.attachToMap(map);
     expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
     control.viaPoints = [
       [950476.4055933182, 6003322.253698345],
@@ -190,7 +190,7 @@ describe('RoutingControl', () => {
       apiKey: 'foo',
       useRawViaPoints: true,
     });
-    control.map = map;
+    control.attachToMap(map);
     expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
     control.viaPoints = [
       '46.2,7.1',

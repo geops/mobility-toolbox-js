@@ -59,8 +59,8 @@ describe('VectorLayer', () => {
   });
 
   test('should called terminate on initalization.', () => {
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap();
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -74,7 +74,7 @@ describe('VectorLayer', () => {
     const spy3 = jest
       .spyOn(map, 'getFeaturesAtPixel')
       .mockReturnValue(features);
-    layer.init(map);
+    layer.attachToMap(map);
     expect(onClick).toHaveBeenCalledTimes(0);
     await map.dispatchEvent(evt);
     expect(spy).toHaveBeenCalledTimes(1);

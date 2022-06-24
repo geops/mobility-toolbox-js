@@ -18,7 +18,7 @@ import { getMapboxMapCopyrights } from '../../common/utils';
  * });
  *
  * const control = new CopyrightControl();
- * control.map = map;
+ * control.attachToMap(map);
  *
  *
  * @see <a href="/example/mb-copyright">Mapbox copyright example</a>

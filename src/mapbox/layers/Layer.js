@@ -22,8 +22,8 @@ class Layer extends LayerCommon {
    * Initialize the layer and listen to user events.
    * @param {ol/Map~Map} map
    */
-  init(map) {
-    super.init(map);
+  attachToMap(map) {
+    super.attachToMap(map);
 
     if (!this.map) {
       return;
@@ -38,13 +38,13 @@ class Layer extends LayerCommon {
     }
   }
 
-  terminate(map) {
+  detachFromMap(map) {
     if (this.map) {
       this.map.off('mousemove', this.onUserMoveCallback);
       this.map.off('click', this.onUserClickCallback);
       unByKey(this.onChangeVisibleKey);
     }
-    super.terminate(map);
+    super.detachFromMap(map);
   }
 
   /**

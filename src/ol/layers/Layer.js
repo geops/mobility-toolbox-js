@@ -60,8 +60,8 @@ class Layer extends LayerCommon {
    * Initialize the layer and listen to feature clicks.
    * @param {ol/Map~Map} map
    */
-  init(map) {
-    super.init(map);
+  attachToMap(map) {
+    super.attachToMap(map);
 
     if (!this.map) {
       return;
@@ -74,7 +74,7 @@ class Layer extends LayerCommon {
     this.olListenersKeys.push(
       this.map.getLayers().on('remove', (evt) => {
         if (evt.element === this.olLayer) {
-          this.terminate();
+          this.detachFromMap();
         }
       }),
     );
@@ -105,14 +105,14 @@ class Layer extends LayerCommon {
   /**
    * Terminate what was initialized in init function. Remove layer, events...
    */
-  terminate() {
+  detachFromMap() {
     unByKey(this.olListenersKeys);
 
     if (this.map && this.olLayer) {
       this.map.removeLayer(this.olLayer);
     }
 
-    super.terminate();
+    super.detachFromMap();
   }
 
   /**

@@ -43,7 +43,7 @@ describe('StopFinderControl', () => {
         foo: 'bar',
       },
     });
-    control.map = map;
+    control.attachToMap(map);
     expect(control.element).toBeDefined();
     control.search('foo').then(() => {
       // Correct url

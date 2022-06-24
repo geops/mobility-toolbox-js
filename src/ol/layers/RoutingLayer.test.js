@@ -32,11 +32,11 @@ describe('RoutingLayer', () => {
   });
 
   test('should called terminate on initalization.', () => {
-    const spy = jest.spyOn(layer, 'terminate');
+    const spy = jest.spyOn(layer, 'detachFromMap');
 
     fetch.mockResponseOnce(JSON.stringify(global.fetchTrajectoriesResponse));
 
-    layer.init(olMap);
+    layer.attachToMap(olMap);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 

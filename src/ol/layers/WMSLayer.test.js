@@ -23,13 +23,13 @@ describe('WMSLayer', () => {
         }),
       }),
     });
-    layer.init(map);
+    layer.attachToMap(map);
     fetch.mockResponseOnce(JSON.stringify({ features: [] }));
     global.fetch = fetch;
   });
 
   afterEach(() => {
-    layer.terminate();
+    layer.detachFromMap();
   });
 
   test('should initialize.', () => {
@@ -37,8 +37,8 @@ describe('WMSLayer', () => {
   });
 
   test('should called terminate on initalization.', () => {
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap();
     expect(spy).toHaveBeenCalledTimes(1);
   });
 

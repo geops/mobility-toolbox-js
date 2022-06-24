@@ -15,7 +15,7 @@ export default () => {
   });
 
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   // Define the layer
   const tracker = new TralisLayer({
@@ -24,10 +24,10 @@ export default () => {
   });
 
   // Add the layer to the map
-  tracker.init(map);
+  tracker.attachToMap(map);
 
   // Remove the layer from the map
-  // tracker.terminate(map);
+  // tracker.detachFromMap(map);
 
   // Display informations on click in the console
   tracker.onClick(([feature]) => {

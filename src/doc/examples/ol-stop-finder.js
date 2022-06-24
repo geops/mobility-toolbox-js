@@ -25,7 +25,7 @@ export default () => {
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
-  mapboxLayer.init(map);
+  mapboxLayer.attachToMap(map);
 
   map.on('singleclick', () => stopFinder.clear());
 };

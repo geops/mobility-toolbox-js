@@ -49,7 +49,7 @@ describe('CopyrightControl', () => {
         zoom: 0,
       }),
     });
-    getLayer(true, 'bar').init(map);
+    getLayer(true, 'bar').attachToMap(map);
     map.setSize([200, 200]);
     map.renderSync();
   });
@@ -68,41 +68,41 @@ describe('CopyrightControl', () => {
 
   test('renders a string copyright', () => {
     const control = new CopyrightControl();
-    control.map = map;
+    control.attachToMap(map);
     expect(control.element.innerHTML).toBe('');
-    getLayer('copyright').init(map);
+    getLayer('copyright').attachToMap(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright');
   });
 
   test('renders an array of copyrights', () => {
     const control = new CopyrightControl();
-    control.map = map;
+    control.attachToMap(map);
     expect(control.element.innerHTML).toBe('');
-    getLayer(['copyright 1', 'copyright 2']).init(map);
+    getLayer(['copyright 1', 'copyright 2']).attachToMap(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright 1 | copyright 2');
   });
 
   test('renders unique copyrights', () => {
     const control = new CopyrightControl();
-    control.map = map;
+    control.attachToMap(map);
     expect(control.element.innerHTML).toBe('');
-    getLayer(['copyright 1', 'copyright 2']).init(map);
-    getLayer('copyright 1').init(map);
-    getLayer(['copyright 2']).init(map);
+    getLayer(['copyright 1', 'copyright 2']).attachToMap(map);
+    getLayer('copyright 1').attachToMap(map);
+    getLayer(['copyright 2']).attachToMap(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright 1 | copyright 2');
   });
 
   test("doesn't render copyright of an hidden layer", () => {
     const control = new CopyrightControl();
-    control.map = map;
+    control.attachToMap(map);
     expect(control.element.innerHTML).toBe('');
     const layer1 = getLayer('copyright hidden', false);
-    layer1.init(map);
+    layer1.attachToMap(map);
     const layer2 = getLayer('copyright', true);
-    layer2.init(map);
+    layer2.attachToMap(map);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright');
 
@@ -115,9 +115,9 @@ describe('CopyrightControl', () => {
   });
 
   test('should activate the control on construction then deactivate it', () => {
-    getLayer('copyright 1').init(map);
+    getLayer('copyright 1').attachToMap(map);
     const control = new CopyrightControl({ active: true });
-    control.map = map;
+    control.attachToMap(map);
     map.renderSync();
 
     expect(control.element.parentNode).toBe(map.getTargetElement());
@@ -133,9 +133,9 @@ describe('CopyrightControl', () => {
   });
 
   test('should deactivate the control on constrcution then activate it', () => {
-    getLayer('copyright 1').init(map);
+    getLayer('copyright 1').attachToMap(map);
     const control = new CopyrightControl({ active: false });
-    control.map = map;
+    control.attachToMap(map);
     map.renderSync();
 
     expect(control.element.parentNode).toBe(map.getTargetElement());
@@ -152,22 +152,22 @@ describe('CopyrightControl', () => {
   });
 
   test('should add copyrights in the map container element then remove it.', () => {
-    getLayer('copyright value').init(map);
+    getLayer('copyright value').attachToMap(map);
     map.renderSync();
 
     const control = new CopyrightControl();
 
     // Add control
-    control.map = map;
+    control.attachToMap(map);
     expect(control.element.parentNode).toBe(map.getTargetElement());
 
     // Remove control
-    control.map = null;
+    control.detachFromMap();
     expect(control.element.parentNode).toBe(null);
   });
 
   test('should add copyrights in the target element then remove it.', () => {
-    getLayer(['copyright value']).init(map);
+    getLayer(['copyright value']).attachToMap(map);
     map.renderSync();
 
     const target = document.createElement('div');
@@ -179,11 +179,11 @@ describe('CopyrightControl', () => {
     });
 
     // Add control
-    control.map = map;
+    control.attachToMap(map);
     expect(control.element.parentNode).toBe(target);
 
     // Remove control
-    control.map = null;
+    control.detachFromMap();
     expect(control.element.parentNode).toBe(null);
   });
 
@@ -199,8 +199,8 @@ describe('CopyrightControl', () => {
           : '';
       },
     });
-    control.map = map;
-    getLayer(['copyright 1', 'copyright 2', 'copyright 3']).init(map);
+    control.attachToMap(map);
+    getLayer(['copyright 1', 'copyright 2', 'copyright 3']).attachToMap(map);
     map.renderSync();
 
     // Add control

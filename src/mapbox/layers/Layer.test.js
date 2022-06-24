@@ -62,8 +62,8 @@ describe('Layer', () => {
 
   test('should call terminate on initialization.', () => {
     const layer = new Layer({ name: 'Layer' });
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init(map);
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -73,7 +73,7 @@ describe('Layer', () => {
     expect(layer.visible).toBe(true);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.init(map);
+    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
     expect(spy).toHaveBeenCalledTimes(0);
@@ -113,7 +113,7 @@ describe('Layer', () => {
     expect(layer.visible).toBe(false);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.init(map);
+    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
     expect(spy).toHaveBeenCalledTimes(0);
@@ -148,13 +148,13 @@ describe('Layer', () => {
     global.console.error.mockRestore();
   });
 
-  test('should not listen for click/hover events  after layer.terminate()', async () => {
+  test('should not listen for click/hover events  after layer.detachFromMap()', async () => {
     global.console.error = jest.fn();
     const layer = new Layer({ name: 'Layer', visible: true });
     expect(layer.visible).toBe(true);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.init(map);
+    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
     expect(spy).toHaveBeenCalledTimes(0);
@@ -174,7 +174,7 @@ describe('Layer', () => {
     spy.mockReset();
     spy2.mockReset();
 
-    layer.terminate(map);
+    layer.detachFromMap(map);
     await map.fire('mousemove', {
       type: 'mousemove',
       lngLat: { toArray: () => [0, 0] },

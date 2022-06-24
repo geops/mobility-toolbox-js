@@ -47,31 +47,31 @@ describe('Layer', () => {
 
   test('should call terminate on initialization.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap();
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
   test('should remove the layer when we call terminate.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init(map);
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(1);
-    layer.terminate(map);
+    layer.detachFromMap(map);
     expect(spy).toHaveBeenCalledTimes(2);
   });
 
   test('should manage copyrights as string.', () => {
     const spy = jest.spyOn(VectorSource.prototype, 'setAttributions');
     const layer = new Layer({ name: 'Layer', copyrights: 'foo', olLayer });
-    layer.init(map);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledWith(['foo']);
   });
 
   test('should manage copyrights as array.', () => {
     const spy = jest.spyOn(VectorSource.prototype, 'setAttributions');
     const layer = new Layer({ name: 'Layer', copyrights: ['bar'], olLayer });
-    layer.init(map);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledWith(['bar']);
   });
 
@@ -82,7 +82,7 @@ describe('Layer', () => {
       copyrights: ['bar'],
       olLayer: new Group({ layers: [olLayer] }),
     });
-    layer.init(map);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledWith(['bar']);
   });
 
@@ -92,7 +92,7 @@ describe('Layer', () => {
     expect(layer.visible).toBe(true);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.init(map);
+    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
     expect(spy).toHaveBeenCalledTimes(0);
@@ -119,7 +119,7 @@ describe('Layer', () => {
     expect(layer.visible).toBe(false);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.init(map);
+    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
     expect(spy).toHaveBeenCalledTimes(0);
@@ -140,13 +140,13 @@ describe('Layer', () => {
     global.console.error.mockRestore();
   });
 
-  test('should not listen for click/hover events  after layer.terminate()', async () => {
+  test('should not listen for click/hover events  after layer.detachFromMap()', async () => {
     global.console.error = jest.fn();
     const layer = new Layer({ name: 'Layer', olLayer, visible: true });
     expect(layer.visible).toBe(true);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.init(map);
+    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
     expect(spy).toHaveBeenCalledTimes(0);
@@ -167,7 +167,7 @@ describe('Layer', () => {
     spy.mockReset();
     spy2.mockReset();
 
-    layer.terminate(map);
+    layer.detachFromMap(map);
     await map.dispatchEvent({
       type: 'pointermove',
       map,

@@ -24,7 +24,7 @@ export default () => {
 
   // Add copyright control
   const control = new CopyrightControl();
-  control.map = map;
+  control.attachToMap(map);
 
   map.on('pointermove', () => {
     map.getTargetElement().style.cursor = '';
@@ -46,7 +46,7 @@ export default () => {
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
-  mapboxLayer.init(map);
+  mapboxLayer.attachToMap(map);
 
   const poiLayer = new MapboxStyleLayer({
     visible: true,
@@ -55,7 +55,7 @@ export default () => {
     onHover,
     onClick,
   });
-  poiLayer.init(map);
+  poiLayer.attachToMap(map);
 
   const vectorLayer = new VectorLayer({
     olLayer: new OLVectorLayer({
@@ -79,5 +79,5 @@ export default () => {
     onHover,
     onClick,
   });
-  vectorLayer.init(map);
+  vectorLayer.attachToMap(map);
 };

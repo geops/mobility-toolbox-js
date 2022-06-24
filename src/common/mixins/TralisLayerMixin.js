@@ -44,12 +44,12 @@ export class TralisLayerInterface {
    *
    * @param {ol/Map~Map} map
    */
-  init(map) {}
+  attachToMap(map) {}
 
   /**
    * Terminate the layer unsubscribing to the Tralis api.
    */
-  terminate() {}
+  detachFromMap() {}
 
   /**
    * Start the clock.
@@ -390,8 +390,8 @@ const TralisLayerMixin = (Base) =>
       this.updateFilters();
     }
 
-    init(map) {
-      super.init(map);
+    attachToMap(map) {
+      super.attachToMap(map);
 
       this.tracker = new Tracker({
         style: (...args) => this.style(...args),
@@ -420,7 +420,7 @@ const TralisLayerMixin = (Base) =>
       );
     }
 
-    terminate() {
+    detachFromMap() {
       document.removeEventListener(
         'visibilitychange',
         this.onDocumentVisibilityChange,
@@ -434,7 +434,7 @@ const TralisLayerMixin = (Base) =>
         context.clearRect(0, 0, canvas.width, canvas.height);
         this.tracker = null;
       }
-      super.terminate();
+      super.detachFromMap();
     }
 
     start() {
