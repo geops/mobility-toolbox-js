@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.8",
+  "version": "2.0.0-beta.9",
   "main": "index.js",
   "module": "esm.js",
   "dependencies": {
@@ -110,7 +110,7 @@
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
     "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
-    "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run esbuild && cd build && git push --tags && HUSKY=0 yarn publish --tag beta",
+    "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run esbuild && cd build && HUSKY=0 yarn publish --tag beta && git push --tags ",
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
     "publish:public": "yarn release && git push origin HEAD && yarn run esbuild && cd build && git push --tags && yarn publish",
     "publish:public:dryrun": "yarn release --dry-run",
