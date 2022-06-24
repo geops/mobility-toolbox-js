@@ -2,9 +2,9 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.4",
+  "version": "2.0.0-beta.5",
   "main": "index.js",
-  "module": "module.js",
+  "module": "esm.js",
   "dependencies": {
     "@geops/geops-ui": "0.1.13",
     "@material-ui/core": "4.12.3",
@@ -188,10 +188,7 @@
   },
   "exports": {
     ".": "./index.js",
-    "./module": "./module.js",
     "./api": "./api/index.js",
-    "./common/trackerConfig": "./common/trackerConfig.js",
-    "./utils": "./common/utils/index.js",
     "./mapbox": "./mapbox/index.js",
     "./ol": "./ol/index.js"
   },
@@ -207,7 +204,7 @@
       "yarn test --bail --findRelatedTests"
     ],
     "package.json": [
-      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
+      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop exports --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
     ],
     "src/**/*.{css,scss}": [
       "stylelint --fix"
