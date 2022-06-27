@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import { makeStyles } from '@material-ui/core';
 import { Map } from 'maplibre-gl';
-import { TralisLayer } from '../../mapbox';
+import { TralisLayer } from '../../../src/mapbox';
 
 const useStyles = makeStyles({
   root: {

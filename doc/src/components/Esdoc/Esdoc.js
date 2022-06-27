@@ -7,7 +7,6 @@ import EsdocContent from './EsdocContent';
 import EsdocNavigation from './EsdocNavigation';
 import EsdocSearch from './EsdocSearch';
 import { version } from '../../../../package.json';
-import './css/style.css';
 
 const useStyles = makeStyles((theme) => ({
   root: {

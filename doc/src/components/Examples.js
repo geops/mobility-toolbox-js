@@ -1,33 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Grid from '@material-ui/core/Grid';
-import MuiCard from '@material-ui/core/Card';
-import MuiCardMedia from '@material-ui/core/CardMedia';
+import Card from '@material-ui/core/Card';
+import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Icon from '@material-ui/core/Icon';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core';
 import { CgArrowRight } from 'react-icons/cg';
 import TextField from '@material-ui/core/TextField';
 import Markdown from 'react-markdown';
 import EXAMPLES from '../examples';
-
-const Card = withStyles({
-  root: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    width: '100%',
-    boxShadow: 'none',
-  },
-})(MuiCard);
-
-const CardMedia = withStyles({
-  root: {
-    paddingTop: '56.25%',
-  },
-})(MuiCardMedia);
+import { useEffect } from 'react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -91,31 +76,34 @@ const useStyles = makeStyles((theme) => ({
       border: '5px solid white',
     },
   },
+  card: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: '100%',
+    boxShadow: 'none',
+  },
 }));
 
-const filterExamples = (str, examples) => {
-  const qry = str.toLowerCase();
-  return examples.filter(
-    (ex) =>
-      `${ex.name}`.toLowerCase().includes(qry) ||
-      (ex.tags || []).find((tag) => tag.toLowerCase().includes(qry)),
-  );
-};
-
-// Get the public api key
-fetch('https://backend.developer.geops.io/publickey')
-  .then((response) => response.json())
-  .then((data) => {
-    if (data && data.success) {
-      window.apiKey = data.key;
-    }
-  });
-
-function Examples() {
+function Examples({ examples = [] }) {
   const classes = useStyles();
   const [filter, setFilter] = useState('');
-  const [raisedExampe, setRaisedExample] = useState(null);
-  const filteredExamples = filterExamples(filter, EXAMPLES);
+  const [raisedExample, setRaisedExample] = useState(null);
+  const [filteredExamples, setFilteredExamples] = useState(examples);
+
+  useEffect(() => {
+    if (!filter) {
+      return () => {};
+    }
+    const qry = filter.toLowerCase();
+    setFilteredExamples(
+      examples.filter(
+        (example) =>
+          `${example.name}`.toLowerCase().includes(qry) ||
+          (example.tags || []).find((tag) => tag.toLowerCase().includes(qry)),
+      ),
+    );
+  }, [filter, examples]);
 
   return (
     <Grid container spacing={3}>
@@ -134,7 +122,7 @@ function Examples() {
           Nothing found.
         </Grid>
       )}
-      {filteredExamples.map((ex) => (
+      {filteredExamples.map((example) => (
         <Grid
           item
           xs={12}
@@ -142,26 +130,33 @@ function Examples() {
           lg={4}
           container
           className={classes.example}
-          key={ex.key}
+          key={example.key}
         >
-          <a href={`/example/${ex.key}`} className={classes.exampleLink}>
+          <a href={`/example/${example.key}`} className={classes.exampleLink}>
             <div className={classes.cardWrapper}>
               <div className={classes.cardOverlay} />
               <Card
-                raised={ex === raisedExampe}
-                className={classes.card}
+                raised={example === raisedExample}
+                classes={{
+                  root: classes.card,
+                }}
                 onMouseOver={() => setRaisedExample(ex)}
                 onMouseOut={() => setRaisedExample(null)}
                 onFocus={() => setRaisedExample(ex)}
                 onBlur={() => setRaisedExample(null)}
               >
-                <CardMedia image={ex.img} />
+                <CardMedia
+                  image={example.img.src}
+                  style={{
+                    paddingTop: '56.25%',
+                  }}
+                />
                 <Box className={classes.container}>
                   <CardContent className={classes.cardContent}>
-                    <Typography variant="h3">{ex.name}</Typography>
+                    <Typography variant="h3">{example.name}</Typography>
                     <Typography>
                       <Markdown className={classes.readme}>
-                        {ex.description || ''}
+                        {example.description || ''}
                       </Markdown>
                     </Typography>
                   </CardContent>

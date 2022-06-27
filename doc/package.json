@@ -1,0 +1,33 @@
+{
+  "name": "doc",
+  "version": "0.1.0",
+  "dependencies": {
+    "@geops/geops-ui": "^0.1.16",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "maplibre-gl": "^2.1.9",
+    "next": "12.1.6",
+    "ol": "^6.14.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.4.0",
+    "react-markdown": "^8.0.3",
+    "react-syntax-highlighter": "^15.5.0",
+    "typeface-lato": "^1.1.13"
+  },
+  "devDependencies": {
+    "@svgr/webpack": "^6.2.1",
+    "eslint": "8.18.0",
+    "eslint-config-next": "12.1.6",
+    "file-loader": "^6.2.0",
+    "next-transpile-modules": "^9.0.0",
+    "raw-loader": "^4.0.2"
+  },
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "next lint",
+    "start": "next start"
+  },
+  "private": true
+}

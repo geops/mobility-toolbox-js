@@ -18,7 +18,7 @@ const codeHtmlPage = `
 const codeMapObject = `
 import { Map } from 'maplibre-gl;
 import { TralisLayer } from 'mobility-toolbox-js/mapbox';
-import 'maplibre-gl/dist/maplibre-gl.css';
+
 
 const map = new Map({
   container: 'map',
@@ -45,8 +45,22 @@ function MarkdownHeading({ ...props }) {
 
 function Home() {
   const [source, setSource] = useState(null);
+  const [apiKey, setApiKey] = useState('');
+
   useEffect(() => {
-    fetch('../../../README.md')
+    // Get the public api key
+    fetch('https://backend.developer.geops.io/publickey')
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.success) {
+          window.apiKey = data.key;
+          setApiKey(data.key);
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch('/README.md')
       .then((response) => response.text())
       .then((text) => {
         // only show the 'Documentation and examples' section on GitHub
@@ -55,7 +69,7 @@ function Home() {
       });
   }, []);
 
-  if (!source) {
+  if (!source || !apiKey) {
     return null;
   }
 

@@ -143,9 +143,7 @@ class RoutingControl extends Control {
 
     /** @ignore */
     this.api = new RoutingAPI({
-      url: options.url,
-      apiKey: this.apiKey,
-      mot: options.mot,
+      ...options,
     });
 
     /** @ignore */
