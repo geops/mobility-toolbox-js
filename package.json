@@ -103,7 +103,7 @@
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
     "publish:public:dryrun": "yarn release --dry-run",
     "release": "standard-version",
-    "start": "yarn doc && yarn start",
+    "start": "yarn doc && cd doc && yarn start",
     "start:examples": "cd doc && yarn build && yarn start",
     "test": "TZ='UTC' jest",
     "test:watch": "yarn test --watchAll"

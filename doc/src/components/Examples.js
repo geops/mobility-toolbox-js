@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
-import Card from '@material-ui/core/Card';
-import CardMedia from '@material-ui/core/CardMedia';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import Icon from '@material-ui/core/Icon';
-import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core';
-import { CgArrowRight } from 'react-icons/cg';
 import TextField from '@material-ui/core/TextField';
-import Markdown from 'react-markdown';
+import ExampleCard from './ExampleCard';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -86,7 +79,6 @@ const useStyles = makeStyles((theme) => ({
 function Examples({ examples = [] }) {
   const classes = useStyles();
   const [filter, setFilter] = useState('');
-  const [raisedExample, setRaisedExample] = useState(null);
   const [filteredExamples, setFilteredExamples] = useState(examples);
 
   useEffect(() => {
@@ -131,43 +123,7 @@ function Examples({ examples = [] }) {
           className={classes.example}
           key={example.key}
         >
-          <a href={`/example/${example.key}`} className={classes.exampleLink}>
-            <div className={classes.cardWrapper}>
-              <div className={classes.cardOverlay} />
-              <Card
-                raised={example === raisedExample}
-                classes={{
-                  root: classes.card,
-                }}
-                onMouseOver={() => setRaisedExample(example)}
-                onMouseOut={() => setRaisedExample(null)}
-                onFocus={() => setRaisedExample(example)}
-                onBlur={() => setRaisedExample(null)}
-              >
-                <CardMedia
-                  image={example.img.src}
-                  style={{
-                    paddingTop: '56.25%',
-                  }}
-                />
-                <Box className={classes.container}>
-                  <CardContent className={classes.cardContent}>
-                    <Typography variant="h3">{example.name}</Typography>
-                    <Typography>
-                      <Markdown className={classes.readme}>
-                        {example.description || ''}
-                      </Markdown>
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Icon>
-                      <CgArrowRight />
-                    </Icon>
-                  </CardActions>
-                </Box>
-              </Card>
-            </div>
-          </a>
+          <ExampleCard example={example} />
         </Grid>
       ))}
     </Grid>
