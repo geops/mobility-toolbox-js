@@ -13,14 +13,14 @@ context('Navigation', () => {
     cy.location('pathname').should('include', 'examples');
 
     cy.go('back');
-    cy.location('pathname').should('include', 'api');
+    cy.location('pathname').should('include', 'doc');
 
     cy.go('forward');
     cy.location('pathname').should('include', 'examples');
 
     // clicking back
     cy.go(-1);
-    cy.location('pathname').should('include', 'api');
+    cy.location('pathname').should('include', 'doc');
 
     // clicking forward
     cy.go(1);

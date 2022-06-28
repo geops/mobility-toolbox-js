@@ -1,0 +1,13 @@
+[build]
+  command = "yarn doc"
+  publish = "doc/.next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+[[plugins]]
+  package = "netlify-plugin-cypress"
+  [plugins.inputs.postBuild]
+    enable = true
+
+  [plugins.inputs]
+    enable = false
