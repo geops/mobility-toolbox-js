@@ -1,28 +1,18 @@
-name: Build
+name: Lint / Unit tests
 
-on: [push]
+on: ['push']
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [14.x]
-
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: yarn install, build, and test
-        run: |
-          echo '[]' > src/doc/components/Esdoc/index.json
-          npm install -g yarn
-          yarn install
-          yarn lint
-          yarn test
-          yarn build
-        env:
-          CI: true
+          node-version: 16
+      - run: npm install -g yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+      - run: yarn test
+      - run: yarn build

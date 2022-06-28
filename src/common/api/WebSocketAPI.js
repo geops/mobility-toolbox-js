@@ -2,8 +2,6 @@
  * Class used to facilitate connection to a WebSocket and
  * also to manage properly messages send to the WebSocket.
  * This class must not contain any specific implementation.
- *
- * @private
  */
 class WebSocketApi {
   constructor() {
