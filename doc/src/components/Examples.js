@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Card from '@material-ui/core/Card';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -7,12 +7,10 @@ import CardActions from '@material-ui/core/CardActions';
 import Icon from '@material-ui/core/Icon';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles, withStyles } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import { CgArrowRight } from 'react-icons/cg';
 import TextField from '@material-ui/core/TextField';
 import Markdown from 'react-markdown';
-import EXAMPLES from '../examples';
-import { useEffect } from 'react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -103,6 +101,7 @@ function Examples({ examples = [] }) {
           (example.tags || []).find((tag) => tag.toLowerCase().includes(qry)),
       ),
     );
+    return () => {};
   }, [filter, examples]);
 
   return (
@@ -140,9 +139,9 @@ function Examples({ examples = [] }) {
                 classes={{
                   root: classes.card,
                 }}
-                onMouseOver={() => setRaisedExample(ex)}
+                onMouseOver={() => setRaisedExample(example)}
                 onMouseOut={() => setRaisedExample(null)}
-                onFocus={() => setRaisedExample(ex)}
+                onFocus={() => setRaisedExample(example)}
                 onBlur={() => setRaisedExample(null)}
               >
                 <CardMedia

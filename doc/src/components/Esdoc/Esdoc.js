@@ -3,10 +3,10 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
+import { version } from 'mobility-toolbox-js/package.json';
 import EsdocContent from './EsdocContent';
 import EsdocNavigation from './EsdocNavigation';
 import EsdocSearch from './EsdocSearch';
-import { version } from '../../../../package.json';
 
 const useStyles = makeStyles((theme) => ({
   root: {

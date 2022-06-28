@@ -211,7 +211,9 @@ function TypeDocLinkHTML({ typeName }) {
     typeName = typeName.replace('...', '');
     if (typeName.includes('|')) {
       const typeNames = typeName.replace('(', '').replace(')', '').split('|');
-      const typeLinks = typeNames.map((v) => <DocLinkHTML longname={v} />);
+      const typeLinks = typeNames.map((v) => (
+        <DocLinkHTML key={v} longname={v} />
+      ));
       return (
         <>
           ...(

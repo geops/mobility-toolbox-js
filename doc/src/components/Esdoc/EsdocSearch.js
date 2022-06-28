@@ -62,11 +62,10 @@ function EsdocSearch() {
               <React.Fragment key={kind}>
                 <li className="search-separator">{kind}</li>
                 {result.map((pair) => {
+                  const href = `/doc/${pair[1]}`.replace(/\./g, '%20');
                   return (
-                    <li>
-                      <a href={`/doc/${pair[1]}`.replace(/\./g, '%20')}>
-                        {pair[2]}
-                      </a>
+                    <li key={href}>
+                      <a href={href}>{pair[2]}</a>
                     </li>
                   );
                 })}

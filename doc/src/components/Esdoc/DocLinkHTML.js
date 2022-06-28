@@ -25,6 +25,7 @@ function DocLinkHTML({ longname, text = null, inner = false, kind = null }) {
     if (longname === 'typedefs') {
       return (
         <span>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/doc/typedef/index%20html">{text || longname}</a>
         </span>
       );

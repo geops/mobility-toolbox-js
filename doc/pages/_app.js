@@ -1,6 +1,6 @@
 import 'react-app-polyfill/stable';
-import React, { useEffect, useMemo } from 'react';
-import { ThemeProvider, CssBaseline } from '@material-ui/core';
+import React, { useEffect } from 'react';
+import { ThemeProvider } from '@material-ui/core';
 import { geopsTheme, Header, Footer } from '@geops/geops-ui';
 
 import 'typeface-lato';

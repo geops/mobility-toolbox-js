@@ -1,6 +1,5 @@
 import React from 'react';
 import { Container, makeStyles } from '@material-ui/core';
-import { useRouter } from 'next/router';
 import EXAMPLES from '../../src/examples';
 import Example from '../../src/components/Example';
 
@@ -23,7 +22,7 @@ export async function getStaticPaths() {
   };
 }
 
-export async function getStaticProps({ params, locale }) {
+export async function getStaticProps({ params }) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
   // const res = await fetch(`https://.../posts/${params.id}`)
@@ -42,7 +41,6 @@ export async function getStaticProps({ params, locale }) {
 
 function ExamplePage({ example }) {
   const classes = useStyles();
-  const router = useRouter();
   return (
     <Container className={classes.content}>
       <Example example={example} />

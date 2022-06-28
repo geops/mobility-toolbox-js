@@ -13,7 +13,7 @@ const useStyles = makeStyles({
   },
 });
 
-export async function getStaticProps({ params, locale }) {
+export async function getStaticProps() {
   return {
     props: {
       examples: EXAMPLES,

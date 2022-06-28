@@ -1,3 +1,4 @@
+/* eslint-disable */
 /*
 
  Software License Agreement (BSD License)
@@ -15,7 +16,7 @@
 
  */
 
-/*jslint        browser : true, continue : true,
+/* jslint        browser : true, continue : true,
  devel  : true, indent  : 2,    maxerr   : 500,
  newcap : true, nomen   : true, plusplus : true,
  regexp : true, sloppy  : true, vars     : false,
@@ -25,33 +26,34 @@
 // BUILD 193d48d, modified by mmikowski to pass jslint
 
 // Setup TAFFY name space to return an object with methods
-var TAFFY, exports, T;
+let TAFFY;
+let exports;
+let T;
 (function () {
-  'use strict';
-  var typeList,
-    makeTest,
-    idx,
-    typeKey,
-    version,
-    TC,
-    idpad,
-    cmax,
-    API,
-    protectJSON,
-    each,
-    eachin,
-    isIndexable,
-    returnFilter,
-    runFilters,
-    numcharsplit,
-    orderByCol,
-    run,
-    intersection,
-    filter,
-    makeCid,
-    safeForJson,
-    isRegexp,
-    sortArgs;
+  let typeList;
+  let makeTest;
+  let idx;
+  let typeKey;
+  let version;
+  let TC;
+  let idpad;
+  let cmax;
+  let API;
+  let protectJSON;
+  let each;
+  let eachin;
+  let isIndexable;
+  let returnFilter;
+  let runFilters;
+  let numcharsplit;
+  let orderByCol;
+  let run;
+  let intersection;
+  let filter;
+  let makeCid;
+  let safeForJson;
+  let isRegexp;
+  let sortArgs;
 
   if (!TAFFY) {
     // TC = Counter for Taffy DBs on page, used for unique IDs
@@ -64,7 +66,7 @@ var TAFFY, exports, T;
     API = {};
 
     sortArgs = function (args) {
-      var v = Array.prototype.slice.call(args);
+      const v = Array.prototype.slice.call(args);
       return v.sort();
     };
 
@@ -77,25 +79,24 @@ var TAFFY, exports, T;
       // ****************************************
       if (TAFFY.isArray(t) || TAFFY.isObject(t)) {
         return t;
-      } else {
-        return JSON.parse(t);
       }
+      return JSON.parse(t);
     };
 
     // gracefully stolen from underscore.js
     intersection = function (array1, array2) {
-      return filter(array1, function (item) {
+      return filter(array1, (item) => {
         return array2.indexOf(item) >= 0;
       });
     };
 
     // gracefully stolen from underscore.js
     filter = function (obj, iterator, context) {
-      var results = [];
+      const results = [];
       if (obj == null) return results;
       if (Array.prototype.filter && obj.filter === Array.prototype.filter)
         return obj.filter(iterator, context);
-      each(obj, function (value, index, list) {
+      each(obj, (value, index, list) => {
         if (iterator.call(context, value, index, list))
           results[results.length] = value;
       });
@@ -107,9 +108,9 @@ var TAFFY, exports, T;
     };
 
     safeForJson = function (aObj) {
-      var myResult = T.isArray(aObj) ? [] : T.isObject(aObj) ? {} : null;
+      const myResult = T.isArray(aObj) ? [] : T.isObject(aObj) ? {} : null;
       if (aObj === null) return aObj;
-      for (var i in aObj) {
+      for (const i in aObj) {
         myResult[i] = isRegexp(aObj[i])
           ? aObj[i].toString()
           : T.isArray(aObj[i]) || T.isObject(aObj[i])
@@ -120,13 +121,16 @@ var TAFFY, exports, T;
     };
 
     makeCid = function (aContext) {
-      var myCid = JSON.stringify(aContext);
+      const myCid = JSON.stringify(aContext);
       if (myCid.match(/regex/) === null) return myCid;
       return JSON.stringify(safeForJson(aContext));
     };
 
     each = function (a, fun, u) {
-      var r, i, x, y;
+      let r;
+      let i;
+      let x;
+      let y;
       // ****************************************
       // *
       // * Takes:
@@ -166,9 +170,9 @@ var TAFFY, exports, T;
       // * Purpose: Used to loop over objects
       // *
       // ****************************************
-      var x = 0,
-        r,
-        i;
+      let x = 0;
+      let r;
+      let i;
 
       for (i in o) {
         if (o.hasOwnProperty(i)) {
@@ -193,7 +197,7 @@ var TAFFY, exports, T;
     };
 
     isIndexable = function (f) {
-      var i;
+      let i;
       // Check to see if record ID
       if (T.isString(f) && /[t][0-9]*[r][0-9]*/i.test(f)) {
         return true;
@@ -206,7 +210,7 @@ var TAFFY, exports, T;
       // Check to see if array of indexes
       if (T.isArray(f)) {
         i = true;
-        each(f, function (r) {
+        each(f, (r) => {
           if (!isIndexable(r)) {
             i = false;
 
@@ -225,9 +229,9 @@ var TAFFY, exports, T;
       // * Takes: takes a record and a collection of filters
       // * Returns: true if the record matches, false otherwise
       // ****************************************
-      var match = true;
+      let match = true;
 
-      each(filter, function (mf) {
+      each(filter, (mf) => {
         switch (T.typeOf(mf)) {
           case 'function':
             // run function
@@ -254,7 +258,7 @@ var TAFFY, exports, T;
                   runFilters(r, mf[3])
                 : false;
             if (mf.length > 4) {
-              each(mf, function (f) {
+              each(mf, (f) => {
                 if (runFilters(r, f)) {
                   match = true;
                 }
@@ -275,23 +279,23 @@ var TAFFY, exports, T;
       // * Purpose: Take a filter object and return a function that can be used to compare
       // * a TaffyDB record to see if the record matches a query
       // ****************************************
-      var nf = [];
+      const nf = [];
       if (T.isString(f) && /[t][0-9]*[r][0-9]*/i.test(f)) {
         f = { ___id: f };
       }
       if (T.isArray(f)) {
         // if we are working with an array
 
-        each(f, function (r) {
+        each(f, (r) => {
           // loop the array and return a filter func for each value
           nf.push(returnFilter(r));
         });
         // now build a func to loop over the filters and return true if ANY of the filters match
         // This handles logical OR expressions
         f = function () {
-          var that = this,
-            match = false;
-          each(nf, function (f) {
+          const that = this;
+          let match = false;
+          each(nf, (f) => {
             if (runFilters(that, f)) {
               match = true;
             }
@@ -307,7 +311,7 @@ var TAFFY, exports, T;
         }
 
         // Loop over each value on the object to prep match type and match value
-        eachin(f, function (v, i) {
+        eachin(f, (v, i) => {
           // default match type to IS/Equals
           if (!T.isObject(v)) {
             v = {
@@ -315,10 +319,10 @@ var TAFFY, exports, T;
             };
           }
           // loop over each value on the value object  - if any
-          eachin(v, function (mtest, s) {
+          eachin(v, (mtest, s) => {
             // s = match type, e.g. is, hasAll, like, etc
-            var c = [],
-              looper;
+            const c = [];
+            let looper;
 
             // function to loop and apply filter
             looper =
@@ -329,26 +333,26 @@ var TAFFY, exports, T;
                 : each;
 
             // loop over each test
-            looper(mtest, function (mtest) {
+            looper(mtest, (mtest) => {
               // su = match success
               // f = match false
-              var su = true,
-                f = false,
-                matchFunc;
+              let su = true;
+              const f = false;
+              let matchFunc;
 
               // push a function onto the filter collection to do the matching
               matchFunc = function () {
                 // get the value from the record
-                var mvalue = this[i],
-                  eqeq = '==',
-                  bangeq = '!=',
-                  eqeqeq = '===',
-                  lt = '<',
-                  gt = '>',
-                  lteq = '<=',
-                  gteq = '>=',
-                  bangeqeq = '!==',
-                  r;
+                const mvalue = this[i];
+                const eqeq = '==';
+                const bangeq = '!=';
+                const eqeqeq = '===';
+                const lt = '<';
+                const gt = '>';
+                const lteq = '<=';
+                const gteq = '>=';
+                const bangeqeq = '!==';
+                let r;
 
                 if (typeof mvalue === 'undefined') {
                   return false;
@@ -360,7 +364,7 @@ var TAFFY, exports, T;
                   s = s.substring(1, s.length);
                 }
                 // get the match results based on the s/match type
-                /*jslint eqeq : true */
+                /* jslint eqeq : true */
                 r =
                   s === 'regex'
                     ? mtest.test(mvalue)
@@ -416,7 +420,7 @@ var TAFFY, exports, T;
                     : T[s] && T.isFunction(T[s])
                     ? T[s](mvalue, mtest)
                     : false;
-                /*jslint eqeq : false */
+                /* jslint eqeq : false */
                 r = r && !su ? false : !r && !su ? true : r;
 
                 return r;
@@ -430,9 +434,9 @@ var TAFFY, exports, T;
               // else build a function to loop over all the filters and return true only if ALL match
               // this is a logical AND
               nf.push(function () {
-                var that = this,
-                  match = false;
-                each(c, function (f) {
+                const that = this;
+                let match = false;
+                each(c, (f) => {
                   if (f.apply(that)) {
                     match = true;
                   }
@@ -445,8 +449,8 @@ var TAFFY, exports, T;
         // finally return a single function that wraps all the other functions and will run a query
         // where all functions have to return true for a record to appear in a query result
         f = function () {
-          var that = this,
-            match = true;
+          const that = this;
+          let match = true;
           // faster if less than  4 functions
           match =
             nf.length === 1 && !nf[0].apply(that)
@@ -456,15 +460,15 @@ var TAFFY, exports, T;
               : nf.length === 3 &&
                 (!nf[0].apply(that) || !nf[1].apply(that) || !nf[2].apply(that))
               ? false
-              : nf.length === 4 &&
-                (!nf[0].apply(that) ||
-                  !nf[1].apply(that) ||
-                  !nf[2].apply(that) ||
-                  !nf[3].apply(that))
-              ? false
-              : true;
+              : !(
+                  nf.length === 4 &&
+                  (!nf[0].apply(that) ||
+                    !nf[1].apply(that) ||
+                    !nf[2].apply(that) ||
+                    !nf[3].apply(that))
+                );
           if (nf.length > 4) {
-            each(nf, function (f) {
+            each(nf, (f) => {
               if (!runFilters(that, f)) {
                 match = false;
               }
@@ -490,14 +494,18 @@ var TAFFY, exports, T;
       // *
       // ****************************************
 
-      var sortFunc = function (a, b) {
+      const sortFunc = function (a, b) {
         // function to pass to the native array.sort to sort an array
-        var r = 0;
+        let r = 0;
 
-        T.each(o, function (sd) {
+        T.each(o, (sd) => {
           // loop over the sort instructions
           // get the column name
-          var o, col, dir, c, d;
+          let o;
+          let col;
+          let dir;
+          let c;
+          let d;
           o = sd.split(' ');
           col = o[0];
 
@@ -509,11 +517,12 @@ var TAFFY, exports, T;
             c = numcharsplit(a[col]);
             d = numcharsplit(b[col]);
             // loop over the charnumarrays until one value is higher than the other
-            T.each(c.length <= d.length ? c : d, function (x, i) {
+            T.each(c.length <= d.length ? c : d, (x, i) => {
               if (c[i] < d[i]) {
                 r = -1;
                 return TAFFY.EXIT;
-              } else if (c[i] > d[i]) {
+              }
+              if (c[i] > d[i]) {
                 r = 1;
                 return TAFFY.EXIT;
               }
@@ -523,11 +532,12 @@ var TAFFY, exports, T;
             c = numcharsplit(a[col]);
             d = numcharsplit(b[col]);
             // loop over the charnumarrays until one value is lower than the other
-            T.each(c.length <= d.length ? c : d, function (x, i) {
+            T.each(c.length <= d.length ? c : d, (x, i) => {
               if (c[i] > d[i]) {
                 r = -1;
                 return TAFFY.EXIT;
-              } else if (c[i] < d[i]) {
+              }
+              if (c[i] < d[i]) {
                 r = 1;
                 return TAFFY.EXIT;
               }
@@ -578,8 +588,8 @@ var TAFFY, exports, T;
     // ****************************************
     (function () {
       // creates a cache for numchar conversions
-      var cache = {},
-        cachcounter = 0;
+      let cache = {};
+      let cachcounter = 0;
       // creates the numcharsplit function
       numcharsplit = function (thing) {
         // if over 1000 items exist in the cache, clear it and start over
@@ -590,17 +600,17 @@ var TAFFY, exports, T;
 
         // if a cache can be found for a numchar then return its array value
         return (
-          cache['_' + thing] ||
+          cache[`_${thing}`] ||
           (function () {
             // otherwise do the conversion
             // make sure it is a string and setup so other variables
-            var nthing = String(thing),
-              na = [],
-              rv = '_',
-              rt = '',
-              x,
-              xx,
-              c;
+            const nthing = String(thing);
+            const na = [];
+            let rv = '_';
+            let rt = '';
+            let x;
+            let xx;
+            let c;
 
             // loop over the string char by char
             for (x = 0, xx = nthing.length; x < xx; x++) {
@@ -614,7 +624,7 @@ var TAFFY, exports, T;
                   na.push(rv.toLowerCase());
                   rv = '';
                 }
-                rv = rv + nthing.charAt(x);
+                rv += nthing.charAt(x);
               } else {
                 // check to see if it is a valid string char and append to string
                 // if last char was a number push the whole number to the charnum array
@@ -623,14 +633,14 @@ var TAFFY, exports, T;
                   na.push(parseFloat(rv));
                   rv = '';
                 }
-                rv = rv + nthing.charAt(x);
+                rv += nthing.charAt(x);
               }
             }
             // once done, push the last value to the charnum array and remove the first uneeded item
             na.push(rt === 'n' ? parseFloat(rv) : rv.toLowerCase());
             na.shift();
             // add to cache
-            cache['_' + thing] = na;
+            cache[`_${thing}`] = na;
             cachcounter++;
             // return charnum array
             return na;
@@ -657,14 +667,14 @@ var TAFFY, exports, T;
       // * Returns: method collection
       // * Purpose: Take filters as objects and cache functions for later lookup when a query is run
       // ****************************************
-      var nc = TAFFY.mergeObj(this.context(), { run: null }),
-        nq = [];
-      each(nc.q, function (v) {
+      const nc = TAFFY.mergeObj(this.context(), { run: null });
+      const nq = [];
+      each(nc.q, (v) => {
         nq.push(v);
       });
       nc.q = nq;
       // Hadnle passing of ___ID or a record on lookup.
-      each(sortArgs(arguments), function (f) {
+      each(sortArgs(arguments), (f) => {
         nc.q.push(returnFilter(f));
         nc.filterRaw.push(f);
       });
@@ -679,10 +689,10 @@ var TAFFY, exports, T;
       // ****************************************
 
       o = o.split(',');
-      var x = [],
-        nc;
+      const x = [];
+      let nc;
 
-      each(o, function (r) {
+      each(o, (r) => {
         x.push(r.replace(/^\s*/, '').replace(/\s*$/, ''));
       });
 
@@ -698,14 +708,14 @@ var TAFFY, exports, T;
       // * Purpose: takes a limit number to limit the number of rows returned by a query. Will update the results
       // * of a query
       // ****************************************
-      var nc = TAFFY.mergeObj(this.context(), {}),
-        limitedresults;
+      const nc = TAFFY.mergeObj(this.context(), {});
+      let limitedresults;
 
       nc.limit = n;
 
       if (nc.run && nc.sort) {
         limitedresults = [];
-        each(nc.results, function (i, x) {
+        each(nc.results, (i, x) => {
           if (x + 1 > n) {
             return TAFFY.EXIT;
           }
@@ -723,14 +733,14 @@ var TAFFY, exports, T;
       // * Purpose: takes a limit number to limit the number of rows returned by a query. Will update the results
       // * of a query
       // ****************************************
-      var nc = TAFFY.mergeObj(this.context(), {}),
-        limitedresults;
+      let nc = TAFFY.mergeObj(this.context(), {});
+      let limitedresults;
 
       nc.start = n;
 
       if (nc.run && nc.sort && !nc.limit) {
         limitedresults = [];
-        each(nc.results, function (i, x) {
+        each(nc.results, (i, x) => {
           if (x + 1 > n) {
             limitedresults.push(i);
           }
@@ -748,10 +758,10 @@ var TAFFY, exports, T;
       // *
       // * Takes: a object and passes it off DBI update method for all matched records
       // ****************************************
-      var runEvent = true,
-        o = {},
-        args = sortArgs(arguments),
-        that;
+      let runEvent = true;
+      let o = {};
+      const args = sortArgs(arguments);
+      let that;
       if (
         TAFFY.isString(arg0) &&
         (arguments.length === 2 || arguments.length === 3)
@@ -769,14 +779,12 @@ var TAFFY, exports, T;
 
       that = this;
       run.call(this);
-      each(this.context().results, function (r) {
-        var c = o;
+      each(this.context().results, (r) => {
+        let c = o;
         if (TAFFY.isFunction(c)) {
           c = c.apply(TAFFY.mergeObj(r, {}));
-        } else {
-          if (T.isFunction(c)) {
-            c = c(TAFFY.mergeObj(r, {}));
-          }
+        } else if (T.isFunction(c)) {
+          c = c(TAFFY.mergeObj(r, {}));
         }
         if (TAFFY.isObject(c)) {
           that.getDBI().update(r.___id, c, runEvent);
@@ -792,10 +800,10 @@ var TAFFY, exports, T;
       // *
       // * Purpose: removes records from the DB via the remove and removeCommit DBI methods
       // ****************************************
-      var that = this,
-        c = 0;
+      const that = this;
+      let c = 0;
       run.call(this);
-      each(this.context().results, function (r) {
+      each(this.context().results, (r) => {
         that.getDBI().remove(r.___id);
         c++;
       });
@@ -825,8 +833,8 @@ var TAFFY, exports, T;
       // * Runs a function on return of run.call
       // ****************************************
       if (f) {
-        var that = this;
-        setTimeout(function () {
+        const that = this;
+        setTimeout(() => {
           run.call(that);
           f.call(that.getroot(that.context()));
         }, delay || 0);
@@ -874,12 +882,12 @@ var TAFFY, exports, T;
       // * Takes: column to sum up
       // * Returns: Sums the values of a column
       // ****************************************
-      var total = 0,
-        that = this;
+      let total = 0;
+      const that = this;
       run.call(that);
-      each(sortArgs(arguments), function (c) {
-        each(that.context().results, function (r) {
-          total = total + (r[c] || 0);
+      each(sortArgs(arguments), (c) => {
+        each(that.context().results, (r) => {
+          total += r[c] || 0;
         });
       });
       return total;
@@ -891,9 +899,9 @@ var TAFFY, exports, T;
       // * Takes: column to find min
       // * Returns: the lowest value
       // ****************************************
-      var lowest = null;
+      let lowest = null;
       run.call(this);
-      each(this.context().results, function (r) {
+      each(this.context().results, (r) => {
         if (lowest === null || r[c] < lowest) {
           lowest = r[c];
         }
@@ -942,11 +950,16 @@ var TAFFY, exports, T;
     //  Revisions to API by Michael Mikowski.
     //  Code convention per standards in http://manning.com/mikowski
     (function () {
-      var innerJoinFunction = (function () {
-        var fnCompareList, fnCombineRow, fnMain;
+      const innerJoinFunction = (function () {
+        let fnCompareList;
+        let fnCombineRow;
+        let fnMain;
 
         fnCompareList = function (left_row, right_row, arg_list) {
-          var data_lt, data_rt, op_code, error;
+          let data_lt;
+          let data_rt;
+          let op_code;
+          let error;
 
           if (arg_list.length === 2) {
             data_lt = left_row[arg_list[0]];
@@ -958,7 +971,7 @@ var TAFFY, exports, T;
             data_rt = right_row[arg_list[2]];
           }
 
-          /*jslint eqeq : true */
+          /* jslint eqeq : true */
           switch (op_code) {
             case '===':
               return data_lt === data_rt;
@@ -977,7 +990,7 @@ var TAFFY, exports, T;
             case '!=':
               return data_lt != data_rt;
             default:
-              throw String(op_code) + ' is not supported';
+              throw `${String(op_code)} is not supported`;
           }
           // 'jslint eqeq : false'  here results in
           // "Unreachable '/*jslint' after 'return'".
@@ -986,9 +999,9 @@ var TAFFY, exports, T;
         };
 
         fnCombineRow = function (left_row, right_row) {
-          var out_map = {},
-            i,
-            prefix;
+          const out_map = {};
+          let i;
+          let prefix;
 
           for (i in left_row) {
             if (left_row.hasOwnProperty(i)) {
@@ -1005,11 +1018,11 @@ var TAFFY, exports, T;
         };
 
         fnMain = function (table) {
-          var right_table,
-            i,
-            arg_list = sortArgs(arguments),
-            arg_length = arg_list.length,
-            result_list = [];
+          let right_table;
+          let i;
+          const arg_list = sortArgs(arguments);
+          const arg_length = arg_list.length;
+          const result_list = [];
           if (typeof table.filter !== 'function') {
             if (table.TAFFY) {
               right_table = table();
@@ -1024,11 +1037,11 @@ var TAFFY, exports, T;
             results: this.getDBI().query(this.context()),
           });
 
-          TAFFY.each(this.context().results, function (left_row) {
-            right_table.each(function (right_row) {
-              var arg_data,
-                is_ok = true;
-              CONDITION: for (i = 1; i < arg_length; i++) {
+          TAFFY.each(this.context().results, (left_row) => {
+            right_table.each((right_row) => {
+              let arg_data;
+              let is_ok = true;
+              for (i = 1; i < arg_length; i++) {
                 arg_data = arg_list[i];
                 if (typeof arg_data === 'function') {
                   is_ok = arg_data(left_row, right_row);
@@ -1039,7 +1052,7 @@ var TAFFY, exports, T;
                 }
 
                 if (!is_ok) {
-                  break CONDITION;
+                  break;
                 } // short circuit
               }
 
@@ -1063,9 +1076,9 @@ var TAFFY, exports, T;
       // * Takes: column to find max
       // * Returns: the highest value
       // ****************************************
-      var highest = null;
+      let highest = null;
       run.call(this);
-      each(this.context().results, function (r) {
+      each(this.context().results, (r) => {
         if (highest === null || r[c] > highest) {
           highest = r[c];
         }
@@ -1081,17 +1094,17 @@ var TAFFY, exports, T;
       // * Note if more than one column is given an array of arrays is returned
       // ****************************************
 
-      var ra = [],
-        args = sortArgs(arguments);
+      const ra = [];
+      const args = sortArgs(arguments);
       run.call(this);
       if (arguments.length === 1) {
-        each(this.context().results, function (r) {
+        each(this.context().results, (r) => {
           ra.push(r[args[0]]);
         });
       } else {
-        each(this.context().results, function (r) {
-          var row = [];
-          each(args, function (c) {
+        each(this.context().results, (r) => {
+          const row = [];
+          each(args, (c) => {
             row.push(r[c]);
           });
           ra.push(row);
@@ -1106,14 +1119,14 @@ var TAFFY, exports, T;
       // * Returns: array of values
       // * Note if more than one column is given an array of arrays is returned
       // ****************************************
-      var ra = [],
-        args = sortArgs(arguments);
+      const ra = [];
+      const args = sortArgs(arguments);
       run.call(this);
       if (arguments.length === 1) {
-        each(this.context().results, function (r) {
-          var v = r[args[0]],
-            dup = false;
-          each(ra, function (d) {
+        each(this.context().results, (r) => {
+          const v = r[args[0]];
+          let dup = false;
+          each(ra, (d) => {
             if (v === d) {
               dup = true;
               return TAFFY.EXIT;
@@ -1124,15 +1137,15 @@ var TAFFY, exports, T;
           }
         });
       } else {
-        each(this.context().results, function (r) {
-          var row = [],
-            dup = false;
-          each(args, function (c) {
+        each(this.context().results, (r) => {
+          const row = [];
+          let dup = false;
+          each(args, (c) => {
             row.push(r[c]);
           });
-          each(ra, function (d) {
-            var ldup = true;
-            each(args, function (c, i) {
+          each(ra, (d) => {
+            let ldup = true;
+            each(args, (c, i) => {
               if (row[i] !== d[i]) {
                 ldup = false;
                 return TAFFY.EXIT;
@@ -1156,13 +1169,13 @@ var TAFFY, exports, T;
       // * Takes: a string template formated with key to be replaced with values from the rows, flag to determine if we want array of strings
       // * Returns: array of values or a string
       // ****************************************
-      var ra = [];
+      const ra = [];
       run.call(this);
-      each(this.context().results, function (r) {
+      each(this.context().results, (r) => {
         // TODO: The curly braces used to be unescaped
         ra.push(
-          template.replace(/\{([^\{\}]*)\}/g, function (a, b) {
-            var v = r[b];
+          template.replace(/\{([^\{\}]*)\}/g, (a, b) => {
+            const v = r[b];
             return typeof v === 'string' || typeof v === 'number' ? v : a;
           }),
         );
@@ -1186,9 +1199,9 @@ var TAFFY, exports, T;
       // * Takes: a function
       // * Purpose: loops over every matching record and applies the function, returing the results in an array
       // ****************************************
-      var ra = [];
+      const ra = [];
       run.call(this);
-      each(this.context().results, function (r) {
+      each(this.context().results, (r) => {
         ra.push(m(r));
       });
       return ra;
@@ -1201,27 +1214,27 @@ var TAFFY, exports, T;
       // * Takes: an array of objects or JSON
       // * Returns a new TAFFYDB
       // ****************************************
-      var TOb = [],
-        ID = {},
-        RC = 1,
-        settings = {
-          template: false,
-          onInsert: false,
-          onUpdate: false,
-          onRemove: false,
-          onDBChange: false,
-          storageName: false,
-          forcePropertyCase: null,
-          cacheSize: 100,
-          name: '',
-        },
-        dm = new Date(),
-        CacheCount = 0,
-        CacheClear = 0,
-        Cache = {},
-        DBI,
-        runIndexes,
-        root;
+      let TOb = [];
+      let ID = {};
+      let RC = 1;
+      let settings = {
+        template: false,
+        onInsert: false,
+        onUpdate: false,
+        onRemove: false,
+        onDBChange: false,
+        storageName: false,
+        forcePropertyCase: null,
+        cacheSize: 100,
+        name: '',
+      };
+      let dm = new Date();
+      let CacheCount = 0;
+      let CacheClear = 0;
+      let Cache = {};
+      let DBI;
+      let runIndexes;
+      let root;
       // ****************************************
       // *
       // * TOb = this database
@@ -1242,14 +1255,14 @@ var TAFFY, exports, T;
         // * Returns: collection with records matching indexed filters
         // ****************************************
 
-        var records = [],
-          UniqueEnforce = false;
+        let records = [];
+        let UniqueEnforce = false;
 
         if (indexes.length === 0) {
           return TOb;
         }
 
-        each(indexes, function (f) {
+        each(indexes, (f) => {
           // Check to see if record ID
           if (T.isString(f) && /[t][0-9]*[r][0-9]*/i.test(f) && TOb[ID[f]]) {
             records.push(TOb[ID[f]]);
@@ -1262,8 +1275,8 @@ var TAFFY, exports, T;
           }
           // Check to see if array of indexes
           if (T.isArray(f)) {
-            each(f, function (r) {
-              each(runIndexes(r), function (rr) {
+            each(f, (r) => {
+              each(runIndexes(r), (rr) => {
                 records.push(rr);
               });
             });
@@ -1281,7 +1294,7 @@ var TAFFY, exports, T;
         // *
         // * The DBI is the internal DataBase Interface that interacts with the data
         // ****************************************
-        dm: function (nd) {
+        dm(nd) {
           // ****************************************
           // *
           // * Takes: an optional new modify date
@@ -1294,33 +1307,34 @@ var TAFFY, exports, T;
             CacheClear = 0;
           }
           if (settings.onDBChange) {
-            setTimeout(function () {
+            setTimeout(() => {
               settings.onDBChange.call(TOb);
             }, 0);
           }
           if (settings.storageName) {
-            setTimeout(function () {
+            setTimeout(() => {
               localStorage.setItem(
-                'taffy_' + settings.storageName,
+                `taffy_${settings.storageName}`,
                 JSON.stringify(TOb),
               );
             });
           }
           return dm;
         },
-        insert: function (i, runEvent) {
+        insert(i, runEvent) {
           // ****************************************
           // *
           // * Takes: a new record to insert
           // * Purpose: merge the object with the template, add an ID, insert into DB, call insert event
           // ****************************************
-          var columns = [],
-            records = [],
-            input = protectJSON(i);
-          each(input, function (v, i) {
-            var nv, o;
+          const columns = [];
+          const records = [];
+          const input = protectJSON(i);
+          each(input, (v, i) => {
+            let nv;
+            let o;
             if (T.isArray(v) && i === 0) {
-              each(v, function (av) {
+              each(v, (av) => {
                 columns.push(
                   settings.forcePropertyCase === 'lower'
                     ? av.toLowerCase()
@@ -1330,16 +1344,17 @@ var TAFFY, exports, T;
                 );
               });
               return true;
-            } else if (T.isArray(v)) {
+            }
+            if (T.isArray(v)) {
               nv = {};
-              each(v, function (av, ai) {
+              each(v, (av, ai) => {
                 nv[columns[ai]] = av;
               });
               v = nv;
             } else if (T.isObject(v) && settings.forcePropertyCase) {
               o = {};
 
-              eachin(v, function (av, ai) {
+              eachin(v, (av, ai) => {
                 o[
                   settings.forcePropertyCase === 'lower'
                     ? ai.toLowerCase()
@@ -1352,11 +1367,9 @@ var TAFFY, exports, T;
             }
 
             RC++;
-            v.___id =
-              'T' +
-              String(idpad + TC).slice(-6) +
-              'R' +
-              String(idpad + RC).slice(-6);
+            v.___id = `T${String(idpad + TC).slice(-6)}R${String(
+              idpad + RC,
+            ).slice(-6)}`;
             v.___s = true;
             records.push(v.___id);
             if (settings.template) {
@@ -1375,33 +1388,33 @@ var TAFFY, exports, T;
           });
           return root(records);
         },
-        sort: function (o) {
+        sort(o) {
           // ****************************************
           // *
           // * Purpose: Change the sort order of the DB itself and reset the ID bucket
           // ****************************************
           TOb = orderByCol(TOb, o.split(','));
           ID = {};
-          each(TOb, function (r, i) {
+          each(TOb, (r, i) => {
             ID[r.___id] = i;
           });
           DBI.dm(new Date());
           return true;
         },
-        update: function (id, changes, runEvent) {
+        update(id, changes, runEvent) {
           // ****************************************
           // *
           // * Takes: the ID of record being changed and the changes
           // * Purpose: Update a record and change some or all values, call the on update method
           // ****************************************
 
-          var nc = {},
-            or,
-            nr,
-            tc,
-            hasChange;
+          const nc = {};
+          let or;
+          let nr;
+          let tc;
+          let hasChange;
           if (settings.forcePropertyCase) {
-            eachin(changes, function (v, p) {
+            eachin(changes, (v, p) => {
               nc[
                 settings.forcePropertyCase === 'lower'
                   ? p.toLowerCase()
@@ -1418,7 +1431,7 @@ var TAFFY, exports, T;
 
           tc = {};
           hasChange = false;
-          eachin(nr, function (v, i) {
+          eachin(nr, (v, i) => {
             if (TAFFY.isUndefined(or[i]) || or[i] !== v) {
               tc[i] = v;
               hasChange = true;
@@ -1435,7 +1448,7 @@ var TAFFY, exports, T;
             DBI.dm(new Date());
           }
         },
-        remove: function (id) {
+        remove(id) {
           // ****************************************
           // *
           // * Takes: the ID of record to be removed
@@ -1443,8 +1456,8 @@ var TAFFY, exports, T;
           // ****************************************
           TOb[ID[id]].___s = false;
         },
-        removeCommit: function (runEvent) {
-          var x;
+        removeCommit(runEvent) {
+          let x;
           // ****************************************
           // *
           // *
@@ -1463,21 +1476,26 @@ var TAFFY, exports, T;
             }
           }
           ID = {};
-          each(TOb, function (r, i) {
+          each(TOb, (r, i) => {
             ID[r.___id] = i;
           });
           DBI.dm(new Date());
         },
-        query: function (context) {
+        query(context) {
           // ****************************************
           // *
           // * Takes: the context object for a query and either returns a cache result or a new query result
           // ****************************************
-          var returnq, cid, results, indexed, limitq, ni;
+          let returnq;
+          let cid;
+          let results;
+          let indexed;
+          let limitq;
+          let ni;
 
           if (settings.cacheSize) {
             cid = '';
-            each(context.filterRaw, function (r) {
+            each(context.filterRaw, (r) => {
               if (T.isFunction(r)) {
                 cid = 'nocache';
                 return TAFFY.EXIT;
@@ -1502,28 +1520,27 @@ var TAFFY, exports, T;
             if (settings.cacheSize && Cache[cid]) {
               Cache[cid].i = CacheCount++;
               return Cache[cid].results;
+            }
+            // if no filter, return DB
+            if (context.q.length === 0 && context.index.length === 0) {
+              each(TOb, (r) => {
+                results.push(r);
+              });
+              returnq = results;
             } else {
-              // if no filter, return DB
-              if (context.q.length === 0 && context.index.length === 0) {
-                each(TOb, function (r) {
+              // use indexes
+
+              indexed = runIndexes(context.index);
+
+              // run filters
+              each(indexed, (r) => {
+                // Run filter to see if record matches query
+                if (context.q.length === 0 || runFilters(r, context.q)) {
                   results.push(r);
-                });
-                returnq = results;
-              } else {
-                // use indexes
+                }
+              });
 
-                indexed = runIndexes(context.index);
-
-                // run filters
-                each(indexed, function (r) {
-                  // Run filter to see if record matches query
-                  if (context.q.length === 0 || runFilters(r, context.q)) {
-                    results.push(r);
-                  }
-                });
-
-                returnq = results;
-              }
+              returnq = results;
             }
           } else {
             // If query exists and run has not been cleared return the cache results
@@ -1541,7 +1558,7 @@ var TAFFY, exports, T;
             ((context.limit && context.limit < returnq.length) || context.start)
           ) {
             limitq = [];
-            each(returnq, function (r, i) {
+            each(returnq, (r, i) => {
               if (!context.start || (context.start && i + 1 >= context.start)) {
                 if (context.limit) {
                   ni = context.start ? i + 1 - context.start : i;
@@ -1562,13 +1579,14 @@ var TAFFY, exports, T;
           if (settings.cacheSize && cid !== 'nocache') {
             CacheClear++;
 
-            setTimeout(function () {
-              var bCounter, nc;
+            setTimeout(() => {
+              let bCounter;
+              let nc;
               if (CacheClear >= settings.cacheSize * 2) {
                 CacheClear = 0;
                 bCounter = CacheCount - settings.cacheSize;
                 nc = {};
-                eachin(function (r, k) {
+                eachin((r, k) => {
                   if (r.i >= bCounter) {
                     nc[k] = r;
                   }
@@ -1584,7 +1602,8 @@ var TAFFY, exports, T;
       };
 
       root = function () {
-        var iAPI, context;
+        let iAPI;
+        let context;
         // ****************************************
         // *
         // * The root function that gets returned when a new DB is created
@@ -1596,13 +1615,13 @@ var TAFFY, exports, T;
         // * Certain methods are or are not avaliable once you have started a query such as insert -- you can only insert into root
         // ****************************************
         iAPI = TAFFY.mergeObj(TAFFY.mergeObj(API, { insert: undefined }), {
-          getDBI: function () {
+          getDBI() {
             return DBI;
           },
-          getroot: function (c) {
+          getroot(c) {
             return root.call(c);
           },
-          context: function (n) {
+          context(n) {
             // ****************************************
             // *
             // * The context contains all the information to manage a query including filters, limits, and sorts
@@ -1633,13 +1652,13 @@ var TAFFY, exports, T;
                 results: false,
                 run: null,
                 sort: null,
-                settings: settings,
+                settings,
               };
         // ****************************************
         // *
         // * Call the query method to setup a new query
         // ****************************************
-        each(sortArgs(arguments), function (f) {
+        each(sortArgs(arguments), (f) => {
           if (isIndexable(f)) {
             context.index.push(f);
           } else {
@@ -1663,14 +1682,14 @@ var TAFFY, exports, T;
       root.insert = DBI.insert;
 
       root.merge = function (i, key, runEvent) {
-        var search = {},
-          finalSearch = [],
-          obj = {};
+        const search = {};
+        const finalSearch = [];
+        const obj = {};
         runEvent = runEvent || false;
         key = key || 'id';
 
-        each(i, function (o) {
-          var existingObject;
+        each(i, (o) => {
+          let existingObject;
           search[key] = o[key];
           finalSearch.push(o[key]);
           existingObject = root(search).first();
@@ -1715,19 +1734,19 @@ var TAFFY, exports, T;
         // * Setup localstorage for this DB on a given name
         // * Pull data into the DB as needed
         // ****************************************
-        var r = false,
-          i;
+        let r = false;
+        let i;
         if (localStorage) {
           if (n) {
-            i = localStorage.getItem('taffy_' + n);
+            i = localStorage.getItem(`taffy_${n}`);
             if (i && i.length > 0) {
               root.insert(i);
               r = true;
             }
             if (TOb.length > 0) {
-              setTimeout(function () {
+              setTimeout(() => {
                 localStorage.setItem(
-                  'taffy_' + settings.storageName,
+                  `taffy_${settings.storageName}`,
                   JSON.stringify(TOb),
                 );
               });
@@ -1788,11 +1807,11 @@ var TAFFY, exports, T;
     // *
     // ****************************************
     TAFFY.mergeObj = function (ob1, ob2) {
-      var c = {};
-      eachin(ob1, function (v, n) {
+      const c = {};
+      eachin(ob1, (v, n) => {
         c[n] = ob1[n];
       });
-      eachin(ob2, function (v, n) {
+      eachin(ob2, (v, n) => {
         c[n] = ob2[n];
       });
       return c;
@@ -1808,89 +1827,87 @@ var TAFFY, exports, T;
     // *
     // ****************************************
     TAFFY.has = function (var1, var2) {
-      var re = false,
-        n;
+      let re = false;
+      let n;
 
       if (var1.TAFFY) {
         re = var1(var2);
         if (re.length > 0) {
           return true;
-        } else {
-          return false;
         }
-      } else {
-        switch (T.typeOf(var1)) {
-          case 'object':
-            if (T.isObject(var2)) {
-              eachin(var2, function (v, n) {
-                if (
-                  re === true &&
-                  !T.isUndefined(var1[n]) &&
-                  var1.hasOwnProperty(n)
-                ) {
-                  re = T.has(var1[n], var2[n]);
-                } else {
-                  re = false;
-                  return TAFFY.EXIT;
-                }
-              });
-            } else if (T.isArray(var2)) {
-              each(var2, function (v, n) {
-                re = T.has(var1, var2[n]);
-                if (re) {
-                  return TAFFY.EXIT;
-                }
-              });
-            } else if (T.isString(var2)) {
-              if (!TAFFY.isUndefined(var1[var2])) {
-                return true;
-              } else {
-                return false;
-              }
-            }
-            return re;
-          case 'array':
-            if (T.isObject(var2)) {
-              each(var1, function (v, i) {
-                re = T.has(var1[i], var2);
-                if (re === true) {
-                  return TAFFY.EXIT;
-                }
-              });
-            } else if (T.isArray(var2)) {
-              each(var2, function (v2, i2) {
-                each(var1, function (v1, i1) {
-                  re = T.has(var1[i1], var2[i2]);
-                  if (re === true) {
-                    return TAFFY.EXIT;
-                  }
-                });
-                if (re === true) {
-                  return TAFFY.EXIT;
-                }
-              });
-            } else if (T.isString(var2) || T.isNumber(var2)) {
-              re = false;
-              for (n = 0; n < var1.length; n++) {
-                re = T.has(var1[n], var2);
-                if (re) {
-                  return true;
-                }
-              }
-            }
-            return re;
-          case 'string':
-            if (T.isString(var2) && var2 === var1) {
-              return true;
-            }
-            break;
-          default:
-            if (T.typeOf(var1) === T.typeOf(var2) && var1 === var2) {
-              return true;
-            }
-            break;
-        }
+        return false;
       }
+      switch (T.typeOf(var1)) {
+        case 'object':
+          if (T.isObject(var2)) {
+            eachin(var2, (v, n) => {
+              if (
+                re === true &&
+                !T.isUndefined(var1[n]) &&
+                var1.hasOwnProperty(n)
+              ) {
+                re = T.has(var1[n], var2[n]);
+              } else {
+                re = false;
+                return TAFFY.EXIT;
+              }
+            });
+          } else if (T.isArray(var2)) {
+            each(var2, (v, n) => {
+              re = T.has(var1, var2[n]);
+              if (re) {
+                return TAFFY.EXIT;
+              }
+            });
+          } else if (T.isString(var2)) {
+            if (!TAFFY.isUndefined(var1[var2])) {
+              return true;
+            }
+            return false;
+          }
+          return re;
+        case 'array':
+          if (T.isObject(var2)) {
+            each(var1, (v, i) => {
+              re = T.has(var1[i], var2);
+              if (re === true) {
+                return TAFFY.EXIT;
+              }
+            });
+          } else if (T.isArray(var2)) {
+            each(var2, (v2, i2) => {
+              each(var1, (v1, i1) => {
+                re = T.has(var1[i1], var2[i2]);
+                if (re === true) {
+                  return TAFFY.EXIT;
+                }
+              });
+              if (re === true) {
+                return TAFFY.EXIT;
+              }
+            });
+          } else if (T.isString(var2) || T.isNumber(var2)) {
+            re = false;
+            for (n = 0; n < var1.length; n++) {
+              re = T.has(var1[n], var2);
+              if (re) {
+                return true;
+              }
+            }
+          }
+          return re;
+        case 'string':
+          if (T.isString(var2) && var2 === var1) {
+            return true;
+          }
+          break;
+        default:
+          if (T.typeOf(var1) === T.typeOf(var2) && var1 === var2) {
+            return true;
+          }
+          break;
+      }
+
       return false;
     };
 
@@ -1905,20 +1922,19 @@ var TAFFY, exports, T;
     // *
     // ****************************************
     TAFFY.hasAll = function (var1, var2) {
-      var T = TAFFY,
-        ar;
+      const T = TAFFY;
+      let ar;
       if (T.isArray(var2)) {
         ar = true;
-        each(var2, function (v) {
+        each(var2, (v) => {
           ar = T.has(var1, v);
           if (ar === false) {
             return TAFFY.EXIT;
           }
         });
         return ar;
-      } else {
-        return T.has(var1, var2);
       }
+      return T.has(var1, var2);
     };
 
     // ****************************************
@@ -1927,7 +1943,7 @@ var TAFFY, exports, T;
     // *
     // ****************************************
     TAFFY.typeOf = function (v) {
-      var s = typeof v;
+      let s = typeof v;
       if (s === 'object') {
         if (v) {
           if (
@@ -1951,8 +1967,8 @@ var TAFFY, exports, T;
     // *
     // ****************************************
     TAFFY.getObjectKeys = function (ob) {
-      var kA = [];
-      eachin(ob, function (n, h) {
+      const kA = [];
+      eachin(ob, (n, h) => {
         kA.push(h);
       });
       kA.sort();
@@ -1967,11 +1983,11 @@ var TAFFY, exports, T;
     // *
     // ****************************************
     TAFFY.isSameArray = function (ar1, ar2) {
-      return TAFFY.isArray(ar1) &&
+      return !!(
+        TAFFY.isArray(ar1) &&
         TAFFY.isArray(ar2) &&
         ar1.join(',') === ar2.join(',')
-        ? true
-        : false;
+      );
     };
 
     // ****************************************
@@ -1983,12 +1999,12 @@ var TAFFY, exports, T;
     // *
     // ****************************************
     TAFFY.isSameObject = function (ob1, ob2) {
-      var T = TAFFY,
-        rv = true;
+      const T = TAFFY;
+      let rv = true;
 
       if (T.isObject(ob1) && T.isObject(ob2)) {
         if (T.isSameArray(T.getObjectKeys(ob1), T.getObjectKeys(ob2))) {
-          eachin(ob1, function (v, n) {
+          eachin(ob1, (v, n) => {
             if (
               !(
                 (T.isObject(ob1[n]) &&
@@ -2037,13 +2053,13 @@ var TAFFY, exports, T;
 
     makeTest = function (thisKey) {
       return function (data) {
-        return TAFFY.typeOf(data) === thisKey.toLowerCase() ? true : false;
+        return TAFFY.typeOf(data) === thisKey.toLowerCase();
       };
     };
 
     for (idx = 0; idx < typeList.length; idx++) {
       typeKey = typeList[idx];
-      TAFFY['is' + typeKey] = makeTest(typeKey);
+      TAFFY[`is${typeKey}`] = makeTest(typeKey);
     }
   }
 })();

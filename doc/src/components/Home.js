@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Markdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import Typography from '@material-ui/core/Typography';
+import Link from 'next/link';
 import TrackerExample from './TrackerExample';
 
 const codeHtmlPage = `
@@ -93,8 +94,11 @@ function Home() {
           Maplibre GL JS
         </a>{' '}
         map. Check out the{' '}
-        <a href="/example/ol-tracker">Live Tracker with OpenLayers</a> example
-        to see how to use{' '}
+        <Link href="/examples/ol-tracker" passHref>
+          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+          <a>Live Tracker with OpenLayers</a>
+        </Link>{' '}
+        example to see how to use{' '}
         <a href="https://openlayers.org/" target="_blank" rel="noreferrer">
           OpenLayers
         </a>{' '}
