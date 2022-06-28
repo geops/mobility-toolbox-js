@@ -1,5 +1,5 @@
 [build]
-  command = "yarn doc"
+  command = "cd doc && yarn install --frozen-lockfile &&  yarn build"
   publish = "doc/.next"
 
 [[plugins]]
