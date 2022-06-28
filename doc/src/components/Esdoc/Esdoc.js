@@ -1,9 +1,10 @@
 /* eslint-disable react/prop-types */
+/* eslint-disable import/no-relative-packages */
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
-import { version } from 'mobility-toolbox-js/package.json';
+import { version } from '../../../../package.json';
 import EsdocContent from './EsdocContent';
 import EsdocNavigation from './EsdocNavigation';
 import EsdocSearch from './EsdocSearch';
