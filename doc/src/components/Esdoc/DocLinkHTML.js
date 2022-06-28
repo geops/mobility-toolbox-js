@@ -25,7 +25,7 @@ function DocLinkHTML({ longname, text = null, inner = false, kind = null }) {
     if (longname === 'typedefs') {
       return (
         <span>
-          <a href="/api/typedef/index%20html">{text || longname}</a>
+          <a href="/doc/typedef/index%20html">{text || longname}</a>
         </span>
       );
     }
@@ -51,7 +51,7 @@ function DocLinkHTML({ longname, text = null, inner = false, kind = null }) {
   if (url) {
     return (
       <span>
-        <Anchor path={`/api/${url.replace(/\./g, '%20')}-offset-anchor`}>
+        <Anchor path={`/doc/${url.replace(/\./g, '%20')}-offset-anchor`}>
           {text}
         </Anchor>
       </span>

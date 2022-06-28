@@ -90,7 +90,7 @@ function NavDoc() {
                 <Anchor
                   data-ice="dirPath"
                   className="nav-dir-path"
-                  path={`/api/identifiers%20html#${escapeURLHash(dirPath)}`}
+                  path={`/doc/identifiers%20html#${escapeURLHash(dirPath)}`}
                 >
                   {dirPath || 'api'}
                 </Anchor>

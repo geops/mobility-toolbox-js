@@ -1,17 +1,7 @@
-const withTM = require('next-transpile-modules')(['@geops/geops-ui', 'ol']);
-
 /** @type {import('next').NextConfig} */
-const nextConfig = withTM({
+const nextConfig = {
   reactStrictMode: true,
   webpack: (config) => {
-    config.module.rules.push({
-      test: /\.url\.svg$/,
-      use: ['file-loader'],
-    });
-    config.module.rules.push({
-      test: /^((?!url).)*\.svg/,
-      use: ['@svgr/webpack'],
-    });
     config.module.rules.push({
       test: /\.md$/,
       use: 'raw-loader',
@@ -23,6 +13,6 @@ const nextConfig = withTM({
 
     return config;
   },
-});
+};
 
 module.exports = nextConfig;

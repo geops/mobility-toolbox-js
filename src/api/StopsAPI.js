@@ -1,4 +1,4 @@
-import HttpAPI from '../../common/api/HttpAPI';
+import HttpAPI from '../common/api/HttpAPI';
 
 /**
  * Access to the [Stops service](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).

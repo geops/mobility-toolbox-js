@@ -9,29 +9,27 @@ import '../styles/identifiers.css';
 import '../styles/search.css';
 import '../styles/style.css';
 
+const tabs = [
+  {
+    label: 'Home',
+    href: '/home',
+  },
+  {
+    label: 'API',
+    href: '/doc',
+  },
+  {
+    label: 'Examples',
+    href: '/examples',
+  },
+  {
+    label: 'Code',
+    href: 'https://github.com/geops/mobility-toolbox-js',
+  },
+];
+
 function MyApp(props) {
   const { Component, pageProps } = props;
-
-  const tabs = useMemo(() => {
-    return [
-      {
-        label: 'Home',
-        href: '/home',
-      },
-      {
-        label: 'API',
-        href: '/api',
-      },
-      {
-        label: 'Examples',
-        href: '/examples',
-      },
-      {
-        label: 'Code',
-        href: 'https://github.com/geops/mobility-toolbox-js',
-      },
-    ];
-  }, []);
 
   useEffect(() => {
     // Remove the server-side injected CSS.

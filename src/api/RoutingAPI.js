@@ -1,4 +1,4 @@
-import HttpAPI from '../../common/api/HttpAPI';
+import HttpAPI from '../common/api/HttpAPI';
 
 /**
  * Access to the [Routing service](https://developer.geops.io/apis/routing).

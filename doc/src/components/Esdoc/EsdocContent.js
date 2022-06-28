@@ -13,16 +13,21 @@ import {
 
 // Preprocess the index.json content.
 // https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js
-let docs = _resolveExtendsChain(docss);
-docs = _resolveNecessary(docs);
-docs = _resolveIgnore(docs);
-docs = _resolveLink(docs);
+let docs;
 
 function EsdocContent({ path }) {
   let doc;
 
   if (!path) {
     return null;
+  }
+  if (!docs) {
+    // Preprocess the index.json content.
+    // https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js
+    docs = _resolveExtendsChain(docss);
+    docs = _resolveNecessary(docs);
+    docs = _resolveIgnore(docs);
+    docs = _resolveLink(docs);
   }
 
   const [firstPath] = path.split('#')[0].split('/');

@@ -1,4 +1,4 @@
-import WebSocketAPI from '../../common/api/WebSocketAPI';
+import WebSocketAPI from '../common/api/WebSocketAPI';
 import {
   getModeSuffix,
   cleanStopTime,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { useParams, useLocation } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core';
+import { useRouter } from 'next/router';
 import Esdoc from './Esdoc/Esdoc';
 
 const useStyles = makeStyles({
@@ -19,16 +19,18 @@ const useStyles = makeStyles({
 
 function Documentation() {
   const classes = useStyles();
-  const params = useParams();
-  const { hash } = useLocation();
+  const {
+    query: { slug },
+  } = useRouter();
+  // const params = useParams();
+  // const { hash } = useLocation();
   const [path, setPath] = useState('identifiers%20html');
 
   useEffect(() => {
-    const matchPath = (params || {})['*'];
-    if (matchPath) {
-      setPath(matchPath.replace(/ /g, '.') + hash);
+    if (slug?.length) {
+      setPath(slug.join('/').replace(/ /g, '.'));
     }
-  }, [params, hash]);
+  }, [slug]);
 
   return (
     <div className={classes.root}>

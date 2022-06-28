@@ -64,7 +64,7 @@ function EsdocSearch() {
                 {result.map((pair) => {
                   return (
                     <li>
-                      <a href={`/api/${pair[1]}`.replace(/\./g, '%20')}>
+                      <a href={`/doc/${pair[1]}`.replace(/\./g, '%20')}>
                         {pair[2]}
                       </a>
                     </li>

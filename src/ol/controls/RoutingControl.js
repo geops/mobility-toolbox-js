@@ -6,7 +6,7 @@ import { click } from 'ol/events/condition';
 import { GeoJSON } from 'ol/format';
 import { buffer } from 'ol/extent';
 import { fromLonLat, toLonLat } from 'ol/proj';
-import RoutingAPI from '../../api/routing/RoutingAPI';
+import { RoutingAPI } from '../../api';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
 

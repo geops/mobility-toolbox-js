@@ -1,7 +1,10 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-underscore-dangle */
 import React from 'react';
-import { taffy } from 'taffydb';
+
+// We had to copy the taffydb code here instead of loading the module because nextjs can't import the module properly
+// so the taffydb.js file in this folder is a copy paste from taffydb@2.7.3 with a esm default export at the end.
+import taffy from './taffydb';
 import docss from './index.json';
 
 /**
@@ -369,7 +372,7 @@ export const _resolveLink = (docs) => {
       }
       const url = _getURL(doc, false);
       if (url) {
-        return `[${longname}](/api/${url.replace(/\./g, '%20')})`;
+        return `[${longname}](/doc/${url.replace(/\./g, '%20')})`;
       }
     });
   };

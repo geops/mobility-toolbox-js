@@ -2,7 +2,7 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-import StopsAPI from '../../api/stops/StopsAPI';
+import { StopsAPI } from '../../api';
 
 /**
  * Search control interface.

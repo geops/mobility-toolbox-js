@@ -1,4 +1,4 @@
-import { TralisAPI, TralisModes } from '..';
+import { TralisAPI, TralisModes } from '.';
 
 describe('TralisAPI', () => {
   let tralisAPI;

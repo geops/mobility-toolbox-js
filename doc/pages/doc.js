@@ -1,24 +1,22 @@
 import React from 'react';
 import { Container, makeStyles } from '@material-ui/core';
-import Home from '../src/components/Home';
+import Documentation from '../src/components/Documentation';
 
 const useStyles = makeStyles({
-  content: {
+  root: {
     flexGrow: 1,
     overflowY: 'auto',
-    paddingBottom: 115,
-    margin: 'auto',
-    marginTop: 30,
+    padding: 0,
   },
 });
 
-function HomePage() {
+function ApiPage() {
   const classes = useStyles();
   return (
-    <Container className={classes.content}>
-      <Home />
+    <Container className={classes.root}>
+      <Documentation />
     </Container>
   );
 }
 
-export default HomePage;
+export default ApiPage;

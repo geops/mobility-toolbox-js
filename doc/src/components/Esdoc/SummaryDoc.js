@@ -15,7 +15,7 @@ const showInheritedHref = (memberof, parentMemberOf) => {
   return (
     <>
       Inherited from:{' '}
-      <a href={`/api/class/${memberof.replace('.', '%20')}%20html`}>
+      <a href={`/doc/class/${memberof.replace('.', '%20')}%20html`}>
         {name.length && name[1]}
       </a>
     </>
