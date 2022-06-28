@@ -87,7 +87,7 @@
     "cy:test:firefox": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'",
     "dev": "yarn doc && yarn dev:examples",
     "dev:examples": "cd doc && yarn dev",
-    "doc": "yarn apidoc && cd doc && yarn build",
+    "doc": "yarn apidoc && cd doc && yarn install --frozen-lockfile && yarn build",
     "esbuild": "rm -rf build && yarn esbuild:all && yarn esbuild:iife && cp README.md build/ && cp package.json build/",
     "esbuild:all": "esbuild src/index.js src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
     "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
