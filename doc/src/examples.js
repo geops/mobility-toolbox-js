@@ -1,13 +1,3 @@
-import liveTrackerOLImg from './img/examples/live_tracker_ol.jpg';
-import liveTrackerMBImg from './img/examples/live_tracker_mb.jpg';
-// import liveTrackerMunichImg from './img/examples/live_tracker_munich.jpg';
-import mapboxImg from './img/examples/mapbox.jpg';
-import mapboxStyleImg from './img/examples/mapbox_style.jpg';
-import queryObjectsImg from './img/examples/query_objects.jpg';
-import olCopyrightImg from './img/examples/ol-copyright.png';
-import stopsImg from './img/examples/stops.jpg';
-import routingImg from './img/examples/routing.jpg';
-
 // We load statically the readme to have the content when the page use server side rendering.
 import olTrackerReadme from '../public/static/examples/ol-tracker.md';
 import mbTrackerReadme from '../public/static/examples/mb-tracker.md';
@@ -25,7 +15,7 @@ export default [
     key: 'ol-tracker',
     description:
       'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
-    img: liveTrackerOLImg,
+    img: '/static/img/live_tracker_ol.jpg',
     readme: olTrackerReadme,
   },
   {
@@ -33,7 +23,7 @@ export default [
     key: 'mb-tracker',
     description:
       'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
-    img: liveTrackerMBImg,
+    img: '/static/img/live_tracker_mb.jpg',
     readme: mbTrackerReadme,
   },
   {
@@ -41,7 +31,7 @@ export default [
     key: 'ol-stop-finder',
     description:
       'Use the [geOps Stops API](https://developer.geops.io/apis/stops/) for finding public transport stops.',
-    img: stopsImg,
+    img: '/static/img/stops.jpg',
     readme: olStopFinderReadme,
   },
   {
@@ -49,7 +39,7 @@ export default [
     key: 'routing-control',
     description:
       'Use the [geOps Routing API](https://developer.geops.io/apis/routing/) to find the shortest route between 2 points.',
-    img: routingImg,
+    img: '/static/img/routing.jpg',
     readme: olRoutingReadme,
     files: {
       html: 'ol-routing.html',
@@ -86,34 +76,34 @@ export default [
     name: 'Mapbox layer',
     key: 'ol-mapbox-layer',
     description: 'Display a Mapbox style on an OpenLayers map.',
-    img: mapboxImg,
+    img: '/static/img/mapbox.jpg',
   },
   {
     name: 'Mapbox Style layer',
     key: 'ol-mapbox-style-layer',
     description:
       'Display/hide a set of layers of a Mapbox style on an OpenLayers map.',
-    img: mapboxStyleImg,
+    img: '/static/img/mapbox_style.jpg',
   },
   {
     name: 'Querying objects',
     key: 'ol-query',
     description:
       'This example shows how to query objects in different kinds of layers.',
-    img: queryObjectsImg,
+    img: '/static/img/query_objects.jpg',
   },
   {
     name: 'Copyrights with OpenLayers',
     key: 'ol-copyright',
     description:
       'This example shows how to use the CopyrightControl component.',
-    img: olCopyrightImg,
+    img: '/static/img/ol-copyright.png',
   },
   {
     name: 'Copyrights with Mapbox',
     key: 'mb-copyright',
     description:
       'This example shows how to use the CopyrightControl component.',
-    img: olCopyrightImg,
+    img: '/static/img/ol-copyright.png',
   },
 ];

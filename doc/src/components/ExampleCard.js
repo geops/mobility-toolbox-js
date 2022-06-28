@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   exampleLink: {
     height: '100%',
     width: '100%',
-    color: 'black',
+    color: '#353535',
   },
   container: {
     display: 'flex',
@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
       border: '5px solid white',
     },
     cursor: 'pointer',
-    zIndex: 0,
+    zIndex: 1,
   },
   cardOverlayHover: {
     border: '5px solid white',
@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     width: '100%',
     boxShadow: 'none',
-    zIndex: 10000,
+    zIndex: 0,
   },
 }));
 
@@ -97,11 +97,13 @@ function ExampleCard({ example }) {
 
   return (
     <div className={classes.cardWrapper}>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <div
         className={
           classes.cardOverlay +
           (example === raisedExample ? ` ${classes.cardOverlayHover}` : '')
         }
+        onClick={() => router.push(`/example/${example.key}`)}
       />
       <Card
         classes={{
@@ -113,11 +115,9 @@ function ExampleCard({ example }) {
         onFocus={() => setRaisedExample(example)}
         onBlur={() => setRaisedExample()}
       >
-        <CardActionArea
-          onClick={() => router.replace(`/example/${example.key}`)}
-        >
+        <CardActionArea onClick={() => router.push(`/example/${example.key}`)}>
           <CardMedia
-            image={example.img.src}
+            image={example.img}
             style={{
               paddingTop: '56.25%',
             }}
