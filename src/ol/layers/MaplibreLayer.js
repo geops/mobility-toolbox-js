@@ -6,7 +6,7 @@ import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import { toDegrees } from 'ol/math';
 import Layer from './Layer';
-import { getMapboxMapCopyrights, getMapboxStyleUrl } from '../../common/utils';
+import { getMapboxMapCopyrights, getUrlWithParams } from '../../common/utils';
 
 /**
  * A class representing MaplibreLayer to display on BasicMap
@@ -142,14 +142,6 @@ export default class MaplibreLayer extends Layer {
   }
 
   /**
-   * Returns a style URL with apiKey & apiKeyName infos.
-   * @private
-   */
-  createStyleUrl() {
-    return getMapboxStyleUrl(this.apiKey, this.apiKeyName, this.styleUrl);
-  }
-
-  /**
    * Create the mapbox map.
    * @private
    */
@@ -179,12 +171,21 @@ export default class MaplibreLayer extends Layer {
     container.style.width = '100%';
     container.style.height = '100%';
 
+    if (!this.apiKey && !this.styleUrl.includes(this.apiKeyName)) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `No apiKey defined for mapbox layer with style url to ${this.url}`,
+      );
+    }
+
     /**
      * A mapbox map
      * @type {mapboxgl.Map}
      */
     this.mbMap = new Map({
-      style: this.createStyleUrl(),
+      style: getUrlWithParams(this.styleUrl, {
+        [this.apiKeyName]: this.apiKey,
+      }),
       container,
       interactive: false,
       trackResize: false,

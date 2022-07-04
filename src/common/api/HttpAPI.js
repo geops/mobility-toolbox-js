@@ -1,5 +1,5 @@
 import BaseObject from 'ol/Object';
-
+import getUrlWithParams from '../utils/getUrlWithParams';
 /**
  * Common class to access to a geOps api using http.
  *
@@ -37,24 +37,13 @@ class HttpAPI extends BaseObject {
     }
 
     // Clean requets parameters, removing undefined and null values.
-    const url = new URL(`${this.url}${path || ''}`);
-
-    if (this.apiKey) {
-      url.searchParams.set('key', this.apiKey);
-    }
-
     const searchParams = params || {};
-    Object.entries(searchParams).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        url.searchParams.set(key, value);
-      }
+    const url = getUrlWithParams(`${this.url}${path || ''}`, {
+      key: this.apiKey,
+      ...searchParams,
     });
 
-    if (this.apiKey) {
-      url.searchParams.set('key', this.apiKey);
-    }
-
-    return fetch(url.toString(), config).then((response) => {
+    return fetch(url, config).then((response) => {
       try {
         return response.json().then((data) => {
           if (data.error) {
