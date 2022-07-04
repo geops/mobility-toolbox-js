@@ -8,7 +8,8 @@
     ".": "./index.js",
     "./api": "./api/index.js",
     "./mapbox": "./mapbox/index.js",
-    "./ol": "./ol/index.js"
+    "./ol": "./ol/index.js",
+    "./types": "./types/index.d.ts"
   },
   "dependencies": {
     "@turf/helpers": "^6.5.0",
@@ -63,6 +64,7 @@
     "maplibre-gl": "2.1.9",
     "mock-socket": "9.1.2",
     "ol": "6.12.0",
+    "openapi-typescript": "^5.4.0",
     "postcss": "8.3.3",
     "postcss-loader": "3.0.0",
     "prettier": "2.5.1",
@@ -106,7 +108,8 @@
     "start": "yarn doc && cd doc && yarn start",
     "start:examples": "cd doc && yarn build && yarn start",
     "test": "TZ='UTC' jest",
-    "test:watch": "yarn test --watchAll"
+    "test:watch": "yarn test --watchAll",
+    "types:backend": "openapi-typescript https://developer.geops.io/swagger/routing.json --output types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output types/stops.d.ts"
   },
   "browserslist": {
     "production": [
