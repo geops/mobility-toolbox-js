@@ -19,7 +19,8 @@ describe('MapboxStyleLayer', () => {
     onClick = jest.fn();
     source = new MaplibreLayer({
       name: 'Layer',
-      apiKey: false,
+      apiKey: 'foo',
+      url: 'https://foo.com/styles',
     });
     layer = new MapboxStyleLayer({
       name: 'mapbox layer',
@@ -172,7 +173,7 @@ describe('MapboxStyleLayer', () => {
     });
   });
 
-  describe('#getFeatureInfoAtCoordinate()', () => {
+  describe.only('#getFeatureInfoAtCoordinate()', () => {
     beforeEach(() => {
       source.attachToMap(map);
       source.mbMap.isStyleLoaded = jest.fn(() => true);

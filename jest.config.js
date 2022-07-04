@@ -16,10 +16,10 @@ const config = {
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testEnvironment: 'jsdom',
   transform: {
-    '.+\\.[jt]sx?$': ['esbuild-jest'],
+    '.+\\.[jt]s$': ['esbuild-jest'],
   },
   transformIgnorePatterns: ['node_modules/(?!(ol|geotiff))'],
-  testMatch: ['<rootDir>/src/**/?(*.)+(spec|test).[jt]sx?$'],
+  testMatch: ['<rootDir>/src/**/?(*.)+(spec|test).(j|t)s'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
 };
 

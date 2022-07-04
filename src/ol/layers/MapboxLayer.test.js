@@ -6,7 +6,7 @@ import MapboxLayer from './MapboxLayer';
 let layer;
 let map;
 let consoleOutput;
-const styleUrl = 'foo.com/styles';
+const styleUrl = 'http://foo.com/styles';
 
 describe('MapboxLayer', () => {
   describe('without apiKey', () => {
@@ -39,7 +39,7 @@ describe('MapboxLayer', () => {
       layer.attachToMap(map);
       expect(layer.mbMap).toBeInstanceOf(gllib.Map);
       expect(consoleOutput[0]).toBe(
-        'No apiKey is defined for request to foo.com/styles',
+        'No apiKey is defined for request to http://foo.com/styles',
       );
     });
 
@@ -87,7 +87,9 @@ describe('MapboxLayer', () => {
         apiKey: 'apiKeyVal',
       });
       layer1.attachToMap(map);
-      expect(layer1.mbMap.options.style).toBe('foo.com/styles?key=apiKeyVal');
+      expect(layer1.mbMap.options.style).toBe(
+        'http://foo.com/styles?key=apiKeyVal',
+      );
     });
 
     test("should initalized mapbox map, with 'apiKeyName' prop", () => {
@@ -98,7 +100,9 @@ describe('MapboxLayer', () => {
         apiKeyName: 'apiKey',
       });
       layer1.attachToMap(map);
-      expect(layer1.mbMap.options.style).toBe('foo.com/styles?apiKey=test');
+      expect(layer1.mbMap.options.style).toBe(
+        'http://foo.com/styles?apiKey=test',
+      );
     });
   });
 

@@ -1,8 +1,7 @@
-import qs from 'query-string';
 import BaseObject from 'ol/Object';
 
 /**
- * Common class to access to a geOps api.
+ * Common class to access to a geOps api using http.
  *
  * @example
  * import { API } from 'mobility-toolbox-js/api';
@@ -15,7 +14,7 @@ import BaseObject from 'ol/Object';
  * @classproperty {string} url Url of the service.
  * @classproperty {string} apiKey Api key to access the service.
  */
-class HttpApi extends BaseObject {
+class HttpAPI extends BaseObject {
   constructor(options = {}) {
     super();
     /** @ignore */
@@ -30,23 +29,32 @@ class HttpApi extends BaseObject {
    * @ignore
    */
   fetch(path, params, config) {
-    // Clean requets parameters, removing undefined and null values.
-    const urlParams = { ...(params || {}), key: this.apiKey };
-    const clone = { ...urlParams };
-    Object.keys(urlParams).forEach(
-      (key) =>
-        (clone[key] === undefined || clone[key] === null) && delete clone[key],
-    );
-    if (!this.apiKey) {
+    if (!this.apiKey && !/key=/.test(this.url)) {
       // eslint-disable-next-line no-console
       return Promise.reject(
         new Error(`No apiKey defined for request to ${this.url}`),
       );
     }
-    return fetch(
-      `${this.url}${path || ''}?${qs.stringify(clone)}`,
-      config,
-    ).then((response) => {
+
+    // Clean requets parameters, removing undefined and null values.
+    const url = new URL(`${this.url}${path || ''}`);
+
+    if (this.apiKey) {
+      url.searchParams.set('key', this.apiKey);
+    }
+
+    const searchParams = params || {};
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.set(key, value);
+      }
+    });
+
+    if (this.apiKey) {
+      url.searchParams.set('key', this.apiKey);
+    }
+
+    return fetch(url.toString(), config).then((response) => {
       try {
         return response.json().then((data) => {
           if (data.error) {
@@ -61,4 +69,4 @@ class HttpApi extends BaseObject {
   }
 }
 
-export default HttpApi;
+export default HttpAPI;

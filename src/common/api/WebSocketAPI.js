@@ -3,7 +3,7 @@
  * also to manage properly messages send to the WebSocket.
  * This class must not contain any specific implementation.
  */
-class WebSocketApi {
+class WebSocketAPI {
   constructor() {
     this.defineProperties();
   }
@@ -240,7 +240,7 @@ class WebSocketApi {
    * @private
    */
   get(params, cb, errorCb) {
-    const reqStr = WebSocketApi.getRequestString('GET', params);
+    const reqStr = WebSocketAPI.getRequestString('GET', params);
     this.send(reqStr);
     this.listen(params, cb, errorCb);
   }
@@ -256,7 +256,7 @@ class WebSocketApi {
    */
   subscribe(params, cb, errorCb, quiet = false) {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
-    const reqStr = WebSocketApi.getRequestString('', params);
+    const reqStr = WebSocketAPI.getRequestString('', params);
 
     const index = this.subscriptions.findIndex(
       (subcr) => params.channel === subcr.params.channel && cb === subcr.cb,
@@ -333,4 +333,4 @@ class WebSocketApi {
   }
 }
 
-export default WebSocketApi;
+export default WebSocketAPI;
