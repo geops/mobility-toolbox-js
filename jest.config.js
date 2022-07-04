@@ -16,7 +16,7 @@ const config = {
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testEnvironment: 'jsdom',
   transform: {
-    '.+\\.js$': ['esbuild-jest'],
+    '.+\\.(j|t)sx?$': ['esbuild-jest'],
   },
   transformIgnorePatterns: ['node_modules/(?!(ol|geotiff))'],
   testMatch: ['<rootDir>/src/**/?(*.)+(spec|test).[jt]s?(x)'],

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "outDir": "./build",
+    "allowJs": true,
+    "target": "es5",
+    // Generate d.ts files
+    "declaration": true,
+    // This compiler run should
+    // only output d.ts files
+    "emitDeclarationOnly": true,
+    // go to js file when using IDE functions like
+    // "Go to Definition" in VSCode
+    "declarationMap": true
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["./src/**/*.test.js"]
+}

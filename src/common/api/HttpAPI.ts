@@ -1,5 +1,9 @@
-import qs from 'query-string';
 import BaseObject from 'ol/Object';
+
+export type HttpApiOptions = {
+  url: string;
+  apiKey?: string;
+};
 
 /**
  * Common class to access to a geOps api.
@@ -16,7 +20,10 @@ import BaseObject from 'ol/Object';
  * @classproperty {string} apiKey Api key to access the service.
  */
 class HttpApi extends BaseObject {
-  constructor(options = {}) {
+  url: string;
+  apiKey: string;
+
+  constructor(options: HttpApiOptions) {
     super();
     /** @ignore */
     this.url = options.url;
@@ -29,7 +36,7 @@ class HttpApi extends BaseObject {
    * Append the apiKey before sending the request.
    * @ignore
    */
-  fetch(path, params, config) {
+  fetch(path: string, params: Object, config: RequestInit): Promise<any> {
     // Clean requets parameters, removing undefined and null values.
     const urlParams = { ...(params || {}), key: this.apiKey };
     const clone = { ...urlParams };
@@ -37,16 +44,18 @@ class HttpApi extends BaseObject {
       (key) =>
         (clone[key] === undefined || clone[key] === null) && delete clone[key],
     );
+    const url = new URL(this.url + path);
+    Object.entries(clone).forEach(([key, value]) => {
+      url.searchParams.append(key, value);
+    });
     if (!this.apiKey) {
       // eslint-disable-next-line no-console
       return Promise.reject(
         new Error(`No apiKey defined for request to ${this.url}`),
       );
     }
-    return fetch(
-      `${this.url}${path || ''}?${qs.stringify(clone)}`,
-      config,
-    ).then((response) => {
+
+    return fetch(url.toString(), config).then((response) => {
       try {
         return response.json().then((data) => {
           if (data.error) {

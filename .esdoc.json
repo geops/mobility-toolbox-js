@@ -1,12 +1,13 @@
 {
   "source": "./src",
   "destination": "./apidoc",
-  "includes": ["\\.js$"],
+  "includes": ["\\.(js|ts)$"],
   "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
   "plugins": [
     {
       "name": "esdoc-standard-plugin"
     },
+    { "name": "esdoc-typescript-plugin", "option": { "enable": true } },
     { "name": "esdoc-ecmascript-proposal-plugin", "option": { "all": true } },
     {
       "name": "esdoc-publish-html-plugin"
