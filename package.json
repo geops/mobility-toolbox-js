@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.13",
+  "version": "2.0.0-beta.14",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
@@ -80,7 +80,7 @@
   },
   "scripts": {
     "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
-    "build": "yarn esbuild",
+    "build": "rm -rf build && yarn esbuild && cp README.md build/ && cp package.json build/ && cp -R src/types build/",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
     "cy:test": "start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'",
@@ -90,7 +90,7 @@
     "dev": "yarn doc && yarn dev:examples",
     "dev:examples": "cd doc && yarn dev",
     "doc": "yarn apidoc && cd doc && yarn install --frozen-lockfile && yarn build",
-    "esbuild": "rm -rf build && yarn esbuild:all && yarn esbuild:iife && cp README.md build/ && cp package.json build/",
+    "esbuild": "yarn esbuild:all && yarn esbuild:iife",
     "esbuild:all": "esbuild src/index.js src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
     "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
     "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
