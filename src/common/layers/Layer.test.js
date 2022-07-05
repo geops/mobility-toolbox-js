@@ -47,13 +47,13 @@ describe('Layer', () => {
 
   test('should be hidden using setter.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
-    layer.setVisible(false);
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
   test('should visibility stay unchanged', () => {
     const layer = new Layer({ name: 'Layer', visible: false, olLayer });
-    layer.setVisible(false);
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
@@ -112,8 +112,7 @@ describe('Layer', () => {
         }),
       ],
     });
-    expect(layer.getVisibleChildren().length).toBe(1);
-    expect(layer.hasVisibleChildren()).toBe(true);
+    expect(layer.children.length).toBe(2);
   });
 
   test('should set onClick using constructor.', () => {
@@ -178,103 +177,6 @@ describe('Layer', () => {
       const spy = jest.spyOn(layer, 'detachFromMap');
       layer.attachToMap();
       expect(spy).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('#get() and #set()', () => {
-    test('should get/set a properties.', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      expect(layer.get('foo')).toBe(undefined);
-      layer.set('foo', 'bar');
-      expect(layer.get('foo')).toBe('bar');
-    });
-  });
-
-  describe('#set()', () => {
-    test('should dispatch a change event.', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      layer.set('foo', 'bar');
-      expect(spy).toHaveBeenCalledWith({ type: 'change:foo', target: layer });
-    });
-  });
-
-  describe('#setVisible()', () => {
-    test("should not trigger a change event if the visiblity hasn't changed.", () => {
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      layer.setVisible(false, 'foo', 'bar', 'qux');
-      expect(spy).toHaveBeenCalledTimes(0);
-    });
-
-    test('should trigger a change event only if the visiblity change.', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      layer.setVisible(true, 'foo', 'bar', 'qux');
-      expect(layer.visible).toBe(true);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({
-        type: 'change:visible',
-        target: layer,
-        stopPropagationDown: 'foo',
-        stopPropagationUp: 'bar',
-        stopPropagationSiblings: 'qux',
-      });
-    });
-  });
-
-  describe('#getVisibleChildren()', () => {
-    test('should return only visible child.', () => {
-      const layerVisible = { visible: true };
-      const layerVisible2 = { visible: true };
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerHidden, layerVisible2],
-      });
-      expect(layer.getVisibleChildren()).toEqual([layerVisible, layerVisible2]);
-    });
-  });
-
-  describe('#hasVisibleChildren()', () => {
-    test('should return true.', () => {
-      const layerVisible = { visible: true };
-      const layerVisible2 = { visible: true };
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerHidden, layerVisible2],
-      });
-      expect(layer.hasVisibleChildren()).toEqual(true);
-    });
-
-    test('should return false.', () => {
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerHidden],
-      });
-      expect(layer.hasVisibleChildren()).toEqual(false);
     });
   });
 

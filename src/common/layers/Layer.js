@@ -1,4 +1,4 @@
-import Observable from 'ol/Observable';
+import BaseObject from 'ol/Object';
 import { v4 as uuid } from 'uuid';
 
 /**
@@ -22,7 +22,7 @@ import { v4 as uuid } from 'uuid';
  * @classproperty {Object} properties - Custom properties.
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
  */
-export default class Layer extends Observable {
+export default class Layer extends BaseObject {
   /**
    * Constructor
    *
@@ -55,11 +55,42 @@ export default class Layer extends Observable {
       this.onClick(onClick);
     }
 
+    if (options.properties) {
+      this.setProperties(options.properties);
+    }
+
     // This if is very important if you remove it you break the copyright control.
     if (options.copyrights) {
       /** @ignore */
       this.copyrights = options.copyrights;
     }
+
+    this.visible = options.visible === undefined ? true : options.visible;
+
+    if (this.children) {
+      this.children.forEach((child) => {
+        // eslint-disable-next-line no-param-reassign
+        child.parent = this;
+      });
+    }
+
+    this.group = options.group;
+
+    // Listen for group visiblity change
+    // if a layer from a group is newly visible we hide the others.
+    this.on(`change:visible:group`, (evt) => {
+      // We hide layer of the same group
+      if (
+        this.group === evt.target.group &&
+        this !== evt.target &&
+        this.visible
+      ) {
+        this.visible = false;
+        // Propagate event to parent
+      } else if (this.children) {
+        this.children.forEach((child) => child.dispatchEvent(evt));
+      }
+    });
 
     /** @ignore */
     this.onUserClickCallback = this.onUserClickCallback.bind(this);
@@ -69,7 +100,7 @@ export default class Layer extends Observable {
   }
 
   /**
-   * Define layer's properties.
+   * Define layer's properties that needs custom get and set.
    *
    * @ignore
    */
@@ -78,7 +109,6 @@ export default class Layer extends Observable {
       name,
       key,
       children,
-      visible,
       properties,
       isBaseLayer,
       isQueryable,
@@ -123,6 +153,10 @@ export default class Layer extends Observable {
         value: hitTolerance || 5,
         writable: true,
       },
+      parent: {
+        value: null,
+        writable: true,
+      },
       children: {
         value: children || [],
         writable: true,
@@ -136,9 +170,55 @@ export default class Layer extends Observable {
           this.set('copyrights', arrValue);
         },
       },
+      group: {
+        get: () => this.get('group'),
+        set: (newGroup) => {
+          this.set('group', newGroup);
+        },
+      },
       visible: {
-        value: visible === undefined ? true : visible,
-        writable: true,
+        get: () => this.get('visible'),
+        set: (newVisible) => {
+          if (newVisible === this.visible) {
+            return;
+          }
+
+          this.set('visible', newVisible);
+
+          if (this.visible) {
+            if (this.parent && !this.parent.visible) {
+              this.parent.visible = true;
+            }
+
+            if (this.children && this.children.find((child) => child.group)) {
+              const child = this.children.find((childd) => !!childd.group);
+              // Make visible only radioGroup layers
+              child.visible = true;
+            }
+
+            // Warn the same group that a new layer is visible
+            if (this.parent && this.group) {
+              // We search for the higher parent then it will dispatch to all the tree.
+              let higherParent = this.parent;
+
+              while (higherParent.parent) {
+                higherParent = higherParent.parent;
+              }
+              higherParent.dispatchEvent({
+                type: `change:visible:group`,
+                target: this,
+              });
+            }
+          } else if (!this.visible) {
+            if (
+              this.parent &&
+              this.parent.visible &&
+              !this.parent.children.find((child) => child.visible)
+            ) {
+              this.parent.visible = false;
+            }
+          }
+        },
       },
       properties: {
         value: { ...(properties || {}) },
@@ -170,87 +250,21 @@ export default class Layer extends Observable {
     this.detachFromMap();
     /** @ignore */
     this.map = map;
+
+    if (this.children) {
+      this.children.forEach((child) => {
+        child.attachToMap(map);
+      });
+    }
   }
 
   /**
    * Terminate what was initialized in init function. Remove layer, events...
    */
   // eslint-disable-next-line class-methods-use-this
-  detachFromMap() {}
-
-  /**
-   * Get a layer property.
-   *
-   * @param {string} name Property name.
-   * @return {property} Property
-   */
-  get(name) {
-    return this.properties[name];
-  }
-
-  /**
-   * Set a layer property.
-   *
-   * @param {string} name Property name.
-   * @param {string} value Value.
-   */
-  set(name, value) {
-    if (value !== this.properties[name]) {
-      this.properties[name] = value;
-      this.dispatchEvent({
-        type: `change:${name}`,
-        target: this,
-      });
-    }
-  }
-
-  /**
-   * Change the visibility of the layer
-   *
-   * @param {boolean} visible Defines the visibility of the layer
-   * @param {boolean} [stopPropagationDown]
-   * @param {boolean} [stopPropagationUp]
-   * @param {boolean} [stopPropagationSiblings]
-   */
-  setVisible(
-    visible,
-    stopPropagationDown = false,
-    stopPropagationUp = false,
-    stopPropagationSiblings = false,
-  ) {
-    if (visible === this.visible) {
-      return;
-    }
-
+  detachFromMap() {
     /** @ignore */
-    this.visible = visible;
-
-    this.dispatchEvent({
-      type: 'change:visible',
-      target: this,
-      stopPropagationDown,
-      stopPropagationUp,
-      stopPropagationSiblings,
-    });
-  }
-
-  /**
-   * Returns an array with visible child layers
-   *
-   * @return {Layer[]} Visible children
-   */
-  getVisibleChildren() {
-    return this.children.filter((child) => child.visible);
-  }
-
-  /**
-   * Checks whether the layer has child layers with visible set to True
-   *
-   * @return {boolean} True if the layer has visible child layers
-   * @deprecated
-   */
-  hasVisibleChildren() {
-    return !!this.children.find((child) => child.visible === true);
+    // this.map = null;
   }
 
   /**

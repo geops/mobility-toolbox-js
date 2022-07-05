@@ -45,13 +45,13 @@ describe('Layer', () => {
 
   test('should be invisible if set.', () => {
     const layer = new Layer({ name: 'Layer' });
-    layer.setVisible(false);
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
   test('should visibility stay unchanged', () => {
     const layer = new Layer({ name: 'Layer', visible: false });
-    layer.setVisible(false);
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
@@ -93,7 +93,7 @@ describe('Layer', () => {
     spy.mockReset();
     spy2.mockReset();
 
-    layer.setVisible(false);
+    layer.visible = false;
     await map.fire('mousemove', {
       type: 'mousemove',
       lngLat: { toArray: () => [0, 0] },
@@ -133,7 +133,7 @@ describe('Layer', () => {
     spy.mockReset();
     spy2.mockReset();
 
-    layer.setVisible(true);
+    layer.visible = true;
     await map.fire('mousemove', {
       type: 'mousemove',
       lngLat: { toArray: () => [0, 0] },

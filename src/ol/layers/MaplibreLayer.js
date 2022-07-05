@@ -34,9 +34,7 @@ export default class MaplibreLayer extends Layer {
     const mbLayer = new OLLayer({
       source: new Source({}),
       render: (frameState) => {
-        if (!this.mbMap) {
-          // eslint-disable-next-line no-console
-          console.warn("Mapbox map doesn't exist.");
+        if (!this.map || !this.mbMap) {
           return null;
         }
 

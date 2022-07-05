@@ -18,7 +18,7 @@ const config = {
   transform: {
     '.+\\.[jt]s$': ['esbuild-jest'],
   },
-  transformIgnorePatterns: ['node_modules/(?!(ol|geotiff))'],
+  transformIgnorePatterns: ['node_modules/(?!(ol|geotiff|quick-lru))'],
   testMatch: ['<rootDir>/src/**/?(*.)+(spec|test).(j|t)s'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
 };

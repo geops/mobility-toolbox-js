@@ -107,9 +107,9 @@ describe('CopyrightControl', () => {
     expect(control.element.innerHTML).toBe('copyright');
 
     // the we update visibility of both layers
-    layer1.setVisible(true);
+    layer1.visible = true;
     map.renderSync();
-    layer2.setVisible(false);
+    layer2.visible = false;
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright hidden');
   });

@@ -71,6 +71,14 @@ class Layer extends LayerCommon {
     }
 
     this.olListenersKeys.push(
+      this.on('change:visible', () => {
+        if (this.olLayer) {
+          this.olLayer.setVisible(this.visible);
+        }
+      }),
+    );
+
+    this.olListenersKeys.push(
       this.map.getLayers().on('remove', (evt) => {
         if (evt.element === this.olLayer) {
           this.detachFromMap();
@@ -112,36 +120,6 @@ class Layer extends LayerCommon {
     }
 
     super.detachFromMap();
-  }
-
-  /**
-   * Change the visibility of the layer
-   *
-   * @param {boolean} visible Defines the visibility of the layer
-   * @param {boolean} [stopPropagationDown]
-   * @param {boolean} [stopPropagationUp]
-   * @param {boolean} [stopPropagationSiblings]
-   */
-  setVisible(
-    visible,
-    stopPropagationDown = false,
-    stopPropagationUp = false,
-    stopPropagationSiblings = false,
-  ) {
-    if (visible === this.visible) {
-      return;
-    }
-
-    super.setVisible(
-      visible,
-      stopPropagationDown,
-      stopPropagationUp,
-      stopPropagationSiblings,
-    );
-
-    if (this.olLayer) {
-      this.olLayer.setVisible(this.visible);
-    }
   }
 
   /**
