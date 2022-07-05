@@ -82,16 +82,4 @@ describe('TralisLayer', () => {
     expect(laye).toBeInstanceOf(TralisLayer);
     expect(laye.filter).toBe(fn);
   });
-
-  test('should override filter function if operator, tripNumber, regexPublishedLineName is set.', () => {
-    const fn = () => true;
-    const laye = new TralisLayer({
-      url: 'ws://localhost:1234',
-      apiKey: 'apiKey',
-      filter: fn, // reverse the array
-      publishedLineName: '.*',
-    });
-    expect(laye).toBeInstanceOf(TralisLayer);
-    expect(laye.filter).not.toBe(fn);
-  });
 });

@@ -39,8 +39,8 @@ export const getDelayTextCanvas = (
   fontSize,
   font,
   delayColor,
-  delayOutlineColor,
-  pixelRatio,
+  delayOutlineColor = '#000',
+  pixelRatio = 1,
 ) => {
   const key = `${width}, ${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
   if (!cacheDelayText[key]) {
@@ -153,8 +153,8 @@ const style = (trajectory, viewState, options) => {
     hoverVehicleId,
     selectedVehicleId,
     useDelayStyle,
-    delayOutlineColor,
-    delayDisplay,
+    delayOutlineColor = '#000',
+    delayDisplay = 300000,
   } = options;
 
   const { zoom, pixelRatio } = viewState;

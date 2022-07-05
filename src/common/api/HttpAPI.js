@@ -43,7 +43,8 @@ class HttpAPI extends BaseObject {
       ...searchParams,
     });
 
-    return fetch(url, config).then((response) => {
+    // We use toString  because of TYpeScript bug that only accept a string in fetch method.
+    return fetch(url.toString(), config).then((response) => {
       try {
         return response.json().then((data) => {
           if (data.error) {

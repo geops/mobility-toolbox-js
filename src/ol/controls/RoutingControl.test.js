@@ -1,6 +1,5 @@
 import fetch from 'jest-fetch-mock';
 import View from 'ol/View';
-import qs from 'query-string';
 import Map from 'ol/Map';
 import RoutingControl from './RoutingControl';
 
@@ -164,8 +163,8 @@ describe('RoutingControl', () => {
       'e3666f03cba06b2b',
     ];
     control.drawRoute(control.viaPoints).then(() => {
-      const params = qs.parseUrl(fetch.mock.calls[1][0]).query;
-      expect(params.via).toBe(
+      const { searchParams } = new URL(fetch.mock.calls[1][0]);
+      expect(searchParams.get('via')).toBe(
         '@47.3739194713294,8.538274823394632|@47.37595378493421,8.537490375951839|!e3666f03cba06b2b',
       );
       done();
@@ -196,8 +195,8 @@ describe('RoutingControl', () => {
       [950389, 6003656],
     ];
     control.drawRoute(control.viaPoints).then(() => {
-      const params = qs.parseUrl(fetch.mock.calls[2][0]).query;
-      expect(params.via).toBe(
+      const params = new URL(fetch.mock.calls[2][0]).searchParams;
+      expect(params.get('via')).toBe(
         '46.2,7.1|@46.2,7.1|@46.2,7$1|station name$2|station name@46.2,7|stationname@46.2,7.7$3|!stationid|47.375949774398805,8.537489645590679',
       );
       done();

@@ -252,7 +252,7 @@ export default class MapboxLayer extends Layer {
     this.mbMap = new Map({
       style: getUrlWithParams(this.styleUrl, {
         [this.apiKeyName]: this.apiKey,
-      }),
+      }).toString(),
       container,
       interactive: false,
       trackResize: false,

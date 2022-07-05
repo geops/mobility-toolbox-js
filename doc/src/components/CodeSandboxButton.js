@@ -42,7 +42,6 @@ function CodeSandboxButton({ html, js, extraFiles, ...props }) {
             'maplibre-gl': '2',
             'mobility-toolbox-js': 'latest@beta',
             ol: '6.3.1',
-            'query-string': '6.13.1',
           },
           devDependencies: {
             '@babel/core': '7.2.0',

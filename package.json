@@ -17,7 +17,6 @@
     "lodash.debounce": "4.0.8",
     "lodash.throttle": "4.1.1",
     "path": "^0.12.7",
-    "query-string": "7.1.0",
     "turf": "^3.0.14",
     "uuid": "8.3.2"
   },

@@ -173,7 +173,7 @@ describe('MapboxStyleLayer', () => {
     });
   });
 
-  describe.only('#getFeatureInfoAtCoordinate()', () => {
+  describe('#getFeatureInfoAtCoordinate()', () => {
     beforeEach(() => {
       source.attachToMap(map);
       source.mbMap.isStyleLoaded = jest.fn(() => true);

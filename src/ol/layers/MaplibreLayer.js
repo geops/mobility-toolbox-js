@@ -185,7 +185,7 @@ export default class MaplibreLayer extends Layer {
     this.mbMap = new Map({
       style: getUrlWithParams(this.styleUrl, {
         [this.apiKeyName]: this.apiKey,
-      }),
+      }).toString(),
       container,
       interactive: false,
       trackResize: false,

@@ -3,24 +3,16 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-import qs from 'query-string';
 import { buffer, containsCoordinate, intersects } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
 import GeoJSON from 'ol/format/GeoJSON';
-import Point from 'ol/geom/Point';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
 import Tracker from '../Tracker';
 import { timeSteps } from '../trackerConfig';
-import createFilters from '../utils/createTrackerFilters';
 import trackerDefaultStyle from '../styles/trackerDefaultStyle';
 import { TralisAPI, TralisModes } from '../../api';
-
-/* Permalink parameter used to filters vehicles */
-const LINE_FILTER = 'publishedlinename';
-const ROUTE_FILTER = 'tripnumber';
-const OPERATOR_FILTER = 'operator';
 
 /**
  * TralisLayerInterface.
@@ -156,9 +148,6 @@ const TralisLayerMixin = (Base) =>
      * @ignore
      */
     defineProperties(options) {
-      // Tracker options use to build the tracker.
-      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
-        options;
       const {
         style,
         speed,
@@ -330,50 +319,6 @@ const TralisLayerMixin = (Base) =>
         },
 
         /**
-         * Filter properties used in combination with permalink parameters.
-         */
-        publishedLineName: {
-          get: () => publishedLineName,
-          set: (newPublishedLineName) => {
-            publishedLineName = newPublishedLineName;
-            this.updateFilters();
-          },
-        },
-        tripNumber: {
-          get: () => tripNumber,
-          set: (newTripNumber) => {
-            tripNumber = newTripNumber;
-            this.updateFilters();
-          },
-        },
-        operator: {
-          get: () => operator,
-          set: (newOperator) => {
-            operator = newOperator;
-            this.updateFilters();
-          },
-        },
-        regexPublishedLineName: {
-          get: () => regexPublishedLineName,
-          set: (newRegex) => {
-            regexPublishedLineName = newRegex;
-            this.updateFilters();
-          },
-        },
-
-        /**
-         * Style properties.
-         */
-        delayDisplay: {
-          value: options.delayDisplay || 300000,
-          writable: true,
-        },
-        delayOutlineColor: {
-          value: options.delayOutlineColor || '#000000',
-          writable: true,
-        },
-
-        /**
          * Debug properties.
          */
         // Not used anymore, but could be useful for debugging.
@@ -385,9 +330,6 @@ const TralisLayerMixin = (Base) =>
         //   writable: true,
         // },
       });
-
-      // Update filter function based on convenient properties
-      this.updateFilters();
     }
 
     attachToMap(map) {
@@ -538,8 +480,6 @@ const TralisLayerMixin = (Base) =>
           hoverVehicleId: this.hoverVehicleId,
           selectedVehicleId: this.selectedVehicleId,
           iconScale: this.iconScale,
-          delayDisplay: this.delayDisplay,
-          delayOutlineColor: this.delayOutlineColor,
         },
       );
 
@@ -900,29 +840,6 @@ const TralisLayerMixin = (Base) =>
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
         this.renderTrajectories(true);
-      }
-    }
-
-    /**
-     * Update filter provided by properties or permalink.
-     */
-    updateFilters() {
-      // Setting filters from the permalink if no values defined by the layer.
-      const parameters = qs.parse(window.location.search.toLowerCase());
-      const publishedName = this.publishedLineName || parameters[LINE_FILTER];
-      const tripNumber = this.tripNumber || parameters[ROUTE_FILTER];
-      const operator = this.operator || parameters[OPERATOR_FILTER];
-      const { regexPublishedLineName } = this;
-
-      // Only overrides filter function if one of this property exists.
-      if (publishedName || tripNumber || operator || regexPublishedLineName) {
-        // filter is the property in TrackerLayerMixin.
-        this.filter = createFilters(
-          publishedName,
-          tripNumber,
-          operator,
-          regexPublishedLineName,
-        );
       }
     }
   };

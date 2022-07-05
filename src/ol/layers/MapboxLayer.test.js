@@ -35,7 +35,7 @@ describe('MapboxLayer', () => {
       expect(layer.mbMap).toBe();
     });
 
-    test.only('should initalized mapbox map and warn the user if there is no api key defined.', () => {
+    test('should initalized mapbox map and warn the user if there is no api key defined.', () => {
       layer.attachToMap(map);
       expect(layer.mbMap).toBeInstanceOf(gllib.Map);
       expect(consoleOutput[0]).toBe(
