@@ -27,7 +27,6 @@ describe('Layer', () => {
     expect(layer.isClickActive).toBe(true);
     expect(layer.isHoverActive).toBe(true);
     expect(layer.hitTolerance).toBe(5);
-    expect(layer.isMobilityLayer).toBe(true);
     expect(layer.copyrights).toBe();
     expect(layer.visible).toBe(true);
     expect(layer.properties).toEqual({});

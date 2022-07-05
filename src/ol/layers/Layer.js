@@ -1,5 +1,4 @@
 import { unByKey } from 'ol/Observable';
-import Group from 'ol/layer/Group';
 import LayerCommon from '../../common/layers/Layer';
 
 /**
@@ -89,7 +88,7 @@ class Layer extends LayerCommon {
     // We set the copyright to the source used by the layer.
     if (this.copyrights && this.olLayer) {
       const attributions = this.copyrights || [];
-      if (this.olLayer instanceof Group) {
+      if (this.olLayer.getLayers) {
         this.olLayer
           .getLayers()
           .getArray()

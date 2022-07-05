@@ -6,6 +6,7 @@ import { click } from 'ol/events/condition';
 import { GeoJSON } from 'ol/format';
 import { buffer } from 'ol/extent';
 import { fromLonLat, toLonLat } from 'ol/proj';
+import GeomType from 'ol/geom/GeometryType';
 import { RoutingAPI } from '../../api';
 import Control from '../../common/controls/Control';
 import RoutingLayer from '../layers/RoutingLayer';
@@ -549,7 +550,7 @@ class RoutingControl extends Control {
     const feats = e.target.getFeaturesAtPixel(e.pixel);
     const viaPoint = feats.find(
       (feat) =>
-        feat.getGeometry() instanceof Point &&
+        feat.getGeometry()?.getType() === GeomType.POINT &&
         feat.get('viaPointIdx') !== undefined,
     );
 
@@ -572,7 +573,7 @@ class RoutingControl extends Control {
     let segmentIndex = -1;
     const route = evt.features
       .getArray()
-      .find((feat) => feat.getGeometry() instanceof LineString);
+      .find((feat) => feat.getGeometry()?.getType() === GeomType.LINE_STRING);
 
     // Find the segment index that is being modified
     if (route) {
@@ -592,7 +593,8 @@ class RoutingControl extends Control {
     // Find the viaPoint that is being modified
     const viaPoint = (evt.features
       .getArray()
-      .filter((feat) => feat.getGeometry() instanceof Point) || [])[0];
+      .filter((feat) => feat.getGeometry()?.getType() === GeomType.POINT) ||
+      [])[0];
 
     // Write object with modify info
     /** @ignore */
@@ -670,7 +672,9 @@ class RoutingControl extends Control {
           hitTolerance: 5,
         });
         const viaPoint = feats.find(
-          (feat) => feat.getGeometry() instanceof Point && feat.get('index'),
+          (feat) =>
+            feat.getGeometry()?.getType() === GeomType.POINT &&
+            feat.get('index'),
         );
         if (click(e) && viaPoint) {
           // Remove node & viaPoint if an existing viaPoint was clicked

@@ -16,7 +16,6 @@ import { v4 as uuid } from 'uuid';
  * @classproperty {boolean} isQueryable - Define if the layer can be queried. If false, it will set isHoverActive and isClickActive to false. Read-only.
  * @classproperty {boolean} isClickActive - If true feature information will be queried on user click event. See inherited layers for more informations. Read-only.
  * @classproperty {boolean} isHoverActive - If true feature information will be queried on pointer move event. See inherited layers for more informations. Read-only.
- * @classproperty {boolean} isMobilityLayer - Custom property for duck typing since `instanceof` is not working when the instance was created on different bundles. Read-only.
  * @classproperty {Layer[]} children - List of children.
  * @classproperty {boolean} visible - Define if the layer is visible or not.
  * @classproperty {number} hitTolerance - Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
@@ -33,7 +32,8 @@ export default class Layer extends Observable {
    * @param {string[]} [options.copyrights=undefined] Array of copyrights.
    * @param {Array<Layer>} [options.children=[]] Sublayers.
    * @param {Object} [options.properties={}] Application-specific layer properties.
-   * @param {boolean} [options.visible=true] If true this layer is visible on the map.
+   * @param {boolean} [options.visible=true] true if the layer is visible on the map.
+   * @param {boolean} [options.disabled=true] true if the layer is disabled, that actually on the map but can't be seen  (extent, zoom ,data restrictions)
    * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
    * @param {boolean} [options.isQueryable=true] Define if the layer can be queried. If false, it will also set isHoverActive and isClickActive to false. Read-only.
    * @param {boolean} [options.isClickActive=true] If true feature information will be queried on click event. See inherited layers for more informations. Read-only.
@@ -122,11 +122,6 @@ export default class Layer extends Observable {
       hitTolerance: {
         value: hitTolerance || 5,
         writable: true,
-      },
-      // Custom property for duck typing since `instanceof` is not working
-      // when the instance was created on different bundles.
-      isMobilityLayer: {
-        value: true,
       },
       children: {
         value: children || [],
