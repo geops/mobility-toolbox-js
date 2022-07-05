@@ -9,10 +9,10 @@ import GeoJSON from 'ol/format/GeoJSON';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
-import Tracker from '../Tracker';
-import { timeSteps } from '../trackerConfig';
 import trackerDefaultStyle from '../styles/trackerDefaultStyle';
 import { TralisAPI, TralisModes } from '../../api';
+import renderTrajectories from '../utils/renderTrajectories';
+import * as trackerConfig from '../utils/trackerConfig';
 
 /**
  * TralisLayerInterface.
@@ -97,27 +97,40 @@ const TralisLayerMixin = (Base) =>
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
       this.format = new GeoJSON();
-      this.generalizationLevelByZoom = options.generalizationLevelByZoom || {
-        0: 5,
-        1: 5,
-        2: 5,
-        3: 5,
-        4: 5,
-        5: 5,
-        6: 5,
-        7: 5,
-        8: 10,
-        9: 30,
-        10: 30,
-        11: 100,
-        12: 100,
-        13: 100,
+      this.generalizationLevelByZoom = options.generalizationLevelByZoom || [
+        5, 5, 5, 5, 5, 5, 5, 5, 10, 30, 30, 100, 100, 100,
+      ];
+      this.getGeneralizationLevelByZoom = (zoom) => {
+        return (
+          (options.getGeneralizationLevelByZoom &&
+            options.getGeneralizationLevelByZoom(
+              zoom,
+              this.generalizationLevelByZoom,
+            )) ||
+          this.generalizationLevelByZoom[zoom]
+        );
+      };
+
+      this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom || [
+        100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400,
+        300, 250, 180, 90, 60, 50, 50, 50, 50, 50,
+      ];
+
+      this.getRenderTimeIntervalByZoom = (zoom) => {
+        return (
+          (options.getRenderTimeIntervalByZoom &&
+            options.getRenderTimeIntervalByZoom(
+              zoom,
+              this.renderTimeIntervalByZoom,
+            )) ||
+          this.renderTimeIntervalByZoom[zoom]
+        );
       };
 
       // This property will call api.setBbox on each movend event
       this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd !== false;
 
-      // Define throttling nad debounce render function
+      // Define throttling and debounce render function
       this.throttleRenderTrajectories = throttle(
         this.renderTrajectoriesInternal,
         50,
@@ -158,17 +171,9 @@ const TralisLayerMixin = (Base) =>
         sort,
         time,
         live,
+        canvas,
+        styleOptions,
       } = options;
-
-      const initTrackerOptions = {
-        style,
-      };
-
-      Object.keys(initTrackerOptions).forEach(
-        (key) =>
-          initTrackerOptions[key] === undefined &&
-          delete initTrackerOptions[key],
-      );
 
       let currSpeed = speed || 1;
       let currTime = time || new Date();
@@ -178,12 +183,22 @@ const TralisLayerMixin = (Base) =>
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
 
+        canvas: {
+          value: canvas || document.createElement('canvas'),
+        },
+
         /**
          * Style function used to render a vehicle.
          */
         style: {
-          value: (trajectory, viewState) =>
-            (style || trackerDefaultStyle)(trajectory, viewState, this),
+          value: style || trackerDefaultStyle,
+        },
+
+        /**
+         * Custom options to pass as last parameter of the style function.
+         */
+        styleOptions: {
+          value: { ...trackerConfig, ...(styleOptions || {}) },
         },
 
         /**
@@ -215,16 +230,6 @@ const TralisLayerMixin = (Base) =>
         },
 
         /**
-         * The tracker that renders the trajectories.
-         */
-        tracker: { value: null, writable: true },
-
-        /**
-         * Canvas cache object for trajectories drawn.
-         */
-        styleCache: { value: {} },
-
-        /**
          * If true. The layer will always use Date.now() on the next tick to render the trajectories.
          * When true, setting the time property has no effect.
          */
@@ -254,13 +259,6 @@ const TralisLayerMixin = (Base) =>
         },
 
         /**
-         * Keep track of which trajectories are currently drawn.
-         */
-        renderedTrajectories: {
-          get: () => (this.tracker && this.tracker.renderedTrajectories) || [],
-        },
-
-        /**
          * Id of the hovered vehicle.
          */
         hoverVehicleId: {
@@ -284,14 +282,6 @@ const TralisLayerMixin = (Base) =>
             pixelRatio ||
             (typeof window !== 'undefined' ? window.devicePixelRatio : 1),
           writable: true,
-        },
-
-        /**
-         * Options used by the constructor of the Tracker class.
-         */
-        initTrackerOptions: {
-          value: initTrackerOptions,
-          writable: false,
         },
 
         /**
@@ -335,11 +325,6 @@ const TralisLayerMixin = (Base) =>
     attachToMap(map) {
       super.attachToMap(map);
 
-      this.tracker = new Tracker({
-        style: (...args) => this.style(...args),
-        ...this.initTrackerOptions,
-      });
-
       // If the layer is visible we start  the rendering clock
       if (this.visible) {
         this.start();
@@ -370,12 +355,8 @@ const TralisLayerMixin = (Base) =>
 
       this.stop();
       unByKey(this.visibilityRef);
-      if (this.tracker) {
-        const { canvas } = this.tracker;
-        const context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        this.tracker = null;
-      }
+      const context = this.canvas.getContext('2d');
+      context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       super.detachFromMap();
     }
 
@@ -456,10 +437,6 @@ const TralisLayerMixin = (Base) =>
      * @private
      */
     renderTrajectoriesInternal(viewState, noInterpolate) {
-      if (!this.tracker) {
-        return false;
-      }
-
       const time = this.live ? Date.now() : this.time;
 
       const trajectories = Object.values(this.trajectories);
@@ -471,15 +448,17 @@ const TralisLayerMixin = (Base) =>
       // console.timeEnd('sort');
 
       // console.time('render');
-      this.renderState = this.tracker.renderTrajectories(
+      this.renderState = renderTrajectories(
+        this.canvas,
         trajectories,
+        this.style,
         { ...viewState, pixelRatio: this.pixelRatio, time },
         {
           noInterpolate:
             viewState.zoom < this.minZoomInterpolation ? true : noInterpolate,
           hoverVehicleId: this.hoverVehicleId,
           selectedVehicleId: this.selectedVehicleId,
-          iconScale: this.iconScale,
+          ...this.styleOptions,
         },
       );
 
@@ -541,7 +520,7 @@ const TralisLayerMixin = (Base) =>
         }
 
         /* @ignore */
-        this.generalizationLevel = this.generalizationLevelByZoom[zoom];
+        this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
@@ -575,7 +554,7 @@ const TralisLayerMixin = (Base) =>
      */
     getRefreshTimeInMs(zoom) {
       const roundedZoom = Math.round(zoom);
-      const timeStep = timeSteps[roundedZoom] || 25;
+      const timeStep = this.getRenderTimeIntervalByZoom(roundedZoom) || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
       const nextThrottleTick = Math.min(nextTick, 500);
       // TODO: see if this should go elsewhere.
@@ -697,7 +676,7 @@ const TralisLayerMixin = (Base) =>
     }
 
     /**
-     * Add a trajectory to the tracker.
+     * Add a trajectory.
      * @param {TralisTrajectory} trajectory The trajectory to add.
      * @private
      */

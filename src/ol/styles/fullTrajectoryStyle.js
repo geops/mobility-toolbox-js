@@ -1,5 +1,4 @@
 import { Style, Fill, Stroke, Circle } from 'ol/style';
-import { getBgColor } from '../../common/trackerConfig';
 
 const borderStyle = new Style({
   zIndex: 2,
@@ -15,7 +14,7 @@ const borderStyle = new Style({
   }),
 });
 
-const fullTrajectorystyle = (feature) => {
+const fullTrajectorystyle = (feature, resolution, options) => {
   let lineColor = '#ffffff'; // white
 
   const type = feature.get('type');
@@ -25,7 +24,7 @@ const fullTrajectorystyle = (feature) => {
     stroke = `#${stroke}`;
   }
 
-  lineColor = stroke || getBgColor(type);
+  lineColor = stroke || options?.getBgColor(type);
 
   // Don't allow white lines, use red instead.
   lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;

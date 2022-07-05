@@ -67,7 +67,7 @@ class TralisLayer extends mixin(Layer) {
 
     this.source = {
       type: 'canvas',
-      canvas: this.tracker.canvas,
+      canvas: this.canvas,
       coordinates: getSourceCoordinates(map, this.pixelRatio),
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
