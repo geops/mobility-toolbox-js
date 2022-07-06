@@ -7,8 +7,9 @@ const getLayersAsFlatArray = (layersOrLayer) => {
   layers.forEach((layer) => {
     flatLayers.push(layer);
     const { children } = layer;
-    flatLayers = flatLayers.concat(this.getLayersAsFlatArray(children));
+    flatLayers = flatLayers.concat(getLayersAsFlatArray(children));
   });
   return flatLayers;
 };
+
 export default getLayersAsFlatArray;
