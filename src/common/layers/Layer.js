@@ -6,18 +6,15 @@ import { v4 as uuid } from 'uuid';
  *
  * @example
  * const layer = new Layer({
- *   name: 'myLayer',
+ *   name: 'My Layer',
  * });
  *
- * @classproperty {string} name - Name of the layer
  * @classproperty {string} key - Identifier of the layer. Must be unique.
+ * @classproperty {string} name - Name of the layer
  * @classproperty {string[]} copyrights - Array of copyrights.
- * @classproperty {boolean} isBaseLayer - Define if the layer is a base layer. Read-only.
- * @classproperty {boolean} isQueryable - Define if the layer can be queried. If false, it will set isHoverActive and isClickActive to false. Read-only.
- * @classproperty {boolean} isClickActive - If true feature information will be queried on user click event. See inherited layers for more informations. Read-only.
- * @classproperty {boolean} isHoverActive - If true feature information will be queried on pointer move event. See inherited layers for more informations. Read-only.
- * @classproperty {Layer[]} children - List of children.
- * @classproperty {boolean} visible - Define if the layer is visible or not.
+ * @classproperty {Layer[]} children - List of children layers.
+ * @classproperty {boolean} visible - Define if the layer is currently display on the map.
+ * @classproperty {boolean} disabled - Define if the layer is currently display on the map but can't be seen (extent, zoom ,data restrictions).
  * @classproperty {number} hitTolerance - Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
  * @classproperty {Object} properties - Custom properties.
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
@@ -27,54 +24,31 @@ export default class Layer extends BaseObject {
    * Constructor
    *
    * @param {Object} options
-   * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
-   * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
-   * @param {string[]} [options.copyrights=undefined] Array of copyrights.
-   * @param {Array<Layer>} [options.children=[]] Sublayers.
-   * @param {Object} [options.properties={}] Application-specific layer properties.
-   * @param {boolean} [options.visible=true] true if the layer is visible on the map.
-   * @param {boolean} [options.disabled=true] true if the layer is disabled, that actually on the map but can't be seen  (extent, zoom ,data restrictions)
-   * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
-   * @param {boolean} [options.isQueryable=true] Define if the layer can be queried. If false, it will also set isHoverActive and isClickActive to false. Read-only.
-   * @param {boolean} [options.isClickActive=true] If true feature information will be queried on click event. See inherited layers for more informations. Read-only.
-   * @param {boolean} [options.isHoverActive=true] If true feature information will be queried on pointer move event. See inherited layers for more informations. Read-only.
+   * @param {string} [options.key=uuid()] Identifier of the layer. Muste be unique. Default use a generated uuid.
+   * @param {string} [options.name] Name of the layer.
+   * @param {string[]} [options.copyrights] Array of copyrights.
+   * @param {Array<Layer>} [options.children=[]] Sublayers, all child layers will have a parent property associated to this layer.
+   * @param {boolean} [options.visible=true]  Define if the layer is currently display on the map.
+   * @param {boolean} [options.disabled=false] Define if the layer is currently display on the map but can't be seen (extent, zoom ,data restrictions).
    * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
+   * @param {Object} [options.properties={}] Application-specific layer properties.
    */
   constructor(options = {}) {
     super();
     this.defineProperties(options);
 
-    // Add mouse event callbacks
-    const { onClick, onHover } = options;
+    this.setProperties(options.properties);
 
-    if (onHover) {
-      this.onHover(onHover);
-    }
-
-    if (onClick) {
-      this.onClick(onClick);
-    }
-
-    if (options.properties) {
-      this.setProperties(options.properties);
-    }
-
-    // This if is very important if you remove it you break the copyright control.
-    if (options.copyrights) {
-      /** @ignore */
-      this.copyrights = options.copyrights;
-    }
-
-    this.visible = options.visible === undefined ? true : options.visible;
-
-    if (this.children) {
-      this.children.forEach((child) => {
-        // eslint-disable-next-line no-param-reassign
-        child.parent = this;
-      });
-    }
+    this.visible = options.visible === undefined ? true : !!options.visible;
 
     this.group = options.group;
+
+    this.copyrights = options.copyrights;
+
+    this.children.forEach((child) => {
+      // eslint-disable-next-line no-param-reassign
+      child.parent = this;
+    });
 
     // Listen for group visiblity change
     // if a layer from a group is newly visible we hide the others.
@@ -91,12 +65,6 @@ export default class Layer extends BaseObject {
         this.children.forEach((child) => child.dispatchEvent(evt));
       }
     });
-
-    /** @ignore */
-    this.onUserClickCallback = this.onUserClickCallback.bind(this);
-
-    /** @ignore */
-    this.onUserMoveCallback = this.onUserMoveCallback.bind(this);
   }
 
   /**
@@ -105,70 +73,17 @@ export default class Layer extends BaseObject {
    * @ignore
    */
   defineProperties(options) {
-    const {
-      name,
-      key,
-      children,
-      properties,
-      isBaseLayer,
-      isQueryable,
-      isClickActive,
-      isHoverActive,
-      hitTolerance,
-    } = {
-      isQueryable: true,
-      isClickActive: true,
-      isHoverActive: true,
+    const { name, key, children, properties, hitTolerance } = {
       ...options,
     };
     const uid = uuid();
-    const dfltName = name || uid;
     Object.defineProperties(this, {
-      // options is used for clone function.
-      options: {
-        value: options,
-      },
+      /* Layer's information properties */
       name: {
-        value: dfltName,
+        value: name,
       },
       key: {
-        value: key || dfltName.toLowerCase(),
-      },
-      isBaseLayer: {
-        value: !!isBaseLayer,
-      },
-      isQueryable: {
-        value: !!isQueryable,
-        writable: true,
-      },
-      isClickActive: {
-        value: !!isQueryable && !!isClickActive,
-        writable: true,
-      },
-      isHoverActive: {
-        value: !!isQueryable && !!isHoverActive,
-        writable: true,
-      },
-      hitTolerance: {
-        value: hitTolerance || 5,
-        writable: true,
-      },
-      parent: {
-        value: null,
-        writable: true,
-      },
-      children: {
-        value: children || [],
-        writable: true,
-      },
-      copyrights: {
-        get: () => this.get('copyrights'),
-        set: (newCopyrights) => {
-          const arrValue = !Array.isArray(newCopyrights)
-            ? [newCopyrights]
-            : newCopyrights;
-          this.set('copyrights', arrValue);
-        },
+        value: key || uid,
       },
       group: {
         get: () => this.get('group'),
@@ -176,6 +91,25 @@ export default class Layer extends BaseObject {
           this.set('group', newGroup);
         },
       },
+      copyrights: {
+        get: () => this.get('copyrights'),
+        set: (newCopyrights) => {
+          const arrValue =
+            newCopyrights && !Array.isArray(newCopyrights)
+              ? [newCopyrights]
+              : newCopyrights;
+          this.set('copyrights', arrValue || []);
+        },
+      },
+      // options is used for clone function.
+      options: {
+        value: options,
+      },
+      map: {
+        writable: true,
+      },
+
+      /* Layer's state properties */
       visible: {
         get: () => this.get('visible'),
         set: (newVisible) => {
@@ -220,23 +154,32 @@ export default class Layer extends BaseObject {
           }
         },
       },
-      properties: {
-        value: { ...(properties || {}) },
+      disabled: {
+        get: () => this.get('disabled'),
+        set: (newValue) => {
+          this.set('disabled', newValue);
+        },
       },
-      map: {
+
+      /* Layer's hierarchy properties */
+      parent: {
+        value: null,
         writable: true,
       },
-      /**
-       * Callback function when a user click on a feature.
-       */
-      clickCallbacks: {
-        value: [],
+      children: {
+        value: children || [],
+        writable: true,
       },
-      /**
-       * Callback function when a user hover on a feature.
-       */
-      hoverCallbacks: {
-        value: [],
+
+      /* Layer's query properties */
+      hitTolerance: {
+        value: hitTolerance || 5,
+        writable: true,
+      },
+
+      /* Custom app specific properties */
+      properties: {
+        value: { ...(properties || {}) },
       },
     });
   }
@@ -264,7 +207,7 @@ export default class Layer extends BaseObject {
   // eslint-disable-next-line class-methods-use-this
   detachFromMap() {
     /** @ignore */
-    // this.map = null;
+    this.map = null;
   }
 
   /**
@@ -283,11 +226,6 @@ export default class Layer extends BaseObject {
       this.key,
     );
 
-    // No response so we modify the properties accordingly, to avoid spaming the console.
-    this.isQueryable = false;
-    // this.isClickActive = false;
-    // this.isHoverActive = false;
-
     // This layer returns no feature info.
     // The function is implemented by inheriting layers.
     return Promise.resolve({
@@ -295,119 +233,5 @@ export default class Layer extends BaseObject {
       features: [],
       coordinate,
     });
-  }
-
-  /**
-   * Listens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features,
-   *   the layer instance and the click event.
-   */
-  onClick(callback) {
-    if (typeof callback === 'function') {
-      if (!this.clickCallbacks.includes(callback)) {
-        this.clickCallbacks.push(callback);
-      }
-    } else {
-      throw new Error('onClick callback must be of type function:', callback);
-    }
-  }
-
-  /**
-   * Unlistens to click events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features,
-   *   the layer instance and the click event.
-   */
-  unClick(callback) {
-    if (typeof callback === 'function') {
-      const idx = this.clickCallbacks.indexOf(callback);
-      if (idx > -1) {
-        this.clickCallbacks.splice(idx, 1);
-      }
-    }
-  }
-
-  /**
-   * Function triggered when the user click the map.
-   * @private
-   */
-  onUserClickCallback(evt) {
-    const emptyFeatureInfo = {
-      features: [],
-      layer: this,
-      coordinate: evt.coordinate,
-      event: evt,
-    };
-
-    if (!this.isClickActive || !this.clickCallbacks.length) {
-      return Promise.resolve(emptyFeatureInfo);
-    }
-
-    return this.getFeatureInfoAtCoordinate(evt.coordinate)
-      .then((featureInfo) => {
-        const { features, layer, coordinate } = featureInfo;
-        this.clickCallbacks.forEach((callback) =>
-          callback(features, layer, coordinate),
-        );
-        return featureInfo;
-      })
-      .catch(() => emptyFeatureInfo);
-  }
-
-  /**
-   * Listens to hover events on the layer.
-   * @param {function} callback Callback function, called with the clicked
-   *   features, the layer instance and the click event.
-   */
-  onHover(callback) {
-    if (typeof callback === 'function') {
-      if (!this.hoverCallbacks.includes(callback)) {
-        this.hoverCallbacks.push(callback);
-      }
-    } else {
-      throw new Error('callback must be of type function.');
-    }
-  }
-
-  /**
-   * Unlistens to hover events on the layer.
-   * @param {function} callback Callback function, called with the hovered
-   *   features, the layer instance and the click event.
-   */
-  unHover(callback) {
-    if (typeof callback === 'function') {
-      const idx = this.hoverCallbacks.indexOf(callback);
-      if (idx > -1) {
-        this.hoverCallbacks.splice(idx, 1);
-      }
-    }
-  }
-
-  /**
-   * Function triggered when the user move the cursor.
-   * @private
-   */
-  onUserMoveCallback(evt) {
-    const emptyFeatureInfo = {
-      features: [],
-      layer: this,
-      coordinate: evt.coordinate,
-      event: evt,
-    };
-
-    if (!this.isHoverActive || !this.hoverCallbacks.length) {
-      return Promise.resolve(emptyFeatureInfo);
-    }
-
-    return this.getFeatureInfoAtCoordinate(evt.coordinate)
-      .then((featureInfo) => {
-        const { features, layer, coordinate } = featureInfo;
-        this.hoverCallbacks.forEach((callback) =>
-          callback(features, layer, coordinate),
-        );
-        return featureInfo;
-      })
-      .catch(() => emptyFeatureInfo);
   }
 }

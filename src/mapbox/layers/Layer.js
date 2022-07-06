@@ -1,6 +1,7 @@
 import { unByKey } from 'ol/Observable';
 import { transformExtent } from 'ol/proj';
 import LayerCommon from '../../common/layers/Layer';
+import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
 
 /**
  * A class representing a layer to display on an OpenLayers map.
@@ -17,7 +18,7 @@ import LayerCommon from '../../common/layers/Layer';
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
-class Layer extends LayerCommon {
+class Layer extends userInteractionsMixin(LayerCommon) {
   /**
    * Initialize the layer and listen to user events.
    * @param {ol/Map~Map} map
@@ -29,7 +30,7 @@ class Layer extends LayerCommon {
       return;
     }
 
-    if (this.isClickActive || this.isHoverActive) {
+    if (this.userInteractions) {
       this.toggleVisibleListeners();
       this.onChangeVisibleKey = this.on(
         'change:visible',
@@ -38,29 +39,40 @@ class Layer extends LayerCommon {
     }
   }
 
-  detachFromMap(map) {
+  detachFromMap() {
+    if (this.map) {
+      this.deactivateUserInteractions();
+      unByKey(this.onChangeVisibleKey);
+    }
+    super.detachFromMap();
+  }
+
+  activateUserInteractions() {
+    this.deactivateUserInteractions();
+    if (
+      this.map &&
+      this.userInteractions &&
+      this.userClickInteractions &&
+      this.userClickCallbacks.length
+    ) {
+      this.map.on('click', this.onUserClickCallback);
+    }
+
+    if (
+      this.map &&
+      this.userInteractions &&
+      this.userHoverInteractions &&
+      this.userHoverCallbacks.length
+    ) {
+      this.map.on('mousemove', this.onUserMoveCallback);
+    }
+  }
+
+  deactivateUserInteractions() {
     if (this.map) {
       this.map.off('mousemove', this.onUserMoveCallback);
       this.map.off('click', this.onUserClickCallback);
-      unByKey(this.onChangeVisibleKey);
     }
-    super.detachFromMap(map);
-  }
-
-  /**
-   * Function triggered when the user click the map.
-   * @private
-   */
-  onUserClickCallback(evt) {
-    super.onUserClickCallback({ coordinate: evt.lngLat.toArray(), ...evt });
-  }
-
-  /**
-   * Function triggered when the user moves the cursor over the map.
-   * @private
-   */
-  onUserMoveCallback(evt) {
-    super.onUserMoveCallback({ coordinate: evt.lngLat.toArray(), ...evt });
   }
 
   /**
@@ -69,21 +81,9 @@ class Layer extends LayerCommon {
    */
   toggleVisibleListeners() {
     if (this.visible) {
-      if (this.isClickActive) {
-        this.map.on('click', this.onUserClickCallback);
-      }
-
-      if (this.isHoverActive) {
-        this.map.on('mousemove', this.onUserMoveCallback);
-      }
+      this.activateUserInteractions();
     } else {
-      if (this.isClickActive) {
-        this.map.off('click', this.onUserClickCallback);
-      }
-
-      if (this.isHoverActive) {
-        this.map.off('mousemove', this.onUserMoveCallback);
-      }
+      this.deactivateUserInteractions();
     }
   }
 

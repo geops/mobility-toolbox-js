@@ -42,20 +42,7 @@ describe('VectorLayer', () => {
 
   test('should be instanced.', () => {
     expect(layer).toBeInstanceOf(VectorLayer);
-    expect(layer.clickCallbacks[0]).toBe(onClick);
     expect(layer.hitTolerance).toBe(5);
-  });
-
-  test('should add onClick callback.', () => {
-    const onClick2 = jest.fn();
-    layer.onClick(onClick2);
-    expect(layer.clickCallbacks[1]).toBe(onClick2);
-  });
-
-  test('should onClick throw error.', () => {
-    expect(() => {
-      layer.onClick('not of type function');
-    }).toThrow(Error);
   });
 
   test('should called terminate on initalization.', () => {

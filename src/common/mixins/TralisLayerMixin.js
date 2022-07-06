@@ -88,7 +88,10 @@ export class TralisLayerInterface {
 const TralisLayerMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
-      super({ hitTolerance: 10, ...options });
+      super({
+        hitTolerance: 10,
+        ...options,
+      });
 
       this.debug = options.debug;
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
@@ -364,14 +367,6 @@ const TralisLayerMixin = (Base) =>
       this.stop();
       this.renderTrajectories();
       this.startUpdateTime();
-
-      if (this.isClickActive) {
-        this.onClick(this.onFeatureClick);
-      }
-
-      if (this.isHoverActive) {
-        this.onHover(this.onFeatureHover);
-      }
 
       this.api.open();
       this.api.subscribeTrajectory(

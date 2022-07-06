@@ -4,7 +4,7 @@ import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import { Vector as VectorSource } from 'ol/source';
 import Layer from './Layer';
-import mixin from '../../common/mixins/TralisLayerMixin';
+import tralisMixin from '../../common/mixins/TralisLayerMixin';
 import { fullTrajectoryStyle } from '../styles';
 
 const format = new GeoJSON();
@@ -24,9 +24,10 @@ const format = new GeoJSON();
  * @see <a href="/api/class/src/api/tralis/TralisAPI%20js~TralisAPI%20html">TralisAPI</a>
  *
  * @extends {Layer}
+ * @implements {UserInteractionsLayerInterface}
  * @implements {TralisLayerInterface}
  */
-class TralisLayer extends mixin(Layer) {
+class TralisLayer extends tralisMixin(Layer) {
   /**
    * Constructor.
    *
@@ -253,7 +254,7 @@ class TralisLayer extends mixin(Layer) {
     if (
       this.visible &&
       this.isUpdateBboxOnMoveEnd &&
-      this.isClickActive &&
+      this.userClickInteractions &&
       this.selectedVehicleId
     ) {
       this.highlightTrajectory(this.selectedVehicleId);

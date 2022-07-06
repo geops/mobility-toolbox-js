@@ -10,14 +10,14 @@ import tralisLiveMapReadme from '../public/static/examples/tralis-live-map.md';
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
 export default [
-  {
-    name: 'Layers',
-    key: 'layers',
-    description:
-      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
-    img: '/static/img/live_tracker_ol.jpg',
-    readme: olTrackerReadme,
-  },
+  // {
+  //   name: 'Layers',
+  //   key: 'layers',
+  //   description:
+  //     'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
+  //   img: '/static/img/live_tracker_ol.jpg',
+  //   readme: olTrackerReadme,
+  // },
   {
     name: 'Live tracker with OpenLayers',
     key: 'ol-tracker',

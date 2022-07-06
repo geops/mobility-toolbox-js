@@ -92,9 +92,9 @@ describe('Layer', () => {
     expect(layer.visible).toBe(true);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 
@@ -119,9 +119,9 @@ describe('Layer', () => {
     expect(layer.visible).toBe(false);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 
@@ -149,6 +149,7 @@ describe('Layer', () => {
     layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 

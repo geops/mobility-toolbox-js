@@ -56,24 +56,6 @@ describe('WMSLayer', () => {
     expect(data.layer).toBeInstanceOf(WMSLayer);
   });
 
-  test('#onClick', () => {
-    const f = () => {};
-    const f2 = () => {};
-    layer.onClick(f);
-    expect(layer.clickCallbacks[0]).toBe(f);
-    expect(layer.clickCallbacks.length).toBe(1);
-    layer.onClick(f);
-    expect(layer.clickCallbacks.length).toBe(1);
-    layer.onClick(f2);
-    expect(layer.clickCallbacks.length).toBe(2);
-  });
-
-  test('should onClick throw error.', () => {
-    expect(() => {
-      layer.onClick('not of type function');
-    }).toThrow(Error);
-  });
-
   test('should clone', () => {
     const clone = layer.clone({ name: 'clone' });
     expect(clone).not.toBe(layer);

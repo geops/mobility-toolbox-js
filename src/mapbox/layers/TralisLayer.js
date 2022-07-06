@@ -157,17 +157,6 @@ class TralisLayer extends mixin(Layer) {
   }
 
   /**
-   * Function triggered when the user click the map.
-   * @override
-   */
-  onUserClickCallback(evt) {
-    super.onUserClickCallback({
-      coordinate: fromLonLat(evt.lngLat.toArray()),
-      ...evt,
-    });
-  }
-
-  /**
    * Function triggered when the user moves the cursor over the map.
    * @override
    */

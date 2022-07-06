@@ -142,6 +142,10 @@ export const getTextCanvas = (
  * @return a canvas
  */
 const styleCache = {};
+
+window.setInterval(() => {
+  console.log(Object.keys(styleCache).length);
+}, 3000);
 const style = (trajectory, viewState, options) => {
   const {
     hoverVehicleId,
@@ -208,10 +212,12 @@ const style = (trajectory, viewState, options) => {
   const mustDrawText = radius > 10 * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${type}${color}${hover}${selected}${cancelled}${delay}`;
+  let key = `${radius}${hover}${selected}${cancelled}${delay}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}`;
+  } else {
+    key += `${type}${color}`;
   }
 
   if (mustDrawText) {

@@ -28,7 +28,6 @@ describe('RoutingLayer', () => {
 
   test('should be instanced.', () => {
     expect(layer).toBeInstanceOf(RoutingLayer);
-    expect(layer.clickCallbacks[0]).toBe(onClick);
   });
 
   test('should called terminate on initalization.', () => {
