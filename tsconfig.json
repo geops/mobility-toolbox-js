@@ -12,6 +12,5 @@
     // "Go to Definition" in VSCode
     "declarationMap": true
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./src/**/*.test.js"]
+  "include": ["./src/**/*"]
 }

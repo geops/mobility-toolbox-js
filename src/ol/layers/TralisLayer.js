@@ -4,7 +4,7 @@ import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import { Vector as VectorSource } from 'ol/source';
 import Layer from './Layer';
-import mixin from '../../common/mixins/TralisLayerMixin';
+import tralisMixin from '../../common/mixins/TralisLayerMixin';
 import { fullTrajectoryStyle } from '../styles';
 
 const format = new GeoJSON();
@@ -24,9 +24,10 @@ const format = new GeoJSON();
  * @see <a href="/api/class/src/api/tralis/TralisAPI%20js~TralisAPI%20html">TralisAPI</a>
  *
  * @extends {Layer}
+ * @implements {UserInteractionsLayerInterface}
  * @implements {TralisLayerInterface}
  */
-class TralisLayer extends mixin(Layer) {
+class TralisLayer extends tralisMixin(Layer) {
   /**
    * Constructor.
    *
@@ -47,15 +48,17 @@ class TralisLayer extends mixin(Layer) {
         layers: [
           new VectorLayer({
             source: new VectorSource({ features: [] }),
-            style: options.fullTrajectoryStyle || fullTrajectoryStyle,
+            style: (feature, resolution) => {
+              return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
+                feature,
+                resolution,
+                this.styleOptions,
+              );
+            },
           }),
           new OLLayer({
             source: new Source({}),
             render: (frameState) => {
-              if (!this.tracker || !this.tracker.canvas) {
-                return null;
-              }
-
               if (!this.container) {
                 this.container = document.createElement('div');
                 this.container.style.position = 'absolute';
@@ -66,11 +69,11 @@ class TralisLayer extends mixin(Layer) {
                 this.transformContainer.style.width = '100%';
                 this.transformContainer.style.height = '100%';
                 this.container.appendChild(this.transformContainer);
-                this.tracker.canvas.style.position = 'absolute';
-                this.tracker.canvas.style.top = '0';
-                this.tracker.canvas.style.left = '0';
-                this.tracker.canvas.style.transformOrigin = 'top left';
-                this.transformContainer.appendChild(this.tracker.canvas);
+                this.canvas.style.position = 'absolute';
+                this.canvas.style.top = '0';
+                this.canvas.style.left = '0';
+                this.canvas.style.transformOrigin = 'top left';
+                this.transformContainer.appendChild(this.canvas);
               }
 
               if (this.renderedViewState) {
@@ -83,9 +86,13 @@ class TralisLayer extends mixin(Layer) {
 
                 if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
-                  const { canvas } = this.tracker;
-                  const context = canvas.getContext('2d');
-                  context.clearRect(0, 0, canvas.width, canvas.height);
+                  const context = this.canvas.getContext('2d');
+                  context.clearRect(
+                    0,
+                    0,
+                    this.canvas.width,
+                    this.canvas.height,
+                  );
                 } else {
                   const pixelCenterRendered =
                     this.map.getPixelFromCoordinate(renderedCenter);
@@ -157,8 +164,8 @@ class TralisLayer extends mixin(Layer) {
    * @returns
    */
   hasFeatureInfoAtCoordinate(coordinate) {
-    if (this.map && this.tracker && this.tracker.canvas) {
-      const context = this.tracker.canvas.getContext('2d');
+    if (this.map && this.canvas) {
+      const context = this.canvas.getContext('2d');
       const pixel = this.map.getPixelFromCoordinate(coordinate);
       return !!context.getImageData(
         pixel[0] * this.pixelRatio,
@@ -247,7 +254,7 @@ class TralisLayer extends mixin(Layer) {
     if (
       this.visible &&
       this.isUpdateBboxOnMoveEnd &&
-      this.isClickActive &&
+      this.userClickInteractions &&
       this.selectedVehicleId
     ) {
       this.highlightTrajectory(this.selectedVehicleId);

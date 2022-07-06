@@ -1,12 +1,12 @@
 import BaseObject from 'ol/Object';
+import getUrlWithParams from '../utils/getUrlWithParams';
 
 export type HttpApiOptions = {
-  url: string;
+  url?: string;
   apiKey?: string;
 };
-
 /**
- * Common class to access to a geOps api.
+ * Common class to access to a geOps api using http.
  *
  * @example
  * import { API } from 'mobility-toolbox-js/api';
@@ -19,9 +19,9 @@ export type HttpApiOptions = {
  * @classproperty {string} url Url of the service.
  * @classproperty {string} apiKey Api key to access the service.
  */
-class HttpApi extends BaseObject {
-  url: string;
-  apiKey: string;
+class HttpAPI extends BaseObject {
+  url?: string;
+  apiKey?: string;
 
   constructor(options: HttpApiOptions) {
     super();
@@ -37,24 +37,21 @@ class HttpApi extends BaseObject {
    * @ignore
    */
   fetch(path: string, params: Object, config: RequestInit): Promise<any> {
-    // Clean requets parameters, removing undefined and null values.
-    const urlParams = { ...(params || {}), key: this.apiKey };
-    const clone = { ...urlParams };
-    Object.keys(urlParams).forEach(
-      (key) =>
-        (clone[key] === undefined || clone[key] === null) && delete clone[key],
-    );
-    const url = new URL(this.url + path);
-    Object.entries(clone).forEach(([key, value]) => {
-      url.searchParams.append(key, value);
-    });
-    if (!this.apiKey) {
+    if (!this.apiKey && !/key=/.test(this.url)) {
       // eslint-disable-next-line no-console
       return Promise.reject(
         new Error(`No apiKey defined for request to ${this.url}`),
       );
     }
 
+    // Clean requets parameters, removing undefined and null values.
+    const searchParams = params || {};
+    const url = getUrlWithParams(`${this.url}${path || ''}`, {
+      key: this.apiKey,
+      ...searchParams,
+    });
+
+    // We use toString  because of TYpeScript bug that only accept a string in fetch method.
     return fetch(url.toString(), config).then((response) => {
       try {
         return response.json().then((data) => {
@@ -70,4 +67,4 @@ class HttpApi extends BaseObject {
   }
 }
 
-export default HttpApi;
+export default HttpAPI;

@@ -30,13 +30,13 @@ describe('Layer', () => {
 
   test('should be invisible if set.', () => {
     const layer = new Layer({ name: 'Layer', olLayer });
-    layer.setVisible(false);
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
   test('should visibility stay unchanged', () => {
     const layer = new Layer({ name: 'Layer', visible: false, olLayer });
-    layer.setVisible(false);
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
@@ -92,9 +92,9 @@ describe('Layer', () => {
     expect(layer.visible).toBe(true);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 
@@ -105,7 +105,7 @@ describe('Layer', () => {
     spy.mockReset();
     spy2.mockReset();
 
-    layer.setVisible(false);
+    layer.visible = false;
     await map.dispatchEvent({ type: 'pointermove', map, coordinate: [0, 0] });
     await map.dispatchEvent({ type: 'singleclick', map, coordinate: [0, 0] });
     expect(spy).toHaveBeenCalledTimes(0);
@@ -119,9 +119,9 @@ describe('Layer', () => {
     expect(layer.visible).toBe(false);
     const spy = jest.fn();
     const spy2 = jest.fn();
-    layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 
@@ -132,7 +132,7 @@ describe('Layer', () => {
     spy.mockReset();
     spy2.mockReset();
 
-    layer.setVisible(true);
+    layer.visible = true;
     await map.dispatchEvent({ type: 'pointermove', map, coordinate: [0, 0] });
     await map.dispatchEvent({ type: 'singleclick', map, coordinate: [0, 0] });
     expect(spy).toHaveBeenCalledTimes(1);
@@ -149,6 +149,7 @@ describe('Layer', () => {
     layer.attachToMap(map);
     layer.onHover(spy);
     layer.onClick(spy2);
+    layer.attachToMap(map);
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
 

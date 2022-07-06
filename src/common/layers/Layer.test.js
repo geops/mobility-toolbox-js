@@ -13,6 +13,7 @@ describe('Layer', () => {
   test('should define default properties.', () => {
     const options = {
       name: 'Layer',
+      key: 'Layerkey',
       olLayer,
     };
     const layer = new Layer(options);
@@ -20,66 +21,44 @@ describe('Layer', () => {
     expect(layer).toBeInstanceOf(Layer);
     expect(layer.options).toEqual(options);
     expect(layer.name).toEqual(options.name);
-    expect(layer.key).toEqual('layer');
-    expect(layer.isBaseLayer).toBe(false);
-    expect(layer.isBaseLayer).toBe(false);
-    expect(layer.isQueryable).toBe(true);
-    expect(layer.isClickActive).toBe(true);
-    expect(layer.isHoverActive).toBe(true);
+    expect(layer.key).toEqual('Layerkey');
     expect(layer.hitTolerance).toBe(5);
-    expect(layer.isMobilityLayer).toBe(true);
-    expect(layer.copyrights).toBe();
+    expect(layer.copyrights).toEqual([]);
     expect(layer.visible).toBe(true);
     expect(layer.properties).toEqual({});
     expect(layer.map).toBe(undefined);
-    expect(layer.clickCallbacks).toEqual([]);
-    expect(layer.hoverCallbacks).toEqual([]);
+    expect(layer.group).toBe(undefined);
   });
 
   test('should be visible by default.', () => {
-    const layer = new Layer({ name: 'Layer', olLayer });
+    const layer = new Layer();
     expect(layer.visible).toBe(true);
   });
 
   test('should be hidden using constructor.', () => {
-    const layer = new Layer({ name: 'Layer', visible: false, olLayer });
+    const layer = new Layer({ visible: false });
     expect(layer.visible).toBe(false);
   });
 
   test('should be hidden using setter.', () => {
-    const layer = new Layer({ name: 'Layer', olLayer });
-    layer.setVisible(false);
+    const layer = new Layer();
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
   test('should visibility stay unchanged', () => {
-    const layer = new Layer({ name: 'Layer', visible: false, olLayer });
-    layer.setVisible(false);
+    const layer = new Layer();
+    layer.visible = false;
     expect(layer.visible).toBe(false);
   });
 
   test('should return its name.', () => {
-    const layer = new Layer({ name: 'Layer', visible: false, olLayer });
+    const layer = new Layer({ name: 'Layer' });
     expect(layer.name).toEqual('Layer');
   });
 
-  test('should set isClickActive and isHoverActive to false if isQueryable is set to false.', () => {
-    const options = {
-      name: 'Layer',
-      isQueryable: false,
-      isClickActive: true,
-      isHoverActive: true,
-      olLayer,
-    };
-    const layer = new Layer(options);
-    expect(layer).toBeInstanceOf(Layer);
-    expect(layer.isQueryable).toBe(false);
-    expect(layer.isClickActive).toBe(false);
-    expect(layer.isHoverActive).toBe(false);
-  });
-
-  test('should called terminate on initialization.', () => {
-    const layer = new Layer({ name: 'Layer', olLayer });
+  test('should called detachFromMap on initialization.', () => {
+    const layer = new Layer();
     const spy = jest.spyOn(layer, 'detachFromMap');
     layer.attachToMap();
     expect(spy).toHaveBeenCalledTimes(1);
@@ -102,38 +81,11 @@ describe('Layer', () => {
 
   test('should set children', () => {
     const layer = new Layer({
-      name: 'foo',
-      children: [
-        new Layer({
-          name: 'bar',
-        }),
-        new Layer({
-          name: 'foobar',
-          visible: false,
-        }),
-      ],
+      children: [new Layer(), new Layer()],
     });
-    expect(layer.getVisibleChildren().length).toBe(1);
-    expect(layer.hasVisibleChildren()).toBe(true);
-  });
-
-  test('should set onClick using constructor.', () => {
-    const fn = () => {};
-    const layer = new Layer({
-      name: 'Layer',
-      olLayer,
-      onClick: fn,
-      onHover: fn,
-    });
-    expect(layer.clickCallbacks[0]).toBe(fn);
-    expect(layer.hoverCallbacks[0]).toBe(fn);
-  });
-
-  test('should onClick throw error.', () => {
-    const layer = new Layer({ name: 'Layer', olLayer });
-    expect(() => {
-      layer.onClick('not of type function');
-    }).toThrow(Error);
+    expect(layer.children.length).toBe(2);
+    expect(layer.children[0].parent).toBe(layer);
+    expect(layer.children[1].parent).toBe(layer);
   });
 
   test('should initialize copyrights property.', () => {
@@ -182,103 +134,6 @@ describe('Layer', () => {
     });
   });
 
-  describe('#get() and #set()', () => {
-    test('should get/set a properties.', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      expect(layer.get('foo')).toBe(undefined);
-      layer.set('foo', 'bar');
-      expect(layer.get('foo')).toBe('bar');
-    });
-  });
-
-  describe('#set()', () => {
-    test('should dispatch a change event.', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      layer.set('foo', 'bar');
-      expect(spy).toHaveBeenCalledWith({ type: 'change:foo', target: layer });
-    });
-  });
-
-  describe('#setVisible()', () => {
-    test("should not trigger a change event if the visiblity hasn't changed.", () => {
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      layer.setVisible(false, 'foo', 'bar', 'qux');
-      expect(spy).toHaveBeenCalledTimes(0);
-    });
-
-    test('should trigger a change event only if the visiblity change.', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-      });
-      const spy = jest.spyOn(layer, 'dispatchEvent');
-      layer.setVisible(true, 'foo', 'bar', 'qux');
-      expect(layer.visible).toBe(true);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith({
-        type: 'change:visible',
-        target: layer,
-        stopPropagationDown: 'foo',
-        stopPropagationUp: 'bar',
-        stopPropagationSiblings: 'qux',
-      });
-    });
-  });
-
-  describe('#getVisibleChildren()', () => {
-    test('should return only visible child.', () => {
-      const layerVisible = { visible: true };
-      const layerVisible2 = { visible: true };
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerHidden, layerVisible2],
-      });
-      expect(layer.getVisibleChildren()).toEqual([layerVisible, layerVisible2]);
-    });
-  });
-
-  describe('#hasVisibleChildren()', () => {
-    test('should return true.', () => {
-      const layerVisible = { visible: true };
-      const layerVisible2 = { visible: true };
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerVisible, layerHidden, layerVisible2],
-      });
-      expect(layer.hasVisibleChildren()).toEqual(true);
-    });
-
-    test('should return false.', () => {
-      const layerHidden = { visible: false };
-      const layer = new Layer({
-        name: 'Layer',
-        visible: false,
-        olLayer,
-        children: [layerHidden],
-      });
-      expect(layer.hasVisibleChildren()).toEqual(false);
-    });
-  });
-
   describe('#getFeatureInfoAtCoordinate()', () => {
     test('return an empty fetaureInfo object and display an error message', (done) => {
       // eslint-disable-next-line no-console
@@ -298,288 +153,6 @@ describe('Layer', () => {
         // eslint-disable-next-line no-console
         console.error.mockRestore();
       });
-    });
-  });
-
-  describe('#onClick()', () => {
-    test('adds function to clickCallbacks array', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const fn = jest.fn();
-      const fn2 = jest.fn();
-      layer.onClick(fn);
-      expect(layer.clickCallbacks).toEqual([fn]);
-      layer.onClick(fn2);
-      expect(layer.clickCallbacks).toEqual([fn, fn2]);
-    });
-
-    test('triggers Error if parameter is not a function', (done) => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      try {
-        layer.onClick('test');
-      } catch (e) {
-        expect(e).toBeDefined();
-        done();
-      }
-    });
-  });
-
-  describe('#unClick()', () => {
-    test('removes function from clickCallbacks array', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const fn = jest.fn();
-      const fn2 = jest.fn();
-      layer.onClick(fn);
-      expect(layer.clickCallbacks).toEqual([fn]);
-      layer.onClick(fn2);
-      expect(layer.clickCallbacks).toEqual([fn, fn2]);
-      layer.unClick(fn);
-      expect(layer.clickCallbacks).toEqual([fn2]);
-      // Make sure no callbacks are removed if the callback is not in the list.
-      layer.unClick(fn);
-      expect(layer.clickCallbacks).toEqual([fn2]);
-    });
-  });
-
-  describe('#onUserClickCallback()', () => {
-    const evt = { type: 'signleclick', coordinate: [0, 0] };
-
-    const getFeatureInfo = (layer, features = []) => ({
-      features,
-      layer,
-      coordinate: evt.coordinate,
-      event: evt,
-    });
-
-    test('calls click callback functions', (done) => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const goodFeatureInfo = getFeatureInfo(layer, [{ name: 'test' }]);
-      const fn = jest.fn();
-      const fn2 = jest.fn();
-      const spy = jest
-        .spyOn(layer, 'getFeatureInfoAtCoordinate')
-        .mockResolvedValue(goodFeatureInfo);
-      layer.onClick(fn);
-      layer.onClick(fn2);
-      layer.onUserClickCallback(evt).then((featureInfo) => {
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith(evt.coordinate);
-        expect(featureInfo).toBe(goodFeatureInfo);
-        expect(fn).toHaveBeenCalledTimes(1);
-        expect(fn.mock.calls[0][0]).toBe(goodFeatureInfo.features);
-        expect(fn.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
-        expect(fn.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
-        expect(fn2).toHaveBeenCalledTimes(1);
-        expect(fn2.mock.calls[0][0]).toBe(goodFeatureInfo.features);
-        expect(fn2.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
-        expect(fn2.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
-        done();
-      });
-    });
-
-    describe('returns empty feature info', () => {
-      test('if isClickActive = false', (done) => {
-        const layer = new Layer({
-          name: 'Layer',
-          isClickActive: false,
-          olLayer,
-        });
-        layer.onClick(jest.fn());
-        layer.onUserClickCallback(evt).then((featureInfo) => {
-          expect(featureInfo).toEqual(getFeatureInfo(layer));
-          done();
-        });
-      });
-
-      test('if clickCallbacks is empty', (done) => {
-        const layer = new Layer({
-          name: 'Layer',
-          olLayer,
-        });
-        layer.onUserClickCallback(evt).then((featureInfo) => {
-          expect(featureInfo).toEqual(getFeatureInfo(layer));
-          done();
-        });
-      });
-
-      test('if an error is thrown in click callback', (done) => {
-        const layer = new Layer({
-          name: 'Layer',
-          olLayer,
-        });
-        layer.onClick(() => {
-          throw new Error('foo');
-        });
-        layer.onUserClickCallback(evt).then((featureInfo) => {
-          expect(featureInfo).toEqual(getFeatureInfo(layer));
-          done();
-        });
-      });
-    });
-
-    test('triggers Error if parameter is not a function', (done) => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      try {
-        layer.onClick('test');
-      } catch (e) {
-        expect(e).toBeDefined();
-        done();
-      }
-    });
-  });
-
-  describe('#onHover()', () => {
-    test('adds function to clickCallbacks array', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const fn = jest.fn();
-      const fn2 = jest.fn();
-      layer.onHover(fn);
-      expect(layer.hoverCallbacks).toEqual([fn]);
-      layer.onHover(fn2);
-      expect(layer.hoverCallbacks).toEqual([fn, fn2]);
-    });
-
-    test('triggers Error if parameter is not a function', (done) => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      try {
-        layer.onHover('test');
-      } catch (e) {
-        expect(e).toBeDefined();
-        done();
-      }
-    });
-  });
-
-  describe('#unHover()', () => {
-    test('removes function from clickCallbacks array', () => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const fn = jest.fn();
-      const fn2 = jest.fn();
-      layer.onHover(fn);
-      expect(layer.hoverCallbacks).toEqual([fn]);
-      layer.onHover(fn2);
-      expect(layer.hoverCallbacks).toEqual([fn, fn2]);
-      layer.unHover(fn);
-      expect(layer.hoverCallbacks).toEqual([fn2]);
-      // Make sure no callbacks are removed if the callback is not in the list.
-      layer.unHover(fn);
-      expect(layer.hoverCallbacks).toEqual([fn2]);
-    });
-  });
-
-  describe('#onUserMoveCallback()', () => {
-    const evt = { type: 'pointermove', coordinate: [0, 0] };
-
-    const getFeatureInfo = (layer, features = []) => ({
-      features,
-      layer,
-      coordinate: evt.coordinate,
-      event: evt,
-    });
-
-    test('calls hover callback functions', (done) => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      const goodFeatureInfo = getFeatureInfo(layer, [{ name: 'test' }]);
-      const fn = jest.fn();
-      const fn2 = jest.fn();
-      const spy = jest
-        .spyOn(layer, 'getFeatureInfoAtCoordinate')
-        .mockResolvedValue(goodFeatureInfo);
-      layer.onHover(fn);
-      layer.onHover(fn2);
-      layer.onUserMoveCallback(evt).then((featureInfo) => {
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith(evt.coordinate);
-        expect(featureInfo).toBe(goodFeatureInfo);
-        expect(fn).toHaveBeenCalledTimes(1);
-        expect(fn.mock.calls[0][0]).toBe(goodFeatureInfo.features);
-        expect(fn.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
-        expect(fn.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
-        expect(fn2).toHaveBeenCalledTimes(1);
-        expect(fn2.mock.calls[0][0]).toBe(goodFeatureInfo.features);
-        expect(fn2.mock.calls[0][1]).toBe(goodFeatureInfo.layer);
-        expect(fn2.mock.calls[0][2]).toBe(goodFeatureInfo.coordinate);
-        done();
-      });
-    });
-
-    describe('returns empty feature info', () => {
-      test('if isHoverActive = false', (done) => {
-        const layer = new Layer({
-          name: 'Layer',
-          isHoverActive: false,
-          olLayer,
-        });
-        layer.onHover(jest.fn());
-        layer.onUserMoveCallback(evt).then((featureInfo) => {
-          expect(featureInfo).toEqual(getFeatureInfo(layer));
-          done();
-        });
-      });
-
-      test('if hoverCallbacks is empty', (done) => {
-        const layer = new Layer({
-          name: 'Layer',
-          olLayer,
-        });
-        layer.onUserMoveCallback(evt).then((featureInfo) => {
-          expect(featureInfo).toEqual(getFeatureInfo(layer));
-          done();
-        });
-      });
-
-      test('if an error is thrown in hover callback', (done) => {
-        const layer = new Layer({
-          name: 'Layer',
-          olLayer,
-        });
-        layer.onHover(() => {
-          throw new Error('foo');
-        });
-        layer.onUserMoveCallback(evt).then((featureInfo) => {
-          expect(featureInfo).toEqual(getFeatureInfo(layer));
-          done();
-        });
-      });
-    });
-
-    test('triggers Error if parameter is not a function', (done) => {
-      const layer = new Layer({
-        name: 'Layer',
-        olLayer,
-      });
-      try {
-        layer.onHover('test');
-      } catch (e) {
-        expect(e).toBeDefined();
-        done();
-      }
     });
   });
 });

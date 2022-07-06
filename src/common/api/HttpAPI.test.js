@@ -25,7 +25,7 @@ describe('HttpAPI', () => {
         .then((response) => {
           // Correct url
           expect(fetch.mock.calls[0][0]).toEqual(
-            'https://foo.ch/path?fooEmpty=&key=apiKey&q=Bern',
+            'https://foo.ch/path?key=apiKey&q=Bern&fooEmpty=',
           );
 
           // Correct search result

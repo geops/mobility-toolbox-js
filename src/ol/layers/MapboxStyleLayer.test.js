@@ -19,7 +19,8 @@ describe('MapboxStyleLayer', () => {
     onClick = jest.fn();
     source = new MaplibreLayer({
       name: 'Layer',
-      apiKey: false,
+      apiKey: 'foo',
+      url: 'https://foo.com/styles',
     });
     layer = new MapboxStyleLayer({
       name: 'mapbox layer',
@@ -46,7 +47,6 @@ describe('MapboxStyleLayer', () => {
   test('should be instanced.', () => {
     expect(layer).toBeInstanceOf(MapboxStyleLayer);
     expect(layer.styleLayers[0]).toBe(styleLayer);
-    expect(layer.clickCallbacks[0]).toBe(onClick);
   });
 
   test('should not initalized mapbox map.', () => {
@@ -61,12 +61,6 @@ describe('MapboxStyleLayer', () => {
     expect(layer.mapboxLayer.mbMap).toBeInstanceOf(gllib.Map);
     layer.detachFromMap();
     source.detachFromMap();
-  });
-
-  test('should add onClick callback.', () => {
-    const onClick2 = jest.fn();
-    layer.onClick(onClick2);
-    expect(layer.clickCallbacks[1]).toBe(onClick2);
   });
 
   test('should called terminate on initalization.', () => {

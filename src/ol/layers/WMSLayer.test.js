@@ -2,7 +2,6 @@ import OLView from 'ol/View';
 import ImageLayer from 'ol/layer/Image';
 import ImageWMS from 'ol/source/ImageWMS';
 import fetch from 'jest-fetch-mock';
-import qs from 'query-string';
 import Map from 'ol/Map';
 import WMSLayer from './WMSLayer';
 
@@ -18,7 +17,7 @@ describe('WMSLayer', () => {
     layer = new WMSLayer({
       olLayer: new ImageLayer({
         source: new ImageWMS({
-          url: 'dummy',
+          url: 'http://dummy',
           params: { LAYERS: 'layers' },
         }),
       }),
@@ -44,10 +43,10 @@ describe('WMSLayer', () => {
 
   test('should return a promise resolving features.', async () => {
     const data = await layer.getFeatureInfoAtCoordinate([50, 50]);
-    const params = qs.parse(fetch.mock.calls[0][0].split('?')[1]);
-    expect(params.REQUEST).toBe('GetFeatureInfo');
-    expect(params.I).toBe('50');
-    expect(params.J).toBe('50');
+    const params = new URL(fetch.mock.calls[0][0]).searchParams;
+    expect(params.get('REQUEST')).toBe('GetFeatureInfo');
+    expect(params.get('I')).toBe('50');
+    expect(params.get('J')).toBe('50');
     expect(data.features).toEqual([]);
   });
 
@@ -55,24 +54,6 @@ describe('WMSLayer', () => {
     const data = await layer.getFeatureInfoAtCoordinate([50, 50]);
     expect(data.coordinate).toEqual([50, 50]);
     expect(data.layer).toBeInstanceOf(WMSLayer);
-  });
-
-  test('#onClick', () => {
-    const f = () => {};
-    const f2 = () => {};
-    layer.onClick(f);
-    expect(layer.clickCallbacks[0]).toBe(f);
-    expect(layer.clickCallbacks.length).toBe(1);
-    layer.onClick(f);
-    expect(layer.clickCallbacks.length).toBe(1);
-    layer.onClick(f2);
-    expect(layer.clickCallbacks.length).toBe(2);
-  });
-
-  test('should onClick throw error.', () => {
-    expect(() => {
-      layer.onClick('not of type function');
-    }).toThrow(Error);
   });
 
   test('should clone', () => {

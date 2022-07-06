@@ -41,7 +41,7 @@ export default () => {
 
   // Toggle pois visibility
   document.getElementById('button').addEventListener('click', (evt) => {
-    poiLayer.setVisible(!poiLayer.visible);
+    poiLayer.visible = !poiLayer.visible;
     const { target } = evt;
     target.innerHTML = `${poiLayer.visible ? 'Hide' : 'Show'} the POIs`;
   });

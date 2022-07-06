@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.12",
+  "version": "2.0.0-beta.18",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
@@ -17,7 +17,6 @@
     "lodash.debounce": "4.0.8",
     "lodash.throttle": "4.1.1",
     "path": "^0.12.7",
-    "query-string": "7.1.0",
     "turf": "^3.0.14",
     "uuid": "8.3.2"
   },
@@ -34,6 +33,9 @@
     "@babel/preset-react": "7.16.7",
     "@commitlint/cli": "17.0.2",
     "@commitlint/config-conventional": "17.0.2",
+    "@types/geojson": "^7946.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
     "autoprefixer": "9.7.6",
     "cypress": "9.4.1",
     "deepmerge": "4.2.2",
@@ -46,6 +48,7 @@
     "esdoc-typescript-plugin": "^1.0.1",
     "eslint": "8.8.0",
     "eslint-config-airbnb": "19.0.4",
+    "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-cypress": "2.12.1",
     "eslint-plugin-import": "2.25.4",
@@ -64,7 +67,7 @@
     "mapbox-gl": "1.13.2",
     "maplibre-gl": "2.1.9",
     "mock-socket": "9.1.2",
-    "ol": "6.12.0",
+    "ol": "6.14.1",
     "openapi-typescript": "^5.4.0",
     "postcss": "8.3.3",
     "postcss-loader": "3.0.0",
@@ -82,7 +85,7 @@
   },
   "scripts": {
     "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
-    "build": "yarn esbuild",
+    "build": "rm -rf build && yarn esbuild && cp README.md build/ && cp package.json build/ && cp -R src/types build/",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
     "cy:test": "start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'",
@@ -92,8 +95,8 @@
     "dev": "yarn doc && yarn dev:examples",
     "dev:examples": "cd doc && yarn dev",
     "doc": "yarn apidoc && cd doc && yarn install --frozen-lockfile && yarn build",
-    "esbuild": "rm -rf build && yarn esbuild:all && yarn esbuild:iife && cp README.md build/ && cp package.json build/",
-    "esbuild:all": "esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
+    "esbuild": "yarn esbuild:all && yarn esbuild:iife",
+    "esbuild:all": "esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx",
     "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
     "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
     "esbuild:iife:minify": "yarn esbuild:iife:base --minify --outfile=build/mbt.min.js",
@@ -102,7 +105,7 @@
     "lib": "REACT_APP_LIB_MODE=1  webpack --mode production",
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
-    "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss' --allow-empty-input",
+    "lint": "eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input",
     "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags ",
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
     "publish:public:dryrun": "yarn release --dry-run",
@@ -111,7 +114,7 @@
     "start:examples": "cd doc && yarn build && yarn start",
     "test": "TZ='UTC' jest",
     "test:watch": "yarn test --watchAll",
-    "types": "tsc src/api/RoutingAPI.ts --declaration --emitDeclarationOnly --isolatedModules --outdir build",
+    "types": "tsc src/*.ts src/**/*.(t|j)s --declaration --emitDeclarationOnly --isolatedModules --outdir build",
     "types:backend": "openapi-typescript https://developer.geops.io/swagger/routing.json --output types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output types/stops.d.ts"
   },
   "browserslist": {
@@ -126,37 +129,6 @@
       "last 1 safari version",
       "last 1 ie version"
     ]
-  },
-  "eslintConfig": {
-    "env": {
-      "cypress/globals": true,
-      "node": true,
-      "browser": true,
-      "es6": true,
-      "jest": true
-    },
-    "parser": "@babel/eslint-parser",
-    "extends": [
-      "airbnb",
-      "prettier"
-    ],
-    "plugins": [
-      "cypress",
-      "prettier"
-    ],
-    "rules": {
-      "arrow-body-style": 0,
-      "react/jsx-filename-extension": [
-        1,
-        {
-          "extensions": [
-            ".js",
-            ".jsx"
-          ]
-        }
-      ],
-      "prettier/prettier": "error"
-    }
   },
   "keywords": [
     "mobility",

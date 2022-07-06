@@ -1,6 +1,5 @@
 import fetch from 'jest-fetch-mock';
 import View from 'ol/View';
-import qs from 'query-string';
 import Map from 'ol/Map';
 import RoutingControl from './RoutingControl';
 
@@ -51,25 +50,24 @@ describe('RoutingControl', () => {
       apiKey: 'foo',
     });
     control.attachToMap(map);
-    expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
+    expect(
+      map.getTargetElement().querySelector('#ol-toggle-routing'),
+    ).toBeDefined();
     control.viaPoints = [
       [950476.4055933182, 6003322.253698345],
       [950389.0813034325, 6003656.659274571],
     ];
-    control
-      .drawRoute(control.viaPoints)
-      .then(() => {
-        // Should use correct URL
-        expect(fetch.mock.calls[0][0]).toEqual(
-          'https://foo.ch?coord-punish=1000&coord-radius=100&elevation=false&graph=osm&key=foo&mot=bus&resolve-hops=false&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839',
-        );
-        // routingLayer should contain three features (2 x viapoints, 1 x route)
-        expect(
-          control.routingLayer.olLayer.getSource().getFeatures().length,
-        ).toEqual(3);
-        done();
-      })
-      .catch(() => {});
+    control.drawRoute(control.viaPoints).then(() => {
+      // Should use correct URL
+      expect(fetch.mock.calls[0][0]).toEqual(
+        'https://foo.ch/?key=foo&graph=osm&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+      );
+      // routingLayer should contain three features (2 x viapoints, 1 x route)
+      expect(
+        control.routingLayer.olLayer.getSource().getFeatures().length,
+      ).toEqual(3);
+      done();
+    });
   });
 
   test('launch routing and add features for multiple graphs', (done) => {
@@ -97,38 +95,35 @@ describe('RoutingControl', () => {
     });
     control.attachToMap(map);
     control.viaPoints = ['a4dca961d199ff76', 'e3666f03cba06b2b'];
-    control
-      .drawRoute(control.viaPoints)
-      .then(() => {
-        // Should use correct URL
-        expect(fetch.mock.calls[0][0]).toEqual(
-          'https://foo.ch/lookup/a4dca961d199ff76?key=foo',
-        );
-        expect(fetch.mock.calls[1][0]).toEqual(
-          'https://foo.ch/lookup/e3666f03cba06b2b?key=foo',
-        );
-        expect(fetch.mock.calls[2][0]).toEqual(
-          'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=gen5&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
-        );
-        expect(fetch.mock.calls[3][0]).toEqual(
-          'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=gen10&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
-        );
-        expect(fetch.mock.calls[4][0]).toEqual(
-          'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=gen30&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
-        );
-        expect(fetch.mock.calls[5][0]).toEqual(
-          'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=gen100&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
-        );
-        expect(fetch.mock.calls[6][0]).toEqual(
-          'https://foo.ch/?coord-punish=1000&coord-radius=100&elevation=false&graph=osm&key=foo&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
-        );
-        // routingLayer should contain seven features (2 x viapoints, 5 x route for each graph)
-        expect(
-          control.routingLayer.olLayer.getSource().getFeatures().length,
-        ).toEqual(7);
-        done();
-      })
-      .catch(() => {});
+    control.drawRoute(control.viaPoints).then(() => {
+      // Should use correct URL
+      expect(fetch.mock.calls[0][0]).toEqual(
+        'https://foo.ch/lookup/a4dca961d199ff76?key=foo',
+      );
+      expect(fetch.mock.calls[1][0]).toEqual(
+        'https://foo.ch/lookup/e3666f03cba06b2b?key=foo',
+      );
+      expect(fetch.mock.calls[2][0]).toEqual(
+        'https://foo.ch/?key=foo&graph=gen5&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+      );
+      expect(fetch.mock.calls[3][0]).toEqual(
+        'https://foo.ch/?key=foo&graph=gen10&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+      );
+      expect(fetch.mock.calls[4][0]).toEqual(
+        'https://foo.ch/?key=foo&graph=gen30&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+      );
+      expect(fetch.mock.calls[5][0]).toEqual(
+        'https://foo.ch/?key=foo&graph=gen100&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+      );
+      expect(fetch.mock.calls[6][0]).toEqual(
+        'https://foo.ch/?key=foo&graph=osm&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+      );
+      // routingLayer should contain seven features (2 x viapoints, 5 x route for each graph)
+      expect(
+        control.routingLayer.olLayer.getSource().getFeatures().length,
+      ).toEqual(7);
+      done();
+    });
   });
 
   test('ignores Abort Error and returns undefined', (done) => {
@@ -167,16 +162,13 @@ describe('RoutingControl', () => {
       [950389.0813034325, 6003656.659274571],
       'e3666f03cba06b2b',
     ];
-    control
-      .drawRoute(control.viaPoints)
-      .then(() => {
-        const params = qs.parseUrl(fetch.mock.calls[1][0]).query;
-        expect(params.via).toBe(
-          '@47.3739194713294,8.538274823394632|@47.37595378493421,8.537490375951839|!e3666f03cba06b2b',
-        );
-        done();
-      })
-      .catch(() => {});
+    control.drawRoute(control.viaPoints).then(() => {
+      const { searchParams } = new URL(fetch.mock.calls[1][0]);
+      expect(searchParams.get('via')).toBe(
+        '@47.3739194713294,8.538274823394632|@47.37595378493421,8.537490375951839|!e3666f03cba06b2b',
+      );
+      done();
+    });
   });
 
   test('calls routing api with raw via points', (done) => {
@@ -202,15 +194,12 @@ describe('RoutingControl', () => {
       '!stationid', // will send a stops lookup request fo the station id
       [950389, 6003656],
     ];
-    control
-      .drawRoute(control.viaPoints)
-      .then(() => {
-        const params = qs.parseUrl(fetch.mock.calls[2][0]).query;
-        expect(params.via).toBe(
-          '46.2,7.1|@46.2,7.1|@46.2,7$1|station name$2|station name@46.2,7|stationname@46.2,7.7$3|!stationid|47.375949774398805,8.537489645590679',
-        );
-        done();
-      })
-      .catch(() => {});
+    control.drawRoute(control.viaPoints).then(() => {
+      const params = new URL(fetch.mock.calls[2][0]).searchParams;
+      expect(params.get('via')).toBe(
+        '46.2,7.1|@46.2,7.1|@46.2,7$1|station name$2|station name@46.2,7|stationname@46.2,7.7$3|!stationid|47.375949774398805,8.537489645590679',
+      );
+      done();
+    });
   });
 });

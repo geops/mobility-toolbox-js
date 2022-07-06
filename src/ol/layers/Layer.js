@@ -1,6 +1,6 @@
 import { unByKey } from 'ol/Observable';
-import Group from 'ol/layer/Group';
 import LayerCommon from '../../common/layers/Layer';
+import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
 
 /**
  * A class representing a layer to display on an OpenLayers map.
@@ -17,7 +17,7 @@ import LayerCommon from '../../common/layers/Layer';
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
-class Layer extends LayerCommon {
+class Layer extends userInteractionsMixin(LayerCommon) {
   /**
    * Constructor.
    *
@@ -29,9 +29,6 @@ class Layer extends LayerCommon {
    * @param {Array<Layer>} [options.children=[]] Sublayers.
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
-   * @param {boolean} [options.isBaseLayer=false] If true this layer is a baseLayer.
-   * @param {boolean} [options.isQueryable=true] If true feature information can be queried by the react-spatial LayerService. Default is true.
-   * @param {boolean} [options.isClickActive=true] If true feature information will be queried on 'singleclick' event. All results will be passed to function registered using `onClick` function. Default is true.
    */
   constructor(options) {
     super(options);
@@ -72,6 +69,14 @@ class Layer extends LayerCommon {
     }
 
     this.olListenersKeys.push(
+      this.on('change:visible', () => {
+        if (this.olLayer) {
+          this.olLayer.setVisible(this.visible);
+        }
+      }),
+    );
+
+    this.olListenersKeys.push(
       this.map.getLayers().on('remove', (evt) => {
         if (evt.element === this.olLayer) {
           this.detachFromMap();
@@ -79,17 +84,15 @@ class Layer extends LayerCommon {
       }),
     );
 
-    if (this.isClickActive || this.isHoverActive) {
-      this.toggleVisibleListeners();
-      this.olListenersKeys.push(
-        this.on('change:visible', this.toggleVisibleListeners),
-      );
-    }
+    this.toggleVisibleListeners();
+    this.olListenersKeys.push(
+      this.on('change:visible', this.toggleVisibleListeners),
+    );
 
     // We set the copyright to the source used by the layer.
     if (this.copyrights && this.olLayer) {
       const attributions = this.copyrights || [];
-      if (this.olLayer instanceof Group) {
+      if (this.olLayer.getLayers) {
         this.olLayer
           .getLayers()
           .getArray()
@@ -106,6 +109,7 @@ class Layer extends LayerCommon {
    * Terminate what was initialized in init function. Remove layer, events...
    */
   detachFromMap() {
+    this.deactivateUserInteractions();
     unByKey(this.olListenersKeys);
 
     if (this.map && this.olLayer) {
@@ -115,34 +119,35 @@ class Layer extends LayerCommon {
     super.detachFromMap();
   }
 
-  /**
-   * Change the visibility of the layer
-   *
-   * @param {boolean} visible Defines the visibility of the layer
-   * @param {boolean} [stopPropagationDown]
-   * @param {boolean} [stopPropagationUp]
-   * @param {boolean} [stopPropagationSiblings]
-   */
-  setVisible(
-    visible,
-    stopPropagationDown = false,
-    stopPropagationUp = false,
-    stopPropagationSiblings = false,
-  ) {
-    if (visible === this.visible) {
-      return;
+  activateUserInteractions() {
+    this.deactivateUserInteractions();
+    if (
+      this.map &&
+      this.userInteractions &&
+      this.userClickInteractions &&
+      this.userClickCallbacks.length
+    ) {
+      this.singleClickListenerKey = this.map.on(
+        'singleclick',
+        this.onUserClickCallback,
+      );
+      this.olListenersKeys.push(this.singleClickListenerKey);
     }
-
-    super.setVisible(
-      visible,
-      stopPropagationDown,
-      stopPropagationUp,
-      stopPropagationSiblings,
-    );
-
-    if (this.olLayer) {
-      this.olLayer.setVisible(this.visible);
+    if (
+      this.map &&
+      this.userInteractions &&
+      this.userHoverInteractions &&
+      this.userHoverCallbacks.length
+    ) {
+      this.pointerMoveListenerKey = this.map.on(
+        'pointermove',
+        this.onUserMoveCallback,
+      );
     }
+  }
+
+  deactivateUserInteractions() {
+    unByKey([this.pointerMoveListenerKey, this.singleClickListenerKey]);
   }
 
   /**
@@ -150,34 +155,10 @@ class Layer extends LayerCommon {
    * @private
    */
   toggleVisibleListeners() {
-    // Remove previous event
-    if (this.isClickListenerKey && this.isHoverListenerKey) {
-      [this.isClickListenerKey, this.isHoverListenerKey].forEach((key) => {
-        const index = this.olListenersKeys.indexOf(key);
-        if (index > -1) {
-          this.olListenersKeys.splice(index, 1);
-        }
-        unByKey([this.isHoverListenerKey, this.isClickListenerKey]);
-      });
-    }
-
     if (this.visible) {
-      if (this.isClickActive) {
-        this.isClickListenerKey = this.map.on(
-          'singleclick',
-          this.onUserClickCallback,
-        );
-      }
-      if (this.isHoverActive) {
-        this.isHoverListenerKey = this.map.on(
-          'pointermove',
-          this.onUserMoveCallback,
-        );
-      }
-      this.olListenersKeys.push(
-        this.isClickListenerKey,
-        this.isHoverListenerKey,
-      );
+      this.activateUserInteractions();
+    } else {
+      this.deactivateUserInteractions();
     }
   }
 

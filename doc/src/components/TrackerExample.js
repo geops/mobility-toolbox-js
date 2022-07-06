@@ -26,7 +26,6 @@ function TrackerExample() {
     const tracker = new TralisLayer({
       url: 'wss://api.geops.io/tracker-ws/v1/',
       apiKey: window.apiKey,
-      isQueryable: false,
     });
 
     tracker.attachToMap(map);

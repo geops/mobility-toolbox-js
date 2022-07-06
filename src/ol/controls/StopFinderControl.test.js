@@ -48,7 +48,7 @@ describe('StopFinderControl', () => {
     control.search('foo').then(() => {
       // Correct url
       expect(fetch.mock.calls[0][0]).toEqual(
-        'https://foo.ch?foo=bar&key=foo&limit=10&q=foo',
+        'https://foo.ch/?key=foo&limit=10&foo=bar&q=foo',
       );
       expect(
         control.element.querySelector('div').querySelector('div').innerHTML,

@@ -5,7 +5,7 @@ import Source from 'ol/source/Source';
 import OLLayer from 'ol/layer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from './Layer';
-import { getMapboxMapCopyrights, getMapboxStyleUrl } from '../../common/utils';
+import { getMapboxMapCopyrights, getUrlWithParams } from '../../common/utils';
 
 /**
  * A class representing Mapboxlayer to display on BasicMap
@@ -33,9 +33,7 @@ export default class MapboxLayer extends Layer {
     const mbLayer = new OLLayer({
       source: new Source({}),
       render: (frameState) => {
-        if (!this.mbMap) {
-          // eslint-disable-next-line no-console
-          console.warn("Mapbox map doesn't exist.");
+        if (!this.map || !this.mbMap) {
           return null;
         }
         let changed = false;
@@ -203,14 +201,6 @@ export default class MapboxLayer extends Layer {
   }
 
   /**
-   * Returns a style URL with apiKey & apiKeyName infos.
-   * @private
-   */
-  createStyleUrl() {
-    return getMapboxStyleUrl(this.apiKey, this.apiKeyName, this.styleUrl);
-  }
-
-  /**
    * Create the mapbox map.
    * @private
    */
@@ -248,12 +238,19 @@ export default class MapboxLayer extends Layer {
     container.style.width = '100%';
     container.style.height = '100%';
 
+    if (!this.apiKey && !this.styleUrl.includes(this.apiKeyName)) {
+      // eslint-disable-next-line no-console
+      console.warn(`No apiKey is defined for request to ${this.styleUrl}`);
+    }
+
     /**
      * A mapbox map
      * @type {mapboxgl.Map}
      */
     this.mbMap = new Map({
-      style: this.createStyleUrl(),
+      style: getUrlWithParams(this.styleUrl, {
+        [this.apiKeyName]: this.apiKey,
+      }).toString(),
       container,
       interactive: false,
       trackResize: false,

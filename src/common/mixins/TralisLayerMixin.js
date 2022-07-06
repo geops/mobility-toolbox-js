@@ -1,26 +1,18 @@
-/* eslint-disable no-empty-function */
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-empty-function,@typescript-eslint/no-empty-function */
+/* eslint-disable no-useless-constructor,@typescript-eslint/no-useless-constructor */
+/* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-import qs from 'query-string';
 import { buffer, containsCoordinate, intersects } from 'ol/extent';
 import { unByKey } from 'ol/Observable';
 import GeoJSON from 'ol/format/GeoJSON';
-import Point from 'ol/geom/Point';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
-import Tracker from '../Tracker';
-import { timeSteps } from '../trackerConfig';
-import createFilters from '../utils/createTrackerFilters';
 import trackerDefaultStyle from '../styles/trackerDefaultStyle';
 import { TralisAPI, TralisModes } from '../../api';
-
-/* Permalink parameter used to filters vehicles */
-const LINE_FILTER = 'publishedlinename';
-const ROUTE_FILTER = 'tripnumber';
-const OPERATOR_FILTER = 'operator';
+import renderTrajectories from '../utils/renderTrajectories';
+import * as trackerConfig from '../utils/trackerConfig';
 
 /**
  * TralisLayerInterface.
@@ -96,7 +88,10 @@ export class TralisLayerInterface {
 const TralisLayerMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
-      super({ hitTolerance: 10, ...options });
+      super({
+        hitTolerance: 10,
+        ...options,
+      });
 
       this.debug = options.debug;
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
@@ -105,27 +100,40 @@ const TralisLayerMixin = (Base) =>
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
       this.format = new GeoJSON();
-      this.generalizationLevelByZoom = options.generalizationLevelByZoom || {
-        0: 5,
-        1: 5,
-        2: 5,
-        3: 5,
-        4: 5,
-        5: 5,
-        6: 5,
-        7: 5,
-        8: 10,
-        9: 30,
-        10: 30,
-        11: 100,
-        12: 100,
-        13: 100,
+      this.generalizationLevelByZoom = options.generalizationLevelByZoom || [
+        5, 5, 5, 5, 5, 5, 5, 5, 10, 30, 30, 100, 100, 100,
+      ];
+      this.getGeneralizationLevelByZoom = (zoom) => {
+        return (
+          (options.getGeneralizationLevelByZoom &&
+            options.getGeneralizationLevelByZoom(
+              zoom,
+              this.generalizationLevelByZoom,
+            )) ||
+          this.generalizationLevelByZoom[zoom]
+        );
+      };
+
+      this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom || [
+        100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400,
+        300, 250, 180, 90, 60, 50, 50, 50, 50, 50,
+      ];
+
+      this.getRenderTimeIntervalByZoom = (zoom) => {
+        return (
+          (options.getRenderTimeIntervalByZoom &&
+            options.getRenderTimeIntervalByZoom(
+              zoom,
+              this.renderTimeIntervalByZoom,
+            )) ||
+          this.renderTimeIntervalByZoom[zoom]
+        );
       };
 
       // This property will call api.setBbox on each movend event
       this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd !== false;
 
-      // Define throttling nad debounce render function
+      // Define throttling and debounce render function
       this.throttleRenderTrajectories = throttle(
         this.renderTrajectoriesInternal,
         50,
@@ -156,9 +164,6 @@ const TralisLayerMixin = (Base) =>
      * @ignore
      */
     defineProperties(options) {
-      // Tracker options use to build the tracker.
-      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
-        options;
       const {
         style,
         speed,
@@ -169,17 +174,9 @@ const TralisLayerMixin = (Base) =>
         sort,
         time,
         live,
+        canvas,
+        styleOptions,
       } = options;
-
-      const initTrackerOptions = {
-        style,
-      };
-
-      Object.keys(initTrackerOptions).forEach(
-        (key) =>
-          initTrackerOptions[key] === undefined &&
-          delete initTrackerOptions[key],
-      );
 
       let currSpeed = speed || 1;
       let currTime = time || new Date();
@@ -189,12 +186,22 @@ const TralisLayerMixin = (Base) =>
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
 
+        canvas: {
+          value: canvas || document.createElement('canvas'),
+        },
+
         /**
          * Style function used to render a vehicle.
          */
         style: {
-          value: (trajectory, viewState) =>
-            (style || trackerDefaultStyle)(trajectory, viewState, this),
+          value: style || trackerDefaultStyle,
+        },
+
+        /**
+         * Custom options to pass as last parameter of the style function.
+         */
+        styleOptions: {
+          value: { ...trackerConfig, ...(styleOptions || {}) },
         },
 
         /**
@@ -226,16 +233,6 @@ const TralisLayerMixin = (Base) =>
         },
 
         /**
-         * The tracker that renders the trajectories.
-         */
-        tracker: { value: null, writable: true },
-
-        /**
-         * Canvas cache object for trajectories drawn.
-         */
-        styleCache: { value: {} },
-
-        /**
          * If true. The layer will always use Date.now() on the next tick to render the trajectories.
          * When true, setting the time property has no effect.
          */
@@ -265,13 +262,6 @@ const TralisLayerMixin = (Base) =>
         },
 
         /**
-         * Keep track of which trajectories are currently drawn.
-         */
-        renderedTrajectories: {
-          get: () => (this.tracker && this.tracker.renderedTrajectories) || [],
-        },
-
-        /**
          * Id of the hovered vehicle.
          */
         hoverVehicleId: {
@@ -295,14 +285,6 @@ const TralisLayerMixin = (Base) =>
             pixelRatio ||
             (typeof window !== 'undefined' ? window.devicePixelRatio : 1),
           writable: true,
-        },
-
-        /**
-         * Options used by the constructor of the Tracker class.
-         */
-        initTrackerOptions: {
-          value: initTrackerOptions,
-          writable: false,
         },
 
         /**
@@ -330,50 +312,6 @@ const TralisLayerMixin = (Base) =>
         },
 
         /**
-         * Filter properties used in combination with permalink parameters.
-         */
-        publishedLineName: {
-          get: () => publishedLineName,
-          set: (newPublishedLineName) => {
-            publishedLineName = newPublishedLineName;
-            this.updateFilters();
-          },
-        },
-        tripNumber: {
-          get: () => tripNumber,
-          set: (newTripNumber) => {
-            tripNumber = newTripNumber;
-            this.updateFilters();
-          },
-        },
-        operator: {
-          get: () => operator,
-          set: (newOperator) => {
-            operator = newOperator;
-            this.updateFilters();
-          },
-        },
-        regexPublishedLineName: {
-          get: () => regexPublishedLineName,
-          set: (newRegex) => {
-            regexPublishedLineName = newRegex;
-            this.updateFilters();
-          },
-        },
-
-        /**
-         * Style properties.
-         */
-        delayDisplay: {
-          value: options.delayDisplay || 300000,
-          writable: true,
-        },
-        delayOutlineColor: {
-          value: options.delayOutlineColor || '#000000',
-          writable: true,
-        },
-
-        /**
          * Debug properties.
          */
         // Not used anymore, but could be useful for debugging.
@@ -385,18 +323,10 @@ const TralisLayerMixin = (Base) =>
         //   writable: true,
         // },
       });
-
-      // Update filter function based on convenient properties
-      this.updateFilters();
     }
 
     attachToMap(map) {
       super.attachToMap(map);
-
-      this.tracker = new Tracker({
-        style: (...args) => this.style(...args),
-        ...this.initTrackerOptions,
-      });
 
       // If the layer is visible we start  the rendering clock
       if (this.visible) {
@@ -428,12 +358,8 @@ const TralisLayerMixin = (Base) =>
 
       this.stop();
       unByKey(this.visibilityRef);
-      if (this.tracker) {
-        const { canvas } = this.tracker;
-        const context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        this.tracker = null;
-      }
+      const context = this.canvas.getContext('2d');
+      context.clearRect(0, 0, this.canvas.width, this.canvas.height);
       super.detachFromMap();
     }
 
@@ -441,14 +367,6 @@ const TralisLayerMixin = (Base) =>
       this.stop();
       this.renderTrajectories();
       this.startUpdateTime();
-
-      if (this.isClickActive) {
-        this.onClick(this.onFeatureClick);
-      }
-
-      if (this.isHoverActive) {
-        this.onHover(this.onFeatureHover);
-      }
 
       this.api.open();
       this.api.subscribeTrajectory(
@@ -514,10 +432,6 @@ const TralisLayerMixin = (Base) =>
      * @private
      */
     renderTrajectoriesInternal(viewState, noInterpolate) {
-      if (!this.tracker) {
-        return false;
-      }
-
       const time = this.live ? Date.now() : this.time;
 
       const trajectories = Object.values(this.trajectories);
@@ -529,17 +443,17 @@ const TralisLayerMixin = (Base) =>
       // console.timeEnd('sort');
 
       // console.time('render');
-      this.renderState = this.tracker.renderTrajectories(
+      this.renderState = renderTrajectories(
+        this.canvas,
         trajectories,
+        this.style,
         { ...viewState, pixelRatio: this.pixelRatio, time },
         {
           noInterpolate:
             viewState.zoom < this.minZoomInterpolation ? true : noInterpolate,
           hoverVehicleId: this.hoverVehicleId,
           selectedVehicleId: this.selectedVehicleId,
-          iconScale: this.iconScale,
-          delayDisplay: this.delayDisplay,
-          delayOutlineColor: this.delayOutlineColor,
+          ...this.styleOptions,
         },
       );
 
@@ -601,7 +515,7 @@ const TralisLayerMixin = (Base) =>
         }
 
         /* @ignore */
-        this.generalizationLevel = this.generalizationLevelByZoom[zoom];
+        this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
@@ -635,7 +549,7 @@ const TralisLayerMixin = (Base) =>
      */
     getRefreshTimeInMs(zoom) {
       const roundedZoom = Math.round(zoom);
-      const timeStep = timeSteps[roundedZoom] || 25;
+      const timeStep = this.getRenderTimeIntervalByZoom(roundedZoom) || 25;
       const nextTick = Math.max(25, timeStep / this.speed);
       const nextThrottleTick = Math.min(nextTick, 500);
       // TODO: see if this should go elsewhere.
@@ -757,7 +671,7 @@ const TralisLayerMixin = (Base) =>
     }
 
     /**
-     * Add a trajectory to the tracker.
+     * Add a trajectory.
      * @param {TralisTrajectory} trajectory The trajectory to add.
      * @private
      */
@@ -900,29 +814,6 @@ const TralisLayerMixin = (Base) =>
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
         this.renderTrajectories(true);
-      }
-    }
-
-    /**
-     * Update filter provided by properties or permalink.
-     */
-    updateFilters() {
-      // Setting filters from the permalink if no values defined by the layer.
-      const parameters = qs.parse(window.location.search.toLowerCase());
-      const publishedName = this.publishedLineName || parameters[LINE_FILTER];
-      const tripNumber = this.tripNumber || parameters[ROUTE_FILTER];
-      const operator = this.operator || parameters[OPERATOR_FILTER];
-      const { regexPublishedLineName } = this;
-
-      // Only overrides filter function if one of this property exists.
-      if (publishedName || tripNumber || operator || regexPublishedLineName) {
-        // filter is the property in TrackerLayerMixin.
-        this.filter = createFilters(
-          publishedName,
-          tripNumber,
-          operator,
-          regexPublishedLineName,
-        );
       }
     }
   };
