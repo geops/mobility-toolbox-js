@@ -164,7 +164,7 @@ export default class Layer extends BaseObject {
         writable: true,
       },
       children: {
-        get: () => this.get('children'),
+        get: () => this.get('children') || [],
         set: (newValue) => {
           (this.children || []).forEach((child) => {
             // eslint-disable-next-line no-param-reassign
@@ -176,7 +176,7 @@ export default class Layer extends BaseObject {
               child.parent = this;
             });
           }
-          this.set('children', newValue);
+          this.set('children', newValue || []);
         },
       },
 
