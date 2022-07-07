@@ -143,9 +143,6 @@ export const getTextCanvas = (
  */
 const styleCache = {};
 
-window.setInterval(() => {
-  console.log(Object.keys(styleCache).length);
-}, 3000);
 const style = (trajectory, viewState, options) => {
   const {
     hoverVehicleId,
