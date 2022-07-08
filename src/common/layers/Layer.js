@@ -1,5 +1,6 @@
 import BaseObject from 'ol/Object';
 import { v4 as uuid } from 'uuid';
+import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
 
 /**
  * A class representing a layer to display on map.
@@ -242,5 +243,12 @@ export default class Layer extends BaseObject {
       features: [],
       coordinate,
     });
+  }
+
+  /**
+   * Return the an array containing all the descendants of the layer in a flat array. Including the current layer.
+   */
+  flat() {
+    return getLayersAsFlatArray(this);
   }
 }

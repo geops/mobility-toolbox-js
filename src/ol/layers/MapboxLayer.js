@@ -281,7 +281,7 @@ export default class MapboxLayer extends Layer {
       /** @ignore */
       this.copyrights = getMapboxMapCopyrights(this.mbMap) || [];
 
-      this.olLayer.getSource().setAttributions(this.copyrights);
+      this.olLayer.getSource()?.setAttributions(this.copyrights);
 
       this.dispatchEvent({
         type: 'load',
@@ -311,7 +311,7 @@ export default class MapboxLayer extends Layer {
     const newAttributions = getMapboxMapCopyrights(evt.target) || [];
     if (this.copyrights.toString() !== newAttributions.toString()) {
       this.copyrights = newAttributions;
-      this.olLayer.getSource().setAttributions(newAttributions);
+      this.olLayer.getSource()?.setAttributions(newAttributions);
     }
   }
 

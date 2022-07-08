@@ -97,10 +97,10 @@ class Layer extends userInteractionsMixin(LayerCommon) {
           .getLayers()
           .getArray()
           .forEach((layer) => {
-            layer.getSource().setAttributions(attributions);
+            layer.getSource()?.setAttributions(attributions);
           });
       } else if (this.olLayer.getSource) {
-        this.olLayer.getSource().setAttributions(attributions);
+        this.olLayer.getSource()?.setAttributions(attributions);
       }
     }
   }
