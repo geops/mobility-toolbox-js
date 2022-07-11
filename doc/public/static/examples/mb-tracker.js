@@ -1,5 +1,5 @@
 import { Map } from 'maplibre-gl';
-import { TralisLayer, CopyrightControl } from '../../../../src/mapbox';
+import { RealtimeLayer, CopyrightControl } from '../../../../src/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
@@ -18,7 +18,7 @@ export default () => {
   control.attachToMap(map);
 
   // Define the layer
-  const tracker = new TralisLayer({
+  const tracker = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
   });

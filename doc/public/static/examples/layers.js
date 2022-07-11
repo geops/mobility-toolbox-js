@@ -1,6 +1,5 @@
 import { Map, View } from 'ol';
 import {
-  TralisLayer,
   MaplibreLayer,
   CopyrightControl,
   trackerDelayStyle,

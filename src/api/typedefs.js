@@ -65,7 +65,7 @@
  */
 
 /**
- * @typedef {GeoJSONFeature} TralisTrajectory
+ * @typedef {GeoJSONFeature} RealtimeTrajectory
  */
 
 /**

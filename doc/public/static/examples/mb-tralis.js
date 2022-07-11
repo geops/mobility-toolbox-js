@@ -1,6 +1,6 @@
 import { Map } from 'maplibre-gl';
 import { toLonLat } from 'ol/proj';
-import { TralisLayer, CopyrightControl } from '../../../../src/mapbox';
+import { RealtimeLayer, CopyrightControl } from '../../../../src/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
@@ -16,7 +16,7 @@ export default () => {
   const control = new CopyrightControl();
   control.attachToMap(map);
 
-  const tracker = new TralisLayer({
+  const tracker = new RealtimeLayer({
     url: '',
     apiKey: '',
   });

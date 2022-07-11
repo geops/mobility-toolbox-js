@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Map } from 'maplibre-gl';
-import { TralisLayer } from '../../../src/mapbox';
+import { RealtimeLayer } from '../../../src/mapbox';
 
 const useStyles = makeStyles({
   root: {
@@ -23,7 +23,7 @@ function TrackerExample() {
       zoom: 12,
     });
 
-    const tracker = new TralisLayer({
+    const tracker = new RealtimeLayer({
       url: 'wss://api.geops.io/tracker-ws/v1/',
       apiKey: window.apiKey,
     });

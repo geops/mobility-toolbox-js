@@ -1,5 +1,5 @@
 import { Map } from 'mapbox-gl';
-import { TralisLayer, CopyrightControl } from '../../../../src/mapbox';
+import { RealtimeLayer, CopyrightControl } from '../../../../src/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import LINE_IMAGES from './assets/tralis-live-map';
 
@@ -19,7 +19,7 @@ export default () => {
   control.attachToMap(map);
 
   const cache = {};
-  const tracker = new TralisLayer({
+  const tracker = new RealtimeLayer({
     url: 'wss://api.geops.io/realtime-ws/v1/',
     isUpdateBboxOnMoveEnd: false,
     apiKey: window.apiKey,

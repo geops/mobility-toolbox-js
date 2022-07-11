@@ -1,2 +1,2 @@
 export { default as Layer } from './Layer';
-export { default as TralisLayer } from './TralisLayer';
+export { default as RealtimeLayer } from './RealtimeLayer';

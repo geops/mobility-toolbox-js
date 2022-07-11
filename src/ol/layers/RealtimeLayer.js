@@ -4,30 +4,30 @@ import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import { Vector as VectorSource } from 'ol/source';
 import Layer from './Layer';
-import tralisMixin from '../../common/mixins/TralisLayerMixin';
+import mixin from '../../common/mixins/RealtimeLayerMixin';
 import { fullTrajectoryStyle } from '../styles';
 
 const format = new GeoJSON();
 
 /**
- * Responsible for loading and display data from a Tralis service.
+ * Responsible for loading and display data from a Realtime service.
  *
  * @example
- * import { TralisLayer } from 'mobility-toolbox-js/ol';
+ * import { RealtimeLayer } from 'mobility-toolbox-js/ol';
  *
- * const layer = new TralisLayer({
+ * const layer = new RealtimeLayer({
  *   url: [yourUrl],
  *   apiKey: [yourApiKey],
  * });
  *
  *
- * @see <a href="/api/class/src/api/tralis/TralisAPI%20js~TralisAPI%20html">TralisAPI</a>
+ * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
  *
  * @extends {Layer}
  * @implements {UserInteractionsLayerInterface}
- * @implements {TralisLayerInterface}
+ * @implements {RealtimeLayerInterface}
  */
-class TralisLayer extends tralisMixin(Layer) {
+class RealtimeLayer extends mixin(Layer) {
   /**
    * Constructor.
    *
@@ -354,13 +354,13 @@ class TralisLayer extends tralisMixin(Layer) {
   }
 
   /**
-   * Create a copy of the TralisLayer.
+   * Create a copy of the RealtimeLayer.
    * @param {Object} newOptions Options to override
-   * @return {TralisLayer} A TralisLayer
+   * @return {RealtimeLayer} A RealtimeLayer
    */
   clone(newOptions) {
-    return new TralisLayer({ ...this.options, ...newOptions });
+    return new RealtimeLayer({ ...this.options, ...newOptions });
   }
 }
 
-export default TralisLayer;
+export default RealtimeLayer;
