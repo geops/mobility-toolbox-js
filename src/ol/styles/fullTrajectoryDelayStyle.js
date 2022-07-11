@@ -1,5 +1,6 @@
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 
+/** @private */
 const stroke = new Style({
   zIndex: 2,
   image: new Circle({
@@ -14,6 +15,7 @@ const stroke = new Style({
   }),
 });
 
+/** @private */
 const fill = new Style({
   zIndex: 3,
   image: new Circle({

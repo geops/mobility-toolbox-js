@@ -18,22 +18,27 @@ import RoutingLayer from '../layers/RoutingLayer';
 // @47.37811,8.53935 a station at position 47.37811, 8.53935
 // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
 // zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
+/** @private */
 const REGEX_VIA_POINT =
   /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
 
 // Examples for a single hop:
 //
 // 47.37811,8.53935 a position 47.37811, 8.53935
+/** @private */
 const REGEX_VIA_POINT_COORD = /^([\d.]+),([\d.]+)$/;
 
 // Examples for a single hop:
 //
 // !8596126 a station with id 8596126
 // !8596126$4 a station with id 8596126
+/** @private */
 const REGEX_VIA_POINT_STATION_ID = /^!([^$]*)(\$?([a-zA-Z0-9]{0,2}))$/;
 
+/** @private */
 const STOP_FETCH_ABORT_CONTROLLER_KEY = 'stop-fetch';
 
+/** @private */
 const getFlatCoordinatesFromSegments = (segmentArray) => {
   const coords = [];
   segmentArray.forEach((seg) => {
@@ -206,17 +211,17 @@ class RoutingControl extends Control {
    *   If an index is passed a viaPoint is added at the specified index.
    *   If an index is passed and overwrite x is > 0, x viaPoints at the specified
    *     index are replaced with a single new viaPoint.
-   * @param {Array<number>} coordinates Array of coordinates
-   * @param {number} index Integer representing the index of the added viaPoint.
+   * @param {number[]|string} coordinates Array of coordinates
+   * @param {number} [index=-1] Integer representing the index of the added viaPoint. If not specified, the viaPoint is added at the end of the array.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
    */
-  addViaPoint(
-    coordinatesOrString,
-    index = this.viaPoints.length,
-    overwrite = 0,
-  ) {
+  addViaPoint(coordinatesOrString, index = -1, overwrite = 0) {
     /* Add/Insert/Overwrite viapoint and redraw route */
-    this.viaPoints.splice(index, overwrite, coordinatesOrString);
+    this.viaPoints.splice(
+      index === -1 ? this.viaPoints.length : index,
+      overwrite,
+      coordinatesOrString,
+    );
     this.drawRoute();
     this.dispatchEvent({
       type: 'change:route',

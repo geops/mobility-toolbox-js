@@ -7,6 +7,7 @@ import Layer from './Layer';
 import mixin from '../../common/mixins/RealtimeLayerMixin';
 import { fullTrajectoryStyle } from '../styles';
 
+/** @private */
 const format = new GeoJSON();
 
 /**
@@ -242,7 +243,6 @@ class RealtimeLayer extends mixin(Layer) {
   /**
    * On move end we update the websocket with the new bbox.
    *
-   * @param {ol/MapEvent~MapEvent} evt Moveend event
    * @private
    * @override
    */

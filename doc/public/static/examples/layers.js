@@ -2,7 +2,7 @@ import { Map, View } from 'ol';
 import {
   MaplibreLayer,
   CopyrightControl,
-  trackerDelayStyle,
+  realtimeDelayStyle,
   sortByDelay,
   Layer,
 } from '../../../../src/ol';

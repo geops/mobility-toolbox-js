@@ -1,6 +1,6 @@
 import { fromLonLat } from 'ol/proj';
 import Control from '../../common/controls/Control';
-import mixin from '../../common/mixins/SearchMixin';
+import mixin from '../../common/mixins/StopFinderMixin';
 
 /**
  * Search stations.
@@ -23,7 +23,7 @@ import mixin from '../../common/mixins/SearchMixin';
  * @see <a href="/example/ol-search">Openlayers search example</a>
  *
  * @extends {Control}
- * @implements {SearchInterface}
+ * @implements {StopFinderInterface}
  */
 class StopFinderControl extends mixin(Control) {
   /**

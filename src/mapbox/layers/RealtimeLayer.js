@@ -289,7 +289,6 @@ class RealtimeLayer extends mixin(Layer) {
   /**
    * Send the new BBOX to the websocket.
    *
-   * @param {ol/MapEvent~MapEvent} evt Moveend event
    * @private
    * @override
    */

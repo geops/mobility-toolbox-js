@@ -9,7 +9,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
-import trackerDefaultStyle from '../styles/trackerDefaultStyle';
+import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
 import * as trackerConfig from '../utils/trackerConfig';
@@ -194,7 +194,7 @@ const RealtimeLayerMixin = (Base) =>
          * Style function used to render a vehicle.
          */
         style: {
-          value: style || trackerDefaultStyle,
+          value: style || realtimeDefaultStyle,
         },
 
         /**

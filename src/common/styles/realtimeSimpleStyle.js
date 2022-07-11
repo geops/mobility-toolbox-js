@@ -3,7 +3,7 @@
  * Display blue point for each train.
  */
 let canvas;
-const style = () => {
+const realtimeSimpleStyle = () => {
   if (!canvas) {
     document.createElement('canvas');
     canvas.width = 15;
@@ -19,4 +19,4 @@ const style = () => {
   }
   return canvas;
 };
-export default style;
+export default realtimeSimpleStyle;

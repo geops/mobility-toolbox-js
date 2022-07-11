@@ -5,11 +5,11 @@
 import { StopsAPI } from '../../api';
 
 /**
- * Search control interface.
+ * StopFinder control interface.
  *
  * @classproperty {StopsSearchParams} apiParams - Default request parameters used by the search method. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
  */
-export class SearchInterface {
+export class StopFinderInterface {
   /**
    * Constructor.
    *
@@ -34,13 +34,13 @@ export class SearchInterface {
 }
 
 /**
- * Mixin for SearchInterface.
+ * Mixin for StopFinderInterface.
  *
- * @param {Class} Base  A class to extend with {SearchInterface} functionnalities.
- * @return {Class}  A class that implements <SearchInterface> class and extends Base;
+ * @param {Class} Base  A class to extend with {StopFinderInterface} functionnalities.
+ * @return {Class}  A class that implements <StopFinderInterface> class and extends Base;
  * @private
  */
-const SearchMixin = (Base) =>
+const StopFinderMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
       super(options);
@@ -174,4 +174,4 @@ const SearchMixin = (Base) =>
     }
   };
 
-export default SearchMixin;
+export default StopFinderMixin;
