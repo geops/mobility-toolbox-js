@@ -173,6 +173,10 @@ class RealtimeLayer extends mixin(Layer) {
    * @overrides
    */
   renderTrajectories(noInterpolate) {
+    if (!this.map) {
+      return;
+    }
+
     const { width, height } = this.map.getCanvas();
     const center = this.map.getCenter();
 
