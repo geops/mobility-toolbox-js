@@ -287,7 +287,7 @@ class RealtimeLayer extends mixin(Layer) {
 
   renderTrajectoriesInternal(viewState, noInterpolate) {
     const render = super.renderTrajectoriesInternal(viewState, noInterpolate);
-    if (render) {
+    if (render && this.map.style) {
       const extent = getSourceCoordinates(this.map, this.pixelRatio);
       const source = this.map.getSource(this.key);
       if (source) {
