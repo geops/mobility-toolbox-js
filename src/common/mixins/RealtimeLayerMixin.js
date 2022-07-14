@@ -299,7 +299,7 @@ const RealtimeLayerMixin = (Base) =>
          * If true, encapsulates the renderTrajectories calls in a throttle function. Default to true.
          */
         useThrottle: {
-          value: options.useThrottle || true,
+          value: options.useThrottle !== false,
           writable: true,
         },
 
