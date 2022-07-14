@@ -432,6 +432,9 @@ const RealtimeLayerMixin = (Base) =>
      * @private
      */
     renderTrajectoriesInternal(viewState, noInterpolate) {
+      if (!this.map) {
+        return false;
+      }
       const time = this.live ? Date.now() : this.time;
 
       const trajectories = Object.values(this.trajectories);
