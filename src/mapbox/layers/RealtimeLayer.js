@@ -3,28 +3,28 @@ import { unByKey } from 'ol/Observable';
 import { getWidth, getHeight } from 'ol/extent';
 import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
-import mixin from '../../common/mixins/TralisLayerMixin';
+import mixin from '../../common/mixins/RealtimeLayerMixin';
 import Layer from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
 
 /**
- * Responsible for loading and display data from a Tralis service.
+ * Responsible for loading and display data from a Realtime service.
  *
  * @example
- * import { TralisLayer } from 'mobility-toolbox-js/mapbox';
+ * import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
  *
- * const layer = new TralisLayer({
+ * const layer = new RealtimeLayer({
  *   url: [yourUrl],
  *   apiKey: [yourApiKey],
  * });
  *
  *
- * @see <a href="/api/class/src/api/tralis/TralisAPI%20js~TralisAPI%20html">TralisAPI</a>
+ * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
  *
  * @extends {Layer}
- * @implements {TralisLayerInterface}
+ * @implements {RealtimeLayerInterface}
  */
-class TralisLayer extends mixin(Layer) {
+class RealtimeLayer extends mixin(Layer) {
   constructor(options = {}) {
     super({
       ...options,
@@ -289,7 +289,6 @@ class TralisLayer extends mixin(Layer) {
   /**
    * Send the new BBOX to the websocket.
    *
-   * @param {ol/MapEvent~MapEvent} evt Moveend event
    * @private
    * @override
    */
@@ -315,4 +314,4 @@ class TralisLayer extends mixin(Layer) {
   }
 }
 
-export default TralisLayer;
+export default RealtimeLayer;

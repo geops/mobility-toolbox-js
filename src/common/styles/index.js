@@ -1,4 +1,4 @@
-export { default as trackerDefaultStyle } from './trackerDefaultStyle';
-export { default as trackerDelayStyle } from './trackerDelayStyle';
-export { default as trackerSimpleStyle } from './trackerSimpleStyle';
-export * from './trackerDefaultStyle';
+export { default as realtimeDefaultStyle } from './realtimeDefaultStyle';
+export { default as realtimeDelayStyle } from './realtimeDelayStyle';
+export { default as realtimeSimpleStyle } from './realtimeSimpleStyle';
+export * from './realtimeDefaultStyle';

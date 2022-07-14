@@ -1,5 +1,6 @@
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 
+/** @private */
 const borderStyle = new Style({
   zIndex: 2,
   image: new Circle({

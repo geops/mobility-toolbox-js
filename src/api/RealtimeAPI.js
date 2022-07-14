@@ -1,20 +1,18 @@
 import WebSocketAPI from '../common/api/WebSocketAPI';
-import {
-  getModeSuffix,
-  cleanStopTime,
-  compareDepartures,
-} from './TralisAPIUtils';
+import cleanStopTime from '../common/utils/cleanStopTime';
+import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
+import compareDepartures from '../common/utils/compareDepartures';
 
 /**
- * Enum for Tralis modes.
+ * Enum for Realtime modes.
  * @readonly
- * @typedef {string} TralisMode
+ * @typedef {string} RealtimeMode
  * @property {string} RAW "raw"
  * @property {string} SCHEMATIC "schematic"
  * @property {string} TOPOGRAPHIC "topographic"
- * @enum {TralisMode}
+ * @enum {RealtimeMode}
  */
-export const TralisModes = {
+export const RealtimeModes = {
   RAW: 'raw',
   TOPOGRAPHIC: 'topographic',
   SCHEMATIC: 'schematic',
@@ -24,19 +22,19 @@ export const TralisModes = {
  * This class provides convenience methods to access to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
  *
  * @example
- * import { TralisAPI } from 'mobility-toolbox-js/api';
+ * import { RealtimeAPI } from 'mobility-toolbox-js/api';
  *
- * const api = new TralisAPI({
+ * const api = new RealtimeAPI({
  *   url: "yourUrl",
  *   apiKey: "yourApiKey"
  * });
  *
  * @example
- * import { TralisAPI } from 'mobility-toolbox-js/api';
+ * import { RealtimeAPI } from 'mobility-toolbox-js/api';
  *
- * const api = new TralisAPI("yourUrl");
+ * const api = new RealtimeAPI("yourUrl");
  */
-class TralisAPI {
+class RealtimeAPI {
   /**
    * Constructor
    *
@@ -250,11 +248,14 @@ class TralisAPI {
    */
   unsubscribe(channel, suffix, cb) {
     this.wsApi.unsubscribe(
-      `${channel}${getModeSuffix(TralisModes.SCHEMATIC, TralisModes)}${suffix}`,
+      `${channel}${getModeSuffix(
+        RealtimeModes.SCHEMATIC,
+        RealtimeModes,
+      )}${suffix}`,
       cb,
     );
     this.wsApi.unsubscribe(
-      `${channel}${getModeSuffix(TralisModes.TOPOGRAPHIC, TralisModes)}${
+      `${channel}${getModeSuffix(RealtimeModes.TOPOGRAPHIC, RealtimeModes)}${
         suffix || ''
       }`,
       cb,
@@ -397,12 +398,12 @@ class TralisAPI {
    * Return a station with a given uic number and a mode.
    *
    * @param {number} uic UIC of the station.
-   * @param {TralisMode} mode Tralis mode.
+   * @param {RealtimeMode} mode Realtime mode.
    * @return {Promise<Station>} A station.
    */
   getStation(uic, mode) {
     const params = {
-      channel: `station${getModeSuffix(mode, TralisModes)}`,
+      channel: `station${getModeSuffix(mode, RealtimeModes)}`,
       args: uic,
     };
 
@@ -420,13 +421,13 @@ class TralisAPI {
   /**
    * Update the model's station list for a given mode and a bbox.
    *
-   * @param {TralisMode} mode Tralis mode.
+   * @param {RealtimeMode} mode Realtime mode.
    * @return {Promise<Array<Station>>} An array of stations.
    */
   getStations(mode) {
     const stations = [];
     const params = {
-      channel: `station${getModeSuffix(mode, TralisModes)}`,
+      channel: `station${getModeSuffix(mode, RealtimeModes)}`,
     };
     window.clearTimeout(this.stationUpdateTimeout);
     return new Promise((resolve, reject) => {
@@ -449,12 +450,12 @@ class TralisAPI {
    * Subscribe to stations channel.
    * One message pro station.
    *
-   * @param {TralisMode} mode Tralis mode.
+   * @param {RealtimeMode} mode Realtime mode.
    * @param {function(station: Station)} onMessage Function called on each message of the channel.
    */
   subscribeStations(mode, onMessage) {
     this.unsubscribeStations();
-    this.subscribe(`station${getModeSuffix(mode, TralisModes)}`, (data) => {
+    this.subscribe(`station${getModeSuffix(mode, RealtimeModes)}`, (data) => {
       if (data.content) {
         onMessage(data.content);
       }
@@ -506,14 +507,14 @@ class TralisAPI {
   /**
    * Subscribe to trajectory channel.
    *
-   * @param {TralisMode} mode Tralis mode.
-   * @param {function(trajectory: TralisTrajectory)} onMessage Function called on each message of the channel.
+   * @param {RealtimeMode} mode Realtime mode.
+   * @param {function(trajectory: RealtimeTrajectory)} onMessage Function called on each message of the channel.
    * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
   subscribeTrajectory(mode, onMessage, quiet = false) {
     this.unsubscribeTrajectory(onMessage);
     this.subscribe(
-      `trajectory${getModeSuffix(mode, TralisModes)}`,
+      `trajectory${getModeSuffix(mode, RealtimeModes)}`,
       onMessage,
       null,
       quiet,
@@ -531,14 +532,14 @@ class TralisAPI {
   /**
    * Subscribe to deleted_vhicles channel.
    *
-   * @param {TralisMode} mode Tralis mode.
+   * @param {RealtimeMode} mode Realtime mode.
    * @param {function(response: { content: Vehicle })} onMessage Function called on each message of the channel.
    * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
   subscribeDeletedVehicles(mode, onMessage, quiet = false) {
     this.unsubscribeDeletedVehicles(onMessage);
     this.subscribe(
-      `deleted_vehicles${getModeSuffix(mode, TralisModes)}`,
+      `deleted_vehicles${getModeSuffix(mode, RealtimeModes)}`,
       onMessage,
       null,
       quiet,
@@ -557,17 +558,17 @@ class TralisAPI {
    * Get a full trajectory of a vehicule .
    *
    * @param {string} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
+   * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
    * @return {Promise<FullTrajectory>} Return a full trajectory.
    */
   getFullTrajectory(id, mode, generalizationLevel) {
-    const channel = [`full_trajectory${getModeSuffix(mode, TralisModes)}`];
+    const channel = [`full_trajectory${getModeSuffix(mode, RealtimeModes)}`];
     if (id) {
       channel.push(id);
     }
 
-    if ((!mode || mode === TralisModes.TOPOGRAPHIC) && generalizationLevel) {
+    if ((!mode || mode === RealtimeModes.TOPOGRAPHIC) && generalizationLevel) {
       channel.push(`gen${generalizationLevel}`);
     }
 
@@ -588,7 +589,7 @@ class TralisAPI {
    * Get full trajectories of a vehicules .
    *
    * @param {string[]} ids List of vehicles ids.
-   * @param {TralisMode} mode Tralis mode.
+   * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of '', 'gen5', 'gen10', 'gen30', 'gen100'.
    * @return {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
    */
@@ -603,13 +604,13 @@ class TralisAPI {
    * Subscribe to full_trajectory channel of a given vehicle.
    *
    * @param {string} id A vehicle id.
-   * @param {TralisMode} mode Tralis mode.
+   * @param {RealtimeMode} mode Realtime mode.
    */
   subscribeFullTrajectory(id, mode) {
     // window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeFullTrajectory(id);
     this.subscribe(
-      `full_trajectory${getModeSuffix(mode, TralisModes)}_${id}`,
+      `full_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
       (data) => {
         // eslint-disable-next-line no-console
         console.log('subscribe full_trajectory', data);
@@ -728,4 +729,4 @@ class TralisAPI {
     this.unsubscribe('healthcheck');
   }
 }
-export default TralisAPI;
+export default RealtimeAPI;

@@ -64,7 +64,10 @@ class Layer extends userInteractionsMixin(LayerCommon) {
       return;
     }
 
-    if (this.map && this.olLayer) {
+    if (
+      this.olLayer &&
+      !this.map?.getLayers()?.getArray()?.includes(this.olLayer)
+    ) {
       this.map.addLayer(this.olLayer);
     }
 
@@ -97,10 +100,10 @@ class Layer extends userInteractionsMixin(LayerCommon) {
           .getLayers()
           .getArray()
           .forEach((layer) => {
-            layer.getSource().setAttributions(attributions);
+            layer.getSource()?.setAttributions(attributions);
           });
       } else if (this.olLayer.getSource) {
-        this.olLayer.getSource().setAttributions(attributions);
+        this.olLayer.getSource()?.setAttributions(attributions);
       }
     }
   }
@@ -112,7 +115,10 @@ class Layer extends userInteractionsMixin(LayerCommon) {
     this.deactivateUserInteractions();
     unByKey(this.olListenersKeys);
 
-    if (this.map && this.olLayer) {
+    if (
+      this.olLayer &&
+      this.map?.getLayers()?.getArray()?.includes(this.olLayer)
+    ) {
       this.map.removeLayer(this.olLayer);
     }
 

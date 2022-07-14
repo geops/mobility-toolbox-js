@@ -215,7 +215,7 @@ export default class MaplibreLayer extends Layer {
     const newAttributions = getMapboxMapCopyrights(evt.target) || [];
     if (this.copyrights?.toString() !== newAttributions.toString()) {
       this.copyrights = newAttributions;
-      this.olLayer.getSource().setAttributions(newAttributions);
+      this.olLayer.getSource()?.setAttributions(newAttributions);
     }
   }
 

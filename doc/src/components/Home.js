@@ -18,7 +18,7 @@ const codeHtmlPage = `
 
 const codeMapObject = `
 import { Map } from 'maplibre-gl;
-import { TralisLayer } from 'mobility-toolbox-js/mapbox';
+import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
 
 
 const map = new Map({
@@ -30,7 +30,7 @@ const map = new Map({
 `;
 
 const codeTracker = `
-const tracker = new TralisLayer({
+const tracker = new RealtimeLayer({
   url: 'wss://api.geops.io/tracker-ws/v1/',
   apiKey: window.apiKey,
 });
@@ -109,7 +109,7 @@ function Home() {
       <p>Create a Maplibre map.</p>
       <SyntaxHighlighter language="js" code={codeMapObject.trim()} />
       <p>
-        Finally, add the <i>TralisLayer</i> for rendering real time vehicle
+        Finally, add the <i>RealtimeLayer</i> for rendering real time vehicle
         positions from our Realtime API. For more information about the backend
         and for obtaining the required API-Key, visit our Developer Portal at{' '}
         <a target="_blank" rel="noreferrer" href="https://geops.io">

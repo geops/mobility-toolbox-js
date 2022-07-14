@@ -2,7 +2,7 @@ import fetch from 'jest-fetch-mock';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import WS from 'jest-websocket-mock';
-import TralisLayer from './TralisLayer';
+import RealtimeLayer from './RealtimeLayer';
 
 // create a WS instance, listening on port 1234 on localhost
 let layer;
@@ -10,14 +10,14 @@ let onClick;
 let olMap;
 let server;
 
-describe('TralisLayer', () => {
+describe('RealtimeLayer', () => {
   beforeEach(() => {
     server = new WS('ws://localhost:1234');
     global.fetch = fetch;
     fetch.resetMocks();
 
     onClick = jest.fn();
-    layer = new TralisLayer({
+    layer = new RealtimeLayer({
       url: 'ws://localhost:1234',
       apiKey: 'apiKey',
       onClick,
@@ -41,7 +41,7 @@ describe('TralisLayer', () => {
   });
 
   test('should be instanced.', () => {
-    expect(layer).toBeInstanceOf(TralisLayer);
+    expect(layer).toBeInstanceOf(RealtimeLayer);
   });
 
   test('should called terminate on initalization.', () => {
@@ -57,28 +57,28 @@ describe('TralisLayer', () => {
     const clone = layer.clone({ name: 'clone' });
     expect(clone).not.toBe(layer);
     expect(clone.name).toBe('clone');
-    expect(clone).toBeInstanceOf(TralisLayer);
+    expect(clone).toBeInstanceOf(RealtimeLayer);
   });
 
   test('should use the sort function.', () => {
     const fn = () => true;
-    const laye = new TralisLayer({
+    const laye = new RealtimeLayer({
       url: 'ws://localhost:1234',
       apiKey: 'apiKey',
       sort: fn,
     });
-    expect(laye).toBeInstanceOf(TralisLayer);
+    expect(laye).toBeInstanceOf(RealtimeLayer);
     expect(laye.sort).toBe(fn);
   });
 
   test('should use filter function.', () => {
     const fn = () => true;
-    const laye = new TralisLayer({
+    const laye = new RealtimeLayer({
       url: 'ws://localhost:1234',
       apiKey: 'apiKey',
       filter: fn, // reverse the array
     });
-    expect(laye).toBeInstanceOf(TralisLayer);
+    expect(laye).toBeInstanceOf(RealtimeLayer);
     expect(laye.filter).toBe(fn);
   });
 });

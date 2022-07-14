@@ -3,6 +3,7 @@ import { Vector as VectorSource } from 'ol/source';
 import { Vector } from 'ol/layer';
 import Layer from './Layer';
 
+/** @private */
 const circleStyle = new Circle({
   radius: 6,
   fill: new Fill({
@@ -14,6 +15,7 @@ const circleStyle = new Circle({
   }),
 });
 
+/** @private */
 const blackBorder = new Style({
   stroke: new Stroke({
     color: [0, 0, 0, 1],
@@ -21,6 +23,7 @@ const blackBorder = new Style({
   }),
 });
 
+/** @private */
 const redLine = new Style({
   image: circleStyle,
   stroke: new Stroke({
@@ -29,6 +32,7 @@ const redLine = new Style({
   }),
 });
 
+/** @private */
 const dashedRedLine = new Style({
   image: circleStyle,
   stroke: new Stroke({
@@ -38,6 +42,7 @@ const dashedRedLine = new Style({
   }),
 });
 
+/** @private */
 const defaultStyleFunction = (feature, resolution) => {
   const minResolution = feature.get('minResolution');
   const maxResolution = feature.get('maxResolution');

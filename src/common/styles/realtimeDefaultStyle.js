@@ -1,7 +1,13 @@
 import createCanvas from '../utils/createCanvas';
 
-// Draw circle delay background
+/** @private */
 const cacheDelayBg = {};
+
+/**
+ * Draw circle delay background
+ *
+ * @private
+ */
 export const getDelayBgCanvas = (origin, radius, color) => {
   const key = `${origin}, ${radius}, ${color}`;
   if (!cacheDelayBg[key]) {
@@ -19,8 +25,14 @@ export const getDelayBgCanvas = (origin, radius, color) => {
   return cacheDelayBg[key];
 };
 
-// Draw delay text
+/** @private */
 const cacheDelayText = {};
+
+/**
+ * Draw delay text
+ *
+ * @private
+ */
 export const getDelayTextCanvas = (
   width,
   text,
@@ -50,8 +62,14 @@ export const getDelayTextCanvas = (
   return cacheDelayText[key];
 };
 
-// Draw colored circle with black border
+/** @private */
 const cacheCircle = {};
+
+/**
+ * Draw colored circle with black border
+ *
+ * @private
+ */
 export const getCircleCanvas = (
   origin,
   radius,
@@ -90,8 +108,14 @@ export const getCircleCanvas = (
   return cacheCircle[key];
 };
 
-// Draw text in the circle
+/** @private */
 const cacheText = {};
+
+/**
+ * Draw text in the circle
+ *
+ * @private
+ */
 export const getTextCanvas = (
   text,
   origin,
@@ -133,6 +157,9 @@ export const getTextCanvas = (
   return cacheText[key];
 };
 
+/** @private */
+const cache = {};
+
 /**
  * A tracker style that take in account the delay.
  *
@@ -141,9 +168,7 @@ export const getTextCanvas = (
  * @param {*} options Some options to change the rendering
  * @return a canvas
  */
-const styleCache = {};
-
-const style = (trajectory, viewState, options) => {
+const realtimeDefaultStyle = (trajectory, viewState, options) => {
   const {
     hoverVehicleId,
     selectedVehicleId,
@@ -221,9 +246,9 @@ const style = (trajectory, viewState, options) => {
     key += `${name}${textColor}`;
   }
 
-  if (!styleCache[key]) {
+  if (!cache[key]) {
     if (radius === 0) {
-      styleCache[key] = null;
+      cache[key] = null;
       return null;
     }
 
@@ -330,10 +355,10 @@ const style = (trajectory, viewState, options) => {
         ctx.drawImage(text, 0, 0);
       }
 
-      styleCache[key] = canvas;
+      cache[key] = canvas;
     }
   }
 
-  return styleCache[key];
+  return cache[key];
 };
-export default style;
+export default realtimeDefaultStyle;

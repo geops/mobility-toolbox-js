@@ -1,6 +1,6 @@
 import { Map, View } from 'ol';
 import {
-  TralisLayer,
+  RealtimeLayer,
   MaplibreLayer,
   CopyrightControl,
 } from '../../../../src/ol';
@@ -22,7 +22,7 @@ export default () => {
     apiKey: window.apiKey,
   });
   layer.attachToMap(map);
-  const tracker = new TralisLayer({
+  const tracker = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
   });

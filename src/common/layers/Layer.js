@@ -1,5 +1,6 @@
 import BaseObject from 'ol/Object';
 import { v4 as uuid } from 'uuid';
+import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
 
 /**
  * A class representing a layer to display on map.
@@ -45,10 +46,7 @@ export default class Layer extends BaseObject {
 
     this.copyrights = options.copyrights;
 
-    this.children.forEach((child) => {
-      // eslint-disable-next-line no-param-reassign
-      child.parent = this;
-    });
+    this.children = options.children;
 
     // Listen for group visiblity change
     // if a layer from a group is newly visible we hide the others.
@@ -73,7 +71,7 @@ export default class Layer extends BaseObject {
    * @ignore
    */
   defineProperties(options) {
-    const { name, key, children, properties, hitTolerance } = {
+    const { name, key, properties, hitTolerance } = {
       ...options,
     };
     const uid = uuid();
@@ -167,8 +165,20 @@ export default class Layer extends BaseObject {
         writable: true,
       },
       children: {
-        value: children || [],
-        writable: true,
+        get: () => this.get('children') || [],
+        set: (newValue) => {
+          (this.children || []).forEach((child) => {
+            // eslint-disable-next-line no-param-reassign
+            child.parent = null;
+          });
+          if (Array.isArray(newValue)) {
+            newValue.forEach((child) => {
+              // eslint-disable-next-line no-param-reassign
+              child.parent = this;
+            });
+          }
+          this.set('children', newValue || []);
+        },
       },
 
       /* Layer's query properties */
@@ -233,5 +243,12 @@ export default class Layer extends BaseObject {
       features: [],
       coordinate,
     });
+  }
+
+  /**
+   * Return the an array containing all the descendants of the layer in a flat array. Including the current layer.
+   */
+  flat() {
+    return getLayersAsFlatArray(this);
   }
 }

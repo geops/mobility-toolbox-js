@@ -1,22 +1,22 @@
-import { TralisAPI, TralisModes } from '.';
+import { RealtimeAPI, RealtimeModes } from '.';
 
-describe('TralisAPI', () => {
-  let tralisAPI;
+describe('RealtimeAPI', () => {
+  let api;
   let get;
 
   beforeEach(() => {
     get = jest.fn((params, cb) => {
       cb({ content: 'content' });
     });
-    tralisAPI = new TralisAPI();
-    tralisAPI.wsApi = {
+    api = new RealtimeAPI();
+    api.wsApi = {
       get,
     };
   });
 
   describe('#getFullTrajectory() calls fullTrajectory channel', () => {
     test('without parameters', (done) => {
-      tralisAPI.getFullTrajectory().then(() => {
+      api.getFullTrajectory().then(() => {
         expect(get.mock.calls.length).toBe(1);
         expect(get.mock.calls[0][0]).toEqual({
           channel: 'full_trajectory',
@@ -25,10 +25,10 @@ describe('TralisAPI', () => {
       });
     });
 
-    [null, TralisModes.TOPOGRAPHIC].forEach((mode) => {
+    [null, RealtimeModes.TOPOGRAPHIC].forEach((mode) => {
       describe(`using mode ${mode}`, () => {
         test('using id', (done) => {
-          tralisAPI.getFullTrajectory('foo', mode).then(() => {
+          api.getFullTrajectory('foo', mode).then(() => {
             expect(get.mock.calls.length).toBe(1);
             expect(get.mock.calls[0][0]).toEqual({
               channel: 'full_trajectory_foo',
@@ -38,7 +38,7 @@ describe('TralisAPI', () => {
         });
 
         test('using id and generalizationLevel param', (done) => {
-          tralisAPI.getFullTrajectory('foo', mode, 5).then(() => {
+          api.getFullTrajectory('foo', mode, 5).then(() => {
             expect(get.mock.calls.length).toBe(1);
             expect(get.mock.calls[0][0]).toEqual({
               channel: 'full_trajectory_foo_gen5',
@@ -51,7 +51,7 @@ describe('TralisAPI', () => {
 
     describe('using schematic mode ', () => {
       test('using id', (done) => {
-        tralisAPI.getFullTrajectory('foo', TralisModes.SCHEMATIC).then(() => {
+        api.getFullTrajectory('foo', RealtimeModes.SCHEMATIC).then(() => {
           expect(get.mock.calls.length).toBe(1);
           expect(get.mock.calls[0][0]).toEqual({
             channel: 'full_trajectory_schematic_foo',
@@ -60,15 +60,13 @@ describe('TralisAPI', () => {
         });
       });
       test("doesn't use generalizationLevel param", (done) => {
-        tralisAPI
-          .getFullTrajectory('foo', TralisModes.SCHEMATIC, 10)
-          .then(() => {
-            expect(get.mock.calls.length).toBe(1);
-            expect(get.mock.calls[0][0]).toEqual({
-              channel: 'full_trajectory_schematic_foo',
-            });
-            done();
+        api.getFullTrajectory('foo', RealtimeModes.SCHEMATIC, 10).then(() => {
+          expect(get.mock.calls.length).toBe(1);
+          expect(get.mock.calls[0][0]).toEqual({
+            channel: 'full_trajectory_schematic_foo',
           });
+          done();
+        });
       });
     });
   });

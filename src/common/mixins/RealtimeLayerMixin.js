@@ -9,37 +9,37 @@ import GeoJSON from 'ol/format/GeoJSON';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
-import trackerDefaultStyle from '../styles/trackerDefaultStyle';
-import { TralisAPI, TralisModes } from '../../api';
+import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
+import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
 import * as trackerConfig from '../utils/trackerConfig';
 
 /**
- * TralisLayerInterface.
+ * RealtimeLayerInterface.
  */
-export class TralisLayerInterface {
+export class RealtimeLayerInterface {
   /*
    * Constructor
 
    * @param {Object} options Layer options.
-   * @param {string} options.url Tralis service url.
+   * @param {string} options.url Realtime service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    * @param {boolean} [options.debug=false] Display additional debug informations.
-   * @param {TralisMode} [options.mode=TralisMode.TOPOGRAPHIC] Tralis's Mode.
+   * @param {RealtimeMode} [options.mode=RealtimeMode.TOPOGRAPHIC] Realtime's Mode.
    * @param {number} [options.minZoomInterpolation=8] Minimal zoom when trains positions start to be interpolated.
    * @param {number} [options.minZoomNonTrain=9] Minimal zoom when non trains vehicles are allowed to be displayed.
    */
   constructor(options = {}) {}
 
   /**
-   * Initialize the layer subscribing to the Tralis api.
+   * Initialize the layer subscribing to the Realtime api.
    *
    * @param {ol/Map~Map} map
    */
   attachToMap(map) {}
 
   /**
-   * Terminate the layer unsubscribing to the Tralis api.
+   * Terminate the layer unsubscribing to the Realtime api.
    */
   detachFromMap() {}
 
@@ -54,7 +54,7 @@ export class TralisLayerInterface {
   stop() {}
 
   /**
-   * Set the Tralis api's bbox.
+   * Set the Realtime api's bbox.
    *
    * @param {Array<number>} extent  Extent to request, [minX, minY, maxX, maxY, zoom].
    * @param {number} zoom  Zoom level to request. Must be an integer.
@@ -62,9 +62,9 @@ export class TralisLayerInterface {
   setBbox(extent, zoom) {}
 
   /**
-   * Set the Tralis api's mode.
+   * Set the Realtime api's mode.
    *
-   * @param {TralisMode} mode  Tralis mode
+   * @param {RealtimeMode} mode  Realtime mode
    */
   setMode(mode) {}
 
@@ -72,20 +72,20 @@ export class TralisLayerInterface {
    * Request the stopSequence and the fullTrajectory informations for a vehicle.
    *
    * @param {string} id The vehicle identifier (the  train_id property).
-   * @param {TralisMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.
+   * @param {RealtimeMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.
    * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
    */
   getTrajectoryInfos(id, mode) {}
 }
 
 /**
- * Mixin for TralisLayerInterface.
+ * Mixin for RealtimeLayerInterface.
  *
- * @param {Class} Base A class to extend with {TralisLayerInterface} functionnalities.
- * @return {Class}  A class that implements {TralisLayerInterface} class and extends Base;
+ * @param {Class} Base A class to extend with {RealtimeLayerInterface} functionnalities.
+ * @return {Class}  A class that implements {RealtimeLayerInterface} class and extends Base;
  * @private
  */
-const TralisLayerMixin = (Base) =>
+const RealtimeLayerMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
       super({
@@ -94,8 +94,8 @@ const TralisLayerMixin = (Base) =>
       });
 
       this.debug = options.debug;
-      this.mode = options.mode || TralisModes.TOPOGRAPHIC;
-      this.api = options.api || new TralisAPI(options);
+      this.mode = options.mode || RealtimeModes.TOPOGRAPHIC;
+      this.api = options.api || new RealtimeAPI(options);
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
@@ -194,7 +194,7 @@ const TralisLayerMixin = (Base) =>
          * Style function used to render a vehicle.
          */
         style: {
-          value: style || trackerDefaultStyle,
+          value: style || realtimeDefaultStyle,
         },
 
         /**
@@ -652,7 +652,7 @@ const TralisLayerMixin = (Base) =>
      *  - that have their trajectory outside the current extent and
      *  - that are not a train and zoom level is lower than layer's minZoomNonTrain property.
      *
-     * @param {TralisTrajectory} trajectory
+     * @param {RealtimeTrajectory} trajectory
      * @param {Array<number>} extent
      * @param {number} zoom
      * @return {boolean} if the trajectory must be displayed or not.
@@ -672,7 +672,7 @@ const TralisLayerMixin = (Base) =>
 
     /**
      * Add a trajectory.
-     * @param {TralisTrajectory} trajectory The trajectory to add.
+     * @param {RealtimeTrajectory} trajectory The trajectory to add.
      * @private
      */
     addTrajectory(trajectory) {
@@ -742,7 +742,7 @@ const TralisLayerMixin = (Base) =>
 
       if (
         this.debug &&
-        this.mode === TralisModes.TOPOGRAPHIC &&
+        this.mode === RealtimeModes.TOPOGRAPHIC &&
         rawCoordinates
       ) {
         trajectory.properties.olGeometry = {
@@ -818,4 +818,4 @@ const TralisLayerMixin = (Base) =>
     }
   };
 
-export default TralisLayerMixin;
+export default RealtimeLayerMixin;

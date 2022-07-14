@@ -67,15 +67,15 @@ export default [
   //   },
   //   readme: tralisLiveMapReadme,
   // },
-  // These examples are used for the dbug of TralisLayer don't remove them pls.
+  // These examples are used for the dbug of RealtimeLayer don't remove them pls.
   // {
-  //   name: 'Tralis tracker with OpenLayers',
+  //   name: 'Realtime tracker with OpenLayers',
   //   key: 'ol-tralis',
   //   description: 'Show moving tramway in an OpenLayers map.',
   //   img: liveTrackerOLImg,
   // },
   // {
-  //   name: 'Tralis tracker with Mapbox',
+  //   name: 'Realtime tracker with Mapbox',
   //   key: 'mapbox-tralis',
   //   description: 'Show moving tramway in an Mapbox map.',
   //   img: liveTrackerOLImg,

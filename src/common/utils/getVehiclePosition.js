@@ -4,7 +4,7 @@ import GeomType from 'ol/geom/GeometryType';
  * Interpolate or not the vehicle position from a trajectory at a specific date.
  *
  * @param {number} now Current date to interpolate a position with. In ms.
- * @param {TralisTrajectory} trajectory The trajectory to interpolate.
+ * @param {RealtimeTrajectory} trajectory The trajectory to interpolate.
  * @param {boolean} noInterpolate If true, the vehicle position is not interpolated on each render but only once.
  * @returns
  */
@@ -44,7 +44,7 @@ const getVehiclePosition = (now, trajectory, noInterpolate) => {
     } else {
       // Interpolate position using time intervals.
       for (let j = 0; j < intervals.length - 1; j += 1) {
-        // Rotation only available in tralis layer.
+        // Rotation only available in realtime layer.
         const [start, startFrac] = intervals[j];
         const [end, endFrac] = intervals[j + 1];
 

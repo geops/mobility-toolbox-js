@@ -1,9 +1,8 @@
 import { Map, View } from 'ol';
 import {
-  TralisLayer,
   MaplibreLayer,
   CopyrightControl,
-  trackerDelayStyle,
+  realtimeDelayStyle,
   sortByDelay,
   Layer,
 } from '../../../../src/ol';

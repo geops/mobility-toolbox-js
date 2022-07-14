@@ -5,11 +5,11 @@
 import { StopsAPI } from '../../api';
 
 /**
- * Search control interface.
+ * StopFinder control interface.
  *
  * @classproperty {StopsSearchParams} apiParams - Default request parameters used by the search method. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
  */
-export class SearchInterface {
+export class StopFinderInterface {
   /**
    * Constructor.
    *
@@ -19,7 +19,7 @@ export class SearchInterface {
    * @param {string} [options.placeholder='Search for a stop...'] Input field placeholder.
    * @param {StopsSearchParams} [options.apiParams={ limit: 20 }] Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
    */
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-useless-constructor, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   constructor(options = {}) {}
 
   /**
@@ -29,18 +29,18 @@ export class SearchInterface {
    * @param {AbortController} abortController Abort controller used to cancel the request.
    * @return {Promise<Array<GeoJSONFeature>>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   search(query, abortController) {}
 }
 
 /**
- * Mixin for SearchInterface.
+ * Mixin for StopFinderInterface.
  *
- * @param {Class} Base  A class to extend with {SearchInterface} functionnalities.
- * @return {Class}  A class that implements <SearchInterface> class and extends Base;
+ * @param {Class} Base  A class to extend with {StopFinderInterface} functionnalities.
+ * @return {Class}  A class that implements <StopFinderInterface> class and extends Base;
  * @private
  */
-const SearchMixin = (Base) =>
+const StopFinderMixin = (Base) =>
   class extends Base {
     constructor(options = {}) {
       super(options);
@@ -157,7 +157,7 @@ const SearchMixin = (Base) =>
     /**
      * To be defined in inherited class
      */
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     onSuggestionClick(suggestion) {}
 
     /**
@@ -174,4 +174,4 @@ const SearchMixin = (Base) =>
     }
   };
 
-export default SearchMixin;
+export default StopFinderMixin;
