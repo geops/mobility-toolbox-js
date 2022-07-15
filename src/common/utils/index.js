@@ -6,4 +6,6 @@ export { default as getLayersAsFlatArray } from './getLayersAsFlatArray';
 export * from './timeUtils';
 export { default as sortByDelay } from './sortByDelay';
 export { default as renderTrajectories } from './renderTrajectories';
+export { default as getMaplibreRender } from './getMaplibreRender';
+export { default as getMapboxRender } from './getMapboxRender';
 export * as trackerConfig from './trackerConfig';

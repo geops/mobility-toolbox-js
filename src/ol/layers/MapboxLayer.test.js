@@ -14,7 +14,7 @@ describe('MapboxLayer', () => {
       // Mock console statement
       consoleOutput = [];
       // eslint-disable-next-line no-console
-      console.warn = (message) => consoleOutput.push(message);
+      console.error = (message) => consoleOutput.push(message);
       layer = new MapboxLayer({
         name: 'Layer',
         url: styleUrl,
@@ -39,7 +39,7 @@ describe('MapboxLayer', () => {
       layer.attachToMap(map);
       expect(layer.mbMap).toBeInstanceOf(gllib.Map);
       expect(consoleOutput[0]).toBe(
-        'No apiKey is defined for request to http://foo.com/styles',
+        'No apiKey defined for mapbox layer with style url to http://foo.com/styles',
       );
     });
 

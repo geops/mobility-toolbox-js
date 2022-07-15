@@ -33,7 +33,7 @@ export default () => {
   tracker.onClick(([feature]) => {
     if (feature) {
       // eslint-disable-next-line no-console
-      console.log(`trajectory: ${feature.getProperties()}`);
+      console.log(feature.getProperties());
     }
   });
 };

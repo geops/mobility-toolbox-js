@@ -137,14 +137,14 @@ const UserInteractionsLayerMixin = (Base) =>
         );
       });
       this.userHoverCallbacks.forEach((callback) => {
-        this.userHoverEventsKeys.push([
+        this.userHoverEventsKeys.push(
           this.on(
             'user:hover',
             ({ target: { features, layer, coordinate, event } }) => {
               callback(features, layer, coordinate, event);
             },
           ),
-        ]);
+        );
       });
     }
 
@@ -164,6 +164,10 @@ const UserInteractionsLayerMixin = (Base) =>
     onClick(callback) {
       this.userClickCallbacks.push(callback);
       this.activateUserInteractions();
+      if (this.map) {
+        // If the layer is already attached to the map we reload the events
+        this.listenEvents();
+      }
     }
 
     /**
@@ -174,6 +178,10 @@ const UserInteractionsLayerMixin = (Base) =>
     onHover(callback) {
       this.userHoverCallbacks.push(callback);
       this.activateUserInteractions();
+      if (this.map) {
+        // If the layer is already attached to the map we reload the events
+        this.listenEvents();
+      }
     }
 
     /**
@@ -181,13 +189,14 @@ const UserInteractionsLayerMixin = (Base) =>
      * @private
      */
     onUserClickCallback(evt) {
+      const coordinate = evt.coordinate || fromLonLat(evt.lngLat.toArray());
       const emptyFeatureInfo = {
         features: [],
         layer: this,
-        coordinate: evt.coordinate || fromLonLat(evt.lngLat.toArray()),
+        coordinate,
         event: evt,
       };
-      return this.getFeatureInfoAtCoordinate(evt.coordinate)
+      return this.getFeatureInfoAtCoordinate(coordinate)
         .then((featureInfo) => {
           this.dispatchEvent({
             type: 'user:click',
@@ -203,14 +212,15 @@ const UserInteractionsLayerMixin = (Base) =>
      * @private
      */
     onUserMoveCallback(evt) {
+      const coordinate = evt.coordinate || fromLonLat(evt.lngLat.toArray());
       const emptyFeatureInfo = {
         features: [],
         layer: this,
-        coordinate: evt.coordinate || fromLonLat(evt.lngLat.toArray()),
+        coordinate,
         event: evt,
       };
 
-      return this.getFeatureInfoAtCoordinate(evt.coordinate)
+      return this.getFeatureInfoAtCoordinate(coordinate)
         .then((featureInfo) => {
           this.dispatchEvent({
             type: 'user:hover',

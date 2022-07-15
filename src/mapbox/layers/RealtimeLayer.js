@@ -108,10 +108,10 @@ class RealtimeLayer extends mixin(Layer) {
       this.listeners.forEach((listener) => {
         unByKey(listener);
       });
-      if (this.map.getLayer(this.key)) {
+      if (this.map.style && this.map.getLayer(this.key)) {
         this.map.removeLayer(this.key);
       }
-      if (this.map.getSource(this.key)) {
+      if (this.map.style && this.map.getSource(this.key)) {
         this.map.removeSource(this.key);
       }
     }
