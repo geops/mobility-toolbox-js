@@ -154,11 +154,20 @@ describe('Layer', () => {
     expect(layer.visible).toBe(true);
     const spy = jest.fn();
     const spy2 = jest.fn();
+    const spy3 = jest.fn();
+    const spy4 = jest.fn();
     layer.onHover(spy);
     layer.onClick(spy2);
     layer.attachToMap(map);
+
+    // Test event after attached to map
+    layer.onHover(spy3);
+    layer.onClick(spy4);
+
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
+    expect(spy3).toHaveBeenCalledTimes(0);
+    expect(spy4).toHaveBeenCalledTimes(0);
 
     await map.fire('mousemove', {
       type: 'mousemove',
@@ -171,8 +180,12 @@ describe('Layer', () => {
     });
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy2).toHaveBeenCalledTimes(1);
+    expect(spy3).toHaveBeenCalledTimes(1);
+    expect(spy4).toHaveBeenCalledTimes(1);
     spy.mockReset();
     spy2.mockReset();
+    spy3.mockReset();
+    spy4.mockReset();
 
     layer.detachFromMap();
     await map.fire('mousemove', {
@@ -186,6 +199,8 @@ describe('Layer', () => {
     });
     expect(spy).toHaveBeenCalledTimes(0);
     expect(spy2).toHaveBeenCalledTimes(0);
+    expect(spy3).toHaveBeenCalledTimes(0);
+    expect(spy4).toHaveBeenCalledTimes(0);
     global.console.error.mockRestore();
   });
 

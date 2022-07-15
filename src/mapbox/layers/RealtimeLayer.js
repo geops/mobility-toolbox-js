@@ -108,10 +108,10 @@ class RealtimeLayer extends mixin(Layer) {
       this.listeners.forEach((listener) => {
         unByKey(listener);
       });
-      if (this.map.getLayer(this.key)) {
+      if (this.map.style && this.map.getLayer(this.key)) {
         this.map.removeLayer(this.key);
       }
-      if (this.map.getSource(this.key)) {
+      if (this.map.style && this.map.getSource(this.key)) {
         this.map.removeSource(this.key);
       }
     }
@@ -173,6 +173,10 @@ class RealtimeLayer extends mixin(Layer) {
    * @overrides
    */
   renderTrajectories(noInterpolate) {
+    if (!this.map) {
+      return;
+    }
+
     const { width, height } = this.map.getCanvas();
     const center = this.map.getCenter();
 
@@ -278,12 +282,19 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    */
   onMove() {
-    const extent = getSourceCoordinates(this.map, this.pixelRatio);
-    const source = this.map.getSource(this.key);
-    if (source) {
-      source.setCoordinates(extent);
-    }
     this.renderTrajectories();
+  }
+
+  renderTrajectoriesInternal(viewState, noInterpolate) {
+    const render = super.renderTrajectoriesInternal(viewState, noInterpolate);
+    if (render && this.map.style) {
+      const extent = getSourceCoordinates(this.map, this.pixelRatio);
+      const source = this.map.getSource(this.key);
+      if (source) {
+        source.setCoordinates(extent);
+      }
+    }
+    return render;
   }
 
   /**

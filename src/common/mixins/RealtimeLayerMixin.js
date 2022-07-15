@@ -299,7 +299,7 @@ const RealtimeLayerMixin = (Base) =>
          * If true, encapsulates the renderTrajectories calls in a throttle function. Default to true.
          */
         useThrottle: {
-          value: options.useThrottle || true,
+          value: options.useThrottle !== false,
           writable: true,
         },
 
@@ -432,6 +432,9 @@ const RealtimeLayerMixin = (Base) =>
      * @private
      */
     renderTrajectoriesInternal(viewState, noInterpolate) {
+      if (!this.map) {
+        return false;
+      }
       const time = this.live ? Date.now() : this.time;
 
       const trajectories = Object.values(this.trajectories);

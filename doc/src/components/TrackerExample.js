@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Map } from 'maplibre-gl';
-import { RealtimeLayer } from '../../../src/mapbox';
+import { RealtimeLayer, CopyrightControl } from '../../../src/mapbox';
 
 const useStyles = makeStyles({
   root: {
@@ -21,7 +21,10 @@ function TrackerExample() {
       style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
       center: [7.4707, 46.95],
       zoom: 12,
+      attributionControl: false,
     });
+    const control = new CopyrightControl();
+    control.attachToMap(map);
 
     const tracker = new RealtimeLayer({
       url: 'wss://api.geops.io/tracker-ws/v1/',

@@ -205,6 +205,9 @@ class RealtimeLayer extends mixin(Layer) {
    * @override
    */
   renderTrajectoriesInternal(viewState, noInterpolate) {
+    if (!this.map) {
+      return false;
+    }
     let isRendered = false;
 
     const blockRendering =
@@ -223,6 +226,7 @@ class RealtimeLayer extends mixin(Layer) {
         this.transformContainer.style.transform = '';
       }
     }
+    return isRendered;
   }
 
   /**

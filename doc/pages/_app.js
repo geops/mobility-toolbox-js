@@ -12,7 +12,7 @@ import '../styles/style.css';
 const tabs = [
   {
     label: 'Home',
-    href: '/home',
+    href: '/',
   },
   {
     label: 'API',
