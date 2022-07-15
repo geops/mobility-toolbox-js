@@ -1,5 +1,6 @@
 import { paths as routing } from './routing';
 import { paths as stops } from './stops';
+
 export * from './realtime';
 
 export type RoutingParameters = routing['/']['get']['parameters']['query'];
