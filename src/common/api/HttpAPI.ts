@@ -21,6 +21,7 @@ export type HttpApiOptions = {
  */
 class HttpAPI extends BaseObject {
   url?: string;
+
   apiKey?: string;
 
   constructor(options: HttpApiOptions) {
@@ -37,7 +38,13 @@ class HttpAPI extends BaseObject {
    * @ignore
    */
   fetch(path: string, params: Object, config: RequestInit): Promise<any> {
-    if (!this.apiKey && !/key=/.test(this.url)) {
+    if (!this.url) {
+      // eslint-disable-next-line no-console
+      return Promise.reject(
+        new Error(`No url defined for request to ${this.url}/${path}`),
+      );
+    }
+    if (!this.url && !this.apiKey && !/key=/.test(this.url)) {
       // eslint-disable-next-line no-console
       return Promise.reject(
         new Error(`No apiKey defined for request to ${this.url}`),
@@ -60,7 +67,7 @@ class HttpAPI extends BaseObject {
           }
           return data;
         });
-      } catch (err) {
+      } catch (err: any | Error) {
         return Promise.reject(new Error(err));
       }
     });

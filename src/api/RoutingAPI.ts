@@ -21,10 +21,7 @@ class RoutingAPI extends HttpAPI {
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    */
   constructor(options: HttpApiOptions) {
-    super({
-      url: 'https://api.geops.io/routing/v1/',
-      ...(options || {}),
-    });
+    super({ url: 'https://api.geops.io/routing/v1/', ...options });
   }
 
   /**

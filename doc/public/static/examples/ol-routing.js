@@ -4,7 +4,7 @@ import {
   MaplibreLayer,
   CopyrightControl,
   RoutingControl,
-} from '../../../../src/ol';
+} from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {

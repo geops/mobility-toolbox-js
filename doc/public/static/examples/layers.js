@@ -5,7 +5,7 @@ import {
   realtimeDelayStyle,
   sortByDelay,
   Layer,
-} from '../../../../src/ol';
+} from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {

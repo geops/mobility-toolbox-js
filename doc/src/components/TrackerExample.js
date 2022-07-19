@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Map } from 'maplibre-gl';
-import { RealtimeLayer, CopyrightControl } from '../../../src/mapbox';
+import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/mapbox';
 
 const useStyles = makeStyles({
   root: {

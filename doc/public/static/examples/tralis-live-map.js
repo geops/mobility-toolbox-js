@@ -1,5 +1,5 @@
 import { Map } from 'mapbox-gl';
-import { RealtimeLayer, CopyrightControl } from '../../../../src/mapbox';
+import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import LINE_IMAGES from './assets/tralis-live-map';
 

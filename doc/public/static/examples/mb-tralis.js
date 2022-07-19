@@ -1,6 +1,6 @@
 import { Map } from 'maplibre-gl';
 import { toLonLat } from 'ol/proj';
-import { RealtimeLayer, CopyrightControl } from '../../../../src/mapbox';
+import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {

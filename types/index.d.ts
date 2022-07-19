@@ -1,5 +1,5 @@
-import { paths as routing } from './routing';
-import { paths as stops } from './stops';
+import { Paths as routing } from './routing';
+import { Paths as stops } from './stops';
 
 export * from './realtime';
 

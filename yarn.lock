@@ -1738,6 +1738,16 @@
     "@turf/rhumb-destination" "^6.5.0"
     "@turf/rhumb-distance" "^6.5.0"
 
+"@types/arcgis-js-api@^4.24.0":
+  version "4.24.0"
+  resolved "https://registry.yarnpkg.com/@types/arcgis-js-api/-/arcgis-js-api-4.24.0.tgz#5cdd3f5996932b7e2c999dd288d51df65f584f51"
+  integrity sha512-Qh6Yw1g4cBq1UGoX1xI+G+4NgxZgTgmSj6IdV8CE9k7IRdPOZIHeEC5ZHDjf93mgjbD8vytPZWHVvcYs1F/PDw==
+
+"@types/arcgis-rest-api@^10.4.5":
+  version "10.4.5"
+  resolved "https://registry.yarnpkg.com/@types/arcgis-rest-api/-/arcgis-rest-api-10.4.5.tgz#35a1d6b1b39bb530b36799d679576cbc1f35cc2e"
+  integrity sha512-MhpTj3aaURIFhK6pBRF50yCHW5TpbeuC1E81juovfNesSOshsQnCzludhpBhIr2pNzplTBlfzrT7RKiLZ5F3Tw==
+
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.19"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.19.tgz#7b497495b7d1b4812bdb9d02804d0576f43ee460"
@@ -1875,6 +1885,48 @@
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.1.tgz#20f18294f797f2209b5f65c8e3b5c8e8261d127c"
   integrity sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==
+
+"@types/topojson-client@*":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@types/topojson-client/-/topojson-client-3.1.1.tgz#d1396b2e79f530ef69bb162523cddf94576bd5a9"
+  integrity sha512-E4/Z2Xg56kVLRzYWem/6uOKVcVNqqxEqlWM9qCG2tCV1BxuzvvXC02/ELoGJWgtKkQhfycBPlMFEuTFdA/YiTg==
+  dependencies:
+    "@types/geojson" "*"
+    "@types/topojson-specification" "*"
+
+"@types/topojson-server@*":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/topojson-server/-/topojson-server-3.0.1.tgz#35fe9dcc33f07742fb49864b77a780b9e6c8c24e"
+  integrity sha512-NxoC9O8lS/+a0M/FiyjIz7Wk6M03DKF5V1xp2vB9zmbMo66ZbaULg2rrosHAqgsU4BmHe4LE7A0JinPZuxGlBw==
+  dependencies:
+    "@types/geojson" "*"
+    "@types/topojson-specification" "*"
+
+"@types/topojson-simplify@*":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/topojson-simplify/-/topojson-simplify-3.0.1.tgz#5df153844e3621a43be0384fde4d6c88f00d1b7a"
+  integrity sha512-H7SS2X11Lo3iRT3e7R6jPTAazOoSLD0LKIGq1b+4m/76Md46JfeU3zVIhxfIX9FY7oiyEbXwGumjK1GUXwIIMA==
+  dependencies:
+    "@types/geojson" "*"
+    "@types/topojson-specification" "*"
+
+"@types/topojson-specification@*":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/topojson-specification/-/topojson-specification-1.0.2.tgz#e20df2c5a611e31f51d606473dbaccc1d90461c8"
+  integrity sha512-SGc1NdX9g3UGDp6S+p+uyG+Z8CehS51sUJ9bejA25Xgn2kkAguILk6J9nxXK+0M/mbTBN7ypMA7+4HVLNMJ8ag==
+  dependencies:
+    "@types/geojson" "*"
+
+"@types/topojson@^3.2.3":
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/@types/topojson/-/topojson-3.2.3.tgz#32b67d2b0acd49081a5f1b9895c6e0a03bea55cd"
+  integrity sha512-j6D8AFYNa8Tcn0TjnWwzKxhWLpUFM4TnQxZU3p20ehOu11xiD9xiVqB6y2148IVI7js6oU8YCKAWi2JaEMktDA==
+  dependencies:
+    "@types/geojson" "*"
+    "@types/topojson-client" "*"
+    "@types/topojson-server" "*"
+    "@types/topojson-simplify" "*"
+    "@types/topojson-specification" "*"
 
 "@types/yargs-parser@*":
   version "21.0.0"
