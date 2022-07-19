@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.32",
+  "version": "2.0.0-beta.33",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
@@ -33,7 +33,10 @@
     "@babel/preset-react": "7.16.7",
     "@commitlint/cli": "17.0.2",
     "@commitlint/config-conventional": "17.0.2",
+    "@types/arcgis-js-api": "^4.24.0",
+    "@types/arcgis-rest-api": "^10.4.5",
     "@types/geojson": "^7946.0.8",
+    "@types/topojson": "^3.2.3",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "autoprefixer": "9.7.6",
@@ -85,7 +88,7 @@
   },
   "scripts": {
     "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
-    "build": "rm -rf build && yarn esbuild && cp README.md build/ && cp package.json build/ && cp -R src/types build/",
+    "build": "rm -rf build && yarn tsc && yarn esbuild:iife && cp README.md build/ && cp package.json build/ && cp -R src/types build/",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
     "cy:test": "start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'",
@@ -114,7 +117,7 @@
     "start:examples": "cd doc && yarn build && yarn start",
     "test": "TZ='UTC' jest",
     "test:watch": "yarn test --watchAll",
-    "types": "tsc src/*.ts src/**/*.(t|j)s --declaration --emitDeclarationOnly --isolatedModules --outdir build",
+    "tsc": "tsc",
     "types:backend": "openapi-typescript https://developer.geops.io/swagger/routing.json --output types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output types/stops.d.ts"
   },
   "browserslist": {
