@@ -1,8 +1,8 @@
 import BaseObject from 'ol/Object';
 import getUrlWithParams from '../utils/getUrlWithParams';
 
-export type HttpApiOptions = {
-  url?: string;
+export type HttpAPIOptions = {
+  url: string;
   apiKey?: string;
 };
 /**
@@ -20,11 +20,11 @@ export type HttpApiOptions = {
  * @classproperty {string} apiKey Api key to access the service.
  */
 class HttpAPI extends BaseObject {
-  url?: string;
+  url: string;
 
   apiKey?: string;
 
-  constructor(options: HttpApiOptions) {
+  constructor(options: HttpAPIOptions) {
     super();
     /** @ignore */
     this.url = options.url;
