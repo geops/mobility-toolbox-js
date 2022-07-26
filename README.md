@@ -16,8 +16,7 @@ Visit https://mobility-toolbox-js.vercel.app/
 * Display [real-time vehicle positions and prognosis data](http://tracker.geops.ch/) on a map.
 * Search for [stops and stations](https://maps.trafimage.ch) all over the world.
 * Get [precise geographic courses](https://routing-demo.geops.io/) for all modes of transport.
-* Generate [beautiful schematic maps for public transport, mobility and logistics](https://mobility.portal.geops.io).
-* Generate [beautiful topographic maps for public transport, mobility and logistics](https://mobility.portal.geops.io/world.geops.networkplans).
+* Generate beautiful [schematic](https://mobility.portal.geops.io/world.geops.networkplans) or [topographic](https://mobility.portal.geops.io) maps for public transport, mobility and logistics.
 
 ## Version 1.x.x
 
