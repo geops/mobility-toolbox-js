@@ -31,7 +31,7 @@ function CodeSandboxButton({ html, js, extraFiles, ...props }) {
         content: {
           name: 'vanilla',
           version: '1.0.0',
-          description: 'Mobility example starter project lalala',
+          description: 'Mobility example starter project',
           main: 'index.html',
           scripts: {
             start: 'parcel index.html --open',
