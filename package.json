@@ -81,7 +81,6 @@
     "stylelint-scss": "4.1.0"
   },
   "scripts": {
-    "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
     "build": "rm -rf build && yarn esbuild && cp README.md build/ && cp package.json build/ && cp -R src/types build/",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
@@ -89,9 +88,8 @@
     "cy:test:chrome": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'",
     "cy:test:edge": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'",
     "cy:test:firefox": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'",
-    "dev": "yarn doc && yarn dev:examples",
+    "dev": "cd doc && yarn install && yarn doc && yarn dev:examples",
     "dev:examples": "cd doc && yarn dev",
-    "doc": "yarn apidoc && cd doc && yarn install --frozen-lockfile && yarn build",
     "esbuild": "yarn esbuild:all && yarn esbuild:iife",
     "esbuild:all": "esbuild src/index.js src/**/*.js src/**/**/*.js --target=chrome100 --outdir=build/ --loader:.js=jsx",
     "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
