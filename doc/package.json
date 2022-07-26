@@ -22,7 +22,6 @@
   "devDependencies": {
     "eslint": "8.18.0",
     "eslint-config-next": "12.1.6",
-    "next-transpile-modules": "9.0.0",
     "raw-loader": "4.0.2"
   },
   "scripts": {
