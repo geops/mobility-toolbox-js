@@ -3,11 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   webpack: (config) => {
     config.module.rules.push({
-      test: /\.md$/,
-      use: 'raw-loader',
-    });
-    config.module.rules.push({
-      test: /\.html$/,
+      test: /\.(md|html)$/,
       use: 'raw-loader',
     });
 
