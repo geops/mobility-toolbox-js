@@ -121,4 +121,4 @@ build
 
 # esdoc files
 apidoc
-doc/src/components/Esdoc/index.json
+# doc/src/components/Esdoc/index.json
