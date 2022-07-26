@@ -20,19 +20,13 @@
     "typeface-lato": "1.1.13"
   },
   "devDependencies": {
-    "esdoc": "1.1.0",
-    "esdoc-ecmascript-proposal-plugin": "1.0.0",
-    "esdoc-publish-html-plugin": "1.1.2",
-    "esdoc-standard-plugin": "1.0.0",
     "eslint": "8.18.0",
     "eslint-config-next": "12.1.6",
     "raw-loader": "4.0.2"
   },
   "scripts": {
-    "apidoc": "esdoc && cp apidoc/index.json ./src/components/Esdoc",
     "build": "next build",
     "dev": "next dev",
-    "doc": "yarn apidoc && yarn build",
     "lint": "next lint",
     "start": "next start"
   },
