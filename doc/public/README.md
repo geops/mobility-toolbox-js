@@ -7,7 +7,7 @@ The tools in this library have been inspired by many projects realized for publi
 [![Build](https://github.com/geops/mobility-toolbox-js/workflows/Build/badge.svg)](https://github.com/geops/mobility-toolbox-js/actions?query=workflow%3ABuild)
 ![Vercel](https://vercelbadge.vercel.app/api/geops/mobility-toolbox-js)
 
-## Main Fetaures
+## Main Features
 
 * Display [real-time vehicle positions and prognosis data](http://tracker.geops.ch/) on a map.
 * Search for [stops and stations](https://maps.trafimage.ch) all over the world.
