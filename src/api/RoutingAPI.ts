@@ -1,4 +1,4 @@
-import HttpAPI, { HttpAPIOptions } from '../common/api/HttpAPI';
+import HttpAPI from '../common/api/HttpAPI';
 import { RoutingParameters, RoutingResponse } from '../../types';
 
 export type RoutingAPIOptions = {
