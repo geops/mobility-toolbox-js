@@ -123,21 +123,10 @@ export default class Layer extends BaseObject {
               this.parent.visible = true;
             }
 
-            // If children contains only not visible layers with group, we display one of them (the last added).
+            // If children doesn't contain any visible layers, we display all children.
             if (
               this.children &&
-              this.children.some((child) => !!child.group && !child.visible)
-            ) {
-              const child = [...this.children]
-                .reverse()
-                .find((childd) => !!childd.group);
-              child.visible = true;
-            }
-
-            // If children doesn't contain any visible layers (not using group), we display all children (not using group).
-            if (
-              this.children &&
-              !this.children.some((child) => !child.group && child.visible)
+              !this.children.some((child) => child.visible)
             ) {
               this.children.forEach((child) => {
                 // eslint-disable-next-line no-param-reassign
