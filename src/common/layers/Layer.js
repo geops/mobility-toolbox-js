@@ -81,7 +81,7 @@ export default class Layer extends BaseObject {
         value: name,
       },
       key: {
-        value: key || uid,
+        value: key || name || uid,
       },
       group: {
         get: () => this.get('group'),
