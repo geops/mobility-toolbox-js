@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.38",
+  "version": "2.0.0-beta.39",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
@@ -68,7 +68,7 @@
     "jest-websocket-mock": "2.3.0",
     "lint-staged": "12.3.3",
     "mapbox-gl": "1.13.2",
-    "maplibre-gl": "2.1.9",
+    "maplibre-gl": "2.4.0",
     "mock-socket": "9.1.2",
     "next": "12.1.6",
     "next-transpile-modules": "9.0.0",
@@ -123,19 +123,13 @@
     "tsc": "tsc",
     "types:backend": "openapi-typescript https://developer.geops.io/swagger/routing.json --output types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output types/stops.d.ts"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version",
-      "last 1 ie version"
-    ]
-  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all",
+    "not ie <= 11",
+    "not android < 5"
+  ],
   "keywords": [
     "mobility",
     "toolbox"
