@@ -123,8 +123,11 @@ export default class Layer extends BaseObject {
               this.parent.visible = true;
             }
 
-            // If children contains layers with group, we display one of them (the last added).
-            if (this.children && this.children.some((child) => !!child.group)) {
+            // If children contains only not visible layers with group, we display one of them (the last added).
+            if (
+              this.children &&
+              this.children.some((child) => !!child.group && !child.visible)
+            ) {
               const child = [...this.children]
                 .reverse()
                 .find((childd) => !!childd.group);
