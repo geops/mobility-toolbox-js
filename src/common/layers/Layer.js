@@ -118,14 +118,28 @@ export default class Layer extends BaseObject {
           this.set('visible', newVisible);
 
           if (this.visible) {
-            if (this.parent && !this.parent.visible) {
+            // We make the parent visible
+            if (this.parent) {
               this.parent.visible = true;
             }
 
-            if (this.children && this.children.find((child) => child.group)) {
-              const child = this.children.find((childd) => !!childd.group);
-              // Make visible only radioGroup layers
+            // If children contains layers with group, we display one of them (the last added).
+            if (this.children && this.children.some((child) => !!child.group)) {
+              const child = [...this.children]
+                .reverse()
+                .find((childd) => !!childd.group);
               child.visible = true;
+            }
+
+            // If children doesn't contain any visible layers (not using group), we display all children (not using group).
+            if (
+              this.children &&
+              !this.children.some((child) => !child.group && child.visible)
+            ) {
+              this.children.forEach((child) => {
+                // eslint-disable-next-line no-param-reassign
+                child.visible = true;
+              });
             }
 
             // Warn the same group that a new layer is visible
@@ -142,6 +156,15 @@ export default class Layer extends BaseObject {
               });
             }
           } else if (!this.visible) {
+            // We hide all the children
+            if (this.children) {
+              this.children.forEach((child) => {
+                // eslint-disable-next-line no-param-reassign
+                child.visible = false;
+              });
+            }
+
+            // If the parent has no more visible child we also hide it.
             if (
               this.parent &&
               this.parent.visible &&
