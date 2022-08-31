@@ -39,19 +39,29 @@ export class UserInteractionsLayerInterface {
   activateUserInteractions() {}
 
   /**
-   * Deactivaet map listeners events.
+   * Deactivate map listeners events.
    */
   deactivateUserInteractions() {}
 
   /**
-   * Terminate the layer unsubscribing user interactions.
+   * Subscribe on user:click event.
    */
   onClick(callback) {}
 
   /**
-   * Terminate the layer unsubscribing user interactions.
+   * Subscribe on user:hover event.
    */
   onHover(callback) {}
+
+  /**
+   * Unsubscribe on user:click event.
+   */
+  unClick(callback) {}
+
+  /**
+   * Unsubscribe on user:hover event.
+   */
+  unHover(callback) {}
 }
 
 /**
@@ -178,6 +188,43 @@ const UserInteractionsLayerMixin = (Base) =>
     onHover(callback) {
       this.userHoverCallbacks.push(callback);
       this.activateUserInteractions();
+      if (this.map) {
+        // If the layer is already attached to the map we reload the events
+        this.listenEvents();
+      }
+    }
+
+    /**
+     * Unlistens to click events on the layer.
+     * @param {function} callback Callback function, called with the clicked
+     *   features,
+     *   the layer instance and the click event.
+     */
+    unClick(callback) {
+      const index = this.userClickCallbacks.indexOf(callback);
+      if (index !== -1) {
+        return;
+      }
+      this.userClickCallbacks = this.userClickCallbacks.slice(index, 1);
+
+      if (this.map) {
+        // If the layer is already attached to the map we reload the events
+        this.listenEvents();
+      }
+    }
+
+    /**
+     * Unlistens to hover events on the layer.
+     * @param {function} callback Callback function, called with the clicked
+     *   features, the layer instance and the click event.
+     */
+    unHover(callback) {
+      const index = this.userHoverCallbacks.indexOf(callback);
+      if (index !== -1) {
+        return;
+      }
+      this.userHoverCallbacks = this.userHoverCallbacks.slice(index, 1);
+
       if (this.map) {
         // If the layer is already attached to the map we reload the events
         this.listenEvents();

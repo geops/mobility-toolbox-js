@@ -184,6 +184,10 @@ class RealtimeLayer extends mixin(Layer) {
    * @overrides
    */
   renderTrajectories(noInterpolate) {
+    if (!this.map) {
+      return;
+    }
+
     const view = this.map.getView();
     super.renderTrajectories(
       {
