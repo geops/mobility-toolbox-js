@@ -26,7 +26,7 @@ export default class MapboxLayer extends mixin(Layer) {
   attachToMap(map) {
     super.attachToMap(map);
 
-    if (!this.map || this.mbMap) {
+    if (!this.map) {
       return;
     }
 
