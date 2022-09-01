@@ -1,6 +1,6 @@
-/* eslint-disable no-empty-function */
-/* eslint-disable no-useless-constructor */
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-empty-function,@typescript-eslint/no-empty-function */
+/* eslint-disable no-useless-constructor,@typescript-eslint/no-useless-constructor */
+/* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 import { buffer, containsCoordinate, intersects } from 'ol/extent';

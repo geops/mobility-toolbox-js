@@ -181,7 +181,73 @@ describe('WebSocketAPI', () => {
         expect(client.send).toHaveBeenCalledTimes(0);
       });
     });
+    describe('#get', () => {
+      test('listen to message event', async () => {
+        // eslint-disable-next-line no-unused-vars
+        const client = new WebSocketAPI();
+        client.connect(`ws://foo:1234`);
+        await server.connected;
+        const params = { channel: 'get', args: ['baz'], id: 'id' };
+        const cb = jest.fn();
+        const errorCb = jest.fn();
+        client.get(params, cb, errorCb);
 
+        expect(cb).toHaveBeenCalledTimes(0);
+        const obj = { source: 'get baz', client_reference: 'id' };
+        server.send(JSON.stringify(obj));
+        expect(cb).toHaveBeenCalledTimes(1);
+        expect(cb).toHaveBeenCalledWith(obj);
+      });
+
+      test('unlisten after receiving one response', async () => {
+        // eslint-disable-next-line no-unused-vars
+        const client = new WebSocketAPI();
+        client.connect(`ws://foo:1234`);
+        await server.connected;
+        const params = { channel: 'get', args: ['baz'], id: 'id' };
+        const cb = jest.fn();
+        const errorCb = jest.fn();
+        client.get(params, cb, errorCb);
+
+        expect(cb).toHaveBeenCalledTimes(0);
+        const obj = { source: 'get baz', client_reference: 'id' };
+        server.send(JSON.stringify(obj));
+        expect(cb).toHaveBeenCalledTimes(1);
+        server.send(JSON.stringify(obj));
+        server.send(JSON.stringify(obj));
+        server.send(JSON.stringify(obj));
+        server.send(JSON.stringify(obj));
+        expect(cb).toHaveBeenCalledTimes(1);
+      });
+
+      test('call (then remove) good callbacks on multiple requests', async () => {
+        // eslint-disable-next-line no-unused-vars
+        const client = new WebSocketAPI();
+        client.connect(`ws://foo:1234`);
+        await server.connected;
+        const params = { channel: 'get', args: ['baz'], id: 'id' };
+        const cb = jest.fn();
+        const errorCb = jest.fn();
+        client.get(params, cb, errorCb);
+
+        const params2 = { channel: 'get', args: ['foo'], id: 'id' };
+        const cb2 = jest.fn();
+        const errorCb2 = jest.fn();
+        client.get(params2, cb2, errorCb2);
+        client.get(params, cb2, errorCb);
+
+        expect(cb).toHaveBeenCalledTimes(0);
+        const obj = { source: 'get baz', client_reference: 'id' };
+        server.send(JSON.stringify(obj));
+        expect(cb).toHaveBeenCalledTimes(1);
+        expect(cb2).toHaveBeenCalledTimes(1);
+        server.send(
+          JSON.stringify({ source: 'get foo', client_reference: 'id' }),
+        );
+        expect(cb).toHaveBeenCalledTimes(1);
+        expect(cb2).toHaveBeenCalledTimes(2);
+      });
+    });
     describe('#subscribe', () => {
       test('adds subscription to subscriptions array', async () => {
         // eslint-disable-next-line no-unused-vars

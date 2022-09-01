@@ -4,7 +4,7 @@ import {
   RealtimeLayer,
   MapboxLayer,
   CopyrightControl,
-} from '../../../../src/ol';
+} from 'mobility-toolbox-js/ol';
 
 export default () => {
   const map = new Map({

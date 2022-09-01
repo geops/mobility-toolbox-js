@@ -26,7 +26,7 @@ export default class MapboxLayer extends mixin(Layer) {
   attachToMap(map) {
     super.attachToMap(map);
 
-    if (!this.map || this.mbMap) {
+    if (!this.map) {
       return;
     }
 
@@ -71,6 +71,11 @@ export default class MapboxLayer extends mixin(Layer) {
     };
 
     super.loadMbMap();
+
+    if (!this.mbMap) {
+      // mbMap could ne bull if the map is not in the dom yet.
+      return;
+    }
 
     this.mbMap.once('load', () => {
       this.mbMap.resize();

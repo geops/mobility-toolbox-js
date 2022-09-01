@@ -1,5 +1,10 @@
 import BaseObject from 'ol/Object';
 import getUrlWithParams from '../utils/getUrlWithParams';
+
+export type HttpAPIOptions = {
+  url: string;
+  apiKey?: string;
+};
 /**
  * Common class to access to a geOps api using http.
  *
@@ -15,7 +20,11 @@ import getUrlWithParams from '../utils/getUrlWithParams';
  * @classproperty {string} apiKey Api key to access the service.
  */
 class HttpAPI extends BaseObject {
-  constructor(options = {}) {
+  url: string;
+
+  apiKey?: string;
+
+  constructor(options: HttpAPIOptions) {
     super();
     /** @ignore */
     this.url = options.url;
@@ -28,8 +37,14 @@ class HttpAPI extends BaseObject {
    * Append the apiKey before sending the request.
    * @ignore
    */
-  fetch(path, params, config) {
-    if (!this.apiKey && !/key=/.test(this.url)) {
+  fetch(path: string, params: Object, config: RequestInit): Promise<any> {
+    if (!this.url) {
+      // eslint-disable-next-line no-console
+      return Promise.reject(
+        new Error(`No url defined for request to ${this.url}/${path}`),
+      );
+    }
+    if (!this.url && !this.apiKey && !/key=/.test(this.url)) {
       // eslint-disable-next-line no-console
       return Promise.reject(
         new Error(`No apiKey defined for request to ${this.url}`),
@@ -52,7 +67,7 @@ class HttpAPI extends BaseObject {
           }
           return data;
         });
-      } catch (err) {
+      } catch (err: any | Error) {
         return Promise.reject(new Error(err));
       }
     });

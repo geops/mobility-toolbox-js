@@ -1,5 +1,5 @@
 import { Map, View } from 'ol';
-import { MaplibreLayer, CopyrightControl } from '../../../../src/ol';
+import { MaplibreLayer, CopyrightControl } from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {

@@ -1,5 +1,5 @@
 import { Map } from 'maplibre-gl';
-import { CopyrightControl } from '../../../../src/mapbox';
+import { CopyrightControl } from 'mobility-toolbox-js/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {

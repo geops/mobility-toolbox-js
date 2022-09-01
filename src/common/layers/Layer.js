@@ -81,7 +81,7 @@ export default class Layer extends BaseObject {
         value: name,
       },
       key: {
-        value: key || uid,
+        value: key || name || uid,
       },
       group: {
         get: () => this.get('group'),
@@ -118,14 +118,20 @@ export default class Layer extends BaseObject {
           this.set('visible', newVisible);
 
           if (this.visible) {
-            if (this.parent && !this.parent.visible) {
+            // We make the parent visible
+            if (this.parent) {
               this.parent.visible = true;
             }
 
-            if (this.children && this.children.find((child) => child.group)) {
-              const child = this.children.find((childd) => !!childd.group);
-              // Make visible only radioGroup layers
-              child.visible = true;
+            // If children doesn't contain any visible layers, we display all children.
+            if (
+              this.children &&
+              !this.children.some((child) => child.visible)
+            ) {
+              this.children.forEach((child) => {
+                // eslint-disable-next-line no-param-reassign
+                child.visible = true;
+              });
             }
 
             // Warn the same group that a new layer is visible
@@ -142,6 +148,15 @@ export default class Layer extends BaseObject {
               });
             }
           } else if (!this.visible) {
+            // We hide all the children
+            if (this.children) {
+              this.children.forEach((child) => {
+                // eslint-disable-next-line no-param-reassign
+                child.visible = false;
+              });
+            }
+
+            // If the parent has no more visible child we also hide it.
             if (
               this.parent &&
               this.parent.visible &&
@@ -228,7 +243,7 @@ export default class Layer extends BaseObject {
    * @param {Object} options Some options. See child classes to see which are supported.
    * @return {Promise<FeatureInfo>} An empty response.
    */
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   getFeatureInfoAtCoordinate(coordinate, options) {
     // eslint-disable-next-line no-console
     console.error(

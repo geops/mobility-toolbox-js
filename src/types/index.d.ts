@@ -1,9 +1,10 @@
-import { paths as routing } from './routing';
-import { paths as stops } from './stops';
+import { Paths as Routing } from './routing';
+import { Paths as Stops } from './stops';
+
 export * from './realtime';
 
-export type RoutingParameters = routing['/']['get']['parameters']['query'];
-export type RoutingResponse = routing['/']['get']['responses']['200']['schema'];
+export type RoutingParameters = Routing['/']['get']['parameters']['query'];
+export type RoutingResponse = Routing['/']['get']['responses']['200']['schema'];
 
-export type StopsParameters = stops['/']['get']['parameters']['query'];
-export type StopsResponse = stops['/']['get']['responses']['200']['schema'];
+export type StopsParameters = Stops['/']['get']['parameters']['query'];
+export type StopsResponse = Stops['/']['get']['responses']['200']['schema'];

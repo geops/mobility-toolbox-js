@@ -348,6 +348,7 @@ class RoutingControl extends Control {
 
     return Promise.all(
       this.graphs.map(([graph], index) => {
+        const { signal } = this.abortControllers[graph];
         return this.api
           .route(
             {
@@ -360,7 +361,7 @@ class RoutingControl extends Control {
               'coord-punish': 1000.0,
               ...this.routingApiParams,
             },
-            this.abortControllers[graph],
+            { signal },
           )
           .then((featureCollection) => {
             this.segments = this.format.readFeatures(featureCollection);

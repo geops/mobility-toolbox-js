@@ -132,8 +132,8 @@ class RealtimeLayer extends mixin(Layer) {
     super.attachToMap(map);
     if (this.map) {
       this.olListenersKeys.push(
-        this.map.on(['moveend', 'change:target'], (evt) => {
-          const view = this.map.getView();
+        ...this.map.on(['moveend', 'change:target'], (evt) => {
+          const view = evt.map.getView();
           if (view.getAnimating() || view.getInteracting()) {
             return;
           }
@@ -184,6 +184,10 @@ class RealtimeLayer extends mixin(Layer) {
    * @overrides
    */
   renderTrajectories(noInterpolate) {
+    if (!this.map) {
+      return;
+    }
+
     const view = this.map.getView();
     super.renderTrajectories(
       {

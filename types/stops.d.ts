@@ -138,6 +138,6 @@ export interface Paths {
   };
 }
 
-export interface Operations {}
+export interface operations {}
 
-export interface External {}
+export interface external {}

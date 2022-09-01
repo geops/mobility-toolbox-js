@@ -19,7 +19,7 @@ export class StopFinderInterface {
    * @param {string} [options.placeholder='Search for a stop...'] Input field placeholder.
    * @param {StopsSearchParams} [options.apiParams={ limit: 20 }] Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
    */
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-useless-constructor, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   constructor(options = {}) {}
 
   /**
@@ -29,7 +29,7 @@ export class StopFinderInterface {
    * @param {AbortController} abortController Abort controller used to cancel the request.
    * @return {Promise<Array<GeoJSONFeature>>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   search(query, abortController) {}
 }
 
@@ -157,7 +157,7 @@ const StopFinderMixin = (Base) =>
     /**
      * To be defined in inherited class
      */
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     onSuggestionClick(suggestion) {}
 
     /**

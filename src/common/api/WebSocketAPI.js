@@ -156,6 +156,28 @@ class WebSocketAPI {
     }
   }
 
+  addEvents(onMessage, onError) {
+    if (this.websocket) {
+      this.websocket.addEventListener('message', onMessage);
+
+      if (onError) {
+        this.websocket.addEventListener('error', onError);
+        this.websocket.addEventListener('close', onError);
+      }
+    }
+  }
+
+  removeEvents(onMessage, onError) {
+    if (this.websocket) {
+      this.websocket.removeEventListener('message', onMessage);
+
+      if (onError) {
+        this.websocket.removeEventListener('error', onError);
+        this.websocket.removeEventListener('close', onError);
+      }
+    }
+  }
+
   /**
    * Listen to websocket messages.
    *
@@ -167,8 +189,9 @@ class WebSocketAPI {
    */
   listen(params, cb, errorCb) {
     // Remove the previous identical callback
-    this.unlisten(params, cb);
+    this.unlisten(params, cb, errorCb);
 
+    // We wrap the message callback to be sure we only propagate the message if it is for the right channel.
     const onMessage = (evt) => {
       let data = {};
       try {
@@ -193,14 +216,7 @@ class WebSocketAPI {
       });
     };
 
-    if (this.websocket) {
-      this.websocket.addEventListener('message', onMessage);
-
-      if (errorCb) {
-        this.websocket.addEventListener('error', errorCb);
-        this.websocket.addEventListener('close', errorCb);
-      }
-    }
+    this.addEvents(onMessage, errorCb);
 
     return { onMessageCb: onMessage, onErrorCb: errorCb };
   }
@@ -213,36 +229,68 @@ class WebSocketAPI {
    * @private
    */
   unlisten(params, cb) {
-    if (!this.websocket) {
-      return;
-    }
-    this.subscriptions
+    [...(this.subscriptions || []), ...(this.requests || [])]
       .filter(
         (s) => s.params.channel === params.channel && (!cb || s.cb === cb),
       )
       .forEach(({ onMessageCb, onErrorCb }) => {
-        if (this.websocket) {
-          this.websocket.removeEventListener('message', onMessageCb);
-          if (onErrorCb) {
-            this.websocket.removeEventListener('error', onErrorCb);
-            this.websocket.removeEventListener('close', onErrorCb);
-          }
-        }
+        this.removeEvents(onMessageCb, onErrorCb);
       });
   }
 
   /**
    * Sends a get request to the websocket.
+   * The callback is called only once, when the response is received or when the call returns an error.
    *
    * @param {Object} params Parameters for the websocket get request
-   * @param {function} cb callback on listen
-   * @param {function} errorCb Callback on error
+   * @param {function} onMessage callback on message event
+   * @param {function} onError Callback on error and close event
    * @private
    */
   get(params, cb, errorCb) {
-    const reqStr = WebSocketAPI.getRequestString('GET', params);
-    this.send(reqStr);
-    this.listen(params, cb, errorCb);
+    const requestString = WebSocketAPI.getRequestString('GET', params);
+    this.send(requestString);
+
+    // We wrap the callbacks to make sure they are called only once.
+    const once =
+      (callback) =>
+      (...args) => {
+        callback(...args);
+        const index = this.requests.findIndex(
+          (request) =>
+            requestString === request.requestString && cb === request.cb,
+        );
+        const { onMessageCb, onErrorCb } = this.requests[index];
+        this.removeEvents(onMessageCb, onErrorCb);
+        this.requests.splice(index, 1);
+      };
+
+    const { onMessageCb, onErrorCb } = this.listen(
+      params,
+      once(cb),
+      once(errorCb),
+    );
+
+    // Store requests and callbacks to be able to remove them.
+    if (!this.requests) {
+      this.requests = [];
+    }
+    const index = this.requests.findIndex(
+      (request) => requestString === request.requestString && cb === request.cb,
+    );
+    const newReq = {
+      params,
+      requestString,
+      cb,
+      errorCb,
+      onMessageCb,
+      onErrorCb,
+    };
+    if (index > -1) {
+      this.requests[index] = newReq;
+    } else {
+      this.requests.push(newReq);
+    }
   }
 
   /**
@@ -289,13 +337,7 @@ class WebSocketAPI {
     );
 
     toRemove.forEach(({ onMessageCb, onErrorCb }) => {
-      if (this.websocket) {
-        this.websocket.removeEventListener('message', onMessageCb);
-        if (onErrorCb) {
-          this.websocket.removeEventListener('error', onErrorCb);
-          this.websocket.removeEventListener('close', onErrorCb);
-        }
-      }
+      this.removeEvents(onMessageCb, onErrorCb);
     });
 
     this.subscriptions = this.subscriptions.filter(

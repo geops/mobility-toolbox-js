@@ -3,7 +3,7 @@ import {
   RealtimeLayer,
   MaplibreLayer,
   CopyrightControl,
-} from '../../../../src/ol';
+} from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {
@@ -15,13 +15,16 @@ export default () => {
     }),
     controls: [],
   });
+
   const control = new CopyrightControl();
   control.attachToMap(map);
+
   const layer = new MaplibreLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
   layer.attachToMap(map);
+
   const tracker = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,

@@ -5,7 +5,7 @@
 let canvas;
 const realtimeSimpleStyle = () => {
   if (!canvas) {
-    document.createElement('canvas');
+    canvas = document.createElement('canvas');
     canvas.width = 15;
     canvas.height = 15;
     const ctx = canvas.getContext('2d');
