@@ -1,7 +1,39 @@
-import WebSocketAPI from '../common/api/WebSocketAPI';
+import WebSocketAPI, {
+  WebSocketAPIDataCallback,
+  WebSocketAPIMessageEventData,
+} from '../common/api/WebSocketAPI';
 import cleanStopTime from '../common/utils/cleanStopTime';
 import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
 import compareDepartures from '../common/utils/compareDepartures';
+import {
+  RealtimeMode,
+  RealtimeDeparture,
+  RealtimeNews,
+  RealtimeDepartureExtended,
+  RealtimeStation,
+  RealtimeExtraGeom,
+  RealtimeTrainId,
+  RealtimeGeneralizationLevel,
+  RealtimeStopSequence,
+} from '../types';
+
+export type RealtimeAPIOptions = {
+  url?: string;
+  apiKey?: string;
+  prefix?: string;
+  projection?: string;
+  bbox?: (number | string)[];
+  buffer?: number[];
+  pingIntervalMs?: number;
+};
+
+export declare type RealtimeAPIExtraGeomsById = {
+  [index: string]: RealtimeExtraGeom;
+};
+
+export type RealtimeAPIDeparturesById = {
+  [index: string]: RealtimeDeparture;
+};
 
 /**
  * Enum for Realtime modes.
@@ -35,6 +67,38 @@ export const RealtimeModes = {
  * const api = new RealtimeAPI("yourUrl");
  */
 class RealtimeAPI {
+  url!: string;
+
+  wsApi!: WebSocketAPI;
+
+  projection?: string;
+
+  bbox?: (number | string)[];
+
+  buffer?: number[];
+
+  subscribedStationUic?: number;
+
+  maxDepartureAge!: number;
+
+  prefix!: string;
+
+  extraGeoms!: RealtimeAPIExtraGeomsById;
+
+  departureUpdateTimeout?: number;
+
+  pingInterval!: number;
+
+  pingIntervalMs!: number;
+
+  reconnectTimeout?: number;
+
+  reconnectTimeoutMs?: number;
+
+  stationUpdateTimeout?: number;
+
+  fullTrajectoryUpdateTimeout?: number;
+
   /**
    * Constructor
    *
@@ -45,14 +109,14 @@ class RealtimeAPI {
    * @param {string} [options.projection] The epsg code of the projection for features. Default to EPSG:3857.
    * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
    */
-  constructor(options = {}) {
+  constructor(options: RealtimeAPIOptions = {}) {
     this.defineProperties(options);
 
     /** @ignore */
-    this.subscribedStationUic = null;
+    this.subscribedStationUic = undefined;
 
     /** @ignore */
-    this.departureUpdateTimeout = null;
+    this.departureUpdateTimeout = undefined;
 
     /** @ignore */
     this.maxDepartureAge = 30;
@@ -67,7 +131,8 @@ class RealtimeAPI {
     this.onOpen = this.onOpen.bind(this);
   }
 
-  defineProperties(options) {
+  /* @private */
+  defineProperties(options: RealtimeAPIOptions) {
     let opt = options;
 
     if (typeof options === 'string') {
@@ -106,7 +171,7 @@ class RealtimeAPI {
         set: (newBbox) => {
           if (JSON.stringify(newBbox) !== JSON.stringify(bbox)) {
             bbox = newBbox;
-            if (this.wsApi) {
+            if (this.wsApi && bbox) {
               this.wsApi.send(`BBOX ${bbox.join(' ')}`);
             }
           }
@@ -159,9 +224,11 @@ class RealtimeAPI {
     this.wsApi.connect(this.url, this.onOpen);
 
     // Register reconnection on close.
-    this.wsApi.websocket.onclose = () => {
-      this.onClose();
-    };
+    if (this.wsApi.websocket) {
+      this.wsApi.websocket.onclose = () => {
+        this.onClose();
+      };
+    }
   }
 
   /**
@@ -202,7 +269,7 @@ class RealtimeAPI {
     if (this.pingIntervalMs) {
       window.clearInterval(this.pingInterval);
       /** @ignore */
-      this.pingInterval = setInterval(() => {
+      this.pingInterval = window.setInterval(() => {
         this.wsApi.send('PING');
       }, this.pingIntervalMs);
     }
@@ -234,7 +301,15 @@ class RealtimeAPI {
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @private
    */
-  subscribe(channel, onSuccess, onError, quiet = false) {
+  subscribe(
+    channel: string,
+    onSuccess: WebSocketAPIDataCallback,
+    onError?: EventListener,
+    quiet: boolean = false,
+  ) {
+    if (!channel || !onSuccess) {
+      return;
+    }
     this.wsApi.subscribe({ channel }, onSuccess, onError, quiet);
   }
 
@@ -246,7 +321,11 @@ class RealtimeAPI {
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(channel, suffix, cb) {
+  unsubscribe(
+    channel: string,
+    suffix: string = '',
+    cb?: WebSocketAPIDataCallback,
+  ) {
     this.wsApi.unsubscribe(
       `${channel}${getModeSuffix(
         RealtimeModes.SCHEMATIC,
@@ -267,38 +346,43 @@ class RealtimeAPI {
    *
    * @param {Object} depObject The object containing departures by id.
    * @param {boolean} [sortByMinArrivalTime=false] If true sort departures by arrival time.
-   * @return {Array<departure>} Return departures array.
+   * @return {Array<Departure>} Return departures array.
    * @private
    */
-  filterDepartures(depObject, sortByMinArrivalTime = false) {
+  filterDepartures(
+    depObject: RealtimeAPIDeparturesById,
+    sortByMinArrivalTime: boolean = false,
+  ): RealtimeDepartureExtended[] {
     const departures = Object.keys(depObject).map((k) => depObject[k]);
     departures.sort((a, b) => compareDepartures(a, b, sortByMinArrivalTime));
 
-    let future = new Date();
-    future.setMinutes(future.getMinutes() + this.maxDepartureAge);
-    future = future.getTime();
+    const futureDate = new Date();
+    futureDate.setMinutes(futureDate.getMinutes() + this.maxDepartureAge);
+    const future = futureDate.getTime();
 
-    let past = new Date();
-    past.setMinutes(past.getMinutes() - this.maxDepartureAge);
-    past = past.getTime();
+    const pastDate = new Date();
+    pastDate.setMinutes(pastDate.getMinutes() - this.maxDepartureAge);
+    const past = pastDate.getTime();
 
     const departureArray = [];
     const platformsBoarding = [];
     let previousDeparture = null;
 
     for (let i = departures.length - 1; i >= 0; i -= 1) {
-      const d = departures[i];
-      const t = new Date(d.time).getTime();
+      const departure: RealtimeDepartureExtended = {
+        ...departures[i],
+      };
+      const time = new Date(departure.time).getTime();
 
       // Only show departures within the next 30 minutes
-      if (t > past && t < future) {
+      if (time > past && time < future) {
         // If 2 trains are boarding at the same platform,
         // remove the older one.
-        if (d.state === 'BOARDING') {
-          if (platformsBoarding.indexOf(d.platform) === -1) {
-            platformsBoarding.push(d.platform);
+        if (departure.state === 'BOARDING') {
+          if (platformsBoarding.indexOf(departure.platform) === -1) {
+            platformsBoarding.push(departure.platform);
           } else {
-            d.state = 'HIDDEN';
+            departure.state = 'HIDDEN';
           }
         }
 
@@ -306,20 +390,20 @@ class RealtimeAPI {
         // and a departure difference < 1 minute, hide the second one.
         if (
           previousDeparture &&
-          d.to[0] === previousDeparture.to[0] &&
-          Math.abs(t - previousDeparture.time) < 1000 &&
-          d.line.name === previousDeparture.line.name
+          departure.to[0] === previousDeparture.to[0] &&
+          Math.abs(time - previousDeparture.time) < 1000 &&
+          departure.line.name === previousDeparture.line.name
         ) {
-          d.state = 'HIDDEN';
+          departure.state = 'HIDDEN';
         }
 
-        if (/(STOP_CANCELLED|JOURNEY_CANCELLED)/.test(d.state)) {
-          d.cancelled = true;
+        if (/(STOP_CANCELLED|JOURNEY_CANCELLED)/.test(departure.state)) {
+          departure.cancelled = true;
         }
 
-        previousDeparture = d;
-        previousDeparture.time = t;
-        departureArray.unshift(d);
+        previousDeparture = departure;
+        previousDeparture.time = time;
+        departureArray.unshift(departure);
       }
     }
 
@@ -333,56 +417,66 @@ class RealtimeAPI {
    * @param {Boolean} sortByMinArrivalTime Sort by minimum arrival time
    * @param {function(departures:Departure[])} onMessage Function called on each message of the channel.
    */
-  subscribeDepartures(stationId, sortByMinArrivalTime, onMessage) {
+  subscribeDepartures(
+    stationId: number,
+    sortByMinArrivalTime: boolean,
+    onMessage: (departures: RealtimeDepartureExtended[]) => void,
+  ) {
     window.clearTimeout(this.departureUpdateTimeout);
     this.unsubscribeDepartures();
     this.subscribedStationUic = stationId;
     const channel = stationId ? `timetable_${stationId}` : null;
-    const departureObject = {};
-    this.subscribe(
-      channel,
-      (data) => {
-        if (data.source === channel) {
-          const content = data.content || {};
-          const tDiff = new Date(content.timestamp).getTime() - Date.now();
-          content.timediff = tDiff;
-          departureObject[content.call_id] = content;
+    const departureObject: RealtimeAPIDeparturesById = {};
 
-          window.clearTimeout(this.departureUpdateTimeout);
-          this.departureUpdateTimeout = window.setTimeout(() => {
-            const departures = this.filterDepartures(
-              departureObject,
-              sortByMinArrivalTime || false,
-            );
-            onMessage(departures);
-          }, 100);
-        }
-      },
-      () => {
-        onMessage([]);
-      },
-    );
+    if (!channel) {
+      return;
+    }
+
+    const onSuccess: WebSocketAPIDataCallback = (
+      data: WebSocketAPIMessageEventData,
+    ) => {
+      if (data.source === channel) {
+        const content = (data.content as RealtimeDeparture) || {};
+        // TODO: These lines seems useless because content.timestamp never exists
+        // we should check if actually the case
+        const tDiff = new Date(content.timestamp).getTime() - Date.now();
+        departureObject[content.call_id] = { ...content, timediff: tDiff };
+
+        window.clearTimeout(this.departureUpdateTimeout);
+        this.departureUpdateTimeout = window.setTimeout(() => {
+          const departures = this.filterDepartures(
+            departureObject,
+            sortByMinArrivalTime || false,
+          );
+          onMessage(departures);
+        }, 100);
+      }
+    };
+
+    this.subscribe(channel, onSuccess, () => {
+      onMessage([]);
+    });
   }
 
   /**
    * Unsubscribe from current departures channel.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDepartures(cb) {
+  unsubscribeDepartures(cb?: WebSocketAPIDataCallback) {
     if (this.subscribedStationUic) {
       this.unsubscribe(`timetable_${this.subscribedStationUic}`, '', cb);
-      this.subscribedStationUic = null;
+      this.subscribedStationUic = undefined;
     }
   }
 
   /**
    * Subscribe to the disruptions channel for tenant.
    *
-   * @param {function} onMessage Function called on each message of the channel.
+   * @param {function(news: RealtimeNews)} onMessage Function called on each message of the channel.
    */
-  subscribeDisruptions(onMessage) {
+  subscribeDisruptions(onMessage: (news: RealtimeNews[]) => void) {
     this.subscribe(`${this.prefix}newsticker`, (data) => {
-      onMessage(data.content);
+      onMessage(data.content as RealtimeNews[]);
     });
   }
 
@@ -390,7 +484,7 @@ class RealtimeAPI {
    * Unsubscribe disruptions.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDisruptions(cb) {
+  unsubscribeDisruptions(cb?: WebSocketAPIDataCallback) {
     this.unsubscribe(`${this.prefix}newsticker`, '', cb);
   }
 
@@ -401,7 +495,7 @@ class RealtimeAPI {
    * @param {RealtimeMode} mode Realtime mode.
    * @return {Promise<Station>} A station.
    */
-  getStation(uic, mode) {
+  getStation(uic: number, mode: RealtimeMode) {
     const params = {
       channel: `station${getModeSuffix(mode, RealtimeModes)}`,
       args: uic,
@@ -424,8 +518,8 @@ class RealtimeAPI {
    * @param {RealtimeMode} mode Realtime mode.
    * @return {Promise<Array<Station>>} An array of stations.
    */
-  getStations(mode) {
-    const stations = [];
+  getStations(mode: RealtimeMode) {
+    const stations = [] as RealtimeStation[];
     const params = {
       channel: `station${getModeSuffix(mode, RealtimeModes)}`,
     };
@@ -433,7 +527,7 @@ class RealtimeAPI {
     return new Promise((resolve, reject) => {
       this.wsApi.get(params, (data) => {
         if (data.content) {
-          stations.push(data.content);
+          stations.push(data.content as RealtimeStation);
           window.clearTimeout(this.stationUpdateTimeout);
           /** @ignore */
           this.stationUpdateTimeout = window.setTimeout(() => {
@@ -453,11 +547,14 @@ class RealtimeAPI {
    * @param {RealtimeMode} mode Realtime mode.
    * @param {function(station: Station)} onMessage Function called on each message of the channel.
    */
-  subscribeStations(mode, onMessage) {
+  subscribeStations(
+    mode: RealtimeMode,
+    onMessage: (station: RealtimeStation) => void,
+  ) {
     this.unsubscribeStations();
     this.subscribe(`station${getModeSuffix(mode, RealtimeModes)}`, (data) => {
       if (data.content) {
-        onMessage(data.content);
+        onMessage(data.content as RealtimeStation);
       }
     });
   }
@@ -466,7 +563,7 @@ class RealtimeAPI {
    * Unsubscribe to stations channel.
    * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeStations(cb) {
+  unsubscribeStations(cb?: WebSocketAPIDataCallback) {
     window.clearTimeout(this.stationUpdateTimeout);
     this.unsubscribe('station', '', cb);
   }
@@ -476,9 +573,9 @@ class RealtimeAPI {
    *
    * @param {function(extraGeoms: GeosJSONFeature[])} onMessage Function called on each message of the channel.
    */
-  subscribeExtraGeoms(onMessage) {
+  subscribeExtraGeoms(onMessage: (extraGeoms: RealtimeExtraGeom[]) => void) {
     this.subscribe('extra_geoms', (data) => {
-      const extraGeom = data.content;
+      const extraGeom = data.content as RealtimeExtraGeom;
 
       if (extraGeom) {
         const { ref } = extraGeom.properties;
@@ -500,7 +597,7 @@ class RealtimeAPI {
    * Unsubscribe to extra_geoms channel.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeExtraGeoms(cb) {
+  unsubscribeExtraGeoms(cb: WebSocketAPIDataCallback) {
     this.unsubscribe('extra_geoms', '', cb);
   }
 
@@ -511,12 +608,16 @@ class RealtimeAPI {
    * @param {function(trajectory: RealtimeTrajectory)} onMessage Function called on each message of the channel.
    * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
-  subscribeTrajectory(mode, onMessage, quiet = false) {
+  subscribeTrajectory(
+    mode: RealtimeMode,
+    onMessage: (response: WebSocketAPIMessageEventData) => void,
+    quiet = false,
+  ) {
     this.unsubscribeTrajectory(onMessage);
     this.subscribe(
       `trajectory${getModeSuffix(mode, RealtimeModes)}`,
       onMessage,
-      null,
+      undefined,
       quiet,
     );
   }
@@ -525,7 +626,7 @@ class RealtimeAPI {
    * Unsubscribe to trajectory channels.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeTrajectory(cb) {
+  unsubscribeTrajectory(cb: WebSocketAPIDataCallback) {
     this.unsubscribe(`trajectory`, '', cb);
   }
 
@@ -536,12 +637,16 @@ class RealtimeAPI {
    * @param {function(response: { content: Vehicle })} onMessage Function called on each message of the channel.
    * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
-  subscribeDeletedVehicles(mode, onMessage, quiet = false) {
+  subscribeDeletedVehicles(
+    mode: RealtimeMode,
+    onMessage: (response: WebSocketAPIMessageEventData) => void,
+    quiet = false,
+  ) {
     this.unsubscribeDeletedVehicles(onMessage);
     this.subscribe(
       `deleted_vehicles${getModeSuffix(mode, RealtimeModes)}`,
       onMessage,
-      null,
+      undefined,
       quiet,
     );
   }
@@ -550,7 +655,7 @@ class RealtimeAPI {
    * Unsubscribe to deleted_vhicles channels.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDeletedVehicles(cb) {
+  unsubscribeDeletedVehicles(cb: WebSocketAPIDataCallback) {
     this.unsubscribe('deleted_vehicles', '', cb);
   }
 
@@ -562,7 +667,11 @@ class RealtimeAPI {
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
    * @return {Promise<FullTrajectory>} Return a full trajectory.
    */
-  getFullTrajectory(id, mode, generalizationLevel) {
+  getFullTrajectory(
+    id: RealtimeTrainId,
+    mode: RealtimeMode,
+    generalizationLevel: RealtimeGeneralizationLevel,
+  ) {
     const channel = [`full_trajectory${getModeSuffix(mode, RealtimeModes)}`];
     if (id) {
       channel.push(id);
@@ -593,7 +702,11 @@ class RealtimeAPI {
    * @param {string} generalizationLevel The generalization level to request. Can be one of '', 'gen5', 'gen10', 'gen30', 'gen100'.
    * @return {Promise<Array<FullTrajectory>>} Return an array of full trajectories.
    */
-  getFullTrajectories(ids, mode, generalizationLevel) {
+  getFullTrajectories(
+    ids: RealtimeTrainId[],
+    mode: RealtimeMode,
+    generalizationLevel: RealtimeGeneralizationLevel,
+  ) {
     const promises = ids.map((id) =>
       this.getFullTrajectory(id, mode, generalizationLevel),
     );
@@ -606,7 +719,7 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
    */
-  subscribeFullTrajectory(id, mode) {
+  subscribeFullTrajectory(id: RealtimeTrainId, mode: RealtimeMode) {
     // window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeFullTrajectory(id);
     this.subscribe(
@@ -628,7 +741,10 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeFullTrajectory(id, cb) {
+  unsubscribeFullTrajectory(
+    id: RealtimeTrainId,
+    cb?: WebSocketAPIDataCallback,
+  ) {
     this.unsubscribe('full_trajectory', `_${id}`, cb);
   }
 
@@ -638,7 +754,7 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @return {Promise<StopSequence>} Returns a stop sequence object.
    */
-  getStopSequence(id) {
+  getStopSequence(id: RealtimeTrainId) {
     const params = {
       channel: `stopsequence_${id}`,
     };
@@ -646,13 +762,14 @@ class RealtimeAPI {
       this.wsApi.get(
         params,
         (data) => {
-          if (data.content && data.content.length) {
-            const content = data.content.map((stopSequence) =>
+          const content = data.content as RealtimeStopSequence[];
+          if (content && content.length) {
+            const stopSequences = content.map((stopSequence) =>
               cleanStopTime(stopSequence),
             );
 
             // Remove the delay from arrivalTime and departureTime
-            resolve(content);
+            resolve(stopSequences);
           }
           resolve([]);
         },
@@ -669,7 +786,7 @@ class RealtimeAPI {
    * @param {string[]} ids List of vehicles ids.
    * @return {Promise<Array<StopSequence>>} Return an array of stop sequences.
    */
-  getStopSequences(ids) {
+  getStopSequences(ids: RealtimeTrainId[]) {
     const promises = ids.map((id) => this.getStopSequence(id));
     return Promise.all(promises);
   }
@@ -680,20 +797,24 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {function(stopSequence: StopSequence)} onMessage Function called on each message of the channel.
    */
-  subscribeStopSequence(id, onMessage) {
+  subscribeStopSequence(
+    id: RealtimeTrainId,
+    onMessage: (stopSequences: RealtimeStopSequence[]) => void,
+  ) {
     window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeStopSequence(id);
 
     this.subscribe(
       `stopsequence_${id}`,
       (data) => {
-        if (data.content && data.content.length) {
-          const content = data.content.map((stopSequence) =>
+        const content = data.content as RealtimeStopSequence[];
+        if (content && content.length) {
+          const stopSequences = content.map((stopSequence) =>
             cleanStopTime(stopSequence),
           );
 
           // Remove the delay from arrivalTime and departureTime
-          onMessage(content);
+          onMessage(stopSequences);
         }
       },
       (err) => {
@@ -709,7 +830,7 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeStopSequence(id, cb) {
+  unsubscribeStopSequence(id: RealtimeTrainId, cb?: WebSocketAPIDataCallback) {
     this.unsubscribe(`stopsequence`, `_${id}`, cb);
   }
 
@@ -717,7 +838,7 @@ class RealtimeAPI {
    * Subscribe to healthcheck channel.
    * @param {function} onMessage Callback when the subscribe to healthcheck channel succeeds.
    */
-  subscribeHealthCheck(onMessage) {
+  subscribeHealthCheck(onMessage: WebSocketAPIDataCallback) {
     this.unsubscribeHealthCheck();
     this.subscribe('healthcheck', onMessage);
   }

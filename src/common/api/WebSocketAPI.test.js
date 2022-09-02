@@ -49,7 +49,7 @@ describe('WebSocketAPI', () => {
         expect(client.messagesOnOpen).toEqual(['GET foo']);
         client.close();
         expect(client.messagesOnOpen).toEqual([]);
-        expect(client.websocket).toBeNull();
+        expect(client.websocket).toBeUndefined();
       });
     });
 

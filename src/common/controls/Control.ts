@@ -1,4 +1,16 @@
+import { Map as MaplibreMap } from 'maplibre-gl';
+import { Map as MapboxMap } from 'mapbox-gl';
+import { Map as OlMap } from 'ol';
 import BaseObject from 'ol/Object';
+
+export type ControlOptions = {
+  active?: Boolean;
+  element?: HTMLElement;
+  target?: HTMLElement;
+  render?: () => void;
+};
+
+export type AnyMap = OlMap | MaplibreMap | MapboxMap;
 
 /**
  * A class representing a control to display on map.
@@ -12,6 +24,14 @@ import BaseObject from 'ol/Object';
  * @classproperty {HTMLElement} target - The HTML element where to render the element property. Default is the map's element. Read only.
  */
 class Control extends BaseObject {
+  active: Boolean;
+
+  map?: AnyMap;
+
+  target?: HTMLElement;
+
+  element?: HTMLElement;
+
   /**
    * Constructor
    *
@@ -21,7 +41,7 @@ class Control extends BaseObject {
    * @param {HTMLElement} [options.target] The HTML element where to render the element property. Default is the map's element.
    * @param {function} [options.render] Render function called whenever the control needs to be rerendered.
    */
-  constructor(options = {}) {
+  constructor(options: ControlOptions = {}) {
     super(options);
     this.defineProperties(options);
 
@@ -40,8 +60,9 @@ class Control extends BaseObject {
    * Define control's properties.
    *
    * @private
+   * @ignore
    */
-  defineProperties(options) {
+  defineProperties(options: ControlOptions) {
     const { target, element, render } = {
       ...options,
     };
@@ -76,8 +97,10 @@ class Control extends BaseObject {
             // Add new node
             const targett =
               this.target ||
-              (this.map.getTargetElement && this.map.getTargetElement()) ||
-              (this.map.getContainer && this.map.getContainer());
+              ((this.map as OlMap).getTargetElement &&
+                (this.map as OlMap).getTargetElement()) ||
+              ((this.map as MaplibreMap).getContainer &&
+                (this.map as MaplibreMap).getContainer());
 
             if (!this.element) {
               this.createDefaultElement();
@@ -113,7 +136,7 @@ class Control extends BaseObject {
   /**
    * Attach the control to the map. Add events, html element ...
    */
-  attachToMap(map) {
+  attachToMap(map: AnyMap) {
     this.map = map;
   }
 
@@ -121,7 +144,7 @@ class Control extends BaseObject {
    * Detach the control From the map. Remove events, html element ..
    */
   detachFromMap() {
-    this.map = null;
+    this.map = undefined;
   }
 
   /**

@@ -1,6 +1,22 @@
 import BaseObject from 'ol/Object';
 import { v4 as uuid } from 'uuid';
+import BaseEvent from 'ol/events/Event';
+import { Feature } from 'ol';
 import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
+import { AnyMap } from '../controls/Control';
+
+export type CommonLayerOptions = {
+  key?: string;
+  name?: string;
+  group?: string;
+  copyrights?: string[];
+  children?: Layer[];
+  visible?: Boolean;
+  disabled?: Boolean;
+  hitTolerance?: Number;
+  properties?: { [x: string]: any };
+  map?: AnyMap;
+};
 
 /**
  * A class representing a layer to display on map.
@@ -21,6 +37,28 @@ import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
  */
 export default class Layer extends BaseObject {
+  key?: string;
+
+  name?: string;
+
+  group?: string;
+
+  copyrights?: string[];
+
+  children?: Layer[];
+
+  visible?: Boolean;
+
+  disabled?: Boolean;
+
+  hitTolerance?: Number;
+
+  properties?: { [x: string]: any };
+
+  map?: AnyMap;
+
+  parent?: Layer;
+
   /**
    * Constructor
    *
@@ -34,11 +72,13 @@ export default class Layer extends BaseObject {
    * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
    * @param {Object} [options.properties={}] Application-specific layer properties.
    */
-  constructor(options = {}) {
+  constructor(options: CommonLayerOptions = {}) {
     super();
     this.defineProperties(options);
 
-    this.setProperties(options.properties);
+    if (options.properties) {
+      this.setProperties(options.properties);
+    }
 
     this.visible = options.visible === undefined ? true : !!options.visible;
 
@@ -50,6 +90,7 @@ export default class Layer extends BaseObject {
 
     // Listen for group visiblity change
     // if a layer from a group is newly visible we hide the others.
+    /* @ts-ignore */
     this.on(`change:visible:group`, (evt) => {
       // We hide layer of the same group
       if (
@@ -70,7 +111,7 @@ export default class Layer extends BaseObject {
    *
    * @ignore
    */
-  defineProperties(options) {
+  defineProperties(options: CommonLayerOptions = {}) {
     const { name, key, properties, hitTolerance } = {
       ...options,
     };
@@ -142,10 +183,9 @@ export default class Layer extends BaseObject {
               while (higherParent.parent) {
                 higherParent = higherParent.parent;
               }
-              higherParent.dispatchEvent({
-                type: `change:visible:group`,
-                target: this,
-              });
+              const evt = new BaseEvent(`change:visible:group`);
+              evt.target = this;
+              higherParent.dispatchEvent(evt);
             }
           } else if (!this.visible) {
             // We hide all the children
@@ -160,6 +200,7 @@ export default class Layer extends BaseObject {
             if (
               this.parent &&
               this.parent.visible &&
+              this.parent.children &&
               !this.parent.children.find((child) => child.visible)
             ) {
               this.parent.visible = false;
@@ -184,7 +225,7 @@ export default class Layer extends BaseObject {
         set: (newValue) => {
           (this.children || []).forEach((child) => {
             // eslint-disable-next-line no-param-reassign
-            child.parent = null;
+            child.parent = undefined;
           });
           if (Array.isArray(newValue)) {
             newValue.forEach((child) => {
@@ -214,7 +255,7 @@ export default class Layer extends BaseObject {
    *
    * @param {ol/Map~Map|mapboxgl.Map} map A map.
    */
-  attachToMap(map) {
+  attachToMap(map: AnyMap) {
     this.detachFromMap();
     /** @ignore */
     this.map = map;
@@ -232,7 +273,7 @@ export default class Layer extends BaseObject {
   // eslint-disable-next-line class-methods-use-this
   detachFromMap() {
     /** @ignore */
-    this.map = null;
+    this.map = undefined;
   }
 
   /**
@@ -244,7 +285,11 @@ export default class Layer extends BaseObject {
    * @return {Promise<FeatureInfo>} An empty response.
    */
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-  getFeatureInfoAtCoordinate(coordinate, options) {
+  getFeatureInfoAtCoordinate(coordinate: number[]): Promise<{
+    layer: Layer;
+    features: Feature[];
+    coordinate: number[];
+  }> {
     // eslint-disable-next-line no-console
     console.error(
       'getFeatureInfoAtCoordinate must be implemented by inheriting layers',

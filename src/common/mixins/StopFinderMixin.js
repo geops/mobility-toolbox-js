@@ -145,7 +145,10 @@ const StopFinderMixin = (Base) =>
       }
 
       return this.api
-        .search(this.apiParams, abortController)
+        .search(
+          this.apiParams,
+          abortController && { signal: abortController.signal },
+        )
         .then((data) => {
           this.render(data);
         })

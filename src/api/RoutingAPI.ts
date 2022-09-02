@@ -1,5 +1,5 @@
 import HttpAPI from '../common/api/HttpAPI';
-import { RoutingParameters, RoutingResponse } from '../../types';
+import { RoutingParameters, RoutingResponse } from '../types';
 
 export type RoutingAPIOptions = {
   url?: string;
@@ -25,7 +25,7 @@ class RoutingAPI extends HttpAPI {
    * @param {string} [options.url='https://api.geops.io/routing/v1/'] Service url.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
    */
-  constructor(options: RoutingAPIOptions) {
+  constructor(options: RoutingAPIOptions = {}) {
     super({ url: 'https://api.geops.io/routing/v1/', ...options });
   }
 

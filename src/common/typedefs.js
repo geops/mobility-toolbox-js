@@ -21,3 +21,29 @@
  * @property {ol/Feature~Feature[]} features  An array of features.
  * @property {number[2]} coordinate The coordinate where to find the featue.
  */
+
+/**
+ * @typedef {ol/Map~Map|mapboxgl.Map|maplibregl.Map} AnyMap
+ */
+
+/**
+ * @typedef {Object} ControlOptions
+ * @property {boolean} [active = true] Whether the control is active or not.
+ * @property {HTMLElement} element The HTML element used to render the control.
+ * @property {HTMLElement} target The HTML element where to render the element property. Default is the map's element.
+ * @property {function} render Render function called whenever the control needs to be rerendered.
+ */
+
+/**
+ * @typedef {Object} CommonLayerOptions
+ * @property {string} key Identifier of the layer. Must be unique.
+ * @property {string} name  Name of the layer.
+ * @property {string} group Group of the layer.
+ * @property {string[]} copyrights List of copyrights.
+ * @property {Layer[]} children List of children layers.
+ * @property {boolean}visible  Define if the layer is currently display on the map.
+ * @property {boolean} disabled Define if the layer is currently display on the map but can't be seen (extent, zoom ,data restrictions).
+ * @property {number} hittolerance Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
+ * @property {Object} properties - Custom properties.
+ * @property {AnyMap} map - The map used to display the layer.
+ */
