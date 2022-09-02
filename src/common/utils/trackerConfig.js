@@ -113,6 +113,9 @@ export const getTextColor = (type = 0) => {
  * @ignore
  */
 export const getTextSize = (ctx, markerSize, text, fontSize) => {
+  if (!ctx) {
+    return 0;
+  }
   ctx.font = `bold ${fontSize}px Arial`;
   let newText = ctx.measureText(text);
 

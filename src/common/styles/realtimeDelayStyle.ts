@@ -1,5 +1,10 @@
 import realtimeDefaultStyle from './realtimeDefaultStyle';
 
+import {
+  RealtimeTrajectory,
+  ViewState,
+  RealtimeStyleOptions,
+} from '../../types';
 /**
  * A tracker style that display the delay as backgroundColor.
  *
@@ -8,7 +13,11 @@ import realtimeDefaultStyle from './realtimeDefaultStyle';
  * @param {*} options Some options to change the rendering
  * @return a canvas
  */
-const realtimeDelayStyle = (trajectory, viewState, options) => {
+const realtimeDelayStyle = (
+  trajectory: RealtimeTrajectory,
+  viewState: ViewState,
+  options: RealtimeStyleOptions,
+) => {
   return realtimeDefaultStyle(trajectory, viewState, {
     ...options,
     useDelayStyle: true,

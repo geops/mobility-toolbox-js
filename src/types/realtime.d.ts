@@ -56,8 +56,9 @@ export type RealtimeChannelName =
   | `full_trajectory${RealtimeChannelModeSuffix}_${RealtimeTenant}_${RealtimeTrainId}`;
 
 export interface RealtimeTrajectoryProperties {
+  // Tralis and trafimage
   bounds: [number, number, number, number];
-  delay?: number;
+  delay: number | null;
   event_timestamp: number;
   gen_level?: RealtimeGeneralizationLevel;
   gen_range: [number, number];
@@ -77,6 +78,10 @@ export interface RealtimeTrajectoryProperties {
   train_id?: RealtimeTrainId;
   train_number?: number;
   type: RealtimeMots;
+
+  // TODO: verify why these properties are used in createTrackerFilter
+  operator?: string; // TODO not sure if this property exists, see createTrackerFilter code.
+  name?: string; // TODO not sure if this property exists, see createTrackerFilter code.
 }
 
 export interface RealtimeTrajectory extends Feature {
@@ -115,6 +120,8 @@ export interface RealtimeStop {
   state?: RealtimeStopState;
   stationId: RealtimeStationId;
   stationName: string;
+  arrivalTimeWithDelay: number; // TODO: add by cleanStopTime function
+  departureTimeWithDelay: number; // TODO: add by cleanStopTime function
 }
 
 export interface RealtimeStopSequence {

@@ -1,11 +1,10 @@
+import { RealtimeStopSequence } from '../../types';
+
 /**
  * Remove the delay from arrivalTime and departureTime
  * @private
  */
-const cleanStopTime = (content) => {
-  if (!content) {
-    return;
-  }
+const cleanStopTime = (content: RealtimeStopSequence): RealtimeStopSequence => {
   content.stations.forEach((station) => {
     // eslint-disable-next-line no-param-reassign
     station.arrivalTimeWithDelay = station.arrivalTime;

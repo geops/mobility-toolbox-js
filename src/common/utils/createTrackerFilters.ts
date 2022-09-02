@@ -1,3 +1,4 @@
+import { RealtimeTrajectory } from '../../types';
 /**
  * Return a filter functions based on some parameters of a vehicle.
  *
@@ -7,17 +8,22 @@
  * @param {Regexp} regexLine - A regex aplly of vehcile's name.
  * @private
  */
-const createFilters = (line, route, operator, regexLine) => {
-  const filterList = [];
+const createFilters = (
+  line: string | string[],
+  route: string | string[],
+  operator: string | string[],
+  regexLine: string | string[],
+): ((trajectory: RealtimeTrajectory) => boolean) | null => {
+  const filterList: ((trajectory: RealtimeTrajectory) => boolean)[] = [];
 
   if (!line && !route && !operator && !regexLine) {
     return null;
   }
 
   if (regexLine) {
-    const regexLineList =
+    const regexLineList: string[] =
       typeof regexLine === 'string' ? [regexLine] : regexLine;
-    const lineFilter = (item) => {
+    const lineFilter = (item: RealtimeTrajectory) => {
       const name =
         item.properties.name ||
         (item.properties.line && item.properties.line.name) ||
@@ -37,7 +43,7 @@ const createFilters = (line, route, operator, regexLine) => {
     const lineList = lineFiltersList.map((l) =>
       l.replace(/\s+/g, '').toUpperCase(),
     );
-    const lineFilter = (item) => {
+    const lineFilter = (item: RealtimeTrajectory) => {
       const { line: linee, name } = item.properties;
       const lineName = (name || (linee && linee.name) || '').toUpperCase();
       if (!lineName) {
@@ -51,7 +57,7 @@ const createFilters = (line, route, operator, regexLine) => {
   if (route) {
     const routes = typeof route === 'string' ? route.split(',') : route;
     const routeList = routes.map((item) => parseInt(item, 10));
-    const routeFilter = (item) => {
+    const routeFilter = (item: RealtimeTrajectory) => {
       const routeId = parseInt(
         item.properties.routeIdentifier.split('.')[0],
         10,
@@ -63,9 +69,9 @@ const createFilters = (line, route, operator, regexLine) => {
 
   if (operator) {
     const operatorList = typeof operator === 'string' ? [operator] : operator;
-    const operatorFilter = (item) =>
+    const operatorFilter = (item: RealtimeTrajectory) =>
       operatorList.some((op) =>
-        new RegExp(op, 'i').test(item.properties.operator),
+        new RegExp(op, 'i').test(item.properties.operator || ''),
       );
     filterList.push(operatorFilter);
   }
@@ -74,9 +80,9 @@ const createFilters = (line, route, operator, regexLine) => {
     return null;
   }
 
-  return (t) => {
+  return (item: RealtimeTrajectory) => {
     for (let i = 0; i < filterList.length; i += 1) {
-      if (!filterList[i](t)) {
+      if (!filterList[i](item)) {
         return false;
       }
     }

@@ -1,10 +1,17 @@
+import { RealtimeDeparture } from '../../types';
+
 /**
  * Compare two given departures for sort alogithm,
- * @param {Object} a First departure.
- * @param {Object} b Second departure.
+ * @param {Departure} a First departure.
+ * @param {Departure} b Second departure.
+ * @param {boolean} [sortByMinArrivalTime=false] Sort departures by arrival time.
  * @private
  */
-const compareDepartures = (a, b, sortByMinArrivalTime = false) => {
+const compareDepartures = (
+  a: RealtimeDeparture,
+  b: RealtimeDeparture,
+  sortByMinArrivalTime: boolean = false,
+): number => {
   // First LEAVING and HIDDEN, then BOARDING and then sorted by time.
   const topStates = ['HIDDEN', 'LEAVING', 'BOARDING'];
   const aTop = a.has_fzo && topStates.indexOf(a.state) > -1;

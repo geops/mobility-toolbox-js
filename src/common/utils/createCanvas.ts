@@ -4,7 +4,10 @@
  * or new OffscreenCanvas(width, height) if OffscreenCanvas is avalaible (for web worker)
  * or it returns null if neither is available.
  */
-const createCanvas = (width, height) => {
+const createCanvas = (
+  width: number,
+  height: number,
+): HTMLCanvasElement | OffscreenCanvas | null => {
   let canvas = null;
 
   // Prevent SSR errors

@@ -1,19 +1,32 @@
+import {
+  RealtimeTrajectory,
+  ViewState,
+  StyleCache,
+  RealtimeStyleOptions,
+} from '../../types';
 import createCanvas from '../utils/createCanvas';
 
 /** @private */
-const cacheDelayBg = {};
+const cacheDelayBg: StyleCache = {};
 
 /**
  * Draw circle delay background
  *
  * @private
  */
-export const getDelayBgCanvas = (origin, radius, color) => {
+export const getDelayBgCanvas = (
+  origin: number,
+  radius: number,
+  color: string,
+) => {
   const key = `${origin}, ${radius}, ${color}`;
   if (!cacheDelayBg[key]) {
     const canvas = createCanvas(origin * 2, origin * 2);
     if (canvas) {
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return null;
+      }
       ctx.beginPath();
       ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
       ctx.fillStyle = color;
@@ -26,7 +39,7 @@ export const getDelayBgCanvas = (origin, radius, color) => {
 };
 
 /** @private */
-const cacheDelayText = {};
+const cacheDelayText: StyleCache = {};
 
 /**
  * Draw delay text
@@ -34,19 +47,22 @@ const cacheDelayText = {};
  * @private
  */
 export const getDelayTextCanvas = (
-  width,
-  text,
-  fontSize,
-  font,
-  delayColor,
-  delayOutlineColor = '#000',
-  pixelRatio = 1,
+  width: number,
+  text: string,
+  fontSize: number,
+  font: string,
+  delayColor: string,
+  delayOutlineColor: string = '#000',
+  pixelRatio: number = 1,
 ) => {
   const key = `${width}, ${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
   if (!cacheDelayText[key]) {
     const canvas = createCanvas(width, fontSize + 8 * pixelRatio);
     if (canvas) {
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return null;
+      }
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.font = font;
@@ -63,7 +79,7 @@ export const getDelayTextCanvas = (
 };
 
 /** @private */
-const cacheCircle = {};
+const cacheCircle: StyleCache = {};
 
 /**
  * Draw colored circle with black border
@@ -71,18 +87,21 @@ const cacheCircle = {};
  * @private
  */
 export const getCircleCanvas = (
-  origin,
-  radius,
-  color,
-  hasStroke,
-  hasDash,
-  pixelRatio,
+  origin: number,
+  radius: number,
+  color: string,
+  hasStroke: boolean,
+  hasDash: boolean,
+  pixelRatio: number,
 ) => {
   const key = `${origin}, ${radius}, ${color}, ${hasStroke},  ${hasDash}, ${pixelRatio}`;
   if (!cacheCircle[key]) {
     const canvas = createCanvas(origin * 2, origin * 2);
     if (canvas) {
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return null;
+      }
       ctx.fillStyle = color;
 
       if (hasStroke) {
@@ -109,7 +128,7 @@ export const getCircleCanvas = (
 };
 
 /** @private */
-const cacheText = {};
+const cacheText: StyleCache = {};
 
 /**
  * Draw text in the circle
@@ -117,19 +136,22 @@ const cacheText = {};
  * @private
  */
 export const getTextCanvas = (
-  text,
-  origin,
-  textSize,
-  fillColor,
-  strokeColor,
-  hasStroke,
-  pixelRatio,
+  text: string,
+  origin: number,
+  textSize: number,
+  fillColor: string,
+  strokeColor: string,
+  hasStroke: boolean,
+  pixelRatio: number,
 ) => {
   const key = `${text}, ${origin}, ${textSize}, ${fillColor},${strokeColor}, ${hasStroke}, ${pixelRatio}`;
   if (!cacheText[key]) {
     const canvas = createCanvas(origin * 2, origin * 2);
     if (canvas) {
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return null;
+      }
 
       // Draw a stroke to the text only if a provider provides realtime but we don't use it.
       if (hasStroke) {
@@ -158,17 +180,21 @@ export const getTextCanvas = (
 };
 
 /** @private */
-const cache = {};
+const cache: StyleCache = {};
 
 /**
  * A tracker style that take in account the delay.
  *
- * @param {*} trajectory The trajectory to render.
- * @param {*} viewState The view state of the map.
- * @param {*} options Some options to change the rendering
+ * @param {RealtimeTrajectory} trajectory The trajectory to render.
+ * @param {ViewState} viewState The view state of the map.
+ * @param {RealtimeStyleOptions} options Some options to change the rendering
  * @return a canvas
  */
-const realtimeDefaultStyle = (trajectory, viewState, options) => {
+const realtimeDefaultStyle = (
+  trajectory: RealtimeTrajectory,
+  viewState: ViewState,
+  options: RealtimeStyleOptions,
+) => {
   const {
     hoverVehicleId,
     selectedVehicleId,
@@ -217,8 +243,8 @@ const realtimeDefaultStyle = (trajectory, viewState, options) => {
   }
 
   const z = Math.min(Math.floor(zoom || 1), 16);
-  const hover = hoverVehicleId && hoverVehicleId === id;
-  const selected = selectedVehicleId && selectedVehicleId === id;
+  const hover = !!(hoverVehicleId && hoverVehicleId === id);
+  const selected = !!(selectedVehicleId && selectedVehicleId === id);
 
   // Calcul the radius of the circle
   let radius = getRadius(type, z) * pixelRatio;
@@ -246,7 +272,6 @@ const realtimeDefaultStyle = (trajectory, viewState, options) => {
 
   if (!cache[key]) {
     if (radius === 0) {
-      cache[key] = null;
       return null;
     }
 
@@ -260,6 +285,9 @@ const realtimeDefaultStyle = (trajectory, viewState, options) => {
     const canvas = createCanvas(size, size);
     if (canvas) {
       const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return null;
+      }
 
       if (isDisplayStrokeAndDelay && delay !== null) {
         // Draw circle delay background
@@ -268,13 +296,15 @@ const realtimeDefaultStyle = (trajectory, viewState, options) => {
           radiusDelay,
           getDelayColor(delay, cancelled),
         );
-        ctx.drawImage(delayBg, 0, 0);
+        if (delayBg) {
+          ctx.drawImage(delayBg, 0, 0);
+        }
       }
 
       // Show delay if feature is hovered or if delay is above 5mins.
       if (
         isDisplayStrokeAndDelay &&
-        (hover || delay >= delayDisplay || cancelled)
+        (hover || (delay || 0) >= delayDisplay || cancelled)
       ) {
         // Draw delay text
         const fontSize =
@@ -295,11 +325,13 @@ const realtimeDefaultStyle = (trajectory, viewState, options) => {
             delayOutlineColor,
             pixelRatio,
           );
-          ctx.drawImage(
-            delayText,
-            origin + radiusDelay + margin,
-            origin - fontSize,
-          );
+          if (delayText) {
+            ctx.drawImage(
+              delayText,
+              origin + radiusDelay + margin,
+              origin - fontSize,
+            );
+          }
         }
       }
 
@@ -328,7 +360,9 @@ const realtimeDefaultStyle = (trajectory, viewState, options) => {
         pixelRatio,
       );
 
-      ctx.drawImage(circle, 0, 0);
+      if (circle) {
+        ctx.drawImage(circle, 0, 0);
+      }
 
       // Draw text in the circle
       if (mustDrawText) {
@@ -350,7 +384,9 @@ const realtimeDefaultStyle = (trajectory, viewState, options) => {
           pixelRatio,
         );
 
-        ctx.drawImage(text, 0, 0);
+        if (text) {
+          ctx.drawImage(text, 0, 0);
+        }
       }
 
       cache[key] = canvas;
