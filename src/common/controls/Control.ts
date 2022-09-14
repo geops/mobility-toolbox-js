@@ -1,7 +1,7 @@
 import { Map as MaplibreMap } from 'maplibre-gl';
-import { Map as MapboxMap } from 'mapbox-gl';
 import { Map as OlMap } from 'ol';
 import BaseObject from 'ol/Object';
+import { AnyMap } from '../../types';
 
 export type ControlOptions = {
   active?: Boolean;
@@ -9,8 +9,6 @@ export type ControlOptions = {
   target?: HTMLElement;
   render?: () => void;
 };
-
-export type AnyMap = OlMap | MaplibreMap | MapboxMap;
 
 /**
  * A class representing a control to display on map.

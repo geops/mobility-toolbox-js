@@ -5,7 +5,7 @@
  * @param {array} array Array of values.
  * @ignore
  */
-const removeDuplicate = (array) => {
+const removeDuplicate = (array: any[]) => {
   const arrWithoutEmptyValues = array.filter(
     (val) => val !== undefined && val !== null && val.trim && val.trim(),
   );

@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import BaseEvent from 'ol/events/Event';
 import { Feature } from 'ol';
 import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
-import { AnyMap } from '../controls/Control';
+import type { AnyMap } from '../../types';
 
 export type CommonLayerOptions = {
   key?: string;
@@ -47,9 +47,9 @@ export default class Layer extends BaseObject {
 
   children?: Layer[];
 
-  visible?: Boolean;
+  visible?: boolean;
 
-  disabled?: Boolean;
+  disabled?: boolean;
 
   hitTolerance?: Number;
 

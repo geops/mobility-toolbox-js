@@ -1,9 +1,22 @@
 /* eslint-disable max-classes-per-file */
 import { toLonLat } from 'ol/proj';
-import OLLayer from 'ol/layer/Layer';
+import OLLayer, { RenderFunction } from 'ol/layer/Layer';
 import Source from 'ol/source/Source';
 import GeoJSON from 'ol/format/GeoJSON';
+import OlMap from 'ol/Map';
+import { Coordinate } from 'ol/coordinate';
 import { getUrlWithParams, getMapboxMapCopyrights } from '../utils';
+import {
+  AnyMapboxLayerClass,
+  AnyMapboxMap,
+  AnyMapboxMapClass,
+} from '../../types';
+
+export type MapboxLayerMixinOptions = {
+  url?: string;
+  apiKey?: string;
+  apiKeyName?: string;
+};
 
 /**
  * MapboxLayerInterface
@@ -33,9 +46,26 @@ export class MapboxLayerInterface {
  * @return {Class}  A class that implements {MapboxLayerLayerInterface} class and extends Base;
  * @private
  */
-const MapboxLayerMixin = (Base) =>
-  class extends Base {
-    constructor(options = {}) {
+function MapboxLayerMixin<T extends AnyMapboxLayerClass>(Base: T) {
+  // @ts-ignore
+  return class Mixin extends Base {
+    mbMap?: AnyMapboxMap;
+
+    styleUrl?: string;
+
+    apiKey?: string;
+
+    apiKeyName!: string;
+
+    format!: GeoJSON;
+
+    loaded!: boolean;
+
+    getOlLayerRender!: (layer: Mixin) => RenderFunction;
+
+    getMapboxMapClass!: () => AnyMapboxMapClass;
+
+    constructor(options: MapboxLayerMixinOptions = {}) {
       super(options);
 
       this.olLayer = new OLLayer({
@@ -74,7 +104,7 @@ const MapboxLayerMixin = (Base) =>
      * Initialize the layer and listen to feature clicks.
      * @param {ol/Map~Map} map
      */
-    attachToMap(map) {
+    attachToMap(map: OlMap) {
       super.attachToMap(map);
 
       if (!this.map) {
@@ -102,7 +132,7 @@ const MapboxLayerMixin = (Base) =>
         // to avoid display of errors we set an empty function.
         this.mbMap.triggerRepaint = () => {};
         this.mbMap.remove();
-        this.mbMap = null;
+        this.mbMap = undefined;
       }
       this.loaded = false;
       super.detachFromMap();
@@ -114,18 +144,20 @@ const MapboxLayerMixin = (Base) =>
      */
     loadMbMap() {
       this.olListenersKeys.push(
-        this.map.on('change:target', () => {
+        // @ts-ignore
+        this.map?.on('change:target', () => {
           this.loadMbMap();
         }),
       );
 
-      if (!this.map.getTargetElement()) {
+      if (!this.map?.getTargetElement()) {
         return;
       }
 
       if (!this.visible) {
         // On next change of visibility we load the map
         this.olListenersKeys.push(
+          // @ts-ignore
           this.once('change:visible', () => {
             this.loadMbMap();
           }),
@@ -138,7 +170,13 @@ const MapboxLayerMixin = (Base) =>
       container.style.width = '100%';
       container.style.height = '100%';
 
-      if (!this.apiKey && !this.styleUrl.includes(this.apiKeyName)) {
+      if (!this.styleUrl) {
+        // eslint-disable-next-line no-console
+        console.error(`No styleUrl defined for mapbox layer: ${this.styleUrl}`);
+        return;
+      }
+
+      if (!this.apiKey && !this.styleUrl?.includes(this.apiKeyName)) {
         // eslint-disable-next-line no-console
         console.error(
           `No apiKey defined for mapbox layer with style url to ${this.styleUrl}`,
@@ -182,7 +220,7 @@ const MapboxLayerMixin = (Base) =>
      * Update attributions of the source.
      * @private
      */
-    updateAttribution(evt) {
+    updateAttribution(evt: maplibregl.MapLibreEvent | mapboxgl.MapboxEvent) {
       const newAttributions = getMapboxMapCopyrights(evt.target) || [];
       if (this.copyrights?.toString() !== newAttributions.toString()) {
         this.copyrights = newAttributions;
@@ -196,7 +234,7 @@ const MapboxLayerMixin = (Base) =>
      * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.
      * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate. The original Mapbox feature is available as a property named 'mapboxFeature'.
      */
-    getFeatureInfoAtCoordinate(coordinate, options) {
+    getFeatureInfoAtCoordinate(coordinate: Coordinate, options: any) {
       // Ignore the getFeatureInfo until the mapbox map is loaded
       if (
         !options ||
@@ -207,7 +245,9 @@ const MapboxLayerMixin = (Base) =>
         return Promise.resolve({ coordinate, features: [], layer: this });
       }
 
-      let pixel = coordinate && this.mbMap.project(toLonLat(coordinate));
+      let pixel =
+        coordinate &&
+        this.mbMap.project(toLonLat(coordinate) as [number, number]);
 
       if (this.hitTolerance) {
         const { x, y } = pixel;
@@ -239,5 +279,6 @@ const MapboxLayerMixin = (Base) =>
       });
     }
   };
+}
 
 export default MapboxLayerMixin;

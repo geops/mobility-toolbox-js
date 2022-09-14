@@ -1,6 +1,9 @@
+import { MapEvent } from 'ol';
 import { inView } from 'ol/layer/Layer';
-import Control from '../../common/controls/Control';
-import mixin from '../../common/mixins/CopyrightMixin';
+import { FrameState } from 'ol/PluggableMap';
+import CommonCopyrightControl, {
+  CopyrightInterface,
+} from '../../common/controls/CopyrightControl';
 import removeDuplicate from '../../common/utils/removeDuplicate';
 
 /**
@@ -19,11 +22,16 @@ import removeDuplicate from '../../common/utils/removeDuplicate';
  *
  * @see <a href="/example/ol-copyright">Openlayers copyright example</a>
  *
- * @extends {Control}
+ * @extends {CommonCopyrightControl}
  * @implements {CopyrightInterface}
  */
-class CopyrightControl extends mixin(Control) {
-  constructor(options) {
+class CopyrightControl
+  extends CommonCopyrightControl
+  implements CopyrightInterface
+{
+  frameState?: FrameState;
+
+  constructor(options: any) {
     super(options);
     this.onPostRender = this.onPostRender.bind(this);
   }
@@ -32,12 +40,13 @@ class CopyrightControl extends mixin(Control) {
     if (!this.frameState) {
       return [];
     }
-    let copyrights = [];
+    let copyrights: string[] = [];
 
     // This code loop comes mainly from ol.
-    this.frameState.layerStatesArray.forEach((layerState) => {
+    this.frameState?.layerStatesArray.forEach((layerState: any) => {
       const { layer } = layerState;
       if (
+        this.frameState &&
         inView(layerState, this.frameState.viewState) &&
         layer &&
         layer.getSource &&
@@ -66,12 +75,12 @@ class CopyrightControl extends mixin(Control) {
     super.deactivate();
   }
 
-  onPostRender(evt) {
+  onPostRender(evt: MapEvent) {
     if (this.map && this.element) {
       /**
        * @ignore
        */
-      this.frameState = evt.frameState;
+      this.frameState = evt.frameState || undefined;
       this.render();
     }
   }

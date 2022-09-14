@@ -80,7 +80,7 @@ export declare type WebSocketAPIRequest = {
  * also to manage properly messages send to the WebSocketAPI.
  * This class must not contain any specific implementation.
  */
-class WebSocketAPIAPI {
+class WebSocketAPI {
   websocket?: WebSocket;
 
   closed?: boolean;
@@ -370,7 +370,7 @@ class WebSocketAPIAPI {
     cb: WebSocketAPIDataCallback,
     errorCb?: EventListener,
   ) {
-    const requestString = WebSocketAPIAPI.getRequestString('GET', params);
+    const requestString = WebSocketAPI.getRequestString('GET', params);
     this.send(requestString);
 
     // We wrap the callbacks to make sure they are called only once.
@@ -433,7 +433,7 @@ class WebSocketAPIAPI {
     quiet = false,
   ) {
     const { onMessageCb, onErrorCb } = this.listen(params, cb, errorCb);
-    const reqStr = WebSocketAPIAPI.getRequestString('', params);
+    const reqStr = WebSocketAPI.getRequestString('', params);
 
     const index = this.subscriptions.findIndex(
       (subcr) => params.channel === subcr.params.channel && cb === subcr.cb,
@@ -504,4 +504,4 @@ class WebSocketAPIAPI {
   }
 }
 
-export default WebSocketAPIAPI;
+export default WebSocketAPI;

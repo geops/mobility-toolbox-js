@@ -1,10 +1,14 @@
 /* eslint-disable no-underscore-dangle */
+import { FrameState } from 'ol/PluggableMap';
 import { toLonLat } from 'ol/proj';
+import type { AnyMapboxLayer } from '../../types';
 
 /**
  * Return the render function fo the olLayer of a MaplibreLayer
  */
-export default function getMapboxRender(mapoxLayer) {
+export default function getMapboxRender(
+  mapoxLayer: AnyMapboxLayer,
+): (frameState: FrameState) => HTMLElement {
   return (frameState) => {
     const { map, mbMap, renderState, olLayer } = mapoxLayer;
     if (!map || !mbMap) {
@@ -54,7 +58,7 @@ export default function getMapboxRender(mapoxLayer) {
       renderState.center = viewState.center;
     }
 
-    const size = map.getSize();
+    const size = map.getSize() || [0, 0];
     if (renderState.size[0] !== size[0] || renderState.size[1] !== size[1]) {
       changed = true;
       renderState.size = size;

@@ -1,5 +1,6 @@
-import Control from '../../common/controls/Control';
-import mixin from '../../common/mixins/CopyrightMixin';
+import CommonCopyrightControl, {
+  CopyrightInterface,
+} from '../../common/controls/CopyrightControl';
 import { getMapboxMapCopyrights } from '../../common/utils';
 
 /**
@@ -12,9 +13,6 @@ import { getMapboxMapCopyrights } from '../../common/utils';
  * const map = new Map({
  *   container: 'map',
  *   style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
- *   controls: [
- *     new CopyrightControl()
- *   ]
  * });
  *
  * const control = new CopyrightControl();
@@ -23,11 +21,14 @@ import { getMapboxMapCopyrights } from '../../common/utils';
  *
  * @see <a href="/example/mb-copyright">Mapbox copyright example</a>
  *
- * @extends {Control}
+ * @extends {CommonCopyrightControl}
  * @implements {CopyrightInterface}
  */
-class CopyrightControl extends mixin(Control) {
-  constructor(options) {
+class CopyrightControl
+  extends CommonCopyrightControl
+  implements CopyrightInterface
+{
+  constructor(options: any) {
     super(options);
     this.render = this.render.bind(this);
   }

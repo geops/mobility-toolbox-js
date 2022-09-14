@@ -37,13 +37,13 @@
 /**
  * @typedef {Object} CommonLayerOptions
  * @property {string} key Identifier of the layer. Must be unique.
- * @property {string} name  Name of the layer.
- * @property {string} group Group of the layer.
+ * @property {string!} name  Name of the layer.
+ * @property {string!} group Group of the layer.
  * @property {string[]} copyrights List of copyrights.
  * @property {Layer[]} children List of children layers.
- * @property {boolean}visible  Define if the layer is currently display on the map.
- * @property {boolean} disabled Define if the layer is currently display on the map but can't be seen (extent, zoom ,data restrictions).
- * @property {number} hittolerance Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
- * @property {Object} properties - Custom properties.
- * @property {AnyMap} map - The map used to display the layer.
+ * @property {boolean!} visible  Define if the layer is currently display on the map.
+ * @property {boolean!} disabled Define if the layer is currently display on the map but can't be seen (extent, zoom ,data restrictions).
+ * @property {number!} hittolerance Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
+ * @property {Object!} properties - Custom properties.
+ * @property {AnyMap!} map - The map used to display the layer.
  */
