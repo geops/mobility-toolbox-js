@@ -1,11 +1,11 @@
 {
   "source": "./build",
   "destination": "./apidoc",
-  "includes": ["\\.(js)$"],
+  "includes": ["\\.(js)$", "typedefs\\.js$"],
   "excludes": [
-    "setupTests.*",
+    "setupTests\\.*",
     "^iife",
-    "^mbt.*",
+    "^mbt\\.*",
     "\\.test\\.js$",
     "doc/",
     "(u|U)tils"

@@ -1,6 +1,4 @@
-import CommonCopyrightControl, {
-  CopyrightInterface,
-} from '../../common/controls/CopyrightControl';
+import CopyrightControlCommon from '../../common/controls/CopyrightControlCommon';
 import { getMapboxMapCopyrights } from '../../common/utils';
 
 /**
@@ -21,13 +19,9 @@ import { getMapboxMapCopyrights } from '../../common/utils';
  *
  * @see <a href="/example/mb-copyright">Mapbox copyright example</a>
  *
- * @extends {CommonCopyrightControl}
- * @implements {CopyrightInterface}
+ * @extends {CopyrightControlCommon}
  */
-class CopyrightControl
-  extends CommonCopyrightControl
-  implements CopyrightInterface
-{
+class CopyrightControl extends CopyrightControlCommon {
   constructor(options: any) {
     super(options);
     this.render = this.render.bind(this);

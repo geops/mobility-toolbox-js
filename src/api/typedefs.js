@@ -79,3 +79,7 @@
 /**
  * @typedef {GeoJSONFeature} ExtraGeom
  */
+
+// These lines is to block TypeScript to add "use strict;" in the outputed file.
+const dummy = () => {};
+export default dummy;

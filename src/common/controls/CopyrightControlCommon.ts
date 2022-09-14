@@ -4,7 +4,7 @@ import Control from './Control';
 /**
  * Copyright control interface.
  */
-export interface CopyrightInterface {
+export interface CopyrightControlInterface {
   /**
    * Return an array of layer's copyright.
    *
@@ -19,7 +19,10 @@ export interface CopyrightInterface {
  * This class only draw an html element, with an empty string in it.
  * Use subclasses to use it in an ol or mapbox map.
  */
-class CopyrightControl extends Control implements CopyrightInterface {
+class CopyrightControlCommon
+  extends Control
+  implements CopyrightControlInterface
+{
   render() {
     if (!this.element) {
       return;
@@ -51,4 +54,4 @@ class CopyrightControl extends Control implements CopyrightInterface {
   }
 }
 
-export default CopyrightControl;
+export default CopyrightControlCommon;

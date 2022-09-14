@@ -1,9 +1,7 @@
 import { MapEvent } from 'ol';
 import { inView } from 'ol/layer/Layer';
 import { FrameState } from 'ol/PluggableMap';
-import CommonCopyrightControl, {
-  CopyrightInterface,
-} from '../../common/controls/CopyrightControl';
+import CopyrightControlCommon from '../../common/controls/CopyrightControlCommon';
 import removeDuplicate from '../../common/utils/removeDuplicate';
 
 /**
@@ -22,13 +20,9 @@ import removeDuplicate from '../../common/utils/removeDuplicate';
  *
  * @see <a href="/example/ol-copyright">Openlayers copyright example</a>
  *
- * @extends {CommonCopyrightControl}
- * @implements {CopyrightInterface}
+ * @extends {CopyrightControlCommon}
  */
-class CopyrightControl
-  extends CommonCopyrightControl
-  implements CopyrightInterface
-{
+class CopyrightControl extends CopyrightControlCommon {
   frameState?: FrameState;
 
   constructor(options: any) {

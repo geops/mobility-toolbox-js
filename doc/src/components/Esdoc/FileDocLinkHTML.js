@@ -22,9 +22,9 @@ function FileDocLinkHTML({ doc, text }) {
         <a
           target="_blank"
           rel="noreferrer"
-          href={`https://github.com/geops/mobility-toolbox-js/blob/master/${
-            doc.memberof.split('~')[0]
-          }#L${doc.lineNumber}`}
+          href={`https://github.com/geops/mobility-toolbox-js/blob/master/${doc.memberof
+            .split('~')[0]
+            .replace('build/', 'src/')}#L${doc.lineNumber}`}
         >
           {text}
         </a>
