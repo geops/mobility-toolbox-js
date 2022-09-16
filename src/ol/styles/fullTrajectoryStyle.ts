@@ -1,3 +1,4 @@
+import { Feature } from 'ol';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 
 /** @private */
@@ -15,7 +16,11 @@ const borderStyle = new Style({
   }),
 });
 
-const fullTrajectorystyle = (feature, resolution, options) => {
+const fullTrajectorystyle = (
+  feature: Feature,
+  resolution: number,
+  options: any,
+): Style[] => {
   let lineColor = '#ffffff'; // white
 
   const type = feature.get('type');

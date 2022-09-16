@@ -1,4 +1,4 @@
-import { Feature, Point } from 'geojson';
+import { Feature, FeatureCollection, Point } from 'geojson';
 
 export declare type RealtimeMode = 'topographic' | 'schematic' | 'raw';
 
@@ -102,7 +102,7 @@ export interface RealtimeFullTrajectoryProperties {
   train_id: RealtimeTrainId;
 }
 
-export interface RealtimeFullTrajectory extends Feature {
+export interface RealtimeFullTrajectory extends FeatureCollection {
   properties: RealtimeFullTrajectoryProperties;
 }
 

@@ -1,9 +1,9 @@
 import { Map as MaplibreMap } from 'maplibre-gl';
 import { Map as OlMap } from 'ol';
 import BaseObject from 'ol/Object';
-import { AnyMap } from '../../types';
+import { AnyMap, AnyMapboxMap } from '../../types';
 
-export type ControlOptions = {
+export type ControlCommonOptions = {
   active?: Boolean;
   element?: HTMLElement;
   target?: HTMLElement;
@@ -21,7 +21,7 @@ export type ControlOptions = {
  * @classproperty {HTMLElement} element - The HTML element used to render the control.
  * @classproperty {HTMLElement} target - The HTML element where to render the element property. Default is the map's element. Read only.
  */
-class Control extends BaseObject {
+class ControlCommon extends BaseObject {
   active: Boolean;
 
   map?: AnyMap;
@@ -39,7 +39,7 @@ class Control extends BaseObject {
    * @param {HTMLElement} [options.target] The HTML element where to render the element property. Default is the map's element.
    * @param {function} [options.render] Render function called whenever the control needs to be rerendered.
    */
-  constructor(options: ControlOptions = {}) {
+  constructor(options: ControlCommonOptions = {}) {
     super(options);
     this.defineProperties(options);
 
@@ -60,7 +60,7 @@ class Control extends BaseObject {
    * @private
    * @ignore
    */
-  defineProperties(options: ControlOptions) {
+  defineProperties(options: ControlCommonOptions) {
     const { target, element, render } = {
       ...options,
     };
@@ -97,8 +97,8 @@ class Control extends BaseObject {
               this.target ||
               ((this.map as OlMap).getTargetElement &&
                 (this.map as OlMap).getTargetElement()) ||
-              ((this.map as MaplibreMap).getContainer &&
-                (this.map as MaplibreMap).getContainer());
+              ((this.map as AnyMapboxMap).getContainer &&
+                (this.map as AnyMapboxMap).getContainer());
 
             if (!this.element) {
               this.createDefaultElement();
@@ -158,7 +158,12 @@ class Control extends BaseObject {
    * To be defined in inherited classes.
    */
   // eslint-disable-next-line class-methods-use-this
-  deactivate() {}
+  deactivate() {
+    // eslint-disable-next-line no-console
+    console.error(
+      'The function deactivate() must be implemented in subclasses',
+    );
+  }
 
   /**
    * The default render function. It renders content in the HTML element.
@@ -166,7 +171,11 @@ class Control extends BaseObject {
    *
    * @private
    */
-  render() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  render(options?: any) {
+    // eslint-disable-next-line no-console
+    console.error('The function render() must be implemented in subclasses');
+  }
 
   /**
    * The default element to display if this.element is not defined.
@@ -175,7 +184,12 @@ class Control extends BaseObject {
    * @private
    */
   // eslint-disable-next-line class-methods-use-this
-  createDefaultElement() {}
+  createDefaultElement() {
+    // eslint-disable-next-line no-console
+    console.error(
+      'The function createDefaultElement() must be implemented in subclasses',
+    );
+  }
 }
 
-export default Control;
+export default ControlCommon;

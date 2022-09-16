@@ -66,7 +66,6 @@ class CopyrightControl extends CopyrightControlCommon {
     if (this.map) {
       this.map.un('postrender', this.onPostRender);
     }
-    super.deactivate();
   }
 
   onPostRender(evt: MapEvent) {

@@ -1,5 +1,25 @@
 /* eslint-disable no-param-reassign */
-import Layer from './Layer';
+import { Feature, Map } from 'ol';
+import { Coordinate } from 'ol/coordinate';
+import { ObjectEvent } from 'ol/Object';
+import { AnyMapboxLayer, LayerGetFeatureInfoResponse } from '../../types';
+import Layer, { OlLayerOptions } from './Layer';
+
+export type MapboxStyleLayerOptions = OlLayerOptions & {
+  beforeId?: string;
+  mapboxLayer?: AnyMapboxLayer;
+  styleLayer?: { [key: string]: any };
+  styleLayers?: { [key: string]: any }[];
+  styleLayersFilter?: FilterFunction;
+  filters: FilterFunction | { [key: string]: any }[];
+  featureInfoFilter?: FilterFunction;
+  queryRenderedLayersFilter?: FilterFunction;
+};
+
+export type StyleLayer = {
+  id?: string;
+  [key: string]: any;
+};
 
 /**
  * Layer for visualizing a specific set of layer from a MapboxLayer.
@@ -20,6 +40,26 @@ import Layer from './Layer';
  * @extends {Layer}
  */
 class MapboxStyleLayer extends Layer {
+  beforeId?: string;
+
+  mapboxLayer?: AnyMapboxLayer;
+
+  styleLayersFilter?: FilterFunction;
+
+  featureInfoFilter?: FilterFunction;
+
+  queryRenderedLayersFilter?: FilterFunction;
+
+  selectedFeatures?: Feature[];
+
+  highlightedFeatures?: Feature[];
+
+  styleLayer?: StyleLayer;
+
+  styleLayers: StyleLayer[];
+
+  addDynamicFilters?: () => void;
+
   /**
    * Constructor.
    *
@@ -27,7 +67,7 @@ class MapboxStyleLayer extends Layer {
    * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.
    * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.
    */
-  constructor(options = {}) {
+  constructor(options: MapboxStyleLayerOptions) {
     super(options);
 
     /**
@@ -62,7 +102,7 @@ class MapboxStyleLayer extends Layer {
      * @type {function}
      * @private
      */
-    this.featureInfoFilter = options.featureInfoFilter || ((obj) => obj);
+    this.featureInfoFilter = options.featureInfoFilter || ((obj: any) => obj);
 
     /**
      * Function to query the rendered features.
@@ -115,22 +155,23 @@ class MapboxStyleLayer extends Layer {
 
     if (!this.styleLayersFilter && this.styleLayers) {
       const ids = this.styleLayers.map((s) => s.id);
-      this.styleLayersFilter = (styleLayer) => ids.includes(styleLayer.id);
+      this.styleLayersFilter = (styleLayer: StyleLayer) =>
+        ids.includes(styleLayer.id);
     }
   }
 
   /**
    * Initialize the layer.
-   * @param {mapboxgl.Map} map the mapbox map.
+   * @param {ol/Map~Map} map the mapbox map.
    * @override
    */
-  attachToMap(map) {
-    if (!this.mapboxLayer.map) {
-      this.mapboxLayer.attachToMap(map);
+  attachToMap(map: Map) {
+    if (this.mapboxLayer && !this.mapboxLayer.map) {
+      this.mapboxLayer?.attachToMap(map);
     }
     super.attachToMap(map);
 
-    if (!this.map) {
+    if (!this.map || !this.mapboxLayer) {
       return;
     }
 
@@ -160,6 +201,7 @@ class MapboxStyleLayer extends Layer {
 
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
+      // @ts-ignore
       this.on('change:visible', (evt) => {
         // Once the map is loaded we can apply vsiiblity without waiting
         // the style. Mapbox take care of the application of style changes.
@@ -168,6 +210,7 @@ class MapboxStyleLayer extends Layer {
     );
 
     this.olListenersKeys.push(
+      // @ts-ignore
       this.mapboxLayer.on('load', () => {
         this.onLoad();
       }),
@@ -176,29 +219,28 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * Terminate the layer.
-   * @param {mapboxgl.Map} map the mapbox map.
    * @override
    */
-  detachFromMap(map) {
-    const { mbMap } = this.mapboxLayer;
-    if (mbMap) {
+  detachFromMap() {
+    if (this.mapboxLayer?.mbMap) {
+      const { mbMap } = this.mapboxLayer;
       mbMap.off('load', this.onLoad);
       this.removeStyleLayers();
     }
-    super.detachFromMap(map);
+    super.detachFromMap();
   }
 
   /** @ignore */
   addStyleLayers() {
-    const { mbMap } = this.mapboxLayer;
-
-    if (!mbMap) {
+    if (!this.mapboxLayer?.mbMap) {
       return;
     }
+    const { mbMap } = this.mapboxLayer;
 
     this.styleLayers.forEach((styleLayer) => {
       const { id, source } = styleLayer;
-      if (mbMap.getSource(source) && !mbMap.getLayer(id)) {
+      if (mbMap.getSource(source) && id && !mbMap.getLayer(id)) {
+        // @ts-ignore
         mbMap.addLayer(styleLayer, this.beforeId);
       }
     });
@@ -207,15 +249,15 @@ class MapboxStyleLayer extends Layer {
 
   /** @ignore */
   removeStyleLayers() {
-    const { mbMap } = this.mapboxLayer;
-
-    if (!mbMap) {
+    if (!this.mapboxLayer?.mbMap) {
       return;
     }
+    const { mbMap } = this.mapboxLayer;
 
     this.styleLayers.forEach((styleLayer) => {
-      if (mbMap.getLayer(styleLayer.id)) {
-        mbMap.removeLayer(styleLayer.id);
+      const { id } = styleLayer;
+      if (id && mbMap.getLayer(id)) {
+        mbMap.removeLayer(id);
       }
     });
   }
@@ -231,9 +273,13 @@ class MapboxStyleLayer extends Layer {
       this.addDynamicFilters();
     }
 
+    if (!this.mapboxLayer?.mbMap) {
+      return;
+    }
     const { mbMap } = this.mapboxLayer;
     const style = mbMap.getStyle();
     if (style && this.styleLayersFilter) {
+      // @ts-ignore
       const styles = style.layers.filter(this.styleLayersFilter);
       this.disabled = !styles.length;
     }
@@ -244,11 +290,16 @@ class MapboxStyleLayer extends Layer {
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
    */
-  getFeatureInfoAtCoordinate(coordinate) {
+  getFeatureInfoAtCoordinate(
+    coordinate: Coordinate,
+  ): Promise<LayerGetFeatureInfoResponse> {
+    if (!this.mapboxLayer?.mbMap) {
+      return Promise.resolve({ coordinate, features: [], layer: this });
+    }
     const { mbMap } = this.mapboxLayer;
 
     // Ignore the getFeatureInfo until the mapbox map is loaded
-    if (!mbMap || !mbMap.isStyleLoaded()) {
+    if (!mbMap.isStyleLoaded()) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
 
@@ -256,10 +307,12 @@ class MapboxStyleLayer extends Layer {
     let layers = this.styleLayers || [];
 
     if (this.styleLayersFilter) {
+      // @ts-ignore
       layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);
     }
 
     if (this.queryRenderedLayersFilter) {
+      // @ts-ignore
       layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
     }
 
@@ -268,9 +321,15 @@ class MapboxStyleLayer extends Layer {
         layers: layers.map((layer) => layer && layer.id),
         validate: false,
       })
-      .then((featureInfo) => {
-        const features = featureInfo.features.filter((feature) =>
-          this.featureInfoFilter(feature, this.map.getView().getResolution()),
+      .then((featureInfo: LayerGetFeatureInfoResponse) => {
+        const features: Feature[] = featureInfo.features.filter(
+          (feature: Feature) => {
+            // @ts-ignore
+            return this.featureInfoFilter(
+              feature,
+              this.map?.getView().getResolution(),
+            ) as Feature[];
+          },
         );
         this.highlight(features);
         return { ...featureInfo, features, layer: this };
@@ -281,15 +340,15 @@ class MapboxStyleLayer extends Layer {
    * Set filter that determines which features should be rendered in a style layer.
    * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.
    */
-  setFilter(filter) {
-    const { mbMap } = this.mapboxLayer;
-
-    if (!mbMap) {
+  setFilter(filter: { [key: string]: any }) {
+    if (!this.mapboxLayer?.mbMap) {
       return;
     }
+    const { mbMap } = this.mapboxLayer;
 
     this.styleLayers.forEach(({ id }) => {
-      if (mbMap.getLayer(id)) {
+      if (id && filter && mbMap.getLayer(id)) {
+        // @ts-ignore
         mbMap.setFilter(id, filter);
       }
     });
@@ -301,14 +360,17 @@ class MapboxStyleLayer extends Layer {
    * @param {boolean} state Is the feature hovered
    * @private
    */
-  setHoverState(features, state) {
+  setHoverState(features: Feature[], state: boolean) {
+    if (!this.mapboxLayer?.mbMap) {
+      return;
+    }
     const { mbMap } = this.mapboxLayer;
 
     if (!features || !mbMap) {
       return;
     }
 
-    features.forEach((feature) => {
+    features.forEach((feature: Feature) => {
       const { source, sourceLayer } = feature.get('mapboxFeature') || {};
       if ((!source && !sourceLayer) || !feature.getId()) {
         if (!feature.getId()) {
@@ -338,10 +400,10 @@ class MapboxStyleLayer extends Layer {
    * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.
    * @private
    */
-  select(features = []) {
-    this.setHoverState(this.selectedFeatures, false);
+  select(features: Feature[] = []) {
+    this.setHoverState(this.selectedFeatures || [], false);
     this.selectedFeatures = features;
-    this.setHoverState(this.selectedFeatures, true);
+    this.setHoverState(this.selectedFeatures || [], true);
   }
 
   /**
@@ -349,14 +411,15 @@ class MapboxStyleLayer extends Layer {
    * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.
    * @private
    */
-  highlight(features = []) {
+  highlight(features: Feature[] = []) {
     // Filter out selected features
-    const filtered = this.highlightedFeatures.filter(
-      (feature) =>
-        !this.selectedFeatures
-          .map((feat) => feat.getId())
-          .includes(feature.getId()),
-    );
+    const filtered: Feature[] =
+      this.highlightedFeatures?.filter(
+        (feature) =>
+          !(this.selectedFeatures || [])
+            .map((feat: Feature) => feat.getId())
+            .includes(feature.getId()),
+      ) || [];
 
     // Remove previous highlight
     this.setHoverState(filtered, false);
@@ -371,16 +434,16 @@ class MapboxStyleLayer extends Layer {
    * @param {Event} evt Layer's event that has called the function.
    * @private
    */
-  // eslint-disable-next-line no-unused-vars
-  applyLayoutVisibility(evt) {
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  applyLayoutVisibility(evt?: ObjectEvent) {
     const { visible } = this;
-    const { mbMap } = this.mapboxLayer;
     const filterFunc = this.styleLayersFilter;
 
-    if (!mbMap) {
+    if (!this.mapboxLayer?.mbMap) {
       return;
     }
 
+    const { mbMap } = this.mapboxLayer;
     const style = mbMap.getStyle();
 
     if (!style) {
@@ -409,7 +472,7 @@ class MapboxStyleLayer extends Layer {
    * @param {Object} newOptions Options to override.
    * @return {MapboxStyleLayer} A MapboxStyleLayer.
    */
-  clone(newOptions) {
+  clone(newOptions: MapboxStyleLayerOptions) {
     return new MapboxStyleLayer({ ...this.options, ...newOptions });
   }
 }

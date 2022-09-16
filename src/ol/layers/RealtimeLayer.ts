@@ -3,12 +3,32 @@ import { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import { Vector as VectorSource } from 'ol/source';
+import Feature, { FeatureLike } from 'ol/Feature';
+import { MapEvent } from 'ol';
+import { Coordinate } from 'ol/coordinate';
 import Layer from './Layer';
-import mixin from '../../common/mixins/RealtimeLayerMixin';
+import mixin, {
+  RealtimeLayerMixinOptions,
+} from '../../common/mixins/RealtimeLayerMixin';
 import { fullTrajectoryStyle } from '../styles';
+import {
+  AnyMap,
+  LayerGetFeatureInfoResponse,
+  RealtimeFullTrajectory,
+  RealtimeTrainId,
+} from '../../types';
+import { RealtimeTrajectory } from '../../api/typedefs';
 
 /** @private */
 const format = new GeoJSON();
+
+export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
+  fullTrajectoryStyle: (
+    feature: FeatureLike,
+    resolution: number,
+    options: any,
+  ) => void;
+};
 
 /**
  * Responsible for loading and display data from a Realtime service.
@@ -28,6 +48,7 @@ const format = new GeoJSON();
  * @implements {UserInteractionsLayerInterface}
  * @implements {RealtimeLayerInterface}
  */
+// @ts-ignore
 class RealtimeLayer extends mixin(Layer) {
   /**
    * Constructor.
@@ -35,7 +56,7 @@ class RealtimeLayer extends mixin(Layer) {
    * @param {Object} options
    * @private
    */
-  constructor(options = {}) {
+  constructor(options: OlRealtimeLayerOptions) {
     // We use a group to be able to add custom vector layer in extended class.
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
@@ -70,11 +91,15 @@ class RealtimeLayer extends mixin(Layer) {
                 this.transformContainer.style.width = '100%';
                 this.transformContainer.style.height = '100%';
                 this.container.appendChild(this.transformContainer);
-                this.canvas.style.position = 'absolute';
-                this.canvas.style.top = '0';
-                this.canvas.style.left = '0';
-                this.canvas.style.transformOrigin = 'top left';
-                this.transformContainer.appendChild(this.canvas);
+                if (this.canvas) {
+                  (this.canvas as HTMLCanvasElement).style.position =
+                    'absolute';
+                  (this.canvas as HTMLCanvasElement).style.top = '0';
+                  (this.canvas as HTMLCanvasElement).style.left = '0';
+                  (this.canvas as HTMLCanvasElement).style.transformOrigin =
+                    'top left';
+                  this.transformContainer.appendChild(this.canvas);
+                }
               }
 
               if (this.renderedViewState) {
@@ -87,12 +112,12 @@ class RealtimeLayer extends mixin(Layer) {
 
                 if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
-                  const context = this.canvas.getContext('2d');
-                  context.clearRect(
+                  const context = this.canvas?.getContext('2d');
+                  context?.clearRect(
                     0,
                     0,
-                    this.canvas.width,
-                    this.canvas.height,
+                    this.canvas?.width as number,
+                    this.canvas?.height as number,
                   );
                 } else {
                   const pixelCenterRendered =
@@ -123,16 +148,16 @@ class RealtimeLayer extends mixin(Layer) {
     /** @ignore */
     this.renderState = {
       center: [0, 0],
-      zoom: null,
+      zoom: undefined,
       rotation: 0,
     };
   }
 
-  attachToMap(map) {
+  attachToMap(map: AnyMap) {
     super.attachToMap(map);
     if (this.map) {
       this.olListenersKeys.push(
-        ...this.map.on(['moveend', 'change:target'], (evt) => {
+        ...this.map.on(['moveend', 'change:target'], (evt: MapEvent) => {
           const view = evt.map.getView();
           if (view.getAnimating() || view.getInteracting()) {
             return;
@@ -141,7 +166,7 @@ class RealtimeLayer extends mixin(Layer) {
 
           // Update the interval between render updates
           if (this.currentZoom !== zoom) {
-            this.onZoomEnd(evt);
+            this.onZoomEnd();
           }
           this.currentZoom = zoom;
 
@@ -164,13 +189,13 @@ class RealtimeLayer extends mixin(Layer) {
    * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test
    * @returns
    */
-  hasFeatureInfoAtCoordinate(coordinate) {
+  hasFeatureInfoAtCoordinate(coordinate: Coordinate) {
     if (this.map && this.canvas) {
       const context = this.canvas.getContext('2d');
       const pixel = this.map.getPixelFromCoordinate(coordinate);
-      return !!context.getImageData(
-        pixel[0] * this.pixelRatio,
-        pixel[1] * this.pixelRatio,
+      return !!context?.getImageData(
+        pixel[0] * (this.pixelRatio || 1),
+        pixel[1] * (this.pixelRatio || 1),
         1,
         1,
       ).data[3];
@@ -183,7 +208,8 @@ class RealtimeLayer extends mixin(Layer) {
    * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
    * @overrides
    */
-  renderTrajectories(noInterpolate) {
+  // @ts-ignore
+  renderTrajectories(noInterpolate: boolean) {
     if (!this.map) {
       return;
     }
@@ -208,7 +234,7 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    * @override
    */
-  renderTrajectoriesInternal(viewState, noInterpolate) {
+  renderTrajectoriesInternal(viewState: ViewState, noInterpolate: boolean) {
     if (!this.map) {
       return false;
     }
@@ -240,7 +266,10 @@ class RealtimeLayer extends mixin(Layer) {
     return super.getRefreshTimeInMs(this.map.getView().getZoom());
   }
 
-  getFeatureInfoAtCoordinate(coordinate, options = {}) {
+  getFeatureInfoAtCoordinate(
+    coordinate: Coordinate,
+    options = {},
+  ): Promise<LayerGetFeatureInfoResponse> {
     const resolution = this.map.getView().getResolution();
     return super.getFeatureInfoAtCoordinate(coordinate, {
       resolution,
@@ -254,7 +283,8 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    * @override
    */
-  onMoveEnd() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onMoveEnd(evt: MapEvent) {
     if (this.visible && this.isUpdateBboxOnMoveEnd) {
       this.setBbox();
     }
@@ -277,8 +307,8 @@ class RealtimeLayer extends mixin(Layer) {
    * @override
    */
   // eslint-disable-next-line no-unused-vars
-  onZoomEnd(evt) {
-    super.onZoomEnd(evt);
+  onZoomEnd() {
+    super.onZoomEnd();
   }
 
   /**
@@ -287,7 +317,11 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    * @override
    */
-  onFeatureHover(features, layer, coordinate) {
+  onFeatureHover(
+    features: Feature[],
+    layer: RealtimeLayer,
+    coordinate: Coordinate,
+  ) {
     super.onFeatureHover(features, layer, coordinate);
     this.map.getTargetElement().style.cursor = features.length
       ? 'pointer'
@@ -300,7 +334,11 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    * @override
    */
-  onFeatureClick(features, layer, coordinate) {
+  onFeatureClick(
+    features: Feature[],
+    layer: RealtimeLayer,
+    coordinate: Coordinate,
+  ) {
     super.onFeatureClick(features, layer, coordinate);
     if (!features.length && this.vectorLayer) {
       this.vectorLayer.getSource().clear();
@@ -315,7 +353,11 @@ class RealtimeLayer extends mixin(Layer) {
    *
    * @private
    */
-  purgeTrajectory(trajectory, extent, zoom) {
+  purgeTrajectory(
+    trajectory: RealtimeTrajectory,
+    extent: [number, number, number, number],
+    zoom: number,
+  ) {
     return super.purgeTrajectory(
       trajectory,
       extent || this.map.getView().calculateExtent(),
@@ -328,7 +370,7 @@ class RealtimeLayer extends mixin(Layer) {
    *
    * @private
    */
-  setBbox(extent, zoom) {
+  setBbox(extent?: [number, number, number, number], zoom?: number) {
     let newExtent = extent;
     let newZoom = zoom;
     if (!newExtent && this.isUpdateBboxOnMoveEnd) {
@@ -342,10 +384,10 @@ class RealtimeLayer extends mixin(Layer) {
    * Highlight the trajectory of journey.
    * @private
    */
-  highlightTrajectory(id) {
+  highlightTrajectory(id: RealtimeTrainId) {
     this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
-      .then((fullTrajectory) => {
+      .then((fullTrajectory: RealtimeFullTrajectory) => {
         const vectorSource = this.vectorLayer.getSource();
         vectorSource.clear();
 
@@ -366,7 +408,7 @@ class RealtimeLayer extends mixin(Layer) {
    * @param {Object} newOptions Options to override
    * @return {RealtimeLayer} A RealtimeLayer
    */
-  clone(newOptions) {
+  clone(newOptions: OlRealtimeLayerOptions) {
     return new RealtimeLayer({ ...this.options, ...newOptions });
   }
 }

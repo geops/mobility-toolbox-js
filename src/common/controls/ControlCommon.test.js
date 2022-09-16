@@ -1,4 +1,12 @@
-import Control from './Control';
+import ControlCommon from './ControlCommon';
+
+// We Crate a class to extend to avoid having console error messages.
+class Control extends ControlCommon {
+  // eslint-disable-next-line class-methods-use-this
+  deactivate() {}
+
+  render() {}
+}
 
 describe('Control', () => {
   test('should be activated by default', () => {
@@ -77,7 +85,7 @@ describe('Control', () => {
 
   test('set a custom render method', () => {
     const spy = jest.fn();
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     const control = new Control({
       render: spy,
     });

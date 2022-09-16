@@ -1,18 +1,25 @@
 /**
  * @typedef {function} FilterFunction
- * @param {Object} vehicle Vehicle to filter.
+ * @param {Vehicle} vehicle Vehicle to filter.
+ * @returns boolean
+ */
+/**
+ * @typedef {function} SortFunction
+ * @param {any} a Object a to compare.
+ * @param {any} b Object b to compare.
+ * @returns number
  */
 
 /**
  * @typedef {Object} ViewState
- * @property {number} time A time in ms.
- * @property {number[2]} center A center in mercator coordinate.
+ * @property {number|undefined} time A time in ms.
+ * @property {number[2]|undefined} center A center in mercator coordinate.
  * @property {number[4]} extent An Extent in mercator coordinates.
  * @property {number[2]} size A size ([width, height]).
  * @property {number} rotation A rotation in radians.
  * @property {number} resolution A resolution.
  * @property {number} zoom A zoom level.
- * @property {number} pixelRatio A pixel ratio.
+ * @property {number|undefined} pixelRatio A pixel ratio.
  */
 
 /**
@@ -27,7 +34,7 @@
  */
 
 /**
- * @typedef {Object} ControlOptions
+ * @typedef {Object} ControlCommonOptions
  * @property {boolean} [active = true] Whether the control is active or not.
  * @property {HTMLElement} element The HTML element used to render the control.
  * @property {HTMLElement} target The HTML element where to render the element property. Default is the map's element.
@@ -35,7 +42,7 @@
  */
 
 /**
- * @typedef {Object} CommonLayerOptions
+ * @typedef {Object} LayerCommonOptions
  * @property {string} key Identifier of the layer. Must be unique.
  * @property {string!} name  Name of the layer.
  * @property {string!} group Group of the layer.

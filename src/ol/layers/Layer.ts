@@ -3,21 +3,11 @@ import { EventsKey } from 'ol/events';
 import LayerGroup from 'ol/layer/Group';
 import OlLayer from 'ol/layer/Layer';
 import { unByKey } from 'ol/Observable';
-import LayerCommon from '../../common/layers/Layer';
+import LayerCommon from '../../common/layers/LayerCommon';
 import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
-import type { AnyMap } from '../../types';
+import type { UserInteractionCallback } from '../../types';
 
-export type OlLayerOptions = {
-  key?: string;
-  name?: string;
-  group?: string;
-  copyrights?: string[];
-  children?: Layer[];
-  visible?: boolean;
-  disabled?: Boolean;
-  hitTolerance?: Number;
-  properties?: { [x: string]: any };
-  map?: AnyMap;
+export type OlLayerOptions = LayerCommonOptions & {
   olLayer: OlLayer | LayerGroup;
 };
 
@@ -34,7 +24,7 @@ export type OlLayerOptions = {
  * @see <a href="/example/ol-map">Map example</a>
  *
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
- * @extends {Layer}
+ * @extends {LayerCommon}
  */
 class Layer extends userInteractionsMixin(LayerCommon) {
   olLayer?: OlLayer;
@@ -51,30 +41,30 @@ class Layer extends userInteractionsMixin(LayerCommon) {
 
   map?: Map;
 
-  /* userInteractionsMixin */
-
-  userInteractions!: any[];
-
-  userClickInteractions!: any[];
-
-  userClickCallbacks!: any[];
-
-  onUserClickCallback!: () => void;
-
   singleClickListenerKey!: EventsKey;
 
-  userHoverInteractions!: any[];
-
-  userHoverCallbacks!: () => void;
-
   pointerMoveListenerKey!: EventsKey;
+
+  /* userInteractionsMixin */
+
+  userInteractions?: boolean;
+
+  userClickInteractions?: boolean;
+
+  userHoverInteractions?: boolean;
+
+  userClickCallbacks?: UserInteractionCallback[];
+
+  userHoverCallbacks?: UserInteractionCallback[];
+
+  onUserClickCallback!: () => void;
 
   onUserMoveCallback!: () => void;
 
   /**
    * Constructor.
    *
-   * @param {CommonLayerOptions} options
+   * @param {LayerCommonOptions} options
    * @param {ol/layer/Layer~Layer} options.olLayer The layer (required).
    * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
    * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
@@ -190,7 +180,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
       this.map &&
       this.userInteractions &&
       this.userClickInteractions &&
-      this.userClickCallbacks.length
+      this.userClickCallbacks?.length
     ) {
       this.singleClickListenerKey = this.map.on(
         'singleclick',
@@ -202,7 +192,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
       this.map &&
       this.userInteractions &&
       this.userHoverInteractions &&
-      this.userHoverCallbacks.length
+      this.userHoverCallbacks?.length
     ) {
       this.pointerMoveListenerKey = this.map.on(
         'pointermove',

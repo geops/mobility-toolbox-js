@@ -15,6 +15,7 @@ import {
   RealtimeTrainId,
   RealtimeGeneralizationLevel,
   RealtimeStopSequence,
+  RealtimeFullTrajectory,
 } from '../types';
 
 export type RealtimeAPIOptions = {
@@ -670,8 +671,8 @@ class RealtimeAPI {
   getFullTrajectory(
     id: RealtimeTrainId,
     mode: RealtimeMode,
-    generalizationLevel: RealtimeGeneralizationLevel,
-  ) {
+    generalizationLevel: RealtimeGeneralizationLevel | undefined,
+  ): Promise<RealtimeFullTrajectory> {
     const channel = [`full_trajectory${getModeSuffix(mode, RealtimeModes)}`];
     if (id) {
       channel.push(id);
@@ -688,7 +689,7 @@ class RealtimeAPI {
     return new Promise((resolve) => {
       this.wsApi.get(params, (data) => {
         if (data.content) {
-          resolve(data.content);
+          resolve(data.content as RealtimeFullTrajectory);
         }
       });
     });

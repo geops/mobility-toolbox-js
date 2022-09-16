@@ -13,8 +13,10 @@
     // "Go to Definition" in VSCode
     "declarationMap": true,
     "skipLibCheck": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
   },
+  "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],
-  "exclude": ["./node_modules/**/*"]
+  "exclude": ["./node_modules/**/*", "./node_modules/*"]
 }

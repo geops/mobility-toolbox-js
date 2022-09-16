@@ -8,7 +8,7 @@ import { buffer } from 'ol/extent';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import GeomType from 'ol/geom/GeometryType';
 import { RoutingAPI } from '../../api';
-import Control from '../../common/controls/Control';
+import ControlCommon from '../../common/controls/ControlCommon';
 import RoutingLayer from '../layers/RoutingLayer';
 
 // Examples for a single hop:
@@ -78,7 +78,7 @@ const getFlatCoordinatesFromSegments = (segmentArray) => {
  * @extends {Control}
  * @implements {RoutingInterface}
  */
-class RoutingControl extends Control {
+class RoutingControl extends ControlCommon {
   constructor(options = {}) {
     super(options);
 
@@ -753,8 +753,9 @@ class RoutingControl extends Control {
       this.removeListeners();
       this.reset();
     }
-    super.deactivate();
   }
+
+  render() {}
 }
 
 export default RoutingControl;

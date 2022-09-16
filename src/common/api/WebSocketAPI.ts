@@ -7,6 +7,7 @@ import {
   RealtimeTrajectory,
   RealtimeTrajectoryResponse,
   RealtimeStopSequence,
+  RealtimeFullTrajectory,
 } from '../../types';
 
 export declare type WebSocketAPIParameters = {
@@ -27,7 +28,8 @@ export declare type WebSocketAPIMessageEventData = {
     | RealtimeStation
     | RealtimeExtraGeom
     | RealtimeTrajectory
-    | RealtimeStopSequence[];
+    | RealtimeStopSequence[]
+    | RealtimeFullTrajectory;
   client_reference: string | number | null;
 };
 

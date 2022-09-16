@@ -1,36 +1,27 @@
-import { getWidth, getHeight } from 'ol/extent';
-import { fromLonLat } from 'ol/proj';
-
-/**
- * Get the current resolution of a Mapbox map.
- * @param {mapboxgl.Map} map A map object.
- * @private
- */
-export const getMercatorResolution = (map) => {
-  const bounds = map.getBounds().toArray();
-  const a = fromLonLat(bounds[0]);
-  const b = fromLonLat(bounds[1]);
-  const extent = [...a, ...b];
-  const { width, height } = map.getCanvas();
-  const xResolution = getWidth(extent) / width;
-  const yResolution = getHeight(extent) / height;
-  return Math.max(xResolution, yResolution);
-};
+import { AnyMapboxMap } from '../../types';
 
 /**
  * Get the canvas source coordinates of the current map's extent.
  * @param {mapboxgl.Map} map A map object.
  * @private
  */
-export const getSourceCoordinates = (map, pixelRatio) => {
+export const getSourceCoordinates = (
+  map: AnyMapboxMap,
+  pixelRatio: number = 1,
+) => {
   // Requesting getBounds is not enough when we rotate the map, so we request manually each corner.
   const { width, height } = map.getCanvas();
+  // @ts-ignore
   const leftTop = map.unproject({ x: 0, y: 0 });
+  // @ts-ignore
   const leftBottom = map.unproject({ x: 0, y: height / pixelRatio }); // southWest
+
+  // @ts-ignore
   const rightBottom = map.unproject({
     x: width / pixelRatio,
     y: height / pixelRatio,
   });
+  // @ts-ignore
   const rightTop = map.unproject({ x: width / pixelRatio, y: 0 }); // north east
   return [
     [leftTop.lng, leftTop.lat],
@@ -40,7 +31,4 @@ export const getSourceCoordinates = (map, pixelRatio) => {
   ];
 };
 
-export default {
-  getMercatorResolution,
-  getSourceCoordinates,
-};
+export default getSourceCoordinates;

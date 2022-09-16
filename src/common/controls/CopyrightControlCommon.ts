@@ -1,28 +1,12 @@
 /* eslint-disable max-classes-per-file */
-import Control from './Control';
-
-/**
- * Copyright control interface.
- */
-export interface CopyrightControlInterface {
-  /**
-   * Return an array of layer's copyright.
-   *
-   * @return {String[]} A list of copyrights to render.
-   */
-  // eslint-disable-next-line class-methods-use-this
-  getCopyrights(): string[];
-}
+import ControlCommon from './ControlCommon';
 
 /**
  * A class representing a copyright control to display on map.
  * This class only draw an html element, with an empty string in it.
  * Use subclasses to use it in an ol or mapbox map.
  */
-class CopyrightControlCommon
-  extends Control
-  implements CopyrightControlInterface
-{
+class CopyrightControlCommon extends ControlCommon {
   render() {
     if (!this.element) {
       return;

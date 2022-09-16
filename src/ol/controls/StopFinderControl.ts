@@ -1,6 +1,6 @@
+import { Feature, Point } from 'geojson';
 import { fromLonLat } from 'ol/proj';
-import Control from '../../common/controls/Control';
-import mixin from '../../common/mixins/StopFinderMixin';
+import StopFinderControlCommon from '../../common/controls/StopFinderControlCommon';
 
 /**
  * Search stations.
@@ -21,16 +21,13 @@ import mixin from '../../common/mixins/StopFinderMixin';
  *
  *
  * @see <a href="/example/ol-search">Openlayers search example</a>
- *
- * @extends {Control}
- * @implements {StopFinderInterface}
  */
-class StopFinderControl extends mixin(Control) {
+class StopFinderControl extends StopFinderControlCommon {
   /**
    * @private
    */
-  onSuggestionClick({ geometry }) {
-    const coord = fromLonLat(geometry.coordinates);
+  onSuggestionClick(suggestion: Feature) {
+    const coord = fromLonLat((suggestion.geometry as Point).coordinates);
     this.map.getView().setCenter(coord);
   }
 }

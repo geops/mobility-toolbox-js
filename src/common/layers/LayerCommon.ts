@@ -1,11 +1,14 @@
 import BaseObject from 'ol/Object';
 import { v4 as uuid } from 'uuid';
 import BaseEvent from 'ol/events/Event';
-import { Feature } from 'ol';
 import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
-import type { AnyMap } from '../../types';
+import type {
+  AnyMap,
+  LayerGetFeatureInfoOptions,
+  LayerGetFeatureInfoResponse,
+} from '../../types';
 
-export type CommonLayerOptions = {
+export type LayerCommonOptions = {
   key?: string;
   name?: string;
   group?: string;
@@ -51,7 +54,7 @@ export default class Layer extends BaseObject {
 
   disabled?: boolean;
 
-  hitTolerance?: Number;
+  hitTolerance?: number;
 
   properties?: { [x: string]: any };
 
@@ -72,7 +75,7 @@ export default class Layer extends BaseObject {
    * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
    * @param {Object} [options.properties={}] Application-specific layer properties.
    */
-  constructor(options: CommonLayerOptions = {}) {
+  constructor(options: LayerCommonOptions = {}) {
     super();
     this.defineProperties(options);
 
@@ -111,7 +114,7 @@ export default class Layer extends BaseObject {
    *
    * @ignore
    */
-  defineProperties(options: CommonLayerOptions = {}) {
+  defineProperties(options: LayerCommonOptions = {}) {
     const { name, key, properties, hitTolerance } = {
       ...options,
     };
@@ -285,11 +288,11 @@ export default class Layer extends BaseObject {
    * @return {Promise<FeatureInfo>} An empty response.
    */
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-  getFeatureInfoAtCoordinate(coordinate: number[]): Promise<{
-    layer: Layer;
-    features: Feature[];
-    coordinate: number[];
-  }> {
+  getFeatureInfoAtCoordinate(
+    coordinate: number[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    options?: LayerGetFeatureInfoOptions,
+  ): Promise<LayerGetFeatureInfoResponse> {
     // eslint-disable-next-line no-console
     console.error(
       'getFeatureInfoAtCoordinate must be implemented by inheriting layers',

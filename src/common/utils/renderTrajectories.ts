@@ -1,5 +1,14 @@
 /* eslint-disable no-param-reassign */
 import { compose, apply, create } from 'ol/transform';
+import { RealtimeTrajectory } from '../../api/typedefs';
+import {
+  AnyCanvas,
+  RealtimeRenderState,
+  RealtimeStyleFunction,
+  RealtimeStyleOptions,
+  RealtimeTrajectories,
+  ViewState,
+} from '../../types';
 import getVehiclePosition from './getVehiclePosition';
 
 /**
@@ -16,14 +25,14 @@ import getVehiclePosition from './getVehiclePosition';
  * @private
  */
 const renderTrajectories = (
-  canvas,
-  trajectories,
-  style,
-  viewState,
-  options,
-) => {
+  canvas: AnyCanvas,
+  trajectories: RealtimeTrajectories,
+  style: RealtimeStyleFunction,
+  viewState: ViewState,
+  options: RealtimeStyleOptions,
+): RealtimeRenderState => {
   if (!canvas) {
-    return {};
+    return { renderedTrajectories: [] };
   }
 
   const {
@@ -32,11 +41,16 @@ const renderTrajectories = (
     center,
     resolution,
     rotation = 0,
-    pixelRatio,
+    pixelRatio = 1,
   } = viewState;
+
+  if (!resolution || !center) {
+    return { renderedTrajectories: [] };
+  }
+
   const { noInterpolate = false, hoverVehicleId, selectedVehicleId } = options;
   const context = canvas.getContext('2d');
-  context.clearRect(0, 0, canvas.width, canvas.height);
+  context?.clearRect(0, 0, canvas.width, canvas.height);
 
   const [width, height] = size;
   if (width && height && (canvas.width !== width || canvas.height !== height)) {
@@ -55,9 +69,13 @@ const renderTrajectories = (
   );
 
   // Offscreen canvas has not style attribute
-  if (canvas.style) {
-    canvas.style.width = `${canvas.width / pixelRatio}px`;
-    canvas.style.height = `${canvas.height / pixelRatio}px`;
+  if ((canvas as HTMLCanvasElement).style) {
+    (canvas as HTMLCanvasElement).style.width = `${
+      canvas.width / pixelRatio
+    }px`;
+    (canvas as HTMLCanvasElement).style.height = `${
+      canvas.height / pixelRatio
+    }px`;
   }
 
   let hoverVehicleImg;
@@ -116,11 +134,11 @@ const renderTrajectories = (
       continue;
     }
 
-    const imgWidth = vehicleImg.width;
-    const imgHeight = vehicleImg.height;
+    const imgWidth = vehicleImg.width as number;
+    const imgHeight = vehicleImg.height as number;
 
     if (hoverVehicleId !== id && selectedVehicleId !== id) {
-      context.drawImage(
+      context?.drawImage(
         vehicleImg,
         px[0] - imgWidth / 2,
         px[1] - imgHeight / 2,
@@ -148,8 +166,13 @@ const renderTrajectories = (
     renderedTrajectories.push(trajectory);
   }
 
-  if (selectedVehicleImg) {
-    context.drawImage(
+  if (
+    selectedVehicleImg &&
+    selectedVehiclePx &&
+    selectedVehicleWidth &&
+    selectedVehicleHeight
+  ) {
+    context?.drawImage(
       selectedVehicleImg,
       selectedVehiclePx[0] - selectedVehicleWidth / 2,
       selectedVehiclePx[1] - selectedVehicleHeight / 2,
@@ -158,8 +181,13 @@ const renderTrajectories = (
     );
   }
 
-  if (hoverVehicleImg) {
-    context.drawImage(
+  if (
+    hoverVehicleImg &&
+    hoverVehiclePx &&
+    hoverVehicleWidth &&
+    hoverVehicleHeight
+  ) {
+    context?.drawImage(
       hoverVehicleImg,
       hoverVehiclePx[0] - hoverVehicleWidth / 2,
       hoverVehiclePx[1] - hoverVehicleHeight / 2,

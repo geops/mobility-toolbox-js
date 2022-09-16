@@ -73,7 +73,9 @@ describe('VectorLayer', () => {
     expect(spy3.mock.calls[0][1].layerFilter(layer.olLayer)).toBe(true);
     expect(spy3.mock.calls[0][1].layerFilter({})).toBe(false);
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
+    expect(onClick.mock.calls[0][0]).toBe(features);
+    expect(onClick.mock.calls[0][1]).toBe(layer);
+    expect(onClick.mock.calls[0][2]).toBe(coordinate);
   });
 
   test('should clone', () => {

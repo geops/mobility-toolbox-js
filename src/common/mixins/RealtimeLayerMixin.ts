@@ -9,40 +9,82 @@ import GeoJSON from 'ol/format/GeoJSON';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
+import { EventsKey } from 'ol/events';
+import { ObjectEvent } from 'ol/Object';
+import { Coordinate } from 'ol/coordinate';
+import { Feature } from 'ol';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
 import * as trackerConfig from '../utils/trackerConfig';
+import {
+  AnyCanvas,
+  AnyLayerClass,
+  AnyMap,
+  AnyRealtimeLayer,
+  LayerGetFeatureInfoOptions,
+  RealtimeGeneralizationLevel,
+  RealtimeMode,
+  RealtimeRenderState,
+  RealtimeStyleFunction,
+  RealtimeStyleOptions,
+  RealtimeTenant,
+  RealtimeTrainId,
+  ViewState,
+} from '../../types';
+import { RealtimeTrajectory } from '../../api/typedefs';
+import createCanvas from '../utils/createCanvas';
+import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
+import LayerCommon from '../layers/LayerCommon';
+import { OlLayerOptions } from '../../ol/layers/Layer';
+
+export type RealtimeLayerMixinOptions = OlLayerOptions & {
+  debug?: boolean;
+  mode?: RealtimeMode;
+  api?: RealtimeAPI;
+  tenant?: RealtimeTenant;
+  minZoomNonTrain?: number;
+  minZoomInterpolation?: number;
+  isUpdateBboxOnMoveEnd?: boolean;
+  generalizationLevelByZoom?: RealtimeGeneralizationLevel[];
+  renderTimeIntervalByZoom?: number[];
+  style?: RealtimeStyleFunction;
+  speed?: number;
+  pixelRatio?: number;
+  hoverVehicleId?: RealtimeTrainId;
+  selectedVehicleId?: RealtimeTrainId;
+  filter?: FilterFunction;
+  sort?: SortFunction;
+  time?: number;
+  live?: boolean;
+  canvas?: HTMLCanvasElement;
+  styleOptions?: RealtimeStyleOptions;
+  useRequestAnimationFrame?: boolean;
+  useDebounce?: boolean;
+  useThrottle?: boolean;
+  getGeneralizationLevelByZoom?: (
+    zoom: number,
+    generalizationLevelByZoom: RealtimeGeneralizationLevel[],
+  ) => RealtimeGeneralizationLevel;
+  getRenderTimeIntervalByZoom?: (
+    zoom: number,
+    renderTimeIntervalByZoom: number[],
+  ) => number;
+
+  // From RealtimeAPIOptions
+  url?: string;
+  apiKey?: string;
+  prefix?: string;
+  projection?: string;
+  bbox?: (number | string)[];
+  buffer?: number[];
+  pingIntervalMs?: number;
+};
 
 /**
  * RealtimeLayerInterface.
  */
 export class RealtimeLayerInterface {
-  /*
-   * Constructor
-
-   * @param {Object} options Layer options.
-   * @param {string} options.url Realtime service url.
-   * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
-   * @param {boolean} [options.debug=false] Display additional debug informations.
-   * @param {RealtimeMode} [options.mode=RealtimeMode.TOPOGRAPHIC] Realtime's Mode.
-   * @param {number} [options.minZoomInterpolation=8] Minimal zoom when trains positions start to be interpolated.
-   * @param {number} [options.minZoomNonTrain=9] Minimal zoom when non trains vehicles are allowed to be displayed.
-   */
-  constructor(options = {}) {}
-
-  /**
-   * Initialize the layer subscribing to the Realtime api.
-   *
-   * @param {ol/Map~Map} map
-   */
-  attachToMap(map) {}
-
-  /**
-   * Terminate the layer unsubscribing to the Realtime api.
-   */
-  detachFromMap() {}
-
   /**
    * Start the clock.
    */
@@ -59,14 +101,19 @@ export class RealtimeLayerInterface {
    * @param {Array<number>} extent  Extent to request, [minX, minY, maxX, maxY, zoom].
    * @param {number} zoom  Zoom level to request. Must be an integer.
    */
-  setBbox(extent, zoom) {}
+  setBbox(extent: [number, number, number, number], zoom: number) {}
 
   /**
    * Set the Realtime api's mode.
    *
    * @param {RealtimeMode} mode  Realtime mode
    */
-  setMode(mode) {}
+  setMode(mode: RealtimeMode) {}
+
+  /**
+   * Render the trajectories
+   */
+  renderTrajectories() {}
 
   /**
    * Request the stopSequence and the fullTrajectory informations for a vehicle.
@@ -75,7 +122,7 @@ export class RealtimeLayerInterface {
    * @param {RealtimeMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.
    * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
    */
-  getTrajectoryInfos(id, mode) {}
+  getTrajectoryInfos(id: string, mode: RealtimeMode) {}
 }
 
 /**
@@ -85,16 +132,95 @@ export class RealtimeLayerInterface {
  * @return {Class}  A class that implements {RealtimeLayerInterface} class and extends Base;
  * @private
  */
-const RealtimeLayerMixin = (Base) =>
-  class extends Base {
-    constructor(options = {}) {
+function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
+  // @ts-ignore
+  return class Mixin extends Base {
+    debug: boolean;
+
+    trajectories?: { [key: RealtimeTrainId]: RealtimeTrajectory };
+
+    canvas?: AnyCanvas;
+
+    mode: RealtimeMode;
+
+    api: RealtimeAPI;
+
+    tenant: RealtimeTenant;
+
+    time?: Date;
+
+    live?: boolean;
+
+    speed?: number;
+
+    filter?: FilterFunction;
+
+    sort?: SortFunction;
+
+    style?: RealtimeStyleFunction;
+
+    styleOptions?: RealtimeStyleOptions;
+
+    pixelRatio?: number;
+
+    minZoomNonTrain: number;
+
+    minZoomInterpolation: number;
+
+    isUpdateBboxOnMoveEnd: boolean;
+
+    hoverVehicleId?: RealtimeTrainId;
+
+    selectedVehicleId?: RealtimeTrainId;
+
+    renderState?: RealtimeRenderState;
+
+    useRequestAnimationFrame?: boolean;
+
+    useDebounce?: boolean;
+
+    useThrottle?: boolean;
+
+    generalizationLevel?: RealtimeGeneralizationLevel;
+
+    generalizationLevelByZoom: RealtimeGeneralizationLevel[];
+
+    renderTimeIntervalByZoom: number[];
+
+    format: GeoJSON;
+
+    requestId?: number;
+
+    updateTimeInterval?: number;
+
+    updateTimeDelay?: number;
+
+    visibilityRef!: EventsKey;
+
+    selectedVehicle: RealtimeTrajectory;
+
+    getGeneralizationLevelByZoom: (zoom: number) => RealtimeGeneralizationLevel;
+
+    getRenderTimeIntervalByZoom: (zoom: number) => number;
+
+    throttleRenderTrajectories: (
+      viewState: ViewState,
+      noInterpolate?: boolean,
+    ) => void;
+
+    debounceRenderTrajectories: (
+      viewState: ViewState,
+      noInterpolate?: boolean,
+    ) => void;
+
+    constructor(options: RealtimeLayerMixinOptions) {
       super({
         hitTolerance: 10,
         ...options,
       });
 
-      this.debug = options.debug;
-      this.mode = options.mode || RealtimeModes.TOPOGRAPHIC;
+      this.debug = options.debug || false;
+      this.mode = options.mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
       this.api = options.api || new RealtimeAPI(options);
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
@@ -163,7 +289,7 @@ const RealtimeLayerMixin = (Base) =>
      *
      * @ignore
      */
-    defineProperties(options) {
+    defineProperties(options: RealtimeLayerMixinOptions) {
       const {
         style,
         speed,
@@ -249,6 +375,7 @@ const RealtimeLayerMixin = (Base) =>
           get: () => currTime,
           set: (newTime) => {
             currTime = newTime && newTime.getTime ? newTime : new Date(newTime);
+            // @ts-ignore  function without parameters is defined in subclasses
             this.renderTrajectories();
           },
         },
@@ -325,7 +452,7 @@ const RealtimeLayerMixin = (Base) =>
       });
     }
 
-    attachToMap(map) {
+    attachToMap(map: AnyMap) {
       super.attachToMap(map);
 
       // If the layer is visible we start  the rendering clock
@@ -334,8 +461,8 @@ const RealtimeLayerMixin = (Base) =>
       }
 
       // On change of visibility we start/stop the rendering clock
-      this.visibilityRef = this.on('change:visible', (evt) => {
-        if (evt.target.visible) {
+      this.visibilityRef = this.on('change:visible', (evt: ObjectEvent) => {
+        if ((evt.target as unknown as LayerCommon).visible) {
           this.start();
         } else {
           this.stop();
@@ -358,13 +485,16 @@ const RealtimeLayerMixin = (Base) =>
 
       this.stop();
       unByKey(this.visibilityRef);
-      const context = this.canvas.getContext('2d');
-      context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      super.detachFromMap();
+      if (this.canvas) {
+        const context = this.canvas.getContext('2d');
+        context?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        super.detachFromMap();
+      }
     }
 
     start() {
       this.stop();
+      // @ts-ignore function without parameters must be define  in subclasses
       this.renderTrajectories();
       this.startUpdateTime();
 
@@ -382,6 +512,7 @@ const RealtimeLayerMixin = (Base) =>
 
       if (this.isUpdateBboxOnMoveEnd) {
         // Update the bbox on each move end
+        // @ts-ignore function without parameters defined by subclasses
         this.setBbox();
       }
     }
@@ -392,12 +523,16 @@ const RealtimeLayerMixin = (Base) =>
      */
     startUpdateTime() {
       this.stopUpdateTime();
-      this.updateTimeDelay = this.getRefreshTimeInMs();
-      this.updateTimeInterval = setInterval(() => {
+      this.updateTimeDelay = this.getRefreshTimeInMs() || 0;
+      this.updateTimeInterval = window.setInterval(() => {
         // When live=true, we update the time with new Date();
-        this.time = this.live
-          ? new Date()
-          : this.time.getTime() + this.updateTimeDelay * this.speed;
+        if (this.live) {
+          this.time = new Date();
+        } else if (this.time && this.updateTimeDelay && this.speed) {
+          this.time = new Date(
+            this.time.getTime() + this.updateTimeDelay * this.speed,
+          );
+        }
       }, this.updateTimeDelay);
     }
 
@@ -414,6 +549,7 @@ const RealtimeLayerMixin = (Base) =>
     stopUpdateTime() {
       if (this.updateTimeInterval) {
         clearInterval(this.updateTimeInterval);
+        this.updateTimeInterval = undefined;
       }
     }
 
@@ -431,29 +567,43 @@ const RealtimeLayerMixin = (Base) =>
      *   during map navigation.
      * @private
      */
-    renderTrajectoriesInternal(viewState, noInterpolate) {
-      if (!this.map) {
+    renderTrajectoriesInternal(
+      viewState: ViewState,
+      noInterpolate: boolean = false,
+    ) {
+      if (!this.map || !this.trajectories) {
         return false;
       }
-      const time = this.live ? Date.now() : this.time;
+      const time = this.live ? Date.now() : this.time?.getTime();
 
       const trajectories = Object.values(this.trajectories);
 
       // console.time('sort');
       if (this.sort) {
+        // @ts-ignore
         trajectories.sort(this.sort);
       }
       // console.timeEnd('sort');
+
+      if (!this.canvas || !this.style) {
+        return true;
+      }
 
       // console.time('render');
       this.renderState = renderTrajectories(
         this.canvas,
         trajectories,
         this.style,
-        { ...viewState, pixelRatio: this.pixelRatio, time },
+        {
+          ...viewState,
+          pixelRatio: this.pixelRatio || 1,
+          time,
+        },
         {
           noInterpolate:
-            viewState.zoom < this.minZoomInterpolation ? true : noInterpolate,
+            (viewState.zoom || 0) < this.minZoomInterpolation
+              ? true
+              : noInterpolate,
           hoverVehicleId: this.hoverVehicleId,
           selectedVehicleId: this.selectedVehicleId,
           ...this.styleOptions,
@@ -479,10 +629,17 @@ const RealtimeLayerMixin = (Base) =>
      *   during map navigation.
      * @private
      */
-    renderTrajectories(viewState, noInterpolate) {
+    renderTrajectories(
+      viewState: ViewState | undefined,
+      noInterpolate: boolean | undefined,
+    ) {
       if (this.requestId) {
         cancelAnimationFrame(this.requestId);
-        this.requestId = null;
+        this.requestId = undefined;
+      }
+
+      if (!viewState) {
+        return;
       }
 
       if (!noInterpolate && this.useRequestAnimationFrame) {
@@ -498,19 +655,25 @@ const RealtimeLayerMixin = (Base) =>
       }
     }
 
-    setBbox(extent, zoom) {
+    setBbox(extent?: [number, number, number, number], zoom?: number) {
       // Clean trajectories before sending the new bbox
       // Purge trajectories:
       // - which are outside the extent
       // - when it's bus and zoom level is too low for them
-      const keys = Object.keys(this.trajectories);
-      for (let i = keys.length - 1; i >= 0; i -= 1) {
-        this.purgeTrajectory(this.trajectories[keys[i]], extent, zoom);
+      if (this.trajectories && extent && zoom) {
+        const keys = Object.keys(this.trajectories);
+        for (let i = keys.length - 1; i >= 0; i -= 1) {
+          this.purgeTrajectory(this.trajectories[keys[i]], extent, zoom);
+        }
       }
 
-      const bbox = [...extent];
+      if (!extent) {
+        return;
+      }
 
-      if (this.isUpdateBboxOnMoveEnd) {
+      const bbox: (number | string)[] = [...extent];
+
+      if (this.isUpdateBboxOnMoveEnd && zoom) {
         bbox.push(zoom);
 
         if (this.tenant) {
@@ -527,7 +690,7 @@ const RealtimeLayerMixin = (Base) =>
       this.api.bbox = bbox;
     }
 
-    setMode(mode) {
+    setMode(mode: RealtimeMode) {
       if (this.mode === mode) {
         return;
       }
@@ -550,10 +713,10 @@ const RealtimeLayerMixin = (Base) =>
      * @private
      * @param {number} zoom
      */
-    getRefreshTimeInMs(zoom) {
-      const roundedZoom = Math.round(zoom);
+    getRefreshTimeInMs(zoom: number | undefined = 0): number {
+      const roundedZoom = zoom !== undefined ? Math.round(zoom) : -1;
       const timeStep = this.getRenderTimeIntervalByZoom(roundedZoom) || 25;
-      const nextTick = Math.max(25, timeStep / this.speed);
+      const nextTick = Math.max(25, timeStep / (this.speed || 1));
       const nextThrottleTick = Math.min(nextTick, 500);
       // TODO: see if this should go elsewhere.
       if (this.useThrottle) {
@@ -581,8 +744,13 @@ const RealtimeLayerMixin = (Base) =>
      * @param {function} filterFc A function use to filter results.
      * @return {Array<Object>} Array of vehicle.
      */
-    getVehicle(filterFc) {
-      return Object.values(this.trajectories).filter(filterFc);
+    getVehicle(filterFc: FilterFunction) {
+      return (
+        (this.trajectories &&
+          // @ts-ignore
+          Object.values(this.trajectories).filter(filterFc)) ||
+        []
+      );
     }
 
     /**
@@ -594,15 +762,19 @@ const RealtimeLayerMixin = (Base) =>
      * @param {number} [options.nb=Infinity] The max number of vehicles to return.
      * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
      */
-    getFeatureInfoAtCoordinate(coordinate, options = {}) {
+    getFeatureInfoAtCoordinate(
+      coordinate: Coordinate,
+      options: LayerGetFeatureInfoOptions,
+    ) {
       const { resolution, nb } = options;
       const ext = buffer(
         [...coordinate, ...coordinate],
         this.hitTolerance * resolution,
       );
-      let trajectories = Object.values(this.trajectories);
+      let trajectories = Object.values(this.trajectories || {});
 
       if (this.sort) {
+        // @ts-ignore
         trajectories = trajectories.sort(this.sort);
       }
 
@@ -632,11 +804,11 @@ const RealtimeLayerMixin = (Base) =>
      * @param {string} id The vehicle identifier (the  train_id property).
      * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
      */
-    getTrajectoryInfos(id) {
+    getTrajectoryInfos(id: RealtimeTrainId) {
       // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
       // Then we combine them in one response and send them to inherited layers.
       const promises = [
-        this.api.getStopSequence(id, this.mode),
+        this.api.getStopSequence(id),
         this.api.getFullTrajectory(id, this.mode, this.generalizationLevel),
       ];
 
@@ -661,13 +833,17 @@ const RealtimeLayerMixin = (Base) =>
      * @return {boolean} if the trajectory must be displayed or not.
      * @ignore
      */
-    purgeTrajectory(trajectory, extent, zoom) {
-      const { type, bounds, train_id: id } = trajectory.properties;
+    purgeTrajectory(
+      trajectory: RealtimeTrajectory,
+      extent: [number, number, number, number],
+      zoom: number,
+    ) {
+      const { type, bounds } = trajectory.properties;
       if (
         !intersects(extent, bounds) ||
         (type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
       ) {
-        this.removeTrajectory(id);
+        this.removeTrajectory(trajectory);
         return true;
       }
       return false;
@@ -678,16 +854,28 @@ const RealtimeLayerMixin = (Base) =>
      * @param {RealtimeTrajectory} trajectory The trajectory to add.
      * @private
      */
-    addTrajectory(trajectory) {
+    addTrajectory(trajectory: RealtimeTrajectory) {
       if (this.filter && !this.filter(trajectory)) {
         return;
       }
+      if (!this.trajectories) {
+        this.trajectories = {};
+      }
       this.trajectories[trajectory.properties.train_id] = trajectory;
+      // @ts-ignore the parameter are set by subclasses
       this.renderTrajectories();
     }
 
-    removeTrajectory(id) {
-      delete this.trajectories[id];
+    removeTrajectory(trajectoryOrId: RealtimeTrajectory | RealtimeTrainId) {
+      let id: string;
+      if (typeof trajectoryOrId !== 'string') {
+        id = trajectoryOrId?.properties?.train_id;
+      } else {
+        id = trajectoryOrId;
+      }
+      if (this.trajectories) {
+        delete this.trajectories[id];
+      }
     }
 
     /**
@@ -696,8 +884,7 @@ const RealtimeLayerMixin = (Base) =>
      * @param evt Event that triggered the function.
      * @private
      */
-    // eslint-disable-next-line no-unused-vars
-    onZoomEnd(evt) {
+    onZoomEnd() {
       this.startUpdateTime();
     }
 
@@ -718,11 +905,11 @@ const RealtimeLayerMixin = (Base) =>
      *
      * @private
      */
-    onTrajectoryMessage(data) {
+    onTrajectoryMessage(data: WebSocketAPIMessageEventData) {
       if (!data.content) {
         return;
       }
-      const trajectory = data.content;
+      const trajectory = data.content as RealtimeTrajectory;
 
       const {
         geometry,
@@ -739,6 +926,7 @@ const RealtimeLayerMixin = (Base) =>
       }
 
       // console.time(`onTrajectoryMessage${data.content.properties.train_id}`);
+      // @ts-ignore   default value for extentand zoom are provided by subclasses
       if (this.purgeTrajectory(trajectory)) {
         return;
       }
@@ -771,12 +959,11 @@ const RealtimeLayerMixin = (Base) =>
      * @private
      * @override
      */
-    onDeleteTrajectoryMessage(data) {
+    onDeleteTrajectoryMessage(data: WebSocketAPIMessageEventData) {
       if (!data.content) {
         return;
       }
-
-      this.removeTrajectory(data.content);
+      this.removeTrajectory(data.content as RealtimeTrajectory);
     }
 
     /**
@@ -786,7 +973,11 @@ const RealtimeLayerMixin = (Base) =>
      * @private
      * @override
      */
-    onFeatureHover(features, layer, coordinate) {
+    onFeatureHover(
+      features: Feature[],
+      layer: AnyRealtimeLayer,
+      coordinate: Coordinate,
+    ) {
       const [feature] = features;
       let id = null;
       if (feature) {
@@ -795,6 +986,7 @@ const RealtimeLayerMixin = (Base) =>
       if (this.hoverVehicleId !== id) {
         /** @ignore */
         this.hoverVehicleId = id;
+        // @ts-ignore
         this.renderTrajectories(true);
       }
     }
@@ -806,7 +998,11 @@ const RealtimeLayerMixin = (Base) =>
      * @private
      * @override
      */
-    onFeatureClick(features, layer, coordinate) {
+    onFeatureClick(
+      features: Feature[],
+      layer: AnyRealtimeLayer,
+      coordinate: Coordinate,
+    ) {
       const [feature] = features;
       let id = null;
       if (feature) {
@@ -816,9 +1012,12 @@ const RealtimeLayerMixin = (Base) =>
         /** @ignore */
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
+
+        // @ts-ignore parameters are provided by subclasses
         this.renderTrajectories(true);
       }
     }
   };
+}
 
 export default RealtimeLayerMixin;

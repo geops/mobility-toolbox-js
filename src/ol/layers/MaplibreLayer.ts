@@ -1,7 +1,6 @@
 import { Map } from 'maplibre-gl';
-import Layer from './Layer';
-import mixin from '../../common/mixins/MapboxLayerMixin';
 import { getMaplibreRender } from '../../common/utils';
+import MapGlLayer, { MapGlLayerOptions } from './MapGlLayer';
 
 /**
  * A class representing MaplibreLayer to display on BasicMap
@@ -17,7 +16,7 @@ import { getMaplibreRender } from '../../common/utils';
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
-export default class MaplibreLayer extends mixin(Layer) {
+export default class MaplibreLayer extends MapGlLayer {
   getOlLayerRender() {
     return getMaplibreRender(this);
   }
@@ -32,7 +31,7 @@ export default class MaplibreLayer extends mixin(Layer) {
    * @param {Object} newOptions Options to override
    * @return {MapboxLayer} A MapboxLayer
    */
-  clone(newOptions) {
+  clone(newOptions: MapGlLayerOptions) {
     return new MaplibreLayer({ ...this.options, ...newOptions });
   }
 }

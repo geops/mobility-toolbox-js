@@ -1,7 +1,11 @@
+import { EventsKey } from 'ol/events';
 import { unByKey } from 'ol/Observable';
 import { transformExtent } from 'ol/proj';
-import LayerCommon from '../../common/layers/Layer';
+import LayerCommon, {
+  LayerCommonOptions,
+} from '../../common/layers/LayerCommon';
 import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
+import { AnyMapboxMap, UserInteractionCallback } from '../../types';
 
 /**
  * A class representing a layer to display on an OpenLayers map.
@@ -19,11 +23,31 @@ import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixi
  * @extends {Layer}
  */
 class Layer extends userInteractionsMixin(LayerCommon) {
+  options!: LayerCommonOptions;
+
+  onChangeVisibleKey?: EventsKey;
+
+  /* userInteractionsMixin */
+
+  userInteractions?: boolean;
+
+  userClickInteractions?: boolean;
+
+  userHoverInteractions?: boolean;
+
+  userClickCallbacks?: UserInteractionCallback[];
+
+  userHoverCallbacks?: UserInteractionCallback[];
+
+  onUserClickCallback!: () => void;
+
+  onUserMoveCallback!: () => void;
+
   /**
    * Initialize the layer and listen to user events.
-   * @param {ol/Map~Map} map
+   * @param {mapboxgl.Map|maplibregl.Map} map
    */
-  attachToMap(map) {
+  attachToMap(map: AnyMapboxMap) {
     super.attachToMap(map);
 
     if (!this.map) {
@@ -33,6 +57,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
     if (this.userInteractions) {
       this.toggleVisibleListeners();
       this.onChangeVisibleKey = this.on(
+        // @ts-ignore
         'change:visible',
         this.toggleVisibleListeners,
       );
@@ -42,6 +67,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
   detachFromMap() {
     if (this.map) {
       this.deactivateUserInteractions();
+      // @ts-ignore
       unByKey(this.onChangeVisibleKey);
     }
     super.detachFromMap();
@@ -53,7 +79,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
       this.map &&
       this.userInteractions &&
       this.userClickInteractions &&
-      this.userClickCallbacks.length
+      this.userClickCallbacks?.length
     ) {
       this.map.on('click', this.onUserClickCallback);
     }
@@ -62,7 +88,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
       this.map &&
       this.userInteractions &&
       this.userHoverInteractions &&
-      this.userHoverCallbacks.length
+      this.userHoverCallbacks?.length
     ) {
       this.map.on('mousemove', this.onUserMoveCallback);
     }
@@ -111,7 +137,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
    * @param {Object} newOptions Options to override
    * @return {Layer} A Layer
    */
-  clone(newOptions) {
+  clone(newOptions: LayerCommonOptions) {
     return new Layer({ ...this.options, ...newOptions });
   }
 }

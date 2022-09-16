@@ -201,15 +201,15 @@ const realtimeDefaultStyle = (
     useDelayStyle,
     delayOutlineColor = '#000',
     delayDisplay = 300000,
-    getRadius,
-    getBgColor,
-    getDelayColor,
-    getDelayText,
-    getTextColor,
-    getTextSize,
+    getRadius = () => 0,
+    getBgColor = () => '#000',
+    getDelayColor = () => '#000',
+    getDelayText = () => null,
+    getTextColor = () => '#000',
+    getTextSize = () => 0,
   } = options;
 
-  const { zoom, pixelRatio } = viewState;
+  const { zoom, pixelRatio = 1 } = viewState;
   let { type } = trajectory.properties;
   const {
     train_id: id,
@@ -346,8 +346,8 @@ const realtimeDefaultStyle = (
       const hasStroke = isDisplayStrokeAndDelay || hover || selected;
 
       const hasDash =
-        isDisplayStrokeAndDelay &&
-        useDelayStyle &&
+        !!isDisplayStrokeAndDelay &&
+        !!useDelayStyle &&
         delay === null &&
         operatorProvidesRealtime === 'yes';
 
@@ -365,14 +365,16 @@ const realtimeDefaultStyle = (
       }
 
       // Draw text in the circle
-      if (mustDrawText) {
+      if (mustDrawText && ctx) {
         const fontSize = Math.max(radius, 10);
         const textSize = getTextSize(ctx, markerSize, name, fontSize);
         const textColor2 = !useDelayStyle
           ? textColor || getTextColor(type)
           : '#000000';
         const hasStroke2 =
-          useDelayStyle && delay === null && operatorProvidesRealtime === 'yes';
+          !!useDelayStyle &&
+          delay === null &&
+          operatorProvidesRealtime === 'yes';
 
         const text = getTextCanvas(
           name,

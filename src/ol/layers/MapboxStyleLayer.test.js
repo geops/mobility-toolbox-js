@@ -89,7 +89,9 @@ describe('MapboxStyleLayer', () => {
     expect(onClick).toHaveBeenCalledTimes(0);
     await map.dispatchEvent(evt);
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
+    expect(onClick.mock.calls[0][0]).toEqual(features);
+    expect(onClick.mock.calls[0][1]).toBe(layer);
+    expect(onClick.mock.calls[0][2]).toBe(coordinate);
     layer.detachFromMap();
   });
 

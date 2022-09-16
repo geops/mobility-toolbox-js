@@ -3,9 +3,17 @@ import { unByKey } from 'ol/Observable';
 import { getWidth, getHeight } from 'ol/extent';
 import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
+import { Coordinate } from 'ol/coordinate';
+import { Feature } from 'ol';
 import mixin from '../../common/mixins/RealtimeLayerMixin';
 import Layer from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
+import {
+  AnyMapboxMap,
+  LayerGetFeatureInfoOptions,
+  LayerGetFeatureInfoResponse,
+} from '../../types';
+import { RealtimeTrajectory } from '../../api/typedefs';
 
 /**
  * Responsible for loading and display data from a Realtime service.
@@ -24,6 +32,7 @@ import { getSourceCoordinates, getMercatorResolution } from '../utils';
  * @extends {Layer}
  * @implements {RealtimeLayerInterface}
  */
+// @ts-ignore
 class RealtimeLayer extends mixin(Layer) {
   constructor(options = {}) {
     super({
@@ -53,17 +62,12 @@ class RealtimeLayer extends mixin(Layer) {
    * @param {string} beforeId Layer's id before which we want to add the new layer.
    * @override
    */
-  attachToMap(map, beforeId) {
+  // @ts-ignore
+  attachToMap(map: AnyMapboxMap, beforeId: string) {
     if (!map) {
       return;
     }
-
-    const canvas = map.getCanvas();
-
-    super.attachToMap(map, {
-      width: canvas.width / this.pixelRatio,
-      height: canvas.height / this.pixelRatio,
-    });
+    super.attachToMap(map);
 
     this.source = {
       type: 'canvas',
@@ -105,6 +109,7 @@ class RealtimeLayer extends mixin(Layer) {
     if (this.map) {
       this.map.off('load', this.onLoad);
 
+      // @ts-ignore
       this.listeners.forEach((listener) => {
         unByKey(listener);
       });
@@ -160,7 +165,9 @@ class RealtimeLayer extends mixin(Layer) {
    * Function triggered when the user moves the cursor over the map.
    * @override
    */
-  onUserMoveCallback(evt) {
+  onUserMoveCallback(
+    evt: mapboxgl.MapLayerMouseEvent | maplibregl.MapMouseEvent,
+  ) {
     super.onUserMoveCallback({
       coordinate: fromLonLat(evt.lngLat.toArray()),
       ...evt,
@@ -172,9 +179,13 @@ class RealtimeLayer extends mixin(Layer) {
    * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
    * @overrides
    */
-  renderTrajectories(noInterpolate) {
+  // @ts-ignore
+  renderTrajectories(noInterpolate?: boolean = false) {
     if (!this.map) {
       return;
+    }
+    if (!this.pixelRatio) {
+      this.pixelRatio = 1;
     }
 
     const { width, height } = this.map.getCanvas();
@@ -185,7 +196,10 @@ class RealtimeLayer extends mixin(Layer) {
       x: 0,
       y: height / this.pixelRatio,
     }); // southWest
-    const rightTop = this.map.unproject({ x: width / this.pixelRatio, y: 0 }); // north east
+    const rightTop = this.map.unproject({
+      x: width / this.pixelRatio,
+      y: 0,
+    }); // north east
 
     const coord0 = transformRotate(
       point([leftBottom.lng, leftBottom.lat]),
@@ -228,7 +242,10 @@ class RealtimeLayer extends mixin(Layer) {
     return super.getRefreshTimeInMs(this.map.getZoom());
   }
 
-  getFeatureInfoAtCoordinate(coordinate, options = {}) {
+  getFeatureInfoAtCoordinate(
+    coordinate: Coordinate,
+    options = {},
+  ): Promise<LayerGetFeatureInfoResponse> {
     const resolution = getMercatorResolution(this.map);
     return super.getFeatureInfoAtCoordinate(coordinate, {
       resolution,
@@ -255,7 +272,11 @@ class RealtimeLayer extends mixin(Layer) {
    *
    * @private
    */
-  purgeTrajectory(trajectory, extent, zoom) {
+  purgeTrajectory(
+    trajectory: RealtimeTrajectory,
+    extent: [number, number, number, number],
+    zoom: number,
+  ) {
     return super.purgeTrajectory(
       trajectory,
       extent || this.getMercatorExtent(),
@@ -266,7 +287,7 @@ class RealtimeLayer extends mixin(Layer) {
   /**
    * Send the current bbox to the websocket
    */
-  setBbox(extent, zoom) {
+  setBbox(extent?: [number, number, number, number], zoom?: number) {
     let newExtent = extent;
     let newZoom = zoom;
     if (!newExtent && this.isUpdateBboxOnMoveEnd) {
@@ -285,7 +306,10 @@ class RealtimeLayer extends mixin(Layer) {
     this.renderTrajectories();
   }
 
-  renderTrajectoriesInternal(viewState, noInterpolate) {
+  renderTrajectoriesInternal(
+    viewState: ViewState,
+    noInterpolate: boolean = false,
+  ) {
     const render = super.renderTrajectoriesInternal(viewState, noInterpolate);
     if (render && this.map.style) {
       const extent = getSourceCoordinates(this.map, this.pixelRatio);
@@ -317,7 +341,11 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    * @override
    */
-  onFeatureHover(features, layer, coordinate) {
+  onFeatureHover(
+    features: Feature[],
+    layer: RealtimeLayer,
+    coordinate: Coordinate,
+  ) {
     super.onFeatureHover(features, layer, coordinate);
     this.map.getCanvasContainer().style.cursor = features.length
       ? 'pointer'

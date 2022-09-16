@@ -5,6 +5,21 @@
 /* eslint-disable max-classes-per-file */
 import { fromLonLat } from 'ol/proj';
 import { unByKey } from 'ol/Observable';
+import { EventsKey } from 'ol/events';
+import { ObjectEvent } from 'ol/Object';
+import { Coordinate } from 'ol/coordinate';
+import { MapBrowserEvent, MapEvent } from 'ol';
+import { AnyMap, CommonLayerClass, UserInteractionCallback } from '../../types';
+import LayerCommon from '../layers/LayerCommon';
+
+export type UserInteractionsLayerMixinOptions = {
+  userInteractions?: boolean;
+  userClickInteractions?: boolean;
+  userHoverInteractions?: boolean;
+  defaultUserInteractions?: boolean;
+  onClick?: UserInteractionCallback;
+  onHover?: UserInteractionCallback;
+};
 
 /**
  * UserInteractionsLayerInterface.
@@ -26,7 +41,7 @@ export class UserInteractionsLayerInterface {
    *
    * @param {ol/Map~Map} map
    */
-  attachToMap(map) {}
+  attachToMap(map: AnyMap) {}
 
   /**
    * Terminate the layer unsubscribing user interactions.
@@ -46,22 +61,22 @@ export class UserInteractionsLayerInterface {
   /**
    * Subscribe on user:click event.
    */
-  onClick(callback) {}
+  onClick(callback: UserInteractionCallback) {}
 
   /**
    * Subscribe on user:hover event.
    */
-  onHover(callback) {}
+  onHover(callback: UserInteractionCallback) {}
 
   /**
    * Unsubscribe on user:click event.
    */
-  unClick(callback) {}
+  unClick(callback: UserInteractionCallback) {}
 
   /**
    * Unsubscribe on user:hover event.
    */
-  unHover(callback) {}
+  unHover(callback: UserInteractionCallback) {}
 }
 
 /**
@@ -71,9 +86,32 @@ export class UserInteractionsLayerInterface {
  * @return {Class}  A class that implements {UserInteractionsLayerInterface} class and extends Base;
  * @private
  */
-const UserInteractionsLayerMixin = (Base) =>
-  class extends Base {
-    constructor(options = {}) {
+function UserInteractionsLayerMixin<T extends CommonLayerClass>(
+  Base: T,
+): T & typeof LayerCommon {
+  // @ts-ignore
+  return class extends Base {
+    userInteractions: boolean;
+
+    userClickInteractions: boolean;
+
+    userHoverInteractions: boolean;
+
+    defaultUserInteractions: boolean;
+
+    userClickCallbacks: UserInteractionCallback[];
+
+    userHoverCallbacks: UserInteractionCallback[];
+
+    userClickEventsKeys: EventsKey[];
+
+    userHoverEventsKeys: EventsKey[];
+
+    onFeatureClick?: UserInteractionCallback;
+
+    onFeatureHover?: UserInteractionCallback;
+
+    constructor(options: UserInteractionsLayerMixinOptions = {}) {
       super(options);
 
       const {
@@ -106,8 +144,8 @@ const UserInteractionsLayerMixin = (Base) =>
       }
     }
 
-    attachToMap(map, options) {
-      super.attachToMap(map, options);
+    attachToMap(map: AnyMap) {
+      super.attachToMap(map);
 
       if (
         this.userInteractions &&
@@ -139,9 +177,12 @@ const UserInteractionsLayerMixin = (Base) =>
       this.userClickCallbacks.forEach((callback) => {
         this.userClickEventsKeys.push(
           this.on(
+            // @ts-ignore
             'user:click',
-            ({ target: { features, layer, coordinate } }) => {
-              callback(features, layer, coordinate);
+            ({
+              target: { features, layer, coordinate, event },
+            }: ObjectEvent) => {
+              callback(features, layer, coordinate, event);
             },
           ),
         );
@@ -149,8 +190,11 @@ const UserInteractionsLayerMixin = (Base) =>
       this.userHoverCallbacks.forEach((callback) => {
         this.userHoverEventsKeys.push(
           this.on(
+            // @ts-ignore
             'user:hover',
-            ({ target: { features, layer, coordinate, event } }) => {
+            ({
+              target: { features, layer, coordinate, event },
+            }: ObjectEvent) => {
               callback(features, layer, coordinate, event);
             },
           ),
@@ -171,7 +215,7 @@ const UserInteractionsLayerMixin = (Base) =>
      *   features,
      *   the layer instance and the click event.
      */
-    onClick(callback) {
+    onClick(callback: UserInteractionCallback) {
       this.userClickCallbacks.push(callback);
       this.activateUserInteractions();
       if (this.map) {
@@ -185,7 +229,7 @@ const UserInteractionsLayerMixin = (Base) =>
      * @param {function} callback Callback function, called with the clicked
      *   features, the layer instance and the click event.
      */
-    onHover(callback) {
+    onHover(callback: UserInteractionCallback) {
       this.userHoverCallbacks.push(callback);
       this.activateUserInteractions();
       if (this.map) {
@@ -200,7 +244,7 @@ const UserInteractionsLayerMixin = (Base) =>
      *   features,
      *   the layer instance and the click event.
      */
-    unClick(callback) {
+    unClick(callback: UserInteractionCallback) {
       const index = this.userClickCallbacks.indexOf(callback);
       if (index !== -1) {
         return;
@@ -218,7 +262,7 @@ const UserInteractionsLayerMixin = (Base) =>
      * @param {function} callback Callback function, called with the clicked
      *   features, the layer instance and the click event.
      */
-    unHover(callback) {
+    unHover(callback: UserInteractionCallback) {
       const index = this.userHoverCallbacks.indexOf(callback);
       if (index !== -1) {
         return;
@@ -235,8 +279,19 @@ const UserInteractionsLayerMixin = (Base) =>
      * Function triggered when the user click the map.
      * @private
      */
-    onUserClickCallback(evt) {
-      const coordinate = evt.coordinate || fromLonLat(evt.lngLat.toArray());
+    onUserClickCallback(
+      evt:
+        | { coordinate: Coordinate }
+        | mapboxgl.MapLayerMouseEvent
+        | maplibregl.MapMouseEvent,
+    ) {
+      const coordinate =
+        (evt as { coordinate: Coordinate }).coordinate ||
+        fromLonLat(
+          (
+            evt as mapboxgl.MapLayerMouseEvent | maplibregl.MapMouseEvent
+          ).lngLat.toArray() as Coordinate,
+        );
       const emptyFeatureInfo = {
         features: [],
         layer: this,
@@ -245,6 +300,7 @@ const UserInteractionsLayerMixin = (Base) =>
       };
       return this.getFeatureInfoAtCoordinate(coordinate)
         .then((featureInfo) => {
+          // @ts-ignore
           this.dispatchEvent({
             type: 'user:click',
             target: featureInfo,
@@ -258,8 +314,19 @@ const UserInteractionsLayerMixin = (Base) =>
      * Function triggered when the user move the cursor.
      * @private
      */
-    onUserMoveCallback(evt) {
-      const coordinate = evt.coordinate || fromLonLat(evt.lngLat.toArray());
+    onUserMoveCallback(
+      evt:
+        | { coordinate: Coordinate }
+        | mapboxgl.MapLayerMouseEvent
+        | maplibregl.MapMouseEvent,
+    ) {
+      const coordinate =
+        (evt as { coordinate: Coordinate }).coordinate ||
+        fromLonLat(
+          (
+            evt as mapboxgl.MapLayerMouseEvent | maplibregl.MapMouseEvent
+          ).lngLat.toArray() as Coordinate,
+        );
       const emptyFeatureInfo = {
         features: [],
         layer: this,
@@ -269,6 +336,7 @@ const UserInteractionsLayerMixin = (Base) =>
 
       return this.getFeatureInfoAtCoordinate(coordinate)
         .then((featureInfo) => {
+          // @ts-ignore
           this.dispatchEvent({
             type: 'user:hover',
             target: featureInfo,
@@ -282,5 +350,6 @@ const UserInteractionsLayerMixin = (Base) =>
 
     deactivateUserInteractions() {}
   };
+}
 
 export default UserInteractionsLayerMixin;
