@@ -285,7 +285,7 @@ class RealtimeLayer extends mixin(Layer) {
    * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onMoveEnd(evt: MapEvent) {
+  onMoveEnd(evt: MapEvent |ObjectEvent) {
     if (this.visible && this.isUpdateBboxOnMoveEnd) {
       this.setBbox();
     }
