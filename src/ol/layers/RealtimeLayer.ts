@@ -18,6 +18,7 @@ import {
   RealtimeTrainId,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
+import { ObjectEvent } from 'ol/Object';
 
 /** @private */
 const format = new GeoJSON();
@@ -65,7 +66,7 @@ class RealtimeLayer extends mixin(Layer) {
 
     /** @ignore */
     this.olLayer =
-      options.olLayer ||
+      options ||.olLayer ||
       new Group({
         layers: [
           new VectorLayer({
@@ -157,8 +158,8 @@ class RealtimeLayer extends mixin(Layer) {
     super.attachToMap(map);
     if (this.map) {
       this.olListenersKeys.push(
-        ...this.map.on(['moveend', 'change:target'], (evt: MapEvent) => {
-          const view = evt.map.getView();
+        ...this.map.on(['moveend', 'change:target'], (evt: MapEvent|ObjectEvent) => {
+          const view = ((evt as MapEvent).map || (evt as ObjectEvent).target).getView();
           if (view.getAnimating() || view.getInteracting()) {
             return;
           }
