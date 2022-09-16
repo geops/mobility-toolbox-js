@@ -600,6 +600,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
           time,
         },
         {
+          filter: this.filter,
           noInterpolate:
             (viewState.zoom || 0) < this.minZoomInterpolation
               ? true

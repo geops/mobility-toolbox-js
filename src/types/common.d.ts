@@ -52,6 +52,7 @@ export type RealtimeStyleOptions = {
     name: string,
     fontSize: number,
   ) => number;
+  filter?: FilterFunction;
 };
 
 export type RealtimeTrajectories = {

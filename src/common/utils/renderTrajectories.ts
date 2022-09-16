@@ -48,7 +48,12 @@ const renderTrajectories = (
     return { renderedTrajectories: [] };
   }
 
-  const { noInterpolate = false, hoverVehicleId, selectedVehicleId } = options;
+  const {
+    noInterpolate = false,
+    hoverVehicleId,
+    selectedVehicleId,
+    filter,
+  } = options;
   const context = canvas.getContext('2d');
   context?.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -90,6 +95,12 @@ const renderTrajectories = (
 
   for (let i = trajectories.length - 1; i >= 0; i -= 1) {
     const trajectory = trajectories[i];
+
+    // Filter out trajectories
+    if (filter && !filter(trajectory)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
     // We simplify the trajectory object
     const { train_id: id, timeOffset } = trajectory.properties;
