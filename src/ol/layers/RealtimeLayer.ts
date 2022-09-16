@@ -6,6 +6,7 @@ import { Vector as VectorSource } from 'ol/source';
 import Feature, { FeatureLike } from 'ol/Feature';
 import { MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
+import { ObjectEvent } from 'ol/Object';
 import Layer from './Layer';
 import mixin, {
   RealtimeLayerMixinOptions,
@@ -18,7 +19,6 @@ import {
   RealtimeTrainId,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
-import { ObjectEvent } from 'ol/Object';
 
 /** @private */
 const format = new GeoJSON();
@@ -66,7 +66,7 @@ class RealtimeLayer extends mixin(Layer) {
 
     /** @ignore */
     this.olLayer =
-      options ||.olLayer ||
+      options.olLayer ||
       new Group({
         layers: [
           new VectorLayer({
@@ -158,21 +158,26 @@ class RealtimeLayer extends mixin(Layer) {
     super.attachToMap(map);
     if (this.map) {
       this.olListenersKeys.push(
-        ...this.map.on(['moveend', 'change:target'], (evt: MapEvent|ObjectEvent) => {
-          const view = ((evt as MapEvent).map || (evt as ObjectEvent).target).getView();
-          if (view.getAnimating() || view.getInteracting()) {
-            return;
-          }
-          const zoom = view.getZoom();
+        ...this.map.on(
+          ['moveend', 'change:target'],
+          (evt: MapEvent | ObjectEvent) => {
+            const view = (
+              (evt as MapEvent).map || (evt as ObjectEvent).target
+            ).getView();
+            if (view.getAnimating() || view.getInteracting()) {
+              return;
+            }
+            const zoom = view.getZoom();
 
-          // Update the interval between render updates
-          if (this.currentZoom !== zoom) {
-            this.onZoomEnd();
-          }
-          this.currentZoom = zoom;
+            // Update the interval between render updates
+            if (this.currentZoom !== zoom) {
+              this.onZoomEnd();
+            }
+            this.currentZoom = zoom;
 
-          this.onMoveEnd(evt);
-        }),
+            this.onMoveEnd(evt);
+          },
+        ),
       );
     }
   }
@@ -285,7 +290,7 @@ class RealtimeLayer extends mixin(Layer) {
    * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onMoveEnd(evt: MapEvent |ObjectEvent) {
+  onMoveEnd(evt: MapEvent | ObjectEvent) {
     if (this.visible && this.isUpdateBboxOnMoveEnd) {
       this.setBbox();
     }
