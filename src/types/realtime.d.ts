@@ -69,7 +69,7 @@ export interface RealtimeTrajectoryProperties {
   operator_provides_realtime_journey: 'unknown' | 'yes' | 'no';
   rake?: string;
   raw_time?: string;
-  routeIdentifier: string;
+  route_identifier: string;
   state: RealtimeTrajectoryState;
   tenant: string;
   time_intervals?: Array<Array<number>>;
@@ -79,9 +79,21 @@ export interface RealtimeTrajectoryProperties {
   train_number?: number;
   type: RealtimeMots;
 
-  // TODO: verify why these properties are used in createTrackerFilter
-  operator?: string; // TODO not sure if this property exists, see createTrackerFilter code.
-  name?: string; // TODO not sure if this property exists, see createTrackerFilter code.
+  operator?: string; // deprecated, operator is an old property, use tenant instead.
+  name?: string; // deprecated, name is an old property, use line.name instead.
+
+  // Tralis
+  event?: string;
+  event_delay?: number;
+  event_timestamp?: number;
+  original_line?: RealtimeLine;
+  original_rake?: string;
+  original_train_number?: number;
+  position_correction?: number;
+  raw_coordinates?: [number, number];
+  ride_state?: string;
+  routeIdentifier?: string;
+  transmitting_vehicle?: string;
 }
 
 export interface RealtimeTrajectory extends Feature {

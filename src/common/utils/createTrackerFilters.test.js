@@ -2,7 +2,7 @@ import createTrackerFilters from './createTrackerFilters';
 
 const u1 = {
   properties: {
-    routeIdentifier: '001.000827.004:7',
+    route_identifier: '001.000827.004:7',
     operator: 'FoO',
     line: {
       name: 'U1',
@@ -12,7 +12,7 @@ const u1 = {
 const ireta = {
   properties: {
     routeIdentifier: '0022.000827.004:7',
-    operator: 'BAR',
+    tenant: 'BAR',
     line: {
       name: 'IRETA',
     },
@@ -20,7 +20,7 @@ const ireta = {
 };
 const arb = {
   properties: {
-    routeIdentifier: '00333.000827.004:7',
+    route_identifier: '00333.000827.004:7',
     operator: 'qux',
     line: {
       name: 'ARB',
@@ -48,7 +48,7 @@ describe('#createTrackerFilter()', () => {
     });
   });
 
-  describe('using route identifier', () => {
+  describe('using route identifier (snake_case and camelCase (only tralis)', () => {
     test('as string', () => {
       const filterFunc = createTrackerFilters(null, '1,foo');
       expect(trajectories.filter(filterFunc)).toEqual([u1]);
@@ -61,9 +61,14 @@ describe('#createTrackerFilter()', () => {
   });
 
   describe('using operator', () => {
-    test('as string', () => {
+    test('as string (using operator deprecated property)', () => {
       const filterFunc = createTrackerFilters(null, null, 'foo');
       expect(trajectories.filter(filterFunc)).toEqual([u1]);
+    });
+
+    test('as string (using tenant property)', () => {
+      const filterFunc = createTrackerFilters(null, null, 'bar');
+      expect(trajectories.filter(filterFunc)).toEqual([ireta]);
     });
 
     test('as array of string', () => {

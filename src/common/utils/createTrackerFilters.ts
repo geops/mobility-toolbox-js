@@ -3,7 +3,7 @@ import { RealtimeTrajectory } from '../../types';
  * Return a filter functions based on some parameters of a vehicle.
  *
  * @param {string|Array<string>} line - A list of vehicle's name to filter. Names can be separated by a comma. Ex: 'S1,S2,S3'
- * @param {string|Array<string} route - A list of vehicle's route (contained in routeIdentifier property) to filter. Indentifiers can be separated by a comma. Ex: 'id1,id2,id3'
+ * @param {string|Array<string} route - A list of vehicle's route (contained in route_identifier property) to filter. Indentifiers can be separated by a comma. Ex: 'id1,id2,id3'
  * @param {string|Array<string} operator  A list of vehicle's operator to filter. Operators can be separated by a comma. Ex: 'SBB,DB'
  * @param {Regexp} regexLine - A regex aplly of vehcile's name.
  * @private
@@ -58,10 +58,11 @@ const createFilters = (
     const routes = typeof route === 'string' ? route.split(',') : route;
     const routeList = routes.map((item) => parseInt(item, 10));
     const routeFilter = (item: RealtimeTrajectory) => {
-      const routeId = parseInt(
-        item.properties.routeIdentifier.split('.')[0],
-        10,
-      );
+      const routeIdentifier =
+        item.properties.route_identifier ||
+        item.properties.routeIdentifier ||
+        '';
+      const routeId = parseInt(routeIdentifier.split('.')[0], 10);
       return routeList.includes(routeId);
     };
     filterList.push(routeFilter);
@@ -70,9 +71,11 @@ const createFilters = (
   if (operator) {
     const operatorList = typeof operator === 'string' ? [operator] : operator;
     const operatorFilter = (item: RealtimeTrajectory) =>
-      operatorList.some((op) =>
-        new RegExp(op, 'i').test(item.properties.operator || ''),
-      );
+      operatorList.some((op) => {
+        // operaotr is the old property tenant is the new one
+        const tenant = item.properties.operator || item.properties.tenant || '';
+        return new RegExp(op, 'i').test(tenant);
+      });
     filterList.push(operatorFilter);
   }
 
