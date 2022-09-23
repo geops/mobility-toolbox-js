@@ -2,12 +2,13 @@
  * Return a filter functions based on some parameters of a vehicle.
  *
  * @param {string|Array<string>} line - A list of vehicle's name to filter. Names can be separated by a comma. Ex: 'S1,S2,S3'
- * @param {string|Array<string} route - A list of vehicle's route (contained in routeIdentifier property) to filter. Indentifiers can be separated by a comma. Ex: 'id1,id2,id3'
- * @param {string|Array<string} operator  A list of vehicle's operator to filter. Operators can be separated by a comma. Ex: 'SBB,DB'
+ * @param {string|Array<string>} route - A list of vehicle's route (contained in routeIdentifier property) to filter. Indentifiers can be separated by a comma. Ex: 'id1,id2,id3'
+ * @param {string|Array<string>} operator  A list of vehicle's operator to filter. Operators can be separated by a comma. Ex: 'SBB,DB'
+ * @param {string|Array<string>} type - A list of vehicle's type to filter.
  * @param {Regexp} regexLine - A regex aplly of vehcile's name.
  * @private
  */
-const createFilters = (line, route, operator, regexLine) => {
+const createFilters = (line, route, operator, type, regexLine) => {
   const filterList = [];
 
   if (!line && !route && !operator && !regexLine) {
@@ -69,6 +70,16 @@ const createFilters = (line, route, operator, regexLine) => {
       );
     filterList.push(operatorFilter);
   }
+
+  if (type) {
+    const typeList = typeof type === 'string' ? [type] : type;
+    const typeFilter = (item) =>
+        typeList.some((op) =>
+            new RegExp(op, 'i').test(item.properties.vehicleType),
+        );
+    filterList.push(typeFilter);
+  }
+
 
   if (!filterList.length) {
     return null;
