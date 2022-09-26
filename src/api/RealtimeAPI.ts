@@ -144,8 +144,12 @@ class RealtimeAPI {
     let { url, projection, bbox, buffer = [100, 100] } = opt;
     const wsApi = new WebSocketAPI();
 
+    if (!url) {
+      url = 'wss://api.geops.io/tracker-ws/v1/';
+    }
+
     if (apiKey) {
-      url = `${url || 'wss://api.geops.io/tracker-ws/v1/'}?key=${apiKey}`;
+      url = `${url}?key=${apiKey}`;
     }
 
     Object.defineProperties(this, {

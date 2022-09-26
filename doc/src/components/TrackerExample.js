@@ -27,7 +27,6 @@ function TrackerExample() {
     control.attachToMap(map);
 
     const tracker = new RealtimeLayer({
-      url: 'wss://api.geops.io/tracker-ws/v1/',
       apiKey: window.apiKey,
     });
 
