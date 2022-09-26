@@ -140,7 +140,7 @@ const TrackerLayerMixin = (Base) =>
      */
     defineProperties(options) {
       // Tracker options use to build the tracker.
-      let { regexPublishedLineName, publishedLineName, tripNumber, operator } =
+      let { regexPublishedLineName, publishedLineName, tripNumber, operator, vehicleType } =
         options;
       const {
         style,
