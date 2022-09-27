@@ -8,7 +8,7 @@ import { RealtimeTrajectory } from '../../types';
  * @param {Regexp} regexLine - A regex aplly of vehcile's name.
  * @private
  */
-const createFilters = (
+const createRealtimeFilters = (
   line: string | string[],
   route: string | string[],
   operator: string | string[],
@@ -93,4 +93,4 @@ const createFilters = (
   };
 };
 
-export default createFilters;
+export default createRealtimeFilters;

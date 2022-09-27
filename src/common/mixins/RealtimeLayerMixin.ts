@@ -16,7 +16,7 @@ import { Feature } from 'ol';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
-import * as trackerConfig from '../utils/trackerConfig';
+import * as realtimeConfig from '../utils/realtimeConfig';
 import {
   AnyCanvas,
   AnyLayerClass,
@@ -327,7 +327,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
          * Custom options to pass as last parameter of the style function.
          */
         styleOptions: {
-          value: { ...trackerConfig, ...(styleOptions || {}) },
+          value: { ...realtimeConfig, ...(styleOptions || {}) },
         },
 
         /**

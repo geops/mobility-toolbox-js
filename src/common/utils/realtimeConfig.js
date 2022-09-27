@@ -1,4 +1,4 @@
-const trackerRadiusMapping = {
+const radiusMapping = {
   0: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
   1: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
   2: [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
@@ -79,7 +79,7 @@ export const getTypeIndex = (type) => {
 export const getRadius = (type, zoom) => {
   try {
     const typeIdx = getTypeIndex(type || 0);
-    return trackerRadiusMapping[typeIdx][zoom];
+    return radiusMapping[typeIdx][zoom];
   } catch (e) {
     return 1;
   }

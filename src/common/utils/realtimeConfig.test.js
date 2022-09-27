@@ -1,4 +1,4 @@
-import { getTypeIndex } from './trackerConfig';
+import { getTypeIndex } from './realtimeConfig';
 
 describe('trackerConfig', () => {
   describe('#getTypeIndex()', () => {
