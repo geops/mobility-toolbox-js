@@ -17,6 +17,7 @@ function FileDocLinkHTML({ doc, text }) {
   if (!doc) return null;
 
   if (text === 'source' && doc.memberof) {
+    console.log(doc);
     return (
       <span>
         <a
@@ -24,6 +25,7 @@ function FileDocLinkHTML({ doc, text }) {
           rel="noreferrer"
           href={`https://github.com/geops/mobility-toolbox-js/blob/master/${doc.memberof
             .split('~')[0]
+            .replace('.js', '.ts')
             .replace('build/', 'src/')}#L${doc.lineNumber}`}
         >
           {text}
