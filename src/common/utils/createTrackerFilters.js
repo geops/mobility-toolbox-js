@@ -73,13 +73,15 @@ const createFilters = (line, route, operator, type, regexLine) => {
 
   if (type) {
     const typeList = typeof type === 'string' ? [type] : type;
-    const typeFilter = (item) =>
-        typeList.some((op) =>
-            new RegExp(op, 'i').test(item.properties.vehicleType),
-        );
+    const typeFilter = (item) => {
+      const thisType = item.properties.vehicleType
+      if (!thisType) {
+        return false;
+      }
+      return typeList.includes(thisType);
+    }
     filterList.push(typeFilter);
   }
-
 
   if (!filterList.length) {
     return null;
