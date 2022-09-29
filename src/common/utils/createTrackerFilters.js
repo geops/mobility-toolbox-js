@@ -11,6 +11,8 @@
 const createFilters = (line, route, operator, type, regexLine) => {
   const filterList = [];
 
+  console.log(type)
+  console.log(line)
   if (!line && !route && !operator && !type && !regexLine) {
     return null;
   }
