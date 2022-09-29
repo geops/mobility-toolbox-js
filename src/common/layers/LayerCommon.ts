@@ -56,7 +56,7 @@ export default class Layer extends BaseObject {
 
   hitTolerance?: number;
 
-  properties?: { [x: string]: any };
+  properties?: { [x: string]: any } = {};
 
   map?: AnyMap;
 
@@ -77,7 +77,7 @@ export default class Layer extends BaseObject {
    * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
    * @param {Object} [options.properties={}] Application-specific layer properties.
    */
-  constructor(options: LayerCommonOptions) {
+  constructor(options: LayerCommonOptions = {}) {
     super();
     this.defineProperties(options);
 
