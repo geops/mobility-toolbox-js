@@ -1,9 +1,11 @@
+import type { RealtimeStyleFunction } from '../../types';
+
 /**
  * A very simple tracker style.
  * Display blue point for each train.
  */
 let canvas: HTMLCanvasElement;
-const realtimeSimpleStyle = () => {
+const realtimeSimpleStyle: RealtimeStyleFunction = () => {
   if (!canvas) {
     canvas = document.createElement('canvas');
     canvas.width = 15;

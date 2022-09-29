@@ -1,4 +1,9 @@
-const sortByDelay = (traj1, traj2) => {
+import type { RealtimeTrajectory } from '../../api/typedefs';
+
+const sortByDelay = (
+  traj1: RealtimeTrajectory,
+  traj2: RealtimeTrajectory,
+): number => {
   const props1 = traj1.properties;
   const props2 = traj2.properties;
 

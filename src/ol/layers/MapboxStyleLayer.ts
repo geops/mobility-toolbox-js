@@ -154,9 +154,9 @@ class MapboxStyleLayer extends Layer {
     }
 
     if (!this.styleLayersFilter && this.styleLayers) {
-      const ids = this.styleLayers.map((s) => s.id);
-      this.styleLayersFilter = (styleLayer: StyleLayer) =>
-        ids.includes(styleLayer.id);
+      this.styleLayersFilter = (styleLayer: StyleLayer) => {
+        return !!this.styleLayers?.find((sl) => styleLayer.id === sl.id);
+      };
     }
   }
 

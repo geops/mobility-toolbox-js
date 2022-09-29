@@ -17,6 +17,8 @@ import MapGlLayer, { MapGlLayerOptions } from './MapGlLayer';
  * @extends {Layer}
  */
 export default class MaplibreLayer extends MapGlLayer {
+  mbMap?: maplibregl.Map;
+
   getOlLayerRender() {
     return getMaplibreRender(this);
   }

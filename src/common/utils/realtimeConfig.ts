@@ -1,15 +1,17 @@
-const radiusMapping = {
-  0: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  1: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  2: [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
-  3: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  4: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  5: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  6: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  7: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  8: [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
-  9: [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
-};
+import { AnyCanvasContext, RealtimeMot } from '../../types';
+
+const radiusMapping: number[][] = [
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
+];
 
 /**
  * Trajserv value: 'Tram',  'Subway / Metro / S-Bahn',  'Train', 'Bus', 'Ferry', 'Cable Car', 'Gondola', 'Funicular', 'Long distance bus', 'Rail',
@@ -18,7 +20,7 @@ const radiusMapping = {
  *
  * @ignore
  */
-export const types = [
+export const types: RegExp[] = [
   /^Tram/i,
   /^Subway( \/ Metro \/ S-Bahn)?/i,
   /^Train/i,
@@ -34,7 +36,7 @@ export const types = [
 /**
  * @ignore
  */
-export const bgColors = [
+export const bgColors: string[] = [
   '#ffb400',
   '#ff5400',
   '#ff8080',
@@ -50,7 +52,7 @@ export const bgColors = [
 /**
  * @ignore
  */
-export const textColors = [
+export const textColors: string[] = [
   '#000000',
   '#ffffff',
   '#000000',
@@ -66,7 +68,7 @@ export const textColors = [
 /**
  * @ignore
  */
-export const getTypeIndex = (type) => {
+export const getTypeIndex = (type: RealtimeMot): number => {
   if (typeof type === 'string') {
     return types.findIndex((t) => t.test(type));
   }
@@ -76,7 +78,7 @@ export const getTypeIndex = (type) => {
 /**
  * @ignore
  */
-export const getRadius = (type, zoom) => {
+export const getRadius = (type: RealtimeMot, zoom: number): number => {
   try {
     const typeIdx = getTypeIndex(type || 0);
     return radiusMapping[typeIdx][zoom];
@@ -88,31 +90,36 @@ export const getRadius = (type, zoom) => {
 /**
  * @ignore
  */
-export const getBgColor = (type = 0) => {
+export const getBgColor = (type: RealtimeMot): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return bgColors[typeIdx];
   } catch (e) {
-    return 1;
+    return '#ffffff';
   }
 };
 
 /**
  * @ignore
  */
-export const getTextColor = (type = 0) => {
+export const getTextColor = (type: RealtimeMot): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return textColors[typeIdx];
   } catch (e) {
-    return 1;
+    return '#ffffff';
   }
 };
 
 /**
  * @ignore
  */
-export const getTextSize = (ctx, markerSize, text, fontSize) => {
+export const getTextSize = (
+  ctx: AnyCanvasContext,
+  markerSize: number,
+  text: string,
+  fontSize: number,
+): number => {
   if (!ctx) {
     return 0;
   }
@@ -138,7 +145,11 @@ export const getTextSize = (ctx, markerSize, text, fontSize) => {
  * @param {boolean} cancelled true if the journey is cancelled.
  * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
  */
-export const getDelayColor = (delayInMs, cancelled, isDelayText) => {
+export const getDelayColor = (
+  delayInMs: number,
+  cancelled: boolean,
+  isDelayText: boolean,
+): string => {
   if (cancelled) {
     return isDelayText ? '#ff0000' : '#a0a0a0'; // red or gray
   }
@@ -163,7 +174,7 @@ export const getDelayColor = (delayInMs, cancelled, isDelayText) => {
 /**
  * @ignore
  */
-export const getDelayText = (delayInMs, cancelled) => {
+export const getDelayText = (delayInMs: number, cancelled: boolean): string => {
   if (cancelled) {
     return String.fromCodePoint(0x00d7);
   }

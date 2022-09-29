@@ -1,28 +1,34 @@
 import { toLonLat } from 'ol/proj';
 import { toDegrees } from 'ol/math';
+import type { FrameState } from 'ol/PluggableMap';
+import type { RenderFunction } from 'ol/layer/Layer';
+import type { MaplibreLayer } from '../../ol';
 
 /**
  * Return the render function fo the olLayer of a MaplibreLayer
  */
-export default function getMaplibreRender(maplibreLayer) {
-  return (frameState) => {
+
+export default function getMaplibreRender(
+  maplibreLayer: MaplibreLayer,
+): RenderFunction {
+  const emptyDiv = document.createElement('div');
+  return (frameState: FrameState) => {
     const { map, mbMap, olLayer } = maplibreLayer;
     if (!map || !mbMap) {
-      return null;
+      return emptyDiv;
     }
 
     const canvas = mbMap.getCanvas();
     const { viewState } = frameState;
 
-    const opacity = olLayer.getOpacity();
-    canvas.style.opacity = opacity;
+    const opacity = olLayer?.getOpacity() || 1;
+    canvas.style.opacity = `${opacity}`;
 
     // adjust view parameters in mapbox
     mbMap.jumpTo({
-      center: toLonLat(viewState.center),
+      center: toLonLat(viewState.center) as [number, number],
       zoom: viewState.zoom - 1,
       bearing: toDegrees(-viewState.rotation),
-      animate: false,
     });
 
     if (!canvas.isConnected) {

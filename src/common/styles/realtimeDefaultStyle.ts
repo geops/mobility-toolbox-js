@@ -1,8 +1,9 @@
-import {
+import type {
   RealtimeTrajectory,
   ViewState,
   StyleCache,
   RealtimeStyleOptions,
+  RealtimeStyleFunction,
 } from '../../types';
 import createCanvas from '../utils/createCanvas';
 
@@ -190,7 +191,7 @@ const cache: StyleCache = {};
  * @param {RealtimeStyleOptions} options Some options to change the rendering
  * @return a canvas
  */
-const realtimeDefaultStyle = (
+const realtimeDefaultStyle: RealtimeStyleFunction = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,

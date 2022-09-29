@@ -36,7 +36,7 @@ import { RealtimeTrajectory } from '../../api/typedefs';
 import createCanvas from '../utils/createCanvas';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
 import LayerCommon from '../layers/LayerCommon';
-import { OlLayerOptions } from '../../ol/layers/Layer';
+import type { OlLayerOptions } from '../../ol/layers/Layer';
 
 export type RealtimeLayerMixinOptions = OlLayerOptions & {
   debug?: boolean;

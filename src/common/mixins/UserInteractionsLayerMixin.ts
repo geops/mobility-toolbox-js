@@ -9,6 +9,7 @@ import { EventsKey } from 'ol/events';
 import { ObjectEvent } from 'ol/Object';
 import { Coordinate } from 'ol/coordinate';
 import { MapBrowserEvent, MapEvent } from 'ol';
+import BaseEvent from 'ol/events/Event';
 import { AnyMap, CommonLayerClass, UserInteractionCallback } from '../../types';
 import LayerCommon from '../layers/LayerCommon';
 
@@ -300,11 +301,9 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
       };
       return this.getFeatureInfoAtCoordinate(coordinate)
         .then((featureInfo) => {
-          // @ts-ignore
-          this.dispatchEvent({
-            type: 'user:click',
-            target: featureInfo,
-          });
+          const event = new BaseEvent('user:click');
+          event.target = featureInfo;
+          this.dispatchEvent(event);
           return featureInfo;
         })
         .catch(() => emptyFeatureInfo);
@@ -336,11 +335,9 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
 
       return this.getFeatureInfoAtCoordinate(coordinate)
         .then((featureInfo) => {
-          // @ts-ignore
-          this.dispatchEvent({
-            type: 'user:hover',
-            target: featureInfo,
-          });
+          const event = new BaseEvent('user:hover');
+          event.target = featureInfo;
+          this.dispatchEvent(event);
           return featureInfo;
         })
         .catch(() => emptyFeatureInfo);

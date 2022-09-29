@@ -26,11 +26,7 @@ export default () => {
 
   const copyright = new CopyrightControl();
   copyright.attachToMap(map);
-  window.apii = new RoutingAPI({
-    url: 'http://balable',
-    apiKey: window.apiKey,
-  });
-  console.log(window.apii);
+
   const control = new RoutingControl({
     element: document.createElement('div'),
     apiKey: window.apiKey,

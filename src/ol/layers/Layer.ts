@@ -4,11 +4,12 @@ import LayerGroup from 'ol/layer/Group';
 import OlLayer from 'ol/layer/Layer';
 import { unByKey } from 'ol/Observable';
 import LayerCommon from '../../common/layers/LayerCommon';
+import type { LayerCommonOptions } from '../../common/layers/LayerCommon';
 import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
 import type { UserInteractionCallback } from '../../types';
 
 export type OlLayerOptions = LayerCommonOptions & {
-  olLayer: OlLayer | LayerGroup;
+  olLayer?: OlLayer;
 };
 
 /**
@@ -27,7 +28,7 @@ export type OlLayerOptions = LayerCommonOptions & {
  * @extends {LayerCommon}
  */
 class Layer extends userInteractionsMixin(LayerCommon) {
-  olLayer?: OlLayer;
+  olLayer?: OlLayer | LayerGroup;
 
   olListenersKeys!: EventsKey[];
 
@@ -151,7 +152,10 @@ class Layer extends userInteractionsMixin(LayerCommon) {
               layer.getSource()?.setAttributions(attributions);
             }
           });
+
+        // @ts-ignore
       } else if (this.olLayer.getSource) {
+        // @ts-ignore
         this.olLayer.getSource()?.setAttributions(attributions);
       }
     }

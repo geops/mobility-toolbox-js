@@ -1,4 +1,4 @@
-import { Feature } from 'ol';
+import type { FeatureLike } from 'ol/Feature';
 import { Style, Fill, Stroke, Circle } from 'ol/style';
 
 /** @private */
@@ -17,7 +17,7 @@ const borderStyle = new Style({
 });
 
 const fullTrajectorystyle = (
-  feature: Feature,
+  feature: FeatureLike,
   resolution: number,
   options: any,
 ): Style[] => {

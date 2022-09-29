@@ -1,4 +1,11 @@
+import { Coordinate } from 'ol/coordinate';
 import GeomType from 'ol/geom/GeometryType';
+import { RealtimeTrajectory } from '../../api/typedefs';
+
+export type VehiclePosition = {
+  coord: Coordinate;
+  rotation: number;
+};
 
 /**
  * Interpolate or not the vehicle position from a trajectory at a specific date.
@@ -8,7 +15,11 @@ import GeomType from 'ol/geom/GeometryType';
  * @param {boolean} noInterpolate If true, the vehicle position is not interpolated on each render but only once.
  * @returns
  */
-const getVehiclePosition = (now, trajectory, noInterpolate) => {
+const getVehiclePosition = (
+  now: number,
+  trajectory: RealtimeTrajectory,
+  noInterpolate: boolean,
+): VehiclePosition => {
   const {
     time_intervals: timeIntervals,
     olGeometry: geometry,

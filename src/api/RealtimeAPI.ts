@@ -36,6 +36,12 @@ export type RealtimeAPIDeparturesById = {
   [index: string]: RealtimeDeparture;
 };
 
+export type RealtimeModesType = {
+  RAW: RealtimeMode;
+  TOPOGRAPHIC: RealtimeMode;
+  SCHEMATIC: RealtimeMode;
+};
+
 /**
  * Enum for Realtime modes.
  * @readonly
@@ -46,9 +52,9 @@ export type RealtimeAPIDeparturesById = {
  * @enum {RealtimeMode}
  */
 export const RealtimeModes = {
-  RAW: 'raw',
-  TOPOGRAPHIC: 'topographic',
-  SCHEMATIC: 'schematic',
+  RAW: 'raw' as RealtimeMode,
+  TOPOGRAPHIC: 'topographic' as RealtimeMode,
+  SCHEMATIC: 'schematic' as RealtimeMode,
 };
 
 /**

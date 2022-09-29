@@ -5,6 +5,7 @@ import Source from 'ol/source/Source';
 import GeoJSON from 'ol/format/GeoJSON';
 import OlMap from 'ol/Map';
 import { Coordinate } from 'ol/coordinate';
+import BaseEvent from 'ol/events/Event';
 import { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';
 import {
   AnyMapboxMap,
@@ -182,11 +183,7 @@ class MapGlLayer extends Layer {
        */
       this.loaded = true;
 
-      // @ts-ignore
-      this.dispatchEvent({
-        type: 'load',
-        target: this,
-      });
+      this.dispatchEvent(new BaseEvent('load'));
     });
 
     this.mbMap.on('idle', this.updateAttribution);
@@ -200,6 +197,7 @@ class MapGlLayer extends Layer {
     const newAttributions = getMapboxMapCopyrights(evt.target) || [];
     if (this.copyrights?.toString() !== newAttributions.toString()) {
       this.copyrights = newAttributions;
+      // @ts-ignore
       this.olLayer?.getSource()?.setAttributions(newAttributions);
     }
   }

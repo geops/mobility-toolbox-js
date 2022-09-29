@@ -62,6 +62,8 @@ export default class Layer extends BaseObject {
 
   parent?: Layer;
 
+  options: LayerCommonOptions = {};
+
   /**
    * Constructor
    *
@@ -75,13 +77,15 @@ export default class Layer extends BaseObject {
    * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
    * @param {Object} [options.properties={}] Application-specific layer properties.
    */
-  constructor(options: LayerCommonOptions = {}) {
+  constructor(options: LayerCommonOptions) {
     super();
     this.defineProperties(options);
 
     if (options.properties) {
       this.setProperties(options.properties);
     }
+
+    this.options = options;
 
     this.visible = options.visible === undefined ? true : !!options.visible;
 

@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+import { RenderFunction } from 'ol/layer/Layer';
 import type { FrameState } from 'ol/PluggableMap';
 import { toLonLat } from 'ol/proj';
 import type { MapboxLayer } from '../../ol';
@@ -7,11 +8,12 @@ import type { MapboxLayer } from '../../ol';
  */
 export default function getMapboxRender(
   mapoxLayer: MapboxLayer,
-): (frameState: FrameState) => HTMLElement {
-  return (frameState) => {
+): RenderFunction {
+  const emptyDiv = document.createElement('div');
+  return (frameState: FrameState) => {
     const { map, mbMap, renderState, olLayer } = mapoxLayer;
     if (!map || !mbMap) {
-      return document.createElement('div');
+      return emptyDiv;
     }
     let changed = false;
     const canvas = mbMap.getCanvas();

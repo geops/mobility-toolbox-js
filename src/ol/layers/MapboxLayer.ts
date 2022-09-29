@@ -100,6 +100,7 @@ export default class MapboxLayer extends MapGlLayer {
       /** @ignore */
       this.copyrights = getMapboxMapCopyrights(this.mbMap) || [];
 
+      // @ts-ignore
       this.olLayer?.getSource()?.setAttributions(this.copyrights);
     });
 

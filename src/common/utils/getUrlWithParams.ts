@@ -4,7 +4,7 @@
  * @param {Object<String,String>} params a list of key/value pair to add to the url.
  * @ignore
  */
-const getUrlWithParams = (url, params) => {
+const getUrlWithParams = (url: string, params: Object): URL => {
   // Clean requets parameters, removing undefined and null values.
   const newUrl = new URL(url);
 

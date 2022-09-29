@@ -1,7 +1,6 @@
-import { Map as MaplibreMap } from 'maplibre-gl';
-import { Map as OlMap } from 'ol';
+import type { Map as OlMap } from 'ol';
 import BaseObject from 'ol/Object';
-import { AnyMap, AnyMapboxMap } from '../../types';
+import type { AnyMap, AnyMapboxMap } from '../../types';
 
 export type ControlCommonOptions = {
   active?: Boolean;

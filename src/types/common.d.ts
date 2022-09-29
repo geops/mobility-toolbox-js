@@ -16,6 +16,7 @@ import type {
 } from '../ol';
 import { RealtimeTrajectory } from '../api/typedefs';
 import CommonLayer, { LayerCommonOptions } from '../common/layers/LayerCommon';
+import { RoutingParameters } from '.';
 
 export type StyleCache = { [key: string]: AnyCanvas };
 
@@ -63,7 +64,7 @@ export type RealtimeStyleFunction = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
-) => CanvasImageSource;
+) => AnyCanvas | null;
 
 export type RealtimeRenderState = {
   center?: Coordinate;
@@ -111,3 +112,7 @@ export type UserInteractionCallback = (
   coordinate: Coordinate,
   event: ObjectEvent,
 ) => void;
+
+export type RoutingGraph = [RoutingParameters.graph, number, number];
+export type RoutingMot = RoutingParameters.mot;
+export type RoutingViaPoint = string | Coordinate;
