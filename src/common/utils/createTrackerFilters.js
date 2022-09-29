@@ -11,7 +11,7 @@
 const createFilters = (line, route, operator, type, regexLine) => {
   const filterList = [];
 
-  if (!line && !route && !operator && !regexLine) {
+  if (!line && !route && !operator && !type && !regexLine) {
     return null;
   }
 
