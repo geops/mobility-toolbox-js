@@ -731,6 +731,7 @@ const TrackerLayerMixin = (Base) =>
       const vehicleType = this.vehicleType || parameters[VEHICLETYPE_FILTER];
       const { regexPublishedLineName } = this;
 
+      console.log(vehicleType)
       // Only overrides filter function if one of this property exists.
       if (publishedName || tripNumber || operator || vehicleType || regexPublishedLineName) {
         // filter is the property in TrackerLayerMixin.
