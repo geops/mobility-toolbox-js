@@ -76,7 +76,7 @@ const createFilters = (line, route, operator, type, regexLine) => {
   if (type) {
     const typeList = typeof type === 'string' ? [type] : type;
     const typeFilter = (item) => {
-      const thisType = item.properties.vehicleType
+      const thisType = item.properties.type
       if (!thisType) {
         return false;
       }
