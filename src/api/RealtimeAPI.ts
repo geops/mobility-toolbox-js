@@ -2,7 +2,6 @@ import WebSocketAPI, {
   WebSocketAPIDataCallback,
   WebSocketAPIMessageEventData,
 } from '../common/api/WebSocketAPI';
-import cleanStopTime from '../common/utils/cleanStopTime';
 import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
 import compareDepartures from '../common/utils/compareDepartures';
 import {
@@ -14,9 +13,11 @@ import {
   RealtimeExtraGeom,
   RealtimeTrainId,
   RealtimeGeneralizationLevel,
-  RealtimeStopSequence,
   RealtimeFullTrajectory,
+  RealtimeTrajectoryResponse,
+  RealtimeStationId,
 } from '../types';
+import { StopSequence } from './typedefs';
 
 export type RealtimeAPIOptions = {
   url?: string;
@@ -84,8 +85,6 @@ class RealtimeAPI {
 
   buffer?: number[];
 
-  subscribedStationUic?: number;
-
   maxDepartureAge!: number;
 
   prefix!: string;
@@ -120,16 +119,10 @@ class RealtimeAPI {
     this.defineProperties(options);
 
     /** @ignore */
-    this.subscribedStationUic = undefined;
-
-    /** @ignore */
     this.departureUpdateTimeout = undefined;
 
     /** @ignore */
     this.maxDepartureAge = 30;
-
-    /** @ignore */
-    this.extraGeoms = {};
 
     /** @ignore */
     this.prefix = options.prefix || '';
@@ -314,7 +307,7 @@ class RealtimeAPI {
    */
   subscribe(
     channel: string,
-    onSuccess: WebSocketAPIDataCallback,
+    onSuccess: WebSocketAPIDataCallback<any>,
     onError?: EventListener,
     quiet: boolean = false,
   ) {
@@ -329,26 +322,26 @@ class RealtimeAPI {
    *
    * @param {string} channel Name of the websocket channel to unsubscribe.
    * @param {string} suffix Suffix to add to the channel name.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {function} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
   unsubscribe(
     channel: string,
     suffix: string = '',
-    cb?: WebSocketAPIDataCallback,
+    onMessage?: WebSocketAPIDataCallback<any>,
   ) {
     this.wsApi.unsubscribe(
       `${channel}${getModeSuffix(
         RealtimeModes.SCHEMATIC,
         RealtimeModes,
       )}${suffix}`,
-      cb,
+      onMessage,
     );
     this.wsApi.unsubscribe(
       `${channel}${getModeSuffix(RealtimeModes.TOPOGRAPHIC, RealtimeModes)}${
         suffix || ''
       }`,
-      cb,
+      onMessage,
     );
   }
 
@@ -434,8 +427,7 @@ class RealtimeAPI {
     onMessage: (departures: RealtimeDepartureExtended[]) => void,
   ) {
     window.clearTimeout(this.departureUpdateTimeout);
-    this.unsubscribeDepartures();
-    this.subscribedStationUic = stationId;
+    this.unsubscribeDepartures(stationId);
     const channel = stationId ? `timetable_${stationId}` : null;
     const departureObject: RealtimeAPIDeparturesById = {};
 
@@ -443,8 +435,8 @@ class RealtimeAPI {
       return;
     }
 
-    const onSuccess: WebSocketAPIDataCallback = (
-      data: WebSocketAPIMessageEventData,
+    const onSuccess: WebSocketAPIDataCallback<RealtimeDeparture> = (
+      data: WebSocketAPIMessageEventData<RealtimeDeparture>,
     ) => {
       if (data.source === channel) {
         const content = (data.content as RealtimeDeparture) || {};
@@ -471,32 +463,32 @@ class RealtimeAPI {
 
   /**
    * Unsubscribe from current departures channel.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {RealtimeStationId} id Station's id
+   * @param {function({data: { content: RealtimeDeparture[] }})} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDepartures(cb?: WebSocketAPIDataCallback) {
-    if (this.subscribedStationUic) {
-      this.unsubscribe(`timetable_${this.subscribedStationUic}`, '', cb);
-      this.subscribedStationUic = undefined;
-    }
+  unsubscribeDepartures(
+    id: RealtimeStationId,
+    onMessage?: WebSocketAPIDataCallback<RealtimeDeparture>,
+  ) {
+    this.unsubscribe(`timetable_${id}`, '', onMessage);
   }
 
   /**
    * Subscribe to the disruptions channel for tenant.
    *
-   * @param {function(news: RealtimeNews)} onMessage Function called on each message of the channel.
+   * @param {function({data: { content: RealtimeNews[] }})} onMessage Function called on each message of the channel.
    */
-  subscribeDisruptions(onMessage: (news: RealtimeNews[]) => void) {
-    this.subscribe(`${this.prefix}newsticker`, (data) => {
-      onMessage(data.content as RealtimeNews[]);
-    });
+  subscribeDisruptions(onMessage: WebSocketAPIDataCallback<RealtimeNews>) {
+    this.subscribe(`${this.prefix}newsticker`, onMessage);
   }
 
   /**
    * Unsubscribe disruptions.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   *
+   * @param {function({data: { content: RealtimeNews[] }})} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDisruptions(cb?: WebSocketAPIDataCallback) {
-    this.unsubscribe(`${this.prefix}newsticker`, '', cb);
+  unsubscribeDisruptions(onMessage?: WebSocketAPIDataCallback<RealtimeNews>) {
+    this.unsubscribe(`${this.prefix}newsticker`, '', onMessage);
   }
 
   /**
@@ -556,72 +548,53 @@ class RealtimeAPI {
    * One message pro station.
    *
    * @param {RealtimeMode} mode Realtime mode.
-   * @param {function(station: Station)} onMessage Function called on each message of the channel.
+   * @param {function({data: { content: RealtimeStation }})} onMessage Function called on each message of the channel.
    */
   subscribeStations(
     mode: RealtimeMode,
-    onMessage: (station: RealtimeStation) => void,
+    onMessage: WebSocketAPIDataCallback<RealtimeStation>,
   ) {
     this.unsubscribeStations();
-    this.subscribe(`station${getModeSuffix(mode, RealtimeModes)}`, (data) => {
-      if (data.content) {
-        onMessage(data.content as RealtimeStation);
-      }
-    });
+    this.subscribe(`station${getModeSuffix(mode, RealtimeModes)}`, onMessage);
   }
 
   /**
    * Unsubscribe to stations channel.
-   * @param {function} cb The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
+   * @param {function({data: { content: RealtimeStation }})} onMessage The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
    */
-  unsubscribeStations(cb?: WebSocketAPIDataCallback) {
-    window.clearTimeout(this.stationUpdateTimeout);
-    this.unsubscribe('station', '', cb);
+  unsubscribeStations(onMessage?: WebSocketAPIDataCallback<RealtimeStation>) {
+    this.unsubscribe('station', '', onMessage);
   }
 
   /**
    * Subscribe to extra_geoms channel.
    *
-   * @param {function(extraGeoms: GeosJSONFeature[])} onMessage Function called on each message of the channel.
+   * @param {function({data: { content: RealtimeExtraGeom }})} onMessage Function called on each message of the channel.
    */
-  subscribeExtraGeoms(onMessage: (extraGeoms: RealtimeExtraGeom[]) => void) {
-    this.subscribe('extra_geoms', (data) => {
-      const extraGeom = data.content as RealtimeExtraGeom;
-
-      if (extraGeom) {
-        const { ref } = extraGeom.properties;
-
-        if (extraGeom.type === 'Feature') {
-          this.extraGeoms[ref] = extraGeom;
-        } else {
-          delete this.extraGeoms[ref];
-        }
-
-        onMessage(
-          Object.keys(this.extraGeoms).map((key) => this.extraGeoms[key]),
-        );
-      }
-    });
+  subscribeExtraGeoms(onMessage: WebSocketAPIDataCallback<RealtimeExtraGeom>) {
+    this.subscribe('extra_geoms', onMessage);
   }
 
   /**
    * Unsubscribe to extra_geoms channel.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {function({data: { content: RealtimeExtraGeom }})} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeExtraGeoms(cb: WebSocketAPIDataCallback) {
-    this.unsubscribe('extra_geoms', '', cb);
+  unsubscribeExtraGeoms(
+    onMessage: WebSocketAPIDataCallback<RealtimeExtraGeom>,
+  ) {
+    this.unsubscribe('extra_geoms', '', onMessage);
   }
 
   /**
    * Subscribe to trajectory channel.
    *
    * @param {RealtimeMode} mode Realtime mode.
-   * @param {function(trajectory: RealtimeTrajectory)} onMessage Function called on each message of the channel.
+   * @param {function({data: { content: RealtimeTrajectoryResponse[] }})} onMessage Function called on each message of the channel.
    * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
   subscribeTrajectory(
     mode: RealtimeMode,
-    onMessage: (response: WebSocketAPIMessageEventData) => void,
+    onMessage: WebSocketAPIDataCallback<RealtimeTrajectoryResponse[]>,
     quiet = false,
   ) {
     this.unsubscribeTrajectory(onMessage);
@@ -635,22 +608,25 @@ class RealtimeAPI {
 
   /**
    * Unsubscribe to trajectory channels.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {v} onMessage Function called on each message of the channel.
+   * @param {function} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeTrajectory(cb: WebSocketAPIDataCallback) {
-    this.unsubscribe(`trajectory`, '', cb);
+  unsubscribeTrajectory(
+    onMessage: WebSocketAPIDataCallback<RealtimeTrajectoryResponse[]>,
+  ) {
+    this.unsubscribe(`trajectory`, '', onMessage);
   }
 
   /**
    * Subscribe to deleted_vhicles channel.
    *
    * @param {RealtimeMode} mode Realtime mode.
-   * @param {function(response: { content: Vehicle })} onMessage Function called on each message of the channel.
+   * @param {function({data: { content: RealtimeTrainId }})} onMessage Function called on each message of the channel.
    * @param {boolean} quiet If true, the subscription will not send GET and SUB requests to the websocket.
    */
   subscribeDeletedVehicles(
     mode: RealtimeMode,
-    onMessage: (response: WebSocketAPIMessageEventData) => void,
+    onMessage: WebSocketAPIDataCallback<RealtimeTrainId>,
     quiet = false,
   ) {
     this.unsubscribeDeletedVehicles(onMessage);
@@ -664,10 +640,12 @@ class RealtimeAPI {
 
   /**
    * Unsubscribe to deleted_vhicles channels.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {function({data: { content: RealtimeTrainId }})} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeDeletedVehicles(cb: WebSocketAPIDataCallback) {
-    this.unsubscribe('deleted_vehicles', '', cb);
+  unsubscribeDeletedVehicles(
+    onMessage: WebSocketAPIDataCallback<RealtimeTrainId>,
+  ) {
+    this.unsubscribe('deleted_vehicles', '', onMessage);
   }
 
   /**
@@ -729,16 +707,18 @@ class RealtimeAPI {
    *
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
+   * @param {function({ data: { content: RealtimeFullTrajectory } }) onMessage Function called on each message of the channel.
    */
-  subscribeFullTrajectory(id: RealtimeTrainId, mode: RealtimeMode) {
+  subscribeFullTrajectory(
+    id: RealtimeTrainId,
+    mode: RealtimeMode,
+    onMessage: WebSocketAPIDataCallback<RealtimeFullTrajectory>,
+  ) {
     // window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeFullTrajectory(id);
     this.subscribe(
       `full_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
-      (data) => {
-        // eslint-disable-next-line no-console
-        console.log('subscribe full_trajectory', data);
-      },
+      onMessage,
       (err) => {
         // eslint-disable-next-line no-console
         console.log('subscribe full_trajectory error', err);
@@ -750,13 +730,13 @@ class RealtimeAPI {
    * Unsubscribe from full_trajectory channel
    *
    * @param {string} id A vehicle id.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {function({ data: { content: RealtimeFullTrajectory } }} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeFullTrajectory(
     id: RealtimeTrainId,
-    cb?: WebSocketAPIDataCallback,
+    onMessage?: WebSocketAPIDataCallback<RealtimeFullTrajectory>,
   ) {
-    this.unsubscribe('full_trajectory', `_${id}`, cb);
+    this.unsubscribe('full_trajectory', `_${id}`, onMessage);
   }
 
   /**
@@ -766,23 +746,13 @@ class RealtimeAPI {
    * @return {Promise<StopSequence>} Returns a stop sequence object.
    */
   getStopSequence(id: RealtimeTrainId) {
-    const params = {
-      channel: `stopsequence_${id}`,
-    };
     return new Promise((resolve, reject) => {
       this.wsApi.get(
-        params,
+        {
+          channel: `stopsequence_${id}`,
+        },
         (data) => {
-          const content = data.content as RealtimeStopSequence[];
-          if (content && content.length) {
-            const stopSequences = content.map((stopSequence) =>
-              cleanStopTime(stopSequence),
-            );
-
-            // Remove the delay from arrivalTime and departureTime
-            resolve(stopSequences);
-          }
-          resolve([]);
+          resolve(data);
         },
         (err) => {
           reject(err);
@@ -806,59 +776,49 @@ class RealtimeAPI {
    * Subscribe to stopsequence channel of a given vehicle.
    *
    * @param {string} id A vehicle id.
-   * @param {function(stopSequence: StopSequence)} onMessage Function called on each message of the channel.
+   * @param {function({ data: { content: StopSequence[] } }) onMessage Function called on each message of the channel.
    */
   subscribeStopSequence(
     id: RealtimeTrainId,
-    onMessage: (stopSequences: RealtimeStopSequence[]) => void,
+    onMessage: WebSocketAPIDataCallback<StopSequence[]>,
   ) {
     window.clearTimeout(this.fullTrajectoryUpdateTimeout);
     this.unsubscribeStopSequence(id);
 
-    this.subscribe(
-      `stopsequence_${id}`,
-      (data) => {
-        const content = data.content as RealtimeStopSequence[];
-        if (content && content.length) {
-          const stopSequences = content.map((stopSequence) =>
-            cleanStopTime(stopSequence),
-          );
-
-          // Remove the delay from arrivalTime and departureTime
-          onMessage(stopSequences);
-        }
-      },
-      (err) => {
-        // eslint-disable-next-line no-console
-        console.log('subscribe stopsequence error', err);
-      },
-    );
+    this.subscribe(`stopsequence_${id}`, onMessage, (err) => {
+      // eslint-disable-next-line no-console
+      console.log('subscribe stopsequence error', err);
+    });
   }
 
   /**
    * Unsubscribe from stopsequence channel
    *
    * @param {string} id A vehicle id.
-   * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {function({ data: { content: StopSequence[] } }} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeStopSequence(id: RealtimeTrainId, cb?: WebSocketAPIDataCallback) {
-    this.unsubscribe(`stopsequence`, `_${id}`, cb);
+  unsubscribeStopSequence(
+    id: RealtimeTrainId,
+    onMessage?: WebSocketAPIDataCallback<StopSequence[]>,
+  ) {
+    this.unsubscribe(`stopsequence`, `_${id}`, onMessage);
   }
 
   /**
    * Subscribe to healthcheck channel.
-   * @param {function} onMessage Callback when the subscribe to healthcheck channel succeeds.
+   * @param {function({ data: { content: string } }} onMessage Callback when the subscribe to healthcheck channel succeeds.
    */
-  subscribeHealthCheck(onMessage: WebSocketAPIDataCallback) {
-    this.unsubscribeHealthCheck();
+  subscribeHealthCheck(onMessage: WebSocketAPIDataCallback<string>) {
+    this.unsubscribeHealthCheck(onMessage);
     this.subscribe('healthcheck', onMessage);
   }
 
   /**
    * Unsubscribe to healthcheck channel.
+   * @param {function({ data: { content: string } }} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeHealthCheck() {
-    this.unsubscribe('healthcheck');
+  unsubscribeHealthCheck(onMessage?: WebSocketAPIDataCallback<string>) {
+    this.unsubscribe('healthcheck', '', onMessage);
   }
 }
 export default RealtimeAPI;
