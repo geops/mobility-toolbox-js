@@ -741,6 +741,7 @@ const TrackerLayerMixin = (Base) =>
           vehicleType,
           regexPublishedLineName,
         );
+        this.renderTrajectories();
       }
     }
 
