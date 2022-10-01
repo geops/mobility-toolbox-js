@@ -86,6 +86,7 @@ const TralisLayerMixin = (TrackerLayer) =>
       this.mode = options.mode || TralisModes.TOPOGRAPHIC;
       this.api = options.api || new TralisAPI(options);
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
+      this.mots = options.mots || [];
       this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.format = new GeoJSON();
       this.generalizationLevelByZoom = options.generalizationLevelByZoom || {
@@ -158,6 +159,10 @@ const TralisLayerMixin = (TrackerLayer) =>
 
         if (this.tenant) {
           bbox.push(`tenant=${this.tenant}`);
+        }
+
+        if(this.mots) {
+          bbox.push(`mots=${this.mots}`);
         }
 
         /* @ignore */
