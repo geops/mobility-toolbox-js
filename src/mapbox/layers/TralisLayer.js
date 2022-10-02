@@ -79,8 +79,10 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @override
    */
    onFeatureClick(features, layer, coordinate) {
-    super.onFeatureClick(features, layer, coordinate);
-    this.highlightTrajectory(this.selectedVehicleId);
+      if (layer.layout.visibility == 'visible') {
+          super.onFeatureClick(features, layer, coordinate);
+          this.highlightTrajectory(this.selectedVehicleId);
+      }
   }
 
   /**
