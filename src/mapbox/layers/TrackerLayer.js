@@ -373,6 +373,7 @@ class TrackerLayer extends mixin(Layer) {
    * @override
    */
   onFeatureHover(features, layer, coordinate) {
+    console.log(layer)
     if(layer.visibility == 'visible') {
       super.onFeatureHover(features, layer, coordinate);
       this.map.getCanvasContainer().style.cursor = features.length
