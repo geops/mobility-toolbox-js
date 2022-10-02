@@ -543,9 +543,8 @@ const TrackerLayerMixin = (Base) =>
         trajectories.sort(this.sort);
       }
       console.log(trajectories)
-      console.log(filter)
       if(this.filter) {
-        console.log("ENTER")
+        console.log(filter)
         trajectories.filter(this.filter);
       }
       console.log(trajectories)
