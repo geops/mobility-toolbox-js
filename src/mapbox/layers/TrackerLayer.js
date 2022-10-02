@@ -373,10 +373,12 @@ class TrackerLayer extends mixin(Layer) {
    * @override
    */
   onFeatureHover(features, layer, coordinate) {
-    super.onFeatureHover(features, layer, coordinate);
-    this.map.getCanvasContainer().style.cursor = features.length
-      ? 'pointer'
-      : 'auto';
+    if(layer.visibility == 'visible') {
+      super.onFeatureHover(features, layer, coordinate);
+      this.map.getCanvasContainer().style.cursor = features.length
+          ? 'pointer'
+          : 'auto';
+    }
   }
 
   /**
