@@ -542,12 +542,9 @@ const TrackerLayerMixin = (Base) =>
       if (this.sort) {
         trajectories.sort(this.sort);
       }
-      console.log(trajectories)
       if(this.filter) {
-        console.log(this.filter)
         trajectories.filter(this.filter);
       }
-      console.log(trajectories)
 
       // console.timeEnd('sort');
       window.trajectories = trajectories;
@@ -748,6 +745,7 @@ const TrackerLayerMixin = (Base) =>
           vehicleType,
           regexPublishedLineName,
         );
+        this.renderTrajectories();
       }
     }
 
