@@ -162,7 +162,7 @@ const TralisLayerMixin = (TrackerLayer) =>
         }
 
         if(this.mots) {
-          bbox.push(`mots=rail`);
+          bbox.push(`mots=bus`);
         }
 
         /* @ignore */
@@ -219,6 +219,7 @@ const TralisLayerMixin = (TrackerLayer) =>
      * Determine if the trajectory is useless and should be removed from the list or not.
      * By default, this function exclude vehicles:
      *  - that have their trajectory outside the current extent and
+     *  - that are not a train and zoom level is lower than layer's minZoomNonTrain property.
      *
      * @param {TralisTrajectory} trajectory
      * @param {Array<number>} extent
@@ -229,7 +230,8 @@ const TralisLayerMixin = (TrackerLayer) =>
     purgeTrajectory(trajectory, extent, zoom) {
       const { type, bounds, train_id: id } = trajectory.properties;
       if (
-        !intersects(extent, bounds)
+        !intersects(extent, bounds) ||
+        (type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
       ) {
         this.removeTrajectory(id);
         return true;
