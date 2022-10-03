@@ -78,37 +78,38 @@ class TrackerLayer extends mixin(Layer) {
     map.addLayer(this.layer, this.beforeId);
 
     this.listeners = [this.on('change:visible', this.onVisibilityChange)];
-    
+
+    const vehicleColor = ["case",
+      ["!=", ["get", "stroke"], null], ["get", "stroke"],
+      ["match", ["get", "typeIdx"],
+        0, '#ffb400',
+        1, '#ff5400',
+        2, '#ff8080',
+        3, '#ea0000',
+        4, '#3000ff',
+        5, '#ffb400',
+        6, '#41a27b',
+        7, '#00d237',
+        8, '#b5b5b5',
+        9, '#ff8080',
+        '#ff0000'
+      ]
+    ]
     this.trajectLineLayer = {
       id: "trajectoryLine",
       type: "line",
       source: "selectedLineTraject",
       paint: {
         "line-width": 4,
-        "line-color": ["case",
-          ["!=", ["get", "stroke"], null], ["get", "stroke"],
-          ["match", ["get", "typeIdx"],
-            0, '#ffb400',
-            1, '#ff5400',
-            2, '#ff8080',
-            3, '#ea0000',
-            4, '#3000ff',
-            5, '#ffb400',
-            6, '#41a27b',
-            7, '#00d237',
-            8, '#b5b5b5',
-            9, '#ff8080',
-            '#ff0000'
-          ]
-        ],
+        "line-color": vehicleColor,
         'line-gradient': [
           'interpolate',
           ['linear'],
           ['line-progress'],
           0,
-          '#808080',
+          '#989898',
           1,
-          '#ea0000',
+          vehicleColor,
         ]
       },
       filter: ['==', ["geometry-type"], 'LineString']
@@ -130,22 +131,7 @@ class TrackerLayer extends mixin(Layer) {
       source: "selectedLineTraject",
       paint: {
         'circle-radius': 4,
-        'circle-color': ["case",
-          ["!=", ["get", "stroke"], null], ["get", "stroke"],
-          ["match", ["get", "typeIdx"],
-            0, '#ffb400',
-            1, '#ff5400',
-            2, '#ff8080',
-            3, '#ea0000',
-            4, '#3000ff',
-            5, '#ffb400',
-            6, '#41a27b',
-            7, '#00d237',
-            8, '#b5b5b5',
-            9, '#ff8080',
-            '#ff0000'
-          ]
-        ]
+        'circle-color': vehicleColor
       },
       filter: ['==', ["geometry-type"], 'Point']
     }
