@@ -160,7 +160,7 @@ class TrackerLayer extends mixin(Layer) {
       filter: ['==', ["geometry-type"], 'Point']
     }
 
-    map.addSource("selectedLineTraject", {"type": "geojson", "data": {"type": "FeatureCollection", "features": []}})
+    map.addSource("selectedLineTraject", {"type": "geojson","lineMetrics": true, "data": {"type": "FeatureCollection", "features": []}})
     map.addLayer(this.trajectLineLayer, this.key)
     map.addLayer(this.trajectLineLayerBorder, "trajectoryLine")
     map.addLayer(this.trajectStopsLayer, "trajectoryLine")
