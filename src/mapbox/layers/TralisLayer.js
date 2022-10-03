@@ -79,7 +79,6 @@ class TralisLayer extends mixin(TrackerLayer) {
    * @override
    */
    onFeatureClick(features, layer, coordinate) {
-       console.log(this.map.getLayer(this.key).visibility == 'visible')
       if (this.map.getLayer(this.key).visibility == 'visible') {
           super.onFeatureClick(features, layer, coordinate);
           this.highlightTrajectory(this.selectedVehicleId);

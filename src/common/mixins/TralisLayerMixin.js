@@ -162,7 +162,7 @@ const TralisLayerMixin = (TrackerLayer) =>
         }
 
         if(this.mots) {
-          bbox.push(`mots=bus`);
+          bbox.push(`mots=${this.mots}`);
         }
 
         /* @ignore */
