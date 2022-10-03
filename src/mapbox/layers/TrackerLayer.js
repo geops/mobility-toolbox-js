@@ -106,24 +106,9 @@ class TrackerLayer extends mixin(Layer) {
           ['linear'],
           ['line-progress'],
           0,
-          'grey',
+          '#808080',
           1,
-          ["case",
-            ["!=", ["get", "stroke"], null], ["get", "stroke"],
-            ["match", ["get", "typeIdx"],
-              0, '#ffb400',
-              1, '#ff5400',
-              2, '#ff8080',
-              3, '#ea0000',
-              4, '#3000ff',
-              5, '#ffb400',
-              6, '#41a27b',
-              7, '#00d237',
-              8, '#b5b5b5',
-              9, '#ff8080',
-              '#ff0000'
-            ]
-          ]
+          '#ea0000',
         ]
       },
       filter: ['==', ["geometry-type"], 'LineString']
