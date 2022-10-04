@@ -98,10 +98,12 @@ class TralisLayer extends mixin(TrackerLayer) {
         .getFullTrajectory(id, this.mode, this.generalizationLevel)
         .then((fullTrajectory) => {
            const type = fullTrajectory.features[0].properties.type
+           const typeIdx =  getTypeIndex(type)
            fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
 
+          let lineColor = this.typeToColor(typeIdx)
+
           const stroke = fullTrajectory.features[0].properties.stroke
-          let lineColor = '#ff0000'
           if (stroke && stroke[0] !== '#') {
             lineColor = `#${stroke}`
             fullTrajectory.features[0].properties.stroke = lineColor;
@@ -126,10 +128,45 @@ class TralisLayer extends mixin(TrackerLayer) {
               lineColor
           ]
           this.map.getSource("selectedLineTraject").setData(fullTrajectory)
-          this.map.setPaintProperty('trajectoryLine', 'line_gradient', linePaintInterpolation)
+          if(this.map.getLayer('trajectoryLine')) {
+              console.log('setColor!!')
+              this.map.setPaintProperty('trajectoryLine', 'line_gradient', linePaintInterpolation)
 
+          }
         })
     }
+  }
+
+    /**
+     * Provide the color of a vehicle based on its type
+     * @param typeIdx The type index of the vehicle
+     * @private
+     */
+  typeToColor(typeIdx) {
+      switch (typeIdx) {
+          case 0:
+              return '#ffb400';
+          case 1:
+              return '#ff5400';
+          case 0:
+              return '#ff8080';
+          case 0:
+              return '#ea0000';
+          case 0:
+              return '#3000ff';
+          case 0:
+              return '#ffb400';
+          case 0:
+              return '#41a27b';
+          case 0:
+              return '#00d237';
+          case 0:
+              return '#b5b5b5';
+          case 0:
+              return '#ff8080';
+          default:
+              return '#ff0000';
+      }
   }
 
   /**
