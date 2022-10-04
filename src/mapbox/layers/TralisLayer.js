@@ -1,7 +1,7 @@
 import TrackerLayer from './TrackerLayer';
 import mixin from '../../common/mixins/TralisLayerMixin';
 import { toLonLat } from 'ol/proj';
-import { getTypeIndex } from '../../common/trackerConfig';
+import {bgColors, types, getTypeIndex} from '../../common/trackerConfig';
 
 /**
  * Responsible for loading and display data from a Tralis service.
@@ -98,15 +98,15 @@ class TralisLayer extends mixin(TrackerLayer) {
         .getFullTrajectory(id, this.mode, this.generalizationLevel)
         .then((fullTrajectory) => {
            const type = fullTrajectory.features[0].properties.type
-           const typeIdx =  getTypeIndex(type)
            fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
 
-          let lineColor = this.typeToColor(typeIdx)
-
-          const stroke = fullTrajectory.features[0].properties.stroke
-          if (stroke && stroke[0] !== '#') {
-            lineColor = `#${stroke}`
+          let lineColor = fullTrajectory.features[0].properties.stroke
+          if (lineColor && lineColor[0] !== '#') {
+            lineColor = `#${lineColor}`
             fullTrajectory.features[0].properties.stroke = lineColor;
+          }
+          else if(!lineColor){
+              lineColor = bgColors[types.findIndex((t) => t.test(type))]
           }
 
           fullTrajectory.features[0].geometry.geometries.forEach(element => {
@@ -125,7 +125,7 @@ class TralisLayer extends mixin(TrackerLayer) {
               0,
               '#989898',
               1,
-              lineColor
+              '#ff8080'
           ]
           this.map.getSource("selectedLineTraject").setData(fullTrajectory)
           if(this.map.getLayer('trajectoryLine')) {
