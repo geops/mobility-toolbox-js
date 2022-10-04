@@ -117,7 +117,6 @@ class TralisLayer extends mixin(TrackerLayer) {
             element.coordinates = newCoords
           });
 
-          console.log(lineColor)
           const linePaintInterpolation = [
               'interpolate',
               ['linear'],
@@ -125,48 +124,13 @@ class TralisLayer extends mixin(TrackerLayer) {
               0,
               '#989898',
               1,
-              '#ff8080'
+              lineColor
           ]
           this.map.getSource("selectedLineTraject").setData(fullTrajectory)
-          if(this.map.getLayer('trajectoryLine')) {
-              console.log('setColor!!')
-              this.map.setPaintProperty('trajectoryLine', 'line_gradient', linePaintInterpolation)
+          this.map.setPaintProperty('trajectoryLine', 'line-gradient', linePaintInterpolation)
 
-          }
         })
     }
-  }
-
-    /**
-     * Provide the color of a vehicle based on its type
-     * @param typeIdx The type index of the vehicle
-     * @private
-     */
-  typeToColor(typeIdx) {
-      switch (typeIdx) {
-          case 0:
-              return '#ffb400';
-          case 1:
-              return '#ff5400';
-          case 2:
-              return '#ff8080';
-          case 3:
-              return '#ea0000';
-          case 4:
-              return '#3000ff';
-          case 5:
-              return '#ffb400';
-          case 6:
-              return '#41a27b';
-          case 7:
-              return '#00d237';
-          case 8:
-              return '#b5b5b5';
-          case 9:
-              return '#ff8080';
-          default:
-              return '#ff0000';
-      }
   }
 
   /**
