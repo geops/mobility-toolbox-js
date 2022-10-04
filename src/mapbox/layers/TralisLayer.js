@@ -122,7 +122,7 @@ class TralisLayer extends mixin(TrackerLayer) {
               ['linear'],
               ['line-progress'],
               0,
-              '#989898',
+              '#D3D3D3',
               1,
               lineColor
           ]
