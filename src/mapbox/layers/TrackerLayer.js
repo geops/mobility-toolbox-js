@@ -102,15 +102,6 @@ class TrackerLayer extends mixin(Layer) {
       paint: {
         "line-width": 4,
         "line-color": vehicleColor,
-        'line-gradient': [
-          'interpolate',
-          ['linear'],
-          ['line-progress'],
-          0,
-          '#989898',
-          1,
-          vehicleColor,
-        ]
       },
       filter: ['==', ["geometry-type"], 'LineString']
     }

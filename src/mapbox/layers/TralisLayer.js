@@ -97,12 +97,16 @@ class TralisLayer extends mixin(TrackerLayer) {
       this.api
         .getFullTrajectory(id, this.mode, this.generalizationLevel)
         .then((fullTrajectory) => {
+           const type = fullTrajectory.features[0].properties.type
+           fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
+
           const stroke = fullTrajectory.features[0].properties.stroke
+          let lineColor = '#ff0000'
           if (stroke && stroke[0] !== '#') {
-            fullTrajectory.features[0].properties.stroke = `#${stroke}`;
+            lineColor = `#${stroke}`
+            fullTrajectory.features[0].properties.stroke = lineColor;
           }
-          const type = fullTrajectory.features[0].properties.type
-          fullTrajectory.features[0].properties.typeIdx = getTypeIndex(type)
+
           fullTrajectory.features[0].geometry.geometries.forEach(element => {
             const newCoords = []
             for (const coord of element.coordinates) {
@@ -110,7 +114,20 @@ class TralisLayer extends mixin(TrackerLayer) {
             }
             element.coordinates = newCoords
           });
+
+          console.log(lineColor)
+          const linePaintInterpolation = [
+              'interpolate',
+              ['linear'],
+              ['line-progress'],
+              0,
+              '#989898',
+              1,
+              lineColor
+          ]
           this.map.getSource("selectedLineTraject").setData(fullTrajectory)
+          this.map.setPaintProperty('trajectoryLine', 'line_gradient', linePaintInterpolation)
+
         })
     }
   }
