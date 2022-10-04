@@ -148,21 +148,21 @@ class TralisLayer extends mixin(TrackerLayer) {
               return '#ffb400';
           case 1:
               return '#ff5400';
-          case 0:
+          case 2:
               return '#ff8080';
-          case 0:
+          case 3:
               return '#ea0000';
-          case 0:
+          case 4:
               return '#3000ff';
-          case 0:
+          case 5:
               return '#ffb400';
-          case 0:
+          case 6:
               return '#41a27b';
-          case 0:
+          case 7:
               return '#00d237';
-          case 0:
+          case 8:
               return '#b5b5b5';
-          case 0:
+          case 9:
               return '#ff8080';
           default:
               return '#ff0000';
