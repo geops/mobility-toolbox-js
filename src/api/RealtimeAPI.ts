@@ -409,8 +409,7 @@ class RealtimeAPI {
   }
 
   /**
-   * Get the list of ststions available for a specifc mode. The promise is resolved every 100ms resolved multiple times
-   *
+   * Get the list of ststions available for a specifc mode. The promise is resolved every 100ms
    * @param {RealtimeMode} mode Realtime mode.
    * @param {number} timeout = 100 Duration in ms between each promise resolve calls.
    * @return {Promise<RealtimeStation[]>} An array of stations.
