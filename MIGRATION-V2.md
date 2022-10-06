@@ -241,3 +241,8 @@ Here is an exhaustive list of what you have to change in your application code.
     const feature = featureCollection.features[0];
   });
 ```
+
+## in RealtimeAPI class
+
+* `subscribeXXX()` methods have all the same signature and returns now the complete websocket message. Check the [doc](https://mobility-toolbox-js.geops.io/doc/class/build/api/RealtimeAPI%20js~RealtimeAPI) for more informations.
+* some `getXXX()` methods have a different signature. Check the [doc](https://mobility-toolbox-js.geops.io/doc/class/build/api/RealtimeAPI%20js~RealtimeAPI) for more informations.
