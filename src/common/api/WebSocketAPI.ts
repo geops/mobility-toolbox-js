@@ -1,14 +1,4 @@
-import { Feature } from 'geojson';
-import {
-  RealtimeDeparture,
-  RealtimeNews,
-  RealtimeStation,
-  RealtimeExtraGeom,
-  RealtimeTrajectory,
-  RealtimeTrajectoryResponse,
-  RealtimeStopSequence,
-  RealtimeFullTrajectory,
-} from '../../types';
+import { RealtimeTrajectoryResponse } from '../../types';
 
 export declare type WebSocketAPIParameters = {
   channel?: string;
@@ -16,29 +6,28 @@ export declare type WebSocketAPIParameters = {
   id?: string | number;
 };
 
-export declare type WebSocketAPIMessageEventData = {
+export declare type WebSocketAPIMessageEventData<T> = {
   timestamp: number;
   source: string;
-  content:
-    | string
-    | Feature
-    | RealtimeTrajectoryResponse[]
-    | RealtimeDeparture
-    | RealtimeNews[]
-    | RealtimeStation
-    | RealtimeExtraGeom
-    | RealtimeTrajectory
-    | RealtimeStopSequence[]
-    | RealtimeFullTrajectory;
+  content: T;
+  // | T
+  // | string
+  // | Feature
+  // | RealtimeTrajectoryResponse[]
+  // | RealtimeDeparture
+  // | RealtimeNews[]
+  // | RealtimeStation
+  // | RealtimeExtraGeom
+  // | RealtimeTrajectory
+  // | RealtimeStopSequence[]
+  // | RealtimeFullTrajectory;
   client_reference: string | number | null;
 };
 
-export type WebSocketAPIBufferMessageEventData = Omit<
-  WebSocketAPIMessageEventData,
-  'content'
+export type WebSocketAPIBufferMessageEventData = WebSocketAPIMessageEventData<
+  RealtimeTrajectoryResponse[]
 > & {
   source: 'buffer';
-  content: Array<WebSocketAPIMessageEventData>;
 };
 
 export type WebSocketAPIMessageEvent = Event & {
@@ -52,13 +41,13 @@ export interface WebSocketAPIMessageEventListener {
 /**
  * This type represents a function that has been call with each feature returned by the websocket.
  */
-export interface WebSocketAPIDataCallback {
-  (data: WebSocketAPIMessageEventData): void;
+export interface WebSocketAPIMessageCallback<T> {
+  (data: WebSocketAPIMessageEventData<T>): void;
 }
 
 export declare type WebSocketAPISubscription = {
   params: WebSocketAPIParameters;
-  cb: WebSocketAPIDataCallback;
+  cb: WebSocketAPIMessageCallback<any>;
   errorCb?: EventListener;
   onMessageCb: WebSocketAPIMessageEventListener;
   onErrorCb?: EventListener;
@@ -71,7 +60,7 @@ export declare type WebSocketAPISubscribed = {
 
 export declare type WebSocketAPIRequest = {
   params: WebSocketAPIParameters;
-  cb: WebSocketAPIDataCallback;
+  cb: WebSocketAPIMessageCallback<any>;
   errorCb?: EventListener;
   onMessageCb: WebSocketAPIMessageEventListener;
   onErrorCb?: EventListener;
@@ -292,7 +281,7 @@ class WebSocketAPI {
    */
   listen(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIDataCallback,
+    cb: WebSocketAPIMessageCallback<any>,
     errorCb?: EventListener,
   ): {
     onMessageCb: WebSocketAPIMessageEventListener;
@@ -305,7 +294,7 @@ class WebSocketAPI {
     const onMessage: WebSocketAPIMessageEventListener = (
       evt: WebSocketAPIMessageEvent,
     ) => {
-      let data: WebSocketAPIMessageEventData;
+      let data: WebSocketAPIMessageEventData<any>;
       try {
         data = JSON.parse(evt.data);
       } catch (err) {
@@ -317,7 +306,7 @@ class WebSocketAPI {
       source += params.args ? ` ${params.args}` : '';
 
       // Buffer channel message return a list of other channels to propagate to proper callbacks.
-      let contents: Array<WebSocketAPIMessageEventData>;
+      let contents: Array<WebSocketAPIMessageEventData<any>>;
 
       if (data.source === 'buffer') {
         contents = (data as unknown as WebSocketAPIBufferMessageEventData)
@@ -325,7 +314,7 @@ class WebSocketAPI {
       } else {
         contents = [data];
       }
-      contents.forEach((content: WebSocketAPIMessageEventData) => {
+      contents.forEach((content: WebSocketAPIMessageEventData<any>) => {
         // Because of backend optimization, the last content is null.
         if (
           content?.source === source &&
@@ -348,7 +337,10 @@ class WebSocketAPI {
    * @param {function} cb Callback used when listen.
    * @private
    */
-  unlisten(params: WebSocketAPIParameters, cb: WebSocketAPIDataCallback) {
+  unlisten(
+    params: WebSocketAPIParameters,
+    cb: WebSocketAPIMessageCallback<any>,
+  ) {
     [...(this.subscriptions || []), ...(this.requests || [])]
       .filter(
         (s) => s.params.channel === params.channel && (!cb || s.cb === cb),
@@ -369,7 +361,7 @@ class WebSocketAPI {
    */
   get(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIDataCallback,
+    cb: WebSocketAPIMessageCallback<any>,
     errorCb?: EventListener,
   ) {
     const requestString = WebSocketAPI.getRequestString('GET', params);
@@ -377,7 +369,7 @@ class WebSocketAPI {
 
     // We wrap the callbacks to make sure they are called only once.
     const once =
-      (callback: WebSocketAPIDataCallback | EventListener) =>
+      (callback: WebSocketAPIMessageCallback<any> | EventListener) =>
       // @ts-ignore: Spread error
       (...args) => {
         // @ts-ignore: Spread error
@@ -430,7 +422,7 @@ class WebSocketAPI {
    */
   subscribe(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIDataCallback,
+    cb: WebSocketAPIMessageCallback<any>,
     errorCb?: EventListener,
     quiet = false,
   ) {
@@ -462,7 +454,7 @@ class WebSocketAPI {
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(source: string, cb?: WebSocketAPIDataCallback) {
+  unsubscribe(source: string, cb?: WebSocketAPIMessageCallback<any>) {
     const toRemove = this.subscriptions.filter(
       (s) => s.params.channel === source && (!cb || s.cb === cb),
     );
