@@ -19,6 +19,7 @@ import {
   RealtimeTrainId,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
+import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
 
 /** @private */
 const format = new GeoJSON();
@@ -393,9 +394,9 @@ class RealtimeLayer extends mixin(Layer) {
   highlightTrajectory(id: RealtimeTrainId) {
     this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
-      .then((fullTrajectory: RealtimeFullTrajectory) => {
-        const vectorSource = this.vectorLayer.getSource();
-        vectorSource.clear();
+      .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
+        const fullTrajectory = data.content;
+        this.vectorLayer.getSource().clear();
 
         if (
           !fullTrajectory ||

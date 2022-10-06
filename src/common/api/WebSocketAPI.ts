@@ -51,13 +51,13 @@ export interface WebSocketAPIMessageEventListener {
 /**
  * This type represents a function that has been call with each feature returned by the websocket.
  */
-export interface WebSocketAPIDataCallback<T> {
+export interface WebSocketAPIMessageCallback<T> {
   (data: WebSocketAPIMessageEventData<T>): void;
 }
 
 export declare type WebSocketAPISubscription = {
   params: WebSocketAPIParameters;
-  cb: WebSocketAPIDataCallback<any>;
+  cb: WebSocketAPIMessageCallback<any>;
   errorCb?: EventListener;
   onMessageCb: WebSocketAPIMessageEventListener;
   onErrorCb?: EventListener;
@@ -70,7 +70,7 @@ export declare type WebSocketAPISubscribed = {
 
 export declare type WebSocketAPIRequest = {
   params: WebSocketAPIParameters;
-  cb: WebSocketAPIDataCallback<any>;
+  cb: WebSocketAPIMessageCallback<any>;
   errorCb?: EventListener;
   onMessageCb: WebSocketAPIMessageEventListener;
   onErrorCb?: EventListener;
@@ -291,7 +291,7 @@ class WebSocketAPI {
    */
   listen(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIDataCallback<any>,
+    cb: WebSocketAPIMessageCallback<any>,
     errorCb?: EventListener,
   ): {
     onMessageCb: WebSocketAPIMessageEventListener;
@@ -347,7 +347,10 @@ class WebSocketAPI {
    * @param {function} cb Callback used when listen.
    * @private
    */
-  unlisten(params: WebSocketAPIParameters, cb: WebSocketAPIDataCallback<any>) {
+  unlisten(
+    params: WebSocketAPIParameters,
+    cb: WebSocketAPIMessageCallback<any>,
+  ) {
     [...(this.subscriptions || []), ...(this.requests || [])]
       .filter(
         (s) => s.params.channel === params.channel && (!cb || s.cb === cb),
@@ -368,7 +371,7 @@ class WebSocketAPI {
    */
   get(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIDataCallback<any>,
+    cb: WebSocketAPIMessageCallback<any>,
     errorCb?: EventListener,
   ) {
     const requestString = WebSocketAPI.getRequestString('GET', params);
@@ -376,7 +379,7 @@ class WebSocketAPI {
 
     // We wrap the callbacks to make sure they are called only once.
     const once =
-      (callback: WebSocketAPIDataCallback<any> | EventListener) =>
+      (callback: WebSocketAPIMessageCallback<any> | EventListener) =>
       // @ts-ignore: Spread error
       (...args) => {
         // @ts-ignore: Spread error
@@ -429,7 +432,7 @@ class WebSocketAPI {
    */
   subscribe(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIDataCallback<any>,
+    cb: WebSocketAPIMessageCallback<any>,
     errorCb?: EventListener,
     quiet = false,
   ) {
@@ -461,7 +464,7 @@ class WebSocketAPI {
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(source: string, cb?: WebSocketAPIDataCallback<any>) {
+  unsubscribe(source: string, cb?: WebSocketAPIMessageCallback<any>) {
     const toRemove = this.subscriptions.filter(
       (s) => s.params.channel === source && (!cb || s.cb === cb),
     );

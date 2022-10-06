@@ -132,8 +132,6 @@ export interface RealtimeStop {
   state?: RealtimeStopState;
   stationId: RealtimeStationId;
   stationName: string;
-  arrivalTimeWithDelay: number; // TODO: add by cleanStopTime function
-  departureTimeWithDelay: number; // TODO: add by cleanStopTime function
 }
 
 export interface RealtimeStopSequence {

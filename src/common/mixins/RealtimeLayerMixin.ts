@@ -502,11 +502,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.api.subscribeTrajectory(
         this.mode,
         this.onTrajectoryMessage,
+        undefined,
         this.isUpdateBboxOnMoveEnd,
       );
       this.api.subscribeDeletedVehicles(
         this.mode,
         this.onDeleteTrajectoryMessage,
+        undefined,
         this.isUpdateBboxOnMoveEnd,
       );
 
@@ -699,11 +701,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.api.subscribeTrajectory(
         this.mode,
         this.onTrajectoryMessage,
+        undefined,
         this.isUpdateBboxOnMoveEnd,
       );
       this.api.subscribeDeletedVehicles(
         this.mode,
         this.onDeleteTrajectoryMessage,
+        undefined,
         this.isUpdateBboxOnMoveEnd,
       );
     }
@@ -906,11 +910,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      *
      * @private
      */
-    onTrajectoryMessage(data: WebSocketAPIMessageEventData) {
+    onTrajectoryMessage(
+      data: WebSocketAPIMessageEventData<RealtimeTrajectory>,
+    ) {
       if (!data.content) {
         return;
       }
-      const trajectory = data.content as RealtimeTrajectory;
+      const trajectory = data.content;
 
       const {
         geometry,
@@ -960,11 +966,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @private
      * @override
      */
-    onDeleteTrajectoryMessage(data: WebSocketAPIMessageEventData) {
+    onDeleteTrajectoryMessage(
+      data: WebSocketAPIMessageEventData<RealtimeTrainId>,
+    ) {
       if (!data.content) {
         return;
       }
-      this.removeTrajectory(data.content as RealtimeTrajectory);
+      this.removeTrajectory(data.content);
     }
 
     /**
