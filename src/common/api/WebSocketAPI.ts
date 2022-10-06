@@ -1,14 +1,4 @@
-// import { Feature } from 'geojson';
-import {
-  // RealtimeDeparture,
-  // RealtimeNews,
-  // RealtimeStation,
-  // RealtimeExtraGeom,
-  // RealtimeTrajectory,
-  RealtimeTrajectoryResponse,
-  // RealtimeStopSequence,
-  // RealtimeFullTrajectory,
-} from '../../types';
+import { RealtimeTrajectoryResponse } from '../../types';
 
 export declare type WebSocketAPIParameters = {
   channel?: string;
