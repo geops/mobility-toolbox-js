@@ -16,7 +16,7 @@ import type {
 } from '../ol';
 import { RealtimeTrajectory } from '../api/typedefs';
 import CommonLayer, { LayerCommonOptions } from '../common/layers/LayerCommon';
-import { RoutingParameters } from '.';
+import type { RoutingParameters } from '.';
 
 export type StyleCache = { [key: string]: AnyCanvas };
 
