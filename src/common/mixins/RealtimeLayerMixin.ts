@@ -25,6 +25,7 @@ import {
   LayerGetFeatureInfoOptions,
   RealtimeGeneralizationLevel,
   RealtimeMode,
+  RealtimeMot,
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
@@ -43,9 +44,9 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
   mode?: RealtimeMode;
   api?: RealtimeAPI;
   tenant?: RealtimeTenant;
-  minZoomNonTrain?: number;
   minZoomInterpolation?: number;
   isUpdateBboxOnMoveEnd?: boolean;
+  motsByZoom?: RealtimeMot[][];
   generalizationLevelByZoom?: RealtimeGeneralizationLevel[];
   renderTimeIntervalByZoom?: number[];
   style?: RealtimeStyleFunction;
@@ -62,6 +63,7 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
   useRequestAnimationFrame?: boolean;
   useDebounce?: boolean;
   useThrottle?: boolean;
+  getMotsByZoom: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
   getGeneralizationLevelByZoom?: (
     zoom: number,
     generalizationLevelByZoom: RealtimeGeneralizationLevel[],
@@ -163,8 +165,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
     pixelRatio?: number;
 
-    minZoomNonTrain: number;
-
     minZoomInterpolation: number;
 
     isUpdateBboxOnMoveEnd: boolean;
@@ -180,6 +180,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     useDebounce?: boolean;
 
     useThrottle?: boolean;
+
+    mots?: RealtimeMot[];
+
+    motsByZoom: RealtimeMot[][];
 
     generalizationLevel?: RealtimeGeneralizationLevel;
 
@@ -198,6 +202,8 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     visibilityRef!: EventsKey;
 
     selectedVehicle: RealtimeTrajectory;
+
+    getMotsByZoom: (zoom: number) => RealtimeMot[];
 
     getGeneralizationLevelByZoom: (zoom: number) => RealtimeGeneralizationLevel;
 
@@ -223,9 +229,34 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.mode = options.mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
       this.api = options.api || new RealtimeAPI(options);
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
-      this.minZoomNonTrain = options.minZoomNonTrain || 9; // Min zoom level from which non trains are allowed to be displayed. Min value is 9 (as configured by the server
       this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
       this.format = new GeoJSON();
+
+      // MOTs by zoom
+      const allMots: RealtimeMot[] = [
+        'tram',
+        'subway',
+        'rail',
+        'bus',
+        'ferry',
+        'cablecar',
+        'gondola',
+        'funicular',
+        'coach',
+      ];
+
+      // Server will block non train before zoom 9
+      this.motsByZoom = options.motsByZoom || [allMots];
+      this.getMotsByZoom = (zoom) => {
+        return (
+          (options.getMotsByZoom &&
+            options.getMotsByZoom(zoom, this.motsByZoom)) ||
+          this.motsByZoom[zoom] ||
+          this.motsByZoom[this.motsByZoom.length - 1]
+        );
+      };
+
+      // Generalization levels by zoom
       this.generalizationLevelByZoom = options.generalizationLevelByZoom || [
         5, 5, 5, 5, 5, 5, 5, 5, 10, 30, 30, 100, 100, 100,
       ];
@@ -240,6 +271,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         );
       };
 
+      // Render time interval by zoom
       this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom || [
         100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400,
         300, 250, 180, 90, 60, 50, 50, 50, 50, 50,
@@ -688,6 +720,12 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
+
+        /* @ignore */
+        this.mots = this.getMotsByZoom(zoom);
+        if (this.mots) {
+          bbox.push(`mots=${this.mots}`);
+        }
       }
 
       this.api.bbox = bbox;
@@ -830,7 +868,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * Determine if the trajectory is useless and should be removed from the list or not.
      * By default, this function exclude vehicles:
      *  - that have their trajectory outside the current extent and
-     *  - that are not a train and zoom level is lower than layer's minZoomNonTrain property.
+     *  - that aren't in the MOT list.
      *
      * @param {RealtimeTrajectory} trajectory
      * @param {Array<number>} extent
@@ -846,7 +884,8 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       const { type, bounds } = trajectory.properties;
       if (
         !intersects(extent, bounds) ||
-        (type !== 'rail' && zoom < (this.minZoomNonTrain || 9))
+        !this.mots?.includes(type) ||
+        (type !== 'rail' && zoom < 9) // zoom 9 is defined by the backend
       ) {
         this.removeTrajectory(trajectory);
         return true;
