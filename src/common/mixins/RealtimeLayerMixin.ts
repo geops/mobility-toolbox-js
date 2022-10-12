@@ -338,6 +338,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       let currSpeed = speed || 1;
       let currTime = time || new Date();
+      let currStyle = style || realtimeDefaultStyle;
 
       super.defineProperties(options);
 
@@ -352,7 +353,12 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
          * Style function used to render a vehicle.
          */
         style: {
-          value: style || realtimeDefaultStyle,
+          get: () => currStyle,
+          set: (newStyle: RealtimeStyleFunction) => {
+            currStyle = newStyle;
+            // @ts-ignore  function without parameters is defined in subclasses
+            this.renderTrajectories();
+          },
         },
 
         /**
@@ -882,9 +888,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       zoom: number,
     ) {
       const { type, bounds } = trajectory.properties;
+
       if (
         !intersects(extent, bounds) ||
-        !this.mots?.includes(type) ||
+        (this.mots && !this.mots.includes(type)) ||
         (type !== 'rail' && zoom < 9) // zoom 9 is defined by the backend
       ) {
         this.removeTrajectory(trajectory);

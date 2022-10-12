@@ -30,6 +30,7 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
     resolution: number,
     options: any,
   ) => void;
+  allowRenderWhenAnimating?: boolean;
 };
 
 /**
@@ -52,6 +53,8 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
  */
 // @ts-ignore
 class RealtimeLayer extends mixin(Layer) {
+  allowRenderWhenAnimating?: boolean = false;
+
   /**
    * Constructor.
    *
@@ -64,6 +67,8 @@ class RealtimeLayer extends mixin(Layer) {
     super({
       ...options,
     });
+
+    this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
     /** @ignore */
     this.olLayer =
@@ -247,8 +252,10 @@ class RealtimeLayer extends mixin(Layer) {
     }
     let isRendered = false;
 
-    const blockRendering =
-      this.map.getView().getAnimating() || this.map.getView().getInteracting();
+    const blockRendering = this.allowRenderWhenAnimating
+      ? false
+      : this.map.getView().getAnimating() ||
+        this.map.getView().getInteracting();
 
     // Don't render the map when the map is animating or interacting.
     isRendered = blockRendering

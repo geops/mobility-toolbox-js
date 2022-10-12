@@ -4,7 +4,7 @@ import type {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
 } from '../api/WebSocketAPI';
-import sortAndfilterDepartures from './sortAndFilterDepartures';
+import sortAndFilterDepartures from './sortAndFilterDepartures';
 
 /**
  * This function returns a WebSocket api callback, and call the onDeparturesUpdate function with the list of current departures to display.
@@ -15,7 +15,7 @@ import sortAndfilterDepartures from './sortAndFilterDepartures';
  */
 const debounceDeparturesMessages = (
   onDeparturesUpdate: (departures: RealtimeDepartureExtended[]) => {},
-  sortByMinArrivalTime = true,
+  sortByMinArrivalTime = false,
   maxDepartureAge = 30,
   timeout = 100,
 ): WebSocketAPIMessageCallback<RealtimeDeparture> => {
@@ -34,7 +34,7 @@ const debounceDeparturesMessages = (
     departureObject[departure.call_id] = departure;
 
     departureUpdateTimeout[source] = window.setTimeout(() => {
-      const departures = sortAndfilterDepartures(
+      const departures = sortAndFilterDepartures(
         departureObject,
         sortByMinArrivalTime || false,
         maxDepartureAge,

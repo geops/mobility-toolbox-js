@@ -11,4 +11,5 @@ export { default as getMapboxRender } from './getMapboxRender';
 export { default as debounceDeparturesMessages } from './debounceDeparturesMessages';
 export { default as debounceWebsocketMessages } from './debounceWebsocketMessages';
 export { default as sortAndFilterDepartures } from './sortAndFilterDepartures';
+export { default as compareDepartures } from './compareDepartures';
 export * as realtimeConfig from './realtimeConfig';
