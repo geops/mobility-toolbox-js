@@ -76,7 +76,6 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
   // From RealtimeAPIOptions
   url?: string;
   apiKey?: string;
-  prefix?: string;
   projection?: string;
   bbox?: (number | string)[];
   buffer?: number[];
@@ -165,7 +164,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
     pixelRatio?: number;
 
-    minZoomInterpolation: number;
+    minZoomInterpolation: number = 8;
 
     isUpdateBboxOnMoveEnd: boolean;
 
@@ -229,7 +228,11 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.mode = options.mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
       this.api = options.api || new RealtimeAPI(options);
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
-      this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
+
+      if (!Number.isNaN(options.minZoomInterpolation)) {
+        this.minZoomInterpolation = options.minZoomInterpolation || 0; // Min zoom level from which trains positions are not interpolated.
+      }
+
       this.format = new GeoJSON();
 
       // MOTs by zoom

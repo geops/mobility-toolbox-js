@@ -1,4 +1,4 @@
-import type { RealtimeMode } from '../../types';
+import type { RealtimeMode, RealtimeTenant } from '../../types';
 import type { RealtimeModesType } from '../../api/RealtimeAPI';
 
 /**
@@ -6,7 +6,18 @@ import type { RealtimeModesType } from '../../api/RealtimeAPI';
  * @param {String} mode Mode 'topographic' ou 'schematic'.
  * @private
  */
-const getModeSuffix = (mode: RealtimeMode, modes: RealtimeModesType): string =>
-  mode === modes.SCHEMATIC ? '_schematic' : '';
+const getRealtimeModeSuffix = (
+  mode: RealtimeMode,
+  modes: RealtimeModesType,
+  tenant?: RealtimeTenant,
+): string => {
+  const schematicSuffix = ['', 'schematic'];
 
-export default getModeSuffix;
+  if (tenant) {
+    schematicSuffix.push(tenant);
+  }
+
+  return mode === modes.SCHEMATIC ? schematicSuffix.join('_') : '';
+};
+
+export default getRealtimeModeSuffix;
