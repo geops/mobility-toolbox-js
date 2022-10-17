@@ -3,7 +3,7 @@
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
   "version": "2.0.0-beta.56",
-  "main": "index.js",
+  "module": "index.js",
   "exports": {
     ".": "./index.js",
     "./api": "./api/index.js",
@@ -162,6 +162,7 @@
     "type": "git",
     "url": "https://github.com/geops/mobility-toolbox-js"
   },
+  "sideEffects": false,
   "stylelint": {
     "plugins": [
       "stylelint-scss"
