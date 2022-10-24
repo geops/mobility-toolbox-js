@@ -22,16 +22,8 @@ Visit https://mobility-toolbox-js.vercel.app/
 
 Install the library and the peer dependencies:
 
-### Using mapbox-gl
-
 ```bash
-yarn add mobility-toolbox-js ol@6.14.1 mapbox-gl@1 maplibre-gl@npm:empty-npm-package@1.0.0
-```
-
-### Using maplibre-gl
-
-```bash
-yarn add mobility-toolbox-js ol@6.14.1 maplibre-gl@2 mapbox-gl@npm:empty-npm-package@1.0.0
+yarn add mobility-toolbox-js ol@6.14.1 mapbox-gl@1 maplibre-gl@2
 ```
 
 ## Development
