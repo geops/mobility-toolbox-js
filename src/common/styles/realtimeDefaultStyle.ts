@@ -208,6 +208,8 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     getDelayText = () => null,
     getTextColor = () => '#000',
     getTextSize = () => 0,
+    getMaxRadiusForText = () => 10,
+    getMaxRadiusForStrokeAndDelay = () => 7,
   } = options;
 
   const { zoom, pixelRatio = 1 } = viewState;
@@ -249,14 +251,15 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
 
   // Calcul the radius of the circle
   let radius = getRadius(type, z) * pixelRatio;
-  const isDisplayStrokeAndDelay = radius >= 7 * pixelRatio;
+  const isDisplayStrokeAndDelay =
+    radius >= getMaxRadiusForStrokeAndDelay() * pixelRatio;
 
   if (hover || selected) {
     radius = isDisplayStrokeAndDelay
       ? radius + 5 * pixelRatio
       : 14 * pixelRatio;
   }
-  const mustDrawText = radius > 10 * pixelRatio;
+  const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
   let key = `${radius}${hover}${selected}${cancelled}${delay}`;
@@ -267,7 +270,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     key += `${type}${color}`;
   }
 
-  if (mustDrawText) {
+  if (isDisplayText) {
     key += `${name}${textColor}`;
   }
 
