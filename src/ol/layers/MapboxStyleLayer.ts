@@ -452,8 +452,9 @@ class MapboxStyleLayer extends Layer {
 
     if (filterFunc) {
       const visibilityValue = visible ? 'visible' : 'none';
-      for (let i = 0; i < style.layers.length; i += 1) {
-        const styleLayer = style.layers[i];
+      const layers = style.layers || [];
+      for (let i = 0; i < layers.length; i += 1) {
+        const styleLayer = layers[i];
         if (filterFunc(styleLayer)) {
           if (mbMap.getLayer(styleLayer.id)) {
             mbMap.setLayoutProperty(

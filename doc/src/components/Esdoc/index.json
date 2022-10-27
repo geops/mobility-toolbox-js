@@ -5065,7 +5065,7 @@
     "__docId__": 223,
     "kind": "file",
     "name": "build/common/mixins/RealtimeLayerMixin.js",
-    "content": "/* eslint-disable no-empty-function,@typescript-eslint/no-empty-function */\n/* eslint-disable no-useless-constructor,@typescript-eslint/no-useless-constructor */\n/* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */\n/* eslint-disable class-methods-use-this */\n/* eslint-disable max-classes-per-file */\nimport { buffer, containsCoordinate, intersects } from 'ol/extent';\nimport { unByKey } from 'ol/Observable';\nimport GeoJSON from 'ol/format/GeoJSON';\nimport debounce from 'lodash.debounce';\nimport throttle from 'lodash.throttle';\nimport { fromLonLat } from 'ol/proj';\nimport realtimeDefaultStyle from '../styles/realtimeDefaultStyle';\nimport { RealtimeAPI, RealtimeModes } from '../../api';\nimport renderTrajectories from '../utils/renderTrajectories';\nimport * as realtimeConfig from '../utils/realtimeConfig';\n/**\n * RealtimeLayerInterface.\n */\nexport class RealtimeLayerInterface {\n    /**\n     * Start the clock.\n     */\n    start() { }\n    /**\n     * Stop the clock.\n     */\n    stop() { }\n    /**\n     * Set the Realtime api's bbox.\n     *\n     * @param {Array<number>} extent  Extent to request, [minX, minY, maxX, maxY, zoom].\n     * @param {number} zoom  Zoom level to request. Must be an integer.\n     */\n    setBbox(extent, zoom) { }\n    /**\n     * Set the Realtime api's mode.\n     *\n     * @param {RealtimeMode} mode  Realtime mode\n     */\n    setMode(mode) { }\n    /**\n     * Render the trajectories\n     */\n    renderTrajectories() { }\n    /**\n     * Request the stopSequence and the fullTrajectory informations for a vehicle.\n     *\n     * @param {string} id The vehicle identifier (the  train_id property).\n     * @param {RealtimeMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.\n     * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.\n     */\n    getTrajectoryInfos(id, mode) { }\n}\n/**\n * Mixin for RealtimeLayerInterface.\n *\n * @param {Class} Base A class to extend with {RealtimeLayerInterface} functionnalities.\n * @return {Class}  A class that implements {RealtimeLayerInterface} class and extends Base;\n * @private\n */\nfunction RealtimeLayerMixin(Base) {\n    // @ts-ignore\n    return class Mixin extends Base {\n        constructor(options) {\n            super(Object.assign({ hitTolerance: 10 }, options));\n            this.debug = options.debug || false;\n            this.mode = options.mode || RealtimeModes.TOPOGRAPHIC;\n            this.api = options.api || new RealtimeAPI(options);\n            this.tenant = options.tenant || ''; // sbb,sbh or sbm\n            this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.\n            this.format = new GeoJSON();\n            // MOTs by zoom\n            const allMots = [\n                'tram',\n                'subway',\n                'rail',\n                'bus',\n                'ferry',\n                'cablecar',\n                'gondola',\n                'funicular',\n                'coach',\n            ];\n            // Server will block non train before zoom 9\n            this.motsByZoom = options.motsByZoom || [allMots];\n            this.getMotsByZoom = (zoom) => {\n                return ((options.getMotsByZoom &&\n                    options.getMotsByZoom(zoom, this.motsByZoom)) ||\n                    this.motsByZoom[zoom] ||\n                    this.motsByZoom[this.motsByZoom.length - 1]);\n            };\n            // Generalization levels by zoom\n            this.generalizationLevelByZoom = options.generalizationLevelByZoom || [\n                5, 5, 5, 5, 5, 5, 5, 5, 10, 30, 30, 100, 100, 100,\n            ];\n            this.getGeneralizationLevelByZoom = (zoom) => {\n                return ((options.getGeneralizationLevelByZoom &&\n                    options.getGeneralizationLevelByZoom(zoom, this.generalizationLevelByZoom)) ||\n                    this.generalizationLevelByZoom[zoom]);\n            };\n            // Render time interval by zoom\n            this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom || [\n                100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400,\n                300, 250, 180, 90, 60, 50, 50, 50, 50, 50,\n            ];\n            this.getRenderTimeIntervalByZoom = (zoom) => {\n                return ((options.getRenderTimeIntervalByZoom &&\n                    options.getRenderTimeIntervalByZoom(zoom, this.renderTimeIntervalByZoom)) ||\n                    this.renderTimeIntervalByZoom[zoom]);\n            };\n            // This property will call api.setBbox on each movend event\n            this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd !== false;\n            // Define throttling and debounce render function\n            this.throttleRenderTrajectories = throttle(this.renderTrajectoriesInternal, 50, { leading: false, trailing: true });\n            this.debounceRenderTrajectories = debounce(this.renderTrajectoriesInternal, 50, { leading: true, trailing: true, maxWait: 5000 });\n            // Bind callbacks\n            this.onFeatureHover = this.onFeatureHover.bind(this);\n            this.onFeatureClick = this.onFeatureClick.bind(this);\n            this.renderTrajectoriesInternal =\n                this.renderTrajectoriesInternal.bind(this);\n            this.onTrajectoryMessage = this.onTrajectoryMessage.bind(this);\n            this.onDeleteTrajectoryMessage =\n                this.onDeleteTrajectoryMessage.bind(this);\n            this.onDocumentVisibilityChange =\n                this.onDocumentVisibilityChange.bind(this);\n        }\n        /**\n         * Define layer's properties.\n         *\n         * @ignore\n         */\n        defineProperties(options) {\n            const { style, speed, pixelRatio, hoverVehicleId, selectedVehicleId, filter, sort, time, live, canvas, styleOptions, } = options;\n            let currSpeed = speed || 1;\n            let currTime = time || new Date();\n            super.defineProperties(options);\n            Object.defineProperties(this, {\n                isTrackerLayer: { value: true },\n                canvas: {\n                    value: canvas || document.createElement('canvas'),\n                },\n                /**\n                 * Style function used to render a vehicle.\n                 */\n                style: {\n                    value: style || realtimeDefaultStyle,\n                },\n                /**\n                 * Custom options to pass as last parameter of the style function.\n                 */\n                styleOptions: {\n                    value: Object.assign(Object.assign({}, realtimeConfig), (styleOptions || {})),\n                },\n                /**\n                 * Speed of the wheel of time.\n                 * If live property is true. The speed is ignored.\n                 */\n                speed: {\n                    get: () => currSpeed,\n                    set: (newSpeed) => {\n                        currSpeed = newSpeed;\n                        this.start();\n                    },\n                },\n                /**\n                 * Function to filter which vehicles to display.\n                 */\n                filter: {\n                    value: filter,\n                    writable: true,\n                },\n                /**\n                 * Function to sort the vehicles to display.\n                 */\n                sort: {\n                    value: sort,\n                    writable: true,\n                },\n                /**\n                 * If true. The layer will always use Date.now() on the next tick to render the trajectories.\n                 * When true, setting the time property has no effect.\n                 */\n                live: {\n                    value: live === false ? live : true,\n                    writable: true,\n                },\n                /**\n                 * Time used to display the trajectories. Can be a Date or a number in ms representing a Date.\n                 * If live property is true. The setter does nothing.\n                 */\n                time: {\n                    get: () => currTime,\n                    set: (newTime) => {\n                        currTime = newTime && newTime.getTime ? newTime : new Date(newTime);\n                        // @ts-ignore  function without parameters is defined in subclasses\n                        this.renderTrajectories();\n                    },\n                },\n                /**\n                 * Keep track of which trajectories are stored.\n                 */\n                trajectories: {\n                    value: {},\n                    writable: true,\n                },\n                /**\n                 * Id of the hovered vehicle.\n                 */\n                hoverVehicleId: {\n                    value: hoverVehicleId,\n                    writable: true,\n                },\n                /**\n                 * Id of the selected vehicle.\n                 */\n                selectedVehicleId: {\n                    value: selectedVehicleId,\n                    writable: true,\n                },\n                /**\n                 * Id of the selected vehicle.\n                 */\n                pixelRatio: {\n                    value: pixelRatio ||\n                        (typeof window !== 'undefined' ? window.devicePixelRatio : 1),\n                    writable: true,\n                },\n                /**\n                 * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame.\n                 */\n                useRequestAnimationFrame: {\n                    value: options.useRequestAnimationFrame || false,\n                    writable: true,\n                },\n                /**\n                 * If true, encapsulates the renderTrajectories calls in a throttle function. Default to true.\n                 */\n                useThrottle: {\n                    value: options.useThrottle !== false,\n                    writable: true,\n                },\n                /**\n                 * If true, encapsulates the renderTrajectories calls in a debounce function.\n                 */\n                useDebounce: {\n                    value: options.useDebounce || false,\n                    writable: true,\n                },\n                /**\n                 * Debug properties.\n                 */\n                // Not used anymore, but could be useful for debugging.\n                // showVehicleTraj: {\n                //   value:\n                //     options.showVehicleTraj !== undefined\n                //       ? options.showVehicleTraj\n                //       : true,\n                //   writable: true,\n                // },\n            });\n        }\n        attachToMap(map) {\n            super.attachToMap(map);\n            // If the layer is visible we start  the rendering clock\n            if (this.visible) {\n                this.start();\n            }\n            // On change of visibility we start/stop the rendering clock\n            this.visibilityRef = this.on('change:visible', (evt) => {\n                if (evt.target.visible) {\n                    this.start();\n                }\n                else {\n                    this.stop();\n                }\n            });\n            // To avoid browser hanging when the tab is not visible for a certain amount of time,\n            // We stop the rendering and the websocket when hide and start again when show.\n            document.addEventListener('visibilitychange', this.onDocumentVisibilityChange);\n        }\n        detachFromMap() {\n            document.removeEventListener('visibilitychange', this.onDocumentVisibilityChange);\n            this.stop();\n            unByKey(this.visibilityRef);\n            if (this.canvas) {\n                const context = this.canvas.getContext('2d');\n                context === null || context === void 0 ? void 0 : context.clearRect(0, 0, this.canvas.width, this.canvas.height);\n                super.detachFromMap();\n            }\n        }\n        start() {\n            this.stop();\n            // @ts-ignore function without parameters must be define  in subclasses\n            this.renderTrajectories();\n            this.startUpdateTime();\n            this.api.open();\n            this.api.subscribeTrajectory(this.mode, this.onTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n            this.api.subscribeDeletedVehicles(this.mode, this.onDeleteTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n            if (this.isUpdateBboxOnMoveEnd) {\n                // Update the bbox on each move end\n                // @ts-ignore function without parameters defined by subclasses\n                this.setBbox();\n            }\n        }\n        /**\n         * Start the clock.\n         * @private\n         */\n        startUpdateTime() {\n            this.stopUpdateTime();\n            this.updateTimeDelay = this.getRefreshTimeInMs() || 0;\n            this.updateTimeInterval = window.setInterval(() => {\n                // When live=true, we update the time with new Date();\n                if (this.live) {\n                    this.time = new Date();\n                }\n                else if (this.time && this.updateTimeDelay && this.speed) {\n                    this.time = new Date(this.time.getTime() + this.updateTimeDelay * this.speed);\n                }\n            }, this.updateTimeDelay);\n        }\n        stop() {\n            this.api.unsubscribeTrajectory(this.onTrajectoryMessage);\n            this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);\n            this.api.close();\n        }\n        /**\n         * Stop the clock.\n         * @private\n         */\n        stopUpdateTime() {\n            if (this.updateTimeInterval) {\n                clearInterval(this.updateTimeInterval);\n                this.updateTimeInterval = undefined;\n            }\n        }\n        /**\n         * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.\n         *\n         * @param {object} viewState The view state of the map.\n         * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.\n         * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.\n         * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.\n         * @param {number} [viewState.rotation = 0] Rotation of the map to render.\n         * @param {number} viewState.resolution Resolution of the map to render.\n         * @param {boolean} noInterpolate If true trajectories are not interpolated but\n         *   drawn at the last known coordinate. Use this for performance optimization\n         *   during map navigation.\n         * @private\n         */\n        renderTrajectoriesInternal(viewState, noInterpolate = false) {\n            var _a;\n            if (!this.map || !this.trajectories) {\n                return false;\n            }\n            const time = this.live ? Date.now() : (_a = this.time) === null || _a === void 0 ? void 0 : _a.getTime();\n            const trajectories = Object.values(this.trajectories);\n            // console.time('sort');\n            if (this.sort) {\n                // @ts-ignore\n                trajectories.sort(this.sort);\n            }\n            // console.timeEnd('sort');\n            if (!this.canvas || !this.style) {\n                return true;\n            }\n            // console.time('render');\n            this.renderState = renderTrajectories(this.canvas, trajectories, this.style, Object.assign(Object.assign({}, viewState), { pixelRatio: this.pixelRatio || 1, time }), Object.assign({ filter: this.filter, noInterpolate: (viewState.zoom || 0) < this.minZoomInterpolation\n                    ? true\n                    : noInterpolate, hoverVehicleId: this.hoverVehicleId, selectedVehicleId: this.selectedVehicleId }, this.styleOptions));\n            // console.timeEnd('render');\n            return true;\n        }\n        /**\n         * Render the trajectories requesting an animation frame and cancelling the previous one.\n         * This function must be overrided by children to provide the correct parameters.\n         *\n         * @param {object} viewState The view state of the map.\n         * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.\n         * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.\n         * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.\n         * @param {number} [viewState.rotation = 0] Rotation of the map to render.\n         * @param {number} viewState.resolution Resolution of the map to render.\n         * @param {boolean} noInterpolate If true trajectories are not interpolated but\n         *   drawn at the last known coordinate. Use this for performance optimization\n         *   during map navigation.\n         * @private\n         */\n        renderTrajectories(viewState, noInterpolate) {\n            if (this.requestId) {\n                cancelAnimationFrame(this.requestId);\n                this.requestId = undefined;\n            }\n            if (!viewState) {\n                return;\n            }\n            if (!noInterpolate && this.useRequestAnimationFrame) {\n                this.requestId = requestAnimationFrame(() => {\n                    this.renderTrajectoriesInternal(viewState, noInterpolate);\n                });\n            }\n            else if (!noInterpolate && this.useDebounce) {\n                this.debounceRenderTrajectories(viewState, noInterpolate);\n            }\n            else if (!noInterpolate && this.useThrottle) {\n                this.throttleRenderTrajectories(viewState, noInterpolate);\n            }\n            else {\n                this.renderTrajectoriesInternal(viewState, noInterpolate);\n            }\n        }\n        setBbox(extent, zoom) {\n            // Clean trajectories before sending the new bbox\n            // Purge trajectories:\n            // - which are outside the extent\n            // - when it's bus and zoom level is too low for them\n            if (this.trajectories && extent && zoom) {\n                const keys = Object.keys(this.trajectories);\n                for (let i = keys.length - 1; i >= 0; i -= 1) {\n                    this.purgeTrajectory(this.trajectories[keys[i]], extent, zoom);\n                }\n            }\n            if (!extent) {\n                return;\n            }\n            const bbox = [...extent];\n            if (this.isUpdateBboxOnMoveEnd && zoom) {\n                bbox.push(zoom);\n                if (this.tenant) {\n                    bbox.push(`tenant=${this.tenant}`);\n                }\n                /* @ignore */\n                this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);\n                if (this.generalizationLevel) {\n                    bbox.push(`gen=${this.generalizationLevel}`);\n                }\n                /* @ignore */\n                this.mots = this.getMotsByZoom(zoom);\n                if (this.mots) {\n                    bbox.push(`mots=${this.mots}`);\n                }\n            }\n            this.api.bbox = bbox;\n        }\n        setMode(mode) {\n            if (this.mode === mode) {\n                return;\n            }\n            this.mode = mode;\n            this.api.subscribeTrajectory(this.mode, this.onTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n            this.api.subscribeDeletedVehicles(this.mode, this.onDeleteTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n        }\n        /**\n         * Get the duration before the next update depending on zoom level.\n         *\n         * @private\n         * @param {number} zoom\n         */\n        getRefreshTimeInMs(zoom = 0) {\n            var _a;\n            const roundedZoom = zoom !== undefined ? Math.round(zoom) : -1;\n            const timeStep = this.getRenderTimeIntervalByZoom(roundedZoom) || 25;\n            const nextTick = Math.max(25, timeStep / (this.speed || 1));\n            const nextThrottleTick = Math.min(nextTick, 500);\n            // TODO: see if this should go elsewhere.\n            if (this.useThrottle) {\n                this.throttleRenderTrajectories = throttle(this.renderTrajectoriesInternal, nextThrottleTick, { leading: true, trailing: true });\n            }\n            else if (this.useDebounce) {\n                this.debounceRenderTrajectories = debounce(this.renderTrajectoriesInternal, nextThrottleTick, { leading: true, trailing: true, maxWait: 5000 });\n            }\n            if ((_a = this.api) === null || _a === void 0 ? void 0 : _a.buffer) {\n                const [, size] = this.api.buffer;\n                this.api.buffer = [nextThrottleTick, size];\n            }\n            return nextTick;\n        }\n        /**\n         * Get vehicle.\n         * @param {function} filterFc A function use to filter results.\n         * @return {Array<Object>} Array of vehicle.\n         */\n        getVehicle(filterFc) {\n            return ((this.trajectories &&\n                // @ts-ignore\n                Object.values(this.trajectories).filter(filterFc)) ||\n                []);\n        }\n        /**\n         * Request feature information for a given coordinate.\n         *\n         * @param {ol/coordinate~Coordinate} coordinate Coordinate.\n         * @param {Object} options Options See child classes to see which options are supported.\n         * @param {number} [options.resolution=1] The resolution of the map.\n         * @param {number} [options.nb=Infinity] The max number of vehicles to return.\n         * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n         */\n        getFeatureInfoAtCoordinate(coordinate, options) {\n            const { resolution, nb } = options;\n            const ext = buffer([...coordinate, ...coordinate], this.hitTolerance * resolution);\n            let trajectories = Object.values(this.trajectories || {});\n            if (this.sort) {\n                // @ts-ignore\n                trajectories = trajectories.sort(this.sort);\n            }\n            const vehicles = [];\n            for (let i = 0; i < trajectories.length; i += 1) {\n                if (trajectories[i].properties.coordinate &&\n                    containsCoordinate(ext, trajectories[i].properties.coordinate)) {\n                    vehicles.push(trajectories[i]);\n                }\n                if (vehicles.length === nb) {\n                    break;\n                }\n            }\n            return Promise.resolve({\n                layer: this,\n                features: vehicles.map((vehicle) => this.format.readFeature(vehicle)),\n                coordinate,\n            });\n        }\n        /**\n         * Request the stopSequence and the fullTrajectory informations for a vehicle.\n         *\n         * @param {string} id The vehicle identifier (the  train_id property).\n         * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.\n         */\n        getTrajectoryInfos(id) {\n            // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.\n            // Then we combine them in one response and send them to inherited layers.\n            const promises = [\n                this.api.getStopSequence(id),\n                this.api.getFullTrajectory(id, this.mode, this.generalizationLevel),\n            ];\n            return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {\n                const response = {\n                    stopSequence,\n                    fullTrajectory,\n                };\n                return response;\n            });\n        }\n        /**\n         * Determine if the trajectory is useless and should be removed from the list or not.\n         * By default, this function exclude vehicles:\n         *  - that have their trajectory outside the current extent and\n         *  - that aren't in the MOT list.\n         *\n         * @param {RealtimeTrajectory} trajectory\n         * @param {Array<number>} extent\n         * @param {number} zoom\n         * @return {boolean} if the trajectory must be displayed or not.\n         * @ignore\n         */\n        purgeTrajectory(trajectory, extent, zoom) {\n            var _a;\n            const { type, bounds } = trajectory.properties;\n            console.log('purge');\n            if (!intersects(extent, bounds) ||\n                !((_a = this.mots) === null || _a === void 0 ? void 0 : _a.includes(type)) ||\n                (type !== 'rail' && zoom < 9) // zoom 9 is defined by the backend\n            ) {\n                this.removeTrajectory(trajectory);\n                return true;\n            }\n            return false;\n        }\n        /**\n         * Add a trajectory.\n         * @param {RealtimeTrajectory} trajectory The trajectory to add.\n         * @private\n         */\n        addTrajectory(trajectory) {\n            if (this.filter && !this.filter(trajectory)) {\n                return;\n            }\n            if (!this.trajectories) {\n                this.trajectories = {};\n            }\n            this.trajectories[trajectory.properties.train_id] = trajectory;\n            // @ts-ignore the parameter are set by subclasses\n            this.renderTrajectories();\n        }\n        removeTrajectory(trajectoryOrId) {\n            var _a;\n            let id;\n            if (typeof trajectoryOrId !== 'string') {\n                id = (_a = trajectoryOrId === null || trajectoryOrId === void 0 ? void 0 : trajectoryOrId.properties) === null || _a === void 0 ? void 0 : _a.train_id;\n            }\n            else {\n                id = trajectoryOrId;\n            }\n            if (this.trajectories) {\n                delete this.trajectories[id];\n            }\n        }\n        /**\n         * On zoomend we adjust the time interval of the update of vehicles positions.\n         *\n         * @param evt Event that triggered the function.\n         * @private\n         */\n        onZoomEnd() {\n            this.startUpdateTime();\n        }\n        onDocumentVisibilityChange() {\n            if (!this.visible) {\n                return;\n            }\n            if (document.hidden) {\n                this.stop();\n            }\n            else {\n                this.start();\n            }\n        }\n        /**\n         * Callback on websocket's trajectory channel events.\n         * It adds a trajectory to the list.\n         *\n         * @private\n         */\n        onTrajectoryMessage(data) {\n            if (!data.content) {\n                return;\n            }\n            const trajectory = data.content;\n            const { geometry, properties: { train_id: id, time_since_update: timeSinceUpdate, raw_coordinates: rawCoordinates, }, } = trajectory;\n            // ignore old events [SBAHNM-97]\n            if (timeSinceUpdate < 0) {\n                return;\n            }\n            // console.time(`onTrajectoryMessage${data.content.properties.train_id}`);\n            // @ts-ignore   default value for extentand zoom are provided by subclasses\n            if (this.purgeTrajectory(trajectory)) {\n                return;\n            }\n            if (this.debug &&\n                this.mode === RealtimeModes.TOPOGRAPHIC &&\n                rawCoordinates) {\n                trajectory.properties.olGeometry = {\n                    type: 'Point',\n                    coordinates: fromLonLat(rawCoordinates, this.map.getView().getProjection()),\n                };\n            }\n            else {\n                trajectory.properties.olGeometry = this.format.readGeometry(geometry);\n            }\n            // TODO Make sure the timeOffset is useful. May be we can remove it.\n            trajectory.properties.timeOffset = Date.now() - data.timestamp;\n            this.addTrajectory(trajectory);\n        }\n        /**\n         * Callback on websocket's deleted_vehicles channel events.\n         * It removes the trajectory from the list.\n         *\n         * @private\n         * @override\n         */\n        onDeleteTrajectoryMessage(data) {\n            if (!data.content) {\n                return;\n            }\n            this.removeTrajectory(data.content);\n        }\n        /**\n         * Callback when user moves the mouse/pointer over the map.\n         * It sets the layer's hoverVehicleId property with the current hovered vehicle's id.\n         *\n         * @private\n         * @override\n         */\n        onFeatureHover(features, layer, coordinate) {\n            const [feature] = features;\n            let id = null;\n            if (feature) {\n                id = feature.get('train_id');\n            }\n            if (this.hoverVehicleId !== id) {\n                /** @ignore */\n                this.hoverVehicleId = id;\n                // @ts-ignore\n                this.renderTrajectories(true);\n            }\n        }\n        /**\n         * Callback when user clicks on the map.\n         * It sets the layer's selectedVehicleId property with the current selected vehicle's id.\n         *\n         * @private\n         * @override\n         */\n        onFeatureClick(features, layer, coordinate) {\n            const [feature] = features;\n            let id = null;\n            if (feature) {\n                id = feature.get('train_id');\n            }\n            if (this.selectedVehicleId !== id) {\n                /** @ignore */\n                this.selectedVehicleId = id;\n                this.selectedVehicle = feature;\n                // @ts-ignore parameters are provided by subclasses\n                this.renderTrajectories(true);\n            }\n        }\n    };\n}\nexport default RealtimeLayerMixin;\n",
+    "content": "/* eslint-disable no-empty-function,@typescript-eslint/no-empty-function */\n/* eslint-disable no-useless-constructor,@typescript-eslint/no-useless-constructor */\n/* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */\n/* eslint-disable class-methods-use-this */\n/* eslint-disable max-classes-per-file */\nimport { buffer, containsCoordinate, intersects } from 'ol/extent';\nimport { unByKey } from 'ol/Observable';\nimport GeoJSON from 'ol/format/GeoJSON';\nimport debounce from 'lodash.debounce';\nimport throttle from 'lodash.throttle';\nimport { fromLonLat } from 'ol/proj';\nimport realtimeDefaultStyle from '../styles/realtimeDefaultStyle';\nimport { RealtimeAPI, RealtimeModes } from '../../api';\nimport renderTrajectories from '../utils/renderTrajectories';\nimport * as realtimeConfig from '../utils/realtimeConfig';\n/**\n * RealtimeLayerInterface.\n */\nexport class RealtimeLayerInterface {\n    /**\n     * Start the clock.\n     */\n    start() { }\n    /**\n     * Stop the clock.\n     */\n    stop() { }\n    /**\n     * Set the Realtime api's bbox.\n     *\n     * @param {Array<number>} extent  Extent to request, [minX, minY, maxX, maxY, zoom].\n     * @param {number} zoom  Zoom level to request. Must be an integer.\n     */\n    setBbox(extent, zoom) { }\n    /**\n     * Set the Realtime api's mode.\n     *\n     * @param {RealtimeMode} mode  Realtime mode\n     */\n    setMode(mode) { }\n    /**\n     * Render the trajectories\n     */\n    renderTrajectories() { }\n    /**\n     * Request the stopSequence and the fullTrajectory informations for a vehicle.\n     *\n     * @param {string} id The vehicle identifier (the  train_id property).\n     * @param {RealtimeMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.\n     * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.\n     */\n    getTrajectoryInfos(id, mode) { }\n}\n/**\n * Mixin for RealtimeLayerInterface.\n *\n * @param {Class} Base A class to extend with {RealtimeLayerInterface} functionnalities.\n * @return {Class}  A class that implements {RealtimeLayerInterface} class and extends Base;\n * @private\n */\nfunction RealtimeLayerMixin(Base) {\n    // @ts-ignore\n    return class Mixin extends Base {\n        constructor(options) {\n            super(Object.assign({ hitTolerance: 10 }, options));\n            this.debug = options.debug || false;\n            this.mode = options.mode || RealtimeModes.TOPOGRAPHIC;\n            this.api = options.api || new RealtimeAPI(options);\n            this.tenant = options.tenant || ''; // sbb,sbh or sbm\n            this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.\n            this.format = new GeoJSON();\n            // MOTs by zoom\n            const allMots = [\n                'tram',\n                'subway',\n                'rail',\n                'bus',\n                'ferry',\n                'cablecar',\n                'gondola',\n                'funicular',\n                'coach',\n            ];\n            // Server will block non train before zoom 9\n            this.motsByZoom = options.motsByZoom || [allMots];\n            this.getMotsByZoom = (zoom) => {\n                return ((options.getMotsByZoom &&\n                    options.getMotsByZoom(zoom, this.motsByZoom)) ||\n                    this.motsByZoom[zoom] ||\n                    this.motsByZoom[this.motsByZoom.length - 1]);\n            };\n            // Generalization levels by zoom\n            this.generalizationLevelByZoom = options.generalizationLevelByZoom || [\n                5, 5, 5, 5, 5, 5, 5, 5, 10, 30, 30, 100, 100, 100,\n            ];\n            this.getGeneralizationLevelByZoom = (zoom) => {\n                return ((options.getGeneralizationLevelByZoom &&\n                    options.getGeneralizationLevelByZoom(zoom, this.generalizationLevelByZoom)) ||\n                    this.generalizationLevelByZoom[zoom]);\n            };\n            // Render time interval by zoom\n            this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom || [\n                100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400,\n                300, 250, 180, 90, 60, 50, 50, 50, 50, 50,\n            ];\n            this.getRenderTimeIntervalByZoom = (zoom) => {\n                return ((options.getRenderTimeIntervalByZoom &&\n                    options.getRenderTimeIntervalByZoom(zoom, this.renderTimeIntervalByZoom)) ||\n                    this.renderTimeIntervalByZoom[zoom]);\n            };\n            // This property will call api.setBbox on each movend event\n            this.isUpdateBboxOnMoveEnd = options.isUpdateBboxOnMoveEnd !== false;\n            // Define throttling and debounce render function\n            this.throttleRenderTrajectories = throttle(this.renderTrajectoriesInternal, 50, { leading: false, trailing: true });\n            this.debounceRenderTrajectories = debounce(this.renderTrajectoriesInternal, 50, { leading: true, trailing: true, maxWait: 5000 });\n            // Bind callbacks\n            this.onFeatureHover = this.onFeatureHover.bind(this);\n            this.onFeatureClick = this.onFeatureClick.bind(this);\n            this.renderTrajectoriesInternal =\n                this.renderTrajectoriesInternal.bind(this);\n            this.onTrajectoryMessage = this.onTrajectoryMessage.bind(this);\n            this.onDeleteTrajectoryMessage =\n                this.onDeleteTrajectoryMessage.bind(this);\n            this.onDocumentVisibilityChange =\n                this.onDocumentVisibilityChange.bind(this);\n        }\n        /**\n         * Define layer's properties.\n         *\n         * @ignore\n         */\n        defineProperties(options) {\n            const { style, speed, pixelRatio, hoverVehicleId, selectedVehicleId, filter, sort, time, live, canvas, styleOptions, } = options;\n            let currSpeed = speed || 1;\n            let currTime = time || new Date();\n            let currStyle = style || realtimeDefaultStyle;\n            super.defineProperties(options);\n            Object.defineProperties(this, {\n                isTrackerLayer: { value: true },\n                canvas: {\n                    value: canvas || document.createElement('canvas'),\n                },\n                /**\n                 * Style function used to render a vehicle.\n                 */\n                style: {\n                    get: () => currStyle,\n                    set: (newStyle) => {\n                        currStyle = newStyle;\n                        // @ts-ignore  function without parameters is defined in subclasses\n                        this.renderTrajectories();\n                    },\n                },\n                /**\n                 * Custom options to pass as last parameter of the style function.\n                 */\n                styleOptions: {\n                    value: Object.assign(Object.assign({}, realtimeConfig), (styleOptions || {})),\n                },\n                /**\n                 * Speed of the wheel of time.\n                 * If live property is true. The speed is ignored.\n                 */\n                speed: {\n                    get: () => currSpeed,\n                    set: (newSpeed) => {\n                        currSpeed = newSpeed;\n                        this.start();\n                    },\n                },\n                /**\n                 * Function to filter which vehicles to display.\n                 */\n                filter: {\n                    value: filter,\n                    writable: true,\n                },\n                /**\n                 * Function to sort the vehicles to display.\n                 */\n                sort: {\n                    value: sort,\n                    writable: true,\n                },\n                /**\n                 * If true. The layer will always use Date.now() on the next tick to render the trajectories.\n                 * When true, setting the time property has no effect.\n                 */\n                live: {\n                    value: live === false ? live : true,\n                    writable: true,\n                },\n                /**\n                 * Time used to display the trajectories. Can be a Date or a number in ms representing a Date.\n                 * If live property is true. The setter does nothing.\n                 */\n                time: {\n                    get: () => currTime,\n                    set: (newTime) => {\n                        currTime = newTime && newTime.getTime ? newTime : new Date(newTime);\n                        // @ts-ignore  function without parameters is defined in subclasses\n                        this.renderTrajectories();\n                    },\n                },\n                /**\n                 * Keep track of which trajectories are stored.\n                 */\n                trajectories: {\n                    value: {},\n                    writable: true,\n                },\n                /**\n                 * Id of the hovered vehicle.\n                 */\n                hoverVehicleId: {\n                    value: hoverVehicleId,\n                    writable: true,\n                },\n                /**\n                 * Id of the selected vehicle.\n                 */\n                selectedVehicleId: {\n                    value: selectedVehicleId,\n                    writable: true,\n                },\n                /**\n                 * Id of the selected vehicle.\n                 */\n                pixelRatio: {\n                    value: pixelRatio ||\n                        (typeof window !== 'undefined' ? window.devicePixelRatio : 1),\n                    writable: true,\n                },\n                /**\n                 * If true, encapsulates the renderTrajectories calls in a requestAnimationFrame.\n                 */\n                useRequestAnimationFrame: {\n                    value: options.useRequestAnimationFrame || false,\n                    writable: true,\n                },\n                /**\n                 * If true, encapsulates the renderTrajectories calls in a throttle function. Default to true.\n                 */\n                useThrottle: {\n                    value: options.useThrottle !== false,\n                    writable: true,\n                },\n                /**\n                 * If true, encapsulates the renderTrajectories calls in a debounce function.\n                 */\n                useDebounce: {\n                    value: options.useDebounce || false,\n                    writable: true,\n                },\n                /**\n                 * Debug properties.\n                 */\n                // Not used anymore, but could be useful for debugging.\n                // showVehicleTraj: {\n                //   value:\n                //     options.showVehicleTraj !== undefined\n                //       ? options.showVehicleTraj\n                //       : true,\n                //   writable: true,\n                // },\n            });\n        }\n        attachToMap(map) {\n            super.attachToMap(map);\n            // If the layer is visible we start  the rendering clock\n            if (this.visible) {\n                this.start();\n            }\n            // On change of visibility we start/stop the rendering clock\n            this.visibilityRef = this.on('change:visible', (evt) => {\n                if (evt.target.visible) {\n                    this.start();\n                }\n                else {\n                    this.stop();\n                }\n            });\n            // To avoid browser hanging when the tab is not visible for a certain amount of time,\n            // We stop the rendering and the websocket when hide and start again when show.\n            document.addEventListener('visibilitychange', this.onDocumentVisibilityChange);\n        }\n        detachFromMap() {\n            document.removeEventListener('visibilitychange', this.onDocumentVisibilityChange);\n            this.stop();\n            unByKey(this.visibilityRef);\n            if (this.canvas) {\n                const context = this.canvas.getContext('2d');\n                context === null || context === void 0 ? void 0 : context.clearRect(0, 0, this.canvas.width, this.canvas.height);\n                super.detachFromMap();\n            }\n        }\n        start() {\n            this.stop();\n            // @ts-ignore function without parameters must be define  in subclasses\n            this.renderTrajectories();\n            this.startUpdateTime();\n            this.api.open();\n            this.api.subscribeTrajectory(this.mode, this.onTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n            this.api.subscribeDeletedVehicles(this.mode, this.onDeleteTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n            if (this.isUpdateBboxOnMoveEnd) {\n                // Update the bbox on each move end\n                // @ts-ignore function without parameters defined by subclasses\n                this.setBbox();\n            }\n        }\n        /**\n         * Start the clock.\n         * @private\n         */\n        startUpdateTime() {\n            this.stopUpdateTime();\n            this.updateTimeDelay = this.getRefreshTimeInMs() || 0;\n            this.updateTimeInterval = window.setInterval(() => {\n                // When live=true, we update the time with new Date();\n                if (this.live) {\n                    this.time = new Date();\n                }\n                else if (this.time && this.updateTimeDelay && this.speed) {\n                    this.time = new Date(this.time.getTime() + this.updateTimeDelay * this.speed);\n                }\n            }, this.updateTimeDelay);\n        }\n        stop() {\n            this.api.unsubscribeTrajectory(this.onTrajectoryMessage);\n            this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);\n            this.api.close();\n        }\n        /**\n         * Stop the clock.\n         * @private\n         */\n        stopUpdateTime() {\n            if (this.updateTimeInterval) {\n                clearInterval(this.updateTimeInterval);\n                this.updateTimeInterval = undefined;\n            }\n        }\n        /**\n         * Launch renderTrajectories. it avoids duplicating code in renderTrajectories method.\n         *\n         * @param {object} viewState The view state of the map.\n         * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.\n         * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.\n         * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.\n         * @param {number} [viewState.rotation = 0] Rotation of the map to render.\n         * @param {number} viewState.resolution Resolution of the map to render.\n         * @param {boolean} noInterpolate If true trajectories are not interpolated but\n         *   drawn at the last known coordinate. Use this for performance optimization\n         *   during map navigation.\n         * @private\n         */\n        renderTrajectoriesInternal(viewState, noInterpolate = false) {\n            var _a;\n            if (!this.map || !this.trajectories) {\n                return false;\n            }\n            const time = this.live ? Date.now() : (_a = this.time) === null || _a === void 0 ? void 0 : _a.getTime();\n            const trajectories = Object.values(this.trajectories);\n            // console.time('sort');\n            if (this.sort) {\n                // @ts-ignore\n                trajectories.sort(this.sort);\n            }\n            // console.timeEnd('sort');\n            if (!this.canvas || !this.style) {\n                return true;\n            }\n            // console.time('render');\n            this.renderState = renderTrajectories(this.canvas, trajectories, this.style, Object.assign(Object.assign({}, viewState), { pixelRatio: this.pixelRatio || 1, time }), Object.assign({ filter: this.filter, noInterpolate: (viewState.zoom || 0) < this.minZoomInterpolation\n                    ? true\n                    : noInterpolate, hoverVehicleId: this.hoverVehicleId, selectedVehicleId: this.selectedVehicleId }, this.styleOptions));\n            // console.timeEnd('render');\n            return true;\n        }\n        /**\n         * Render the trajectories requesting an animation frame and cancelling the previous one.\n         * This function must be overrided by children to provide the correct parameters.\n         *\n         * @param {object} viewState The view state of the map.\n         * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.\n         * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.\n         * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.\n         * @param {number} [viewState.rotation = 0] Rotation of the map to render.\n         * @param {number} viewState.resolution Resolution of the map to render.\n         * @param {boolean} noInterpolate If true trajectories are not interpolated but\n         *   drawn at the last known coordinate. Use this for performance optimization\n         *   during map navigation.\n         * @private\n         */\n        renderTrajectories(viewState, noInterpolate) {\n            if (this.requestId) {\n                cancelAnimationFrame(this.requestId);\n                this.requestId = undefined;\n            }\n            if (!viewState) {\n                return;\n            }\n            if (!noInterpolate && this.useRequestAnimationFrame) {\n                this.requestId = requestAnimationFrame(() => {\n                    this.renderTrajectoriesInternal(viewState, noInterpolate);\n                });\n            }\n            else if (!noInterpolate && this.useDebounce) {\n                this.debounceRenderTrajectories(viewState, noInterpolate);\n            }\n            else if (!noInterpolate && this.useThrottle) {\n                this.throttleRenderTrajectories(viewState, noInterpolate);\n            }\n            else {\n                this.renderTrajectoriesInternal(viewState, noInterpolate);\n            }\n        }\n        setBbox(extent, zoom) {\n            // Clean trajectories before sending the new bbox\n            // Purge trajectories:\n            // - which are outside the extent\n            // - when it's bus and zoom level is too low for them\n            if (this.trajectories && extent && zoom) {\n                const keys = Object.keys(this.trajectories);\n                for (let i = keys.length - 1; i >= 0; i -= 1) {\n                    this.purgeTrajectory(this.trajectories[keys[i]], extent, zoom);\n                }\n            }\n            if (!extent) {\n                return;\n            }\n            const bbox = [...extent];\n            if (this.isUpdateBboxOnMoveEnd && zoom) {\n                bbox.push(zoom);\n                if (this.tenant) {\n                    bbox.push(`tenant=${this.tenant}`);\n                }\n                /* @ignore */\n                this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);\n                if (this.generalizationLevel) {\n                    bbox.push(`gen=${this.generalizationLevel}`);\n                }\n                /* @ignore */\n                this.mots = this.getMotsByZoom(zoom);\n                if (this.mots) {\n                    bbox.push(`mots=${this.mots}`);\n                }\n            }\n            this.api.bbox = bbox;\n        }\n        setMode(mode) {\n            if (this.mode === mode) {\n                return;\n            }\n            this.mode = mode;\n            this.api.subscribeTrajectory(this.mode, this.onTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n            this.api.subscribeDeletedVehicles(this.mode, this.onDeleteTrajectoryMessage, undefined, this.isUpdateBboxOnMoveEnd);\n        }\n        /**\n         * Get the duration before the next update depending on zoom level.\n         *\n         * @private\n         * @param {number} zoom\n         */\n        getRefreshTimeInMs(zoom = 0) {\n            var _a;\n            const roundedZoom = zoom !== undefined ? Math.round(zoom) : -1;\n            const timeStep = this.getRenderTimeIntervalByZoom(roundedZoom) || 25;\n            const nextTick = Math.max(25, timeStep / (this.speed || 1));\n            const nextThrottleTick = Math.min(nextTick, 500);\n            // TODO: see if this should go elsewhere.\n            if (this.useThrottle) {\n                this.throttleRenderTrajectories = throttle(this.renderTrajectoriesInternal, nextThrottleTick, { leading: true, trailing: true });\n            }\n            else if (this.useDebounce) {\n                this.debounceRenderTrajectories = debounce(this.renderTrajectoriesInternal, nextThrottleTick, { leading: true, trailing: true, maxWait: 5000 });\n            }\n            if ((_a = this.api) === null || _a === void 0 ? void 0 : _a.buffer) {\n                const [, size] = this.api.buffer;\n                this.api.buffer = [nextThrottleTick, size];\n            }\n            return nextTick;\n        }\n        /**\n         * Get vehicle.\n         * @param {function} filterFc A function use to filter results.\n         * @return {Array<Object>} Array of vehicle.\n         */\n        getVehicle(filterFc) {\n            return ((this.trajectories &&\n                // @ts-ignore\n                Object.values(this.trajectories).filter(filterFc)) ||\n                []);\n        }\n        /**\n         * Request feature information for a given coordinate.\n         *\n         * @param {ol/coordinate~Coordinate} coordinate Coordinate.\n         * @param {Object} options Options See child classes to see which options are supported.\n         * @param {number} [options.resolution=1] The resolution of the map.\n         * @param {number} [options.nb=Infinity] The max number of vehicles to return.\n         * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n         */\n        getFeatureInfoAtCoordinate(coordinate, options) {\n            const { resolution, nb } = options;\n            const ext = buffer([...coordinate, ...coordinate], this.hitTolerance * resolution);\n            let trajectories = Object.values(this.trajectories || {});\n            if (this.sort) {\n                // @ts-ignore\n                trajectories = trajectories.sort(this.sort);\n            }\n            const vehicles = [];\n            for (let i = 0; i < trajectories.length; i += 1) {\n                if (trajectories[i].properties.coordinate &&\n                    containsCoordinate(ext, trajectories[i].properties.coordinate)) {\n                    vehicles.push(trajectories[i]);\n                }\n                if (vehicles.length === nb) {\n                    break;\n                }\n            }\n            return Promise.resolve({\n                layer: this,\n                features: vehicles.map((vehicle) => this.format.readFeature(vehicle)),\n                coordinate,\n            });\n        }\n        /**\n         * Request the stopSequence and the fullTrajectory informations for a vehicle.\n         *\n         * @param {string} id The vehicle identifier (the  train_id property).\n         * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.\n         */\n        getTrajectoryInfos(id) {\n            // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.\n            // Then we combine them in one response and send them to inherited layers.\n            const promises = [\n                this.api.getStopSequence(id),\n                this.api.getFullTrajectory(id, this.mode, this.generalizationLevel),\n            ];\n            return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {\n                const response = {\n                    stopSequence,\n                    fullTrajectory,\n                };\n                return response;\n            });\n        }\n        /**\n         * Determine if the trajectory is useless and should be removed from the list or not.\n         * By default, this function exclude vehicles:\n         *  - that have their trajectory outside the current extent and\n         *  - that aren't in the MOT list.\n         *\n         * @param {RealtimeTrajectory} trajectory\n         * @param {Array<number>} extent\n         * @param {number} zoom\n         * @return {boolean} if the trajectory must be displayed or not.\n         * @ignore\n         */\n        purgeTrajectory(trajectory, extent, zoom) {\n            const { type, bounds } = trajectory.properties;\n            if (!intersects(extent, bounds) ||\n                (this.mots && !this.mots.includes(type)) ||\n                (type !== 'rail' && zoom < 9) // zoom 9 is defined by the backend\n            ) {\n                this.removeTrajectory(trajectory);\n                return true;\n            }\n            return false;\n        }\n        /**\n         * Add a trajectory.\n         * @param {RealtimeTrajectory} trajectory The trajectory to add.\n         * @private\n         */\n        addTrajectory(trajectory) {\n            if (this.filter && !this.filter(trajectory)) {\n                return;\n            }\n            if (!this.trajectories) {\n                this.trajectories = {};\n            }\n            this.trajectories[trajectory.properties.train_id] = trajectory;\n            // @ts-ignore the parameter are set by subclasses\n            this.renderTrajectories();\n        }\n        removeTrajectory(trajectoryOrId) {\n            var _a;\n            let id;\n            if (typeof trajectoryOrId !== 'string') {\n                id = (_a = trajectoryOrId === null || trajectoryOrId === void 0 ? void 0 : trajectoryOrId.properties) === null || _a === void 0 ? void 0 : _a.train_id;\n            }\n            else {\n                id = trajectoryOrId;\n            }\n            if (this.trajectories) {\n                delete this.trajectories[id];\n            }\n        }\n        /**\n         * On zoomend we adjust the time interval of the update of vehicles positions.\n         *\n         * @param evt Event that triggered the function.\n         * @private\n         */\n        onZoomEnd() {\n            this.startUpdateTime();\n        }\n        onDocumentVisibilityChange() {\n            if (!this.visible) {\n                return;\n            }\n            if (document.hidden) {\n                this.stop();\n                // Since we don't receive deleted_vehicles event when docuement\n                // is hidden. We have to clean all the trajectories for a fresh\n                // start when the document is visible again.\n                this.trajectories = {};\n            }\n            else {\n                this.start();\n            }\n        }\n        /**\n         * Callback on websocket's trajectory channel events.\n         * It adds a trajectory to the list.\n         *\n         * @private\n         */\n        onTrajectoryMessage(data) {\n            if (!data.content) {\n                return;\n            }\n            const trajectory = data.content;\n            const { geometry, properties: { train_id: id, time_since_update: timeSinceUpdate, raw_coordinates: rawCoordinates, }, } = trajectory;\n            // ignore old events [SBAHNM-97]\n            if (timeSinceUpdate < 0) {\n                return;\n            }\n            // console.time(`onTrajectoryMessage${data.content.properties.train_id}`);\n            // @ts-ignore   default value for extentand zoom are provided by subclasses\n            if (this.purgeTrajectory(trajectory)) {\n                return;\n            }\n            if (this.debug &&\n                this.mode === RealtimeModes.TOPOGRAPHIC &&\n                rawCoordinates) {\n                trajectory.properties.olGeometry = {\n                    type: 'Point',\n                    coordinates: fromLonLat(rawCoordinates, this.map.getView().getProjection()),\n                };\n            }\n            else {\n                trajectory.properties.olGeometry = this.format.readGeometry(geometry);\n            }\n            // TODO Make sure the timeOffset is useful. May be we can remove it.\n            trajectory.properties.timeOffset = Date.now() - data.timestamp;\n            this.addTrajectory(trajectory);\n        }\n        /**\n         * Callback on websocket's deleted_vehicles channel events.\n         * It removes the trajectory from the list.\n         *\n         * @private\n         * @override\n         */\n        onDeleteTrajectoryMessage(data) {\n            if (!data.content) {\n                return;\n            }\n            this.removeTrajectory(data.content);\n        }\n        /**\n         * Callback when user moves the mouse/pointer over the map.\n         * It sets the layer's hoverVehicleId property with the current hovered vehicle's id.\n         *\n         * @private\n         * @override\n         */\n        onFeatureHover(features, layer, coordinate) {\n            const [feature] = features;\n            let id = null;\n            if (feature) {\n                id = feature.get('train_id');\n            }\n            if (this.hoverVehicleId !== id) {\n                /** @ignore */\n                this.hoverVehicleId = id;\n                // @ts-ignore\n                this.renderTrajectories(true);\n            }\n        }\n        /**\n         * Callback when user clicks on the map.\n         * It sets the layer's selectedVehicleId property with the current selected vehicle's id.\n         *\n         * @private\n         * @override\n         */\n        onFeatureClick(features, layer, coordinate) {\n            const [feature] = features;\n            let id = null;\n            if (feature) {\n                id = feature.get('train_id');\n            }\n            if (this.selectedVehicleId !== id) {\n                /** @ignore */\n                this.selectedVehicleId = id;\n                this.selectedVehicle = feature;\n                // @ts-ignore parameters are provided by subclasses\n                this.renderTrajectories(true);\n            }\n        }\n    };\n}\nexport default RealtimeLayerMixin;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/common/mixins/RealtimeLayerMixin.js",
     "access": "public",
@@ -9743,7 +9743,7 @@
     "__docId__": 474,
     "kind": "file",
     "name": "build/ol/layers/RealtimeLayer.js",
-    "content": "import GeoJSON from 'ol/format/GeoJSON';\nimport { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';\nimport Source from 'ol/source/Source';\nimport { composeCssTransform } from 'ol/transform';\nimport { Vector as VectorSource } from 'ol/source';\nimport Layer from './Layer';\nimport mixin from '../../common/mixins/RealtimeLayerMixin';\nimport { fullTrajectoryStyle } from '../styles';\n/** @private */\nconst format = new GeoJSON();\n/**\n * Responsible for loading and display data from a Realtime service.\n *\n * @example\n * import { RealtimeLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new RealtimeLayer({\n *   url: [yourUrl],\n *   apiKey: [yourApiKey],\n * });\n *\n *\n * @see <a href=\"/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html\">RealtimeAPI</a>\n *\n * @extends {Layer}\n * @implements {UserInteractionsLayerInterface}\n * @implements {RealtimeLayerInterface}\n */\n// @ts-ignore\nclass RealtimeLayer extends mixin(Layer) {\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @private\n     */\n    constructor(options) {\n        // We use a group to be able to add custom vector layer in extended class.\n        // For example TrajservLayer use a vectorLayer to display the complete trajectory.\n        super(Object.assign({}, options));\n        /** @ignore */\n        this.olLayer =\n            options.olLayer ||\n                new Group({\n                    layers: [\n                        new VectorLayer({\n                            source: new VectorSource({ features: [] }),\n                            style: (feature, resolution) => {\n                                return (options.fullTrajectoryStyle || fullTrajectoryStyle)(feature, resolution, this.styleOptions);\n                            },\n                        }),\n                        new OLLayer({\n                            source: new Source({}),\n                            render: (frameState) => {\n                                var _a, _b, _c;\n                                if (!this.container) {\n                                    this.container = document.createElement('div');\n                                    this.container.style.position = 'absolute';\n                                    this.container.style.width = '100%';\n                                    this.container.style.height = '100%';\n                                    this.transformContainer = document.createElement('div');\n                                    this.transformContainer.style.position = 'absolute';\n                                    this.transformContainer.style.width = '100%';\n                                    this.transformContainer.style.height = '100%';\n                                    this.container.appendChild(this.transformContainer);\n                                    if (this.canvas) {\n                                        this.canvas.style.position =\n                                            'absolute';\n                                        this.canvas.style.top = '0';\n                                        this.canvas.style.left = '0';\n                                        this.canvas.style.transformOrigin =\n                                            'top left';\n                                        this.transformContainer.appendChild(this.canvas);\n                                    }\n                                }\n                                if (this.renderedViewState) {\n                                    const { center, resolution, rotation } = frameState.viewState;\n                                    const { center: renderedCenter, resolution: renderedResolution, rotation: renderedRotation, } = this.renderedViewState;\n                                    if (renderedResolution / resolution >= 3) {\n                                        // Avoid having really big points when zooming fast.\n                                        const context = (_a = this.canvas) === null || _a === void 0 ? void 0 : _a.getContext('2d');\n                                        context === null || context === void 0 ? void 0 : context.clearRect(0, 0, (_b = this.canvas) === null || _b === void 0 ? void 0 : _b.width, (_c = this.canvas) === null || _c === void 0 ? void 0 : _c.height);\n                                    }\n                                    else {\n                                        const pixelCenterRendered = this.map.getPixelFromCoordinate(renderedCenter);\n                                        const pixelCenter = this.map.getPixelFromCoordinate(center);\n                                        this.transformContainer.style.transform = composeCssTransform(pixelCenterRendered[0] - pixelCenter[0], pixelCenterRendered[1] - pixelCenter[1], renderedResolution / resolution, renderedResolution / resolution, rotation - renderedRotation, 0, 0);\n                                    }\n                                }\n                                return this.container;\n                            },\n                        }),\n                    ],\n                });\n        // We store the layer used to highlight the full Trajectory\n        this.vectorLayer = this.olLayer.getLayers().item(0);\n        // Options the last render run did happen. If something changes\n        // we have to render again\n        /** @ignore */\n        this.renderState = {\n            center: [0, 0],\n            zoom: undefined,\n            rotation: 0,\n        };\n    }\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (this.map) {\n            this.olListenersKeys.push(...this.map.on(['moveend', 'change:target'], (evt) => {\n                const view = (evt.map || evt.target).getView();\n                if (view.getAnimating() || view.getInteracting()) {\n                    return;\n                }\n                const zoom = view.getZoom();\n                // Update the interval between render updates\n                if (this.currentZoom !== zoom) {\n                    this.onZoomEnd();\n                }\n                this.currentZoom = zoom;\n                this.onMoveEnd(evt);\n            }));\n        }\n    }\n    /**\n     * Destroy the container of the tracker.\n     */\n    detachFromMap() {\n        super.detachFromMap();\n        this.container = null;\n    }\n    /**\n     * Detect in the canvas if there is data to query at a specific coordinate.\n     * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test\n     * @returns\n     */\n    hasFeatureInfoAtCoordinate(coordinate) {\n        if (this.map && this.canvas) {\n            const context = this.canvas.getContext('2d');\n            const pixel = this.map.getPixelFromCoordinate(coordinate);\n            return !!(context === null || context === void 0 ? void 0 : context.getImageData(pixel[0] * (this.pixelRatio || 1), pixel[1] * (this.pixelRatio || 1), 1, 1).data[3]);\n        }\n        return false;\n    }\n    /**\n     * Render the trajectories using current map's size, resolution and rotation.\n     * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.\n     * @overrides\n     */\n    // @ts-ignore\n    renderTrajectories(noInterpolate) {\n        if (!this.map) {\n            return;\n        }\n        const view = this.map.getView();\n        super.renderTrajectories({\n            size: this.map.getSize(),\n            center: this.map.getView().getCenter(),\n            extent: view.calculateExtent(),\n            resolution: view.getResolution(),\n            rotation: view.getRotation(),\n            zoom: view.getZoom(),\n            pixelRatio: this.pixelRatio,\n        }, noInterpolate);\n    }\n    /**\n     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.\n     * @private\n     * @override\n     */\n    renderTrajectoriesInternal(viewState, noInterpolate) {\n        if (!this.map) {\n            return false;\n        }\n        let isRendered = false;\n        const blockRendering = this.map.getView().getAnimating() || this.map.getView().getInteracting();\n        // Don't render the map when the map is animating or interacting.\n        isRendered = blockRendering\n            ? false\n            : super.renderTrajectoriesInternal(viewState, noInterpolate);\n        // We update the current render state.\n        if (isRendered) {\n            this.renderedViewState = Object.assign({}, viewState);\n            if (this.transformContainer) {\n                this.transformContainer.style.transform = '';\n            }\n        }\n        return isRendered;\n    }\n    /**\n     * Return the delay in ms before the next rendering.\n     */\n    getRefreshTimeInMs() {\n        return super.getRefreshTimeInMs(this.map.getView().getZoom());\n    }\n    getFeatureInfoAtCoordinate(coordinate, options = {}) {\n        const resolution = this.map.getView().getResolution();\n        return super.getFeatureInfoAtCoordinate(coordinate, Object.assign({ resolution }, options));\n    }\n    /**\n     * On move end we update the websocket with the new bbox.\n     *\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line @typescript-eslint/no-unused-vars\n    onMoveEnd(evt) {\n        if (this.visible && this.isUpdateBboxOnMoveEnd) {\n            this.setBbox();\n        }\n        if (this.visible &&\n            this.isUpdateBboxOnMoveEnd &&\n            this.userClickInteractions &&\n            this.selectedVehicleId) {\n            this.highlightTrajectory(this.selectedVehicleId);\n        }\n    }\n    /**\n     * Function called on moveend event only when the zoom has changed.\n     *\n     * @param {ol/MapEvent~MapEvent} evt Moveend event.\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line no-unused-vars\n    onZoomEnd() {\n        super.onZoomEnd();\n    }\n    /**\n     * Update the cursor style when hovering a vehicle.\n     *\n     * @private\n     * @override\n     */\n    onFeatureHover(features, layer, coordinate) {\n        super.onFeatureHover(features, layer, coordinate);\n        this.map.getTargetElement().style.cursor = features.length\n            ? 'pointer'\n            : 'auto';\n    }\n    /**\n     * Display the complete trajectory of the vehicle.\n     *\n     * @private\n     * @override\n     */\n    onFeatureClick(features, layer, coordinate) {\n        super.onFeatureClick(features, layer, coordinate);\n        if (!features.length && this.vectorLayer) {\n            this.vectorLayer.getSource().clear();\n        }\n        if (this.selectedVehicleId) {\n            this.highlightTrajectory(this.selectedVehicleId);\n        }\n    }\n    /**\n     * Remove the trajectory form the list if necessary.\n     *\n     * @private\n     */\n    purgeTrajectory(trajectory, extent, zoom) {\n        return super.purgeTrajectory(trajectory, extent || this.map.getView().calculateExtent(), zoom || this.map.getView().getZoom());\n    }\n    /**\n     * Send the current bbox to the websocket\n     *\n     * @private\n     */\n    setBbox(extent, zoom) {\n        let newExtent = extent;\n        let newZoom = zoom;\n        if (!newExtent && this.isUpdateBboxOnMoveEnd) {\n            newExtent = extent || this.map.getView().calculateExtent();\n            newZoom = Math.floor(this.map.getView().getZoom());\n        }\n        super.setBbox(newExtent, newZoom);\n    }\n    /**\n     * Highlight the trajectory of journey.\n     * @private\n     */\n    highlightTrajectory(id) {\n        this.api\n            .getFullTrajectory(id, this.mode, this.generalizationLevel)\n            .then((data) => {\n            const fullTrajectory = data.content;\n            this.vectorLayer.getSource().clear();\n            if (!fullTrajectory ||\n                !fullTrajectory.features ||\n                !fullTrajectory.features.length) {\n                return;\n            }\n            const features = format.readFeatures(fullTrajectory);\n            this.vectorLayer.getSource().addFeatures(features);\n        });\n    }\n    /**\n     * Create a copy of the RealtimeLayer.\n     * @param {Object} newOptions Options to override\n     * @return {RealtimeLayer} A RealtimeLayer\n     */\n    clone(newOptions) {\n        return new RealtimeLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default RealtimeLayer;\n",
+    "content": "import GeoJSON from 'ol/format/GeoJSON';\nimport { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';\nimport Source from 'ol/source/Source';\nimport { composeCssTransform } from 'ol/transform';\nimport { Vector as VectorSource } from 'ol/source';\nimport Layer from './Layer';\nimport mixin from '../../common/mixins/RealtimeLayerMixin';\nimport { fullTrajectoryStyle } from '../styles';\n/** @private */\nconst format = new GeoJSON();\n/**\n * Responsible for loading and display data from a Realtime service.\n *\n * @example\n * import { RealtimeLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new RealtimeLayer({\n *   url: [yourUrl],\n *   apiKey: [yourApiKey],\n * });\n *\n *\n * @see <a href=\"/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html\">RealtimeAPI</a>\n *\n * @extends {Layer}\n * @implements {UserInteractionsLayerInterface}\n * @implements {RealtimeLayerInterface}\n */\n// @ts-ignore\nclass RealtimeLayer extends mixin(Layer) {\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @private\n     */\n    constructor(options) {\n        // We use a group to be able to add custom vector layer in extended class.\n        // For example TrajservLayer use a vectorLayer to display the complete trajectory.\n        super(Object.assign({}, options));\n        this.allowRenderWhenAnimating = false;\n        this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;\n        /** @ignore */\n        this.olLayer =\n            options.olLayer ||\n                new Group({\n                    layers: [\n                        new VectorLayer({\n                            source: new VectorSource({ features: [] }),\n                            style: (feature, resolution) => {\n                                return (options.fullTrajectoryStyle || fullTrajectoryStyle)(feature, resolution, this.styleOptions);\n                            },\n                        }),\n                        new OLLayer({\n                            source: new Source({}),\n                            render: (frameState) => {\n                                var _a, _b, _c;\n                                if (!this.container) {\n                                    this.container = document.createElement('div');\n                                    this.container.style.position = 'absolute';\n                                    this.container.style.width = '100%';\n                                    this.container.style.height = '100%';\n                                    this.transformContainer = document.createElement('div');\n                                    this.transformContainer.style.position = 'absolute';\n                                    this.transformContainer.style.width = '100%';\n                                    this.transformContainer.style.height = '100%';\n                                    this.container.appendChild(this.transformContainer);\n                                    if (this.canvas) {\n                                        this.canvas.style.position =\n                                            'absolute';\n                                        this.canvas.style.top = '0';\n                                        this.canvas.style.left = '0';\n                                        this.canvas.style.transformOrigin =\n                                            'top left';\n                                        this.transformContainer.appendChild(this.canvas);\n                                    }\n                                }\n                                if (this.renderedViewState) {\n                                    const { center, resolution, rotation } = frameState.viewState;\n                                    const { center: renderedCenter, resolution: renderedResolution, rotation: renderedRotation, } = this.renderedViewState;\n                                    if (renderedResolution / resolution >= 3) {\n                                        // Avoid having really big points when zooming fast.\n                                        const context = (_a = this.canvas) === null || _a === void 0 ? void 0 : _a.getContext('2d');\n                                        context === null || context === void 0 ? void 0 : context.clearRect(0, 0, (_b = this.canvas) === null || _b === void 0 ? void 0 : _b.width, (_c = this.canvas) === null || _c === void 0 ? void 0 : _c.height);\n                                    }\n                                    else {\n                                        const pixelCenterRendered = this.map.getPixelFromCoordinate(renderedCenter);\n                                        const pixelCenter = this.map.getPixelFromCoordinate(center);\n                                        this.transformContainer.style.transform = composeCssTransform(pixelCenterRendered[0] - pixelCenter[0], pixelCenterRendered[1] - pixelCenter[1], renderedResolution / resolution, renderedResolution / resolution, rotation - renderedRotation, 0, 0);\n                                    }\n                                }\n                                return this.container;\n                            },\n                        }),\n                    ],\n                });\n        // We store the layer used to highlight the full Trajectory\n        this.vectorLayer = this.olLayer.getLayers().item(0);\n        // Options the last render run did happen. If something changes\n        // we have to render again\n        /** @ignore */\n        this.renderState = {\n            center: [0, 0],\n            zoom: undefined,\n            rotation: 0,\n        };\n    }\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (this.map) {\n            this.olListenersKeys.push(...this.map.on(['moveend', 'change:target'], (evt) => {\n                const view = (evt.map || evt.target).getView();\n                if (view.getAnimating() || view.getInteracting()) {\n                    return;\n                }\n                const zoom = view.getZoom();\n                // Update the interval between render updates\n                if (this.currentZoom !== zoom) {\n                    this.onZoomEnd();\n                }\n                this.currentZoom = zoom;\n                this.onMoveEnd(evt);\n            }));\n        }\n    }\n    /**\n     * Destroy the container of the tracker.\n     */\n    detachFromMap() {\n        super.detachFromMap();\n        this.container = null;\n    }\n    /**\n     * Detect in the canvas if there is data to query at a specific coordinate.\n     * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test\n     * @returns\n     */\n    hasFeatureInfoAtCoordinate(coordinate) {\n        if (this.map && this.canvas) {\n            const context = this.canvas.getContext('2d');\n            const pixel = this.map.getPixelFromCoordinate(coordinate);\n            return !!(context === null || context === void 0 ? void 0 : context.getImageData(pixel[0] * (this.pixelRatio || 1), pixel[1] * (this.pixelRatio || 1), 1, 1).data[3]);\n        }\n        return false;\n    }\n    /**\n     * Render the trajectories using current map's size, resolution and rotation.\n     * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.\n     * @overrides\n     */\n    // @ts-ignore\n    renderTrajectories(noInterpolate) {\n        if (!this.map) {\n            return;\n        }\n        const view = this.map.getView();\n        super.renderTrajectories({\n            size: this.map.getSize(),\n            center: this.map.getView().getCenter(),\n            extent: view.calculateExtent(),\n            resolution: view.getResolution(),\n            rotation: view.getRotation(),\n            zoom: view.getZoom(),\n            pixelRatio: this.pixelRatio,\n        }, noInterpolate);\n    }\n    /**\n     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.\n     * @private\n     * @override\n     */\n    renderTrajectoriesInternal(viewState, noInterpolate) {\n        if (!this.map) {\n            return false;\n        }\n        let isRendered = false;\n        const blockRendering = this.allowRenderWhenAnimating\n            ? false\n            : this.map.getView().getAnimating() ||\n                this.map.getView().getInteracting();\n        // Don't render the map when the map is animating or interacting.\n        isRendered = blockRendering\n            ? false\n            : super.renderTrajectoriesInternal(viewState, noInterpolate);\n        // We update the current render state.\n        if (isRendered) {\n            this.renderedViewState = Object.assign({}, viewState);\n            if (this.transformContainer) {\n                this.transformContainer.style.transform = '';\n            }\n        }\n        return isRendered;\n    }\n    /**\n     * Return the delay in ms before the next rendering.\n     */\n    getRefreshTimeInMs() {\n        return super.getRefreshTimeInMs(this.map.getView().getZoom());\n    }\n    getFeatureInfoAtCoordinate(coordinate, options = {}) {\n        const resolution = this.map.getView().getResolution();\n        return super.getFeatureInfoAtCoordinate(coordinate, Object.assign({ resolution }, options));\n    }\n    /**\n     * On move end we update the websocket with the new bbox.\n     *\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line @typescript-eslint/no-unused-vars\n    onMoveEnd(evt) {\n        if (this.visible && this.isUpdateBboxOnMoveEnd) {\n            this.setBbox();\n        }\n        if (this.visible &&\n            this.isUpdateBboxOnMoveEnd &&\n            this.userClickInteractions &&\n            this.selectedVehicleId) {\n            this.highlightTrajectory(this.selectedVehicleId);\n        }\n    }\n    /**\n     * Function called on moveend event only when the zoom has changed.\n     *\n     * @param {ol/MapEvent~MapEvent} evt Moveend event.\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line no-unused-vars\n    onZoomEnd() {\n        super.onZoomEnd();\n    }\n    /**\n     * Update the cursor style when hovering a vehicle.\n     *\n     * @private\n     * @override\n     */\n    onFeatureHover(features, layer, coordinate) {\n        super.onFeatureHover(features, layer, coordinate);\n        this.map.getTargetElement().style.cursor = features.length\n            ? 'pointer'\n            : 'auto';\n    }\n    /**\n     * Display the complete trajectory of the vehicle.\n     *\n     * @private\n     * @override\n     */\n    onFeatureClick(features, layer, coordinate) {\n        super.onFeatureClick(features, layer, coordinate);\n        if (!features.length && this.vectorLayer) {\n            this.vectorLayer.getSource().clear();\n        }\n        if (this.selectedVehicleId) {\n            this.highlightTrajectory(this.selectedVehicleId);\n        }\n    }\n    /**\n     * Remove the trajectory form the list if necessary.\n     *\n     * @private\n     */\n    purgeTrajectory(trajectory, extent, zoom) {\n        return super.purgeTrajectory(trajectory, extent || this.map.getView().calculateExtent(), zoom || this.map.getView().getZoom());\n    }\n    /**\n     * Send the current bbox to the websocket\n     *\n     * @private\n     */\n    setBbox(extent, zoom) {\n        let newExtent = extent;\n        let newZoom = zoom;\n        if (!newExtent && this.isUpdateBboxOnMoveEnd) {\n            newExtent = extent || this.map.getView().calculateExtent();\n            newZoom = Math.floor(this.map.getView().getZoom());\n        }\n        super.setBbox(newExtent, newZoom);\n    }\n    /**\n     * Highlight the trajectory of journey.\n     * @private\n     */\n    highlightTrajectory(id) {\n        this.api\n            .getFullTrajectory(id, this.mode, this.generalizationLevel)\n            .then((data) => {\n            const fullTrajectory = data.content;\n            this.vectorLayer.getSource().clear();\n            if (!fullTrajectory ||\n                !fullTrajectory.features ||\n                !fullTrajectory.features.length) {\n                return;\n            }\n            const features = format.readFeatures(fullTrajectory);\n            this.vectorLayer.getSource().addFeatures(features);\n        });\n    }\n    /**\n     * Create a copy of the RealtimeLayer.\n     * @param {Object} newOptions Options to override\n     * @return {RealtimeLayer} A RealtimeLayer\n     */\n    clone(newOptions) {\n        return new RealtimeLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default RealtimeLayer;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/ol/layers/RealtimeLayer.js",
     "access": "public",
@@ -9826,48 +9826,31 @@
   {
     "__docId__": 478,
     "kind": "member",
-    "name": "olLayer",
+    "name": "allowRenderWhenAnimating",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
     "static": false,
-    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#olLayer",
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#allowRenderWhenAnimating",
     "access": "public",
     "description": null,
-    "lineNumber": 42,
-    "ignore": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 479,
-    "kind": "member",
-    "name": "container",
-    "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
-    "static": false,
-    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#container",
-    "access": "public",
-    "description": null,
-    "lineNumber": 57,
+    "lineNumber": 41,
     "undocument": true,
     "type": {
       "types": [
-        "*"
+        "boolean"
       ]
     }
   },
   {
     "__docId__": 480,
     "kind": "member",
-    "name": "transformContainer",
+    "name": "olLayer",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
     "static": false,
-    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#transformContainer",
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#olLayer",
     "access": "public",
     "description": null,
-    "lineNumber": 61,
-    "undocument": true,
+    "lineNumber": 44,
+    "ignore": true,
     "type": {
       "types": [
         "*"
@@ -9877,13 +9860,13 @@
   {
     "__docId__": 481,
     "kind": "member",
-    "name": "vectorLayer",
+    "name": "container",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
     "static": false,
-    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#vectorLayer",
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#container",
     "access": "public",
     "description": null,
-    "lineNumber": 96,
+    "lineNumber": 59,
     "undocument": true,
     "type": {
       "types": [
@@ -9894,13 +9877,47 @@
   {
     "__docId__": 482,
     "kind": "member",
+    "name": "transformContainer",
+    "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
+    "static": false,
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#transformContainer",
+    "access": "public",
+    "description": null,
+    "lineNumber": 63,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 483,
+    "kind": "member",
+    "name": "vectorLayer",
+    "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
+    "static": false,
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#vectorLayer",
+    "access": "public",
+    "description": null,
+    "lineNumber": 98,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 484,
+    "kind": "member",
     "name": "renderState",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
     "static": false,
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#renderState",
     "access": "public",
     "description": null,
-    "lineNumber": 100,
+    "lineNumber": 102,
     "ignore": true,
     "type": {
       "types": [
@@ -9909,7 +9926,7 @@
     }
   },
   {
-    "__docId__": 483,
+    "__docId__": 485,
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -9919,7 +9936,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#attachToMap",
     "access": "public",
     "description": null,
-    "lineNumber": 106,
+    "lineNumber": 108,
     "undocument": true,
     "params": [
       {
@@ -9932,7 +9949,7 @@
     "return": null
   },
   {
-    "__docId__": 484,
+    "__docId__": 486,
     "kind": "member",
     "name": "currentZoom",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -9940,7 +9957,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#currentZoom",
     "access": "public",
     "description": null,
-    "lineNumber": 119,
+    "lineNumber": 121,
     "undocument": true,
     "type": {
       "types": [
@@ -9949,7 +9966,7 @@
     }
   },
   {
-    "__docId__": 485,
+    "__docId__": 487,
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -9959,12 +9976,12 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#detachFromMap",
     "access": "public",
     "description": "Destroy the container of the tracker.",
-    "lineNumber": 127,
+    "lineNumber": 129,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 487,
+    "__docId__": 489,
     "kind": "method",
     "name": "hasFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -9974,7 +9991,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#hasFeatureInfoAtCoordinate",
     "access": "public",
     "description": "Detect in the canvas if there is data to query at a specific coordinate.",
-    "lineNumber": 136,
+    "lineNumber": 138,
     "unknown": [
       {
         "tagName": "@returns",
@@ -10000,7 +10017,7 @@
     }
   },
   {
-    "__docId__": 488,
+    "__docId__": 490,
     "kind": "method",
     "name": "renderTrajectories",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10010,7 +10027,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#renderTrajectories",
     "access": "public",
     "description": "Render the trajectories using current map's size, resolution and rotation.",
-    "lineNumber": 150,
+    "lineNumber": 152,
     "unknown": [
       {
         "tagName": "@overrides",
@@ -10032,7 +10049,7 @@
     "return": null
   },
   {
-    "__docId__": 489,
+    "__docId__": 491,
     "kind": "method",
     "name": "renderTrajectoriesInternal",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10042,7 +10059,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#renderTrajectoriesInternal",
     "access": "private",
     "description": "Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.",
-    "lineNumber": 170,
+    "lineNumber": 172,
     "override": true,
     "params": [
       {
@@ -10065,7 +10082,7 @@
     }
   },
   {
-    "__docId__": 490,
+    "__docId__": 492,
     "kind": "member",
     "name": "renderedViewState",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10073,7 +10090,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#renderedViewState",
     "access": "public",
     "description": null,
-    "lineNumber": 182,
+    "lineNumber": 187,
     "undocument": true,
     "type": {
       "types": [
@@ -10082,7 +10099,7 @@
     }
   },
   {
-    "__docId__": 491,
+    "__docId__": 493,
     "kind": "method",
     "name": "getRefreshTimeInMs",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10092,7 +10109,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#getRefreshTimeInMs",
     "access": "public",
     "description": "Return the delay in ms before the next rendering.",
-    "lineNumber": 192,
+    "lineNumber": 197,
     "params": [],
     "return": {
       "types": [
@@ -10101,7 +10118,7 @@
     }
   },
   {
-    "__docId__": 492,
+    "__docId__": 494,
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10111,7 +10128,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#getFeatureInfoAtCoordinate",
     "access": "public",
     "description": null,
-    "lineNumber": 195,
+    "lineNumber": 200,
     "undocument": true,
     "params": [
       {
@@ -10137,7 +10154,7 @@
     }
   },
   {
-    "__docId__": 493,
+    "__docId__": 495,
     "kind": "method",
     "name": "onMoveEnd",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10147,7 +10164,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#onMoveEnd",
     "access": "private",
     "description": "On move end we update the websocket with the new bbox.",
-    "lineNumber": 206,
+    "lineNumber": 211,
     "override": true,
     "params": [
       {
@@ -10160,7 +10177,7 @@
     "return": null
   },
   {
-    "__docId__": 494,
+    "__docId__": 496,
     "kind": "method",
     "name": "onZoomEnd",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10170,7 +10187,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#onZoomEnd",
     "access": "private",
     "description": "Function called on moveend event only when the zoom has changed.",
-    "lineNumber": 225,
+    "lineNumber": 230,
     "params": [
       {
         "nullable": null,
@@ -10187,7 +10204,7 @@
     "return": null
   },
   {
-    "__docId__": 495,
+    "__docId__": 497,
     "kind": "method",
     "name": "onFeatureHover",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10197,7 +10214,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#onFeatureHover",
     "access": "private",
     "description": "Update the cursor style when hovering a vehicle.",
-    "lineNumber": 234,
+    "lineNumber": 239,
     "override": true,
     "params": [
       {
@@ -10222,7 +10239,7 @@
     "return": null
   },
   {
-    "__docId__": 496,
+    "__docId__": 498,
     "kind": "method",
     "name": "onFeatureClick",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10232,7 +10249,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#onFeatureClick",
     "access": "private",
     "description": "Display the complete trajectory of the vehicle.",
-    "lineNumber": 246,
+    "lineNumber": 251,
     "override": true,
     "params": [
       {
@@ -10257,7 +10274,7 @@
     "return": null
   },
   {
-    "__docId__": 497,
+    "__docId__": 499,
     "kind": "method",
     "name": "purgeTrajectory",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10267,7 +10284,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#purgeTrajectory",
     "access": "private",
     "description": "Remove the trajectory form the list if necessary.",
-    "lineNumber": 260,
+    "lineNumber": 265,
     "params": [
       {
         "name": "trajectory",
@@ -10295,7 +10312,7 @@
     }
   },
   {
-    "__docId__": 498,
+    "__docId__": 500,
     "kind": "method",
     "name": "setBbox",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10305,7 +10322,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#setBbox",
     "access": "private",
     "description": "Send the current bbox to the websocket",
-    "lineNumber": 268,
+    "lineNumber": 273,
     "params": [
       {
         "name": "extent",
@@ -10323,7 +10340,7 @@
     "return": null
   },
   {
-    "__docId__": 499,
+    "__docId__": 501,
     "kind": "method",
     "name": "highlightTrajectory",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10333,7 +10350,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#highlightTrajectory",
     "access": "private",
     "description": "Highlight the trajectory of journey.",
-    "lineNumber": 281,
+    "lineNumber": 286,
     "params": [
       {
         "name": "id",
@@ -10345,7 +10362,7 @@
     "return": null
   },
   {
-    "__docId__": 500,
+    "__docId__": 502,
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -10355,7 +10372,7 @@
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#clone",
     "access": "public",
     "description": "Create a copy of the RealtimeLayer.",
-    "lineNumber": 301,
+    "lineNumber": 306,
     "params": [
       {
         "nullable": null,
@@ -10378,7 +10395,7 @@
     }
   },
   {
-    "__docId__": 501,
+    "__docId__": 503,
     "kind": "file",
     "name": "build/ol/layers/RoutingLayer.js",
     "content": "import { Circle, Fill, Stroke, Style } from 'ol/style';\nimport { Vector as VectorSource } from 'ol/source';\nimport { Vector } from 'ol/layer';\nimport Layer from './Layer';\n/** @private */\nconst circleStyle = new Circle({\n    radius: 6,\n    fill: new Fill({\n        color: [255, 0, 0, 1],\n    }),\n    stroke: new Stroke({\n        color: [0, 0, 0, 1],\n        width: 1,\n    }),\n});\n/** @private */\nconst blackBorder = new Style({\n    stroke: new Stroke({\n        color: [0, 0, 0, 1],\n        width: 5,\n    }),\n});\n/** @private */\nconst redLine = new Style({\n    image: circleStyle,\n    stroke: new Stroke({\n        color: [255, 0, 0, 1],\n        width: 3,\n    }),\n});\n/** @private */\nconst dashedRedLine = new Style({\n    image: circleStyle,\n    stroke: new Stroke({\n        color: [255, 0, 0, 1],\n        width: 3,\n        lineDash: [1, 10],\n    }),\n});\n/** @private */\nconst defaultStyleFunction = (feature, resolution) => {\n    const minResolution = feature.get('minResolution');\n    const maxResolution = feature.get('maxResolution');\n    const inRange = resolution <= minResolution && resolution > maxResolution;\n    if (minResolution && maxResolution && !inRange) {\n        return [];\n    }\n    const mot = feature.get('mot');\n    if (mot !== 'foot') {\n        return [blackBorder, redLine];\n    }\n    return [dashedRedLine];\n};\n/**\n * A class use to display vector data.\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass RoutingLayer extends Layer {\n    /**\n     * Constructor.\n     * @param {Object} [options]\n     * @param {ol/style/Style~StyleLike} [options.style] Style to be used for routes, uses (ol/StyleLike) [https://openlayers.org/en/latest/apidoc/module-ol_style_Style.html#~StyleLike] instances\n     */\n    constructor(options) {\n        super(options);\n        this.options = {};\n        this.olLayer =\n            options.olLayer ||\n                new Vector({\n                    source: new VectorSource(),\n                    style: options.style || defaultStyleFunction,\n                });\n    }\n    /**\n     * Create a copy of the RoutingLayer.\n     * @param {Object} newOptions Options to override\n     * @return {RoutingLayer} A RoutingLayer\n     */\n    clone(newOptions) {\n        return new RoutingLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default RoutingLayer;\n",
@@ -10389,7 +10406,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 502,
+    "__docId__": 504,
     "kind": "variable",
     "name": "circleStyle",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -10409,7 +10426,7 @@
     "ignore": true
   },
   {
-    "__docId__": 503,
+    "__docId__": 505,
     "kind": "variable",
     "name": "blackBorder",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -10429,7 +10446,7 @@
     "ignore": true
   },
   {
-    "__docId__": 504,
+    "__docId__": 506,
     "kind": "variable",
     "name": "redLine",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -10449,7 +10466,7 @@
     "ignore": true
   },
   {
-    "__docId__": 505,
+    "__docId__": 507,
     "kind": "variable",
     "name": "dashedRedLine",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -10469,7 +10486,7 @@
     "ignore": true
   },
   {
-    "__docId__": 506,
+    "__docId__": 508,
     "kind": "function",
     "name": "defaultStyleFunction",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -10505,7 +10522,7 @@
     "ignore": true
   },
   {
-    "__docId__": 507,
+    "__docId__": 509,
     "kind": "class",
     "name": "RoutingLayer",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -10529,7 +10546,7 @@
     ]
   },
   {
-    "__docId__": 508,
+    "__docId__": 510,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -10564,7 +10581,7 @@
     ]
   },
   {
-    "__docId__": 509,
+    "__docId__": 511,
     "kind": "member",
     "name": "options",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -10581,7 +10598,7 @@
     }
   },
   {
-    "__docId__": 510,
+    "__docId__": 512,
     "kind": "member",
     "name": "olLayer",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -10598,7 +10615,7 @@
     }
   },
   {
-    "__docId__": 511,
+    "__docId__": 513,
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -10631,7 +10648,7 @@
     }
   },
   {
-    "__docId__": 512,
+    "__docId__": 514,
     "kind": "file",
     "name": "build/ol/layers/VectorLayer.js",
     "content": "import Layer from './Layer';\n/**\n * A class use to display vector data.\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass VectorLayer extends Layer {\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        let features = [];\n        if (this.map) {\n            const pixel = this.map.getPixelFromCoordinate(coordinate);\n            features = this.map.getFeaturesAtPixel(pixel, {\n                layerFilter: (l) => l === this.olLayer,\n                hitTolerance: this.hitTolerance,\n            });\n        }\n        return Promise.resolve({\n            features,\n            layer: this,\n            coordinate,\n        });\n    }\n    /**\n     * Create a copy of the VectorLayer.\n     * @param {Object} newOptions Options to override\n     * @return {VectorLayer} A VectorLayer\n     */\n    clone(newOptions) {\n        return new VectorLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default VectorLayer;\n",
@@ -10642,7 +10659,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 513,
+    "__docId__": 515,
     "kind": "class",
     "name": "VectorLayer",
     "memberof": "build/ol/layers/VectorLayer.js",
@@ -10666,7 +10683,7 @@
     ]
   },
   {
-    "__docId__": 514,
+    "__docId__": 516,
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/VectorLayer.js~VectorLayer",
@@ -10699,7 +10716,7 @@
     }
   },
   {
-    "__docId__": 515,
+    "__docId__": 517,
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/VectorLayer.js~VectorLayer",
@@ -10732,7 +10749,7 @@
     }
   },
   {
-    "__docId__": 516,
+    "__docId__": 518,
     "kind": "file",
     "name": "build/ol/layers/WMSLayer.js",
     "content": "import GeoJSON from 'ol/format/GeoJSON';\nimport Layer from './Layer';\n/**\n * Class use to display a WMS layer.\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass WMSLayer extends Layer {\n    /**\n     * @override\n     */\n    constructor(options) {\n        super(options);\n        /** @ignore */\n        this.abortController = new AbortController();\n        /** @ignore */\n        this.format = new GeoJSON();\n    }\n    /**\n     * Get features infos' Url.\n     * @param {ol/coordinate~Coordinate} coord\n     * @return {ol/layer/Layer~Layer}\n     */\n    getFeatureInfoUrl(coord) {\n        var _a, _b, _c, _d, _e, _f;\n        if (!this.map) {\n            return;\n        }\n        const projection = this.map.getView().getProjection();\n        const resolution = this.map.getView().getResolution();\n        if (resolution &&\n            projection &&\n            ((_b = (_a = this.olLayer) === null || _a === void 0 ? void 0 : _a.getSource()) === null || _b === void 0 ? void 0 : _b.getFeatureInfoUrl)) {\n            // eslint-disable-next-line consistent-return\n            return (_d = (_c = this.olLayer) === null || _c === void 0 ? void 0 : _c.getSource()) === null || _d === void 0 ? void 0 : _d.getFeatureInfoUrl(coord, resolution, projection, {\n                info_format: 'application/json',\n                query_layers: (_f = (_e = this.olLayer) === null || _e === void 0 ? void 0 : _e.getSource()) === null || _f === void 0 ? void 0 : _f.getParams().layers,\n            });\n        }\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        var _a;\n        (_a = this.abortController) === null || _a === void 0 ? void 0 : _a.abort();\n        this.abortController = new AbortController();\n        const { signal } = this.abortController;\n        const url = this.getFeatureInfoUrl(coordinate);\n        if (!url) {\n            // eslint-disable-next-line no-console\n            console.error('No url for the WMS layer.');\n            // resolve an empty feature array something fails\n            return Promise.resolve({\n                features: [],\n                coordinate,\n                layer: this,\n            });\n        }\n        return fetch(url, { signal })\n            .then((resp) => resp.json())\n            .then((r) => r.features)\n            .then((data) => ({\n            layer: this,\n            coordinate,\n            features: data.map((d) => this.format.readFeature(d)),\n        }))\n            .catch(() => \n        // resolve an empty feature array something fails\n        Promise.resolve({\n            features: [],\n            coordinate,\n            layer: this,\n        }));\n    }\n    /**\n     * Create a copy of the WMSLayer.\n     * @param {Object} newOptions Options to override\n     * @return {WMSLayer} A WMSLayer\n     */\n    clone(newOptions) {\n        return new WMSLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default WMSLayer;\n",
@@ -10743,7 +10760,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 517,
+    "__docId__": 519,
     "kind": "class",
     "name": "WMSLayer",
     "memberof": "build/ol/layers/WMSLayer.js",
@@ -10767,7 +10784,7 @@
     ]
   },
   {
-    "__docId__": 518,
+    "__docId__": 520,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -10781,7 +10798,7 @@
     "override": true
   },
   {
-    "__docId__": 519,
+    "__docId__": 521,
     "kind": "member",
     "name": "abortController",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -10798,7 +10815,7 @@
     }
   },
   {
-    "__docId__": 520,
+    "__docId__": 522,
     "kind": "member",
     "name": "format",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -10815,7 +10832,7 @@
     }
   },
   {
-    "__docId__": 521,
+    "__docId__": 523,
     "kind": "method",
     "name": "getFeatureInfoUrl",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -10848,7 +10865,7 @@
     }
   },
   {
-    "__docId__": 522,
+    "__docId__": 524,
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -10881,7 +10898,7 @@
     }
   },
   {
-    "__docId__": 524,
+    "__docId__": 526,
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -10914,7 +10931,7 @@
     }
   },
   {
-    "__docId__": 525,
+    "__docId__": 527,
     "kind": "file",
     "name": "build/ol/layers/index.js",
     "content": "export { default as Layer } from './Layer';\nexport { default as MapboxLayer } from './MapboxLayer';\nexport { default as MaplibreLayer } from './MaplibreLayer';\nexport { default as MapboxStyleLayer } from './MapboxStyleLayer';\nexport { default as RoutingLayer } from './RoutingLayer';\nexport { default as RealtimeLayer } from './RealtimeLayer';\nexport { default as VectorLayer } from './VectorLayer';\nexport { default as WMSLayer } from './WMSLayer';\n",
@@ -10925,7 +10942,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 526,
+    "__docId__": 528,
     "kind": "file",
     "name": "build/ol/styles/fullTrajectoryDelayStyle.js",
     "content": "import { Style, Fill, Stroke, Circle } from 'ol/style';\n/** @private */\nconst stroke = new Style({\n    zIndex: 2,\n    image: new Circle({\n        radius: 5,\n        fill: new Fill({\n            color: '#000000',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#000000',\n        width: 6,\n    }),\n});\n/** @private */\nconst fill = new Style({\n    zIndex: 3,\n    image: new Circle({\n        radius: 4,\n        fill: new Fill({\n            color: '#a0a0a0',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#a0a0a0',\n        width: 4,\n    }),\n});\nconst fullTrajectoryDelaystyle = () => {\n    return [stroke, fill];\n};\nexport default fullTrajectoryDelaystyle;\n",
@@ -10936,7 +10953,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 527,
+    "__docId__": 529,
     "kind": "variable",
     "name": "stroke",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -10956,7 +10973,7 @@
     "ignore": true
   },
   {
-    "__docId__": 528,
+    "__docId__": 530,
     "kind": "variable",
     "name": "fill",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -10976,7 +10993,7 @@
     "ignore": true
   },
   {
-    "__docId__": 529,
+    "__docId__": 531,
     "kind": "function",
     "name": "fullTrajectoryDelaystyle",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -10999,7 +11016,7 @@
     }
   },
   {
-    "__docId__": 530,
+    "__docId__": 532,
     "kind": "file",
     "name": "build/ol/styles/fullTrajectoryStyle.js",
     "content": "import { Style, Fill, Stroke, Circle } from 'ol/style';\n/** @private */\nconst borderStyle = new Style({\n    zIndex: 2,\n    image: new Circle({\n        radius: 5,\n        fill: new Fill({\n            color: '#000000',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#000000',\n        width: 6,\n    }),\n});\nconst fullTrajectorystyle = (feature, resolution, options) => {\n    let lineColor = '#ffffff'; // white\n    const type = feature.get('type');\n    let stroke = feature.get('stroke');\n    if (stroke && stroke[0] !== '#') {\n        stroke = `#${stroke}`;\n    }\n    lineColor = stroke || (options === null || options === void 0 ? void 0 : options.getBgColor(type));\n    // Don't allow white lines, use red instead.\n    lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;\n    const style = [\n        borderStyle,\n        new Style({\n            zIndex: 3,\n            image: new Circle({\n                radius: 4,\n                fill: new Fill({\n                    color: lineColor,\n                }),\n            }),\n            stroke: new Stroke({\n                color: lineColor,\n                width: 4,\n            }),\n        }),\n    ];\n    return style;\n};\nexport default fullTrajectorystyle;\n",
@@ -11010,7 +11027,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 531,
+    "__docId__": 533,
     "kind": "variable",
     "name": "borderStyle",
     "memberof": "build/ol/styles/fullTrajectoryStyle.js",
@@ -11030,7 +11047,7 @@
     "ignore": true
   },
   {
-    "__docId__": 532,
+    "__docId__": 534,
     "kind": "function",
     "name": "fullTrajectorystyle",
     "memberof": "build/ol/styles/fullTrajectoryStyle.js",
@@ -11072,7 +11089,7 @@
     }
   },
   {
-    "__docId__": 533,
+    "__docId__": 535,
     "kind": "file",
     "name": "build/ol/styles/index.js",
     "content": "export { default as fullTrajectoryStyle } from './fullTrajectoryStyle';\nexport { default as fullTrajectoryDelayStyle } from './fullTrajectoryDelayStyle';\n",
@@ -11084,7 +11101,7 @@
   },
   {
     "kind": "index",
-    "content": "# mobility-toolbox-js\n\nToolbox for JavaScript applications in the domains of mobility and logistics.\nThe tools in this library have been inspired by many projects realized for public transport agencies, mobility providers and logistics companies.\n\n[![npm](https://img.shields.io/npm/v/mobility-toolbox-js.svg?style=flat-square)](https://www.npmjs.com/package/mobility-toolbox-js)\n[![Build](https://github.com/geops/mobility-toolbox-js/workflows/Build/badge.svg)](https://github.com/geops/mobility-toolbox-js/actions?query=workflow%3ABuild)\n![Vercel](https://vercelbadge.vercel.app/api/geops/mobility-toolbox-js)\n\n## Documentation and examples\n\nVisit https://mobility-toolbox-js.vercel.app/\n\n## Demos\n\n* Display [real-time vehicle positions and prognosis data](https://mobility.portal.geops.io) on a map.\n* Search for [stops and stations](https://maps.trafimage.ch) all over the world.\n* Get [precise geographic courses](https://routing-demo.geops.io/) for all modes of transport.\n* Generate beautiful [schematic](https://mobility.portal.geops.io/world.geops.networkplans) or [topographic](https://mobility.portal.geops.io) maps for public transport, mobility and logistics.\n\n## Install\n\nInstall the library and the peer dependencies:\n\n### Using mapbox-gl\n\n```bash\nyarn add mobility-toolbox-js ol@6.14.1 mapbox-gl@1 maplibre-gl@npm:empty-npm-package@1.0.0\n```\n\n### Using maplibre-gl\n\n```bash\nyarn add mobility-toolbox-js ol@6.14.1 maplibre-gl@2 mapbox-gl@npm:empty-npm-package@1.0.0\n```\n\n## Development\n\n```bash\nyarn install\nyarn dev\n```\n\n## Deploy\n\nThis library website is deployed automatically using [Vercel](https://vercel.com/geops).\nFor Vercel we have to add the nextjs and raw-loader modules in the dev dependencies of the main package.json.\nBut those 2 librairies are not need to build the library.\n\n## Version 1.x.x\n\nThe master branch is now open for the version 2 development. The version 1 is still available in [1.x.x](https://github.com/geops/mobility-toolbox-js/tree/1.x.x) branch.\n",
+    "content": "# mobility-toolbox-js\n\nToolbox for JavaScript applications in the domains of mobility and logistics.\nThe tools in this library have been inspired by many projects realized for public transport agencies, mobility providers and logistics companies.\n\n[![npm](https://img.shields.io/npm/v/mobility-toolbox-js.svg?style=flat-square)](https://www.npmjs.com/package/mobility-toolbox-js)\n[![Build](https://github.com/geops/mobility-toolbox-js/workflows/Build/badge.svg)](https://github.com/geops/mobility-toolbox-js/actions?query=workflow%3ABuild)\n![Vercel](https://vercelbadge.vercel.app/api/geops/mobility-toolbox-js)\n\n## Documentation and examples\n\nVisit https://mobility-toolbox-js.vercel.app/\n\n## Demos\n\n* Display [real-time vehicle positions and prognosis data](https://mobility.portal.geops.io) on a map.\n* Search for [stops and stations](https://maps.trafimage.ch) all over the world.\n* Get [precise geographic courses](https://routing-demo.geops.io/) for all modes of transport.\n* Generate beautiful [schematic](https://mobility.portal.geops.io/world.geops.networkplans) or [topographic](https://mobility.portal.geops.io) maps for public transport, mobility and logistics.\n\n## Install\n\nInstall the library and the peer dependencies:\n\n```bash\nyarn add mobility-toolbox-js ol@6.14.1 mapbox-gl@1 maplibre-gl@2\n```\n\n## Development\n\n```bash\nyarn install\nyarn dev\n```\n\n## Deploy\n\nThis library website is deployed automatically using [Vercel](https://vercel.com/geops).\nFor Vercel we have to add the nextjs and raw-loader modules in the dev dependencies of the main package.json.\nBut those 2 librairies are not need to build the library.\n\n## Version 1.x.x\n\nThe master branch is now open for the version 2 development. The version 1 is still available in [1.x.x](https://github.com/geops/mobility-toolbox-js/tree/1.x.x) branch.\n",
     "longname": "/home/olivier/GIT/mobility-toolbox-js/README.md",
     "name": "./README.md",
     "static": true,
@@ -11092,7 +11109,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"2.0.0-beta.54\",\n  \"main\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./mapbox\": \"./mapbox/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"^6.5.0\",\n    \"@turf/transform-rotate\": \"^6.5.0\",\n    \"@types/lodash\": \"^4.14.185\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"path\": \"^0.12.7\",\n    \"turf\": \"^3.0.14\",\n    \"uuid\": \"8.3.2\"\n  },\n  \"peerDependencies\": {\n    \"mapbox-gl\": \"^1\",\n    \"maplibre-gl\": \"^1\",\n    \"ol\": \"^6\"\n  },\n  \"devDependencies\": {\n    \"@babel/core\": \"7.16.12\",\n    \"@babel/eslint-parser\": \"7.16.5\",\n    \"@babel/plugin-transform-runtime\": \"7.16.10\",\n    \"@babel/preset-env\": \"^7.18.10\",\n    \"@babel/preset-react\": \"7.16.7\",\n    \"@commitlint/cli\": \"17.0.2\",\n    \"@commitlint/config-conventional\": \"17.0.2\",\n    \"@types/arcgis-js-api\": \"^4.24.0\",\n    \"@types/arcgis-rest-api\": \"^10.4.5\",\n    \"@types/geojson\": \"^7946.0.10\",\n    \"@types/lodash.debounce\": \"^4.0.7\",\n    \"@types/lodash.throttle\": \"^4.1.7\",\n    \"@types/mapbox-gl\": \"^2.7.5\",\n    \"@types/offscreencanvas\": \"^2019.7.0\",\n    \"@types/topojson\": \"^3.2.3\",\n    \"@types/uuid\": \"^8.3.4\",\n    \"@typescript-eslint/eslint-plugin\": \"^5.30.5\",\n    \"@typescript-eslint/parser\": \"^5.30.5\",\n    \"autoprefixer\": \"9.7.6\",\n    \"cypress\": \"9.4.1\",\n    \"deepmerge\": \"4.2.2\",\n    \"esbuild\": \"^0.14.47\",\n    \"esbuild-jest\": \"^0.5.0\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"^1.0.1\",\n    \"eslint\": \"8.8.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"^17.0.0\",\n    \"eslint-config-prettier\": \"8.3.0\",\n    \"eslint-plugin-cypress\": \"2.12.1\",\n    \"eslint-plugin-import\": \"2.25.4\",\n    \"eslint-plugin-jsx-a11y\": \"6.6.1\",\n    \"eslint-plugin-prettier\": \"4.0.0\",\n    \"eslint-plugin-react\": \"^7.30.1\",\n    \"fixpack\": \"3.0.6\",\n    \"husky\": \"8.0.1\",\n    \"jest\": \"26.6.3\",\n    \"jest-canvas-mock\": \"2.3.1\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"^2.0.0\",\n    \"jest-websocket-mock\": \"2.3.0\",\n    \"lint-staged\": \"12.3.3\",\n    \"mapbox-gl\": \"1.13.2\",\n    \"maplibre-gl\": \"2.4.0\",\n    \"mock-socket\": \"9.1.5\",\n    \"next\": \"12.1.6\",\n    \"next-transpile-modules\": \"9.0.0\",\n    \"ol\": \"6.14.1\",\n    \"openapi-typescript\": \"5.4.1\",\n    \"postcss\": \"8.3.3\",\n    \"postcss-loader\": \"3.0.0\",\n    \"prettier\": \"2.5.1\",\n    \"raw-loader\": \"4.0.2\",\n    \"sass\": \"1.52.2\",\n    \"sass-loader\": \"8.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"1.14.0\",\n    \"stylelint\": \"14.3.0\",\n    \"stylelint-config-recommended-scss\": \"5.0.2\",\n    \"stylelint-config-standard\": \"24.0.0\",\n    \"stylelint-scss\": \"4.1.0\",\n    \"typescript\": \"^4.7.4\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"rm -rf build && yarn tsc && yarn esbuild:iife && cp README.md build/ && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"yarn doc && yarn dev:examples\",\n    \"dev:examples\": \"cd doc && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest\",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"toolbox\"\n  ],\n  \"lint-staged\": {\n    \"(src|__mocks__)/**/*.js\": [\n      \"eslint --fix\",\n      \"prettier --write\",\n      \"git add\",\n      \"yarn test --bail --findRelatedTests\"\n    ],\n    \"package.json\": [\n      \"fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop exports --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts\"\n    ],\n    \"src/**/*.{css,scss}\": [\n      \"stylelint --fix --allow-empty-input\"\n    ]\n  },\n  \"prettier\": {\n    \"trailingComma\": \"all\",\n    \"singleQuote\": true\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"stylelint\": {\n    \"plugins\": [\n      \"stylelint-scss\"\n    ],\n    \"extends\": [\n      \"stylelint-config-standard\",\n      \"stylelint-config-recommended-scss\"\n    ]\n  }\n}\n",
+    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"2.0.0-beta.58\",\n  \"module\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./mapbox\": \"./mapbox/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"^6.5.0\",\n    \"@turf/transform-rotate\": \"^6.5.0\",\n    \"@types/lodash\": \"^4.14.185\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"path\": \"^0.12.7\",\n    \"turf\": \"^3.0.14\",\n    \"uuid\": \"8.3.2\"\n  },\n  \"peerDependencies\": {\n    \"mapbox-gl\": \"^1\",\n    \"maplibre-gl\": \"^1\",\n    \"ol\": \"^6\"\n  },\n  \"devDependencies\": {\n    \"@babel/core\": \"7.16.12\",\n    \"@babel/eslint-parser\": \"7.16.5\",\n    \"@babel/plugin-transform-runtime\": \"7.16.10\",\n    \"@babel/preset-env\": \"^7.18.10\",\n    \"@babel/preset-react\": \"7.16.7\",\n    \"@commitlint/cli\": \"17.0.2\",\n    \"@commitlint/config-conventional\": \"17.0.2\",\n    \"@types/arcgis-js-api\": \"^4.24.0\",\n    \"@types/arcgis-rest-api\": \"^10.4.5\",\n    \"@types/geojson\": \"^7946.0.10\",\n    \"@types/lodash.debounce\": \"^4.0.7\",\n    \"@types/lodash.throttle\": \"^4.1.7\",\n    \"@types/mapbox-gl\": \"^2.7.5\",\n    \"@types/offscreencanvas\": \"^2019.7.0\",\n    \"@types/topojson\": \"^3.2.3\",\n    \"@types/uuid\": \"^8.3.4\",\n    \"@typescript-eslint/eslint-plugin\": \"^5.30.5\",\n    \"@typescript-eslint/parser\": \"^5.30.5\",\n    \"autoprefixer\": \"9.7.6\",\n    \"cypress\": \"9.4.1\",\n    \"deepmerge\": \"4.2.2\",\n    \"esbuild\": \"^0.14.47\",\n    \"esbuild-jest\": \"^0.5.0\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"^1.0.1\",\n    \"eslint\": \"8.8.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"^17.0.0\",\n    \"eslint-config-prettier\": \"8.3.0\",\n    \"eslint-plugin-cypress\": \"2.12.1\",\n    \"eslint-plugin-import\": \"2.25.4\",\n    \"eslint-plugin-jsx-a11y\": \"6.6.1\",\n    \"eslint-plugin-prettier\": \"4.0.0\",\n    \"eslint-plugin-react\": \"^7.30.1\",\n    \"fixpack\": \"3.0.6\",\n    \"husky\": \"8.0.1\",\n    \"jest\": \"26.6.3\",\n    \"jest-canvas-mock\": \"2.3.1\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"^2.0.0\",\n    \"jest-websocket-mock\": \"2.3.0\",\n    \"lint-staged\": \"12.3.3\",\n    \"mapbox-gl\": \"1.13.2\",\n    \"maplibre-gl\": \"2.4.0\",\n    \"mock-socket\": \"9.1.5\",\n    \"next\": \"12.1.6\",\n    \"next-transpile-modules\": \"9.0.0\",\n    \"ol\": \"6.14.1\",\n    \"openapi-typescript\": \"5.4.1\",\n    \"postcss\": \"8.3.3\",\n    \"postcss-loader\": \"3.0.0\",\n    \"prettier\": \"2.5.1\",\n    \"raw-loader\": \"4.0.2\",\n    \"sass\": \"1.52.2\",\n    \"sass-loader\": \"8.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"1.14.0\",\n    \"stylelint\": \"14.3.0\",\n    \"stylelint-config-recommended-scss\": \"5.0.2\",\n    \"stylelint-config-standard\": \"24.0.0\",\n    \"stylelint-scss\": \"4.1.0\",\n    \"typescript\": \"^4.7.4\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"rm -rf build && yarn tsc && yarn esbuild:iife && cp README.md build/ && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"yarn doc && yarn dev:examples\",\n    \"dev:examples\": \"cd doc && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest\",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"toolbox\"\n  ],\n  \"lint-staged\": {\n    \"(src|__mocks__)/**/*.js\": [\n      \"eslint --fix\",\n      \"prettier --write\",\n      \"git add\",\n      \"yarn test --bail --findRelatedTests\"\n    ],\n    \"package.json\": [\n      \"fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop exports --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts\"\n    ],\n    \"src/**/*.{css,scss}\": [\n      \"stylelint --fix --allow-empty-input\"\n    ]\n  },\n  \"prettier\": {\n    \"trailingComma\": \"all\",\n    \"singleQuote\": true\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"sideEffects\": false,\n  \"stylelint\": {\n    \"plugins\": [\n      \"stylelint-scss\"\n    ],\n    \"extends\": [\n      \"stylelint-config-standard\",\n      \"stylelint-config-recommended-scss\"\n    ]\n  }\n}\n",
     "longname": "/home/olivier/GIT/mobility-toolbox-js/package.json",
     "name": "package.json",
     "static": true,

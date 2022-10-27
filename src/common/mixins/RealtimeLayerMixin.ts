@@ -336,6 +336,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         styleOptions,
       } = options;
 
+      let currCanvas = canvas;
       let currSpeed = speed || 1;
       let currTime = time || new Date();
       let currStyle = style || realtimeDefaultStyle;
@@ -346,7 +347,15 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         isTrackerLayer: { value: true },
 
         canvas: {
-          value: canvas || document.createElement('canvas'),
+          get: () => {
+            if (!currCanvas) {
+              currCanvas = document.createElement('canvas');
+            }
+            return currCanvas;
+          },
+          set: (cnvas: HTMLCanvasElement) => {
+            currCanvas = cnvas;
+          },
         },
 
         /**
@@ -532,6 +541,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
     start() {
       this.stop();
+
+      // Before starting to update trajectories, we remove trajectories that have
+      // a time_intervals in the past, it will
+      // avoid phantom train that are at the end of their route because we never
+      // received the deleted_vehicle event because we have changed the browser tab.
+      this.purgeOutOfDateTrajectories();
+
       // @ts-ignore function without parameters must be define  in subclasses
       this.renderTrajectories();
       this.startUpdateTime();
@@ -871,6 +887,21 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     }
 
     /**
+     * Remove all trajectories that are in the past.
+     */
+    purgeOutOfDateTrajectories() {
+      Object.entries(this.trajectories || {}).forEach(([key, trajectory]) => {
+        const timeIntervals = trajectory?.properties?.time_intervals;
+        if (this.time && timeIntervals.length) {
+          const lastTimeInterval = timeIntervals[timeIntervals.length - 1][0];
+          if (lastTimeInterval < this.time) {
+            this.trackerLayer.removeTrajectory(key);
+          }
+        }
+      });
+    }
+
+    /**
      * Determine if the trajectory is useless and should be removed from the list or not.
      * By default, this function exclude vehicles:
      *  - that have their trajectory outside the current extent and
@@ -945,6 +976,11 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       }
       if (document.hidden) {
         this.stop();
+
+        // Since we don't receive deleted_vehicles event when docuement
+        // is hidden. We have to clean all the trajectories for a fresh
+        // start when the document is visible again.
+        this.trajectories = {};
       } else {
         this.start();
       }
