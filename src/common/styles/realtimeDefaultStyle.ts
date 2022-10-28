@@ -330,6 +330,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
             pixelRatio,
           );
           if (delayText) {
+            console.log(origin + radiusDelay + margin, origin - fontSize);
             ctx.drawImage(
               delayText,
               origin + radiusDelay + margin,

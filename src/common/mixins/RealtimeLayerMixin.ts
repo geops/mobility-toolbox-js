@@ -245,8 +245,33 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         'coach',
       ];
 
+      const onlyRail: RealtimeMot[] = ['rail'];
+      const withoutCable: RealtimeMot[] = [
+        'tram',
+        'subway',
+        'rail',
+        'bus',
+        'ferry',
+      ];
+
       // Server will block non train before zoom 9
-      this.motsByZoom = options.motsByZoom || [allMots];
+      this.motsByZoom = options.motsByZoom || [
+        onlyRail,
+        onlyRail,
+        onlyRail,
+        onlyRail,
+        onlyRail,
+        onlyRail,
+        onlyRail,
+        onlyRail,
+        onlyRail,
+        withoutCable,
+        withoutCable,
+        withoutCable,
+        allMots,
+        allMots,
+        allMots,
+      ];
       this.getMotsByZoom = (zoom) => {
         return (
           (options.getMotsByZoom &&
@@ -922,8 +947,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       if (
         !intersects(extent, bounds) ||
-        (this.mots && !this.mots.includes(type)) ||
-        (type !== 'rail' && zoom < 9) // zoom 9 is defined by the backend
+        (this.mots && !this.mots.includes(type))
       ) {
         this.removeTrajectory(trajectory);
         return true;

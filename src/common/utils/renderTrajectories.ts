@@ -151,8 +151,8 @@ const renderTrajectories = (
     if (hoverVehicleId !== id && selectedVehicleId !== id) {
       context?.drawImage(
         vehicleImg,
-        px[0] - imgWidth / 2,
-        px[1] - imgHeight / 2,
+        Math.floor(px[0] - imgWidth / 2),
+        Math.floor(px[1] - imgHeight / 2),
         imgWidth,
         imgHeight,
       );
@@ -183,6 +183,13 @@ const renderTrajectories = (
     selectedVehicleWidth &&
     selectedVehicleHeight
   ) {
+    console.log(
+      'la2',
+      selectedVehiclePx[0] - selectedVehicleWidth / 2,
+      selectedVehiclePx[1] - selectedVehicleHeight / 2,
+      selectedVehicleWidth,
+      selectedVehicleHeight,
+    );
     context?.drawImage(
       selectedVehicleImg,
       selectedVehiclePx[0] - selectedVehicleWidth / 2,
@@ -198,6 +205,13 @@ const renderTrajectories = (
     hoverVehicleWidth &&
     hoverVehicleHeight
   ) {
+    console.log(
+      'la2',
+      hoverVehiclePx[0] - hoverVehicleWidth / 2,
+      hoverVehiclePx[1] - hoverVehicleHeight / 2,
+      hoverVehicleWidth,
+      hoverVehicleHeight,
+    );
     context?.drawImage(
       hoverVehicleImg,
       hoverVehiclePx[0] - hoverVehicleWidth / 2,
