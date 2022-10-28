@@ -246,13 +246,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       ];
 
       const onlyRail: RealtimeMot[] = ['rail'];
-      const withoutCable: RealtimeMot[] = [
-        'tram',
-        'subway',
-        'rail',
-        'bus',
-        'ferry',
-      ];
+      const withoutCable: RealtimeMot[] = ['tram', 'subway', 'rail', 'bus'];
 
       // Server will block non train before zoom 9
       this.motsByZoom = options.motsByZoom || [
@@ -267,7 +261,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         onlyRail,
         withoutCable,
         withoutCable,
-        withoutCable,
+        allMots,
         allMots,
         allMots,
         allMots,
