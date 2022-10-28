@@ -53,8 +53,8 @@ export type RealtimeStyleOptions = {
     name: string,
     fontSize: number,
   ) => number;
-  getMaxRadiusForText: () => number;
-  getMaxRadiusForStrokeAndDelay: () => number;
+  getMaxRadiusForText?: () => number;
+  getMaxRadiusForStrokeAndDelay?: () => number;
   filter?: FilterFunction;
 };
 

@@ -99,7 +99,7 @@ class WebSocketAPI {
       closed: {
         get: () =>
           !!(
-            this.websocket &&
+            !this.websocket ||
             this.websocket.readyState === this.websocket.CLOSED
           ),
       },
@@ -181,7 +181,11 @@ class WebSocketAPI {
    */
   connect(url: string, onOpen = () => {}) {
     if (this.websocket && !this.closed) {
-      this.websocket.close();
+      if (!this.closing && this.websocket.url !== url) {
+        this.websocket.close();
+      } else if (this.connecting) {
+        return;
+      }
     }
 
     /** @ignore */
@@ -204,10 +208,12 @@ class WebSocketAPI {
    * @private
    */
   close() {
-    if (this.websocket) {
-      this.websocket.onclose = null;
+    if (this.websocket && (this.open || this.connecting)) {
+      this.websocket.onclose = () => {
+        // We set the ws to undefined here to wait that the ws is properly closed.
+        this.websocket = undefined;
+      };
       this.websocket.close();
-      this.websocket = undefined;
       this.messagesOnOpen = [];
     }
   }

@@ -895,7 +895,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         if (this.time && timeIntervals.length) {
           const lastTimeInterval = timeIntervals[timeIntervals.length - 1][0];
           if (lastTimeInterval < this.time) {
-            this.trackerLayer.removeTrajectory(key);
+            this.removeTrajectory(key);
           }
         }
       });

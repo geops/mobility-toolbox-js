@@ -369,7 +369,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       }
 
       // Draw text in the circle
-      if (mustDrawText && ctx) {
+      if (isDisplayText && ctx) {
         const fontSize = Math.max(radius, 10);
         const textSize = getTextSize(ctx, markerSize, name, fontSize);
         const textColor2 = !useDelayStyle
