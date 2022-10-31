@@ -1,6 +1,7 @@
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
+import { Pixel } from 'ol/pixel';
 import type { RealtimeTrainId } from './realtime';
 import type {
   CopyrightControl as MbCopyrightControl,
@@ -38,6 +39,7 @@ export type RealtimeStyleOptions = {
   delayOutlineColor?: string;
   delayDisplay?: number;
   noInterpolate?: boolean;
+  filter?: FilterFunction;
   getRadius?: (type: number, z: number) => number;
   getBgColor?: (type: number) => string;
   getDelayColor?: (
@@ -55,7 +57,7 @@ export type RealtimeStyleOptions = {
   ) => number;
   getMaxRadiusForText?: () => number;
   getMaxRadiusForStrokeAndDelay?: () => number;
-  filter?: FilterFunction;
+  getScreenPixel?: (pixel: Pixel, viewState: ViewState) => Pixel;
 };
 
 export type RealtimeTrajectories = {
