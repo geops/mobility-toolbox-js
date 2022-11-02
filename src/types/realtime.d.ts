@@ -165,6 +165,11 @@ export interface RealtimeExtraGeom extends Feature {
   properties: RealtimeExtraGeomProperties;
 }
 
+export interface RealtimeExtraGeomDeleted {
+  type: 'Deleted';
+  properties: RealtimeExtraGeomProperties;
+}
+
 export type RealtimeExtraGeoms = {
   [index: string]: Feature[];
 };
@@ -255,7 +260,7 @@ export interface RealtimeExtraGeomsResponse {
   source: `extra_geoms`;
   timestamp: number;
   client_reference: null;
-  content: RealtimeExtraGeom;
+  content: RealtimeExtraGeom | RealtimeExtraGeomDeleted;
 }
 
 export interface RealtimeStationResponse {

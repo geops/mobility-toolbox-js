@@ -4,7 +4,7 @@ import WebSocketAPI, {
 } from '../common/api/WebSocketAPI';
 import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
 import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
-import {
+import type {
   RealtimeMode,
   RealtimeDeparture,
   RealtimeNews,
