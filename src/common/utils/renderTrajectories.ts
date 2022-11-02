@@ -89,12 +89,8 @@ const renderTrajectories = (
 
   let hoverVehicleImg;
   let hoverVehiclePx;
-  let hoverVehicleWidth;
-  let hoverVehicleHeight;
   let selectedVehicleImg;
   let selectedVehiclePx;
-  let selectedVehicleWidth;
-  let selectedVehicleHeight;
   const renderedTrajectories = [];
 
   for (let i = trajectories.length - 1; i >= 0; i -= 1) {
@@ -175,29 +171,19 @@ const renderTrajectories = (
     renderedTrajectories.push(trajectory);
   }
 
-  if (
-    selectedVehicleImg &&
-    selectedVehiclePx &&
-    selectedVehicleWidth &&
-    selectedVehicleHeight
-  ) {
+  if (selectedVehicleImg && selectedVehiclePx) {
     context?.drawImage(
       selectedVehicleImg,
-      Math.floor(selectedVehiclePx[0] - selectedVehicleWidth / 2),
-      Math.floor(selectedVehiclePx[1] - selectedVehicleHeight / 2),
+      Math.floor(selectedVehiclePx[0] - selectedVehicleImg.width / 2),
+      Math.floor(selectedVehiclePx[1] - selectedVehicleImg.height / 2),
     );
   }
 
-  if (
-    hoverVehicleImg &&
-    hoverVehiclePx &&
-    hoverVehicleWidth &&
-    hoverVehicleHeight
-  ) {
+  if (hoverVehicleImg && hoverVehiclePx) {
     context?.drawImage(
       hoverVehicleImg,
-      Math.floor(hoverVehiclePx[0] - hoverVehicleWidth / 2),
-      Math.floor(hoverVehiclePx[1] - hoverVehicleHeight / 2),
+      Math.floor(hoverVehiclePx[0] - hoverVehicleImg.width / 2),
+      Math.floor(hoverVehiclePx[1] - hoverVehicleImg.height / 2),
     );
   }
   return {

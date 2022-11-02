@@ -203,7 +203,9 @@ class RealtimeLayer extends mixin(Layer) {
    */
   hasFeatureInfoAtCoordinate(coordinate: Coordinate) {
     if (this.map && this.canvas) {
-      const context = this.canvas.getContext('2d');
+      const context = this.canvas.getContext('2d', {
+        willReadFrequently: true,
+      });
       const pixel = this.map.getPixelFromCoordinate(coordinate);
       return !!context?.getImageData(
         pixel[0] * (this.pixelRatio || 1),
@@ -323,6 +325,19 @@ class RealtimeLayer extends mixin(Layer) {
   // eslint-disable-next-line no-unused-vars
   onZoomEnd() {
     super.onZoomEnd();
+
+    if (this.visible && this.isUpdateBboxOnMoveEnd) {
+      this.setBbox();
+    }
+
+    if (
+      this.visible &&
+      this.isUpdateBboxOnMoveEnd &&
+      this.userClickInteractions &&
+      this.selectedVehicleId
+    ) {
+      this.highlightTrajectory(this.selectedVehicleId);
+    }
   }
 
   /**
