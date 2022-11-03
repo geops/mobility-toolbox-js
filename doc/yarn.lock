@@ -3192,7 +3192,7 @@ mkdirp@^0.5.1:
     minimist "^1.2.6"
 
 mobility-toolbox-js@./../build:
-  version "2.0.0-beta.67"
+  version "2.0.0-beta.68"
   dependencies:
     "@turf/helpers" "^6.5.0"
     "@turf/transform-rotate" "^6.5.0"
