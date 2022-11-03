@@ -3,7 +3,7 @@ import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
-import Map from '../Map';
+import Map from 'ol/Map';
 import VectorLayer from './VectorLayer';
 
 const feature1 = new Feature({
@@ -42,25 +42,12 @@ describe('VectorLayer', () => {
 
   test('should be instanced.', () => {
     expect(layer).toBeInstanceOf(VectorLayer);
-    expect(layer.clickCallbacks[0]).toBe(onClick);
     expect(layer.hitTolerance).toBe(5);
   });
 
-  test('should add onClick callback.', () => {
-    const onClick2 = jest.fn();
-    layer.onClick(onClick2);
-    expect(layer.clickCallbacks[1]).toBe(onClick2);
-  });
-
-  test('should onClick throw error.', () => {
-    expect(() => {
-      layer.onClick('not of type function');
-    }).toThrow(Error);
-  });
-
   test('should called terminate on initalization.', () => {
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap();
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
@@ -74,7 +61,7 @@ describe('VectorLayer', () => {
     const spy3 = jest
       .spyOn(map, 'getFeaturesAtPixel')
       .mockReturnValue(features);
-    layer.init(map);
+    layer.attachToMap(map);
     expect(onClick).toHaveBeenCalledTimes(0);
     await map.dispatchEvent(evt);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -86,7 +73,9 @@ describe('VectorLayer', () => {
     expect(spy3.mock.calls[0][1].layerFilter(layer.olLayer)).toBe(true);
     expect(spy3.mock.calls[0][1].layerFilter({})).toBe(false);
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
+    expect(onClick.mock.calls[0][0]).toBe(features);
+    expect(onClick.mock.calls[0][1]).toBe(layer);
+    expect(onClick.mock.calls[0][2]).toBe(coordinate);
   });
 
   test('should clone', () => {

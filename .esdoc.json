@@ -1,8 +1,15 @@
 {
-  "source": "./src",
+  "source": "./build",
   "destination": "./apidoc",
-  "includes": ["\\.js$"],
-  "excludes": ["\\.test\\.js$", "doc/", "(u|U)tils"],
+  "includes": ["\\.(js)$", "typedefs\\.js$"],
+  "excludes": [
+    "setupTests\\.*",
+    "^iife",
+    "^mbt\\.*",
+    "\\.test\\.js$",
+    "doc/",
+    "(u|U)tils"
+  ],
   "plugins": [
     {
       "name": "esdoc-standard-plugin"
@@ -12,6 +19,7 @@
       "name": "esdoc-publish-html-plugin"
     },
     { "name": "./esdoc/plugins/dynamic-property-plugin/Plugin.js" },
-    { "name": "./esdoc/plugins/externals-plugin/Plugin.js" }
+    { "name": "./esdoc/plugins/externals-plugin/Plugin.js" },
+    { "name": "./esdoc/plugins/optional-chaining-plugin/Plugin.js" }
   ]
 }

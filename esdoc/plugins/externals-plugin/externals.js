@@ -89,8 +89,5 @@
  * @external {GetTrajectoryStationsParams} https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajstations
  */
 /**
- * @external {StopsSearchParams} https://developer.geops.io/apis/5dcbd702a256d90001cf1361/#/default/get_
- */
-/**
  * @external {HTMLElement} https://developer.mozilla.org/fr/docs/Web/API/HTMLElement
  */

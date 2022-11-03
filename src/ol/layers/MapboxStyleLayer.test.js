@@ -1,8 +1,8 @@
-import Map from 'ol/Map';
+import OlMap from 'ol/Map';
 import View from 'ol/View';
-import mapboxgl from 'mapbox-gl';
+import gllib from 'maplibre-gl';
 import Layer from './Layer';
-import MapboxLayer from './MapboxLayer';
+import MaplibreLayer from './MaplibreLayer';
 import MapboxStyleLayer from './MapboxStyleLayer';
 
 let source;
@@ -17,9 +17,10 @@ const styleLayer = {
 describe('MapboxStyleLayer', () => {
   beforeEach(() => {
     onClick = jest.fn();
-    source = new MapboxLayer({
+    source = new MaplibreLayer({
       name: 'Layer',
-      apiKey: false,
+      apiKey: 'foo',
+      url: 'https://foo.com/styles',
     });
     layer = new MapboxStyleLayer({
       name: 'mapbox layer',
@@ -28,74 +29,85 @@ describe('MapboxStyleLayer', () => {
       styleLayer,
       onClick,
     });
-    map = new Map({
+    map = new OlMap({
       target: document.createElement('div'),
       view: new View({ center: [0, 0] }),
     });
   });
 
+  afterEach(() => {
+    if (layer.map) {
+      layer.detachFromMap(map);
+    }
+    if (source.map) {
+      source.detachFromMap(map);
+    }
+  });
+
   test('should be instanced.', () => {
     expect(layer).toBeInstanceOf(MapboxStyleLayer);
     expect(layer.styleLayers[0]).toBe(styleLayer);
-    expect(layer.clickCallbacks[0]).toBe(onClick);
   });
 
   test('should not initalized mapbox map.', () => {
-    layer.init();
+    layer.attachToMap();
     expect(layer.mbMap).toBe();
+    layer.detachFromMap();
   });
 
   test('should initalized mapbox map.', () => {
-    source.init(map);
-    layer.init(map);
-    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(mapboxgl.Map);
-  });
-
-  test('should add onClick callback.', () => {
-    const onClick2 = jest.fn();
-    layer.onClick(onClick2);
-    expect(layer.clickCallbacks[1]).toBe(onClick2);
+    source.attachToMap(map);
+    layer.attachToMap(map);
+    expect(layer.mapboxLayer.mbMap).toBeInstanceOf(gllib.Map);
+    layer.detachFromMap();
+    source.detachFromMap();
   });
 
   test('should called terminate on initalization.', () => {
-    const spy = jest.spyOn(layer, 'terminate');
-    layer.init();
+    const spy = jest.spyOn(layer, 'detachFromMap');
+    layer.attachToMap();
     expect(spy).toHaveBeenCalledTimes(1);
+    layer.detachFromMap(map);
   });
 
   test('should return coordinates, features and a layer instance.', async () => {
-    source.init(map);
-    layer.init(map);
+    source.attachToMap(map);
+    layer.attachToMap(map);
     const data = await layer.getFeatureInfoAtCoordinate([50, 50]);
     expect(data.coordinate).toEqual([50, 50]);
     expect(data.features).toEqual([]);
     expect(data.layer).toBeInstanceOf(MapboxStyleLayer);
+    layer.detachFromMap(map);
+    source.detachFromMap(map);
   });
 
   test('should call onClick callback', async () => {
     const coordinate = [500, 500];
     const features = [];
     const evt = { type: 'singleclick', map, coordinate };
-    layer.init(map);
+    layer.attachToMap(map);
     expect(onClick).toHaveBeenCalledTimes(0);
     await map.dispatchEvent(evt);
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onClick).toHaveBeenCalledWith(features, layer, coordinate);
+    expect(onClick.mock.calls[0][0]).toEqual(features);
+    expect(onClick.mock.calls[0][1]).toBe(layer);
+    expect(onClick.mock.calls[0][2]).toBe(coordinate);
+    layer.detachFromMap();
   });
 
   test('should call super class terminate function.', () => {
-    layer.init(map);
-    const spy = jest.spyOn(Layer.prototype, 'terminate');
-    layer.terminate(map);
+    layer.attachToMap(map);
+    const spy = jest.spyOn(Layer.prototype, 'detachFromMap');
+    layer.detachFromMap(map);
     expect(spy).toHaveBeenCalledTimes(1);
     spy.mockRestore();
   });
 
   test('should call super class terminate if the mapboxLayer associated has been terminated before.', () => {
-    layer.init(map);
-    source.terminate(map);
-    const spy = jest.spyOn(Layer.prototype, 'terminate');
-    layer.terminate(map);
+    layer.attachToMap(map);
+    source.detachFromMap(map);
+    const spy = jest.spyOn(Layer.prototype, 'detachFromMap');
+    layer.detachFromMap(map);
     expect(spy).toHaveBeenCalledTimes(1);
     spy.mockRestore();
   });
@@ -158,7 +170,7 @@ describe('MapboxStyleLayer', () => {
 
   describe('#getFeatureInfoAtCoordinate()', () => {
     beforeEach(() => {
-      source.init(map);
+      source.attachToMap(map);
       source.mbMap.isStyleLoaded = jest.fn(() => true);
       source.mbMap.getSource = jest.fn(() => true);
     });
@@ -171,7 +183,7 @@ describe('MapboxStyleLayer', () => {
       source.mbMap.getStyle = jest.fn(() => ({
         layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }],
       }));
-      layer.init(map);
+      layer.attachToMap(map);
       layer.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
         Promise.resolve({ features: [] }),
       );
@@ -195,7 +207,7 @@ describe('MapboxStyleLayer', () => {
         styleLayer,
         styleLayersFilter: ({ id }) => /foo/.test(id),
       });
-      layer2.init(map);
+      layer2.attachToMap(map);
       layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
         Promise.resolve({ features: [] }),
       );
@@ -228,7 +240,7 @@ describe('MapboxStyleLayer', () => {
         styleLayersFilter: ({ id }) => /foo/.test(id),
         queryRenderedLayersFilter: ({ id }) => /bar/.test(id),
       });
-      layer2.init(map);
+      layer2.attachToMap(map);
       layer2.mapboxLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
         Promise.resolve({ features: [] }),
       );

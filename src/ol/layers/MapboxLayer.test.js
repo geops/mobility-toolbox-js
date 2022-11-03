@@ -1,12 +1,12 @@
-import Map from 'ol/Map';
+import OlMap from 'ol/Map';
 import View from 'ol/View';
-import mapboxgl from 'mapbox-gl';
+import gllib from 'mapbox-gl';
 import MapboxLayer from './MapboxLayer';
 
 let layer;
 let map;
 let consoleOutput;
-const styleUrl = 'foo.com/styles';
+const styleUrl = 'http://foo.com/styles';
 
 describe('MapboxLayer', () => {
   describe('without apiKey', () => {
@@ -14,12 +14,12 @@ describe('MapboxLayer', () => {
       // Mock console statement
       consoleOutput = [];
       // eslint-disable-next-line no-console
-      console.warn = (message) => consoleOutput.push(message);
+      console.error = (message) => consoleOutput.push(message);
       layer = new MapboxLayer({
         name: 'Layer',
         url: styleUrl,
       });
-      map = new Map({
+      map = new OlMap({
         target: document.createElement('div'),
         view: new View({ center: [0, 0] }),
       });
@@ -31,21 +31,21 @@ describe('MapboxLayer', () => {
     });
 
     test('should not initalized mapbox map.', () => {
-      layer.init();
+      layer.attachToMap();
       expect(layer.mbMap).toBe();
     });
 
     test('should initalized mapbox map and warn the user if there is no api key defined.', () => {
-      layer.init(map);
-      expect(layer.mbMap).toBeInstanceOf(mapboxgl.Map);
+      layer.attachToMap(map);
+      expect(layer.mbMap).toBeInstanceOf(gllib.Map);
       expect(consoleOutput[0]).toBe(
-        'No apiKey is defined for request to foo.com/styles',
+        'No apiKey defined for mapbox layer with style url to http://foo.com/styles',
       );
     });
 
     test('should called terminate on initalization.', () => {
-      const spy = jest.spyOn(layer, 'terminate');
-      layer.init();
+      const spy = jest.spyOn(layer, 'detachFromMap');
+      layer.attachToMap();
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
@@ -64,7 +64,7 @@ describe('MapboxLayer', () => {
         url: styleUrl,
         apiKey: 'apiKey',
       });
-      map = new Map({
+      map = new OlMap({
         target: document.createElement('div'),
         view: new View({ center: [0, 0] }),
       });
@@ -76,7 +76,7 @@ describe('MapboxLayer', () => {
     });
 
     test('should not initalized mapbox map.', () => {
-      layer.init();
+      layer.attachToMap();
       expect(layer.mbMap).toBe();
     });
 
@@ -86,8 +86,10 @@ describe('MapboxLayer', () => {
         url: styleUrl,
         apiKey: 'apiKeyVal',
       });
-      layer1.init(map);
-      expect(layer1.mbMap.options.style).toBe('foo.com/styles?key=apiKeyVal');
+      layer1.attachToMap(map);
+      expect(layer1.mbMap.options.style).toBe(
+        'http://foo.com/styles?key=apiKeyVal',
+      );
     });
 
     test("should initalized mapbox map, with 'apiKeyName' prop", () => {
@@ -97,8 +99,10 @@ describe('MapboxLayer', () => {
         apiKey: 'test',
         apiKeyName: 'apiKey',
       });
-      layer1.init(map);
-      expect(layer1.mbMap.options.style).toBe('foo.com/styles?apiKey=test');
+      layer1.attachToMap(map);
+      expect(layer1.mbMap.options.style).toBe(
+        'http://foo.com/styles?apiKey=test',
+      );
     });
   });
 
@@ -111,7 +115,7 @@ describe('MapboxLayer', () => {
         apiKey: 'test',
         apiKeyName: 'apiKey',
       });
-      layer1.init(map);
+      layer1.attachToMap(map);
       layer1.mbMap.isStyleLoaded = jest.fn(() => true);
       layer1.mbMap.getSource = jest.fn(() => true);
     });

@@ -7,7 +7,7 @@ let layer;
 let onClick;
 let olMap;
 
-describe('TrajservLayer', () => {
+describe('RoutingLayer', () => {
   beforeEach(() => {
     global.fetch = fetch;
     fetch.resetMocks();
@@ -28,15 +28,14 @@ describe('TrajservLayer', () => {
 
   test('should be instanced.', () => {
     expect(layer).toBeInstanceOf(RoutingLayer);
-    expect(layer.clickCallbacks[0]).toBe(onClick);
   });
 
   test('should called terminate on initalization.', () => {
-    const spy = jest.spyOn(layer, 'terminate');
+    const spy = jest.spyOn(layer, 'detachFromMap');
 
     fetch.mockResponseOnce(JSON.stringify(global.fetchTrajectoriesResponse));
 
-    layer.init(olMap);
+    layer.attachToMap(olMap);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 

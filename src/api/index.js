@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
-export { default as StopsAPI } from './stops/StopsAPI';
-export { default as TrajservAPI } from './trajserv/TrajservAPI';
-export { default as TralisAPI, TralisModes } from './tralis/TralisAPI';
+export { default as RoutingAPI } from './RoutingAPI';
+export { default as StopsAPI } from './StopsAPI';
+export { default as RealtimeAPI, RealtimeModes } from './RealtimeAPI';

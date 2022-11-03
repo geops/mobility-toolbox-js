@@ -1,4 +1,0 @@
-toc:
-  - name: mapbox
-    children:
-  - MapboxTrajservLayer

@@ -2,176 +2,143 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "1.7.8-beta.8",
-  "main": "index.js",
-  "module": "module.js",
+  "version": "2.0.0-beta.68",
+  "module": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./api": "./api/index.js",
+    "./mapbox": "./mapbox/index.js",
+    "./ol": "./ol/index.js",
+    "./types": "./types/index.d.ts"
+  },
   "dependencies": {
-    "@geops/geops-ui": "0.1.13",
-    "@material-ui/core": "4.12.3",
-    "@material-ui/icons": "4.11.2",
-    "@material-ui/styles": "4.11.4",
     "@turf/helpers": "^6.5.0",
     "@turf/transform-rotate": "^6.5.0",
-    "codesandbox": "2.2.3",
+    "@types/lodash": "^4.14.185",
     "json-stringify-safe": "^5.0.1",
     "lodash.debounce": "4.0.8",
     "lodash.throttle": "4.1.1",
     "path": "^0.12.7",
-    "prop-types": "15.8.1",
-    "query-string": "7.1.0",
-    "react": "17.0.2",
-    "react-app-polyfill": "^1.0.6",
-    "react-dom": "17.0.2",
-    "react-icons": "4.3.1",
-    "react-markdown": "8.0.0",
-    "react-router-dom": "6",
-    "react-scrollchor": "7.0.1",
-    "react-syntax-highlighter": "15.4.5",
-    "taffydb": "^2.7.3",
     "turf": "^3.0.14",
-    "typeface-lato": "^0.0.75",
     "uuid": "8.3.2"
   },
   "peerDependencies": {
-    "mapbox-gl": "^1",
-    "ol": "^6"
+    "mapbox-gl": "1.13.2",
+    "maplibre-gl": "2.4.0",
+    "ol": "6.14.1"
   },
   "devDependencies": {
     "@babel/core": "7.16.12",
     "@babel/eslint-parser": "7.16.5",
     "@babel/plugin-transform-runtime": "7.16.10",
-    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-env": "^7.18.10",
     "@babel/preset-react": "7.16.7",
-    "@neutrinojs/copy": "9.5.0",
-    "@neutrinojs/jest": "^9.5.0",
-    "@neutrinojs/library": "9.5.0",
-    "@neutrinojs/react": "9.5.0",
+    "@commitlint/cli": "17.0.2",
+    "@commitlint/config-conventional": "17.0.2",
+    "@types/arcgis-js-api": "^4.24.0",
+    "@types/arcgis-rest-api": "^10.4.5",
+    "@types/geojson": "^7946.0.10",
+    "@types/json-stringify-safe": "^5.0.0",
+    "@types/lodash.debounce": "^4.0.7",
+    "@types/lodash.throttle": "^4.1.7",
+    "@types/mapbox-gl": "^2.7.5",
+    "@types/offscreencanvas": "^2019.7.0",
+    "@types/topojson": "^3.2.3",
+    "@types/uuid": "^8.3.4",
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
     "autoprefixer": "9.7.6",
     "cypress": "9.4.1",
     "deepmerge": "4.2.2",
+    "esbuild": "^0.14.47",
+    "esbuild-jest": "^0.5.0",
     "esdoc": "1.1.0",
     "esdoc-ecmascript-proposal-plugin": "1.0.0",
     "esdoc-publish-html-plugin": "1.1.2",
     "esdoc-standard-plugin": "1.0.0",
+    "esdoc-typescript-plugin": "^1.0.1",
     "eslint": "8.8.0",
     "eslint-config-airbnb": "19.0.4",
+    "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "8.3.0",
-    "eslint-import-resolver-webpack": "0.13.2",
     "eslint-plugin-cypress": "2.12.1",
     "eslint-plugin-import": "2.25.4",
-    "eslint-plugin-jsx-a11y": "6.5.1",
+    "eslint-plugin-jsx-a11y": "6.6.1",
     "eslint-plugin-prettier": "4.0.0",
-    "eslint-plugin-react": "7.28.0",
-    "eslint-plugin-react-hooks": "4.3.0",
+    "eslint-plugin-react": "^7.30.1",
     "fixpack": "3.0.6",
-    "husky": "7.0.4",
+    "husky": "8.0.1",
     "jest": "26.6.3",
     "jest-canvas-mock": "2.3.1",
     "jest-fetch-mock": "3.0.3",
     "jest-serializer-html": "7.1.0",
+    "jest-transformer-svg": "^2.0.0",
     "jest-websocket-mock": "2.3.0",
     "lint-staged": "12.3.3",
     "mapbox-gl": "1.13.2",
-    "mock-socket": "9.1.2",
-    "neutrino": "9.5.0",
-    "node-sass": "4.14.1",
-    "ol": "6.12.0",
+    "maplibre-gl": "2.4.0",
+    "mock-socket": "9.1.5",
+    "next": "12.1.6",
+    "next-transpile-modules": "9.0.0",
+    "ol": "6.14.1",
+    "openapi-typescript": "5.4.1",
     "postcss": "8.3.3",
     "postcss-loader": "3.0.0",
     "prettier": "2.5.1",
+    "raw-loader": "4.0.2",
+    "sass": "1.52.2",
     "sass-loader": "8.0.2",
-    "sort-json": "2.0.0",
+    "sort-json": "2.0.1",
+    "standard-version": "9.5.0",
     "start-server-and-test": "1.14.0",
     "stylelint": "14.3.0",
     "stylelint-config-recommended-scss": "5.0.2",
     "stylelint-config-standard": "24.0.0",
     "stylelint-scss": "4.1.0",
-    "webpack": "4.43.0",
-    "webpack-cli": "3.3.11",
-    "webpack-dev-server": "3.11.0",
-    "worker-loader": "3.0.8"
+    "typescript": "^4.7.4"
   },
   "scripts": {
-    "apidoc": "esdoc",
-    "build": "yarn lib",
+    "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
+    "build": "yarn build:tsc && yarn esbuild:iife",
+    "build:tsc": "rm -rf build && yarn tsc && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "cy:test": "start-server-and-test start http://localhost:5000 'cypress run'",
-    "doc": "yarn apidoc && cp apidoc/index.json src/doc/components/Esdoc/ && webpack --mode production",
-    "doc:dev": "yarn apidoc && webpack --mode development",
+    "cy:test": "start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'",
+    "cy:test:chrome": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'",
+    "cy:test:edge": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'",
+    "cy:test:firefox": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'",
+    "dev": "rm -rf .next && rm -rf doc/.next && yarn doc && yarn dev:examples",
+    "dev:examples": "rm -rf .next && rm -rf doc/.next && cd build && yarn link && cd ../doc && yarn link mobility-toolbox-js && yarn dev",
+    "doc": "yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build",
+    "esbuild": "yarn esbuild:all && yarn esbuild:iife",
+    "esbuild:all": "esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx",
+    "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",
+    "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
+    "esbuild:iife:minify": "yarn esbuild:iife:base --minify --outfile=build/mbt.min.js",
+    "esbuild:iife:unminify": "yarn esbuild:iife:base --outfile=build/mbt.js",
     "format": "prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix",
     "lib": "REACT_APP_LIB_MODE=1  webpack --mode production",
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
-    "lint": "eslint 'src/**/*.js' && stylelint 'src/**/*.css' 'src/**/*.scss'",
-    "publish:beta": "HUSKY=0 yarn publish:public --tag beta",
-    "publish:public": "HUSKY=0 yarn version && git push origin HEAD && yarn build && cd build && HUSKY=0 yarn publish",
-    "start": "yarn doc && webpack-dev-server --mode development --open",
-    "start:examples": "webpack-dev-server --mode development --open",
-    "test": "REACT_APP_LIB_MODE=1 jest",
-    "test:watch": "yarn test --watchAll"
+    "lint": "eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input",
+    "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags ",
+    "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
+    "publish:public:dryrun": "yarn release --dry-run",
+    "release": "standard-version",
+    "start": "yarn doc && cd doc && yarn start",
+    "start:examples": "cd doc && yarn build && yarn start",
+    "test": "TZ='UTC' jest",
+    "test:watch": "yarn test --watchAll",
+    "tsc": "tsc",
+    "types:backend": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version",
-      "last 1 ie version"
-    ]
-  },
-  "eslintConfig": {
-    "env": {
-      "cypress/globals": true,
-      "node": true,
-      "browser": true,
-      "es6": true,
-      "jest": true
-    },
-    "parser": "@babel/eslint-parser",
-    "extends": [
-      "airbnb",
-      "airbnb/hooks",
-      "prettier"
-    ],
-    "plugins": [
-      "cypress",
-      "prettier"
-    ],
-    "rules": {
-      "arrow-body-style": 0,
-      "react/jsx-filename-extension": [
-        1,
-        {
-          "extensions": [
-            ".js",
-            ".jsx"
-          ]
-        }
-      ],
-      "prettier/prettier": "error"
-    },
-    "settings": {
-      "import/resolver": "webpack",
-      "react": {
-        "version": "detect"
-      }
-    }
-  },
-  "exports": {
-    ".": "./index.js",
-    "./module": "./module.js",
-    "./api": "./api/index.js",
-    "./common/trackerConfig": "./common/trackerConfig.js",
-    "./common/utils": "./common/utils/index.js",
-    "./mapbox": "./mapbox/index.js",
-    "./ol": "./ol/index.js"
-  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all",
+    "not ie <= 11",
+    "not android < 5"
+  ],
   "keywords": [
     "mobility",
     "toolbox"
@@ -184,10 +151,10 @@
       "yarn test --bail --findRelatedTests"
     ],
     "package.json": [
-      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
+      "fixpack --sortToTop name --sortToTop license --sortToTop description --sortToTop version --sortToTop author --sortToTop main --sortToTop module --sortToTop files --sortToTop exports --sortToTop proxy --sortToTop dependencies --sortToTop peerDependencies --sortToTop devDependencies --sortToTop resolutions --sortToTop scripts"
     ],
     "src/**/*.{css,scss}": [
-      "stylelint --fix"
+      "stylelint --fix --allow-empty-input"
     ]
   },
   "prettier": {
@@ -198,6 +165,7 @@
     "type": "git",
     "url": "https://github.com/geops/mobility-toolbox-js"
   },
+  "sideEffects": false,
   "stylelint": {
     "plugins": [
       "stylelint-scss"
