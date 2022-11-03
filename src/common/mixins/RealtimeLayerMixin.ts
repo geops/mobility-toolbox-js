@@ -106,13 +106,6 @@ export class RealtimeLayerInterface {
   setBbox(extent: [number, number, number, number], zoom: number) {}
 
   /**
-   * Set the Realtime api's mode.
-   *
-   * @param {RealtimeMode} mode  Realtime mode
-   */
-  setMode(mode: RealtimeMode) {}
-
-  /**
    * Render the trajectories
    */
   renderTrajectories() {}
@@ -353,11 +346,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         live,
         canvas,
         styleOptions,
+        mode,
       } = options;
 
       let currCanvas = canvas;
       let currSpeed = speed || 1;
       let currTime = time || new Date();
+      let currMode = mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
       let currStyle = style || realtimeDefaultStyle;
 
       super.defineProperties(options);
@@ -374,6 +369,23 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
           },
           set: (cnvas: HTMLCanvasElement) => {
             currCanvas = cnvas;
+          },
+        },
+
+        /**
+         * Style function used to render a vehicle.
+         */
+        mode: {
+          get: () => currMode,
+          set: (newMode: RealtimeMode) => {
+            if (newMode === currMode) {
+              return;
+            }
+            currMode = newMode;
+            if (this.api?.wsApi?.open) {
+              this.stop();
+              this.start();
+            }
           },
         },
 
@@ -770,25 +782,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       }
 
       this.api.bbox = bbox;
-    }
-
-    setMode(mode: RealtimeMode) {
-      if (this.mode === mode) {
-        return;
-      }
-      this.mode = mode;
-      this.api.subscribeTrajectory(
-        this.mode,
-        this.onTrajectoryMessage,
-        undefined,
-        this.isUpdateBboxOnMoveEnd,
-      );
-      this.api.subscribeDeletedVehicles(
-        this.mode,
-        this.onDeleteTrajectoryMessage,
-        undefined,
-        this.isUpdateBboxOnMoveEnd,
-      );
     }
 
     /**
