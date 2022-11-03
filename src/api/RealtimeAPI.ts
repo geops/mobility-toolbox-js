@@ -4,7 +4,7 @@ import WebSocketAPI, {
 } from '../common/api/WebSocketAPI';
 import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
 import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
-import {
+import type {
   RealtimeMode,
   RealtimeDeparture,
   RealtimeNews,
@@ -206,7 +206,6 @@ class RealtimeAPI {
   }
 
   open() {
-    this.close();
     // Register BBOX and PROJECTION messages must be send before previous subscriptions.
     this.wsApi.connect(this.url, this.onOpen);
 

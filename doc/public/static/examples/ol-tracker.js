@@ -12,6 +12,7 @@ export default () => {
     view: new View({
       center: [831634, 5933959],
       zoom: 13,
+      minZoom: 5,
     }),
     controls: [],
   });

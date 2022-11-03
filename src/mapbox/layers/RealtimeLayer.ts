@@ -227,7 +227,7 @@ class RealtimeLayer extends mixin(Layer) {
       center: fromLonLat([center.lng, center.lat]),
       extent: bounds,
       resolution: res,
-      zoom: this.map.getZoom(),
+      zoom: this.getOlZoom(),
       rotation: -(this.map.getBearing() * Math.PI) / 180,
       pixelRatio: this.pixelRatio,
     };
@@ -280,7 +280,7 @@ class RealtimeLayer extends mixin(Layer) {
     return super.purgeTrajectory(
       trajectory,
       extent || this.getMercatorExtent(),
-      zoom || Math.floor(this.map.getZoom() + 1),
+      zoom || Math.floor(this.getOlZoom()),
     );
   }
 

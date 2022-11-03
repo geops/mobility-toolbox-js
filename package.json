@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.58",
+  "version": "2.0.0-beta.68",
   "module": "index.js",
   "exports": {
     ".": "./index.js",
@@ -22,9 +22,9 @@
     "uuid": "8.3.2"
   },
   "peerDependencies": {
-    "mapbox-gl": "^1",
-    "maplibre-gl": "^1",
-    "ol": "^6"
+    "mapbox-gl": "1.13.2",
+    "maplibre-gl": "2.4.0",
+    "ol": "6.14.1"
   },
   "devDependencies": {
     "@babel/core": "7.16.12",
@@ -97,15 +97,16 @@
   },
   "scripts": {
     "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
-    "build": "rm -rf build && yarn tsc && yarn esbuild:iife && cp README.md build/ && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
+    "build": "yarn build:tsc && yarn esbuild:iife",
+    "build:tsc": "rm -rf build && yarn tsc && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
     "cy:test": "start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'",
     "cy:test:chrome": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'",
     "cy:test:edge": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'",
     "cy:test:firefox": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'",
-    "dev": "yarn doc && yarn dev:examples",
-    "dev:examples": "cd doc && yarn dev",
+    "dev": "rm -rf .next && yarn doc && yarn dev:examples",
+    "dev:examples": "rm -rf .next && cd doc && yarn dev",
     "doc": "yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build",
     "esbuild": "yarn esbuild:all && yarn esbuild:iife",
     "esbuild:all": "esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx",
