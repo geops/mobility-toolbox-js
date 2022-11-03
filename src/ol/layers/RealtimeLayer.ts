@@ -286,6 +286,14 @@ class RealtimeLayer extends mixin(Layer) {
     coordinate: Coordinate,
     options = {},
   ): Promise<LayerGetFeatureInfoResponse> {
+    if (!this.map || !this.map.getView()) {
+      return Promise.resolve({
+        layer: this,
+        features: [],
+        coordinate,
+      });
+    }
+
     const resolution = this.map.getView().getResolution();
     return super.getFeatureInfoAtCoordinate(coordinate, {
       resolution,

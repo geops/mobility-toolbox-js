@@ -209,10 +209,7 @@ class WebSocketAPI {
    */
   close() {
     if (this.websocket && (this.open || this.connecting)) {
-      this.websocket.onclose = () => {
-        // We set the ws to undefined here to wait that the ws is properly closed.
-        this.websocket = undefined;
-      };
+      this.websocket.onclose = () => {};
       this.websocket.close();
       this.messagesOnOpen = [];
     }
