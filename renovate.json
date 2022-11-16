@@ -1,4 +1,0 @@
-{
-  "extends": ["config:js-lib", "schedule:monthly"],
-  "assignees": ["@friedjoff"]
-}
