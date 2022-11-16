@@ -29,6 +29,7 @@ export default () => {
   const tracker = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
+    // allowRenderWhenAnimating: true,
   });
   tracker.attachToMap(map);
 

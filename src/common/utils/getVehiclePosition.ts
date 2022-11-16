@@ -1,5 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
 import GeomType from 'ol/geom/GeometryType';
+import LineString from 'ol/geom/LineString';
 import { RealtimeTrajectory } from '../../api/typedefs';
 
 export type VehiclePosition = {
@@ -29,14 +30,20 @@ const getVehiclePosition = (
   let coord;
   let rotation;
 
+  const type = geometry.getType ? geometry.getType() : trajectory.geometry.type;
+  const coordinates = geometry.getCoordinates
+    ? geometry.getCoordinates()
+    : trajectory.geometry.coordinates;
+
   if (noInterpolate && coordinate) {
     coord = coordinate;
-  } else if (geometry.getType() === GeomType.POINT) {
-    coord = geometry.getCoordinates();
-  } else if (geometry.getType() === GeomType.LINE_STRING) {
+  } else if (type === GeomType.POINT) {
+    coord = coordinates;
+  } else if (type === GeomType.LINE_STRING) {
     const intervals = timeIntervals || [[]];
     const firstInterval = intervals[0];
     const lastInterval = intervals[intervals.length - 1];
+    const line = new LineString(coordinates);
 
     // Between the last time interval of a trajectory event and the beginning
     // of the new trajectory event, there is few seconds, can be 6 to 30
@@ -47,11 +54,11 @@ const getVehiclePosition = (
     if (now < firstInterval[0]) {
       // Display first position known.
       [, , rotation] = firstInterval;
-      coord = geometry.getFirstCoordinate();
+      coord = line.getFirstCoordinate();
     } else if (now > lastInterval[0]) {
       // Display last position known.
       [, , rotation] = lastInterval;
-      coord = geometry.getLastCoordinate();
+      coord = line.getLastCoordinate();
     } else {
       // Interpolate position using time intervals.
       for (let j = 0; j < intervals.length - 1; j += 1) {
@@ -63,7 +70,7 @@ const getVehiclePosition = (
           // interpolate position inside the time interval.
           const timeFrac = Math.min((now - start) / (end - start), 1);
           const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;
-          coord = geometry.getCoordinateAt(geomFrac);
+          coord = line.getCoordinateAt(geomFrac);
           [, , rotation] = intervals[j];
           break;
         }

@@ -13,6 +13,7 @@ import { EventsKey } from 'ol/events';
 import { ObjectEvent } from 'ol/Object';
 import { Coordinate } from 'ol/coordinate';
 import { Feature } from 'ol';
+import stringify from 'json-stringify-safe';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
@@ -955,6 +956,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         this.trajectories = {};
       }
       this.trajectories[trajectory.properties.train_id] = trajectory;
+      this.worker?.postMessage({
+        action: 'addTrajectory',
+        trajectory,
+      });
       // @ts-ignore the parameter are set by subclasses
       this.renderTrajectories();
     }
@@ -969,6 +974,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       if (this.trajectories) {
         delete this.trajectories[id];
       }
+      this.worker?.postMessage({
+        action: 'removeTrajectory',
+        trajectoryId: id,
+      });
     }
 
     /**
@@ -1043,7 +1052,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
             this.map.getView().getProjection(),
           ),
         };
-      } else {
+      } else if (!this.worker) {
         trajectory.properties.olGeometry = this.format.readGeometry(geometry);
       }
 

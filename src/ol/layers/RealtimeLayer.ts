@@ -60,6 +60,9 @@ const updateContainerTransform = (layer: RealtimeLayer) => {
   }
 };
 
+const wworker = new Worker(
+  new URL('../../common/tracker.worker.js', import.meta.url),
+);
 /**
  * Responsible for loading and display data from a Realtime service.
  *
@@ -96,14 +99,12 @@ class RealtimeLayer extends mixin(Layer) {
     });
 
     // Worker that render trajectories.
-    this.worker = new Worker('../../common/tracker.worker.ts', {
-      type: 'module',
-    });
+    this.worker = wworker;
+    console.log('ici');
     // Worker messaging and actions
     const that = this;
     this.worker.onmessage = (message: any) => {
       if (message.data.action === 'requestRender') {
-        console.log('icci');
         // Worker requested a new render frame
         that.map.render();
       } else if (that.canvas && message.data.action === 'rendered') {
@@ -349,16 +350,24 @@ class RealtimeLayer extends mixin(Layer) {
       const frameState = { ...this.mainThreadFrameState };
       delete frameState.layerStatesArray;
       delete frameState.viewState.projection;
+      // console.log(this.trajectories, JSON.parse(stringify(frameState)));
       this.worker.postMessage({
         action: 'render',
-        trajectories: this.trajectories,
+        trajectories: {},
         frameState: JSON.parse(stringify(frameState)),
-        viewState,
+        viewState: {
+          ...viewState,
+          pixelRatio: this.pixelRatio || 1,
+          // time: this.live ? Date.now() : this.time?.getTime(),
+        },
         options: {
-          noInterpolate,
-          iconScale: this.iconScale,
+          noInterpolate:
+            (viewState.zoom || 0) < this.minZoomInterpolation
+              ? true
+              : noInterpolate,
           hoverVehicleId: this.hoverVehicleId,
           selectedVehicleId: this.selectedVehicleId,
+          iconScale: this.iconScale,
           delayDisplay: this.delayDisplay,
           delayOutlineColor: this.delayOutlineColor,
           useDelayStyle: this.useDelayStyle,

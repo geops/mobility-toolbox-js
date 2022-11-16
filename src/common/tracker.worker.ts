@@ -1,11 +1,21 @@
+/// <reference no-default-lib="true"/>
+/// <reference lib="ES2015" />
+/// <reference lib="webworker" />
+/// <reference lib="dom" />
+
 import stringify from 'json-stringify-safe';
-// import GeoJSON from 'ol/format/GeoJSON';
+import GeoJSON from 'ol/format/GeoJSON';
 import type { FrameState } from 'ol/PluggableMap';
 import type { RealtimeStyleOptions, RealtimeTrajectories } from '../types';
-import { realtimeSimpleStyle } from './styles';
-import { renderTrajectories } from './utils';
+import { realtimeSimpleStyle, realtimeDefaultStyle } from './styles';
+import { renderTrajectories, realtimeConfig } from './utils';
 
 const debug = false;
+const trajectories: RealtimeTrajectories = {};
+
+// Default type of `self` is `WorkerGlobalScope & typeof globalThis`
+// https://github.com/microsoft/TypeScript/issues/14877
+declare let self: DedicatedWorkerGlobalScope;
 
 export type RealtimeWorkerRenderEvent = {
   data: {
@@ -18,7 +28,7 @@ export type RealtimeWorkerRenderEvent = {
 
 let renderTimeout: number | null;
 let count = 0;
-// const format = new GeoJSON();
+const format = new GeoJSON();
 const canvas = new OffscreenCanvas(1, 1);
 
 const render = (evt: RealtimeWorkerRenderEvent) => {
@@ -27,14 +37,21 @@ const render = (evt: RealtimeWorkerRenderEvent) => {
   // eslint-disable-next-line no-console
   if (debug) console.log('render', evt.data.frameState);
   count = 0;
-  const { trajectories, frameState, viewState, options } = evt.data;
+  const { frameState, viewState, options } = evt.data;
 
   const { renderedTrajectories } = renderTrajectories(
     canvas,
     Object.values(trajectories),
-    realtimeSimpleStyle,
+    realtimeDefaultStyle,
     viewState,
-    options,
+    {
+      ...options,
+      getRadius: realtimeConfig.getRadius,
+      getTextColor: realtimeConfig.getTextColor,
+      getBgColor: realtimeConfig.getBgColor,
+      getDelayColor: realtimeConfig.getDelayColor,
+      getTextSize: realtimeConfig.getTextSize,
+    },
   );
 
   if (debug) console.timeEnd('render');
@@ -53,7 +70,8 @@ const render = (evt: RealtimeWorkerRenderEvent) => {
       action: 'rendered',
       imageData,
       // transform: rendererTransform,
-      renderedTrajectories,
+      renderedTrajectories: [],
+      nbRenderedTrajectories: renderedTrajectories?.length,
       frameState: JSON.parse(stringify(state)),
     },
     [imageData],
@@ -64,20 +82,20 @@ const render = (evt: RealtimeWorkerRenderEvent) => {
 // eslint-disable-next-line no-restricted-globals
 self.onmessage = (evt) => {
   // debugger;
-  // if (evt.data.action === 'addTrajectory') {
-  //   const { trajectory } = evt.data;
-  //   const id = trajectory.properties.train_id;
-  //   trajectories[id] = trajectory;
-  //   trajectories[id].properties.olGeometry = format.readGeometry(
-  //     trajectory.geometry,
-  //   );
-  //   return;
-  // }
+  if (evt.data.action === 'addTrajectory') {
+    const { trajectory } = evt.data;
+    const id = trajectory.properties.train_id;
+    trajectories[id] = trajectory;
+    trajectories[id].properties.olGeometry = format.readGeometry(
+      trajectory.geometry,
+    );
+    return;
+  }
 
-  // if (evt.data.action === 'removeTrajectory') {
-  //   delete trajectories[evt.data.trajectoryId];
-  //   return;
-  // }
+  if (evt.data.action === 'removeTrajectory') {
+    delete trajectories[evt.data.trajectoryId];
+    return;
+  }
 
   // if (evt.data.action === 'sendData') {
   //   // eslint-disable-next-line no-console
@@ -102,5 +120,5 @@ self.onmessage = (evt) => {
   }, 0);
 };
 
-// eslint-disable-next-line no-restricted-globals
-export default self;
+// We need an export to force this file to act like a module, so TS will let us re-type `self`
+// export default null;

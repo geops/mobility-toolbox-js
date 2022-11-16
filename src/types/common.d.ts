@@ -2,7 +2,7 @@ import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { Pixel } from 'ol/pixel';
-import type { RealtimeTrainId } from './realtime';
+import type { RealtimeMot, RealtimeTrainId } from './realtime';
 import type {
   CopyrightControl as MbCopyrightControl,
   RealtimeLayer as MbRealtimeLayer,
@@ -40,17 +40,17 @@ export type RealtimeStyleOptions = {
   delayDisplay?: number;
   noInterpolate?: boolean;
   filter?: FilterFunction;
-  getRadius?: (type: number, z: number) => number;
-  getBgColor?: (type: number) => string;
+  getRadius?: (type: RealtimeMot, z: number) => number;
+  getBgColor?: (type: RealtimeMot) => string;
   getDelayColor?: (
     delay: number | null,
     cancelled?: boolean,
     isDelayText?: boolean,
   ) => string;
   getDelayText?: (delay: number | null, cancelled?: boolean) => string;
-  getTextColor?: (type: number) => string;
+  getTextColor?: (type: RealtimeMot) => string;
   getTextSize?: (
-    ctx: AnyCanvasContext | null,
+    ctx: AnyCanvasContext,
     markerSize: number,
     name: string,
     fontSize: number,
