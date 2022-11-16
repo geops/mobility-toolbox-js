@@ -14,7 +14,8 @@
     "declarationMap": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "lib": ["es6", "dom"]
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],
