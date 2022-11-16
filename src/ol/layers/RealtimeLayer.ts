@@ -7,7 +7,7 @@ import Feature, { FeatureLike } from 'ol/Feature';
 import { MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
-import stringify from 'json-stringify-safe';
+import type { State } from 'ol/View';
 import Layer from './Layer';
 import mixin, {
   RealtimeLayerMixinOptions,
@@ -35,15 +35,18 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
   allowRenderWhenAnimating?: boolean;
 };
 
-const updateContainerTransform = (layer: RealtimeLayer) => {
-  if (layer.renderedViewState) {
-    const { center, resolution, rotation } =
-      layer.mainThreadFrameState.viewState;
+const updateContainerTransform = (
+  layer: RealtimeLayer,
+  renderedViewState: State,
+  mainThreadViewState: State,
+) => {
+  if (renderedViewState) {
+    const { center, resolution, rotation } = mainThreadViewState;
     const {
       center: renderedCenter,
       resolution: renderedResolution,
       rotation: renderedRotation,
-    } = layer.renderedViewState;
+    } = renderedViewState;
     const pixelCenterRendered =
       layer.map.getPixelFromCoordinate(renderedCenter);
     const pixelCenter = layer.map.getPixelFromCoordinate(center);
@@ -100,52 +103,9 @@ class RealtimeLayer extends mixin(Layer) {
 
     // Worker that render trajectories.
     this.worker = wworker;
-    console.log('ici');
+
     // Worker messaging and actions
-    const that = this;
-    this.worker.onmessage = (message: any) => {
-      if (message.data.action === 'requestRender') {
-        // Worker requested a new render frame
-        that.map.render();
-      } else if (that.canvas && message.data.action === 'rendered') {
-        if (
-          that.map.getView().getInteracting() ||
-          that.map.getView().getAnimating()
-        ) {
-          return;
-        }
-        // Worker provides a new render frame
-        // requestAnimationFrame(() => {
-        //   if (
-        //     !that.renderWhenInteracting(
-        //       that.mainThreadFrameState.viewState,
-        //       that.renderedViewState,
-        //     ) &&
-        //     (that.map.getView().getInteracting() ||
-        //       that.map.getView().getAnimating())
-        //   ) {
-        //     return;
-        //   }
-        const { imageData, nbRenderedTrajectories } = message.data;
-        this.nbRenderedTrajectories = nbRenderedTrajectories;
-        that.canvas.width = imageData.width;
-        that.canvas.height = imageData.height;
-        if ((that.canvas as HTMLCanvasElement)?.style) {
-          (that.canvas as HTMLCanvasElement).style.transform = ``;
-          (that.canvas as HTMLCanvasElement).style.width = `${
-            that.canvas.width / (that.pixelRatio || 1)
-          }px`;
-          (that.canvas as HTMLCanvasElement).style.height = `${
-            that.canvas.height / (that.pixelRatio || 1)
-          }px`;
-        }
-        that.renderedViewState = message.data.frameState.viewState;
-        updateContainerTransform(that);
-        that.canvas?.getContext('2d')?.drawImage(imageData, 0, 0);
-        // });
-        that.rendering = false;
-      }
-    };
+    this.worker.onmessage = this.onWorkerMessage.bind(this);
 
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
@@ -188,19 +148,12 @@ class RealtimeLayer extends mixin(Layer) {
                 }
               }
 
-              this.mainThreadFrameState = frameState;
+              this.mainThreadViewState = frameState.viewState;
 
               if (this.renderedViewState) {
-                const {
-                  //  center,
-                  resolution,
-                  // rotation
-                } = frameState.viewState;
-                const {
-                  // center: renderedCenter,
-                  resolution: renderedResolution,
-                  // rotation: renderedRotation,
-                } = this.renderedViewState;
+                const { resolution } = frameState.viewState;
+                const { resolution: renderedResolution } =
+                  this.renderedViewState;
 
                 if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
@@ -212,19 +165,11 @@ class RealtimeLayer extends mixin(Layer) {
                     this.canvas?.height as number,
                   );
                 } else {
-                  updateContainerTransform(this);
-                  // const pixelCenterRendered =
-                  //   this.map.getPixelFromCoordinate(renderedCenter);
-                  // const pixelCenter = this.map.getPixelFromCoordinate(center);
-                  // this.transformContainer.style.transform = composeCssTransform(
-                  //   pixelCenterRendered[0] - pixelCenter[0],
-                  //   pixelCenterRendered[1] - pixelCenter[1],
-                  //   renderedResolution / resolution,
-                  //   renderedResolution / resolution,
-                  //   rotation - renderedRotation,
-                  //   0,
-                  //   0,
-                  // );
+                  updateContainerTransform(
+                    this,
+                    this.renderedViewState,
+                    frameState.viewState,
+                  );
                 }
               }
               return this.container;
@@ -346,17 +291,11 @@ class RealtimeLayer extends mixin(Layer) {
       : this.map.getView().getAnimating() ||
         this.map.getView().getInteracting();
 
-    if (!blockRendering && this.worker && this.mainThreadFrameState) {
-      const frameState = { ...this.mainThreadFrameState };
-      delete frameState.layerStatesArray;
-      delete frameState.viewState.projection;
-      // console.log(this.trajectories, JSON.parse(stringify(frameState)));
+    if (!blockRendering && this.worker && this.mainThreadViewState) {
       this.worker.postMessage({
         action: 'render',
-        frameState: JSON.parse(stringify(frameState)),
         viewState: {
           ...viewState,
-          pixelRatio: this.pixelRatio || 1,
           // time: this.live ? Date.now() : this.time?.getTime(),
         },
         options: {
@@ -562,6 +501,48 @@ class RealtimeLayer extends mixin(Layer) {
    */
   clone(newOptions: OlRealtimeLayerOptions) {
     return new RealtimeLayer({ ...this.options, ...newOptions });
+  }
+
+  onWorkerMessage(message: any) {
+    if (message.data.action === 'requestRender') {
+      // Worker requested a new render frame
+      this.map.render();
+    } else if (this.canvas && message.data.action === 'rendered') {
+      if (
+        !this.allowRenderWhenAnimating &&
+        (this.map.getView().getInteracting() ||
+          this.map.getView().getAnimating())
+      ) {
+        return;
+      }
+      // Worker provides a new render frame
+      // requestAnimationFrame(() => {
+      //   if (
+      //     !that.renderWhenInteracting(
+      //       that.mainThreadFrameState.viewState,
+      //       that.renderedViewState,
+      //     ) &&
+      //     (that.map.getView().getInteracting() ||
+      //       that.map.getView().getAnimating())
+      //   ) {
+      //     return;
+      //   }
+      const { imageData, viewState } = message.data;
+      this.canvas.width = imageData.width;
+      this.canvas.height = imageData.height;
+      if ((this.canvas as HTMLCanvasElement)?.style) {
+        (this.canvas as HTMLCanvasElement).style.transform = ``;
+        (this.canvas as HTMLCanvasElement).style.width = `${
+          this.canvas.width / (this.pixelRatio || 1)
+        }px`;
+        (this.canvas as HTMLCanvasElement).style.height = `${
+          this.canvas.height / (this.pixelRatio || 1)
+        }px`;
+      }
+      this.renderedViewState = viewState;
+      updateContainerTransform(this, viewState, this.mainThreadViewState);
+      this.canvas?.getContext('2d')?.drawImage(imageData, 0, 0);
+    }
   }
 }
 

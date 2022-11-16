@@ -19,8 +19,6 @@ declare let self: DedicatedWorkerGlobalScope;
 
 export type RealtimeWorkerRenderEvent = {
   data: {
-    trajectories: RealtimeTrajectories;
-    frameState: FrameState;
     viewState: ViewState;
     options: RealtimeStyleOptions;
   };
@@ -35,9 +33,9 @@ const render = (evt: RealtimeWorkerRenderEvent) => {
   // eslint-disable-next-line no-console
   if (debug) console.time('render');
   // eslint-disable-next-line no-console
-  if (debug) console.log('render', evt.data.frameState);
+  if (debug) console.log('render', evt.data.viewState);
   count = 0;
-  const { frameState, viewState, options } = evt.data;
+  const { viewState, options } = evt.data;
 
   const { renderedTrajectories } = renderTrajectories(
     canvas,
@@ -58,21 +56,14 @@ const render = (evt: RealtimeWorkerRenderEvent) => {
   if (debug) console.log('NUMBER OF STYLES CREATED', count);
 
   const imageData = canvas.transferToImageBitmap();
-  const state = { ...frameState };
-  // @ts-ignore
-  delete state.layerStatesArray;
-  // @ts-ignore
-  delete state.viewState.projection;
 
   // eslint-disable-next-line no-restricted-globals
   self.postMessage(
     {
       action: 'rendered',
       imageData,
-      // transform: rendererTransform,
-      renderedTrajectories: [],
-      nbRenderedTrajectories: renderedTrajectories?.length,
-      frameState: JSON.parse(stringify(state)),
+      viewState,
+      nbRenderedTRajectories: renderedTrajectories?.length || 0,
     },
     [imageData],
   );
