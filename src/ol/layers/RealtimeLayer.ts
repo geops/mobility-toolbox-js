@@ -353,7 +353,6 @@ class RealtimeLayer extends mixin(Layer) {
       // console.log(this.trajectories, JSON.parse(stringify(frameState)));
       this.worker.postMessage({
         action: 'render',
-        trajectories: {},
         frameState: JSON.parse(stringify(frameState)),
         viewState: {
           ...viewState,
