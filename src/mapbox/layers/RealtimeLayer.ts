@@ -8,12 +8,8 @@ import { Feature } from 'ol';
 import mixin from '../../common/mixins/RealtimeLayerMixin';
 import Layer from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
-import {
-  AnyMapboxMap,
-  LayerGetFeatureInfoOptions,
-  LayerGetFeatureInfoResponse,
-} from '../../types';
-import { RealtimeTrajectory } from '../../api/typedefs';
+import type { AnyMapboxMap, LayerGetFeatureInfoResponse } from '../../types';
+import type { RealtimeTrajectory } from '../../api/typedefs';
 
 /**
  * Responsible for loading and display data from a Realtime service.
