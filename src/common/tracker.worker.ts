@@ -4,9 +4,8 @@
 /// <reference lib="dom" />
 
 import GeoJSON from 'ol/format/GeoJSON';
-import type { FrameState } from 'ol/PluggableMap';
 import type { RealtimeStyleOptions, RealtimeTrajectories } from '../types';
-import { realtimeSimpleStyle, realtimeDefaultStyle } from './styles';
+import { realtimeDefaultStyle } from './styles';
 import { renderTrajectories, realtimeConfig } from './utils';
 
 const debug = false;
