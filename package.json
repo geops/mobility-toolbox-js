@@ -138,14 +138,5 @@
     "type": "git",
     "url": "https://github.com/geops/mobility-toolbox-js"
   },
-  "sideEffects": false,
-  "stylelint": {
-    "plugins": [
-      "stylelint-scss"
-    ],
-    "extends": [
-      "stylelint-config-standard",
-      "stylelint-config-recommended-scss"
-    ]
-  }
+  "sideEffects": false
 }
