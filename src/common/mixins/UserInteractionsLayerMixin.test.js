@@ -124,7 +124,7 @@ describe('Layer', () => {
       event: evt,
     });
 
-    test('calls click callback functions', async (done) => {
+    test('calls click callback functions', (done) => {
       const layer = new Layer();
       const goodFeatureInfo = getFeatureInfo(layer, [{ name: 'test' }]);
       const fn = jest.fn();

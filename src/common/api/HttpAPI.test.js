@@ -15,7 +15,7 @@ describe('HttpAPI', () => {
     test('should success', () => {
       fetch.mockResponseOnce(JSON.stringify({ foo: 'bar' }));
 
-      return api
+      api
         .fetch('/path', {
           q: 'Bern',
           fooUndefined: undefined,
@@ -36,7 +36,7 @@ describe('HttpAPI', () => {
     describe('should display error message', () => {
       test('reject error', (done) => {
         fetch.mockRejectOnce(new Error('Fake error message'));
-        return api.fetch().catch((err) => {
+        api.fetch().catch((err) => {
           expect(err.name).toEqual('Error');
           expect(err.message).toEqual('Fake error message');
           done();

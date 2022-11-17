@@ -139,7 +139,7 @@ describe('RoutingControl', () => {
     const error = new Error('Error');
     error.name = 'AbortError';
     fetch.mockRejectOnce(error);
-    return control.drawRoute().then((data) => {
+    control.drawRoute().then((data) => {
       expect(data).toEqual([undefined]);
       done();
     });
