@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   env: {
     'cypress/globals': true,
     node: true,
@@ -23,3 +23,5 @@ module.exports = {
     'prettier/prettier': 'error',
   },
 };
+
+export default config;
