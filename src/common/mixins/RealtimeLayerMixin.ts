@@ -565,7 +565,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       unByKey(this.visibilityRef);
       if (this.canvas) {
         const context = this.canvas.getContext('2d');
-        context?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (context) {
+          context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
         super.detachFromMap();
       }
     }
