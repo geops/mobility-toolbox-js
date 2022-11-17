@@ -15,7 +15,7 @@ describe('RoutingAPI', () => {
     test('should success', (done) => {
       fetch.mockResponseOnce(JSON.stringify(global.fetchRouteResponse));
 
-      return api
+      api
         .route({
           mot: 'bus',
           via: '47.3739194713294,8.538274823394632|47.37595378493421,8.537490375951839',

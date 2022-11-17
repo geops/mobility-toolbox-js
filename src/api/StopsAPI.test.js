@@ -15,7 +15,7 @@ describe('StopsAPI', () => {
     test('should success', (done) => {
       fetch.mockResponseOnce(JSON.stringify(global.stopsSearchResponse));
 
-      return api
+      api
         .search({
           q: 'Bern',
         })

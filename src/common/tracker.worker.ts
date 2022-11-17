@@ -3,7 +3,6 @@
 /// <reference lib="webworker" />
 /// <reference lib="dom" />
 
-import stringify from 'json-stringify-safe';
 import GeoJSON from 'ol/format/GeoJSON';
 import type { FrameState } from 'ol/PluggableMap';
 import type { RealtimeStyleOptions, RealtimeTrajectories } from '../types';

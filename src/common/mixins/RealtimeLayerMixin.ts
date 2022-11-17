@@ -13,7 +13,6 @@ import { EventsKey } from 'ol/events';
 import { ObjectEvent } from 'ol/Object';
 import { Coordinate } from 'ol/coordinate';
 import { Feature } from 'ol';
-import stringify from 'json-stringify-safe';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
@@ -566,7 +565,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       unByKey(this.visibilityRef);
       if (this.canvas) {
         const context = this.canvas.getContext('2d');
-        context?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (context) {
+          context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
         super.detachFromMap();
       }
     }

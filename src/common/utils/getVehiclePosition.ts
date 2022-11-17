@@ -1,6 +1,6 @@
 import { Coordinate } from 'ol/coordinate';
-import GeomType from 'ol/geom/GeometryType';
-import { RealtimeTrajectory } from '../../api/typedefs';
+import { LineString } from 'ol/geom';
+import type { RealtimeTrajectory } from '../../api/typedefs';
 
 export type VehiclePosition = {
   coord: Coordinate;
@@ -22,18 +22,22 @@ const getVehiclePosition = (
 ): VehiclePosition => {
   const {
     time_intervals: timeIntervals,
-    olGeometry: geometry,
+    olGeometry,
     coordinate,
   } = trajectory.properties;
-
+  const { type, coordinates } = trajectory.geometry;
+  let geometry = olGeometry;
   let coord;
   let rotation;
 
   if (noInterpolate && coordinate) {
     coord = coordinate;
-  } else if (geometry.getType() === GeomType.POINT) {
-    coord = geometry.getCoordinates();
-  } else if (geometry.getType() === GeomType.LINE_STRING) {
+  } else if (type === 'Point') {
+    coord = coordinates;
+  } else if (type === 'LineString') {
+    if (!geometry) {
+      geometry = new LineString(coordinates);
+    }
     const intervals = timeIntervals || [[]];
     const firstInterval = intervals[0];
     const lastInterval = intervals[intervals.length - 1];
