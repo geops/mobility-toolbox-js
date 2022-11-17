@@ -102,7 +102,7 @@
     "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
     "esbuild:iife:minify": "yarn esbuild:iife:base --minify --outfile=build/mbt.min.js",
     "esbuild:iife:unminify": "yarn esbuild:iife:base --outfile=build/mbt.js",
-    "format": "prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix",
+    "format": "prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix --allow-empty-input",
     "lib": "REACT_APP_LIB_MODE=1  webpack --mode production",
     "lib:dev": "REACT_APP_LIB_MODE=1  webpack --mode development",
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
@@ -130,10 +130,6 @@
     "mobility",
     "toolbox"
   ],
-  "prettier": {
-    "trailingComma": "all",
-    "singleQuote": true
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/geops/mobility-toolbox-js"

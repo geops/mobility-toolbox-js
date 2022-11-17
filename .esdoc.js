@@ -1,4 +1,4 @@
-const config = {
+module.exports = {
   source: './build',
   destination: './apidoc',
   includes: ['\\.(js)$', 'typedefs\\.js$'],
@@ -23,5 +23,3 @@ const config = {
     { name: './esdoc/plugins/optional-chaining-plugin/Plugin.js' },
   ],
 };
-
-export default config;
