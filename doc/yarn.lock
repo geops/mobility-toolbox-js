@@ -314,7 +314,7 @@
   dependencies:
     "@turf/helpers" "^6.5.0"
 
-"@turf/helpers@^6.5.0":
+"@turf/helpers@6.5.0", "@turf/helpers@^6.5.0":
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/@turf/helpers/-/helpers-6.5.0.tgz#f79af094bd6b8ce7ed2bd3e089a8493ee6cae82e"
   integrity sha512-VbI1dV5bLFzohYYdgqwikdMVpe7pJ9X3E+dlr425wa2/sMJqYDhTO++ec38/pcPvPE6oD9WEEeU3Xu3gza+VPw==
@@ -357,7 +357,7 @@
     "@turf/helpers" "^6.5.0"
     "@turf/invariant" "^6.5.0"
 
-"@turf/transform-rotate@^6.5.0":
+"@turf/transform-rotate@6.5.0":
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/@turf/transform-rotate/-/transform-rotate-6.5.0.tgz#e50e96a8779af91d58149eedb00ffd7f6395c804"
   integrity sha512-A2Ip1v4246ZmpssxpcL0hhiVBEf4L8lGnSPWTgSv5bWBEoya2fa/0SnFX9xJgP40rMP+ZzRaCN37vLHbv1Guag==
@@ -3183,11 +3183,11 @@ mkdirp@^0.5.1:
 mobility-toolbox-js@./../build:
   version "2.0.0-beta.68"
   dependencies:
-    "@turf/helpers" "^6.5.0"
-    "@turf/transform-rotate" "^6.5.0"
+    "@turf/helpers" "6.5.0"
+    "@turf/transform-rotate" "6.5.0"
     lodash.debounce "4.0.8"
     lodash.throttle "4.1.1"
-    uuid "8.3.2"
+    uuid "9.0.0"
 
 move-concurrently@^1.0.1:
   version "1.0.1"
@@ -4848,7 +4848,12 @@ util@^0.10.3:
   dependencies:
     inherits "2.0.3"
 
-uuid@8.3.2, uuid@^8.3.1:
+uuid@9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
+
+uuid@^8.3.1:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
