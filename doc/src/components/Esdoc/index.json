@@ -7090,7 +7090,7 @@
     "__docId__": 319,
     "kind": "file",
     "name": "build/ol/controls/RoutingControl.js",
-    "content": "import { Feature } from 'ol';\nimport { LineString, Point } from 'ol/geom';\nimport { Modify } from 'ol/interaction';\nimport { unByKey } from 'ol/Observable';\nimport { click } from 'ol/events/condition';\nimport { GeoJSON } from 'ol/format';\nimport { buffer } from 'ol/extent';\nimport { fromLonLat, toLonLat } from 'ol/proj';\nimport GeomType from 'ol/geom/GeometryType';\nimport BaseEvent from 'ol/events/Event';\nimport { RoutingAPI } from '../../api';\nimport ControlCommon from '../../common/controls/ControlCommon';\nimport RoutingLayer from '../layers/RoutingLayer';\n// Examples for a single hop:\n// basel sbb a station named \"basel sbb\"\n// ZUE, station \"Zürich HB\" by its common abbreviation\n// Zürich Hauptbahnhof or HBF Zürich are all valid synonyms für \"Zürich HB\"\n// @47.37811,8.53935 a station at position 47.37811, 8.53935\n// @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935\n// zürich hb@47.37811,8.53935$8 track 8 in station \"Zürich HB\" at position 47.37811, 8.53935\n/** @private */\nconst REGEX_VIA_POINT = /^([^@$!\\n]*)(@?([\\d.]+),([\\d.]+))?(\\$?([a-zA-Z0-9]{0,2}))$/;\n// Examples for a single hop:\n//\n// 47.37811,8.53935 a position 47.37811, 8.53935\n/** @private */\nconst REGEX_VIA_POINT_COORD = /^([\\d.]+),([\\d.]+)$/;\n// Examples for a single hop:\n//\n// !8596126 a station with id 8596126\n// !8596126$4 a station with id 8596126\n/** @private */\nconst REGEX_VIA_POINT_STATION_ID = /^!([^$]*)(\\$?([a-zA-Z0-9]{0,2}))$/;\n/** @private */\nconst STOP_FETCH_ABORT_CONTROLLER_KEY = 'stop-fetch';\n/** @private */\nconst getFlatCoordinatesFromSegments = (segmentArray) => {\n    const coords = [];\n    segmentArray.forEach((seg) => {\n        var _a;\n        // @ts-ignore\n        const coordArr = (_a = seg.getGeometry()) === null || _a === void 0 ? void 0 : _a.getCoordinates();\n        if (coordArr === null || coordArr === void 0 ? void 0 : coordArr.length) {\n            coords.push(...coordArr);\n        }\n    });\n    return coords;\n};\n/**\n * Display a route of a specified mean of transport.\n *\n * @example\n * import { Map } from 'ol';\n * import { RoutingControl } from 'mobility-toolbox-js/ol';\n *\n * const map = new Map({\n *   target: 'map'\n * });\n *\n * const control = new RoutingControl();\n *\n * control.attachToMap(map)\n *\n * @classproperty {string} apiKey - Key used for RoutingApi requests.\n * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).\n * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).\n * @classproperty {Array.<Array<graph=\"osm\", minZoom=0, maxZoom=99>>} graphs - Array of routing graphs and min/max zoom levels. If you use the control in combination with the [geOps Maps API](https://developer.geops.io/apis/maps/), you may want to use the optimal level of generalizations: \"[['gen4', 0, 8], ['gen3', 8, 9], ['gen2', 9, 11], ['gen1', 11, 13], ['osm', 13, 99]]\"\n * @classproperty {string} mot - Mean of transport to be used for routing.\n * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.\n * @classproperty {object} snapToClosestStation - If true, the routing will snap the coordinate to the closest station. Default to false.\n * @classproperty {boolean} useRawViaPoints - Experimental property. Wen true, it allows the user to add via points using different kind of string. See \"via\" parameter defined by the [geOps Routing API](https://developer.geops.io/apis/routing/). Default to false, only array of coordinates and station's id are supported as via points.\n * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.\n * @classproperty {function} onRouteError - Callback on error.\n * @classproperty {boolean} loading - True if the control is requesting the backend.\n * @see <a href=\"/example/ol-routing\">Openlayers routing example</a>\n *\n * @extends {Control}\n * @implements {RoutingInterface}\n */\nclass RoutingControl extends ControlCommon {\n    constructor(options = {}) {\n        super(options);\n        this.viaPoints = [];\n        this.loading = false;\n        this.graphs = [];\n        this.modify = true;\n        this.useRawViaPoints = false;\n        this.snapToClosestStation = false;\n        this.cacheStationData = {};\n        this.abortControllers = {};\n        this.segments = [];\n        this.format = new GeoJSON({ featureProjection: 'EPSG:3857' });\n        this.initialRouteDrag = {};\n        Object.defineProperties(this, {\n            mot: {\n                get: () => this.get('mot'),\n                set: (newMot) => {\n                    if (newMot) {\n                        this.set('mot', newMot);\n                        if (this.viaPoints) {\n                            this.drawRoute();\n                        }\n                    }\n                },\n            },\n            loading: {\n                get: () => this.get('loading'),\n                set: (newLoading) => {\n                    this.set('loading', newLoading);\n                },\n            },\n            modify: {\n                get: () => this.get('modify'),\n                set: (modify) => {\n                    this.set('modify', modify);\n                },\n            },\n        });\n        /** True if the control is requesting the backend. */\n        this.loading = false;\n        /** @ignore */\n        this.graphs = options.graphs || [['osm', 0, 99]];\n        /** @ignore */\n        this.mot = options.mot || 'bus';\n        /** @ignore */\n        this.modify = options.modify !== false;\n        /** @ignore */\n        this.routingApiParams = options.routingApiParams;\n        /** @ignore */\n        this.useRawViaPoints = options.useRawViaPoints || false;\n        /** @ignore */\n        this.snapToClosestStation = options.snapToClosestStation || false;\n        /** @ignore */\n        this.apiKey = options.apiKey;\n        /** @ignore */\n        this.stopsApiKey = options.stopsApiKey || this.apiKey;\n        /** @ignore */\n        this.stopsApiUrl = options.stopsApiUrl || 'https://api.geops.io/stops/v1/';\n        /** @ignore */\n        this.api = new RoutingAPI(Object.assign({}, options));\n        /** @ignore */\n        this.routingLayer =\n            options.routingLayer ||\n                new RoutingLayer({\n                    name: 'routing-layer',\n                    style: options.style,\n                });\n        /** @ignore */\n        this.onRouteError =\n            options.onRouteError ||\n                ((error) => {\n                    this.dispatchEvent(new BaseEvent('change:route'));\n                    this.reset();\n                    // eslint-disable-next-line no-console\n                    console.error(error);\n                });\n        /** @ignore */\n        this.onMapClick = this.onMapClick.bind(this);\n        /** @ignore */\n        this.onModifyEnd = this.onModifyEnd.bind(this);\n        /** @ignore */\n        this.onModifyStart = this.onModifyStart.bind(this);\n        /** @ignore */\n        this.createModifyInteraction();\n    }\n    /**\n     * Calculate at which resolutions corresponds each generalizations.\n     *\n     * @private\n     */\n    static getGraphsResolutions(graphs, map) {\n        const view = map.getView();\n        return graphs.map(([, minZoom, maxZoom]) => [\n            view.getResolutionForZoom(minZoom),\n            view.getResolutionForZoom(maxZoom || minZoom + 1),\n        ]);\n    }\n    /**\n     * Adds/Replaces a viaPoint to the viaPoints array and redraws route:\n     *   Adds a viaPoint at end of array by default.\n     *   If an index is passed a viaPoint is added at the specified index.\n     *   If an index is passed and overwrite x is > 0, x viaPoints at the specified\n     *     index are replaced with a single new viaPoint.\n     * @param {number[]|string} coordinates Array of coordinates\n     * @param {number} [index=-1] Integer representing the index of the added viaPoint. If not specified, the viaPoint is added at the end of the array.\n     * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.\n     */\n    addViaPoint(coordinatesOrString, index = -1, overwrite = 0) {\n        /* Add/Insert/Overwrite viapoint and redraw route */\n        this.viaPoints.splice(index === -1 ? this.viaPoints.length : index, overwrite, coordinatesOrString);\n        this.drawRoute();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Removes a viaPoint at the passed array index and redraws route\n     * By default the last viaPoint is removed.\n     * @param {number} index Integer representing the index of the viaPoint to delete.\n     */\n    removeViaPoint(index = (this.viaPoints || []).length - 1) {\n        /* Remove viapoint and redraw route */\n        if (this.viaPoints.length && this.viaPoints[index]) {\n            this.viaPoints.splice(index, 1);\n        }\n        this.drawRoute();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Replaces the current viaPoints with a new coordinate array.\n     * @param {Array<Array<number>>} coordinateArray Array of nested coordinates\n     */\n    setViaPoints(coordinateArray) {\n        this.viaPoints = [...coordinateArray];\n        this.drawRoute();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Removes all viaPoints, clears the source and triggers a change event\n     */\n    reset() {\n        var _a, _b, _c;\n        // Clear viaPoints and source\n        this.abortRequests();\n        this.viaPoints = [];\n        (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.clear();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Aborts viapoint and route requests\n     * @private\n     */\n    abortRequests() {\n        var _a;\n        // Abort Routing API requests\n        this.graphs.forEach((graph) => {\n            const graphName = graph[0];\n            if (this.abortControllers[graphName]) {\n                this.abortControllers[graphName].abort();\n            }\n            this.abortControllers[graphName] = new AbortController();\n        });\n        // Abort Stops API requests\n        (_a = this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]) === null || _a === void 0 ? void 0 : _a.abort();\n        this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY] =\n            new AbortController();\n        this.loading = false;\n    }\n    /**\n     * Draws route on map using an array of coordinates:\n     *   If a single coordinate is passed a single point feature is added to map.\n     *   If two or more coordinates are passed a request to the RoutingAPI fetches\n     *       the route using the passed coordinates and the current mot.\n     * @private\n     */\n    drawRoute() {\n        var _a, _b, _c, _d, _e, _f;\n        /* Calls RoutingAPI to draw a route using the viaPoints array */\n        this.abortRequests();\n        (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.clear();\n        if (!this.viaPoints.length) {\n            return null;\n        }\n        if (this.viaPoints.length === 1) {\n            // Add point for first node\n            return this.drawViaPoint(this.viaPoints[0], 0, this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]);\n        }\n        const formattedViaPoints = this.viaPoints.map((viaPoint) => {\n            var _a;\n            if (Array.isArray(viaPoint)) {\n                const projection = (_a = this.map) === null || _a === void 0 ? void 0 : _a.getView().getProjection();\n                // viaPoint is a coordinate\n                // Coordinates need to be reversed as required by the backend RoutingAPI\n                const [lon, lat] = toLonLat(viaPoint, projection);\n                return this.snapToClosestStation ? [`@${lat}`, lon] : [lat, lon];\n            }\n            // viaPoint is a string to use as it is\n            return this.useRawViaPoints ? viaPoint : `!${viaPoint}`;\n        });\n        this.loading = true;\n        // Clear source\n        (_f = (_e = (_d = this.routingLayer) === null || _d === void 0 ? void 0 : _d.olLayer) === null || _e === void 0 ? void 0 : _e.getSource()) === null || _f === void 0 ? void 0 : _f.clear();\n        // Create point features for the viaPoints\n        this.viaPoints.forEach((viaPoint, idx) => this.drawViaPoint(viaPoint, idx, this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]));\n        return Promise.all(this.graphs.map(([graph], index) => {\n            const { signal } = this.abortControllers[graph];\n            if (!this.api) {\n                return Promise.resolve([]);\n            }\n            return this.api\n                .route(Object.assign({ graph, via: `${formattedViaPoints.join('|')}`, mot: this.mot, \n                // @ts-ignore missing property in swagger\n                'resolve-hops': false, elevation: false, 'coord-radius': 100.0, 'coord-punish': 1000.0 }, (this.routingApiParams || {})), { signal })\n                .then((featureCollection) => {\n                var _a, _b, _c, _d;\n                this.segments = this.format.readFeatures(featureCollection);\n                if (this.mot === 'foot') {\n                    // Extract unique values from viaPoint target value\n                    const uniqueVias = this.segments.reduce((resultVias, currentFeat) => {\n                        const segTrg = currentFeat.get('trg');\n                        return resultVias.find((via) => via[0] === segTrg[0] && via[1] === segTrg[1])\n                            ? resultVias\n                            : [...resultVias, segTrg];\n                    }, []);\n                    // Create LineString features from segments with same unique value\n                    this.segments = uniqueVias.map((via) => {\n                        const viaSegments = this.segments.filter((seg) => {\n                            const segTrg = seg.get('trg');\n                            return segTrg[0] === via[0] && segTrg[1] === via[1];\n                        });\n                        const coords = getFlatCoordinatesFromSegments(viaSegments);\n                        return new Feature({\n                            geometry: new LineString(coords),\n                        });\n                    });\n                }\n                // Create the new route. This route will be modifiable by the Modifiy interaction.\n                const coords = getFlatCoordinatesFromSegments(this.segments);\n                const routeFeature = new Feature({\n                    geometry: new LineString(coords),\n                });\n                routeFeature.set('graph', graph);\n                routeFeature.set('mot', this.mot);\n                if (this.graphsResolutions &&\n                    ((_a = this.graphsResolutions[index]) === null || _a === void 0 ? void 0 : _a.length) >= 2) {\n                    routeFeature.set('minResolution', this.graphsResolutions[index][0]);\n                    routeFeature.set('maxResolution', this.graphsResolutions[index][1]);\n                }\n                (_d = (_c = (_b = this.routingLayer) === null || _b === void 0 ? void 0 : _b.olLayer) === null || _c === void 0 ? void 0 : _c.getSource()) === null || _d === void 0 ? void 0 : _d.addFeature(routeFeature);\n                this.loading = false;\n            })\n                .catch((error) => {\n                if (error.name === 'AbortError') {\n                    // Ignore abort error\n                    return;\n                }\n                this.segments = [];\n                // Dispatch error event and execute error function\n                this.dispatchEvent(new BaseEvent('error'));\n                this.onRouteError(error, this);\n                this.loading = false;\n            });\n        }));\n    }\n    /**\n     * Draw a via point. This function can parse all the possibilitiies\n     *\n     * @private\n     */\n    drawViaPoint(viaPoint, idx, abortController) {\n        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;\n        const pointFeature = new Feature();\n        pointFeature.set('viaPointIdx', idx);\n        // The via point is a coordinate using the current map's projection\n        if (Array.isArray(viaPoint)) {\n            pointFeature.setGeometry(new Point(viaPoint));\n            (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.addFeature(pointFeature);\n            return Promise.resolve(pointFeature);\n        }\n        // Possibility to parse:\n        //\n        // !8596126 a station with id 8596126\n        // !8596126$4 a station with id 8596126\n        if (!this.useRawViaPoints || REGEX_VIA_POINT_STATION_ID.test(viaPoint)) {\n            let stationId;\n            let track;\n            if (this.useRawViaPoints) {\n                [, stationId, , track] =\n                    REGEX_VIA_POINT_STATION_ID.exec(viaPoint) || [];\n            }\n            else {\n                [stationId, track] = viaPoint.split('$');\n            }\n            return fetch(`${this.stopsApiUrl}lookup/${stationId}?key=${this.stopsApiKey}`, { signal: abortController.signal })\n                .then((res) => res.json())\n                .then((stationData) => {\n                var _a, _b, _c;\n                const { coordinates } = stationData.features[0].geometry;\n                this.cacheStationData[viaPoint] = fromLonLat(coordinates);\n                pointFeature.set('viaPointTrack', track);\n                pointFeature.setGeometry(new Point(fromLonLat(coordinates)));\n                (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.addFeature(pointFeature);\n                return pointFeature;\n            })\n                .catch((error) => {\n                if (error.name === 'AbortError') {\n                    // Ignore abort error\n                    return;\n                }\n                // Dispatch error event and execute error function\n                this.dispatchEvent(new BaseEvent('error'));\n                this.onRouteError(error, this);\n                this.loading = false;\n            });\n        }\n        // Only when this.useRawViaPoints is true.\n        // Possibility to parse:\n        //\n        // 47.37811,8.53935 a position 47.37811, 8.53935\n        if (this.useRawViaPoints && REGEX_VIA_POINT_COORD.test(viaPoint)) {\n            const [lat, lon] = REGEX_VIA_POINT_COORD.exec(viaPoint) || [];\n            const coordinates = fromLonLat([parseFloat(lon), parseFloat(lat)], (_d = this.map) === null || _d === void 0 ? void 0 : _d.getView().getProjection());\n            pointFeature.setGeometry(new Point(coordinates));\n            (_g = (_f = (_e = this.routingLayer) === null || _e === void 0 ? void 0 : _e.olLayer) === null || _f === void 0 ? void 0 : _f.getSource()) === null || _g === void 0 ? void 0 : _g.addFeature(pointFeature);\n            return Promise.resolve(pointFeature);\n        }\n        // Only when this.useRawViaPoints is true.\n        // It will parse the via point to find some name, id, track coordinates.\n        //\n        // Possibility to parse:\n        //\n        // @47.37811,8.53935 a station at position 47.37811, 8.53935\n        // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935\n        // zürich hb@47.37811,8.53935$8 track 8 in station \"Zürich HB\" at position 47.37811, 8.53935\n        const [, stationName, , lat, lon, , track] = REGEX_VIA_POINT.exec(viaPoint) || [];\n        if (lon && lat) {\n            const coordinates = fromLonLat([parseFloat(lon), parseFloat(lat)], (_h = this.map) === null || _h === void 0 ? void 0 : _h.getView().getProjection());\n            pointFeature.set('viaPointTrack', track);\n            pointFeature.setGeometry(new Point(coordinates));\n            (_l = (_k = (_j = this.routingLayer) === null || _j === void 0 ? void 0 : _j.olLayer) === null || _k === void 0 ? void 0 : _k.getSource()) === null || _l === void 0 ? void 0 : _l.addFeature(pointFeature);\n            return Promise.resolve(pointFeature);\n        }\n        if (stationName) {\n            return fetch(`${this.stopsApiUrl}?key=${this.stopsApiKey}&q=${stationName}&limit=1`, { signal: abortController.signal })\n                .then((res) => res.json())\n                .then((stationData) => {\n                var _a, _b, _c;\n                const { coordinates } = stationData.features[0].geometry;\n                this.cacheStationData[viaPoint] = fromLonLat(coordinates);\n                pointFeature.set('viaPointTrack', track);\n                pointFeature.setGeometry(new Point(fromLonLat(coordinates)));\n                (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.addFeature(pointFeature);\n                return pointFeature;\n            })\n                .catch((error) => {\n                // Dispatch error event and execute error function\n                this.dispatchEvent(new BaseEvent('error'));\n                this.onRouteError(error, this);\n                this.loading = false;\n                return null;\n            });\n        }\n        return Promise.resolve(null);\n    }\n    /**\n     * Used on click on map while control is active:\n     *   By default adds a viaPoint to the end of array.\n     *   If an existing viaPoint is clicked removes the clicked viaPoint.\n     * @private\n     */\n    onMapClick(evt) {\n        const feats = evt.target.getFeaturesAtPixel(evt.pixel);\n        const viaPoint = feats.find((feat) => {\n            var _a;\n            return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === GeomType.POINT &&\n                feat.get('viaPointIdx') !== undefined;\n        });\n        if (viaPoint) {\n            // Remove existing viaPoint on click and abort viaPoint add\n            this.removeViaPoint(viaPoint.get('viaPointIdx'));\n            return;\n        }\n        this.addViaPoint(evt.coordinate);\n    }\n    /**\n     * Used on start of the modify interaction. Stores relevant data\n     * in this.initialRouteDrag object\n     * @private\n     */\n    onModifyStart(evt) {\n        var _a;\n        // When modify start, we search the index of the segment that is modifying.\n        let segmentIndex = -1;\n        const route = evt.features\n            .getArray()\n            .find((feat) => { var _a; return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === GeomType.LINE_STRING; });\n        // Find the segment index that is being modified\n        if (route && route.getGeometry() && evt.mapBrowserEvent.coordinate) {\n            // We use a buff extent to fix floating issues , see https://github.com/openlayers/openlayers/issues/7130#issuecomment-535856422\n            const closestExtent = buffer(new Point(\n            // @ts-ignore\n            (_a = route.getGeometry()) === null || _a === void 0 ? void 0 : _a.getClosestPoint(evt.mapBrowserEvent.coordinate)).getExtent(), 0.001);\n            segmentIndex = this.segments.findIndex((segment) => { var _a; return (_a = segment.getGeometry()) === null || _a === void 0 ? void 0 : _a.intersectsExtent(closestExtent); });\n        }\n        // Find the viaPoint that is being modified\n        const viaPoint = (evt.features\n            .getArray()\n            .filter((feat) => { var _a; return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === GeomType.POINT; }) ||\n            [])[0];\n        // Write object with modify info\n        /** @ignore */\n        this.initialRouteDrag = {\n            viaPoint,\n            oldRoute: route && route.clone(),\n            segmentIndex,\n        };\n    }\n    /**\n     * Used on end of the modify interaction. Resolves feature modification:\n     *   Line drag creates new viaPoint at the final coordinate of drag.\n     *   Point drag replaces old viaPoint.\n     * @private\n     */\n    onModifyEnd(evt) {\n        const coord = evt.mapBrowserEvent.coordinate;\n        const { oldRoute, viaPoint, segmentIndex } = this.initialRouteDrag || {};\n        // If viaPoint is being relocated overwrite the old viaPoint\n        if (viaPoint) {\n            return this.addViaPoint(coord, viaPoint.get('viaPointIdx'), 1);\n        }\n        // In case there is no route overwrite first coordinate\n        if (!oldRoute) {\n            return this.addViaPoint(coord, 0, 1);\n        }\n        // We can't add a via point because we haven't found which segment has been modified.\n        if (segmentIndex === -1) {\n            return Promise.reject(new Error('No segment found'));\n        }\n        // Insert new viaPoint at the  modified segment index + 1\n        return this.addViaPoint(coord, (segmentIndex || 0) + 1);\n    }\n    /**\n     * Define a default element.\n     *\n     * @private\n     */\n    createDefaultElement() {\n        /** @ignore */\n        this.element = document.createElement('button');\n        this.element.id = 'ol-toggle-routing';\n        this.element.innerHTML = 'Toggle Route Control';\n        this.element.onclick = () => this.active ? this.deactivate() : this.activate();\n        Object.assign(this.element.style, {\n            position: 'absolute',\n            right: '10px',\n            top: '10px',\n        });\n    }\n    /**\n     * Create the interaction used to modify vertexes of features.\n     * @private\n     */\n    createModifyInteraction() {\n        var _a, _b, _c;\n        /**\n         * @type {ol.interaction.Modify}\n         * @private\n         */\n        // Define and add modify interaction\n        this.modifyInteraction = new Modify({\n            source: ((_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) || undefined,\n            pixelTolerance: 4,\n            hitDetection: (_c = this.routingLayer) === null || _c === void 0 ? void 0 : _c.olLayer,\n            deleteCondition: (e) => {\n                const feats = e.target.getFeaturesAtPixel(e.pixel, {\n                    hitTolerance: 5,\n                });\n                const viaPoint = feats.find((feat) => {\n                    var _a;\n                    return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === GeomType.POINT &&\n                        feat.get('index');\n                });\n                if (click(e) && viaPoint) {\n                    // Remove node & viaPoint if an existing viaPoint was clicked\n                    this.removeViaPoint(viaPoint.get('index'));\n                    return true;\n                }\n                return false;\n            },\n        });\n        this.modifyInteraction.on('modifystart', this.onModifyStart);\n        this.modifyInteraction.on('modifyend', this.onModifyEnd);\n        this.modifyInteraction.setActive(false);\n    }\n    /**\n     * Add click listener to map.\n     * @private\n     */\n    addListeners() {\n        var _a;\n        if (!this.modify) {\n            return;\n        }\n        this.removeListeners();\n        /** @ignore */\n        this.onMapClickKey = (_a = this.map) === null || _a === void 0 ? void 0 : _a.on('singleclick', this.onMapClick);\n    }\n    /**\n     * Remove click listener from map.\n     * @private\n     */\n    removeListeners() {\n        if (this.onMapClickKey) {\n            unByKey(this.onMapClickKey);\n        }\n    }\n    activate() {\n        var _a, _b;\n        super.activate();\n        if (this.map) {\n            /** @ignore */\n            this.format = new GeoJSON({\n                featureProjection: this.map.getView().getProjection(),\n            });\n            /** @ignore */\n            this.graphsResolutions = RoutingControl.getGraphsResolutions(this.graphs, this.map);\n            // Clean the modifyInteraction if present\n            if (this.modifyInteraction) {\n                this.map.removeInteraction(this.modifyInteraction);\n            }\n            // Add modify interaction, RoutingLayer and listeners\n            (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.attachToMap(this.map);\n            if (this.modifyInteraction) {\n                this.map.addInteraction(this.modifyInteraction);\n            }\n            (_b = this.modifyInteraction) === null || _b === void 0 ? void 0 : _b.setActive(this.modify);\n            this.addListeners();\n        }\n    }\n    deactivate() {\n        var _a;\n        if (this.map) {\n            // Remove modify interaction, RoutingLayer, listeners and viaPoints\n            (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.detachFromMap();\n            if (this.modifyInteraction) {\n                this.map.removeInteraction(this.modifyInteraction);\n            }\n            this.removeListeners();\n            this.reset();\n        }\n    }\n    render() { }\n}\nexport default RoutingControl;\n",
+    "content": "import { Feature } from 'ol';\nimport { LineString, Point } from 'ol/geom';\nimport { Modify } from 'ol/interaction';\nimport { unByKey } from 'ol/Observable';\nimport { click } from 'ol/events/condition';\nimport { GeoJSON } from 'ol/format';\nimport { buffer } from 'ol/extent';\nimport { fromLonLat, toLonLat } from 'ol/proj';\nimport BaseEvent from 'ol/events/Event';\nimport { RoutingAPI } from '../../api';\nimport ControlCommon from '../../common/controls/ControlCommon';\nimport RoutingLayer from '../layers/RoutingLayer';\n// Examples for a single hop:\n// basel sbb a station named \"basel sbb\"\n// ZUE, station \"Zürich HB\" by its common abbreviation\n// Zürich Hauptbahnhof or HBF Zürich are all valid synonyms für \"Zürich HB\"\n// @47.37811,8.53935 a station at position 47.37811, 8.53935\n// @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935\n// zürich hb@47.37811,8.53935$8 track 8 in station \"Zürich HB\" at position 47.37811, 8.53935\n/** @private */\nconst REGEX_VIA_POINT = /^([^@$!\\n]*)(@?([\\d.]+),([\\d.]+))?(\\$?([a-zA-Z0-9]{0,2}))$/;\n// Examples for a single hop:\n//\n// 47.37811,8.53935 a position 47.37811, 8.53935\n/** @private */\nconst REGEX_VIA_POINT_COORD = /^([\\d.]+),([\\d.]+)$/;\n// Examples for a single hop:\n//\n// !8596126 a station with id 8596126\n// !8596126$4 a station with id 8596126\n/** @private */\nconst REGEX_VIA_POINT_STATION_ID = /^!([^$]*)(\\$?([a-zA-Z0-9]{0,2}))$/;\n/** @private */\nconst STOP_FETCH_ABORT_CONTROLLER_KEY = 'stop-fetch';\n/** @private */\nconst getFlatCoordinatesFromSegments = (segmentArray) => {\n    const coords = [];\n    segmentArray.forEach((seg) => {\n        var _a;\n        // @ts-ignore\n        const coordArr = (_a = seg.getGeometry()) === null || _a === void 0 ? void 0 : _a.getCoordinates();\n        if (coordArr === null || coordArr === void 0 ? void 0 : coordArr.length) {\n            coords.push(...coordArr);\n        }\n    });\n    return coords;\n};\n/**\n * Display a route of a specified mean of transport.\n *\n * @example\n * import { Map } from 'ol';\n * import { RoutingControl } from 'mobility-toolbox-js/ol';\n *\n * const map = new Map({\n *   target: 'map'\n * });\n *\n * const control = new RoutingControl();\n *\n * control.attachToMap(map)\n *\n * @classproperty {string} apiKey - Key used for RoutingApi requests.\n * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).\n * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).\n * @classproperty {Array.<Array<graph=\"osm\", minZoom=0, maxZoom=99>>} graphs - Array of routing graphs and min/max zoom levels. If you use the control in combination with the [geOps Maps API](https://developer.geops.io/apis/maps/), you may want to use the optimal level of generalizations: \"[['gen4', 0, 8], ['gen3', 8, 9], ['gen2', 9, 11], ['gen1', 11, 13], ['osm', 13, 99]]\"\n * @classproperty {string} mot - Mean of transport to be used for routing.\n * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.\n * @classproperty {object} snapToClosestStation - If true, the routing will snap the coordinate to the closest station. Default to false.\n * @classproperty {boolean} useRawViaPoints - Experimental property. Wen true, it allows the user to add via points using different kind of string. See \"via\" parameter defined by the [geOps Routing API](https://developer.geops.io/apis/routing/). Default to false, only array of coordinates and station's id are supported as via points.\n * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.\n * @classproperty {function} onRouteError - Callback on error.\n * @classproperty {boolean} loading - True if the control is requesting the backend.\n * @see <a href=\"/example/ol-routing\">Openlayers routing example</a>\n *\n * @extends {Control}\n * @implements {RoutingInterface}\n */\nclass RoutingControl extends ControlCommon {\n    constructor(options = {}) {\n        super(options);\n        this.viaPoints = [];\n        this.loading = false;\n        this.graphs = [];\n        this.modify = true;\n        this.useRawViaPoints = false;\n        this.snapToClosestStation = false;\n        this.cacheStationData = {};\n        this.abortControllers = {};\n        this.segments = [];\n        this.format = new GeoJSON({ featureProjection: 'EPSG:3857' });\n        this.initialRouteDrag = {};\n        Object.defineProperties(this, {\n            mot: {\n                get: () => this.get('mot'),\n                set: (newMot) => {\n                    if (newMot) {\n                        this.set('mot', newMot);\n                        if (this.viaPoints) {\n                            this.drawRoute();\n                        }\n                    }\n                },\n            },\n            loading: {\n                get: () => this.get('loading'),\n                set: (newLoading) => {\n                    this.set('loading', newLoading);\n                },\n            },\n            modify: {\n                get: () => this.get('modify'),\n                set: (modify) => {\n                    this.set('modify', modify);\n                },\n            },\n        });\n        /** True if the control is requesting the backend. */\n        this.loading = false;\n        /** @ignore */\n        this.graphs = options.graphs || [['osm', 0, 99]];\n        /** @ignore */\n        this.mot = options.mot || 'bus';\n        /** @ignore */\n        this.modify = options.modify !== false;\n        /** @ignore */\n        this.routingApiParams = options.routingApiParams;\n        /** @ignore */\n        this.useRawViaPoints = options.useRawViaPoints || false;\n        /** @ignore */\n        this.snapToClosestStation = options.snapToClosestStation || false;\n        /** @ignore */\n        this.apiKey = options.apiKey;\n        /** @ignore */\n        this.stopsApiKey = options.stopsApiKey || this.apiKey;\n        /** @ignore */\n        this.stopsApiUrl = options.stopsApiUrl || 'https://api.geops.io/stops/v1/';\n        /** @ignore */\n        this.api = new RoutingAPI(Object.assign({}, options));\n        /** @ignore */\n        this.routingLayer =\n            options.routingLayer ||\n                new RoutingLayer({\n                    name: 'routing-layer',\n                    style: options.style,\n                });\n        /** @ignore */\n        this.onRouteError =\n            options.onRouteError ||\n                ((error) => {\n                    this.dispatchEvent(new BaseEvent('change:route'));\n                    this.reset();\n                    // eslint-disable-next-line no-console\n                    console.error(error);\n                });\n        /** @ignore */\n        this.onMapClick = this.onMapClick.bind(this);\n        /** @ignore */\n        this.onModifyEnd = this.onModifyEnd.bind(this);\n        /** @ignore */\n        this.onModifyStart = this.onModifyStart.bind(this);\n        /** @ignore */\n        this.createModifyInteraction();\n    }\n    /**\n     * Calculate at which resolutions corresponds each generalizations.\n     *\n     * @private\n     */\n    static getGraphsResolutions(graphs, map) {\n        const view = map.getView();\n        return graphs.map(([, minZoom, maxZoom]) => [\n            view.getResolutionForZoom(minZoom),\n            view.getResolutionForZoom(maxZoom || minZoom + 1),\n        ]);\n    }\n    /**\n     * Adds/Replaces a viaPoint to the viaPoints array and redraws route:\n     *   Adds a viaPoint at end of array by default.\n     *   If an index is passed a viaPoint is added at the specified index.\n     *   If an index is passed and overwrite x is > 0, x viaPoints at the specified\n     *     index are replaced with a single new viaPoint.\n     * @param {number[]|string} coordinates Array of coordinates\n     * @param {number} [index=-1] Integer representing the index of the added viaPoint. If not specified, the viaPoint is added at the end of the array.\n     * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.\n     */\n    addViaPoint(coordinatesOrString, index = -1, overwrite = 0) {\n        /* Add/Insert/Overwrite viapoint and redraw route */\n        this.viaPoints.splice(index === -1 ? this.viaPoints.length : index, overwrite, coordinatesOrString);\n        this.drawRoute();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Removes a viaPoint at the passed array index and redraws route\n     * By default the last viaPoint is removed.\n     * @param {number} index Integer representing the index of the viaPoint to delete.\n     */\n    removeViaPoint(index = (this.viaPoints || []).length - 1) {\n        /* Remove viapoint and redraw route */\n        if (this.viaPoints.length && this.viaPoints[index]) {\n            this.viaPoints.splice(index, 1);\n        }\n        this.drawRoute();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Replaces the current viaPoints with a new coordinate array.\n     * @param {Array<Array<number>>} coordinateArray Array of nested coordinates\n     */\n    setViaPoints(coordinateArray) {\n        this.viaPoints = [...coordinateArray];\n        this.drawRoute();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Removes all viaPoints, clears the source and triggers a change event\n     */\n    reset() {\n        var _a, _b, _c;\n        // Clear viaPoints and source\n        this.abortRequests();\n        this.viaPoints = [];\n        (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.clear();\n        this.dispatchEvent(new BaseEvent('change:route'));\n    }\n    /**\n     * Aborts viapoint and route requests\n     * @private\n     */\n    abortRequests() {\n        var _a;\n        // Abort Routing API requests\n        this.graphs.forEach((graph) => {\n            const graphName = graph[0];\n            if (this.abortControllers[graphName]) {\n                this.abortControllers[graphName].abort();\n            }\n            this.abortControllers[graphName] = new AbortController();\n        });\n        // Abort Stops API requests\n        (_a = this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]) === null || _a === void 0 ? void 0 : _a.abort();\n        this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY] =\n            new AbortController();\n        this.loading = false;\n    }\n    /**\n     * Draws route on map using an array of coordinates:\n     *   If a single coordinate is passed a single point feature is added to map.\n     *   If two or more coordinates are passed a request to the RoutingAPI fetches\n     *       the route using the passed coordinates and the current mot.\n     * @private\n     */\n    drawRoute() {\n        var _a, _b, _c, _d, _e, _f;\n        /* Calls RoutingAPI to draw a route using the viaPoints array */\n        this.abortRequests();\n        (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.clear();\n        if (!this.viaPoints.length) {\n            return null;\n        }\n        if (this.viaPoints.length === 1) {\n            // Add point for first node\n            return this.drawViaPoint(this.viaPoints[0], 0, this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]);\n        }\n        const formattedViaPoints = this.viaPoints.map((viaPoint) => {\n            var _a;\n            if (Array.isArray(viaPoint)) {\n                const projection = (_a = this.map) === null || _a === void 0 ? void 0 : _a.getView().getProjection();\n                // viaPoint is a coordinate\n                // Coordinates need to be reversed as required by the backend RoutingAPI\n                const [lon, lat] = toLonLat(viaPoint, projection);\n                return this.snapToClosestStation ? [`@${lat}`, lon] : [lat, lon];\n            }\n            // viaPoint is a string to use as it is\n            return this.useRawViaPoints ? viaPoint : `!${viaPoint}`;\n        });\n        this.loading = true;\n        // Clear source\n        (_f = (_e = (_d = this.routingLayer) === null || _d === void 0 ? void 0 : _d.olLayer) === null || _e === void 0 ? void 0 : _e.getSource()) === null || _f === void 0 ? void 0 : _f.clear();\n        // Create point features for the viaPoints\n        this.viaPoints.forEach((viaPoint, idx) => this.drawViaPoint(viaPoint, idx, this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY]));\n        return Promise.all(this.graphs.map(([graph], index) => {\n            const { signal } = this.abortControllers[graph];\n            if (!this.api) {\n                return Promise.resolve([]);\n            }\n            return this.api\n                .route(Object.assign({ graph, via: `${formattedViaPoints.join('|')}`, mot: this.mot, \n                // @ts-ignore missing property in swagger\n                'resolve-hops': false, elevation: false, 'coord-radius': 100.0, 'coord-punish': 1000.0 }, (this.routingApiParams || {})), { signal })\n                .then((featureCollection) => {\n                var _a, _b, _c, _d;\n                this.segments = this.format.readFeatures(featureCollection);\n                if (this.mot === 'foot') {\n                    // Extract unique values from viaPoint target value\n                    const uniqueVias = this.segments.reduce((resultVias, currentFeat) => {\n                        const segTrg = currentFeat.get('trg');\n                        return resultVias.find((via) => via[0] === segTrg[0] && via[1] === segTrg[1])\n                            ? resultVias\n                            : [...resultVias, segTrg];\n                    }, []);\n                    // Create LineString features from segments with same unique value\n                    this.segments = uniqueVias.map((via) => {\n                        const viaSegments = this.segments.filter((seg) => {\n                            const segTrg = seg.get('trg');\n                            return segTrg[0] === via[0] && segTrg[1] === via[1];\n                        });\n                        const coords = getFlatCoordinatesFromSegments(viaSegments);\n                        return new Feature({\n                            geometry: new LineString(coords),\n                        });\n                    });\n                }\n                // Create the new route. This route will be modifiable by the Modifiy interaction.\n                const coords = getFlatCoordinatesFromSegments(this.segments);\n                const routeFeature = new Feature({\n                    geometry: new LineString(coords),\n                });\n                routeFeature.set('graph', graph);\n                routeFeature.set('mot', this.mot);\n                if (this.graphsResolutions &&\n                    ((_a = this.graphsResolutions[index]) === null || _a === void 0 ? void 0 : _a.length) >= 2) {\n                    routeFeature.set('minResolution', this.graphsResolutions[index][0]);\n                    routeFeature.set('maxResolution', this.graphsResolutions[index][1]);\n                }\n                (_d = (_c = (_b = this.routingLayer) === null || _b === void 0 ? void 0 : _b.olLayer) === null || _c === void 0 ? void 0 : _c.getSource()) === null || _d === void 0 ? void 0 : _d.addFeature(routeFeature);\n                this.loading = false;\n            })\n                .catch((error) => {\n                if (error.name === 'AbortError') {\n                    // Ignore abort error\n                    return;\n                }\n                this.segments = [];\n                // Dispatch error event and execute error function\n                this.dispatchEvent(new BaseEvent('error'));\n                this.onRouteError(error, this);\n                this.loading = false;\n            });\n        }));\n    }\n    /**\n     * Draw a via point. This function can parse all the possibilitiies\n     *\n     * @private\n     */\n    drawViaPoint(viaPoint, idx, abortController) {\n        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;\n        const pointFeature = new Feature();\n        pointFeature.set('viaPointIdx', idx);\n        // The via point is a coordinate using the current map's projection\n        if (Array.isArray(viaPoint)) {\n            pointFeature.setGeometry(new Point(viaPoint));\n            (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.addFeature(pointFeature);\n            return Promise.resolve(pointFeature);\n        }\n        // Possibility to parse:\n        //\n        // !8596126 a station with id 8596126\n        // !8596126$4 a station with id 8596126\n        if (!this.useRawViaPoints || REGEX_VIA_POINT_STATION_ID.test(viaPoint)) {\n            let stationId;\n            let track;\n            if (this.useRawViaPoints) {\n                [, stationId, , track] =\n                    REGEX_VIA_POINT_STATION_ID.exec(viaPoint) || [];\n            }\n            else {\n                [stationId, track] = viaPoint.split('$');\n            }\n            return fetch(`${this.stopsApiUrl}lookup/${stationId}?key=${this.stopsApiKey}`, { signal: abortController.signal })\n                .then((res) => res.json())\n                .then((stationData) => {\n                var _a, _b, _c;\n                const { coordinates } = stationData.features[0].geometry;\n                this.cacheStationData[viaPoint] = fromLonLat(coordinates);\n                pointFeature.set('viaPointTrack', track);\n                pointFeature.setGeometry(new Point(fromLonLat(coordinates)));\n                (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.addFeature(pointFeature);\n                return pointFeature;\n            })\n                .catch((error) => {\n                if (error.name === 'AbortError') {\n                    // Ignore abort error\n                    return;\n                }\n                // Dispatch error event and execute error function\n                this.dispatchEvent(new BaseEvent('error'));\n                this.onRouteError(error, this);\n                this.loading = false;\n            });\n        }\n        // Only when this.useRawViaPoints is true.\n        // Possibility to parse:\n        //\n        // 47.37811,8.53935 a position 47.37811, 8.53935\n        if (this.useRawViaPoints && REGEX_VIA_POINT_COORD.test(viaPoint)) {\n            const [lat, lon] = REGEX_VIA_POINT_COORD.exec(viaPoint) || [];\n            const coordinates = fromLonLat([parseFloat(lon), parseFloat(lat)], (_d = this.map) === null || _d === void 0 ? void 0 : _d.getView().getProjection());\n            pointFeature.setGeometry(new Point(coordinates));\n            (_g = (_f = (_e = this.routingLayer) === null || _e === void 0 ? void 0 : _e.olLayer) === null || _f === void 0 ? void 0 : _f.getSource()) === null || _g === void 0 ? void 0 : _g.addFeature(pointFeature);\n            return Promise.resolve(pointFeature);\n        }\n        // Only when this.useRawViaPoints is true.\n        // It will parse the via point to find some name, id, track coordinates.\n        //\n        // Possibility to parse:\n        //\n        // @47.37811,8.53935 a station at position 47.37811, 8.53935\n        // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935\n        // zürich hb@47.37811,8.53935$8 track 8 in station \"Zürich HB\" at position 47.37811, 8.53935\n        const [, stationName, , lat, lon, , track] = REGEX_VIA_POINT.exec(viaPoint) || [];\n        if (lon && lat) {\n            const coordinates = fromLonLat([parseFloat(lon), parseFloat(lat)], (_h = this.map) === null || _h === void 0 ? void 0 : _h.getView().getProjection());\n            pointFeature.set('viaPointTrack', track);\n            pointFeature.setGeometry(new Point(coordinates));\n            (_l = (_k = (_j = this.routingLayer) === null || _j === void 0 ? void 0 : _j.olLayer) === null || _k === void 0 ? void 0 : _k.getSource()) === null || _l === void 0 ? void 0 : _l.addFeature(pointFeature);\n            return Promise.resolve(pointFeature);\n        }\n        if (stationName) {\n            return fetch(`${this.stopsApiUrl}?key=${this.stopsApiKey}&q=${stationName}&limit=1`, { signal: abortController.signal })\n                .then((res) => res.json())\n                .then((stationData) => {\n                var _a, _b, _c;\n                const { coordinates } = stationData.features[0].geometry;\n                this.cacheStationData[viaPoint] = fromLonLat(coordinates);\n                pointFeature.set('viaPointTrack', track);\n                pointFeature.setGeometry(new Point(fromLonLat(coordinates)));\n                (_c = (_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) === null || _c === void 0 ? void 0 : _c.addFeature(pointFeature);\n                return pointFeature;\n            })\n                .catch((error) => {\n                // Dispatch error event and execute error function\n                this.dispatchEvent(new BaseEvent('error'));\n                this.onRouteError(error, this);\n                this.loading = false;\n                return null;\n            });\n        }\n        return Promise.resolve(null);\n    }\n    /**\n     * Used on click on map while control is active:\n     *   By default adds a viaPoint to the end of array.\n     *   If an existing viaPoint is clicked removes the clicked viaPoint.\n     * @private\n     */\n    onMapClick(evt) {\n        const feats = evt.target.getFeaturesAtPixel(evt.pixel);\n        const viaPoint = feats.find((feat) => {\n            var _a;\n            return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === 'Point' &&\n                feat.get('viaPointIdx') !== undefined;\n        });\n        if (viaPoint) {\n            // Remove existing viaPoint on click and abort viaPoint add\n            this.removeViaPoint(viaPoint.get('viaPointIdx'));\n            return;\n        }\n        this.addViaPoint(evt.coordinate);\n    }\n    /**\n     * Used on start of the modify interaction. Stores relevant data\n     * in this.initialRouteDrag object\n     * @private\n     */\n    onModifyStart(evt) {\n        var _a;\n        // When modify start, we search the index of the segment that is modifying.\n        let segmentIndex = -1;\n        const route = evt.features\n            .getArray()\n            .find((feat) => { var _a; return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === 'LineString'; });\n        // Find the segment index that is being modified\n        if (route && route.getGeometry() && evt.mapBrowserEvent.coordinate) {\n            // We use a buff extent to fix floating issues , see https://github.com/openlayers/openlayers/issues/7130#issuecomment-535856422\n            const closestExtent = buffer(new Point(\n            // @ts-ignore\n            (_a = route.getGeometry()) === null || _a === void 0 ? void 0 : _a.getClosestPoint(evt.mapBrowserEvent.coordinate)).getExtent(), 0.001);\n            segmentIndex = this.segments.findIndex((segment) => { var _a; return (_a = segment.getGeometry()) === null || _a === void 0 ? void 0 : _a.intersectsExtent(closestExtent); });\n        }\n        // Find the viaPoint that is being modified\n        const viaPoint = (evt.features\n            .getArray()\n            .filter((feat) => { var _a; return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === 'Point'; }) ||\n            [])[0];\n        // Write object with modify info\n        /** @ignore */\n        this.initialRouteDrag = {\n            viaPoint,\n            oldRoute: route && route.clone(),\n            segmentIndex,\n        };\n    }\n    /**\n     * Used on end of the modify interaction. Resolves feature modification:\n     *   Line drag creates new viaPoint at the final coordinate of drag.\n     *   Point drag replaces old viaPoint.\n     * @private\n     */\n    onModifyEnd(evt) {\n        const coord = evt.mapBrowserEvent.coordinate;\n        const { oldRoute, viaPoint, segmentIndex } = this.initialRouteDrag || {};\n        // If viaPoint is being relocated overwrite the old viaPoint\n        if (viaPoint) {\n            return this.addViaPoint(coord, viaPoint.get('viaPointIdx'), 1);\n        }\n        // In case there is no route overwrite first coordinate\n        if (!oldRoute) {\n            return this.addViaPoint(coord, 0, 1);\n        }\n        // We can't add a via point because we haven't found which segment has been modified.\n        if (segmentIndex === -1) {\n            return Promise.reject(new Error('No segment found'));\n        }\n        // Insert new viaPoint at the  modified segment index + 1\n        return this.addViaPoint(coord, (segmentIndex || 0) + 1);\n    }\n    /**\n     * Define a default element.\n     *\n     * @private\n     */\n    createDefaultElement() {\n        /** @ignore */\n        this.element = document.createElement('button');\n        this.element.id = 'ol-toggle-routing';\n        this.element.innerHTML = 'Toggle Route Control';\n        this.element.onclick = () => this.active ? this.deactivate() : this.activate();\n        Object.assign(this.element.style, {\n            position: 'absolute',\n            right: '10px',\n            top: '10px',\n        });\n    }\n    /**\n     * Create the interaction used to modify vertexes of features.\n     * @private\n     */\n    createModifyInteraction() {\n        var _a, _b, _c;\n        /**\n         * @type {ol.interaction.Modify}\n         * @private\n         */\n        // Define and add modify interaction\n        this.modifyInteraction = new Modify({\n            source: ((_b = (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.olLayer) === null || _b === void 0 ? void 0 : _b.getSource()) || undefined,\n            pixelTolerance: 4,\n            hitDetection: (_c = this.routingLayer) === null || _c === void 0 ? void 0 : _c.olLayer,\n            deleteCondition: (e) => {\n                const feats = e.target.getFeaturesAtPixel(e.pixel, {\n                    hitTolerance: 5,\n                });\n                const viaPoint = feats.find((feat) => { var _a; return ((_a = feat.getGeometry()) === null || _a === void 0 ? void 0 : _a.getType()) === 'Point' && feat.get('index'); });\n                if (click(e) && viaPoint) {\n                    // Remove node & viaPoint if an existing viaPoint was clicked\n                    this.removeViaPoint(viaPoint.get('index'));\n                    return true;\n                }\n                return false;\n            },\n        });\n        this.modifyInteraction.on('modifystart', this.onModifyStart);\n        this.modifyInteraction.on('modifyend', this.onModifyEnd);\n        this.modifyInteraction.setActive(false);\n    }\n    /**\n     * Add click listener to map.\n     * @private\n     */\n    addListeners() {\n        var _a;\n        if (!this.modify) {\n            return;\n        }\n        this.removeListeners();\n        /** @ignore */\n        this.onMapClickKey = (_a = this.map) === null || _a === void 0 ? void 0 : _a.on('singleclick', this.onMapClick);\n    }\n    /**\n     * Remove click listener from map.\n     * @private\n     */\n    removeListeners() {\n        if (this.onMapClickKey) {\n            unByKey(this.onMapClickKey);\n        }\n    }\n    activate() {\n        var _a, _b;\n        super.activate();\n        if (this.map) {\n            /** @ignore */\n            this.format = new GeoJSON({\n                featureProjection: this.map.getView().getProjection(),\n            });\n            /** @ignore */\n            this.graphsResolutions = RoutingControl.getGraphsResolutions(this.graphs, this.map);\n            // Clean the modifyInteraction if present\n            if (this.modifyInteraction) {\n                this.map.removeInteraction(this.modifyInteraction);\n            }\n            // Add modify interaction, RoutingLayer and listeners\n            (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.attachToMap(this.map);\n            if (this.modifyInteraction) {\n                this.map.addInteraction(this.modifyInteraction);\n            }\n            (_b = this.modifyInteraction) === null || _b === void 0 ? void 0 : _b.setActive(this.modify);\n            this.addListeners();\n        }\n    }\n    deactivate() {\n        var _a;\n        if (this.map) {\n            // Remove modify interaction, RoutingLayer, listeners and viaPoints\n            (_a = this.routingLayer) === null || _a === void 0 ? void 0 : _a.detachFromMap();\n            if (this.modifyInteraction) {\n                this.map.removeInteraction(this.modifyInteraction);\n            }\n            this.removeListeners();\n            this.reset();\n        }\n    }\n    render() { }\n}\nexport default RoutingControl;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/ol/controls/RoutingControl.js",
     "access": "public",
@@ -7109,7 +7109,7 @@
     "importPath": "mobility-toolbox-js/build/ol/controls/RoutingControl.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 22,
+    "lineNumber": 21,
     "type": {
       "types": [
         "undefined"
@@ -7129,7 +7129,7 @@
     "importPath": "mobility-toolbox-js/build/ol/controls/RoutingControl.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 27,
+    "lineNumber": 26,
     "type": {
       "types": [
         "undefined"
@@ -7149,7 +7149,7 @@
     "importPath": "mobility-toolbox-js/build/ol/controls/RoutingControl.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 33,
+    "lineNumber": 32,
     "type": {
       "types": [
         "undefined"
@@ -7169,7 +7169,7 @@
     "importPath": "mobility-toolbox-js/build/ol/controls/RoutingControl.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 35,
+    "lineNumber": 34,
     "type": {
       "types": [
         "string"
@@ -7191,7 +7191,7 @@
     "importPath": "mobility-toolbox-js/build/ol/controls/RoutingControl.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 37,
+    "lineNumber": 36,
     "params": [
       {
         "name": "segmentArray",
@@ -7225,7 +7225,7 @@
     "see": [
       "<a href=\"/example/ol-routing\">Openlayers routing example</a>"
     ],
-    "lineNumber": 80,
+    "lineNumber": 79,
     "unknown": [
       {
         "tagName": "@classproperty",
@@ -7291,7 +7291,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#constructor",
     "access": "public",
     "description": null,
-    "lineNumber": 81,
+    "lineNumber": 80,
     "undocument": true
   },
   {
@@ -7303,7 +7303,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#viaPoints",
     "access": "public",
     "description": null,
-    "lineNumber": 83,
+    "lineNumber": 82,
     "undocument": true,
     "type": {
       "types": [
@@ -7320,7 +7320,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#loading",
     "access": "public",
     "description": null,
-    "lineNumber": 84,
+    "lineNumber": 83,
     "undocument": true,
     "type": {
       "types": [
@@ -7337,7 +7337,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#graphs",
     "access": "public",
     "description": null,
-    "lineNumber": 85,
+    "lineNumber": 84,
     "undocument": true,
     "type": {
       "types": [
@@ -7354,7 +7354,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#modify",
     "access": "public",
     "description": null,
-    "lineNumber": 86,
+    "lineNumber": 85,
     "undocument": true,
     "type": {
       "types": [
@@ -7371,7 +7371,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#useRawViaPoints",
     "access": "public",
     "description": null,
-    "lineNumber": 87,
+    "lineNumber": 86,
     "undocument": true,
     "type": {
       "types": [
@@ -7388,7 +7388,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#snapToClosestStation",
     "access": "public",
     "description": null,
-    "lineNumber": 88,
+    "lineNumber": 87,
     "undocument": true,
     "type": {
       "types": [
@@ -7405,7 +7405,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#cacheStationData",
     "access": "public",
     "description": null,
-    "lineNumber": 89,
+    "lineNumber": 88,
     "undocument": true,
     "type": {
       "types": [
@@ -7422,7 +7422,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#abortControllers",
     "access": "public",
     "description": null,
-    "lineNumber": 90,
+    "lineNumber": 89,
     "undocument": true,
     "type": {
       "types": [
@@ -7439,7 +7439,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#segments",
     "access": "public",
     "description": null,
-    "lineNumber": 91,
+    "lineNumber": 90,
     "undocument": true,
     "type": {
       "types": [
@@ -7456,7 +7456,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#format",
     "access": "public",
     "description": null,
-    "lineNumber": 92,
+    "lineNumber": 91,
     "undocument": true,
     "type": {
       "types": [
@@ -7473,7 +7473,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#initialRouteDrag",
     "access": "public",
     "description": null,
-    "lineNumber": 93,
+    "lineNumber": 92,
     "undocument": true,
     "type": {
       "types": [
@@ -7490,7 +7490,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#mot",
     "access": "public",
     "description": null,
-    "lineNumber": 124,
+    "lineNumber": 123,
     "ignore": true,
     "type": {
       "types": [
@@ -7507,7 +7507,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#routingApiParams",
     "access": "public",
     "description": null,
-    "lineNumber": 128,
+    "lineNumber": 127,
     "ignore": true,
     "type": {
       "types": [
@@ -7524,7 +7524,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#apiKey",
     "access": "public",
     "description": null,
-    "lineNumber": 134,
+    "lineNumber": 133,
     "ignore": true,
     "type": {
       "types": [
@@ -7541,7 +7541,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#stopsApiKey",
     "access": "public",
     "description": null,
-    "lineNumber": 136,
+    "lineNumber": 135,
     "ignore": true,
     "type": {
       "types": [
@@ -7558,7 +7558,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#stopsApiUrl",
     "access": "public",
     "description": null,
-    "lineNumber": 138,
+    "lineNumber": 137,
     "ignore": true,
     "type": {
       "types": [
@@ -7575,7 +7575,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#api",
     "access": "public",
     "description": null,
-    "lineNumber": 140,
+    "lineNumber": 139,
     "ignore": true,
     "type": {
       "types": [
@@ -7592,7 +7592,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#routingLayer",
     "access": "public",
     "description": null,
-    "lineNumber": 142,
+    "lineNumber": 141,
     "ignore": true,
     "type": {
       "types": [
@@ -7609,7 +7609,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#onRouteError",
     "access": "public",
     "description": null,
-    "lineNumber": 149,
+    "lineNumber": 148,
     "ignore": true,
     "type": {
       "types": [
@@ -7628,7 +7628,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl.getGraphsResolutions",
     "access": "private",
     "description": "Calculate at which resolutions corresponds each generalizations.",
-    "lineNumber": 171,
+    "lineNumber": 170,
     "params": [
       {
         "name": "graphs",
@@ -7660,7 +7660,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#addViaPoint",
     "access": "public",
     "description": "Adds/Replaces a viaPoint to the viaPoints array and redraws route:\n  Adds a viaPoint at end of array by default.\n  If an index is passed a viaPoint is added at the specified index.\n  If an index is passed and overwrite x is > 0, x viaPoints at the specified\n    index are replaced with a single new viaPoint.",
-    "lineNumber": 188,
+    "lineNumber": 187,
     "params": [
       {
         "nullable": null,
@@ -7711,7 +7711,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#removeViaPoint",
     "access": "public",
     "description": "Removes a viaPoint at the passed array index and redraws route\nBy default the last viaPoint is removed.",
-    "lineNumber": 199,
+    "lineNumber": 198,
     "params": [
       {
         "nullable": null,
@@ -7737,7 +7737,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#setViaPoints",
     "access": "public",
     "description": "Replaces the current viaPoints with a new coordinate array.",
-    "lineNumber": 211,
+    "lineNumber": 210,
     "params": [
       {
         "nullable": null,
@@ -7763,7 +7763,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#reset",
     "access": "public",
     "description": "Removes all viaPoints, clears the source and triggers a change event",
-    "lineNumber": 219,
+    "lineNumber": 218,
     "params": [],
     "return": null
   },
@@ -7778,7 +7778,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#abortRequests",
     "access": "private",
     "description": "Aborts viapoint and route requests",
-    "lineNumber": 231,
+    "lineNumber": 230,
     "params": [],
     "return": null
   },
@@ -7793,7 +7793,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#drawRoute",
     "access": "private",
     "description": "Draws route on map using an array of coordinates:\n  If a single coordinate is passed a single point feature is added to map.\n  If two or more coordinates are passed a request to the RoutingAPI fetches\n      the route using the passed coordinates and the current mot.",
-    "lineNumber": 254,
+    "lineNumber": 253,
     "params": [],
     "return": {
       "types": [
@@ -7812,7 +7812,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#drawViaPoint",
     "access": "private",
     "description": "Draw a via point. This function can parse all the possibilitiies",
-    "lineNumber": 348,
+    "lineNumber": 347,
     "params": [
       {
         "name": "viaPoint",
@@ -7850,7 +7850,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#onMapClick",
     "access": "private",
     "description": "Used on click on map while control is active:\n  By default adds a viaPoint to the end of array.\n  If an existing viaPoint is clicked removes the clicked viaPoint.",
-    "lineNumber": 449,
+    "lineNumber": 448,
     "params": [
       {
         "name": "evt",
@@ -7872,7 +7872,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#onModifyStart",
     "access": "private",
     "description": "Used on start of the modify interaction. Stores relevant data\nin this.initialRouteDrag object",
-    "lineNumber": 468,
+    "lineNumber": 467,
     "params": [
       {
         "name": "evt",
@@ -7894,7 +7894,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#onModifyEnd",
     "access": "private",
     "description": "Used on end of the modify interaction. Resolves feature modification:\n  Line drag creates new viaPoint at the final coordinate of drag.\n  Point drag replaces old viaPoint.",
-    "lineNumber": 502,
+    "lineNumber": 501,
     "params": [
       {
         "name": "evt",
@@ -7920,7 +7920,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#createDefaultElement",
     "access": "private",
     "description": "Define a default element.",
-    "lineNumber": 525,
+    "lineNumber": 524,
     "params": [],
     "return": null
   },
@@ -7933,7 +7933,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#element",
     "access": "public",
     "description": null,
-    "lineNumber": 527,
+    "lineNumber": 526,
     "ignore": true,
     "type": {
       "types": [
@@ -7952,7 +7952,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#createModifyInteraction",
     "access": "private",
     "description": "Create the interaction used to modify vertexes of features.",
-    "lineNumber": 541,
+    "lineNumber": 540,
     "params": [],
     "return": null
   },
@@ -7965,7 +7965,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#modifyInteraction",
     "access": "private",
     "description": "",
-    "lineNumber": 548,
+    "lineNumber": 547,
     "type": {
       "nullable": null,
       "types": [
@@ -7986,7 +7986,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#addListeners",
     "access": "private",
     "description": "Add click listener to map.",
-    "lineNumber": 577,
+    "lineNumber": 572,
     "params": [],
     "return": null
   },
@@ -7999,7 +7999,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#onMapClickKey",
     "access": "public",
     "description": null,
-    "lineNumber": 584,
+    "lineNumber": 579,
     "ignore": true,
     "type": {
       "types": [
@@ -8018,7 +8018,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#removeListeners",
     "access": "private",
     "description": "Remove click listener from map.",
-    "lineNumber": 590,
+    "lineNumber": 585,
     "params": [],
     "return": null
   },
@@ -8033,7 +8033,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#activate",
     "access": "public",
     "description": null,
-    "lineNumber": 595,
+    "lineNumber": 590,
     "undocument": true,
     "params": [],
     "return": null
@@ -8047,7 +8047,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#graphsResolutions",
     "access": "public",
     "description": null,
-    "lineNumber": 604,
+    "lineNumber": 599,
     "ignore": true,
     "type": {
       "types": [
@@ -8066,7 +8066,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#deactivate",
     "access": "public",
     "description": null,
-    "lineNumber": 618,
+    "lineNumber": 613,
     "undocument": true,
     "params": [],
     "return": null
@@ -8082,7 +8082,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#render",
     "access": "public",
     "description": null,
-    "lineNumber": 630,
+    "lineNumber": 625,
     "undocument": true,
     "params": [],
     "return": null
@@ -11333,7 +11333,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#apiKey",
     "access": "public",
     "description": "Key used for RoutingApi requests.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "string"
@@ -11348,7 +11348,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#stopsApiKey",
     "access": "public",
     "description": "Key used for Stop lookup requests (defaults to apiKey).",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "string"
@@ -11363,7 +11363,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#stopsApiUrl",
     "access": "public",
     "description": "Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "string"
@@ -11378,7 +11378,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#graphs",
     "access": "public",
     "description": "Array of routing graphs and min/max zoom levels. If you use the control in combination with the [geOps Maps API](https://developer.geops.io/apis/maps/), you may want to use the optimal level of generalizations: \"[['gen4', 0, 8], ['gen3', 8, 9], ['gen2', 9, 11], ['gen1', 11, 13], ['osm', 13, 99]]\"",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "Array.<Array<graph=\"osm\", minZoom=0, maxZoom=99>>"
@@ -11393,7 +11393,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#mot",
     "access": "public",
     "description": "Mean of transport to be used for routing.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "string"
@@ -11408,7 +11408,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#routingApiParams",
     "access": "public",
     "description": "object of additional parameters to pass to the routing api request.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "object"
@@ -11423,7 +11423,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#snapToClosestStation",
     "access": "public",
     "description": "If true, the routing will snap the coordinate to the closest station. Default to false.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "object"
@@ -11438,7 +11438,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#useRawViaPoints",
     "access": "public",
     "description": "Experimental property. Wen true, it allows the user to add via points using different kind of string. See \"via\" parameter defined by the [geOps Routing API](https://developer.geops.io/apis/routing/). Default to false, only array of coordinates and station's id are supported as via points.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "boolean"
@@ -11453,7 +11453,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#routingLayer",
     "access": "public",
     "description": "Layer for adding route features.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "RoutingLayer",
@@ -11469,7 +11469,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#onRouteError",
     "access": "public",
     "description": "Callback on error.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "function"
@@ -11484,7 +11484,7 @@
     "longname": "build/ol/controls/RoutingControl.js~RoutingControl#loading",
     "access": "public",
     "description": "True if the control is requesting the backend.",
-    "lineNumber": 80,
+    "lineNumber": 79,
     "type": {
       "types": [
         "boolean"
