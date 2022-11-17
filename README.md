@@ -37,7 +37,7 @@ yarn dev
 
 This library website is deployed automatically using [Vercel](https://vercel.com/geops).
 For Vercel we have to add the nextjs and raw-loader modules in the dev dependencies of the main package.json.
-But those 2 librairies are not need to build the library.
+But those 2 librairies are not needed to build the library.
 
 ## Version 1.x.x
 

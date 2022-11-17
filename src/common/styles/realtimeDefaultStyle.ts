@@ -264,12 +264,20 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${hover}${selected}${cancelled}${delay}`;
+  let key = `${radius}${hover || selected}`;
 
   if (useDelayStyle) {
-    key += `${operatorProvidesRealtime}`;
+    key += `${operatorProvidesRealtime}${delay}`;
+
+    if (isDisplayStrokeAndDelay) {
+      key += `${cancelled}`;
+    }
   } else {
-    key += `${type}${color}`;
+    key += `${color || type}`;
+
+    if (isDisplayStrokeAndDelay) {
+      key += `${cancelled}${delay}`;
+    }
   }
 
   if (isDisplayText) {
