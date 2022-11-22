@@ -269,7 +269,7 @@ class RealtimeAPI {
     window.clearTimeout(this.pingInterval);
     window.clearTimeout(this.reconnectTimeout);
 
-    if (this.reconnectTimeoutMs) {
+    if (this.reconnectTimeoutMs && !this.connecting) {
       /** @ignore */
       this.reconnectTimeout = window.setTimeout(
         () => this.open(),

@@ -731,6 +731,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       if (!viewState) {
         return;
       }
+      if (this.worker) {
+        this.worker.postMessage({
+          action: 'renderTrajectories',
+          viewState,
+          noInterpolate,
+        });
+      }
 
       if (!noInterpolate && this.useRequestAnimationFrame) {
         this.requestId = requestAnimationFrame(() => {
@@ -783,6 +790,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         }
       }
 
+      if (this.worker) {
+        this.worker.postMessage({
+          action: 'bbox',
+          message: bbox,
+        });
+      }
+
       this.api.bbox = bbox;
     }
 
@@ -813,6 +827,12 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       }
       if (this.api?.buffer) {
         const [, size] = this.api.buffer;
+        if (this.worker) {
+          this.worker.postMessage({
+            action: 'buffer',
+            message: [nextThrottleTick, size],
+          });
+        }
         this.api.buffer = [nextThrottleTick, size];
       }
       return nextTick;
@@ -1024,7 +1044,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       const {
         geometry,
         properties: {
-          train_id: id,
           time_since_update: timeSinceUpdate,
           raw_coordinates: rawCoordinates,
         },

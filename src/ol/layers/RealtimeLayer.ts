@@ -27,6 +27,7 @@ import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
 const format = new GeoJSON();
 
 export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
+  useWorker: boolean;
   fullTrajectoryStyle: (
     feature: FeatureLike,
     resolution: number,
@@ -101,11 +102,12 @@ class RealtimeLayer extends mixin(Layer) {
       ...options,
     });
 
-    // Worker that render trajectories.
-    this.worker = wworker;
-
-    // Worker messaging and actions
-    this.worker.onmessage = this.onWorkerMessage.bind(this);
+    if (options.useWorker) {
+      // Worker that render trajectories.
+      this.worker = wworker;
+      // Worker messaging and actions
+      this.worker.onmessage = this.onWorkerMessage.bind(this);
+    }
 
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 

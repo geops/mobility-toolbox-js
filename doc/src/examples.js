@@ -22,7 +22,15 @@ export default [
     name: 'Live tracker with OpenLayers',
     key: 'ol-tracker',
     description:
-      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a OpenLayers map.',
+    img: '/static/img/live_tracker_ol.jpg',
+    readme: olTrackerReadme,
+  },
+  {
+    name: 'Live tracker with OpenLayer using Web Worker',
+    key: 'ol-tracker-worker',
+    description:
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a OpenLayers map.',
     img: '/static/img/live_tracker_ol.jpg',
     readme: olTrackerReadme,
   },
