@@ -4,6 +4,7 @@ export { default as removeDuplicate } from './removeDuplicate';
 export { default as createRealtimeFilters } from './createRealtimeFilters';
 export { default as getLayersAsFlatArray } from './getLayersAsFlatArray';
 export * from './timeUtils';
+export { default as getVehiclePosition } from './getVehiclePosition';
 export { default as sortByDelay } from './sortByDelay';
 export { default as renderTrajectories } from './renderTrajectories';
 export { default as getMaplibreRender } from './getMaplibreRender';

@@ -2,7 +2,8 @@
   "compilerOptions": {
     "outDir": "./build",
     "allowJs": true,
-    "target": "es6",
+    "target": "es2020",
+    "module": "es2020",
     "strict": true,
     // Generate d.ts files
     "declaration": true,
@@ -15,7 +16,7 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "lib": ["es6", "dom"]
+    "lib": ["webworker", "es2020", "dom"]
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],

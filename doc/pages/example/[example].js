@@ -10,6 +10,7 @@ const useStyles = makeStyles({
     paddingBottom: 115,
     margin: 'auto',
     marginTop: 30,
+    maxWidth: '100% !important',
   },
 });
 

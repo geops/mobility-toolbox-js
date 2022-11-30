@@ -33,6 +33,7 @@ export default () => {
       new URL(window.location.href)?.searchParams?.get(
         'allowRenderWhenAnimating',
       ) === 'true',
+    useWorker: true,
   });
   tracker.attachToMap(map);
 

@@ -7,6 +7,7 @@ import Feature, { FeatureLike } from 'ol/Feature';
 import { MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
+import type { State } from 'ol/View';
 import Layer from './Layer';
 import mixin, {
   RealtimeLayerMixinOptions,
@@ -20,6 +21,7 @@ import {
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
+// import Worker from '../../common/tracker.worker';
 
 /** @private */
 const format = new GeoJSON();
@@ -30,7 +32,36 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
     resolution: number,
     options: any,
   ) => void;
+  useWorker?: boolean;
   allowRenderWhenAnimating?: boolean;
+};
+
+const updateContainerTransform = (
+  layer: RealtimeLayer,
+  renderedViewState: State,
+  mainThreadViewState: State,
+) => {
+  if (renderedViewState) {
+    const { center, resolution, rotation } = mainThreadViewState;
+    const {
+      center: renderedCenter,
+      resolution: renderedResolution,
+      rotation: renderedRotation,
+    } = renderedViewState;
+    const pixelCenterRendered =
+      layer.map.getPixelFromCoordinate(renderedCenter);
+    const pixelCenter = layer.map.getPixelFromCoordinate(center);
+    // eslint-disable-next-line no-param-reassign
+    layer.transformContainer.style.transform = composeCssTransform(
+      pixelCenterRendered[0] - pixelCenter[0],
+      pixelCenterRendered[1] - pixelCenter[1],
+      renderedResolution / resolution,
+      renderedResolution / resolution,
+      rotation - renderedRotation,
+      0,
+      0,
+    );
+  }
 };
 
 /**
@@ -67,6 +98,17 @@ class RealtimeLayer extends mixin(Layer) {
     super({
       ...options,
     });
+
+    if (options.useWorker) {
+      const wworker = new Worker(
+        new URL('../../common/tracker.worker.js', import.meta.url),
+      );
+      // Worker that render trajectories.
+      this.worker = wworker;
+
+      // Worker messaging and actions
+      this.worker.onmessage = this.onWorkerMessage.bind(this);
+    }
 
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
@@ -109,13 +151,12 @@ class RealtimeLayer extends mixin(Layer) {
                 }
               }
 
+              this.mainThreadViewState = frameState.viewState;
+
               if (this.renderedViewState) {
-                const { center, resolution, rotation } = frameState.viewState;
-                const {
-                  center: renderedCenter,
-                  resolution: renderedResolution,
-                  rotation: renderedRotation,
-                } = this.renderedViewState;
+                const { resolution } = frameState.viewState;
+                const { resolution: renderedResolution } =
+                  this.renderedViewState;
 
                 if (renderedResolution / resolution >= 3) {
                   // Avoid having really big points when zooming fast.
@@ -127,17 +168,10 @@ class RealtimeLayer extends mixin(Layer) {
                     this.canvas?.height as number,
                   );
                 } else {
-                  const pixelCenterRendered =
-                    this.map.getPixelFromCoordinate(renderedCenter);
-                  const pixelCenter = this.map.getPixelFromCoordinate(center);
-                  this.transformContainer.style.transform = composeCssTransform(
-                    pixelCenterRendered[0] - pixelCenter[0],
-                    pixelCenterRendered[1] - pixelCenter[1],
-                    renderedResolution / resolution,
-                    renderedResolution / resolution,
-                    rotation - renderedRotation,
-                    0,
-                    0,
+                  updateContainerTransform(
+                    this,
+                    this.renderedViewState,
+                    frameState.viewState,
                   );
                 }
               }
@@ -252,6 +286,7 @@ class RealtimeLayer extends mixin(Layer) {
     if (!this.map) {
       return false;
     }
+
     let isRendered = false;
 
     const blockRendering = this.allowRenderWhenAnimating
@@ -259,17 +294,39 @@ class RealtimeLayer extends mixin(Layer) {
       : this.map.getView().getAnimating() ||
         this.map.getView().getInteracting();
 
-    // Don't render the map when the map is animating or interacting.
-    isRendered = blockRendering
-      ? false
-      : super.renderTrajectoriesInternal(viewState, noInterpolate);
+    if (!blockRendering && this.worker && this.mainThreadViewState) {
+      this.worker.postMessage({
+        action: 'render',
+        viewState: {
+          ...viewState,
+          // time: this.live ? Date.now() : this.time?.getTime(),
+        },
+        options: {
+          noInterpolate:
+            (viewState.zoom || 0) < this.minZoomInterpolation
+              ? true
+              : noInterpolate,
+          hoverVehicleId: this.hoverVehicleId,
+          selectedVehicleId: this.selectedVehicleId,
+          iconScale: this.iconScale,
+          delayDisplay: this.delayDisplay,
+          delayOutlineColor: this.delayOutlineColor,
+          useDelayStyle: this.useDelayStyle,
+        },
+      });
+    } else if (!this.worker) {
+      // Don't render the map when the map is animating or interacting.
+      isRendered = blockRendering
+        ? false
+        : super.renderTrajectoriesInternal(viewState, noInterpolate);
 
-    // We update the current render state.
-    if (isRendered) {
-      this.renderedViewState = { ...viewState };
+      // We update the current render state.
+      if (isRendered) {
+        this.renderedViewState = { ...viewState };
 
-      if (this.transformContainer) {
-        this.transformContainer.style.transform = '';
+        if (this.transformContainer) {
+          this.transformContainer.style.transform = '';
+        }
       }
     }
     return isRendered;
@@ -447,6 +504,48 @@ class RealtimeLayer extends mixin(Layer) {
    */
   clone(newOptions: OlRealtimeLayerOptions) {
     return new RealtimeLayer({ ...this.options, ...newOptions });
+  }
+
+  onWorkerMessage(message: any) {
+    if (message.data.action === 'requestRender') {
+      // Worker requested a new render frame
+      this.map.render();
+    } else if (this.canvas && message.data.action === 'rendered') {
+      if (
+        !this.allowRenderWhenAnimating &&
+        (this.map.getView().getInteracting() ||
+          this.map.getView().getAnimating())
+      ) {
+        return;
+      }
+      // Worker provides a new render frame
+      // requestAnimationFrame(() => {
+      //   if (
+      //     !that.renderWhenInteracting(
+      //       that.mainThreadFrameState.viewState,
+      //       that.renderedViewState,
+      //     ) &&
+      //     (that.map.getView().getInteracting() ||
+      //       that.map.getView().getAnimating())
+      //   ) {
+      //     return;
+      //   }
+      const { imageData, viewState } = message.data;
+      this.canvas.width = imageData.width;
+      this.canvas.height = imageData.height;
+      if ((this.canvas as HTMLCanvasElement)?.style) {
+        (this.canvas as HTMLCanvasElement).style.transform = ``;
+        (this.canvas as HTMLCanvasElement).style.width = `${
+          this.canvas.width / (this.pixelRatio || 1)
+        }px`;
+        (this.canvas as HTMLCanvasElement).style.height = `${
+          this.canvas.height / (this.pixelRatio || 1)
+        }px`;
+      }
+      this.renderedViewState = viewState;
+      updateContainerTransform(this, viewState, this.mainThreadViewState);
+      this.canvas?.getContext('2d')?.drawImage(imageData, 0, 0);
+    }
   }
 }
 

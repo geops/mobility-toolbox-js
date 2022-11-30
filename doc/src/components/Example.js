@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 12,
   },
   htmlContainer: {
-    height: 500,
+    height: 900,
   },
   noPointer: {
     // Remove pointer events for mobile devices on load
