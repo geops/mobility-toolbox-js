@@ -32,6 +32,7 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
     resolution: number,
     options: any,
   ) => void;
+  useWorker?: boolean;
   allowRenderWhenAnimating?: boolean;
 };
 
@@ -63,9 +64,6 @@ const updateContainerTransform = (
   }
 };
 
-const wworker = new Worker(
-  new URL('../../common/tracker.worker.js', import.meta.url),
-);
 /**
  * Responsible for loading and display data from a Realtime service.
  *
@@ -101,11 +99,16 @@ class RealtimeLayer extends mixin(Layer) {
       ...options,
     });
 
-    // Worker that render trajectories.
-    this.worker = wworker;
+    if (options.useWorker) {
+      const wworker = new Worker(
+        new URL('../../common/tracker.worker.js', import.meta.url),
+      );
+      // Worker that render trajectories.
+      this.worker = wworker;
 
-    // Worker messaging and actions
-    this.worker.onmessage = this.onWorkerMessage.bind(this);
+      // Worker messaging and actions
+      this.worker.onmessage = this.onWorkerMessage.bind(this);
+    }
 
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 

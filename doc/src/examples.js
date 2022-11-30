@@ -1,5 +1,6 @@
 // We load statically the readme to have the content when the page use server side rendering.
 import olTrackerReadme from '../public/static/examples/ol-tracker.md';
+import olTrackerWorkerReadme from '../public/static/examples/ol-tracker-worker.md';
 import mbTrackerReadme from '../public/static/examples/mb-tracker.md';
 import olRoutingReadme from '../public/static/examples/ol-routing.md';
 import olStopFinderReadme from '../public/static/examples/ol-stop-finder.md';
@@ -22,7 +23,15 @@ export default [
     name: 'Live tracker with OpenLayers',
     key: 'ol-tracker',
     description:
-      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Openlayers map.',
+    img: '/static/img/live_tracker_ol.jpg',
+    readme: olTrackerReadme,
+  },
+  {
+    name: 'Live tracker with OpenLayers using web worker',
+    key: 'ol-tracker-worker',
+    description:
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Openlayers map.',
     img: '/static/img/live_tracker_ol.jpg',
     readme: olTrackerReadme,
   },
