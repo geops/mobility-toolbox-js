@@ -1038,13 +1038,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         this.mode === RealtimeModes.TOPOGRAPHIC &&
         rawCoordinates
       ) {
-        trajectory.properties.olGeometry = {
+        trajectory.properties.olGeometry = this.format.readGeometry({
           type: 'Point',
           coordinates: fromLonLat(
             rawCoordinates,
             this.map.getView().getProjection(),
           ),
-        };
+        });
       } else {
         trajectory.properties.olGeometry = this.format.readGeometry(geometry);
       }
