@@ -492,7 +492,9 @@ class RealtimeAPI {
    */
   subscribeTrajectory(
     mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<RealtimeTrajectoryResponse[]>,
+    onMessage: WebSocketAPIMessageCallback<
+      RealtimeTrajectoryResponse[] | RealtimeTrajectoryResponse
+    >,
     onError: EventListener = () => {},
     quiet: boolean = false,
   ) {

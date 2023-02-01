@@ -229,10 +229,17 @@ class RealtimeLayer extends mixin(Layer) {
     }
 
     const view = this.map.getView();
+
+    // it could happen that the view is set but without center yet,
+    // so the calcualteExtent will trigger an error.
+    if (!view.getCenter()) {
+      return;
+    }
+
     super.renderTrajectories(
       {
         size: this.map.getSize(),
-        center: this.map.getView().getCenter(),
+        center: view.getCenter(),
         extent: view.calculateExtent(),
         resolution: view.getResolution(),
         rotation: view.getRotation(),
@@ -395,6 +402,12 @@ class RealtimeLayer extends mixin(Layer) {
     extent: [number, number, number, number],
     zoom: number,
   ) {
+    const center = this.map.getView().getCenter();
+    if (!extent && !center) {
+      // In that case the view is not zoomed yet so we can't calculate the extent of the map,
+      // it will trigger a js error on calculateExtent function.
+      return false;
+    }
     return super.purgeTrajectory(
       trajectory,
       extent || this.map.getView().calculateExtent(),
