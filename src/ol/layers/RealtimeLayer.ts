@@ -434,8 +434,8 @@ class RealtimeLayer extends mixin(Layer) {
    * Highlight the trajectory of journey.
    * @private
    */
-  highlightTrajectory(id: RealtimeTrainId) {
-    this.api
+  highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
+    return this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
         const fullTrajectory = data.content;
@@ -446,10 +446,11 @@ class RealtimeLayer extends mixin(Layer) {
           !fullTrajectory.features ||
           !fullTrajectory.features.length
         ) {
-          return;
+          return undefined;
         }
         const features = format.readFeatures(fullTrajectory);
         this.vectorLayer.getSource().addFeatures(features);
+        return features;
       });
   }
 
