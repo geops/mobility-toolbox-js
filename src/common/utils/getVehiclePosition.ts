@@ -25,10 +25,15 @@ const getVehiclePosition = (
     olGeometry,
     coordinate,
   } = trajectory.properties;
-  const { type, coordinates } = trajectory.geometry;
+  const { coordinates } = trajectory.geometry;
+  let { type } = trajectory.geometry;
   let geometry = olGeometry;
   let coord;
   let rotation;
+
+  if (olGeometry) {
+    type = geometry.getType();
+  }
 
   if (noInterpolate && coordinate) {
     coord = coordinate;
