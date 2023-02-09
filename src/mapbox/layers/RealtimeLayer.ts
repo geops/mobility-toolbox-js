@@ -8,12 +8,8 @@ import { Feature } from 'ol';
 import mixin from '../../common/mixins/RealtimeLayerMixin';
 import Layer from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
-import {
-  AnyMapboxMap,
-  LayerGetFeatureInfoOptions,
-  LayerGetFeatureInfoResponse,
-} from '../../types';
-import { RealtimeTrajectory } from '../../api/typedefs';
+import type { AnyMapboxMap, LayerGetFeatureInfoResponse } from '../../types';
+import type { RealtimeTrajectory } from '../../api/typedefs';
 
 /**
  * Responsible for loading and display data from a Realtime service.
@@ -227,7 +223,7 @@ class RealtimeLayer extends mixin(Layer) {
       center: fromLonLat([center.lng, center.lat]),
       extent: bounds,
       resolution: res,
-      zoom: this.map.getZoom(),
+      zoom: this.getOlZoom(),
       rotation: -(this.map.getBearing() * Math.PI) / 180,
       pixelRatio: this.pixelRatio,
     };
@@ -280,7 +276,7 @@ class RealtimeLayer extends mixin(Layer) {
     return super.purgeTrajectory(
       trajectory,
       extent || this.getMercatorExtent(),
-      zoom || Math.floor(this.map.getZoom() + 1),
+      zoom || Math.floor(this.getOlZoom()),
     );
   }
 

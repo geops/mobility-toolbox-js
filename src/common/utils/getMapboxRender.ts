@@ -9,10 +9,14 @@ import type MapboxLayer from '../../ol/layers/MapboxLayer';
 export default function getMapboxRender(
   mapoxLayer: MapboxLayer,
 ): RenderFunction {
-  const emptyDiv = document.createElement('div');
+  // We cretae emptyDiv only in render finction to work with serverside rendering
+  let emptyDiv: HTMLElement;
   return (frameState: FrameState) => {
     const { map, mbMap, renderState, olLayer } = mapoxLayer;
     if (!map || !mbMap) {
+      if (!emptyDiv) {
+        emptyDiv = document.createElement('div');
+      }
       return emptyDiv;
     }
     let changed = false;

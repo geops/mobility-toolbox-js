@@ -48,7 +48,6 @@ const cacheDelayText: StyleCache = {};
  * @private
  */
 export const getDelayTextCanvas = (
-  width: number,
   text: string,
   fontSize: number,
   font: string,
@@ -56,23 +55,26 @@ export const getDelayTextCanvas = (
   delayOutlineColor: string = '#000',
   pixelRatio: number = 1,
 ) => {
-  const key = `${width}, ${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
+  const key = `${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
   if (!cacheDelayText[key]) {
-    const canvas = createCanvas(width, fontSize + 8 * pixelRatio);
+    const canvas = createCanvas(
+      Math.ceil(text.length * fontSize),
+      Math.ceil(fontSize + 8 * pixelRatio),
+    );
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         return null;
       }
+      ctx.font = font;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.font = font;
       ctx.fillStyle = delayColor;
       ctx.strokeStyle = delayOutlineColor;
       ctx.lineWidth = 1.5 * pixelRatio;
-      const delayText = text;
-      ctx.strokeText(delayText, 0, fontSize);
-      ctx.fillText(delayText, 0, fontSize);
+      ctx.strokeText(text, 0, fontSize);
+      ctx.fillText(text, 0, fontSize);
       cacheDelayText[key] = canvas;
     }
   }
@@ -208,6 +210,8 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     getDelayText = () => null,
     getTextColor = () => '#000',
     getTextSize = () => 0,
+    getMaxRadiusForText = () => 10,
+    getMaxRadiusForStrokeAndDelay = () => 7,
   } = options;
 
   const { zoom, pixelRatio = 1 } = viewState;
@@ -249,25 +253,34 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
 
   // Calcul the radius of the circle
   let radius = getRadius(type, z) * pixelRatio;
-  const isDisplayStrokeAndDelay = radius >= 7 * pixelRatio;
+  const isDisplayStrokeAndDelay =
+    radius >= getMaxRadiusForStrokeAndDelay() * pixelRatio;
 
   if (hover || selected) {
     radius = isDisplayStrokeAndDelay
       ? radius + 5 * pixelRatio
       : 14 * pixelRatio;
   }
-  const mustDrawText = radius > 10 * pixelRatio;
+  const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${hover}${selected}${cancelled}${delay}`;
+  let key = `${radius}${hover || selected}`;
 
   if (useDelayStyle) {
-    key += `${operatorProvidesRealtime}`;
+    key += `${operatorProvidesRealtime}${delay}`;
+
+    if (isDisplayStrokeAndDelay) {
+      key += `${cancelled}`;
+    }
   } else {
-    key += `${type}${color}`;
+    key += `${color || type}`;
+
+    if (isDisplayStrokeAndDelay) {
+      key += `${cancelled}${delay}`;
+    }
   }
 
-  if (mustDrawText) {
+  if (isDisplayText) {
     key += `${name}${textColor}`;
   }
 
@@ -279,96 +292,97 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     const margin = 1 * pixelRatio;
     const radiusDelay = radius + 2;
     const markerSize = radius * 2;
-    const size = radiusDelay * 2 + margin * 2 + 100 * pixelRatio; // add space for delay information
+    const size = radiusDelay * 2 + margin * 2;
     const origin = size / 2;
 
+    // Draw circle delay background
+    let delayBg = null;
+    if (isDisplayStrokeAndDelay && delay !== null) {
+      delayBg = getDelayBgCanvas(
+        origin,
+        radiusDelay,
+        getDelayColor(delay, cancelled),
+      );
+    }
+
+    // Show delay if feature is hovered or if delay is above 5mins.
+    let delayText = null;
+    let fontSize = 0;
+    if (
+      isDisplayStrokeAndDelay &&
+      (hover || (delay || 0) >= delayDisplay || cancelled)
+    ) {
+      // Draw delay text
+      fontSize =
+        Math.max(
+          cancelled ? 19 : 14,
+          Math.min(cancelled ? 19 : 17, radius * 1.2),
+        ) * pixelRatio;
+      const text = getDelayText(delay, cancelled);
+
+      if (text) {
+        delayText = getDelayTextCanvas(
+          text,
+          fontSize,
+          `bold ${fontSize}px arial, sans-serif`,
+          getDelayColor(delay, cancelled, true),
+          delayOutlineColor,
+          pixelRatio,
+        );
+      }
+    }
+
+    // Draw colored circle with black border
+    let circleFillColor;
+    if (useDelayStyle) {
+      circleFillColor = getDelayColor(delay, cancelled);
+    } else {
+      circleFillColor = color || getBgColor(type);
+    }
+
+    const hasStroke = isDisplayStrokeAndDelay || hover || selected;
+
+    const hasDash =
+      !!isDisplayStrokeAndDelay &&
+      !!useDelayStyle &&
+      delay === null &&
+      operatorProvidesRealtime === 'yes';
+
+    const circle = getCircleCanvas(
+      origin,
+      radius,
+      circleFillColor,
+      hasStroke,
+      hasDash,
+      pixelRatio,
+    );
+
     // Create the canvas
-    const canvas = createCanvas(size, size);
+    const width = size + (delayText?.width || 0) * 2;
+    const height = size;
+    const canvas = createCanvas(width, height);
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         return null;
       }
 
-      if (isDisplayStrokeAndDelay && delay !== null) {
-        // Draw circle delay background
-        const delayBg = getDelayBgCanvas(
-          origin,
-          radiusDelay,
-          getDelayColor(delay, cancelled),
-        );
-        if (delayBg) {
-          ctx.drawImage(delayBg, 0, 0);
-        }
+      // The renderTrajectories will center the image on the vehicle positions.
+      const originX = delayText?.width || 0;
+
+      if (delayBg) {
+        ctx.drawImage(delayBg, originX, 0);
       }
-
-      // Show delay if feature is hovered or if delay is above 5mins.
-      if (
-        isDisplayStrokeAndDelay &&
-        (hover || (delay || 0) >= delayDisplay || cancelled)
-      ) {
-        // Draw delay text
-        const fontSize =
-          Math.max(
-            cancelled ? 19 : 14,
-            Math.min(cancelled ? 19 : 17, radius * 1.2),
-          ) * pixelRatio;
-        const text = getDelayText(delay, cancelled);
-
-        if (text) {
-          const textWidth = text.length * fontSize;
-          const delayText = getDelayTextCanvas(
-            textWidth,
-            text,
-            fontSize,
-            `bold ${fontSize}px arial, sans-serif`,
-            getDelayColor(delay, cancelled, true),
-            delayOutlineColor,
-            pixelRatio,
-          );
-          if (delayText) {
-            ctx.drawImage(
-              delayText,
-              origin + radiusDelay + margin,
-              origin - fontSize,
-            );
-          }
-        }
-      }
-
-      // Draw colored circle with black border
-      let circleFillColor;
-      if (useDelayStyle) {
-        circleFillColor = getDelayColor(delay, cancelled);
-      } else {
-        circleFillColor = color || getBgColor(type);
-      }
-
-      const hasStroke = isDisplayStrokeAndDelay || hover || selected;
-
-      const hasDash =
-        !!isDisplayStrokeAndDelay &&
-        !!useDelayStyle &&
-        delay === null &&
-        operatorProvidesRealtime === 'yes';
-
-      const circle = getCircleCanvas(
-        origin,
-        radius,
-        circleFillColor,
-        hasStroke,
-        hasDash,
-        pixelRatio,
-      );
 
       if (circle) {
-        ctx.drawImage(circle, 0, 0);
+        ctx.drawImage(circle, originX, 0);
       }
 
       // Draw text in the circle
-      if (mustDrawText && ctx) {
-        const fontSize = Math.max(radius, 10);
-        const textSize = getTextSize(ctx, markerSize, name, fontSize);
+      let circleText = null;
+      if (isDisplayText) {
+        const fontSize2 = Math.max(radius, 10);
+        const textSize = getTextSize(ctx, markerSize, name, fontSize2);
         const textColor2 = !useDelayStyle
           ? textColor || getTextColor(type)
           : '#000000';
@@ -377,7 +391,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
           delay === null &&
           operatorProvidesRealtime === 'yes';
 
-        const text = getTextCanvas(
+        circleText = getTextCanvas(
           name,
           origin,
           textSize,
@@ -386,10 +400,18 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
           hasStroke2,
           pixelRatio,
         );
+      }
 
-        if (text) {
-          ctx.drawImage(text, 0, 0);
-        }
+      if (circleText) {
+        ctx.drawImage(circleText, originX, 0);
+      }
+
+      if (delayText) {
+        ctx.drawImage(
+          delayText,
+          originX + Math.ceil(origin + radiusDelay) + margin,
+          Math.ceil(origin - fontSize),
+        );
       }
 
       cache[key] = canvas;

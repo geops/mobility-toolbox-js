@@ -207,7 +207,6 @@ class RealtimeAPI {
   }
 
   open() {
-    this.close();
     // Register BBOX and PROJECTION messages must be send before previous subscriptions.
     this.wsApi.connect(this.url, this.onOpen);
 
@@ -506,7 +505,9 @@ class RealtimeAPI {
    */
   subscribeTrajectory(
     mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<RealtimeTrajectoryResponse[]>,
+    onMessage: WebSocketAPIMessageCallback<
+      RealtimeTrajectoryResponse[] | RealtimeTrajectoryResponse
+    >,
     onError: EventListener = () => {},
     quiet: boolean = false,
   ) {

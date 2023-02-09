@@ -77,9 +77,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
   constructor(options: OlLayerOptions) {
     super(options);
 
-    if (this.olLayer) {
-      this.olLayer.setVisible(this.visible);
-    }
+    this.olLayer?.setVisible(this.visible);
   }
 
   /**
@@ -107,6 +105,9 @@ class Layer extends userInteractionsMixin(LayerCommon) {
     if (!this.map) {
       return;
     }
+
+    // Make sure the visiblity is correct
+    this.olLayer?.setVisible(this.visible);
 
     if (
       this.olLayer &&

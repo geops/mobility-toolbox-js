@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
+import { Pixel } from 'ol/pixel';
 import { compose, apply, create } from 'ol/transform';
-import { RealtimeTrajectory } from '../../api/typedefs';
 import {
   AnyCanvas,
   RealtimeRenderState,
@@ -53,6 +53,10 @@ const renderTrajectories = (
     hoverVehicleId,
     selectedVehicleId,
     filter,
+    getScreenPixel = (pixel: Pixel, viewStat: ViewState): Pixel =>
+      (viewStat.zoom || 0) < 12
+        ? pixel.map((coord) => Math.floor(coord))
+        : pixel,
   } = options;
   const context = canvas.getContext('2d');
   context?.clearRect(0, 0, canvas.width, canvas.height);
@@ -85,12 +89,8 @@ const renderTrajectories = (
 
   let hoverVehicleImg;
   let hoverVehiclePx;
-  let hoverVehicleWidth;
-  let hoverVehicleHeight;
   let selectedVehicleImg;
   let selectedVehiclePx;
-  let selectedVehicleWidth;
-  let selectedVehicleHeight;
   const renderedTrajectories = [];
 
   for (let i = trajectories.length - 1; i >= 0; i -= 1) {
@@ -145,65 +145,45 @@ const renderTrajectories = (
       continue;
     }
 
-    const imgWidth = vehicleImg.width as number;
-    const imgHeight = vehicleImg.height as number;
-
     if (hoverVehicleId !== id && selectedVehicleId !== id) {
-      context?.drawImage(
-        vehicleImg,
-        px[0] - imgWidth / 2,
-        px[1] - imgHeight / 2,
-        imgWidth,
-        imgHeight,
+      // To optimize the performance we use integer as pixel coordinate
+      // to avoid an additional work by the browser on zoom level < 12.
+      // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas?retiredLocale=de#avoid_floating-point_coordinates_and_use_integers_instead
+      const [x, y] = getScreenPixel(
+        [px[0] - vehicleImg.width / 2, px[1] - vehicleImg.height / 2],
+        viewState,
       );
+      context?.drawImage(vehicleImg, x, y);
     }
 
     if (hoverVehicleId && hoverVehicleId === id) {
       // Store the canvas to draw it at the end
       hoverVehicleImg = vehicleImg;
       hoverVehiclePx = px;
-      hoverVehicleWidth = imgWidth;
-      hoverVehicleHeight = imgHeight;
     }
 
     if (selectedVehicleId && selectedVehicleId === id) {
       // Store the canvas to draw it at the end
       selectedVehicleImg = vehicleImg;
       selectedVehiclePx = px;
-      selectedVehicleWidth = imgWidth;
-      selectedVehicleHeight = imgHeight;
     }
 
     renderedTrajectories.push(trajectory);
   }
 
-  if (
-    selectedVehicleImg &&
-    selectedVehiclePx &&
-    selectedVehicleWidth &&
-    selectedVehicleHeight
-  ) {
+  if (selectedVehicleImg && selectedVehiclePx) {
     context?.drawImage(
       selectedVehicleImg,
-      selectedVehiclePx[0] - selectedVehicleWidth / 2,
-      selectedVehiclePx[1] - selectedVehicleHeight / 2,
-      selectedVehicleWidth,
-      selectedVehicleHeight,
+      Math.floor(selectedVehiclePx[0] - selectedVehicleImg.width / 2),
+      Math.floor(selectedVehiclePx[1] - selectedVehicleImg.height / 2),
     );
   }
 
-  if (
-    hoverVehicleImg &&
-    hoverVehiclePx &&
-    hoverVehicleWidth &&
-    hoverVehicleHeight
-  ) {
+  if (hoverVehicleImg && hoverVehiclePx) {
     context?.drawImage(
       hoverVehicleImg,
-      hoverVehiclePx[0] - hoverVehicleWidth / 2,
-      hoverVehiclePx[1] - hoverVehicleHeight / 2,
-      hoverVehicleWidth,
-      hoverVehicleHeight,
+      Math.floor(hoverVehiclePx[0] - hoverVehicleImg.width / 2),
+      Math.floor(hoverVehiclePx[1] - hoverVehicleImg.height / 2),
     );
   }
   return {

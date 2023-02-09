@@ -12,6 +12,7 @@ export default () => {
     view: new View({
       center: [831634, 5933959],
       zoom: 13,
+      minZoom: 5,
     }),
     controls: [],
   });
@@ -28,6 +29,7 @@ export default () => {
   const tracker = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
+    debug: true,
   });
   tracker.attachToMap(map);
 

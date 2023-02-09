@@ -146,12 +146,15 @@ export const getTextSize = (
  * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
  */
 export const getDelayColor = (
-  delayInMs: number,
-  cancelled: boolean,
-  isDelayText: boolean,
+  delayInMs: number | null,
+  cancelled?: boolean,
+  isDelayText?: boolean,
 ): string => {
   if (cancelled) {
     return isDelayText ? '#ff0000' : '#a0a0a0'; // red or gray
+  }
+  if (delayInMs === null) {
+    return '#a0a0a0'; // grey { r: 160, g: 160, b: 160, s: '160,160,160' };
   }
   if (delayInMs >= 3600000) {
     return '#ed004c'; // pink { r: 237, g: 0, b: 76, s: '237,0,76' };
@@ -164,9 +167,6 @@ export const getDelayColor = (
   }
   if (delayInMs >= 180000) {
     return '#f7bf00'; // yellow { r: 247, g: 191, b: 0, s: '247,191,0' };
-  }
-  if (delayInMs === null) {
-    return '#a0a0a0'; // grey { r: 160, g: 160, b: 160, s: '160,160,160' };
   }
   return '#00a00c'; // green { r: 0, g: 160, b: 12, s: '0,160,12' };
 };

@@ -9,6 +9,7 @@ export default () => {
     style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
     center: [7.47, 46.95],
     zoom: 12,
+    minZoom: 4,
     touchPitch: false,
     pitchWithRotate: false,
     attributionControl: false,

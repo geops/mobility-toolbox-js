@@ -11,10 +11,13 @@ import type { MaplibreLayer } from '../../ol';
 export default function getMaplibreRender(
   maplibreLayer: MaplibreLayer,
 ): RenderFunction {
-  const emptyDiv = document.createElement('div');
+  let emptyDiv: HTMLElement;
   return (frameState: FrameState) => {
     const { map, mbMap, olLayer } = maplibreLayer;
     if (!map || !mbMap) {
+      if (!emptyDiv) {
+        emptyDiv = document.createElement('div');
+      }
       return emptyDiv;
     }
 

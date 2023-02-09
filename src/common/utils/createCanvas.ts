@@ -14,7 +14,7 @@ const createCanvas = (width: number, height: number): AnyCanvas | null => {
     return null;
   }
 
-  if (document?.createElement) {
+  if (typeof document !== 'undefined' && document?.createElement) {
     canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;

@@ -203,7 +203,9 @@ class RealtimeLayer extends mixin(Layer) {
    */
   hasFeatureInfoAtCoordinate(coordinate: Coordinate) {
     if (this.map && this.canvas) {
-      const context = this.canvas.getContext('2d');
+      const context = this.canvas.getContext('2d', {
+        willReadFrequently: true,
+      });
       const pixel = this.map.getPixelFromCoordinate(coordinate);
       return !!context?.getImageData(
         pixel[0] * (this.pixelRatio || 1),
@@ -227,10 +229,17 @@ class RealtimeLayer extends mixin(Layer) {
     }
 
     const view = this.map.getView();
+
+    // it could happen that the view is set but without center yet,
+    // so the calcualteExtent will trigger an error.
+    if (!view.getCenter()) {
+      return;
+    }
+
     super.renderTrajectories(
       {
         size: this.map.getSize(),
-        center: this.map.getView().getCenter(),
+        center: view.getCenter(),
         extent: view.calculateExtent(),
         resolution: view.getResolution(),
         rotation: view.getRotation(),
@@ -284,6 +293,14 @@ class RealtimeLayer extends mixin(Layer) {
     coordinate: Coordinate,
     options = {},
   ): Promise<LayerGetFeatureInfoResponse> {
+    if (!this.map || !this.map.getView()) {
+      return Promise.resolve({
+        layer: this,
+        features: [],
+        coordinate,
+      });
+    }
+
     const resolution = this.map.getView().getResolution();
     return super.getFeatureInfoAtCoordinate(coordinate, {
       resolution,
@@ -323,6 +340,19 @@ class RealtimeLayer extends mixin(Layer) {
   // eslint-disable-next-line no-unused-vars
   onZoomEnd() {
     super.onZoomEnd();
+
+    if (this.visible && this.isUpdateBboxOnMoveEnd) {
+      this.setBbox();
+    }
+
+    if (
+      this.visible &&
+      this.isUpdateBboxOnMoveEnd &&
+      this.userClickInteractions &&
+      this.selectedVehicleId
+    ) {
+      this.highlightTrajectory(this.selectedVehicleId);
+    }
   }
 
   /**
@@ -372,6 +402,12 @@ class RealtimeLayer extends mixin(Layer) {
     extent: [number, number, number, number],
     zoom: number,
   ) {
+    const center = this.map.getView().getCenter();
+    if (!extent && !center) {
+      // In that case the view is not zoomed yet so we can't calculate the extent of the map,
+      // it will trigger a js error on calculateExtent function.
+      return false;
+    }
     return super.purgeTrajectory(
       trajectory,
       extent || this.map.getView().calculateExtent(),
@@ -398,8 +434,8 @@ class RealtimeLayer extends mixin(Layer) {
    * Highlight the trajectory of journey.
    * @private
    */
-  highlightTrajectory(id: RealtimeTrainId) {
-    this.api
+  highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
+    return this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
         const fullTrajectory = data.content;
@@ -410,10 +446,11 @@ class RealtimeLayer extends mixin(Layer) {
           !fullTrajectory.features ||
           !fullTrajectory.features.length
         ) {
-          return;
+          return undefined;
         }
         const features = format.readFeatures(fullTrajectory);
         this.vectorLayer.getSource().addFeatures(features);
+        return features;
       });
   }
 
