@@ -3,8 +3,8 @@ import WebSocketAPI, {
   WebSocketAPIMessageEventData,
 } from '../common/api/WebSocketAPI';
 import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
-import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
-import type {
+import getRealtimeModeSuffix from '../common/utils/getRealtimeModeSuffix';
+import {
   RealtimeMode,
   RealtimeDeparture,
   RealtimeNews,
@@ -15,13 +15,14 @@ import type {
   RealtimeFullTrajectory,
   RealtimeTrajectoryResponse,
   RealtimeStationId,
+  RealtimeTenant,
 } from '../types';
 import { StopSequence } from './typedefs';
 
 export type RealtimeAPIOptions = {
   url?: string;
   apiKey?: string;
-  prefix?: string;
+  tenant?: RealtimeTenant;
   projection?: string;
   bbox?: (number | string)[];
   buffer?: number[];
@@ -84,7 +85,7 @@ class RealtimeAPI {
 
   buffer?: number[];
 
-  prefix!: string;
+  tenant?: RealtimeTenant;
 
   pingInterval!: number;
 
@@ -100,7 +101,7 @@ class RealtimeAPI {
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Url to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.prefix=''] Service prefix to specify tenant.
+   * @param {string} [options.tenant=''] Tenant of the provider. Use to limitate some subscriptions to a specfic provider (it is used by schematic channels and newsticker).
    * @param {string} [options.projection] The epsg code of the projection for features. Default to EPSG:3857.
    * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
    */
@@ -108,7 +109,7 @@ class RealtimeAPI {
     this.defineProperties(options);
 
     /** @ignore */
-    this.prefix = options.prefix || '';
+    this.tenant = options.tenant;
 
     /** @ignore */
     this.onOpen = this.onOpen.bind(this);
@@ -312,16 +313,18 @@ class RealtimeAPI {
     suffix: string = '',
     onMessage?: WebSocketAPIMessageCallback<any>,
   ) {
-    const suffixSchenatic = getModeSuffix(
+    const suffixSchematic = getRealtimeModeSuffix(
       RealtimeModes.SCHEMATIC,
       RealtimeModes,
+      this.tenant,
     );
-    const suffixTopographic = getModeSuffix(
+    const suffixTopographic = getRealtimeModeSuffix(
       RealtimeModes.TOPOGRAPHIC,
       RealtimeModes,
+      this.tenant,
     );
     this.wsApi.unsubscribe(
-      `${channel}${suffixSchenatic}${suffix || ''}`,
+      `${channel}${suffixSchematic}${suffix || ''}`,
       onMessage,
     );
     this.wsApi.unsubscribe(
@@ -372,7 +375,8 @@ class RealtimeAPI {
     onError: EventListener = () => {},
     quiet: boolean = false,
   ) {
-    this.subscribe(`${this.prefix}newsticker`, onMessage, onError, quiet);
+    const channel = [this.tenant, 'newsticker'];
+    this.subscribe(channel.join('_'), onMessage, onError, quiet);
   }
 
   /**
@@ -383,7 +387,8 @@ class RealtimeAPI {
   unsubscribeDisruptions(
     onMessage?: WebSocketAPIMessageCallback<RealtimeNews>,
   ) {
-    this.unsubscribe(`${this.prefix}newsticker`, '', onMessage);
+    const channel = [this.tenant, 'newsticker'];
+    this.unsubscribe(channel.join('_'), '', onMessage);
   }
 
   /**
@@ -398,7 +403,11 @@ class RealtimeAPI {
     mode: RealtimeMode,
   ): Promise<WebSocketAPIMessageEventData<RealtimeStation>> {
     const params = {
-      channel: `station${getModeSuffix(mode, RealtimeModes)}`,
+      channel: `station${getRealtimeModeSuffix(
+        mode,
+        RealtimeModes,
+        this.tenant,
+      )}`,
       args: uic,
     };
 
@@ -408,7 +417,7 @@ class RealtimeAPI {
   }
 
   /**
-   * Get the list of ststions available for a specifc mode. The promise is resolved every 100ms
+   * Get the list of stations available for a specifc mode. The promise is resolved every 100ms
    * @param {RealtimeMode} mode Realtime mode.
    * @param {number} timeout = 100 Duration in ms between each promise resolve calls.
    * @return {Promise<RealtimeStation[]>} An array of stations.
@@ -417,7 +426,11 @@ class RealtimeAPI {
     return new Promise((resolve) => {
       this.wsApi.get(
         {
-          channel: `station${getModeSuffix(mode, RealtimeModes)}`,
+          channel: `station${getRealtimeModeSuffix(
+            mode,
+            RealtimeModes,
+            this.tenant,
+          )}`,
         },
         debounceWebsocketMessages(resolve, undefined, timeout),
       );
@@ -440,7 +453,7 @@ class RealtimeAPI {
     quiet: boolean = false,
   ) {
     this.subscribe(
-      `station${getModeSuffix(mode, RealtimeModes)}`,
+      `station${getRealtimeModeSuffix(mode, RealtimeModes, this.tenant)}`,
       onMessage,
       onError,
       quiet,
@@ -500,7 +513,7 @@ class RealtimeAPI {
   ) {
     this.unsubscribeTrajectory(onMessage);
     this.subscribe(
-      `trajectory${getModeSuffix(mode, RealtimeModes)}`,
+      `trajectory${getRealtimeModeSuffix(mode, RealtimeModes, this.tenant)}`,
       onMessage,
       onError,
       quiet,
@@ -533,7 +546,11 @@ class RealtimeAPI {
   ) {
     this.unsubscribeDeletedVehicles(onMessage);
     this.subscribe(
-      `deleted_vehicles${getModeSuffix(mode, RealtimeModes)}`,
+      `deleted_vehicles${getRealtimeModeSuffix(
+        mode,
+        RealtimeModes,
+        this.tenant,
+      )}`,
       onMessage,
       onError,
       quiet,
@@ -563,7 +580,9 @@ class RealtimeAPI {
     mode: RealtimeMode,
     generalizationLevel: RealtimeGeneralizationLevel | undefined,
   ): Promise<WebSocketAPIMessageEventData<RealtimeFullTrajectory>> {
-    const channel = [`full_trajectory${getModeSuffix(mode, RealtimeModes)}`];
+    const channel = [
+      `full_trajectory${getRealtimeModeSuffix(mode, RealtimeModes)}`,
+    ];
     if (id) {
       channel.push(id);
     }
@@ -598,7 +617,7 @@ class RealtimeAPI {
     quiet: boolean = false,
   ) {
     this.subscribe(
-      `full_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
+      `full_trajectory${getRealtimeModeSuffix(mode, RealtimeModes)}_${id}`,
       onMessage,
       onError,
       quiet,

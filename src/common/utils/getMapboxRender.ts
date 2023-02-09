@@ -2,7 +2,7 @@
 import { RenderFunction } from 'ol/layer/Layer';
 import type { FrameState } from 'ol/PluggableMap';
 import { toLonLat } from 'ol/proj';
-import type { MapboxLayer } from '../../ol';
+import type MapboxLayer from '../../ol/layers/MapboxLayer';
 /**
  * Return the render function fo the olLayer of a MaplibreLayer
  */
