@@ -32,6 +32,7 @@ import {
   RealtimeTenant,
   RealtimeTrainId,
   ViewState,
+  AnyLayer,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import createCanvas from '../utils/createCanvas';
@@ -72,6 +73,8 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
     zoom: number,
     renderTimeIntervalByZoom: number[],
   ) => number;
+  onStart?: (realtimeLayer: AnyRealtimeLayer) => void;
+  onStop?: (realtimeLayer: AnyRealtimeLayer) => void;
 
   // From RealtimeAPIOptions
   url?: string;
@@ -86,7 +89,7 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
 /**
  * RealtimeLayerInterface.
  */
-export class RealtimeLayerInterface {
+export class Function {
   /**
    * Start the clock.
    */
@@ -212,6 +215,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       noInterpolate?: boolean,
     ) => void;
 
+    onStart?: (realtimeLayer: AnyLayer) => void;
+
+    onStop?: (realtimeLayer: AnyLayer) => void;
+
     constructor(options: RealtimeLayerMixinOptions) {
       super({
         hitTolerance: 10,
@@ -224,6 +231,8 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.tenant = options.tenant || ''; // sbb,sbh or sbm
       this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
       this.format = new GeoJSON();
+      this.onStart = options.onStart;
+      this.onStop = options.onStop;
 
       // MOTs by zoom
       const allMots: RealtimeMot[] = [
@@ -604,6 +613,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         // @ts-ignore function without parameters defined by subclasses
         this.setBbox();
       }
+
+      if (this.onStart) {
+        this.onStart(this);
+      }
     }
 
     /**
@@ -629,6 +642,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.api.unsubscribeTrajectory(this.onTrajectoryMessage);
       this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);
       this.api.close();
+      if (this.onStop) {
+        this.onStop(this);
+      }
     }
 
     /**
