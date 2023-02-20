@@ -89,7 +89,7 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
 /**
  * RealtimeLayerInterface.
  */
-export class Function {
+export class RealtimeLayerInterface {
   /**
    * Start the clock.
    */
