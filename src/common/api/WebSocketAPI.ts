@@ -222,7 +222,7 @@ class WebSocketAPI {
    * @private
    */
   send(message: string) {
-    if (!this.websocket) {
+    if (!this.websocket || this.closed || this.closing) {
       return;
     }
     const send = () => {
