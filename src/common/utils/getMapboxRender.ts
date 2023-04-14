@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { RenderFunction } from 'ol/layer/Layer';
-import type { FrameState } from 'ol/PluggableMap';
+import type { FrameState } from 'ol/Map';
 import { toLonLat } from 'ol/proj';
 import type { MapboxLayer } from '../../ol';
 /**

@@ -1,6 +1,6 @@
 import { MapEvent } from 'ol';
 import { inView } from 'ol/layer/Layer';
-import { FrameState } from 'ol/PluggableMap';
+import type { FrameState } from 'ol/Map';
 import CopyrightControlCommon from '../../common/controls/CopyrightControlCommon';
 import removeDuplicate from '../../common/utils/removeDuplicate';
 

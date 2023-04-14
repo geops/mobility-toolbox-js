@@ -17,3 +17,15 @@ global.URL.createObjectURL = jest.fn(() => 'fooblob');
 window.OffscreenCanvas = () => {
   return document.createElement('canvas');
 };
+
+/* eslint-disable */
+class ResizeObserver {
+  constructor(onResize) {
+    ResizeObserver.onResize = onResize;
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+window.ResizeObserver = ResizeObserver;
