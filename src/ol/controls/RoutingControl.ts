@@ -586,13 +586,17 @@ class RoutingControl extends ControlCommon {
     // 47.37811,8.53935 a position 47.37811, 8.53935
     if (this.useRawViaPoints && REGEX_VIA_POINT_COORD.test(viaPoint)) {
       const [lat, lon] = REGEX_VIA_POINT_COORD.exec(viaPoint) || [];
-      const coordinates = fromLonLat(
-        [parseFloat(lon), parseFloat(lat)],
-        this.map?.getView().getProjection(),
-      );
-      pointFeature.setGeometry(new Point(coordinates));
-      this.routingLayer?.olLayer?.getSource()?.addFeature(pointFeature);
-      return Promise.resolve(pointFeature);
+      if (lon && lat) {
+        const floatLon = parseFloat(lon);
+        const floatLat = parseFloat(lat);
+        const coordinates = fromLonLat(
+          [floatLon, floatLat],
+          this.map?.getView().getProjection(),
+        );
+        pointFeature.setGeometry(new Point(coordinates));
+        this.routingLayer?.olLayer?.getSource()?.addFeature(pointFeature);
+        return Promise.resolve(pointFeature);
+      }
     }
 
     // Only when this.useRawViaPoints is true.
