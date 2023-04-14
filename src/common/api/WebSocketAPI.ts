@@ -180,11 +180,22 @@ class WebSocketAPI {
    * @private
    */
   connect(url: string, onOpen = () => {}) {
-    if (this.websocket && !this.closed) {
-      if (!this.closing && this.websocket.url !== url) {
-        this.websocket.close();
-      } else if (this.connecting) {
+    // if no url specify, close the current websocket and do nothing.
+    if (!url) {
+      this.websocket?.close();
+      return;
+    }
+
+    // Behavior when a websocket already exists.
+    if (this.websocket) {
+      // If the current websocket has the same url and is open or is connecting, do nothing.
+      if (this.websocket.url === url && (this.open || this.connecting)) {
         return;
+      }
+
+      // If the current websocket has not the same url and is open or is connecting, close it.
+      if (this.websocket.url !== url && (this.open || this.connecting)) {
+        this.websocket.close();
       }
     }
 

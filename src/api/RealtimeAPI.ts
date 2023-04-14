@@ -138,8 +138,14 @@ class RealtimeAPI {
       url: {
         get: () => url,
         set: (newUrl) => {
-          url = newUrl;
-          this.open();
+          if (url !== newUrl) {
+            url = newUrl;
+
+            // Update the websocket only if the url has changed and the websocket is already open or is opening.
+            if (this.wsApi.open || this.wsApi.connecting) {
+              this.open();
+            }
+          }
         },
       },
       projection: {
