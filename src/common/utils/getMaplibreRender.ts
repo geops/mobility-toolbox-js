@@ -1,6 +1,6 @@
 import { toLonLat } from 'ol/proj';
 import { toDegrees } from 'ol/math';
-import type { FrameState } from 'ol/PluggableMap';
+import type { FrameState } from 'ol/Map';
 import type { RenderFunction } from 'ol/layer/Layer';
 import type { MaplibreLayer } from '../../ol';
 
