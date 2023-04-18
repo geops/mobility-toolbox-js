@@ -290,7 +290,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     }
 
     const margin = 1 * pixelRatio;
-    const radiusDelay = radius + 2;
+    const radiusDelay = radius + 2 * pixelRatio;
     const markerSize = radius * 2;
     const size = radiusDelay * 2 + margin * 2;
     const origin = size / 2;
