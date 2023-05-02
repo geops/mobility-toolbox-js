@@ -12,4 +12,5 @@ export { default as debounceDeparturesMessages } from './debounceDeparturesMessa
 export { default as debounceWebsocketMessages } from './debounceWebsocketMessages';
 export { default as sortAndFilterDepartures } from './sortAndFilterDepartures';
 export { default as compareDepartures } from './compareDepartures';
+export { default as createCanvas } from './createCanvas';
 export * as realtimeConfig from './realtimeConfig';

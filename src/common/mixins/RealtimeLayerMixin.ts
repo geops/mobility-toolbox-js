@@ -35,7 +35,6 @@ import {
   AnyLayer,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
-import createCanvas from '../utils/createCanvas';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
 import LayerCommon from '../layers/LayerCommon';
 import type { OlLayerOptions } from '../../ol/layers/Layer';
