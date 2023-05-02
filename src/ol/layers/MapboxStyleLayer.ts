@@ -11,7 +11,7 @@ export type MapboxStyleLayerOptions = OlLayerOptions & {
   styleLayer?: { [key: string]: any };
   styleLayers?: { [key: string]: any }[];
   styleLayersFilter?: FilterFunction;
-  filters: FilterFunction | { [key: string]: any }[];
+  filters?: FilterFunction | { [key: string]: any }[];
   featureInfoFilter?: FilterFunction;
   queryRenderedLayersFilter?: FilterFunction;
 };
