@@ -796,6 +796,8 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         if (this.mots) {
           bbox.push(`mots=${this.mots}`);
         }
+      } else if (this.tenant) {
+        bbox.push(`tenant=${this.tenant}`);
       }
 
       this.api.bbox = bbox;
