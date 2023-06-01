@@ -781,10 +781,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       if (this.isUpdateBboxOnMoveEnd && zoom) {
         bbox.push(zoom);
 
-        if (this.tenant) {
-          bbox.push(`tenant=${this.tenant}`);
-        }
-
         /* @ignore */
         this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);
         if (this.generalizationLevel) {
@@ -796,7 +792,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         if (this.mots) {
           bbox.push(`mots=${this.mots}`);
         }
-      } else if (this.tenant) {
+      }
+
+      if (this.tenant) {
         bbox.push(`tenant=${this.tenant}`);
       }
 
@@ -952,7 +950,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       const { type, bounds } = trajectory.properties;
 
       if (
-        !intersects(extent, bounds) ||
+        (this.isUpdateBboxOnMoveEnd && !intersects(extent, bounds)) ||
         (this.mots && !this.mots.includes(type))
       ) {
         this.removeTrajectory(trajectory);
