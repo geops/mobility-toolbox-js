@@ -14,6 +14,8 @@ export type MapboxStyleLayerOptions = OlLayerOptions & {
   filters?: FilterFunction | { [key: string]: any }[];
   featureInfoFilter?: FilterFunction;
   queryRenderedLayersFilter?: FilterFunction;
+  maxZoom?: number;
+  minZoom?: number;
 };
 
 export type StyleLayer = {
@@ -59,6 +61,10 @@ class MapboxStyleLayer extends Layer {
   styleLayers: StyleLayer[];
 
   addDynamicFilters?: () => void;
+
+  maxZoom?: number;
+
+  minZoom?: number;
 
   /**
    * Constructor.
@@ -158,6 +164,20 @@ class MapboxStyleLayer extends Layer {
         return !!this.styleLayers?.find((sl) => styleLayer.id === sl.id);
       };
     }
+
+    /**
+     * Maximum zoom at which to display the layer
+     * @type {number}
+     * @private
+     */
+    this.maxZoom = options.maxZoom;
+
+    /**
+     * Minimum zoom at which to display the layer
+     * @type {number}
+     * @private
+     */
+    this.minZoom = options.minZoom;
   }
 
   /**
@@ -462,6 +482,13 @@ class MapboxStyleLayer extends Layer {
               'visibility',
               visibilityValue,
             );
+            if (this.minZoom || this.maxZoom) {
+              mbMap.setLayerZoomRange(
+                styleLayer.id,
+                this.minZoom ? this.minZoom - 1 : 0,
+                this.maxZoom ? this.maxZoom - 1 : 0,
+              );
+            }
           }
         }
       }
