@@ -485,7 +485,7 @@ class MapboxStyleLayer extends Layer {
             if (this.minZoom || this.maxZoom) {
               mbMap.setLayerZoomRange(
                 styleLayer.id,
-                this.minZoom ? this.minZoom - 1 : 0,
+                this.minZoom ? this.minZoom - 1 : 0, // mapbox zoom = ol zoom - 1
                 this.maxZoom ? this.maxZoom - 1 : 0,
               );
             }
