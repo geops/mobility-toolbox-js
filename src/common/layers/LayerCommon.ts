@@ -19,8 +19,6 @@ export type LayerCommonOptions = {
   hitTolerance?: Number;
   properties?: { [x: string]: any };
   map?: AnyMap;
-  maxZoom?: number;
-  minZoom?: number;
 };
 
 /**
