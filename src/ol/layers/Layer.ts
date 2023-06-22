@@ -126,6 +126,24 @@ class Layer extends userInteractionsMixin(LayerCommon) {
     );
 
     this.olListenersKeys.push(
+      // @ts-ignore
+      this.on('change:minZoom', () => {
+        if (this.olLayer && this.get('minZoom')) {
+          this.olLayer.setMinZoom(this.get('minZoom'));
+        }
+      }),
+    );
+
+    this.olListenersKeys.push(
+      // @ts-ignore
+      this.on('change:maxZoom', () => {
+        if (this.olLayer && this.get('maxZoom')) {
+          this.olLayer.setMaxZoom(this.get('maxZoom'));
+        }
+      }),
+    );
+
+    this.olListenersKeys.push(
       this.map.getLayers().on('remove', (evt) => {
         if (evt.element === this.olLayer) {
           this.detachFromMap();

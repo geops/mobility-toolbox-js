@@ -203,7 +203,7 @@ class MapboxStyleLayer extends Layer {
     this.olListenersKeys.push(
       // @ts-ignore
       this.on('change:visible', (evt) => {
-        // Once the map is loaded we can apply vsiiblity without waiting
+        // Once the map is loaded we can apply visiblity without waiting
         // the style. Mapbox take care of the application of style changes.
         this.applyLayoutVisibility(evt);
       }),
@@ -462,6 +462,13 @@ class MapboxStyleLayer extends Layer {
               'visibility',
               visibilityValue,
             );
+            if (this.get('minZoom') || this.get('maxZoom')) {
+              mbMap.setLayerZoomRange(
+                styleLayer.id,
+                this.get('minZoom') ? this.get('minZoom') - 1 : 0, // mapbox zoom = ol zoom - 1
+                this.get('maxZoom') ? this.get('maxZoom') - 1 : 24,
+              );
+            }
           }
         }
       }
