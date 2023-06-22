@@ -14,8 +14,6 @@ export type MapboxStyleLayerOptions = OlLayerOptions & {
   filters?: FilterFunction | { [key: string]: any }[];
   featureInfoFilter?: FilterFunction;
   queryRenderedLayersFilter?: FilterFunction;
-  maxZoom?: number;
-  minZoom?: number;
 };
 
 export type StyleLayer = {
@@ -61,10 +59,6 @@ class MapboxStyleLayer extends Layer {
   styleLayers: StyleLayer[];
 
   addDynamicFilters?: () => void;
-
-  maxZoom?: number;
-
-  minZoom?: number;
 
   /**
    * Constructor.
@@ -164,20 +158,6 @@ class MapboxStyleLayer extends Layer {
         return !!this.styleLayers?.find((sl) => styleLayer.id === sl.id);
       };
     }
-
-    /**
-     * Maximum zoom at which to display the layer
-     * @type {number}
-     * @private
-     */
-    this.maxZoom = options.maxZoom;
-
-    /**
-     * Minimum zoom at which to display the layer
-     * @type {number}
-     * @private
-     */
-    this.minZoom = options.minZoom;
   }
 
   /**
@@ -223,7 +203,7 @@ class MapboxStyleLayer extends Layer {
     this.olListenersKeys.push(
       // @ts-ignore
       this.on('change:visible', (evt) => {
-        // Once the map is loaded we can apply vsiiblity without waiting
+        // Once the map is loaded we can apply visiblity without waiting
         // the style. Mapbox take care of the application of style changes.
         this.applyLayoutVisibility(evt);
       }),
@@ -482,11 +462,11 @@ class MapboxStyleLayer extends Layer {
               'visibility',
               visibilityValue,
             );
-            if (this.minZoom || this.maxZoom) {
+            if (this.get('minZoom') || this.get('maxZoom')) {
               mbMap.setLayerZoomRange(
                 styleLayer.id,
-                this.minZoom ? this.minZoom - 1 : 0, // mapbox zoom = ol zoom - 1
-                this.maxZoom ? this.maxZoom - 1 : 0,
+                this.get('minZoom') ? this.get('minZoom') - 1 : 0, // mapbox zoom = ol zoom - 1
+                this.get('maxZoom') ? this.get('maxZoom') - 1 : 24,
               );
             }
           }
