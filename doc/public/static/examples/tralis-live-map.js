@@ -1,37 +1,53 @@
-import { Map } from 'mapbox-gl';
-import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/mapbox';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import View from 'ol/View';
+import Map from 'ol/Map';
+import {
+  RealtimeLayer,
+  MapboxLayer,
+  CopyrightControl,
+} from 'mobility-toolbox-js/ol';
+import { fromLonLat } from 'ol/proj';
 import LINE_IMAGES from './assets/tralis-live-map';
 
 export default () => {
   const map = new Map({
-    container: 'map',
-    style: 'https://maps.geops.io/styles/travic_v2/style.json',
-    apiKey: window.apiKey,
-    center: [11.55, 48.14],
-    zoom: 10,
-    touchPitch: false,
-    pitchWithRotate: false,
-    attributionControl: false,
+    target: 'map',
+    view: new View({
+      // center: max,
+      // center: [831634, 5933959],
+      zoom: 10,
+      zoom: 13,
+      // center: fromLonLat([7.841148, 47.996542]), // freiburg
+      center: fromLonLat([11.55, 48.14]), // munich
+    }),
+    controls: [],
   });
 
   const control = new CopyrightControl();
   control.attachToMap(map);
 
+  const layer = new MapboxLayer({
+    url: 'https://maps.geops.io/styles/travic_v2/style.json',
+    apiKey: window.apiKey,
+  });
+  layer.attachToMap(map);
+
   const cache = {};
   const tracker = new RealtimeLayer({
-    url: 'wss://api.geops.io/realtime-ws/v1/',
-    isUpdateBboxOnMoveEnd: false,
-    apiKey: window.apiKey,
-    bbox: [1152072, 6048052, 1433666, 6205578],
+    url: 'wss://api.geops.io/realtime-ws/dev/',
+    apiKey: '5cc87b12d7c5370001c1d6552f74b904e4f644699efa5779559ccd45',
+    version: '2',
+    tenant: 'sbm',
+    generalizationLevelByZoom: [],
+    motsByZoom: [],
+    // bbox: [1152072, 6048052, 1433666, 6205578],
     style: (props) => {
-      let { name } = props.line || {};
+      let { name } = props.properties.line || {};
       if (!name || !LINE_IMAGES[name]) {
         name = 'unknown';
       }
       if (!cache[name]) {
         const img = new Image();
-        img.src = LINE_IMAGES[name];
+        img.src = LINE_IMAGES[name].src;
         img.width = 25 * window.devicePixelRatio;
         img.height = 25 * window.devicePixelRatio;
         cache[name] = img;

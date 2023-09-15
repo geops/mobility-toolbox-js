@@ -107,7 +107,7 @@
     "link2": "cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link",
     "lint": "eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input",
     "prepare": "is-ci || husky install",
-    "publish:dev": "HUSKY=0 yarn release -- --prerelease apiv2 --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag dev && git push --tags ",
+    "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags ",
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
     "publish:public:dryrun": "yarn release --dry-run",
     "release": "standard-version",

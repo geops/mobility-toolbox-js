@@ -5,7 +5,7 @@ import olRoutingReadme from '../public/static/examples/ol-routing.md';
 import olStopFinderReadme from '../public/static/examples/ol-stop-finder.md';
 import tralisLiveMapReadme from '../public/static/examples/tralis-live-map.md';
 
-// const munichAssets = require('./examples/assets/tralis-live-map').default;
+import munichAssets from '../public/static/examples/tralis-live-map';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -54,32 +54,32 @@ export default [
       js: 'ol-routing.js',
     },
   },
-  // {
-  //   name: 'Live train positions for Munich',
-  //   key: 'tralis-live-map',
-  //   description:
-  //     'Realtime vehicle positions and prognosis data based on scheduled times, realtime updates and GPS locations.',
-  //   img: liveTrackerMunichImg,
-  //   extraFiles: {
-  //     'assets/tralis-live-map/index.js': {
-  //       content: `export default ${JSON.stringify(munichAssets)};`,
-  //     },
-  //   },
-  //   readme: tralisLiveMapReadme,
-  // },
+  {
+    name: 'Live train positions for Munich',
+    key: 'tralis-live-map',
+    description:
+      'Realtime vehicle positions and prognosis data based on scheduled times, realtime updates and GPS locations.',
+    img: '/static/img/routing.jpg',
+    extraFiles: {
+      'assets/tralis-live-map/index.js': {
+        content: `export default ${JSON.stringify(munichAssets)};`,
+      },
+    },
+    readme: tralisLiveMapReadme,
+  },
   // These examples are used for the dbug of RealtimeLayer don't remove them pls.
-  // {
-  //   name: 'Realtime tracker with OpenLayers',
-  //   key: 'ol-tralis',
-  //   description: 'Show moving tramway in an OpenLayers map.',
-  //   img: liveTrackerOLImg,
-  // },
-  // {
-  //   name: 'Realtime tracker with Mapbox',
-  //   key: 'mapbox-tralis',
-  //   description: 'Show moving tramway in an Mapbox map.',
-  //   img: liveTrackerOLImg,
-  // },
+  {
+    name: 'Tralis tracker with OpenLayers',
+    key: 'ol-tralis',
+    description: 'Show moving tramway in an OpenLayers map.',
+    img: '/static/img/routing.jpg',
+  },
+  {
+    name: 'Tralis tracker with Mapbox',
+    key: 'mapbox-tralis',
+    description: 'Show moving tramway in an Mapbox map.',
+    img: '/static/img/routing.jpg',
+  },
   {
     name: 'Mapbox layer',
     key: 'ol-mapbox-layer',

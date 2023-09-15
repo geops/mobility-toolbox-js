@@ -15,12 +15,14 @@ import type {
   RealtimeFullTrajectory,
   RealtimeTrajectoryResponse,
   RealtimeStationId,
+  RealtimeVersion,
 } from '../types';
 import { StopSequence } from './typedefs';
 
 export type RealtimeAPIOptions = {
   url?: string;
   apiKey?: string;
+  version?: RealtimeVersion;
   prefix?: string;
   projection?: string;
   bbox?: (number | string)[];
@@ -76,6 +78,8 @@ export const RealtimeModes = {
 class RealtimeAPI {
   url!: string;
 
+  version: RealtimeVersion = '1';
+
   wsApi!: WebSocketAPI;
 
   projection?: string;
@@ -122,7 +126,7 @@ class RealtimeAPI {
       opt = { url: options };
     }
 
-    const { apiKey } = opt;
+    const { apiKey, version } = opt;
     let { url, projection, bbox, buffer = [100, 100] } = opt;
     const wsApi = new WebSocketAPI();
 
@@ -180,6 +184,13 @@ class RealtimeAPI {
             }
           }
         },
+      },
+      /**
+       * The RealtimeApi version
+       */
+      version: {
+        value: version,
+        writable: true,
       },
       /**
        * The websocket helper class to connect the websocket.
@@ -505,12 +516,13 @@ class RealtimeAPI {
     quiet: boolean = false,
   ) {
     this.unsubscribeTrajectory(onMessage);
-    this.subscribe(
-      `trajectory${getModeSuffix(mode, RealtimeModes)}`,
-      onMessage,
-      onError,
-      quiet,
-    );
+
+    let suffix = '';
+    if (this.version === '1') {
+      suffix = getModeSuffix(mode, RealtimeModes);
+    }
+
+    this.subscribe(`trajectory${suffix}`, onMessage, onError, quiet);
   }
 
   /**
@@ -538,12 +550,13 @@ class RealtimeAPI {
     quiet: boolean = false,
   ) {
     this.unsubscribeDeletedVehicles(onMessage);
-    this.subscribe(
-      `deleted_vehicles${getModeSuffix(mode, RealtimeModes)}`,
-      onMessage,
-      onError,
-      quiet,
-    );
+
+    let suffix = '';
+    if (this.version === '1') {
+      suffix = getModeSuffix(mode, RealtimeModes);
+    }
+
+    this.subscribe(`deleted_vehicles${suffix}`, onMessage, onError, quiet);
   }
 
   /**
@@ -569,7 +582,12 @@ class RealtimeAPI {
     mode: RealtimeMode,
     generalizationLevel: RealtimeGeneralizationLevel | undefined,
   ): Promise<WebSocketAPIMessageEventData<RealtimeFullTrajectory>> {
-    const channel = [`full_trajectory${getModeSuffix(mode, RealtimeModes)}`];
+    let suffix = '';
+    if (this.version === '1') {
+      suffix = getModeSuffix(mode, RealtimeModes);
+    }
+
+    const channel = [`full_trajectory${suffix}`];
     if (id) {
       channel.push(id);
     }
@@ -603,12 +621,12 @@ class RealtimeAPI {
     onError: EventListener = () => {},
     quiet: boolean = false,
   ) {
-    this.subscribe(
-      `full_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
-      onMessage,
-      onError,
-      quiet,
-    );
+    let suffix = '';
+    if (this.version === '1') {
+      suffix = getModeSuffix(mode, RealtimeModes);
+    }
+
+    this.subscribe(`full_trajectory${suffix}_${id}`, onMessage, onError, quiet);
   }
 
   /**
