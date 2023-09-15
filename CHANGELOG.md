@@ -2,14 +2,6 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [2.1.0](https://github.com/geops/mobility-toolbox-js/compare/v2.0.0-beta.81...v2.1.0) (2023-09-15)
-
-
-### Bug Fixes
-
-* don't test intersection with the bbox if the update of bbox is not activated ([8ec74ba](https://github.com/geops/mobility-toolbox-js/commit/8ec74ba00c26fe61b301bf2b87549e14cbfa86f8))
-* **MapboxStyleLayer:** add minZoom and maxZoom options for layer visibility ([#192](https://github.com/geops/mobility-toolbox-js/issues/192)) ([911db7d](https://github.com/geops/mobility-toolbox-js/commit/911db7d8b481bf5b5c5e6dea676c55874e7cd5f3))
-
 ## [2.1.0](https://github.com/geops/mobility-toolbox-js/compare/v1.7.5...v2.1.0) (2022-06-20)
 
 This version contains lot of breaking change, to make things simpler to use and to remove all application specific stuff.
