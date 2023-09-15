@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.0.0-beta.0",
+  "version": "2.1.1-beta.0",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "module": "index.js",
   "exports": {
@@ -109,6 +109,7 @@
     "prepare": "is-ci || husky install",
     "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push --tags ",
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
+    "publish:public": "yarn release && git push origin HEAD && yarn run build && cd build && HUSKY=0 yarn publish && git push --tags ",
     "publish:public:dryrun": "yarn release --dry-run",
     "release": "standard-version",
     "start": "yarn doc && cd doc && yarn start",
