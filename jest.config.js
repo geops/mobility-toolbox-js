@@ -15,9 +15,9 @@ const config = {
   // if using TypeScript with a baseUrl set to the root directory then you need the below for alias' to work
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testEnvironment: 'jsdom',
-  transform: {
-    '.+\\.(j|t)s$': ['esbuild-jest'],
-  },
+  // transform: {
+  //   '.+\\.(j|t)s$': ['esbuild-jest'],
+  // },
   transformIgnorePatterns: [],
   testMatch: ['<rootDir>/src/**/?(*.)+(spec|test).(j|t)s'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
