@@ -16,7 +16,7 @@ import type {
   RealtimeTrajectoryResponse,
   RealtimeStationId,
 } from '../types';
-import { StopSequence } from './typedefs';
+import { RealtimeTrajectory, StopSequence } from './typedefs';
 
 export type RealtimeAPIOptions = {
   url?: string;
@@ -486,6 +486,28 @@ class RealtimeAPI {
     onMessage: WebSocketAPIMessageCallback<RealtimeExtraGeom>,
   ) {
     this.unsubscribe('extra_geoms', '', onMessage);
+  }
+
+  /**
+   * Get the trajectory of a vehicule .
+   *
+   * @param {string} id A vehicle id.
+   * @param {RealtimeMode} mode Realtime mode.
+   * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
+   * @return {Promise<{ data: { content: Trajectory } }>} Return a trajectory.
+   */
+  getTrajectory(
+    id: RealtimeTrainId,
+    mode: RealtimeMode,
+  ): Promise<WebSocketAPIMessageEventData<RealtimeTrajectory>> {
+    const params = {
+      channel: `trajectory${getModeSuffix(mode, RealtimeModes)}`,
+      args: id,
+    };
+
+    return new Promise((resolve, reject) => {
+      this.wsApi.get(params, resolve, reject);
+    });
   }
 
   /**
