@@ -68,7 +68,7 @@
     "maplibre-gl": "3.3.1",
     "mock-socket": "9.2.1",
     "next": "12.1.6",
-    "next-transpile-modules": "10.0.0",
+    "next-transpile-modules": "10.0.1",
     "ol": "8.1.0",
     "openapi-typescript": "6.7.0",
     "prettier": "3.0.3",
