@@ -117,7 +117,8 @@
     "test": "TZ='UTC' jest ",
     "test:watch": "yarn test --watchAll",
     "tsc": "tsc",
-    "types:backend": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts"
+    "types:backend": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts",
+    "up": "yarn upgrade-interactive --latest"
   },
   "browserslist": [
     ">0.2%",
