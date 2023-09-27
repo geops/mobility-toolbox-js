@@ -17,7 +17,7 @@
     "@turf/transform-rotate": "6.5.0",
     "lodash.debounce": "4.0.8",
     "lodash.throttle": "4.1.1",
-    "uuid": "9.0.0"
+    "uuid": "9.0.1"
   },
   "peerDependencies": {
     "mapbox-gl": "1.13.2",
