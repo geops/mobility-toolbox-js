@@ -965,9 +965,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @private
      */
     addTrajectory(trajectory: RealtimeTrajectory) {
-      if (this.filter && !this.filter(trajectory)) {
-        return;
-      }
       if (!this.trajectories) {
         this.trajectories = {};
       }
