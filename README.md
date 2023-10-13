@@ -5,6 +5,7 @@ The tools in this library have been inspired by many projects realized for publi
 
 [![npm](https://img.shields.io/npm/v/mobility-toolbox-js.svg?style=flat-square)](https://www.npmjs.com/package/mobility-toolbox-js)
 [![Build](https://github.com/geops/mobility-toolbox-js/workflows/Build/badge.svg)](https://github.com/geops/mobility-toolbox-js/actions?query=workflow%3ABuild)
+[![Lint / Unit tests](https://github.com/geops/mobility-toolbox-js/workflows/Lint%20/%20Unit%20tests/badge.svg)](https://github.com/geops/mobility-toolbox-js/actions?query=workflow%3ALint%20/%20Unit%20tests)
 ![Vercel](https://vercelbadge.vercel.app/api/geops/mobility-toolbox-js)
 
 ## Documentation and examples
