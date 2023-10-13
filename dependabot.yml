@@ -10,3 +10,6 @@ updates:
       interval: 'daily'
     # Disable version updates for npm dependencies
     open-pull-requests-limit: 0
+    commit-message:
+      # Prefix all commit messages with "npm: "
+      prefix: 'build'

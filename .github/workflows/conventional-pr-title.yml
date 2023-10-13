@@ -12,7 +12,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: aslafy-z/conventional-pr-title-action@v3
-        with:
-          preset: conventional-changelog-conventionalcommits@5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
