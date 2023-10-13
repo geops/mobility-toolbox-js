@@ -440,10 +440,7 @@ class RealtimeAPI {
    */
   getStations(mode: RealtimeMode, timeout = 100): Promise<RealtimeStation[]> {
     return new Promise((resolve) => {
-      this.wsApi.get(
-        {
-          channel: `station${getModeSuffix(mode, RealtimeModes)}`,
-        },
+      this.get(`station${getModeSuffix(mode, RealtimeModes)}`).then(
         debounceWebsocketMessages(resolve, undefined, timeout),
       );
     });
