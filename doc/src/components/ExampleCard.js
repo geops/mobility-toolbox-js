@@ -123,11 +123,11 @@ function ExampleCard({ example }) {
             }}
           />
           <CardContent className={classes.cardContent}>
-            <Link href={`/example/${example.key}`} passHref>
-              {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-              <a className={classes.exampleLink}>
-                <Typography variant="h3">{example.name}</Typography>
-              </a>
+            <Link
+              href={`/example/${example.key}`}
+              className={classes.exampleLink}
+            >
+              <Typography variant="h3">{example.name}</Typography>
             </Link>
             {/* Use of typography as wrapper breaks hydration of nextjs */}
             <Markdown className="MuiTypography-root MuiTypography-body1">

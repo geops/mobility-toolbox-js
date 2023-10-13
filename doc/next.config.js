@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 
-const withTM = require('next-transpile-modules')(['mobility-toolbox-js']);
-
 const nextConfig = {
+  transpilePackages: ['mobility-toolbox-js'],
   reactStrictMode: true,
   webpack: (config) => {
     config.module.rules.push({
@@ -14,4 +13,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withTM(nextConfig);
+module.exports = nextConfig;

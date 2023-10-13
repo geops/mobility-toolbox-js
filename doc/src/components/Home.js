@@ -40,8 +40,8 @@ tracker.attachToMap(map);
 
 function MarkdownHeading({ ...props }) {
   // eslint-disable-next-line react/prop-types
-  const { level, children } = props;
-  return <Typography variant={`h${level}`}>{children}</Typography>;
+  const { node, children } = props;
+  return <Typography variant={node.tagName}>{children}</Typography>;
 }
 
 function Home() {
@@ -75,12 +75,12 @@ function Home() {
   }
 
   const renderers = {
-    heading: MarkdownHeading,
+    h1: MarkdownHeading,
   };
 
   return (
     <>
-      <Markdown renderers={renderers}>{source}</Markdown>
+      <Markdown components={renderers}>{source}</Markdown>
       <br />
       <h2>Quick Start</h2>
       <TrackerExample />
@@ -94,10 +94,7 @@ function Home() {
           Maplibre GL JS
         </a>{' '}
         map. Check out the{' '}
-        <Link href="/examples/ol-tracker" passHref>
-          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-          <a>Live Tracker with OpenLayers</a>
-        </Link>{' '}
+        <Link href="/examples/ol-tracker">Live Tracker with OpenLayers</Link>{' '}
         example to see how to use{' '}
         <a href="https://openlayers.org/" target="_blank" rel="noreferrer">
           OpenLayers
