@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/geops/mobility-toolbox-js/compare/v2.1.1...v2.2.0) (2023-10-13)
+
+
+### Features
+
+* add new get an gettrajectory method in realtimeapi ([#195](https://github.com/geops/mobility-toolbox-js/issues/195)) ([0461fde](https://github.com/geops/mobility-toolbox-js/commit/0461fdebe8f36e0680eb5d802546ec91306da843))
+
 ### [2.1.1](https://github.com/geops/mobility-toolbox-js/compare/v2.1.0...v2.1.1) (2023-10-06)
 
 
