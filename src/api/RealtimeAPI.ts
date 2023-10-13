@@ -16,6 +16,7 @@ import type {
   RealtimeFullTrajectory,
   RealtimeTrajectoryResponse,
   RealtimeStationId,
+  RealtimeTrajectory,
 } from '../types';
 import { StopSequence } from './typedefs';
 
@@ -505,6 +506,22 @@ class RealtimeAPI {
   }
 
   /**
+   * Return a partial trajectory with a given id and a mode.
+   *
+   * @param {number} trainId The identifier of a trajectory.
+   * @param {RealtimeMode} mode Realtime mode.
+   * @return {Promise<{data: { content: RealtimeTrajectory }}>} A trajectory.
+   */
+  getTrajectory(
+    id: RealtimeTrainId,
+    mode: RealtimeMode,
+  ): Promise<WebSocketAPIMessageEventData<RealtimeTrajectory>> {
+    return this.get(
+      `partial_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
+    );
+  }
+
+  /**
    * Subscribe to trajectory channel.
    *
    * @param {RealtimeMode} mode Realtime mode.
@@ -578,7 +595,7 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
-   * @return {Promise<{ data: { content: FullTrajectory } }>} Return a full trajectory.
+   * @return {Promise<{ data: { content: RealtimeFullTrajectory } }>} Return a full trajectory.
    */
   getFullTrajectory(
     id: RealtimeTrainId,
