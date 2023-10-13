@@ -1,6 +1,7 @@
 import WebSocketAPI, {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
+  WebSocketAPIParameters,
 } from '../common/api/WebSocketAPI';
 import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
 import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
@@ -15,6 +16,7 @@ import type {
   RealtimeFullTrajectory,
   RealtimeTrajectoryResponse,
   RealtimeStationId,
+  RealtimeTrajectory,
 } from '../types';
 import { StopSequence } from './typedefs';
 
@@ -285,6 +287,26 @@ class RealtimeAPI {
   }
 
   /**
+   * Send GET to a channel.
+   *
+   * @param {string | WebSocketAPIParameters} channelOrParams Name of the websocket channel to send GET or an object representing parameters to send
+   * @return {Promise<WebSocketAPIMessageEventData<?>>} A websocket response.
+   */
+  get(
+    channelOrParams: string | WebSocketAPIParameters,
+  ): Promise<WebSocketAPIMessageEventData<any>> {
+    let params = channelOrParams as WebSocketAPIParameters;
+
+    if (typeof channelOrParams === 'string') {
+      params = { channel: channelOrParams };
+    }
+
+    return new Promise((resolve, reject) => {
+      this.wsApi.get(params, resolve, reject);
+    });
+  }
+
+  /**
    * Subscribe to a channel.
    *
    * @param {string} channel Name of the websocket channel to subscribe.
@@ -408,9 +430,7 @@ class RealtimeAPI {
       args: uic,
     };
 
-    return new Promise((resolve, reject) => {
-      this.wsApi.get(params, resolve, reject);
-    });
+    return this.get(params);
   }
 
   /**
@@ -421,10 +441,7 @@ class RealtimeAPI {
    */
   getStations(mode: RealtimeMode, timeout = 100): Promise<RealtimeStation[]> {
     return new Promise((resolve) => {
-      this.wsApi.get(
-        {
-          channel: `station${getModeSuffix(mode, RealtimeModes)}`,
-        },
+      this.get(`station${getModeSuffix(mode, RealtimeModes)}`).then(
         debounceWebsocketMessages(resolve, undefined, timeout),
       );
     });
@@ -486,6 +503,22 @@ class RealtimeAPI {
     onMessage: WebSocketAPIMessageCallback<RealtimeExtraGeom>,
   ) {
     this.unsubscribe('extra_geoms', '', onMessage);
+  }
+
+  /**
+   * Return a partial trajectory with a given id and a mode.
+   *
+   * @param {number} trainId The identifier of a trajectory.
+   * @param {RealtimeMode} mode Realtime mode.
+   * @return {Promise<{data: { content: RealtimeTrajectory }}>} A trajectory.
+   */
+  getTrajectory(
+    id: RealtimeTrainId,
+    mode: RealtimeMode,
+  ): Promise<WebSocketAPIMessageEventData<RealtimeTrajectory>> {
+    return this.get(
+      `partial_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
+    );
   }
 
   /**
@@ -562,7 +595,7 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
-   * @return {Promise<{ data: { content: FullTrajectory } }>} Return a full trajectory.
+   * @return {Promise<{ data: { content: RealtimeFullTrajectory } }>} Return a full trajectory.
    */
   getFullTrajectory(
     id: RealtimeTrainId,
@@ -578,13 +611,7 @@ class RealtimeAPI {
       channel.push(`gen${generalizationLevel}`);
     }
 
-    const params = {
-      channel: channel.join('_'),
-    };
-
-    return new Promise((resolve, reject) => {
-      this.wsApi.get(params, resolve, reject);
-    });
+    return this.get(channel.join('_'));
   }
 
   /**
@@ -633,15 +660,7 @@ class RealtimeAPI {
   getStopSequence(
     id: RealtimeTrainId,
   ): Promise<WebSocketAPIMessageEventData<StopSequence[]>> {
-    return new Promise((resolve, reject) => {
-      this.wsApi.get(
-        {
-          channel: `stopsequence_${id}`,
-        },
-        resolve,
-        reject,
-      );
-    });
+    return this.get(`stopsequence_${id}`);
   }
 
   /**
