@@ -16,7 +16,7 @@ export default () => {
   });
 
   const control = new CopyrightControl();
-  control.attachToMap(map);
+  map.addControl(copyright);
 
   // Define the layer
   const tracker = new RealtimeLayer({

@@ -20,7 +20,7 @@ export default () => {
   });
 
   const control = new CopyrightControl();
-  control.attachToMap(map);
+  map.addControl(copyright);
 
   const layer = new MapboxLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',

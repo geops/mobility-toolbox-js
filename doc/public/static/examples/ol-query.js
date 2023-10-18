@@ -24,7 +24,7 @@ export default () => {
 
   // Add copyright control
   const control = new CopyrightControl();
-  control.attachToMap(map);
+  map.addControl(copyright);
 
   map.on('pointermove', () => {
     map.getTargetElement().style.cursor = '';

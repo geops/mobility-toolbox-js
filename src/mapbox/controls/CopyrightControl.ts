@@ -1,4 +1,4 @@
-import CopyrightControlCommon from '../../common/controls/CopyrightControlCommon';
+import { ControlPosition, IControl } from 'maplibre-gl';
 import { getMapboxMapCopyrights } from '../../common/utils';
 
 /**
@@ -14,39 +14,57 @@ import { getMapboxMapCopyrights } from '../../common/utils';
  * });
  *
  * const control = new CopyrightControl();
- * control.attachToMap(map);
+ * map.addControl(control);
  *
  *
  * @see <a href="/example/mb-copyright">Mapbox copyright example</a>
  *
- * @extends {CopyrightControlCommon}
  */
-class CopyrightControl extends CopyrightControlCommon {
-  constructor(options: any) {
-    super(options);
+class CopyrightControl implements IControl {
+  map?: maplibregl.Map;
+
+  container?: HTMLElement;
+
+  content?: string;
+
+  onAdd(map: maplibregl.Map) {
+    this.map = map;
+    this.container = document.createElement('div');
+    this.container.className = 'maplibregl-ctrl maplibregl-ctrl-attrib';
     this.render = this.render.bind(this);
+    this.map.on('idle', this.render);
+    // this.map.on('sourcedata', this.render);
+    this.map.on('styledata', this.render);
+    this.render();
+    return this.container;
   }
 
-  activate() {
-    super.activate();
-    if (this.map) {
-      this.map.on('sourcedata', this.render);
-      this.map.on('styledata', this.render);
-      this.map.on('idle', this.render);
+  onRemove() {
+    if (this.container?.parentElement) {
+      this.container.parentElement?.removeChild(this.container);
     }
-  }
 
-  deactivate() {
     if (this.map) {
       this.map.off('sourcedata', this.render);
       this.map.off('styledata', this.render);
       this.map.off('idle', this.render);
     }
-    super.deactivate();
+    this.map = undefined;
   }
 
-  getCopyrights() {
-    return getMapboxMapCopyrights(this.map);
+  // eslint-disable-next-line class-methods-use-this
+  getDefaultPosition(): ControlPosition {
+    return 'bottom-right';
+  }
+
+  render() {
+    if (this.map && this.container) {
+      const content = getMapboxMapCopyrights(this.map).join(' | ');
+      if (content !== this.content) {
+        this.content = content;
+        this.container.innerHTML = this.content;
+      }
+    }
   }
 }
 

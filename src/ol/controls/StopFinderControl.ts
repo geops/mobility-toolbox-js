@@ -1,6 +1,13 @@
 import { Feature, Point } from 'geojson';
 import { fromLonLat } from 'ol/proj';
+import Control, { Options } from 'ol/control/Control';
 import StopFinderControlCommon from '../../common/controls/StopFinderControlCommon';
+import createDefaultStopFinderElement from '../../common/utils/createDefaultStopFinderElt';
+
+export type StopFinderControlOptions = Options &
+  StopFinderControlCommon & {
+    className?: string;
+  };
 
 /**
  * Search stations.
@@ -17,18 +24,31 @@ import StopFinderControlCommon from '../../common/controls/StopFinderControlComm
  *   apiKey: [yourApiKey]
  * });
  *
- * control.attachToMap(map);
+ * map.addControl(control);
  *
  *
  * @see <a href="/example/ol-search">Openlayers search example</a>
  */
-class StopFinderControl extends StopFinderControlCommon {
+class StopFinderControl extends Control {
+  controller: StopFinderControlCommon;
+
+  constructor(options: StopFinderControlOptions) {
+    const element = createDefaultStopFinderElement();
+    element.className = options?.className || 'mbt-stop-finder';
+    const opt = { element, ...(options || {}) };
+    super(opt);
+    this.controller = new StopFinderControlCommon({
+      onSuggestionClick: this.onSuggestionClick.bind(this),
+      ...opt,
+    });
+  }
+
   /**
    * @private
    */
   onSuggestionClick(suggestion: Feature) {
     const coord = fromLonLat((suggestion.geometry as Point).coordinates);
-    this.map.getView().setCenter(coord);
+    this.getMap()?.getView().setCenter(coord);
   }
 }
 
