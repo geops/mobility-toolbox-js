@@ -17,6 +17,7 @@ import {
   LayerGetFeatureInfoResponse,
   RealtimeFullTrajectory,
   RealtimeTrainId,
+  ViewState,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
@@ -70,7 +71,7 @@ class RealtimeLayer extends mixin(Layer) {
 
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
-    /** @ignore */
+    /** @private */
     this.olLayer =
       options.olLayer ||
       new Group({
@@ -152,7 +153,7 @@ class RealtimeLayer extends mixin(Layer) {
 
     // Options the last render run did happen. If something changes
     // we have to render again
-    /** @ignore */
+    /** @private */
     this.renderState = {
       center: [0, 0],
       zoom: undefined,

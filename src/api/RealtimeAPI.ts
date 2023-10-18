@@ -109,10 +109,10 @@ class RealtimeAPI {
   constructor(options: RealtimeAPIOptions = {}) {
     this.defineProperties(options);
 
-    /** @ignore */
+    /** @private */
     this.prefix = options.prefix || '';
 
-    /** @ignore */
+    /** @private */
     this.onOpen = this.onOpen.bind(this);
   }
 
@@ -262,7 +262,7 @@ class RealtimeAPI {
      */
     if (this.pingIntervalMs) {
       window.clearInterval(this.pingInterval);
-      /** @ignore */
+      /** @private */
       this.pingInterval = window.setInterval(() => {
         this.wsApi.send('PING');
       }, this.pingIntervalMs);
@@ -278,7 +278,7 @@ class RealtimeAPI {
     window.clearTimeout(this.reconnectTimeout);
 
     if (this.reconnectTimeoutMs) {
-      /** @ignore */
+      /** @private */
       this.reconnectTimeout = window.setTimeout(
         () => this.open(),
         this.reconnectTimeoutMs,

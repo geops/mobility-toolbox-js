@@ -3,7 +3,7 @@
  * It removes also null, undefined or non string values.
  *
  * @param {array} array Array of values.
- * @ignore
+ * @private
  */
 const removeDuplicate = (array: any[]) => {
   const arrWithoutEmptyValues = array.filter(

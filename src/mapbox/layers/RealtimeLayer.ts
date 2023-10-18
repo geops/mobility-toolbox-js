@@ -8,7 +8,11 @@ import { Feature } from 'ol';
 import mixin from '../../common/mixins/RealtimeLayerMixin';
 import Layer from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
-import type { AnyMapboxMap, LayerGetFeatureInfoResponse } from '../../types';
+import type {
+  AnyMapboxMap,
+  LayerGetFeatureInfoResponse,
+  ViewState,
+} from '../../types';
 import type { RealtimeTrajectory } from '../../api/typedefs';
 
 /**
@@ -35,19 +39,19 @@ class RealtimeLayer extends mixin(Layer) {
       ...options,
     });
 
-    /** @ignore */
+    /** @private */
     this.onLoad = this.onLoad.bind(this);
 
-    /** @ignore */
+    /** @private */
     this.onMove = this.onMove.bind(this);
 
-    /** @ignore */
+    /** @private */
     this.onMoveEnd = this.onMoveEnd.bind(this);
 
-    /** @ignore */
+    /** @private */
     this.onZoomEnd = this.onZoomEnd.bind(this);
 
-    /** @ignore */
+    /** @private */
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 

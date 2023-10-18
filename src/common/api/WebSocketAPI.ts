@@ -199,7 +199,7 @@ class WebSocketAPI {
       }
     }
 
-    /** @ignore */
+    /** @private */
     this.websocket = new WebSocket(url);
 
     if (!this.open) {

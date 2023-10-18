@@ -6,6 +6,8 @@ import type { MaplibreLayer } from '../../ol';
 
 /**
  * Return the render function fo the olLayer of a MaplibreLayer
+ * @private
+ *
  */
 
 export default function getMaplibreRender(

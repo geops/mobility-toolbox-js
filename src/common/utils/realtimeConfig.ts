@@ -1,5 +1,6 @@
 import { AnyCanvasContext, RealtimeMot } from '../../types';
 
+/** @private */
 const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -18,7 +19,7 @@ const radiusMapping: number[][] = [
  * New endpoint use Rail instead of Train.
  * New tracker values:  null, "tram", "subway", "rail", "bus", "ferry", "cablecar", "gondola", "funicular", "coach".
  *
- * @ignore
+ * @private
  */
 export const types: RegExp[] = [
   /^Tram/i,
@@ -34,7 +35,7 @@ export const types: RegExp[] = [
 ];
 
 /**
- * @ignore
+ * @private
  */
 export const bgColors: string[] = [
   '#ffb400',
@@ -50,7 +51,7 @@ export const bgColors: string[] = [
 ];
 
 /**
- * @ignore
+ * @private
  */
 export const textColors: string[] = [
   '#000000',
@@ -66,7 +67,7 @@ export const textColors: string[] = [
 ];
 
 /**
- * @ignore
+ * @private
  */
 export const getTypeIndex = (type: RealtimeMot): number => {
   if (typeof type === 'string') {
@@ -76,7 +77,7 @@ export const getTypeIndex = (type: RealtimeMot): number => {
 };
 
 /**
- * @ignore
+ * @private
  */
 export const getRadius = (type: RealtimeMot, zoom: number): number => {
   try {
@@ -88,7 +89,7 @@ export const getRadius = (type: RealtimeMot, zoom: number): number => {
 };
 
 /**
- * @ignore
+ * @private
  */
 export const getBgColor = (type: RealtimeMot): string => {
   try {
@@ -100,7 +101,7 @@ export const getBgColor = (type: RealtimeMot): string => {
 };
 
 /**
- * @ignore
+ * @private
  */
 export const getTextColor = (type: RealtimeMot): string => {
   try {
@@ -112,7 +113,7 @@ export const getTextColor = (type: RealtimeMot): string => {
 };
 
 /**
- * @ignore
+ * @private
  */
 export const getTextSize = (
   ctx: AnyCanvasContext,
@@ -140,7 +141,7 @@ export const getTextSize = (
 };
 
 /**
- * @ignore
+ * @private
  * @param {number} delayInMs Delay in milliseconds.
  * @param {boolean} cancelled true if the journey is cancelled.
  * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
@@ -172,7 +173,7 @@ export const getDelayColor = (
 };
 
 /**
- * @ignore
+ * @private
  */
 export const getDelayText = (delayInMs: number, cancelled: boolean): string => {
   if (cancelled) {

@@ -17,6 +17,7 @@ const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
   ctx?.translate(-canvas.width / 2, -canvas.height / 2);
 };
 
+/** @private */
 const arrowCache: {
   [key: string]: AnyCanvas | null;
 } = {};
@@ -48,6 +49,7 @@ const getArrowCanvas = (fillColor: string): AnyCanvas | null => {
   return arrowCache[key];
 };
 
+/** @private */
 const bufferArrowCache: {
   [key: string]: AnyCanvas | null;
 } = {};

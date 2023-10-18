@@ -48,7 +48,7 @@ class ControlCommon extends BaseObject {
     };
 
     /**
-     * @ignore
+     * @private
      */
     this.active = active;
   }
@@ -57,7 +57,7 @@ class ControlCommon extends BaseObject {
    * Define control's properties.
    *
    * @private
-   * @ignore
+   * @private
    */
   defineProperties(options: ControlCommonOptions) {
     const { target, element, render } = {
@@ -123,7 +123,7 @@ class ControlCommon extends BaseObject {
         writable: true,
       },
       render: {
-        /** @ignore */
+        /** @private */
         value: render || this.render,
         writable: true,
       },

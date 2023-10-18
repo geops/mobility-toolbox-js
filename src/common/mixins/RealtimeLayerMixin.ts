@@ -38,6 +38,7 @@ import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
 import LayerCommon from '../layers/LayerCommon';
 import type { OlLayerOptions } from '../../ol/layers/Layer';
+import { FilterFunction, SortFunction } from '../typedefs';
 
 export type RealtimeLayerMixinOptions = OlLayerOptions & {
   debug?: boolean;
@@ -339,7 +340,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     /**
      * Define layer's properties.
      *
-     * @ignore
+     * @private
      */
     defineProperties(options: RealtimeLayerMixinOptions) {
       const {
@@ -781,13 +782,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       if (this.isUpdateBboxOnMoveEnd && zoom) {
         bbox.push(zoom);
 
-        /* @ignore */
+        /* @private */
         this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
 
-        /* @ignore */
+        /* @private */
         this.mots = this.getMotsByZoom(zoom);
         if (this.mots) {
           bbox.push(`mots=${this.mots}`);
@@ -940,7 +941,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @param {Array<number>} extent
      * @param {number} zoom
      * @return {boolean} if the trajectory must be displayed or not.
-     * @ignore
+     * @private
      */
     purgeTrajectory(
       trajectory: RealtimeTrajectory,
@@ -1100,7 +1101,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         id = feature.get('train_id');
       }
       if (this.hoverVehicleId !== id) {
-        /** @ignore */
+        /** @private */
         this.hoverVehicleId = id;
         // @ts-ignore
         this.renderTrajectories(true);
@@ -1125,7 +1126,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         id = feature.get('train_id');
       }
       if (this.selectedVehicleId !== id) {
-        /** @ignore */
+        /** @private */
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
 

@@ -9,7 +9,6 @@
  * @param {any} b Object b to compare.
  * @returns number
  */
-
 /**
  * @typedef {Object} ViewState
  * @property {number|undefined} time A time in ms.
@@ -21,18 +20,15 @@
  * @property {number} zoom A zoom level.
  * @property {number|undefined} pixelRatio A pixel ratio.
  */
-
 /**
  * @typedef {Object} FeatureInfo
  * @property {Layer} layer A layer.
  * @property {ol/Feature~Feature[]} features  An array of features.
  * @property {number[2]} coordinate The coordinate where to find the featue.
  */
-
 /**
  * @typedef {ol/Map~Map|mapboxgl.Map|maplibregl.Map} AnyMap
  */
-
 /**
  * @typedef {Object} ControlCommonOptions
  * @property {boolean} [active = true] Whether the control is active or not.
@@ -40,7 +36,6 @@
  * @property {HTMLElement} target The HTML element where to render the element property. Default is the map's element.
  * @property {function} render Render function called whenever the control needs to be rerendered.
  */
-
 /**
  * @typedef {Object} LayerCommonOptions
  * @property {string!} key Identifier of the layer. Must be unique.
@@ -54,3 +49,11 @@
  * @property {Object!} properties - Custom properties.
  * @property {AnyMap!} map - The map used to display the layer.
  */
+/**
+ * @typedef {Object} VehiclePosition
+ * @property {number[2]} coord Coordinate of the vehicle position in Mercator .
+ * @property {number!} rotation  An angle in radians representing the direction (from the true north) towards which the vehicle is facing.
+ */
+// These lines is to block TypeScript to add "use strict;" in the outputed file.
+const dummy = () => {};
+export default dummy;

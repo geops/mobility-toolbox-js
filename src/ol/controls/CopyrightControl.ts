@@ -71,7 +71,7 @@ class CopyrightControl extends CopyrightControlCommon {
   onPostRender(evt: MapEvent) {
     if (this.map && this.element) {
       /**
-       * @ignore
+       * @private
        */
       this.frameState = evt.frameState || undefined;
       this.render();

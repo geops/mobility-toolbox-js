@@ -213,39 +213,39 @@ class RoutingControl extends ControlCommon {
     /** True if the control is requesting the backend. */
     this.loading = false;
 
-    /** @ignore */
+    /** @private */
     this.graphs = options.graphs || [['osm', 0, 99]];
 
-    /** @ignore */
+    /** @private */
     this.mot = options.mot || 'bus';
 
-    /** @ignore */
+    /** @private */
     this.modify = options.modify !== false;
 
-    /** @ignore */
+    /** @private */
     this.routingApiParams = options.routingApiParams;
 
-    /** @ignore */
+    /** @private */
     this.useRawViaPoints = options.useRawViaPoints || false;
 
-    /** @ignore */
+    /** @private */
     this.snapToClosestStation = options.snapToClosestStation || false;
 
-    /** @ignore */
+    /** @private */
     this.apiKey = options.apiKey;
 
-    /** @ignore */
+    /** @private */
     this.stopsApiKey = options.stopsApiKey || this.apiKey;
 
-    /** @ignore */
+    /** @private */
     this.stopsApiUrl = options.stopsApiUrl || 'https://api.geops.io/stops/v1/';
 
-    /** @ignore */
+    /** @private */
     this.api = new RoutingAPI({
       ...options,
     });
 
-    /** @ignore */
+    /** @private */
     this.routingLayer =
       options.routingLayer ||
       new RoutingLayer({
@@ -253,7 +253,7 @@ class RoutingControl extends ControlCommon {
         style: options.style,
       });
 
-    /** @ignore */
+    /** @private */
     this.onRouteError =
       options.onRouteError ||
       ((error) => {
@@ -263,16 +263,16 @@ class RoutingControl extends ControlCommon {
         console.error(error);
       });
 
-    /** @ignore */
+    /** @private */
     this.onMapClick = this.onMapClick.bind(this);
 
-    /** @ignore */
+    /** @private */
     this.onModifyEnd = this.onModifyEnd.bind(this);
 
-    /** @ignore */
+    /** @private */
     this.onModifyStart = this.onModifyStart.bind(this);
 
-    /** @ignore */
+    /** @private */
     this.createModifyInteraction();
   }
 
@@ -696,8 +696,8 @@ class RoutingControl extends ControlCommon {
         0.001,
       );
 
-      segmentIndex = this.segments.findIndex((segment) =>
-        segment.getGeometry()?.intersectsExtent(closestExtent),
+      segmentIndex = this.segments.findIndex(
+        (segment) => segment.getGeometry()?.intersectsExtent(closestExtent),
       );
     }
 
@@ -708,7 +708,7 @@ class RoutingControl extends ControlCommon {
       [])[0] as Feature<Point>;
 
     // Write object with modify info
-    /** @ignore */
+    /** @private */
     this.initialRouteDrag = {
       viaPoint,
       oldRoute: route && route.clone(),
@@ -751,7 +751,7 @@ class RoutingControl extends ControlCommon {
    * @private
    */
   createDefaultElement() {
-    /** @ignore */
+    /** @private */
     this.element = document.createElement('button');
     this.element.id = 'ol-toggle-routing';
     this.element.innerHTML = 'Toggle Route Control';
@@ -808,7 +808,7 @@ class RoutingControl extends ControlCommon {
       return;
     }
     this.removeListeners();
-    /** @ignore */
+    /** @private */
     this.onMapClickKey = this.map?.on('singleclick', this.onMapClick);
   }
 
@@ -825,12 +825,12 @@ class RoutingControl extends ControlCommon {
   activate() {
     super.activate();
     if (this.map) {
-      /** @ignore */
+      /** @private */
       this.format = new GeoJSON({
         featureProjection: this.map.getView().getProjection(),
       });
 
-      /** @ignore */
+      /** @private */
       this.graphsResolutions = RoutingControl.getGraphsResolutions(
         this.graphs,
         this.map,
