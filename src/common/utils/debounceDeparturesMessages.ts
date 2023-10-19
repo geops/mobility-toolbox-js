@@ -12,6 +12,7 @@ import sortAndFilterDepartures from './sortAndFilterDepartures';
  * @param {boolean} [sortByMinArrivalTime = true] Sort departures by arrival time
  * @param {number} [maxDepartureAge = 30] max departure age of departures in minutes
  * @param {number} [timeout = 100] debounce timeout in ms
+ * @private
  */
 const debounceDeparturesMessages = (
   onDeparturesUpdate: (departures: RealtimeDepartureExtended[]) => {},

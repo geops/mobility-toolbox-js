@@ -4,6 +4,7 @@ import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { AnyMapboxLayer, LayerGetFeatureInfoResponse } from '../../types';
 import Layer, { OlLayerOptions } from './Layer';
+import { FilterFunction } from '../../common/typedefs';
 
 export type MapboxStyleLayerOptions = OlLayerOptions & {
   beforeId?: string;
@@ -230,7 +231,7 @@ class MapboxStyleLayer extends Layer {
     super.detachFromMap();
   }
 
-  /** @ignore */
+  /** @private */
   addStyleLayers() {
     if (!this.mapboxLayer?.mbMap) {
       return;
@@ -247,7 +248,7 @@ class MapboxStyleLayer extends Layer {
     this.applyLayoutVisibility();
   }
 
-  /** @ignore */
+  /** @private */
   removeStyleLayers() {
     if (!this.mapboxLayer?.mbMap) {
       return;
@@ -264,7 +265,7 @@ class MapboxStyleLayer extends Layer {
 
   /**
    * On Mapbox map load callback function. Add style layers and dynaimc filters.
-   * @ignore
+   * @private
    */
   onLoad() {
     this.addStyleLayers();

@@ -26,16 +26,16 @@ class HttpAPI extends BaseObject {
 
   constructor(options: HttpAPIOptions) {
     super();
-    /** @ignore */
+    /** @private */
     this.url = options.url;
 
-    /** @ignore */
+    /** @private */
     this.apiKey = options.apiKey;
   }
 
   /**
    * Append the apiKey before sending the request.
-   * @ignore
+   * @private
    */
   fetch(path: string, params: Object, config: RequestInit): Promise<any> {
     if (!this.url) {

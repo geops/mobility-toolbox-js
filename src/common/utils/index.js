@@ -13,4 +13,5 @@ export { default as debounceWebsocketMessages } from './debounceWebsocketMessage
 export { default as sortAndFilterDepartures } from './sortAndFilterDepartures';
 export { default as compareDepartures } from './compareDepartures';
 export { default as createCanvas } from './createCanvas';
+export { default as getVehiclePosition } from './getVehiclePosition';
 export * as realtimeConfig from './realtimeConfig';

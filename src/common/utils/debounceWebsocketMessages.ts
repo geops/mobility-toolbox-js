@@ -9,6 +9,7 @@ import type {
  * @param {function(objects: any[])} onUpdate callback when list of subscribed objects changes, called after 100 ms
  * @param {function(object: any)} [getObjectId = true] function returning the id of an object
  * @param {number} [timeout = 100] debounce timeout in ms
+ * @private
  */
 const debounceWebsocketMessages = (
   onUpdate: (objects: any[]) => void,

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/geops/mobility-toolbox-js/compare/v2.1.1...v2.2.0) (2023-10-13)
+
+
+### Features
+
+* add new get an gettrajectory method in realtimeapi ([#195](https://github.com/geops/mobility-toolbox-js/issues/195)) ([0461fde](https://github.com/geops/mobility-toolbox-js/commit/0461fdebe8f36e0680eb5d802546ec91306da843))
+
+### [2.1.1](https://github.com/geops/mobility-toolbox-js/compare/v2.1.0...v2.1.1) (2023-10-06)
+
+
+### Bug Fixes
+
+* add trajectory to the list even if they are filtered out ([f0d034c](https://github.com/geops/mobility-toolbox-js/commit/f0d034c6cd815dde6a27c65ff85330df7720521b))
+
 ## [2.1.0](https://github.com/geops/mobility-toolbox-js/compare/v1.7.5...v2.1.0) (2022-06-20)
 
 This version contains lot of breaking change, to make things simpler to use and to remove all application specific stuff.

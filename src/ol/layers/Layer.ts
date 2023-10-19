@@ -83,7 +83,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
   /**
    * Define layer's properties.
    *
-   * @ignore
+   * @private
    */
   defineProperties(options: OlLayerOptions) {
     super.defineProperties(options);

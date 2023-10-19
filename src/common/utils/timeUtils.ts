@@ -1,7 +1,7 @@
 /**
  * Get a Date object as UTC date string .
  * ex: 2019 09 01
- * @ignore
+ * @private
  */
 export const getUTCDateString = (now = new Date()): string => {
   let month = (now.getUTCMonth() + 1).toString();
@@ -15,7 +15,7 @@ export const getUTCDateString = (now = new Date()): string => {
 /**
  * Get the UTC time string of Date object.
  * ex: 09:05:01.123
- * @ignore
+ * @private
  */
 export const getUTCTimeString = (date: Date): string =>
   [
@@ -26,7 +26,7 @@ export const getUTCTimeString = (date: Date): string =>
 
 /**
  * Returns a string representation of a number, with a zero if the number is lower than 10.
- * @ignore
+ * @private
  */
 export const pad = (integer: number): string =>
   integer < 10 ? `0${integer}` : `${integer}`;
@@ -34,7 +34,7 @@ export const pad = (integer: number): string =>
 /**
  * Returns a 'hh:mm' string from a time in ms.
  * @param {Number} timeInMs Time in milliseconds.
- * @ignore
+ * @private
  */
 export const getHoursAndMinutes = (timeInMs: number): string => {
   if (!timeInMs || timeInMs <= 0) {

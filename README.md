@@ -5,6 +5,7 @@ The tools in this library have been inspired by many projects realized for publi
 
 [![npm](https://img.shields.io/npm/v/mobility-toolbox-js.svg?style=flat-square)](https://www.npmjs.com/package/mobility-toolbox-js)
 [![Build](https://github.com/geops/mobility-toolbox-js/workflows/Build/badge.svg)](https://github.com/geops/mobility-toolbox-js/actions?query=workflow%3ABuild)
+[![Lint / Unit tests](https://github.com/geops/mobility-toolbox-js/workflows/Lint%20/%20Unit%20tests/badge.svg)](https://github.com/geops/mobility-toolbox-js/actions?query=workflow%3ALint%20/%20Unit%20tests)
 ![Vercel](https://vercelbadge.vercel.app/api/geops/mobility-toolbox-js)
 
 ## Documentation and examples
@@ -23,7 +24,7 @@ Visit https://mobility-toolbox-js.vercel.app/
 Install the library and the peer dependencies:
 
 ```bash
-yarn add mobility-toolbox-js ol@6.14.1 mapbox-gl@1 maplibre-gl@2
+yarn add mobility-toolbox-js ol maplibre-gl
 ```
 
 ## Development
@@ -39,6 +40,3 @@ This library website is deployed automatically using [Vercel](https://vercel.com
 For Vercel we have to add the nextjs and raw-loader modules in the dev dependencies of the main package.json.
 But those 2 librairies are not needed to build the library.
 
-## Version 1.x.x
-
-The master branch is now open for the version 2 development. The version 1 is still available in [1.x.x](https://github.com/geops/mobility-toolbox-js/tree/1.x.x) branch.
