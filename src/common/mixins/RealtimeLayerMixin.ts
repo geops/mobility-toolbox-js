@@ -84,6 +84,15 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
   bbox?: (number | string)[];
   buffer?: number[];
   pingIntervalMs?: number;
+  bboxParameters?: {
+    [index: string]:
+      | string
+      | number
+      | boolean
+      | string[]
+      | boolean[]
+      | number[];
+  };
 };
 
 /**
@@ -144,6 +153,16 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     api: RealtimeAPI;
 
     tenant: RealtimeTenant;
+
+    bboxParameters?: {
+      [index: string]:
+        | string
+        | number
+        | boolean
+        | string[]
+        | boolean[]
+        | number[];
+    };
 
     time?: Date;
 
@@ -356,6 +375,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         canvas,
         styleOptions,
         mode,
+        bboxParameters,
       } = options;
 
       let currCanvas = canvas;
@@ -427,6 +447,14 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
             currSpeed = newSpeed;
             this.start();
           },
+        },
+
+        /**
+         * Custom parameters to send on each BBOX request.
+         */
+        bboxParameters: {
+          value: bboxParameters,
+          writable: true,
         },
 
         /**
@@ -797,6 +825,12 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       if (this.tenant) {
         bbox.push(`tenant=${this.tenant}`);
+      }
+
+      if (this.bboxParameters) {
+        Object.entries(this.bboxParameters).forEach(([key, value]) => {
+          bbox.push(`${key}=${value}`);
+        });
       }
 
       this.api.bbox = bbox;
