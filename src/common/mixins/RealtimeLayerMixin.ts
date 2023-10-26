@@ -827,6 +827,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         bbox.push(`tenant=${this.tenant}`);
       }
 
+      if (this.mode !== 'topographic') {
+        bbox.push(`channel_prefix=${this.mode}`);
+      }
+
       if (this.bboxParameters) {
         Object.entries(this.bboxParameters).forEach(([key, value]) => {
           bbox.push(`${key}=${value}`);
