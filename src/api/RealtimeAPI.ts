@@ -80,7 +80,7 @@ export const RealtimeModes = {
 class RealtimeAPI {
   url!: string;
 
-  version: RealtimeVersion = '1';
+  version: RealtimeVersion = '2';
 
   wsApi!: WebSocketAPI;
 

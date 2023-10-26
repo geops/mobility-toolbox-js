@@ -33,8 +33,8 @@ export default () => {
 
   const cache = {};
   const tracker = new RealtimeLayer({
-    url: 'wss://api.geops.io/realtime-ws/dev/',
-    apiKey: '5cc87b12d7c5370001c1d6552f74b904e4f644699efa5779559ccd45',
+    url: 'wss://api.geops.io/realtime-ws/v1/',
+    apiKey: window.apiKey,
     version: '2',
     tenant: 'sbm',
     generalizationLevelByZoom: [],
