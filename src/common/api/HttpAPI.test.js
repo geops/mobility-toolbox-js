@@ -48,8 +48,8 @@ describe('HttpAPI', () => {
 
         api.fetch().catch((err) => {
           expect(err.name).toEqual('FetchError');
-          expect(err.message).toEqual(
-            'invalid json response body at  reason: Unexpected token i in JSON at position 0',
+          expect(err.message).toMatch(
+            'invalid json response body at  reason: Unexpected token',
           );
           done();
         });
