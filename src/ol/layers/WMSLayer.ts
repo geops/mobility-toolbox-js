@@ -26,9 +26,9 @@ class WMSLayer extends Layer {
   constructor(options: OlLayerOptions) {
     super(options);
 
-    /** @ignore */
+    /** @private */
     this.abortController = new AbortController();
-    /** @ignore */
+    /** @private */
     this.format = new GeoJSON();
   }
 

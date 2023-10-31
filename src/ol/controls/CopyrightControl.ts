@@ -1,7 +1,6 @@
 import { MapEvent } from 'ol';
 import { inView } from 'ol/layer/Layer';
 import Control, { Options } from 'ol/control/Control';
-import { FrameState } from 'ol/Map';
 import removeDuplicate from '../../common/utils/removeDuplicate';
 import createDefaultCopyrightElement from '../../common/utils/createDefaultCopyrightElt';
 

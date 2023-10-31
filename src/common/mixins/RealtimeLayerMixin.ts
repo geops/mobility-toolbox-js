@@ -38,6 +38,7 @@ import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
 import LayerCommon from '../layers/LayerCommon';
 import type { OlLayerOptions } from '../../ol/layers/Layer';
+import { FilterFunction, SortFunction } from '../typedefs';
 
 export type RealtimeLayerMixinOptions = OlLayerOptions & {
   debug?: boolean;
@@ -83,6 +84,15 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
   bbox?: (number | string)[];
   buffer?: number[];
   pingIntervalMs?: number;
+  bboxParameters?: {
+    [index: string]:
+      | string
+      | number
+      | boolean
+      | string[]
+      | boolean[]
+      | number[];
+  };
 };
 
 /**
@@ -143,6 +153,16 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     api: RealtimeAPI;
 
     tenant: RealtimeTenant;
+
+    bboxParameters?: {
+      [index: string]:
+        | string
+        | number
+        | boolean
+        | string[]
+        | boolean[]
+        | number[];
+    };
 
     time?: Date;
 
@@ -339,7 +359,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     /**
      * Define layer's properties.
      *
-     * @ignore
+     * @private
      */
     defineProperties(options: RealtimeLayerMixinOptions) {
       const {
@@ -355,6 +375,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         canvas,
         styleOptions,
         mode,
+        bboxParameters,
       } = options;
 
       let currCanvas = canvas;
@@ -426,6 +447,14 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
             currSpeed = newSpeed;
             this.start();
           },
+        },
+
+        /**
+         * Custom parameters to send on each BBOX request.
+         */
+        bboxParameters: {
+          value: bboxParameters,
+          writable: true,
         },
 
         /**
@@ -781,13 +810,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       if (this.isUpdateBboxOnMoveEnd && zoom) {
         bbox.push(zoom);
 
-        /* @ignore */
+        /* @private */
         this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
 
-        /* @ignore */
+        /* @private */
         this.mots = this.getMotsByZoom(zoom);
         if (this.mots) {
           bbox.push(`mots=${this.mots}`);
@@ -796,6 +825,16 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       if (this.tenant) {
         bbox.push(`tenant=${this.tenant}`);
+      }
+
+      if (this.mode !== 'topographic') {
+        bbox.push(`channel_prefix=${this.mode}`);
+      }
+
+      if (this.bboxParameters) {
+        Object.entries(this.bboxParameters).forEach(([key, value]) => {
+          bbox.push(`${key}=${value}`);
+        });
       }
 
       this.api.bbox = bbox;
@@ -940,7 +979,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @param {Array<number>} extent
      * @param {number} zoom
      * @return {boolean} if the trajectory must be displayed or not.
-     * @ignore
+     * @private
      */
     purgeTrajectory(
       trajectory: RealtimeTrajectory,
@@ -1100,7 +1139,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         id = feature.get('train_id');
       }
       if (this.hoverVehicleId !== id) {
-        /** @ignore */
+        /** @private */
         this.hoverVehicleId = id;
         // @ts-ignore
         this.renderTrajectories(true);
@@ -1125,7 +1164,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         id = feature.get('train_id');
       }
       if (this.selectedVehicleId !== id) {
-        /** @ignore */
+        /** @private */
         this.selectedVehicleId = id;
         this.selectedVehicle = feature;
 

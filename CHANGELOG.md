@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/geops/mobility-toolbox-js/compare/v2.2.1...v2.3.0) (2023-10-26)
+
+
+### Features
+
+* use realtime api v2 by default ([#194](https://github.com/geops/mobility-toolbox-js/issues/194)) ([fb5e950](https://github.com/geops/mobility-toolbox-js/commit/fb5e9509b17ee383278fe1af7d2e56c76633f3dc))
+
+### [2.2.1](https://github.com/geops/mobility-toolbox-js/compare/v2.2.0...v2.2.1) (2023-10-25)
+
+
+### Bug Fixes
+
+* add new bboxParamters property ([ee56316](https://github.com/geops/mobility-toolbox-js/commit/ee5631604dbfee009c0e8c5208b5cedb51616796))
+
 ## [2.2.0](https://github.com/geops/mobility-toolbox-js/compare/v2.1.1...v2.2.0) (2023-10-13)
 
 

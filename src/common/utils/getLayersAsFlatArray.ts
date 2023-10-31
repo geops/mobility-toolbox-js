@@ -1,4 +1,5 @@
 // TODO: I use any to avoid circular dependency  with common/layers/layer
+/** @private */
 const getLayersAsFlatArray = (layersOrLayer: any | any[]): any[] => {
   let layers = layersOrLayer;
   if (!Array.isArray(layers)) {

@@ -74,7 +74,7 @@ export default class MapboxLayer extends MapGlLayer {
 
     // Options the last render run did happen. If something changes
     // we have to render again
-    /** @ignore */
+    /** @private */
     this.renderState = {
       center: [x, y],
       zoom: undefined,
@@ -97,7 +97,7 @@ export default class MapboxLayer extends MapGlLayer {
       }
       this.mbMap.resize();
 
-      /** @ignore */
+      /** @private */
       this.copyrights = getMapboxMapCopyrights(this.mbMap) || [];
 
       // @ts-ignore

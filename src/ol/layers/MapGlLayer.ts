@@ -72,7 +72,7 @@ class MapGlLayer extends Layer {
      */
     this.apiKeyName = options.apiKeyName || 'key';
 
-    /** @ignore */
+    /** @private */
     this.updateAttribution = this.updateAttribution.bind(this);
   }
 

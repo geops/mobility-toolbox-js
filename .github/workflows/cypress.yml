@@ -3,24 +3,31 @@ name: Cypress
 on: [push]
 
 jobs:
-  run:
+  chrome:
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node16.14.2-slim-chrome100-ff99-edge
+      image: cypress/browsers:node-20.9.0-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
       options: --user 1001
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Cypress install
-        uses: cypress-io/github-action@v4
-        with:
-          runTests: false
-      # report machine parameters
+      - run: yarn install --frozen-lockfile
       - run: yarn cypress info
       - run: node --version
       - run: node -p 'os.cpus()'
       - run: yarn cy:test:chrome
+  edge:
+    runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node-20.9.0-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
+      options: --user 1001
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: yarn install --frozen-lockfile
+      - run: yarn cypress info
+      - run: node --version
+      - run: node -p 'os.cpus()'
       - run: yarn cy:test:edge
 
   # chrome:

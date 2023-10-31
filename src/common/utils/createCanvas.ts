@@ -5,6 +5,7 @@ import { AnyCanvas } from '../../types';
  * it uses document.createElement('canvas') if document is available
  * or new OffscreenCanvas(width, height) if OffscreenCanvas is avalaible (for web worker)
  * or it returns null if neither is available.
+ * @private
  */
 const createCanvas = (width: number, height: number): AnyCanvas | null => {
   let canvas = null;

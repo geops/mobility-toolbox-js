@@ -97,13 +97,13 @@ function DetailDocs({ docs, title }) {
                 </span>
               </span>
             </h3>
-            {doc.export && doc.importPath && doc.importStyle && (
+            {/* {doc.export && doc.importPath && doc.importStyle && (
               <div data-ice="importPath" className="import-path">
                 <SyntaxHighlighter language="js">
                   {`import ${doc.importStyle} from '${doc.importPath}';`}
                 </SyntaxHighlighter>
               </div>
-            )}
+            )} */}
             <div className="deprecated" data-ice="deprecated">
               <DeprecatedHTML doc={doc} />
             </div>

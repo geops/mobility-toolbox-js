@@ -1,5 +1,6 @@
 import type { RealtimeTrajectory } from '../../api/typedefs';
 
+/** @private */
 const sortByDelay = (
   traj1: RealtimeTrajectory,
   traj2: RealtimeTrajectory,

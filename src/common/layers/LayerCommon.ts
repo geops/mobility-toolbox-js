@@ -116,7 +116,7 @@ export default class Layer extends BaseObject {
   /**
    * Define layer's properties that needs custom get and set.
    *
-   * @ignore
+   * @private
    */
   defineProperties(options: LayerCommonOptions = {}) {
     const { name, key, properties, hitTolerance } = {
@@ -264,7 +264,7 @@ export default class Layer extends BaseObject {
    */
   attachToMap(map: AnyMap) {
     this.detachFromMap();
-    /** @ignore */
+    /** @private */
     this.map = map;
 
     if (this.children) {
@@ -279,7 +279,7 @@ export default class Layer extends BaseObject {
    */
   // eslint-disable-next-line class-methods-use-this
   detachFromMap() {
-    /** @ignore */
+    /** @private */
     this.map = undefined;
   }
 

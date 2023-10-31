@@ -9,3 +9,5 @@ export type RoutingResponse = Routing['/']['get']['responses']['200']['schema'];
 
 export type StopsParameters = Stops['/']['get']['parameters']['query'];
 export type StopsResponse = Stops['/']['get']['responses']['200']['schema'];
+
+export type RealtimeVersion = '1' | '2';

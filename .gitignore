@@ -122,3 +122,6 @@ build
 # esdoc files
 apidoc
 doc/src/components/Esdoc/index.json
+
+#cypress
+cypress/screenshots

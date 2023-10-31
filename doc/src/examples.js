@@ -5,7 +5,7 @@ import olRoutingReadme from '../public/static/examples/ol-routing.md';
 import olStopFinderReadme from '../public/static/examples/ol-stop-finder.md';
 import tralisLiveMapReadme from '../public/static/examples/tralis-live-map.md';
 
-// const munichAssets = require('./examples/assets/tralis-live-map').default;
+// import munichAssets from '../public/static/examples/tralis-live-map';
 
 // To make redirect works properly on netlify it's important that the key
 // are differents from the name of js and html files.
@@ -59,7 +59,7 @@ export default [
   //   key: 'tralis-live-map',
   //   description:
   //     'Realtime vehicle positions and prognosis data based on scheduled times, realtime updates and GPS locations.',
-  //   img: liveTrackerMunichImg,
+  //   img: '/static/img/routing.jpg',
   //   extraFiles: {
   //     'assets/tralis-live-map/index.js': {
   //       content: `export default ${JSON.stringify(munichAssets)};`,
@@ -69,16 +69,16 @@ export default [
   // },
   // These examples are used for the dbug of RealtimeLayer don't remove them pls.
   // {
-  //   name: 'Realtime tracker with OpenLayers',
+  //   name: 'Tralis tracker with OpenLayers',
   //   key: 'ol-tralis',
   //   description: 'Show moving tramway in an OpenLayers map.',
-  //   img: liveTrackerOLImg,
+  //   img: '/static/img/routing.jpg',
   // },
   // {
-  //   name: 'Realtime tracker with Mapbox',
+  //   name: 'Tralis tracker with Mapbox',
   //   key: 'mapbox-tralis',
   //   description: 'Show moving tramway in an Mapbox map.',
-  //   img: liveTrackerOLImg,
+  //   img: '/static/img/routing.jpg',
   // },
   {
     name: 'Mapbox layer',

@@ -5,6 +5,7 @@ import { toLonLat } from 'ol/proj';
 import type { MapboxLayer } from '../../ol';
 /**
  * Return the render function fo the olLayer of a MaplibreLayer
+ * @private
  */
 export default function getMapboxRender(
   mapoxLayer: MapboxLayer,

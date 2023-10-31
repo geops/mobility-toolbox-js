@@ -2,14 +2,7 @@ module.exports = {
   source: './build',
   destination: './apidoc',
   includes: ['\\.(js)$', 'typedefs\\.js$'],
-  excludes: [
-    'setupTests\\.*',
-    '^iife',
-    '^mbt\\.*',
-    '\\.test\\.js$',
-    'doc/',
-    '(u|U)tils',
-  ],
+  excludes: ['setupTests\\.*', '^iife', '^mbt\\.*', '\\.test\\.js$', 'doc/'],
   plugins: [
     {
       name: 'esdoc-standard-plugin',
