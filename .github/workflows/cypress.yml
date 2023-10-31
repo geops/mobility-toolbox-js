@@ -6,7 +6,7 @@ jobs:
   chrome:
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node-18.15.0-chrome-106.0.5249.61-1-ff-99.0.1-edge-114.0.1823.51-1
+      image: cypress/browsers:node-20.9.0-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
       options: --user 1001
     steps:
       - name: Checkout
@@ -19,7 +19,7 @@ jobs:
   edge:
     runs-on: ubuntu-latest
     container:
-      image: cypress/browsers:node-18.15.0-chrome-106.0.5249.61-1-ff-99.0.1-edge-114.0.1823.51-1
+      image: cypress/browsers:node-20.9.0-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
       options: --user 1001
     steps:
       - name: Checkout
