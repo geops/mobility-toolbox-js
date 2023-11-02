@@ -11,11 +11,11 @@ import type { MaplibreLayer } from '../../ol';
  */
 
 export default function getMaplibreRender(
-  maplibreLayer: MaplibreLayer,
+  layer: MaplibreLayer,
 ): RenderFunction {
   let emptyDiv: HTMLElement;
   return (frameState: FrameState) => {
-    const { map, mbMap, olLayer } = maplibreLayer;
+    const { map, mbMap } = layer;
     if (!map || !mbMap) {
       if (!emptyDiv) {
         emptyDiv = document.createElement('div');
@@ -26,7 +26,7 @@ export default function getMaplibreRender(
     const canvas = mbMap.getCanvas();
     const { viewState } = frameState;
 
-    const opacity = olLayer?.getOpacity() || 1;
+    const opacity = layer?.getOpacity() || 1;
     canvas.style.opacity = `${opacity}`;
 
     // adjust view parameters in mapbox

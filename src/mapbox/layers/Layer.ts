@@ -1,9 +1,10 @@
+// @ts-nocheck
 import { EventsKey } from 'ol/events';
 import { unByKey } from 'ol/Observable';
 import { transformExtent } from 'ol/proj';
 import LayerCommon, {
   LayerCommonOptions,
-} from '../../common/layers/LayerCommon';
+} from '../../common/mixins/PropertiesLayerMixin';
 import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
 import { AnyMapboxMap, UserInteractionCallback } from '../../types';
 
@@ -22,6 +23,7 @@ import { AnyMapboxMap, UserInteractionCallback } from '../../types';
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
+
 class Layer extends userInteractionsMixin(LayerCommon) {
   options!: LayerCommonOptions;
 

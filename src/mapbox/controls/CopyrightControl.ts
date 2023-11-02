@@ -1,6 +1,8 @@
 import { ControlPosition, IControl } from 'maplibre-gl';
 import { getMapboxMapCopyrights } from '../../common/utils';
 
+const DEFAULT_SEPARATOR = ' | ';
+
 /**
  * Display layer's copyrights.
  *
@@ -27,13 +29,23 @@ class CopyrightControl implements IControl {
 
   content?: string;
 
+  options?: {
+    customAttribution?: string | string[];
+    separator?: string;
+  };
+
+  constructor(options = {}) {
+    this.options = options;
+  }
+
   onAdd(map: maplibregl.Map) {
     this.map = map;
-    this.container = document.createElement('div');
-    this.container.className = 'maplibregl-ctrl maplibregl-ctrl-attrib';
+    if (!this.container) {
+      this.container = document.createElement('div');
+    }
     this.render = this.render.bind(this);
     this.map.on('idle', this.render);
-    // this.map.on('sourcedata', this.render);
+    this.map.on('sourcedata', this.render);
     this.map.on('styledata', this.render);
     this.render();
     return this.container;
@@ -50,6 +62,8 @@ class CopyrightControl implements IControl {
       this.map.off('idle', this.render);
     }
     this.map = undefined;
+
+    return this.container;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -59,8 +73,15 @@ class CopyrightControl implements IControl {
 
   render() {
     if (this.map && this.container) {
-      const content = getMapboxMapCopyrights(this.map).join(' | ');
-      if (content !== this.content) {
+      const separator = this.options?.separator || DEFAULT_SEPARATOR;
+
+      const attribs =
+        this.options?.customAttribution || getMapboxMapCopyrights(this.map);
+      const content = (Array.isArray(attribs) ? attribs : [attribs]).join(
+        separator,
+      );
+
+      if (this.container.innerHTML !== content) {
         this.content = content;
         this.container.innerHTML = this.content;
       }

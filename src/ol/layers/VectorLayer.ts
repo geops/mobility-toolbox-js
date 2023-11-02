@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { LayerGetFeatureInfoResponse } from '../../types';

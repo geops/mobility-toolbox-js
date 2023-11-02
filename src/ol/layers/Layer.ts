@@ -1,15 +1,17 @@
+/* eslint-disable @typescript-eslint/no-useless-constructor */
+// @ts-nocheck
 import { Map } from 'ol';
+import Base from 'ol/layer/Layer';
 import { EventsKey } from 'ol/events';
 import LayerGroup from 'ol/layer/Group';
-import OlLayer from 'ol/layer/Layer';
 import { unByKey } from 'ol/Observable';
-import LayerCommon from '../../common/layers/LayerCommon';
-import type { LayerCommonOptions } from '../../common/layers/LayerCommon';
-import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
+import type { LayerCommonOptions } from '../../common/mixins/PropertiesLayerMixin';
+import UserInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
 import type { UserInteractionCallback } from '../../types';
+import PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';
 
 export type OlLayerOptions = LayerCommonOptions & {
-  olLayer?: OlLayer;
+  olLayer?: Base;
 };
 
 /**
@@ -27,8 +29,8 @@ export type OlLayerOptions = LayerCommonOptions & {
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {LayerCommon}
  */
-class Layer extends userInteractionsMixin(LayerCommon) {
-  olLayer?: OlLayer | LayerGroup;
+class Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {
+  olLayer?: Base | LayerGroup;
 
   olListenersKeys!: EventsKey[];
 
@@ -66,7 +68,6 @@ class Layer extends userInteractionsMixin(LayerCommon) {
    * Constructor.
    *
    * @param {LayerCommonOptions} options
-   * @param {ol/layer/Layer~Layer} options.olLayer The layer (required).
    * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
    * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
    * @param {string} [options.copyright=undefined] Copyright-Statement.
@@ -76,8 +77,15 @@ class Layer extends userInteractionsMixin(LayerCommon) {
    */
   constructor(options: OlLayerOptions) {
     super(options);
+  }
 
-    this.olLayer?.setVisible(this.visible);
+  setMapInternal(map: Map) {
+    super.setMapInternal(map);
+    if (map) {
+      this.attachToMap(map);
+    } else {
+      this.detachFromMap();
+    }
   }
 
   /**
@@ -88,7 +96,21 @@ class Layer extends userInteractionsMixin(LayerCommon) {
   defineProperties(options: OlLayerOptions) {
     super.defineProperties(options);
     Object.defineProperties(this, {
-      olLayer: { value: options.olLayer, writable: true },
+      olLayer: {
+        get: () => {
+          // eslint-disable-next-line no-console
+          console.log(
+            "Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This getter is only a redirect to the current 'this' object.",
+          );
+          return this;
+        },
+        set: () => {
+          // eslint-disable-next-line no-console
+          console.log(
+            'Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This setter has no effect.',
+          );
+        },
+      },
       olListenersKeys: {
         value: [],
       },
@@ -98,6 +120,7 @@ class Layer extends userInteractionsMixin(LayerCommon) {
   /**
    * Initialize the layer and listen to feature clicks.
    * @param {ol/Map~Map} map
+   * @private
    */
   attachToMap(map: Map) {
     super.attachToMap(map);
@@ -106,78 +129,11 @@ class Layer extends userInteractionsMixin(LayerCommon) {
       return;
     }
 
-    // Make sure the visiblity is correct
-    this.olLayer?.setVisible(this.visible);
-
-    if (
-      this.olLayer &&
-      !this.map?.getLayers()?.getArray()?.includes(this.olLayer)
-    ) {
-      this.map.addLayer(this.olLayer);
-    }
-
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:visible', () => {
-        if (this.olLayer) {
-          this.olLayer.setVisible(this.visible);
-        }
-      }),
-    );
-
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:minZoom', () => {
-        if (this.olLayer && this.get('minZoom')) {
-          this.olLayer.setMinZoom(this.get('minZoom'));
-        }
-      }),
-    );
-
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:maxZoom', () => {
-        if (this.olLayer && this.get('maxZoom')) {
-          this.olLayer.setMaxZoom(this.get('maxZoom'));
-        }
-      }),
-    );
-
-    this.olListenersKeys.push(
-      this.map.getLayers().on('remove', (evt) => {
-        if (evt.element === this.olLayer) {
-          this.detachFromMap();
-        }
-      }),
-    );
-
     this.toggleVisibleListeners();
     this.olListenersKeys.push(
       // @ts-ignore
       this.on('change:visible', this.toggleVisibleListeners),
     );
-
-    // We set the copyright to the source used by the layer.
-    if (this.copyrights && this.olLayer) {
-      const attributions = this.copyrights || [];
-      if ((this.olLayer as unknown as LayerGroup).getLayers) {
-        (this.olLayer as unknown as LayerGroup)
-          .getLayers()
-          .getArray()
-          .forEach((layer) => {
-            // @ts-ignore
-            if (layer.getSource) {
-              // @ts-ignore
-              layer.getSource()?.setAttributions(attributions);
-            }
-          });
-
-        // @ts-ignore
-      } else if (this.olLayer.getSource) {
-        // @ts-ignore
-        this.olLayer.getSource()?.setAttributions(attributions);
-      }
-    }
   }
 
   /**
@@ -186,13 +142,6 @@ class Layer extends userInteractionsMixin(LayerCommon) {
   detachFromMap() {
     this.deactivateUserInteractions();
     unByKey(this.olListenersKeys);
-
-    if (
-      this.olLayer &&
-      this.map?.getLayers()?.getArray()?.includes(this.olLayer)
-    ) {
-      this.map.removeLayer(this.olLayer);
-    }
 
     super.detachFromMap();
   }

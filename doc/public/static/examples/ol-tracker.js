@@ -17,23 +17,23 @@ export default () => {
     controls: [],
   });
 
-  const control = new CopyrightControl();
-  control.attachToMap(map);
+  map.addControl(new CopyrightControl());
 
   const layer = new MaplibreLayer({
     url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
-  layer.attachToMap(map);
+  map.addLayer(layer);
 
-  const tracker = new RealtimeLayer({
+  const realtime = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
     debug: true,
   });
-  tracker.attachToMap(map);
+  map.addLayer(realtime);
 
-  tracker.onClick(([feature]) => {
+  let maxZoom = 20;
+  realtime.onClick(([feature]) => {
     if (feature) {
       // eslint-disable-next-line no-console
       console.log(feature.getProperties());

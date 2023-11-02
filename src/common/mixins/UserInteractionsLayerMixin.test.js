@@ -1,6 +1,6 @@
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import BaseLayer from '../layers/LayerCommon';
+import BaseLayer from './PropertiesLayerMixin';
 import mixin from './UserInteractionsLayerMixin';
 
 const olLayer = new VectorLayer({ source: new VectorSource() });

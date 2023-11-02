@@ -36,7 +36,7 @@ import {
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
-import LayerCommon from '../layers/LayerCommon';
+import LayerCommon from './PropertiesLayerMixin';
 import type { OlLayerOptions } from '../../ol/layers/Layer';
 import { FilterFunction, SortFunction } from '../typedefs';
 
@@ -577,7 +577,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       // On change of visibility we start/stop the rendering clock
       this.visibilityRef = this.on('change:visible', (evt: ObjectEvent) => {
-        if ((evt.target as unknown as LayerCommon).visible) {
+        if ((evt.target as any).visible) {
           this.start();
         } else {
           this.stop();

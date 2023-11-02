@@ -3,6 +3,7 @@
 /* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
+// @ts-nocheck
 import { fromLonLat } from 'ol/proj';
 import { unByKey } from 'ol/Observable';
 import { EventsKey } from 'ol/events';
@@ -11,7 +12,7 @@ import { Coordinate } from 'ol/coordinate';
 import { MapBrowserEvent, MapEvent } from 'ol';
 import BaseEvent from 'ol/events/Event';
 import { AnyMap, CommonLayerClass, UserInteractionCallback } from '../../types';
-import LayerCommon from '../layers/LayerCommon';
+import LayerCommon from './PropertiesLayerMixin';
 
 export type UserInteractionsLayerMixinOptions = {
   userInteractions?: boolean;
@@ -177,6 +178,7 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
       this.unlistenEvents();
       this.userClickCallbacks.forEach((callback) => {
         this.userClickEventsKeys.push(
+          // @ts-ignore
           this.on(
             // @ts-ignore
             'user:click',

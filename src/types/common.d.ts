@@ -16,7 +16,9 @@ import type {
   layer as OlLayer,
 } from '../ol';
 import { RealtimeTrajectory } from '../api/typedefs';
-import CommonLayer, { LayerCommonOptions } from '../common/layers/LayerCommon';
+import CommonLayer, {
+  LayerCommonOptions,
+} from '../common/mixins/PropertiesLayerMixin';
 import type { RoutingParameters } from '.';
 
 export type StyleCache = { [key: string]: AnyCanvas };
@@ -83,7 +85,8 @@ export type AnyOlLayer = OlLayer;
 export type AnyMapboxLayer = MapboxLayer | MaplibreLayer;
 export type AnyRealtimeLayer = MbRealtimeLayer | OlRealtimeLayer;
 export type AnyCopyrightControl = MbCopyrightControl | OlCopyrightControl;
-export type AnyMapboxMap = mapboxgl.Map | maplibregl.Map;
+export type AnyMapboxMap = mapboxgl.Map | maplibregl.Ma;
+export type AnyMapboxMapOptions = mapboxgl.MapOptions | maplibregl.MapOptions;
 export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type AnyCanvasContext =
   | CanvasRenderingContext2D

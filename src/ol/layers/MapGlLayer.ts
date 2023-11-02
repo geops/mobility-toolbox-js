@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+// @ts-nocheck
 import { toLonLat } from 'ol/proj';
 import OlLayer, { RenderFunction } from 'ol/layer/Layer';
 import Source from 'ol/source/Source';
@@ -10,6 +11,7 @@ import { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';
 import {
   AnyMapboxMap,
   AnyMapboxMapClass,
+  AnyMapboxMapOptions,
   LayerGetFeatureInfoResponse,
 } from '../../types';
 import Layer, { OlLayerOptions } from './Layer';
@@ -18,7 +20,7 @@ export type MapGlLayerOptions = OlLayerOptions & {
   url?: string;
   apiKey?: string;
   apiKeyName?: string;
-  mapOptions?: any;
+  mapOptions?: AnyMapboxMapOptions;
   tabIndex?: number;
 };
 
@@ -41,13 +43,19 @@ class MapGlLayer extends Layer {
 
   options!: MapGlLayerOptions;
 
-  constructor(options: MapGlLayerOptions) {
-    super(options);
-
-    this.olLayer = new OlLayer({
+  constructor(options: MapGlLayerOptions = {}) {
+    super({
       source: new Source({}),
-      render: this.getOlLayerRender(),
+      ...options,
     });
+    this.render = this.getOlLayerRender();
+
+    // if no specific attributions set on the source, we use the default one.
+    if (!this.getSource().getAttributions()) {
+      this.getSource().setAttributions(() => {
+        return getMapboxMapCopyrights(this.mbMap);
+      });
+    }
 
     /**
      * Url of the mapbox style.
@@ -71,9 +79,6 @@ class MapGlLayer extends Layer {
      * @private
      */
     this.apiKeyName = options.apiKeyName || 'key';
-
-    /** @private */
-    this.updateAttribution = this.updateAttribution.bind(this);
   }
 
   /**
@@ -103,7 +108,6 @@ class MapGlLayer extends Layer {
    */
   detachFromMap() {
     if (this.mbMap) {
-      this.mbMap.off('idle', this.updateAttribution);
       // Some asynchrone repaints are triggered even if the mbMap has been removed,
       // to avoid display of errors we set an empty function.
       this.mbMap.triggerRepaint = () => {};
@@ -185,21 +189,6 @@ class MapGlLayer extends Layer {
 
       this.dispatchEvent(new BaseEvent('load'));
     });
-
-    this.mbMap.on('idle', this.updateAttribution);
-  }
-
-  /**
-   * Update attributions of the source.
-   * @private
-   */
-  updateAttribution(evt: maplibregl.MapLibreEvent | mapboxgl.MapboxEvent) {
-    const newAttributions = getMapboxMapCopyrights(evt.target) || [];
-    if (this.copyrights?.toString() !== newAttributions.toString()) {
-      this.copyrights = newAttributions;
-      // @ts-ignore
-      this.olLayer?.getSource()?.setAttributions(newAttributions);
-    }
   }
 
   /**

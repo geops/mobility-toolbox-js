@@ -1,5 +1,6 @@
+// @ts-nocheck
 import GeoJSON from 'ol/format/GeoJSON';
-import { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorLayer } from 'ol/layer';
 import Source from 'ol/source/Source';
 import { composeCssTransform } from 'ol/transform';
 import { Vector as VectorSource } from 'ol/source';
@@ -7,8 +8,9 @@ import Feature, { FeatureLike } from 'ol/Feature';
 import { MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
+import { FrameState } from 'ol/Map';
 import Layer from './Layer';
-import mixin, {
+import RealtimeLayerMixin, {
   RealtimeLayerMixinOptions,
 } from '../../common/mixins/RealtimeLayerMixin';
 import { fullTrajectoryStyle } from '../styles';
@@ -53,7 +55,7 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
  * @implements {RealtimeLayerInterface}
  */
 // @ts-ignore
-class RealtimeLayer extends mixin(Layer) {
+class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   allowRenderWhenAnimating?: boolean = false;
 
   /**
@@ -66,90 +68,23 @@ class RealtimeLayer extends mixin(Layer) {
     // We use a group to be able to add custom vector layer in extended class.
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
+      source: new Source({}), // TODO set some attributions
       ...options,
     });
 
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
-    /** @private */
-    this.olLayer =
-      options.olLayer ||
-      new Group({
-        layers: [
-          new VectorLayer({
-            source: new VectorSource({ features: [] }),
-            style: (feature, resolution) => {
-              return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
-                feature,
-                resolution,
-                this.styleOptions,
-              );
-            },
-          }),
-          new OLLayer({
-            source: new Source({}),
-            render: (frameState) => {
-              if (!this.container) {
-                this.container = document.createElement('div');
-                this.container.style.position = 'absolute';
-                this.container.style.width = '100%';
-                this.container.style.height = '100%';
-                this.transformContainer = document.createElement('div');
-                this.transformContainer.style.position = 'absolute';
-                this.transformContainer.style.width = '100%';
-                this.transformContainer.style.height = '100%';
-                this.container.appendChild(this.transformContainer);
-                if (this.canvas) {
-                  (this.canvas as HTMLCanvasElement).style.position =
-                    'absolute';
-                  (this.canvas as HTMLCanvasElement).style.top = '0';
-                  (this.canvas as HTMLCanvasElement).style.left = '0';
-                  (this.canvas as HTMLCanvasElement).style.transformOrigin =
-                    'top left';
-                  this.transformContainer.appendChild(this.canvas);
-                }
-              }
-
-              if (this.renderedViewState) {
-                const { center, resolution, rotation } = frameState.viewState;
-                const {
-                  center: renderedCenter,
-                  resolution: renderedResolution,
-                  rotation: renderedRotation,
-                } = this.renderedViewState;
-
-                if (renderedResolution / resolution >= 3) {
-                  // Avoid having really big points when zooming fast.
-                  const context = this.canvas?.getContext('2d');
-                  context?.clearRect(
-                    0,
-                    0,
-                    this.canvas?.width as number,
-                    this.canvas?.height as number,
-                  );
-                } else {
-                  const pixelCenterRendered =
-                    this.map.getPixelFromCoordinate(renderedCenter);
-                  const pixelCenter = this.map.getPixelFromCoordinate(center);
-                  this.transformContainer.style.transform = composeCssTransform(
-                    pixelCenterRendered[0] - pixelCenter[0],
-                    pixelCenterRendered[1] - pixelCenter[1],
-                    renderedResolution / resolution,
-                    renderedResolution / resolution,
-                    rotation - renderedRotation,
-                    0,
-                    0,
-                  );
-                }
-              }
-              return this.container;
-            },
-          }),
-        ],
-      });
-
     // We store the layer used to highlight the full Trajectory
-    this.vectorLayer = this.olLayer.getLayers().item(0);
+    this.vectorLayer = new VectorLayer({
+      source: new VectorSource({ features: [] }),
+      style: (feature, resolution) => {
+        return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
+          feature,
+          resolution,
+          this.styleOptions,
+        );
+      },
+    });
 
     // Options the last render run did happen. If something changes
     // we have to render again
@@ -161,9 +96,62 @@ class RealtimeLayer extends mixin(Layer) {
     };
   }
 
+  render(frameState: FrameState) {
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.className = this.getClassName();
+      this.container.style.position = 'absolute';
+      this.container.style.width = '100%';
+      this.container.style.height = '100%';
+      if (this.canvas) {
+        (this.canvas as HTMLCanvasElement).style.position = 'absolute';
+        (this.canvas as HTMLCanvasElement).style.top = '0';
+        (this.canvas as HTMLCanvasElement).style.left = '0';
+        (this.canvas as HTMLCanvasElement).style.transformOrigin = 'top left';
+        this.container.appendChild(this.canvas);
+      }
+    }
+
+    if (this.renderedViewState) {
+      const { center, resolution, rotation } = frameState.viewState;
+      const {
+        center: renderedCenter,
+        resolution: renderedResolution,
+        rotation: renderedRotation,
+      } = this.renderedViewState;
+
+      if (renderedResolution / resolution >= 3) {
+        // Avoid having really big points when zooming fast.
+        const context = this.canvas?.getContext('2d');
+        context?.clearRect(
+          0,
+          0,
+          this.canvas?.width as number,
+          this.canvas?.height as number,
+        );
+      } else {
+        const pixelCenterRendered =
+          this.map.getPixelFromCoordinate(renderedCenter);
+        const pixelCenter = this.map.getPixelFromCoordinate(center);
+        this.container.style.transform = composeCssTransform(
+          pixelCenterRendered[0] - pixelCenter[0],
+          pixelCenterRendered[1] - pixelCenter[1],
+          renderedResolution / resolution,
+          renderedResolution / resolution,
+          rotation - renderedRotation,
+          0,
+          0,
+        );
+      }
+    }
+    return this.container;
+  }
+
   attachToMap(map: AnyMap) {
     super.attachToMap(map);
     if (this.map) {
+      const index = this.map.getLayers().getArray().indexOf(this);
+      this.map.getLayers().insertAt(index, this.vectorLayer);
       this.olListenersKeys.push(
         ...this.map.on(
           ['moveend', 'change:target'],
@@ -185,6 +173,16 @@ class RealtimeLayer extends mixin(Layer) {
             this.onMoveEnd(evt);
           },
         ),
+        this.on('propertychange', (evt: ObjectEvent) => {
+          // We apply every property change event related to visiblity to the vectorlayer
+          if (
+            /(opacity|visible|zIndex|minResolution|maxResolution|minZoom|maxZoom)/.test(
+              evt.key,
+            )
+          ) {
+            this.vectorLayer.set(evt.key, evt.target.get(evt.key));
+          }
+        }),
       );
     }
   }
@@ -193,6 +191,7 @@ class RealtimeLayer extends mixin(Layer) {
    * Destroy the container of the tracker.
    */
   detachFromMap() {
+    this.map?.removeLayer(this.vectorLayer);
     super.detachFromMap();
     this.container = null;
   }
@@ -276,8 +275,8 @@ class RealtimeLayer extends mixin(Layer) {
     if (isRendered) {
       this.renderedViewState = { ...viewState };
 
-      if (this.transformContainer) {
-        this.transformContainer.style.transform = '';
+      if (this.container) {
+        this.container.style.transform = '';
       }
     }
     return isRendered;
@@ -385,12 +384,7 @@ class RealtimeLayer extends mixin(Layer) {
     coordinate: Coordinate,
   ) {
     super.onFeatureClick(features, layer, coordinate);
-    if (!features.length && this.vectorLayer) {
-      this.vectorLayer.getSource().clear();
-    }
-    if (this.selectedVehicleId) {
-      this.highlightTrajectory(this.selectedVehicleId);
-    }
+    this.highlightTrajectory(this.selectedVehicleId);
   }
 
   /**
@@ -436,11 +430,15 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    */
   highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
+    if (!id) {
+      this.vectorLayer.getSource().clear(true);
+      return Promise.resolve([]);
+    }
     return this.api
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
         const fullTrajectory = data.content;
-        this.vectorLayer.getSource().clear();
+        this.vectorLayer.getSource().clear(true);
 
         if (
           !fullTrajectory ||
@@ -452,6 +450,10 @@ class RealtimeLayer extends mixin(Layer) {
         const features = format.readFeatures(fullTrajectory);
         this.vectorLayer.getSource().addFeatures(features);
         return features;
+      })
+      .catch(() => {
+        this.vectorLayer.getSource().clear(true);
+        return [];
       });
   }
 

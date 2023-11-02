@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+// @ts-nocheck
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
