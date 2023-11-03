@@ -1,4 +1,4 @@
-import { Map } from 'maplibre-gl';
+import { Map } from 'maplibre-gl/dist/maplibre-gl-dev';
 import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/mapbox';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -15,26 +15,26 @@ export default () => {
     attributionControl: false,
   });
 
-  const control = new CopyrightControl();
-  map.addControl(copyright);
+  map.addControl(new CopyrightControl());
 
   // Define the layer
-  const tracker = new RealtimeLayer({
+  const realtime = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
+    key: 'test',
   });
 
-  // Add the layer to the map
-  tracker.attachToMap(map);
+  map.on('load', () => {
+    console.log(realtime.source.id, realtime.source);
+    // map.addSource(realtime.source.id, realtime.source);
+    map.addLayer(realtime);
 
-  // Remove the layer from the map
-  // tracker.detachFromMap(map);
-
-  // Display informations on click in the console
-  tracker.onClick(([feature]) => {
-    if (feature) {
-      // eslint-disable-next-line no-console
-      console.log(feature.getProperties());
-    }
+    // Display informations on click in the console
+    realtime.onClick(([feature]) => {
+      if (feature) {
+        // eslint-disable-next-line no-console
+        console.log(feature.getProperties());
+      }
+    });
   });
 };

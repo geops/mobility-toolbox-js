@@ -1,12 +1,28 @@
 // @ts-nocheck
+// eslint-disable-next-line max-classes-per-file
 import { EventsKey } from 'ol/events';
+import { CustomLayerInterface } from 'maplibre-gl';
 import { unByKey } from 'ol/Observable';
 import { transformExtent } from 'ol/proj';
-import LayerCommon, {
+import PropertiesLayerMixin, {
   LayerCommonOptions,
 } from '../../common/mixins/PropertiesLayerMixin';
-import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
+import UserInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
 import { AnyMapboxMap, UserInteractionCallback } from '../../types';
+
+class Base implements CustomLayerInterface {
+  // eslint-disable-next-line class-methods-use-this
+  onAdd() {}
+
+  // eslint-disable-next-line class-methods-use-this
+  onRemove() {}
+
+  defineProperties() {}
+
+  attachToMap() {}
+
+  detachFromMap() {}
+}
 
 /**
  * A class representing a layer to display on an OpenLayers map.
@@ -24,7 +40,7 @@ import { AnyMapboxMap, UserInteractionCallback } from '../../types';
  * @extends {Layer}
  */
 
-class Layer extends userInteractionsMixin(LayerCommon) {
+class Layer extends UserInteractionsMixin(Base) {
   options!: LayerCommonOptions;
 
   onChangeVisibleKey?: EventsKey;
@@ -44,6 +60,21 @@ class Layer extends userInteractionsMixin(LayerCommon) {
   onUserClickCallback!: () => void;
 
   onUserMoveCallback!: () => void;
+
+  // constructor() {
+  //   // this.id = 'null-island';
+  //   // this.type = 'custom';
+  //   // this.renderingMode = '2d';
+  // }
+
+  onAdd(map) {
+    console.log('attachToMap');
+    this.attachToMap(map);
+  }
+
+  onRemove() {
+    this.detachFromMap(map);
+  }
 
   /**
    * Initialize the layer and listen to user events.

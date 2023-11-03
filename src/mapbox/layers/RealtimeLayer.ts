@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { fromLonLat } from 'ol/proj';
 import { unByKey } from 'ol/Observable';
 import { getWidth, getHeight } from 'ol/extent';
@@ -5,7 +6,7 @@ import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
 import { Coordinate } from 'ol/coordinate';
 import { Feature } from 'ol';
-import mixin from '../../common/mixins/RealtimeLayerMixin';
+import RealtimeLayerMixin from '../../common/mixins/RealtimeLayerMixin';
 import Layer from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
 import type {
@@ -33,11 +34,47 @@ import type { RealtimeTrajectory } from '../../api/typedefs';
  * @implements {RealtimeLayerInterface}
  */
 // @ts-ignore
-class RealtimeLayer extends mixin(Layer) {
+class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   constructor(options = {}) {
+    const canvas = document.createElement('canvas');
     super({
+      canvas,
       ...options,
     });
+
+    console.log(this.canvas);
+    const { key } = options;
+    this.key = key;
+    this.source = {
+      id: this.key,
+      type: 'canvas',
+      canvas: this.canvas,
+      coordinates: [
+        [0, 0],
+        [1, 1],
+        [2, 2],
+        [0, 0],
+      ], // getSourceCoordinates(map, this.pixelRatio),
+      // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
+      animate: true,
+      attribution: this.copyrights && this.copyrights.join(', '),
+      loaded: true,
+    };
+
+    const 
+    this.layer = {
+      id: this.key,
+      type: 'raster',
+      source: this.key,
+      layout: {
+        visibility: this.visible ? 'visible' : 'none',
+      },
+      paint: {
+        'raster-opacity': 1,
+        'raster-fade-duration': 0,
+        'raster-resampling': 'nearest', // important otherwise it looks blurry
+      },
+    };
 
     /** @private */
     this.onLoad = this.onLoad.bind(this);
@@ -55,6 +92,16 @@ class RealtimeLayer extends mixin(Layer) {
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  onAdd() {
+    console.log('onAdd');
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  onRemove() {
+    console.log('onRemove');
+  }
+
   /**
    * Initialize the layer.
    *
@@ -69,29 +116,7 @@ class RealtimeLayer extends mixin(Layer) {
     }
     super.attachToMap(map);
 
-    this.source = {
-      type: 'canvas',
-      canvas: this.canvas,
-      coordinates: getSourceCoordinates(map, this.pixelRatio),
-      // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
-      animate: true,
-      attribution: this.copyrights && this.copyrights.join(', '),
-    };
-
     this.beforeId = beforeId;
-    this.layer = {
-      id: this.key,
-      type: 'raster',
-      source: this.key,
-      layout: {
-        visibility: this.visible ? 'visible' : 'none',
-      },
-      paint: {
-        'raster-opacity': 1,
-        'raster-fade-duration': 0,
-        'raster-resampling': 'nearest', // important otherwise it looks blurry
-      },
-    };
 
     if (map.isStyleLoaded()) {
       this.onLoad();

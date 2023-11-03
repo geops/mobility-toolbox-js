@@ -243,6 +243,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         hitTolerance: 10,
         ...options,
       });
+      this.defineProperties(options);
 
       this.debug = options.debug || false;
       this.mode = options.mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
@@ -377,7 +378,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         mode,
         bboxParameters,
       } = options;
-
+      console.log('lalala', canvas);
       let currCanvas = canvas;
       let currSpeed = speed || 1;
       let currTime = time || new Date();

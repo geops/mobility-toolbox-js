@@ -1,8 +1,11 @@
 // @ts-nocheck
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
+import { Vector } from 'ol/layer';
 import { LayerGetFeatureInfoResponse } from '../../types';
-import Layer, { OlLayerOptions } from './Layer';
+import { OlLayerOptions } from './Layer';
+import PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';
+import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
 
 /**
  * A class use to display vector data.
@@ -10,7 +13,9 @@ import Layer, { OlLayerOptions } from './Layer';
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
-class VectorLayer extends Layer {
+class VectorLayer extends UserInteractionsLayerMixin(
+  PropertiesLayerMixin(Vector),
+) {
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.

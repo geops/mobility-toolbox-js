@@ -158,13 +158,13 @@ function PropertiesLayerMixin(Base: any) {
         },
         /* Layer's state properties */
         visible: {
-          get: () => this.getVisible(),
+          get: () => this.get('visible'),
           set: (newVisible) => {
             if (newVisible === this.visible) {
               return;
             }
 
-            this.setVisible(newVisible);
+            this.set('visible', newVisible);
 
             if (this.visible) {
               // We make the parent visible
