@@ -28,7 +28,6 @@ export default () => {
   const realtime = new RealtimeLayer({
     url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
-    debug: true,
   });
   map.addLayer(realtime);
 
