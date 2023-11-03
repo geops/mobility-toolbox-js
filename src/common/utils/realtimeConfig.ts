@@ -179,18 +179,23 @@ export const getDelayText = (delayInMs: number, cancelled: boolean): string => {
   if (cancelled) {
     return String.fromCodePoint(0x00d7);
   }
-  if (delayInMs > 3600000) {
+  if (delayInMs >= 3600000) {
     const rounded = Math.round(delayInMs / 3600000);
     return `+${rounded}h`;
   }
 
-  if (delayInMs > 59000) {
+  if (delayInMs >= 60000) {
     const rounded = Math.round(delayInMs / 60000);
     return `+${rounded}m`;
   }
 
+  if (delayInMs >= 1000) {
+    const rounded = Math.round(delayInMs / 1000);
+    return `+${rounded}s`;
+  }
+
   if (delayInMs > 0) {
-    return `+${delayInMs}s`;
+    return `+${delayInMs}ms`;
   }
 
   return '';
