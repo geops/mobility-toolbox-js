@@ -25,15 +25,15 @@ export default () => {
   });
 
   map.on('load', () => {
-    console.log(realtime.source.id, realtime.source);
+    // console.log(realtime.source.id, realtime.source);
     // map.addSource(realtime.source.id, realtime.source);
-    map.addLayer(realtime);
+    const layer = map.addLayer(realtime);
 
     // Display informations on click in the console
     realtime.onClick(([feature]) => {
       if (feature) {
         // eslint-disable-next-line no-console
-        console.log(feature.getProperties());
+        console.log(feature);
       }
     });
   });

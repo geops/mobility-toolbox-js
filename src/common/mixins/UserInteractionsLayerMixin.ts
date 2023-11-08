@@ -5,14 +5,8 @@
 /* eslint-disable max-classes-per-file */
 // @ts-nocheck
 import { fromLonLat } from 'ol/proj';
-import { unByKey } from 'ol/Observable';
-import { EventsKey } from 'ol/events';
-import { ObjectEvent } from 'ol/Object';
 import { Coordinate } from 'ol/coordinate';
-import { MapBrowserEvent, MapEvent } from 'ol';
-import BaseEvent from 'ol/events/Event';
-import { AnyMap, CommonLayerClass, UserInteractionCallback } from '../../types';
-import LayerCommon from './PropertiesLayerMixin';
+import { AnyMap, UserInteractionCallback } from '../../types';
 
 export type UserInteractionsLayerMixinOptions = {
   userInteractions?: boolean;
@@ -88,9 +82,7 @@ export class UserInteractionsLayerInterface {
  * @return {Class}  A class that implements {UserInteractionsLayerInterface} class and extends Base;
  * @private
  */
-function UserInteractionsLayerMixin<T extends CommonLayerClass>(
-  Base: T,
-): T & typeof LayerCommon {
+function UserInteractionsLayerMixin<T>(Base: T): T {
   // @ts-ignore
   return class extends Base {
     userInteractions: boolean;
@@ -104,10 +96,6 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
     userClickCallbacks: UserInteractionCallback[];
 
     userHoverCallbacks: UserInteractionCallback[];
-
-    userClickEventsKeys: EventsKey[];
-
-    userHoverEventsKeys: EventsKey[];
 
     onFeatureClick?: UserInteractionCallback;
 
@@ -166,50 +154,10 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
       ) {
         this.onHover(this.onFeatureHover);
       }
-      this.listenEvents();
     }
 
     detachFromMap() {
-      this.unlistenEvents();
       super.detachFromMap();
-    }
-
-    listenEvents() {
-      this.unlistenEvents();
-      this.userClickCallbacks.forEach((callback) => {
-        this.userClickEventsKeys.push(
-          // @ts-ignore
-          this.on(
-            // @ts-ignore
-            'user:click',
-            ({
-              target: { features, layer, coordinate, event },
-            }: ObjectEvent) => {
-              callback(features, layer, coordinate, event);
-            },
-          ),
-        );
-      });
-      this.userHoverCallbacks.forEach((callback) => {
-        this.userHoverEventsKeys.push(
-          this.on(
-            // @ts-ignore
-            'user:hover',
-            ({
-              target: { features, layer, coordinate, event },
-            }: ObjectEvent) => {
-              callback(features, layer, coordinate, event);
-            },
-          ),
-        );
-      });
-    }
-
-    unlistenEvents() {
-      unByKey(this.userClickEventsKeys);
-      unByKey(this.userHoverEventsKeys);
-      this.userClickEventsKeys = [];
-      this.userHoverEventsKeys = [];
     }
 
     /**
@@ -221,10 +169,6 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
     onClick(callback: UserInteractionCallback) {
       this.userClickCallbacks.push(callback);
       this.activateUserInteractions();
-      if (this.map) {
-        // If the layer is already attached to the map we reload the events
-        this.listenEvents();
-      }
     }
 
     /**
@@ -235,10 +179,6 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
     onHover(callback: UserInteractionCallback) {
       this.userHoverCallbacks.push(callback);
       this.activateUserInteractions();
-      if (this.map) {
-        // If the layer is already attached to the map we reload the events
-        this.listenEvents();
-      }
     }
 
     /**
@@ -253,11 +193,6 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
         return;
       }
       this.userClickCallbacks = this.userClickCallbacks.slice(index, 1);
-
-      if (this.map) {
-        // If the layer is already attached to the map we reload the events
-        this.listenEvents();
-      }
     }
 
     /**
@@ -271,11 +206,6 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
         return;
       }
       this.userHoverCallbacks = this.userHoverCallbacks.slice(index, 1);
-
-      if (this.map) {
-        // If the layer is already attached to the map we reload the events
-        this.listenEvents();
-      }
     }
 
     /**
@@ -288,27 +218,7 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
         | mapboxgl.MapLayerMouseEvent
         | maplibregl.MapMouseEvent,
     ) {
-      const coordinate =
-        (evt as { coordinate: Coordinate }).coordinate ||
-        fromLonLat(
-          (
-            evt as mapboxgl.MapLayerMouseEvent | maplibregl.MapMouseEvent
-          ).lngLat.toArray() as Coordinate,
-        );
-      const emptyFeatureInfo = {
-        features: [],
-        layer: this,
-        coordinate,
-        event: evt,
-      };
-      return this.getFeatureInfoAtCoordinate(coordinate)
-        .then((featureInfo) => {
-          const event = new BaseEvent('user:click');
-          event.target = featureInfo;
-          this.dispatchEvent(event);
-          return featureInfo;
-        })
-        .catch(() => emptyFeatureInfo);
+      return this.onUserActionCallback(evt, this.userClickCallbacks);
     }
 
     /**
@@ -321,12 +231,17 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
         | mapboxgl.MapLayerMouseEvent
         | maplibregl.MapMouseEvent,
     ) {
+      return this.onUserActionCallback(evt, this.userHoverCallbacks);
+    }
+
+    onUserActionCallback(
+      evt: { coordinate: Coordinate } | { lngLat: maplibregl.LngLat },
+      callbacks,
+    ) {
       const coordinate =
         (evt as { coordinate: Coordinate }).coordinate ||
         fromLonLat(
-          (
-            evt as mapboxgl.MapLayerMouseEvent | maplibregl.MapMouseEvent
-          ).lngLat.toArray() as Coordinate,
+          (evt as { lngLat: maplibregl.LngLat }).lngLat.toArray() as Coordinate,
         );
       const emptyFeatureInfo = {
         features: [],
@@ -337,9 +252,10 @@ function UserInteractionsLayerMixin<T extends CommonLayerClass>(
 
       return this.getFeatureInfoAtCoordinate(coordinate)
         .then((featureInfo) => {
-          const event = new BaseEvent('user:hover');
-          event.target = featureInfo;
-          this.dispatchEvent(event);
+          callbacks.forEach((callback) => {
+            const { features, layer, coordinate: coord } = featureInfo;
+            callback(features, layer, coord);
+          });
           return featureInfo;
         })
         .catch(() => emptyFeatureInfo);

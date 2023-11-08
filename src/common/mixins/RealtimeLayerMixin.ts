@@ -13,6 +13,7 @@ import { EventsKey } from 'ol/events';
 import { ObjectEvent } from 'ol/Object';
 import { Coordinate } from 'ol/coordinate';
 import { Feature } from 'ol';
+import { GeoJSONFeature } from 'maplibre-gl';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
@@ -572,18 +573,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       super.attachToMap(map);
 
       // If the layer is visible we start  the rendering clock
-      if (this.visible) {
-        this.start();
-      }
-
-      // On change of visibility we start/stop the rendering clock
-      this.visibilityRef = this.on('change:visible', (evt: ObjectEvent) => {
-        if ((evt.target as any).visible) {
-          this.start();
-        } else {
-          this.stop();
-        }
-      });
+      // if (this.visible) {
+      this.start();
+      // }
 
       // To avoid browser hanging when the tab is not visible for a certain amount of time,
       // We stop the rendering and the websocket when hide and start again when show.
@@ -927,7 +919,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       return Promise.resolve({
         layer: this,
-        features: vehicles.map((vehicle) => this.format.readFeature(vehicle)),
+        features: vehicles,
         coordinate,
       });
     }
@@ -1130,14 +1122,16 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @override
      */
     onFeatureHover(
-      features: Feature[],
+      features: (Feature | GeoJSONFeature)[],
       layer: AnyRealtimeLayer,
       coordinate: Coordinate,
     ) {
       const [feature] = features;
       let id = null;
       if (feature) {
-        id = feature.get('train_id');
+        id = (feature as Feature).get
+          ? (feature as Feature).get('train_id')
+          : (feature as GeoJSONFeature).properties.train_id;
       }
       if (this.hoverVehicleId !== id) {
         /** @private */
@@ -1154,15 +1148,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @private
      * @override
      */
-    onFeatureClick(
-      features: Feature[],
-      layer: AnyRealtimeLayer,
-      coordinate: Coordinate,
-    ) {
+    onFeatureClick(features: (Feature | GeoJSONFeature)[]) {
       const [feature] = features;
       let id = null;
       if (feature) {
-        id = feature.get('train_id');
+        id = (feature as Feature).get
+          ? (feature as Feature).get('train_id')
+          : (feature as GeoJSONFeature).properties.train_id;
       }
       if (this.selectedVehicleId !== id) {
         /** @private */

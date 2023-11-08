@@ -6,6 +6,7 @@ import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
 import { Coordinate } from 'ol/coordinate';
 import { Feature } from 'ol';
+import { MercatorCoordinate } from 'maplibre-gl';
 import RealtimeLayerMixin from '../../common/mixins/RealtimeLayerMixin';
 import Layer from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
@@ -42,7 +43,6 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
       ...options,
     });
 
-    console.log(this.canvas);
     const { key } = options;
     this.key = key;
     this.source = {
@@ -61,13 +61,12 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
       loaded: true,
     };
 
-    const 
     this.layer = {
-      id: this.key,
+      id: `${this.key}-layer`,
       type: 'raster',
       source: this.key,
       layout: {
-        visibility: this.visible ? 'visible' : 'none',
+        visibility: 'visible',
       },
       paint: {
         'raster-opacity': 1,
@@ -79,27 +78,14 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     /** @private */
     this.onLoad = this.onLoad.bind(this);
 
-    /** @private */
+    // /** @private */
     this.onMove = this.onMove.bind(this);
 
-    /** @private */
+    // /** @private */
     this.onMoveEnd = this.onMoveEnd.bind(this);
 
-    /** @private */
+    // /** @private */
     this.onZoomEnd = this.onZoomEnd.bind(this);
-
-    /** @private */
-    this.onVisibilityChange = this.onVisibilityChange.bind(this);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  onAdd() {
-    console.log('onAdd');
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  onRemove() {
-    console.log('onRemove');
   }
 
   /**
@@ -123,8 +109,6 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     }
 
     this.map.on('load', this.onLoad);
-
-    this.listeners = [this.on('change:visible', this.onVisibilityChange)];
   }
 
   /**
@@ -138,11 +122,11 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
       this.listeners.forEach((listener) => {
         unByKey(listener);
       });
-      if (this.map.style && this.map.getLayer(this.key)) {
-        this.map.removeLayer(this.key);
+      if (this.map.style && this.map.getLayer(this.layer.id)) {
+        this.map.removeLayer(this.layer.id);
       }
       if (this.map.style && this.map.getSource(this.key)) {
-        this.map.removeSource(this.key);
+        this.map.removeSource(`${this.key}-realtime`);
       }
     }
     super.detachFromMap();
@@ -181,7 +165,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     if (!this.map.getSource(this.key)) {
       this.map.addSource(this.key, this.source);
     }
-    if (!this.map.getLayer(this.key)) {
+    if (!this.map.getLayer(this.layer.id)) {
       this.map.addLayer(this.layer, this.beforeId);
     }
   }
@@ -278,20 +262,6 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     });
   }
 
-  onVisibilityChange() {
-    if (this.visible && !this.map.getLayer(this.key)) {
-      this.map.addLayer(this.layer, this.beforeId);
-    } else if (this.map.getLayer(this.key)) {
-      this.map.removeLayer(this.key);
-    }
-    // We can't use setLayoutProperty it triggers an error probably a bug in mapbox
-    // this.map.setLayoutProperty(
-    //   this.key,
-    //   'visibilty',
-    //   this.visible ? 'visible' : 'none',
-    // );
-  }
-
   /**
    * Remove the trajectory form the list if necessary.
    *
@@ -355,10 +325,25 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   onMoveEnd() {
     this.renderTrajectories();
 
-    if (this.visible && this.isUpdateBboxOnMoveEnd) {
+    if (this.isUpdateBboxOnMoveEnd) {
       this.setBbox();
     }
   }
+
+  // onClick(callback) {
+  //   if (!this.clickCallbacks) {
+  //     this.clickCallbacks = [];
+  //   }
+  //   const clickCallback = (evt) => {
+  //     this.getFeatureInfoAtCoordinate(
+  //       fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
+  //     ).then(({ features }) => {
+  //       callback(features);
+  //     });
+  //   };
+  //   this.clickCallbacks.push(clickCallback);
+  //   this.map?.on('click', clickCallback);
+  // }
 
   /**
    * Update the cursor style when hovering a vehicle.

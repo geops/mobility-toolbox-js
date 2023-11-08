@@ -1,23 +1,64 @@
 // @ts-nocheck
 // eslint-disable-next-line max-classes-per-file
 import { EventsKey } from 'ol/events';
-import { CustomLayerInterface } from 'maplibre-gl';
+import { CustomLayerInterface, Evented } from 'maplibre-gl';
 import { unByKey } from 'ol/Observable';
 import { transformExtent } from 'ol/proj';
-import PropertiesLayerMixin, {
-  LayerCommonOptions,
-} from '../../common/mixins/PropertiesLayerMixin';
-import UserInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
+import { LayerCommonOptions } from '../../common/mixins/PropertiesLayerMixin';
 import { AnyMapboxMap, UserInteractionCallback } from '../../types';
+import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
 
-class Base implements CustomLayerInterface {
-  // eslint-disable-next-line class-methods-use-this
-  onAdd() {}
+class CustomLayer extends Evented implements CustomLayerInterface {
+  constructor(options) {
+    super(options);
+    this.id = options.key;
+    this.type = 'custom';
+    this.visible = true;
+    this.hitTolerance = 5;
+  }
 
-  // eslint-disable-next-line class-methods-use-this
-  onRemove() {}
+  onAdd(map) {
+    this.map = map;
+    this.attachToMap(map);
+  }
 
-  defineProperties() {}
+  onRemove() {
+    this.detachFromMap(map);
+    this.map = null;
+  }
+
+  render() {}
+
+  defineProperties(options = {}) {
+    // const { visible } = options;
+    Object.defineProperties(this, {
+      // visible: {
+      //   get: () => {
+      //     if (this.map?.getLayer(this.layer?.id)) {
+      //       visible =
+      //         (this.map.getLayoutProperty(this.layer?.id, 'visibility') ||
+      //           null) === 'visible';
+      //     }
+      //     return visible;
+      //   },
+      //   set: (newValue) => {
+      //     visible = !!newValue;
+      //     if (!this.map?.getLayer(id)) {
+      //       return;
+      //     }
+      //     this.map.setLayoutProperty(
+      //       this.layer.id,
+      //       'layout',
+      //       visible ? 'visible' : 'none',
+      //     );
+      //     this.fireEvent('change:visible', {
+      //       layer: this,
+      //       newValue: visible,
+      //     });
+      //   },
+      // },
+    });
+  }
 
   attachToMap() {}
 
@@ -40,7 +81,7 @@ class Base implements CustomLayerInterface {
  * @extends {Layer}
  */
 
-class Layer extends UserInteractionsMixin(Base) {
+class Layer extends UserInteractionsLayerMixin(CustomLayer) {
   options!: LayerCommonOptions;
 
   onChangeVisibleKey?: EventsKey;
@@ -60,21 +101,6 @@ class Layer extends UserInteractionsMixin(Base) {
   onUserClickCallback!: () => void;
 
   onUserMoveCallback!: () => void;
-
-  // constructor() {
-  //   // this.id = 'null-island';
-  //   // this.type = 'custom';
-  //   // this.renderingMode = '2d';
-  // }
-
-  onAdd(map) {
-    console.log('attachToMap');
-    this.attachToMap(map);
-  }
-
-  onRemove() {
-    this.detachFromMap(map);
-  }
 
   /**
    * Initialize the layer and listen to user events.
@@ -139,6 +165,7 @@ class Layer extends UserInteractionsMixin(Base) {
    * @private
    */
   toggleVisibleListeners() {
+    console.log('lala', this.visible);
     if (this.visible) {
       this.activateUserInteractions();
     } else {

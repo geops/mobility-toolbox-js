@@ -173,6 +173,13 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
             this.onMoveEnd(evt);
           },
         ),
+        this.on('change:visible', (evt: ObjectEvent) => {
+          if ((evt.target as any).visible) {
+            this.start();
+          } else {
+            this.stop();
+          }
+        }),
         this.on('propertychange', (evt: ObjectEvent) => {
           // We apply every property change event related to visiblity to the vectorlayer
           if (
@@ -302,10 +309,19 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     }
 
     const resolution = this.map.getView().getResolution();
-    return super.getFeatureInfoAtCoordinate(coordinate, {
-      resolution,
-      ...options,
-    });
+    return super
+      .getFeatureInfoAtCoordinate(coordinate, {
+        resolution,
+        ...options,
+      })
+      .then((featureInfo) => {
+        const olFeatures = featureInfo.features.map((vehicle) =>
+          this.format.readFeature(vehicle),
+        );
+        // eslint-disable-next-line no-param-reassign
+        featureInfo.features = olFeatures;
+        return featureInfo;
+      });
   }
 
   /**
