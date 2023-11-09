@@ -1,14 +1,12 @@
 // @ts-nocheck
 import { fromLonLat } from 'ol/proj';
-import { unByKey } from 'ol/Observable';
 import { getWidth, getHeight } from 'ol/extent';
 import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
 import { Coordinate } from 'ol/coordinate';
 import { Feature } from 'ol';
-import { MercatorCoordinate } from 'maplibre-gl';
 import RealtimeLayerMixin from '../../common/mixins/RealtimeLayerMixin';
-import Layer from './Layer';
+import Layer, { LayerOptions } from './Layer';
 import { getSourceCoordinates, getMercatorResolution } from '../utils';
 import type {
   AnyMapboxMap,
@@ -16,6 +14,13 @@ import type {
   ViewState,
 } from '../../types';
 import type { RealtimeTrajectory } from '../../api/typedefs';
+import toMercatorExtent from '../../common/utils/toMercatorExtent';
+import UserInteractionsLayerMixin, {
+  UserInteractionsLayerMixinOptions,
+} from '../../common/mixins/UserInteractionsLayerMixin';
+
+export type RealtimeLayerOptions = UserInteractionsLayerMixinOptions &
+  LayerOptions;
 
 /**
  * Responsible for loading and display data from a Realtime service.
@@ -32,10 +37,16 @@ import type { RealtimeTrajectory } from '../../api/typedefs';
  * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
  *
  * @extends {Layer}
+ * @implements {UserInteractionsLayerInterface}
  * @implements {RealtimeLayerInterface}
  */
 // @ts-ignore
-class RealtimeLayer extends RealtimeLayerMixin(Layer) {
+class RealtimeLayer extends RealtimeLayerMixin(
+  UserInteractionsLayerMixin(Layer),
+) {
+  /**
+   * Extends Layer
+   */
   constructor(options = {}) {
     const canvas = document.createElement('canvas');
     super({
@@ -43,18 +54,17 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
       ...options,
     });
 
-    const { key } = options;
-    this.key = key;
     this.source = {
-      id: this.key,
+      id: this.id,
       type: 'canvas',
       canvas: this.canvas,
+      // Set a default coordinates, it will be overrides on next data update
       coordinates: [
         [0, 0],
         [1, 1],
         [2, 2],
         [0, 0],
-      ], // getSourceCoordinates(map, this.pixelRatio),
+      ],
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
       attribution: this.copyrights && this.copyrights.join(', '),
@@ -62,9 +72,9 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     };
 
     this.layer = {
-      id: `${this.key}-layer`,
+      id: `${this.id}-raster`,
       type: 'raster',
-      source: this.key,
+      source: this.id,
       layout: {
         visibility: 'visible',
       },
@@ -96,13 +106,11 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    * @override
    */
   // @ts-ignore
-  attachToMap(map: AnyMapboxMap, beforeId: string) {
+  attachToMap(map: AnyMapboxMap) {
     if (!map) {
       return;
     }
     super.attachToMap(map);
-
-    this.beforeId = beforeId;
 
     if (map.isStyleLoaded()) {
       this.onLoad();
@@ -118,19 +126,30 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     if (this.map) {
       this.map.off('load', this.onLoad);
 
-      // @ts-ignore
-      this.listeners.forEach((listener) => {
-        unByKey(listener);
-      });
-      if (this.map.style && this.map.getLayer(this.layer.id)) {
+      if (this.map.getLayer(this.layer.id)) {
         this.map.removeLayer(this.layer.id);
       }
-      if (this.map.style && this.map.getSource(this.key)) {
-        this.map.removeSource(`${this.key}-realtime`);
+      if (this.map.getSource(this.id)) {
+        this.map.removeSource(this.id);
       }
     }
     super.detachFromMap();
   }
+
+  onLoad() {
+    if (!this.map.getSource(this.id)) {
+      this.map.addSource(this.id, this.source);
+    }
+    if (!this.map.getLayer(this.layer.id)) {
+      this.map.addLayer(this.layer, this.id);
+    }
+    this.start();
+  }
+  // End extends Layer
+
+  /**
+   * Extends RealtimeLayerMixin
+   */
 
   /**
    * Start updating vehicles position.
@@ -141,7 +160,6 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    */
   start() {
     super.start();
-
     this.map.on('move', this.onMove);
     this.map.on('moveend', this.onMoveEnd);
     this.map.on('zoomend', this.onZoomEnd);
@@ -154,33 +172,9 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    */
   stop() {
     super.stop();
-    if (this.map) {
-      this.map.off('move', this.onMove);
-      this.map.off('moveend', this.onMoveEnd);
-      this.map.off('zoomend', this.onZoomEnd);
-    }
-  }
-
-  onLoad() {
-    if (!this.map.getSource(this.key)) {
-      this.map.addSource(this.key, this.source);
-    }
-    if (!this.map.getLayer(this.layer.id)) {
-      this.map.addLayer(this.layer, this.beforeId);
-    }
-  }
-
-  /**
-   * Function triggered when the user moves the cursor over the map.
-   * @override
-   */
-  onUserMoveCallback(
-    evt: mapboxgl.MapLayerMouseEvent | maplibregl.MapMouseEvent,
-  ) {
-    super.onUserMoveCallback({
-      coordinate: fromLonLat(evt.lngLat.toArray()),
-      ...evt,
-    });
+    this.map?.off('move', this.onMove);
+    this.map?.off('moveend', this.onMoveEnd);
+    this.map?.off('zoomend', this.onZoomEnd);
   }
 
   /**
@@ -236,7 +230,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
       center: fromLonLat([center.lng, center.lat]),
       extent: bounds,
       resolution: res,
-      zoom: this.getOlZoom(),
+      zoom: this.map.getZoom() - 1,
       rotation: -(this.map.getBearing() * Math.PI) / 180,
       pixelRatio: this.pixelRatio,
     };
@@ -274,8 +268,8 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   ) {
     return super.purgeTrajectory(
       trajectory,
-      extent || this.getMercatorExtent(),
-      zoom || Math.floor(this.getOlZoom()),
+      extent || toMercatorExtent(this.map.getBounds()),
+      zoom || Math.floor(this.map.getZoom() - 1),
     );
   }
 
@@ -286,8 +280,8 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     let newExtent = extent;
     let newZoom = zoom;
     if (!newExtent && this.isUpdateBboxOnMoveEnd) {
-      newExtent = extent || this.getMercatorExtent();
-      newZoom = Math.floor(this.getOlZoom());
+      newExtent = extent || toMercatorExtent(this.map.getBounds());
+      newZoom = Math.floor(this.map.getZoom() - 1);
     }
     super.setBbox(newExtent, newZoom);
   }
@@ -308,7 +302,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     const render = super.renderTrajectoriesInternal(viewState, noInterpolate);
     if (render && this.map.style) {
       const extent = getSourceCoordinates(this.map, this.pixelRatio);
-      const source = this.map.getSource(this.key);
+      const source = this.map.getSource(this.id);
       if (source) {
         source.setCoordinates(extent);
       }
@@ -329,21 +323,21 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
       this.setBbox();
     }
   }
+  // End extends RealtimeLayerMixin
 
-  // onClick(callback) {
-  //   if (!this.clickCallbacks) {
-  //     this.clickCallbacks = [];
-  //   }
-  //   const clickCallback = (evt) => {
-  //     this.getFeatureInfoAtCoordinate(
-  //       fromLonLat([evt.lngLat.lng, evt.lngLat.lat]),
-  //     ).then(({ features }) => {
-  //       callback(features);
-  //     });
-  //   };
-  //   this.clickCallbacks.push(clickCallback);
-  //   this.map?.on('click', clickCallback);
-  // }
+  /**
+   * Extends UserInteractionsLayerMixin
+   */
+  activateUserInteractions() {
+    this.deactivateUserInteractions();
+    this.map?.on('click', this.onUserClickCallback);
+    this.map?.on('mousemove', this.onUserMoveCallback);
+  }
+
+  deactivateUserInteractions() {
+    this.map?.off('mousemove', this.onUserMoveCallback);
+    this.map?.off('click', this.onUserClickCallback);
+  }
 
   /**
    * Update the cursor style when hovering a vehicle.
@@ -357,10 +351,13 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     coordinate: Coordinate,
   ) {
     super.onFeatureHover(features, layer, coordinate);
-    this.map.getCanvasContainer().style.cursor = features.length
-      ? 'pointer'
-      : 'auto';
+    if (this.userClickCallbacks.length) {
+      this.map.getCanvasContainer().style.cursor = features.length
+        ? 'pointer'
+        : 'auto';
+    }
   }
+  // End extends UserInteractionsLayerMixin
 }
 
 export default RealtimeLayer;

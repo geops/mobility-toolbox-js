@@ -121,42 +121,41 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
       this.userHoverEventsKeys = [];
       this.onUserClickCallback = this.onUserClickCallback.bind(this);
       this.onUserMoveCallback = this.onUserMoveCallback.bind(this);
+      this.onFeatureClick = this.onFeatureClick.bind(this);
+      this.onFeatureHover = this.onFeatureHover.bind(this);
 
       // Add mouse event callbacks
       const { onClick, onHover } = options;
 
-      if (this.userInteractions && this.userClickInteractions && onClick) {
-        this.onClick(onClick);
+      if (this.userInteractions && this.userClickInteractions) {
+        if (onClick) {
+          this.onClick(onClick);
+        }
+
+        if (this.defaultUserInteractions && this.onFeatureClick) {
+          this.onClick(this.onFeatureClick);
+        }
       }
 
-      if (this.userInteractions && this.userHoverInteractions && onHover) {
-        this.onHover(onHover);
+      if (this.userInteractions && this.userHoverInteractions) {
+        if (onHover) {
+          this.onHover(onHover);
+        }
+        if (this.defaultUserInteractions && this.onFeatureHover) {
+          this.onHover(this.onFeatureHover);
+        }
       }
     }
 
     attachToMap(map: AnyMap) {
       super.attachToMap(map);
-
-      if (
-        this.userInteractions &&
-        this.defaultUserInteractions &&
-        this.userClickInteractions &&
-        this.onFeatureClick
-      ) {
-        this.onClick(this.onFeatureClick);
-      }
-
-      if (
-        this.userInteractions &&
-        this.defaultUserInteractions &&
-        this.userHoverInteractions &&
-        this.onFeatureHover
-      ) {
-        this.onHover(this.onFeatureHover);
+      if (this.userInteractions) {
+        this.activateUserInteractions();
       }
     }
 
     detachFromMap() {
+      this.deactivateUserInteractions();
       super.detachFromMap();
     }
 
@@ -261,9 +260,19 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
         .catch(() => emptyFeatureInfo);
     }
 
-    activateUserInteractions() {}
+    activateUserInteractions() {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'The activateUserInteractions function must be impkmented in subclasses',
+      );
+    }
 
-    deactivateUserInteractions() {}
+    deactivateUserInteractions() {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'The deactivateUserInteractions function must be impkmented in subclasses',
+      );
+    }
   };
 }
 

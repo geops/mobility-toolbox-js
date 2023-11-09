@@ -150,6 +150,10 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   attachToMap(map: AnyMap) {
     super.attachToMap(map);
     if (this.map) {
+      // If the layer is visible we start  the rendering clock
+      if (this.visible) {
+        this.start();
+      }
       const index = this.map.getLayers().getArray().indexOf(this);
       this.map.getLayers().insertAt(index, this.vectorLayer);
       this.olListenersKeys.push(

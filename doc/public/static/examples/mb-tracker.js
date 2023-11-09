@@ -19,14 +19,11 @@ export default () => {
 
   // Define the layer
   const realtime = new RealtimeLayer({
-    url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
-    key: 'test',
+    id: 'id',
   });
 
   map.on('load', () => {
-    // console.log(realtime.source.id, realtime.source);
-    // map.addSource(realtime.source.id, realtime.source);
     const layer = map.addLayer(realtime);
 
     // Display informations on click in the console
@@ -37,4 +34,12 @@ export default () => {
       }
     });
   });
+  document.getElementById('button').onclick = () => {
+    const prop = map.getLayoutProperty('id', 'visibility');
+    map.setLayoutProperty(
+      'id-raster',
+      'visibility',
+      prop === 'none' ? 'visible' : 'none',
+    );
+  };
 };

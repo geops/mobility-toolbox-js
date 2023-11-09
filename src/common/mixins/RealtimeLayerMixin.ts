@@ -572,11 +572,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     attachToMap(map: AnyMap) {
       super.attachToMap(map);
 
-      // If the layer is visible we start  the rendering clock
-      // if (this.visible) {
-      this.start();
-      // }
-
       // To avoid browser hanging when the tab is not visible for a certain amount of time,
       // We stop the rendering and the websocket when hide and start again when show.
       document.addEventListener(
@@ -1028,9 +1023,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     }
 
     onDocumentVisibilityChange() {
-      if (!this.visible) {
-        return;
-      }
       if (document.hidden) {
         this.stop();
 
@@ -1039,6 +1031,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         // start when the document is visible again.
         this.trajectories = {};
       } else {
+        if (this.visible === false) {
+          return;
+        }
         this.start();
       }
     }

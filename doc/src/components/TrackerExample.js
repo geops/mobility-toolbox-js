@@ -24,16 +24,29 @@ function TrackerExample() {
       attributionControl: false,
     });
     const control = new CopyrightControl();
-    control.attachToMap(map);
+    map.addControl(control);
 
-    const tracker = new RealtimeLayer({
+    const layer = new RealtimeLayer({
+      key: 'test',
       apiKey: window.apiKey,
     });
 
-    tracker.attachToMap(map);
+    const onLoad = () => {
+      map.addLayer(layer);
+    };
+
+    map.once('load', onLoad);
+
+    return () => {
+      map.off('load', onLoad);
+      if (map.getLayer(layer.id)) {
+        map.removeLayer(layer);
+      }
+      map.removeControl(control);
+    };
   }, []);
 
   return <div id="map" className={classes.root} />;
 }
 
-export default TrackerExample;
+export default React.memo(TrackerExample);

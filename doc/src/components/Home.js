@@ -20,7 +20,6 @@ const codeMapObject = `
 import { Map } from 'maplibre-gl;
 import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
 
-
 const map = new Map({
   container: 'map',
   style: 'https://maps.geops.io/styles/travic_v2/style.json?key=' + window.apiKey,
@@ -30,12 +29,14 @@ const map = new Map({
 `;
 
 const codeTracker = `
-const tracker = new RealtimeLayer({
+const layer = new RealtimeLayer({
   url: 'wss://api.geops.io/tracker-ws/v1/',
   apiKey: window.apiKey,
 });
 
-tracker.attachToMap(map);
+map.on('load', () => {
+  map.addLayer(layer);
+})
 `;
 
 function MarkdownHeading({ ...props }) {

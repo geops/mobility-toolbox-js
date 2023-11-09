@@ -1,195 +1,67 @@
-// @ts-nocheck
-// eslint-disable-next-line max-classes-per-file
-import { EventsKey } from 'ol/events';
+import { v4 as uuid } from 'uuid';
 import { CustomLayerInterface, Evented } from 'maplibre-gl';
-import { unByKey } from 'ol/Observable';
-import { transformExtent } from 'ol/proj';
-import { LayerCommonOptions } from '../../common/mixins/PropertiesLayerMixin';
-import { AnyMapboxMap, UserInteractionCallback } from '../../types';
-import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
+import { AnyMapboxMap } from '../../types';
 
-class CustomLayer extends Evented implements CustomLayerInterface {
-  constructor(options) {
-    super(options);
-    this.id = options.key;
+export type LayerOptions = {
+  id?: string;
+  visible?: boolean;
+  hitTolerance?: number;
+};
+
+/**
+ * A class representing a layer to display on an Maplibre map.
+ *
+ * @example
+ * import { Layer } from 'mobility-toolbox-js/mapbox';
+ *
+ * const layer = new Layer({ id:'MyLayer' });
+ *
+ * @implements {maplibregl.CustomLayer}
+ * @extends {maplibregl.Evented}
+ */
+class Layer extends Evented implements CustomLayerInterface {
+  id: string;
+
+  hitTolerance: number = 5;
+
+  map: AnyMapboxMap;
+
+  options: LayerOptions = {};
+
+  type: 'custom' = 'custom';
+
+  constructor(options: LayerOptions = {}) {
+    super();
+    this.options = options;
+    this.id = options.id || uuid();
     this.type = 'custom';
-    this.visible = true;
     this.hitTolerance = 5;
   }
 
-  onAdd(map) {
-    this.map = map;
-    this.attachToMap(map);
+  onAdd(map: AnyMapboxMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
+    this.attachToMap(map, gl);
   }
 
   onRemove() {
-    this.detachFromMap(map);
-    this.map = null;
+    this.detachFromMap();
   }
 
-  render() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  render(gl: WebGLRenderingContext | WebGL2RenderingContext) {}
 
-  defineProperties(options = {}) {
-    // const { visible } = options;
-    Object.defineProperties(this, {
-      // visible: {
-      //   get: () => {
-      //     if (this.map?.getLayer(this.layer?.id)) {
-      //       visible =
-      //         (this.map.getLayoutProperty(this.layer?.id, 'visibility') ||
-      //           null) === 'visible';
-      //     }
-      //     return visible;
-      //   },
-      //   set: (newValue) => {
-      //     visible = !!newValue;
-      //     if (!this.map?.getLayer(id)) {
-      //       return;
-      //     }
-      //     this.map.setLayoutProperty(
-      //       this.layer.id,
-      //       'layout',
-      //       visible ? 'visible' : 'none',
-      //     );
-      //     this.fireEvent('change:visible', {
-      //       layer: this,
-      //       newValue: visible,
-      //     });
-      //   },
-      // },
-    });
-  }
+  // eslint-disable-next-line class-methods-use-this
+  defineProperties() {}
 
-  attachToMap() {}
-
-  detachFromMap() {}
-}
-
-/**
- * A class representing a layer to display on an OpenLayers map.
- *
- * @example
- * import { Layer } from 'mobility-toolbox-js/ol';
- *
- * const layer = new Layer({
- *   olLayer: ...,
- * });
- *
- * @see <a href="/example/ol-map">Map example</a>
- *
- * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
- * @extends {Layer}
- */
-
-class Layer extends UserInteractionsLayerMixin(CustomLayer) {
-  options!: LayerCommonOptions;
-
-  onChangeVisibleKey?: EventsKey;
-
-  /* userInteractionsMixin */
-
-  userInteractions?: boolean;
-
-  userClickInteractions?: boolean;
-
-  userHoverInteractions?: boolean;
-
-  userClickCallbacks?: UserInteractionCallback[];
-
-  userHoverCallbacks?: UserInteractionCallback[];
-
-  onUserClickCallback!: () => void;
-
-  onUserMoveCallback!: () => void;
-
-  /**
-   * Initialize the layer and listen to user events.
-   * @param {mapboxgl.Map|maplibregl.Map} map
-   */
-  attachToMap(map: AnyMapboxMap) {
-    super.attachToMap(map);
-
-    if (!this.map) {
-      return;
-    }
-
-    if (this.userInteractions) {
-      this.toggleVisibleListeners();
-      this.onChangeVisibleKey = this.on(
-        // @ts-ignore
-        'change:visible',
-        this.toggleVisibleListeners,
-      );
-    }
+  attachToMap(
+    map: AnyMapboxMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    gl: WebGLRenderingContext | WebGL2RenderingContext,
+  ) {
+    this.map = map;
   }
 
   detachFromMap() {
-    if (this.map) {
-      this.deactivateUserInteractions();
-      // @ts-ignore
-      unByKey(this.onChangeVisibleKey);
-    }
-    super.detachFromMap();
-  }
-
-  activateUserInteractions() {
-    this.deactivateUserInteractions();
-    if (
-      this.map &&
-      this.userInteractions &&
-      this.userClickInteractions &&
-      this.userClickCallbacks?.length
-    ) {
-      this.map.on('click', this.onUserClickCallback);
-    }
-
-    if (
-      this.map &&
-      this.userInteractions &&
-      this.userHoverInteractions &&
-      this.userHoverCallbacks?.length
-    ) {
-      this.map.on('mousemove', this.onUserMoveCallback);
-    }
-  }
-
-  deactivateUserInteractions() {
-    if (this.map) {
-      this.map.off('mousemove', this.onUserMoveCallback);
-      this.map.off('click', this.onUserClickCallback);
-    }
-  }
-
-  /**
-   * Toggle listeners needed when a layer is avisible or not.
-   * @private
-   */
-  toggleVisibleListeners() {
-    console.log('lala', this.visible);
-    if (this.visible) {
-      this.activateUserInteractions();
-    } else {
-      this.deactivateUserInteractions();
-    }
-  }
-
-  /**
-   * Returns the current extent in mercator coordinates.
-   */
-  getMercatorExtent() {
-    const bounds = this.map.getBounds().toArray();
-    return transformExtent(
-      [...bounds[0], ...bounds[1]],
-      'EPSG:4326',
-      'EPSG:3857',
-    );
-  }
-
-  /**
-   * Returns the equivalent zoom in Openlayers.
-   */
-  getOlZoom() {
-    return this.map.getZoom() + 1;
+    this.map = null;
   }
 
   /**
@@ -197,8 +69,9 @@ class Layer extends UserInteractionsLayerMixin(CustomLayer) {
    * @param {Object} newOptions Options to override
    * @return {Layer} A Layer
    */
-  clone(newOptions: LayerCommonOptions) {
+  clone(newOptions: LayerOptions = {}): Layer {
     return new Layer({ ...this.options, ...newOptions });
   }
 }
+
 export default Layer;
