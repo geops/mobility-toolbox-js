@@ -19,13 +19,12 @@ import MapGlLayer, { MapGlLayerOptions } from './MapGlLayer';
 export default class MaplibreLayer extends MapGlLayer {
   mbMap?: maplibregl.Map;
 
-  getOlLayerRender() {
-    return getMaplibreRender(this);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getMapboxMapClass() {
-    return Map;
+  constructor(options = {}) {
+    super({
+      ...options,
+      mapClass: Map,
+    });
+    this.render = getMaplibreRender(this);
   }
 
   /**

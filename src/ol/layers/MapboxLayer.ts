@@ -33,6 +33,14 @@ export default class MapboxLayer extends MapGlLayer {
 
   tabIndex?: number;
 
+  constructor(options = {}) {
+    super({
+      ...options,
+      mapClass: Map,
+    });
+    this.render = getMapboxRender(this);
+  }
+
   /**
    * Initialize the layer and listen to feature clicks.
    * @param {ol/Map~Map} map
@@ -114,15 +122,6 @@ export default class MapboxLayer extends MapGlLayer {
         mapboxCanvas.removeAttribute('tabindex');
       }
     }
-  }
-
-  getOlLayerRender() {
-    return getMapboxRender(this);
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getMapboxMapClass() {
-    return Map;
   }
 
   /**

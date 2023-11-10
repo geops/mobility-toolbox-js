@@ -1,7 +1,6 @@
 /* eslint-disable max-classes-per-file */
 // @ts-nocheck
 import { toLonLat } from 'ol/proj';
-import OlLayer, { RenderFunction } from 'ol/layer/Layer';
 import Source from 'ol/source/Source';
 import GeoJSON from 'ol/format/GeoJSON';
 import OlMap from 'ol/Map';
@@ -20,6 +19,7 @@ export type MapGlLayerOptions = OlLayerOptions & {
   url?: string;
   apiKey?: string;
   apiKeyName?: string;
+  mapClass: AnyMapboxMapClass;
   mapOptions?: AnyMapboxMapOptions;
   tabIndex?: number;
 };
@@ -29,10 +29,6 @@ export type MapGlLayerOptions = OlLayerOptions & {
  * It's used to share code between Mapbox and Maplibre layers without importing both libs.
  */
 class MapGlLayer extends Layer {
-  mbMap?: AnyMapboxMap;
-
-  styleUrl?: string;
-
   apiKey?: string;
 
   apiKeyName!: string;
@@ -41,14 +37,21 @@ class MapGlLayer extends Layer {
 
   loaded!: boolean;
 
+  mbMap?: AnyMapboxMap;
+
+  mapClass: AnyMapboxMapClass;
+
   options!: MapGlLayerOptions;
+
+  styleUrl?: string;
 
   constructor(options: MapGlLayerOptions = {}) {
     super({
       source: new Source({}),
       ...options,
     });
-    this.render = this.getOlLayerRender();
+
+    this.mapClass = options.mapClass;
 
     // if no specific attributions set on the source, we use the default one.
     if (!this.getSource().getAttributions()) {
@@ -163,7 +166,7 @@ class MapGlLayer extends Layer {
       );
     }
 
-    const Map = this.getMapboxMapClass();
+    const Map = this.mapClass;
 
     /**
      * A mapbox map
@@ -251,18 +254,6 @@ class MapGlLayer extends Layer {
       features,
       coordinate,
     });
-  }
-
-  /**
-   * Return the render function function for the ol layer.
-   *
-   */
-  // eslint-disable-next-line class-methods-use-this
-  getOlLayerRender(): RenderFunction {
-    // eslint-disable-next-line no-console
-    console.error('This function must be implemented in subclasses');
-    const div = document.createElement('div');
-    return () => div;
   }
 
   /**
