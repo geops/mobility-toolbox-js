@@ -32,6 +32,10 @@ const debounceDeparturesMessages = (
       window.clearTimeout(departureUpdateTimeout[source]);
     }
 
+    if (!departure) {
+      return;
+    }
+
     departureObject[departure.call_id] = departure;
 
     departureUpdateTimeout[source] = window.setTimeout(() => {

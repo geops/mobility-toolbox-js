@@ -62,7 +62,7 @@ export const getDelayTextCanvas = (
       Math.ceil(fontSize + 8 * pixelRatio),
     );
     if (canvas) {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
       if (!ctx) {
         return null;
       }
@@ -146,7 +146,7 @@ export const getTextCanvas = (
   strokeColor: string,
   hasStroke: boolean,
   pixelRatio: number,
-  getFont: (fontSize: number) => string,
+  getTextFont: (fontSize: number, text?: string) => string,
 ) => {
   const key = `${text}, ${origin}, ${textSize}, ${fillColor},${strokeColor}, ${hasStroke}, ${pixelRatio}`;
   if (!cacheText[key]) {
@@ -162,7 +162,7 @@ export const getTextCanvas = (
         ctx.save();
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
-        ctx.font = getFont(textSize + 2);
+        ctx.font = getTextFont(textSize + 2, text);
         ctx.strokeStyle = strokeColor;
         ctx.strokeText(text, origin, origin);
         ctx.restore();
@@ -172,7 +172,7 @@ export const getTextCanvas = (
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
       ctx.fillStyle = fillColor;
-      ctx.font = getFont(textSize);
+      ctx.font = getTextFont(textSize, text);
       ctx.strokeStyle = strokeColor;
       ctx.strokeText(text, origin, origin);
       ctx.fillText(text, origin, origin);
@@ -212,7 +212,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     getDelayFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
     getTextFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
     getTextColor = () => '#000',
-    getTextSize = () => 0,
+    getTextSize = () => 14,
     getMaxRadiusForText = () => 10,
     getMaxRadiusForStrokeAndDelay = () => 7,
   } = options;
@@ -327,7 +327,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         delayText = getDelayTextCanvas(
           text,
           fontSize,
-          getDelayFont(fontSize),
+          getDelayFont(fontSize, text),
           getDelayColor(delay, cancelled, true),
           delayOutlineColor,
           pixelRatio,
@@ -365,7 +365,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     const height = size;
     const canvas = createCanvas(width, height);
     if (canvas) {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
       if (!ctx) {
         return null;
       }
@@ -385,7 +385,13 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       let circleText = null;
       if (isDisplayText) {
         const fontSize2 = Math.max(radius, 10);
-        const textSize = getTextSize(ctx, markerSize, name, fontSize2);
+        const textSize = getTextSize(
+          ctx,
+          markerSize,
+          name,
+          fontSize2,
+          getTextFont,
+        );
         const textColor2 = !useDelayStyle
           ? textColor || getTextColor(type)
           : '#000000';

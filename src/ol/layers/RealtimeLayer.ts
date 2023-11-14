@@ -26,7 +26,7 @@ import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
 const format = new GeoJSON();
 
 export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
-  fullTrajectoryStyle: (
+  fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
     options: any,
