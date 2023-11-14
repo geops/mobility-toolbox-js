@@ -64,7 +64,7 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
   useRequestAnimationFrame?: boolean;
   useDebounce?: boolean;
   useThrottle?: boolean;
-  getMotsByZoom: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
+  getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
   getGeneralizationLevelByZoom?: (
     zoom: number,
     generalizationLevelByZoom: RealtimeGeneralizationLevel[],

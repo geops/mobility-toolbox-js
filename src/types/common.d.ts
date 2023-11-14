@@ -47,8 +47,10 @@ export type RealtimeStyleOptions = {
     cancelled?: boolean,
     isDelayText?: boolean,
   ) => string;
+  getDelayFont?: (fontSize: number) => string;
   getDelayText?: (delay: number | null, cancelled?: boolean) => string;
   getTextColor?: (type: RealtimeMot) => string;
+  getTextFont?: (fontSize: number) => string;
   getTextSize?: (
     ctx: AnyCanvasContext,
     markerSize: number,
