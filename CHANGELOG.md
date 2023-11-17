@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.5](https://github.com/geops/mobility-toolbox-js/compare/v2.3.4...v2.3.5) (2023-11-17)
+
+
+### Bug Fixes
+
+* simplify setBbox function ([8f99991](https://github.com/geops/mobility-toolbox-js/commit/8f99991df3f99c64b3776cd8c18dff0820c4a638))
+* use floored value for the zoom ([7961de0](https://github.com/geops/mobility-toolbox-js/commit/7961de0d3e660d67658205aef5e6578ea79b440b))
+
 ### [2.3.4](https://github.com/geops/mobility-toolbox-js/compare/v2.3.3...v2.3.4) (2023-11-17)
 
 
