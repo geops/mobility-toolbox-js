@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.3](https://github.com/geops/mobility-toolbox-js/compare/v2.3.2...v2.3.3) (2023-11-17)
+
+
+### Bug Fixes
+
+* add text parameter to getXXXFont functions ([83cec9b](https://github.com/geops/mobility-toolbox-js/commit/83cec9b3b9a58aad76a3944257cf83dc80710b89))
+* send floor/ceil values to the websocket ([50b8b0a](https://github.com/geops/mobility-toolbox-js/commit/50b8b0aaad28f9cc63ab1c7f460d2662262bcfe6))
+* update full trajectory layer when interacting and animating ([97a9ad8](https://github.com/geops/mobility-toolbox-js/commit/97a9ad86d03d4ca8f760df3269840537746cd403))
+
 ### [2.3.2](https://github.com/geops/mobility-toolbox-js/compare/v2.3.1...v2.3.2) (2023-11-14)
 
 
