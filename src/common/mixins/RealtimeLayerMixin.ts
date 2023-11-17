@@ -805,7 +805,15 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         return;
       }
 
-      const bbox: (number | string)[] = [...extent];
+      // The extent does not need to be precise under meter, so we round floor/ceil the values.
+      const [minX, minY, maxX, maxY] = extent;
+
+      const bbox: (number | string)[] = [
+        Math.floor(minX),
+        Math.floor(minY),
+        Math.ceil(maxX),
+        Math.ceil(maxY),
+      ];
 
       if (this.isUpdateBboxOnMoveEnd && zoom) {
         bbox.push(zoom);
