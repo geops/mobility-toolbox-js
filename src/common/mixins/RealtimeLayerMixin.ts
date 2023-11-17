@@ -288,12 +288,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         allMots,
       ];
       this.getMotsByZoom = (zoom) => {
-        return (
-          (options.getMotsByZoom &&
-            options.getMotsByZoom(zoom, this.motsByZoom)) ||
-          this.motsByZoom[zoom] ||
-          this.motsByZoom[this.motsByZoom.length - 1]
-        );
+        if (options.getMotsByZoom) {
+          return options.getMotsByZoom(zoom, this.motsByZoom);
+        }
+        return this.motsByZoom[zoom];
       };
 
       // Generalization levels by zoom
