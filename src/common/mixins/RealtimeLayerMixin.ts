@@ -297,18 +297,15 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       };
 
       // Generalization levels by zoom
-      this.generalizationLevelByZoom = options.generalizationLevelByZoom || [
-        5, 5, 5, 5, 5, 5, 5, 5, 10, 30, 30, 100, 100, 100,
-      ];
+      this.generalizationLevelByZoom = options.generalizationLevelByZoom || [];
       this.getGeneralizationLevelByZoom = (zoom) => {
-        return (
-          (options.getGeneralizationLevelByZoom &&
-            options.getGeneralizationLevelByZoom(
-              zoom,
-              this.generalizationLevelByZoom,
-            )) ||
-          this.generalizationLevelByZoom[zoom]
-        );
+        if (options.getGeneralizationLevelByZoom) {
+          return options.getGeneralizationLevelByZoom(
+            zoom,
+            this.generalizationLevelByZoom,
+          );
+        }
+        return this.generalizationLevelByZoom[zoom];
       };
 
       // Render time interval by zoom
