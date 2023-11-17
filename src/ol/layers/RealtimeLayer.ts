@@ -77,6 +77,8 @@ class RealtimeLayer extends mixin(Layer) {
       new Group({
         layers: [
           new VectorLayer({
+            updateWhileAnimating: true,
+            updateWhileInteracting: true,
             source: new VectorSource({ features: [] }),
             style: (feature, resolution) => {
               return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
