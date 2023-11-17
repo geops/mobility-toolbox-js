@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.4](https://github.com/geops/mobility-toolbox-js/compare/v2.3.3...v2.3.4) (2023-11-17)
+
+
+### Bug Fixes
+
+* do not set generalizationLevelByZoom by default ([69b59ba](https://github.com/geops/mobility-toolbox-js/commit/69b59ba204529eb90cf1bd99a5bedd95705f821f))
+* simplify getMotsByZoom behavior ([1fc259f](https://github.com/geops/mobility-toolbox-js/commit/1fc259f29bf3da276a158aa2c063e7609ca6a6f9))
+* simplify getMotsByZoom behavior ([87e52ec](https://github.com/geops/mobility-toolbox-js/commit/87e52ec26e9d7204b563a39602fa3c0aa1a90530))
+
 ### [2.3.3](https://github.com/geops/mobility-toolbox-js/compare/v2.3.2...v2.3.3) (2023-11-17)
 
 
