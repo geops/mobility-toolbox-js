@@ -764,7 +764,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       }
     }
 
-    setBbox(extent?: [number, number, number, number], zoom?: number) {
+    setBbox(extent: [number, number, number, number], zoom: number) {
       // Clean trajectories before sending the new bbox
       // Purge trajectories:
       // - which are outside the extent

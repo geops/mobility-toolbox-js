@@ -319,18 +319,11 @@ class RealtimeLayer extends mixin(Layer) {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onMoveEnd(evt: MapEvent | ObjectEvent) {
-    if (this.visible && this.isUpdateBboxOnMoveEnd) {
-      this.setBbox();
+    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
+      return;
     }
 
-    if (
-      this.visible &&
-      this.isUpdateBboxOnMoveEnd &&
-      this.userClickInteractions &&
-      this.selectedVehicleId
-    ) {
-      this.highlightTrajectory(this.selectedVehicleId);
-    }
+    this.setBbox();
   }
 
   /**
@@ -344,16 +337,11 @@ class RealtimeLayer extends mixin(Layer) {
   onZoomEnd() {
     super.onZoomEnd();
 
-    if (this.visible && this.isUpdateBboxOnMoveEnd) {
-      this.setBbox();
+    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
+      return;
     }
 
-    if (
-      this.visible &&
-      this.isUpdateBboxOnMoveEnd &&
-      this.userClickInteractions &&
-      this.selectedVehicleId
-    ) {
+    if (this.userClickInteractions && this.selectedVehicleId) {
       this.highlightTrajectory(this.selectedVehicleId);
     }
   }
@@ -424,13 +412,10 @@ class RealtimeLayer extends mixin(Layer) {
    * @private
    */
   setBbox(extent?: [number, number, number, number], zoom?: number) {
-    let newExtent = extent;
-    let newZoom = zoom;
-    if (!newExtent && this.isUpdateBboxOnMoveEnd) {
-      newExtent = extent || this.map.getView().calculateExtent();
-      newZoom = this.map.getView().getZoom();
-    }
-    super.setBbox(newExtent, newZoom);
+    super.setBbox(
+      extent || this.map.getView().calculateExtent(),
+      zoom || this.map.getView().getZoom(),
+    );
   }
 
   /**

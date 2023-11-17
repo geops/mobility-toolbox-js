@@ -288,13 +288,7 @@ class RealtimeLayer extends mixin(Layer) {
    * Send the current bbox to the websocket
    */
   setBbox(extent?: [number, number, number, number], zoom?: number) {
-    let newExtent = extent;
-    let newZoom = zoom;
-    if (!newExtent && this.isUpdateBboxOnMoveEnd) {
-      newExtent = extent || this.getMercatorExtent();
-      newZoom = this.getOlZoom();
-    }
-    super.setBbox(newExtent, newZoom);
+    super.setBbox(extent || this.getMercatorExtent(), zoom || this.getOlZoom());
   }
 
   /**
