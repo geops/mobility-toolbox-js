@@ -428,7 +428,7 @@ class RealtimeLayer extends mixin(Layer) {
     let newZoom = zoom;
     if (!newExtent && this.isUpdateBboxOnMoveEnd) {
       newExtent = extent || this.map.getView().calculateExtent();
-      newZoom = Math.floor(this.map.getView().getZoom());
+      newZoom = this.map.getView().getZoom();
     }
     super.setBbox(newExtent, newZoom);
   }

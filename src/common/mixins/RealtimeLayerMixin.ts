@@ -790,17 +790,19 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         Math.ceil(maxY),
       ];
 
-      if (this.isUpdateBboxOnMoveEnd && zoom) {
-        bbox.push(zoom);
+      if (zoom) {
+        // The backend only supports non float value
+        const zoomFloor = Math.floor(zoom);
+        bbox.push(zoomFloor);
 
         /* @private */
-        this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);
+        this.generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
 
         /* @private */
-        this.mots = this.getMotsByZoom(zoom);
+        this.mots = this.getMotsByZoom(zoomFloor);
         if (this.mots) {
           bbox.push(`mots=${this.mots}`);
         }
