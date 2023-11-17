@@ -14,6 +14,31 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
+export const MOTS_ONLY_RAIL: RealtimeMot[] = ['rail'];
+export const MOTS_WITH_CABLE: RealtimeMot[] = [
+  'cablecar',
+  'gondola',
+  'funicular',
+  'coach',
+];
+export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
+  'tram',
+  'subway',
+  'rail',
+  'bus',
+];
+export const MOTS_ALL: RealtimeMot[] = [
+  'tram',
+  'subway',
+  'rail',
+  'bus',
+  'ferry',
+  'cablecar',
+  'gondola',
+  'funicular',
+  'coach',
+];
+
 /**
  * Trajserv value: 'Tram',  'Subway / Metro / S-Bahn',  'Train', 'Bus', 'Ferry', 'Cable Car', 'Gondola', 'Funicular', 'Long distance bus', 'Rail',
  * New endpoint use Rail instead of Train.

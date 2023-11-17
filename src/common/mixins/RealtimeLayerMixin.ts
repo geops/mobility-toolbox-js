@@ -253,40 +253,21 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.onStart = options.onStart;
       this.onStop = options.onStop;
 
-      // MOTs by zoom
-      const allMots: RealtimeMot[] = [
-        'tram',
-        'subway',
-        'rail',
-        'bus',
-        'ferry',
-        'cablecar',
-        'gondola',
-        'funicular',
-        'coach',
-      ];
-
-      const onlyRail: RealtimeMot[] = ['rail'];
-      const withoutCable: RealtimeMot[] = ['tram', 'subway', 'rail', 'bus'];
-
       // Server will block non train before zoom 9
       this.motsByZoom = options.motsByZoom || [
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        withoutCable,
-        withoutCable,
-        allMots,
-        allMots,
-        allMots,
-        allMots,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_WITHOUT_CABLE,
+        realtimeConfig.MOTS_WITHOUT_CABLE,
       ];
+
       this.getMotsByZoom = (zoom) => {
         if (options.getMotsByZoom) {
           return options.getMotsByZoom(zoom, this.motsByZoom);
@@ -313,14 +294,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       ];
 
       this.getRenderTimeIntervalByZoom = (zoom) => {
-        return (
-          (options.getRenderTimeIntervalByZoom &&
-            options.getRenderTimeIntervalByZoom(
-              zoom,
-              this.renderTimeIntervalByZoom,
-            )) ||
-          this.renderTimeIntervalByZoom[zoom]
-        );
+        if (options.getRenderTimeIntervalByZoom) {
+          return options.getRenderTimeIntervalByZoom(
+            zoom,
+            this.renderTimeIntervalByZoom,
+          );
+        }
+        return this.renderTimeIntervalByZoom[zoom];
       };
 
       // This property will call api.setBbox on each movend event
