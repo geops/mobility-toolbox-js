@@ -12,6 +12,8 @@ import Layer, { OlLayerOptions } from './Layer';
  *
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
+ * @deprecated
+ * @private
  */
 class WMSLayer extends Layer {
   abortController?: AbortController;
@@ -25,6 +27,10 @@ class WMSLayer extends Layer {
    */
   constructor(options: OlLayerOptions) {
     super(options);
+    // eslint-disable-next-line no-console
+    console.warn(
+      'Deprecated. Replace this WMSLayer by an ol layer with WMS source.',
+    );
 
     /** @private */
     this.abortController = new AbortController();
@@ -68,6 +74,13 @@ class WMSLayer extends Layer {
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
   ): Promise<LayerGetFeatureInfoResponse> {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. Use the new utils function getFeatureInfoAtCoordinate instead:
+
+    import { getFeatureInfoAtCoordinate }  from 'mobility-toolbox-js/ol';
+    `,
+    );
     this.abortController?.abort();
     this.abortController = new AbortController();
     const { signal } = this.abortController;

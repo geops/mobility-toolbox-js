@@ -16,6 +16,15 @@ import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLaye
 class VectorLayer extends UserInteractionsLayerMixin(
   PropertiesLayerMixin(Vector),
 ) {
+  constructor(options) {
+    super(options);
+
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. Replace this VectorLayer by an ol layer with vector source.`,
+    );
+  }
+
   /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.
@@ -24,6 +33,13 @@ class VectorLayer extends UserInteractionsLayerMixin(
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
   ): Promise<LayerGetFeatureInfoResponse> {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. Use the new utils function getFeatureInfoAtCoordinate instead:
+
+    import { getFeatureInfoAtCoordinate }  from 'mobility-toolbox-js/ol';
+    `,
+    );
     let features: Feature[] = [];
 
     if (this.map) {

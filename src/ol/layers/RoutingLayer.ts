@@ -97,6 +97,11 @@ class RoutingLayer extends Layer {
         source: new VectorSource(),
         style: options.style || defaultStyleFunction,
       });
+
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. Replace this RoutingLayer by an ol layer with vector source.`,
+    );
   }
 
   /**
