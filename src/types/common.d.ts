@@ -49,13 +49,16 @@ export type RealtimeStyleOptions = {
     cancelled?: boolean,
     isDelayText?: boolean,
   ) => string;
+  getDelayFont?: (fontSize: number, text?: string) => string;
   getDelayText?: (delay: number | null, cancelled?: boolean) => string;
   getTextColor?: (type: RealtimeMot) => string;
+  getTextFont?: (fontSize: number, text?: string) => string;
   getTextSize?: (
     ctx: AnyCanvasContext,
     markerSize: number,
     name: string,
     fontSize: number,
+    getFont: (fontSize: number, text?: string) => string,
   ) => number;
   getMaxRadiusForText?: () => number;
   getMaxRadiusForStrokeAndDelay?: () => number;

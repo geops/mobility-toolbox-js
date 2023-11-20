@@ -28,7 +28,7 @@ import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
 const format = new GeoJSON();
 
 export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
-  fullTrajectoryStyle: (
+  fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
     options: any,
@@ -76,6 +76,8 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
 
     // We store the layer used to highlight the full Trajectory
     this.vectorLayer = new VectorLayer({
+      updateWhileAnimating: this.allowRenderWhenAnimating,
+      updateWhileInteracting: true,
       source: new VectorSource({ features: [] }),
       style: (feature, resolution) => {
         return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
@@ -336,18 +338,11 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onMoveEnd(evt: MapEvent | ObjectEvent) {
-    if (this.visible && this.isUpdateBboxOnMoveEnd) {
-      this.setBbox();
+    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
+      return;
     }
 
-    if (
-      this.visible &&
-      this.isUpdateBboxOnMoveEnd &&
-      this.userClickInteractions &&
-      this.selectedVehicleId
-    ) {
-      this.highlightTrajectory(this.selectedVehicleId);
-    }
+    this.setBbox();
   }
 
   /**
@@ -361,16 +356,11 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   onZoomEnd() {
     super.onZoomEnd();
 
-    if (this.visible && this.isUpdateBboxOnMoveEnd) {
-      this.setBbox();
+    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
+      return;
     }
 
-    if (
-      this.visible &&
-      this.isUpdateBboxOnMoveEnd &&
-      this.userClickInteractions &&
-      this.selectedVehicleId
-    ) {
+    if (this.userClickInteractions && this.selectedVehicleId) {
       this.highlightTrajectory(this.selectedVehicleId);
     }
   }
@@ -436,13 +426,10 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    * @private
    */
   setBbox(extent?: [number, number, number, number], zoom?: number) {
-    let newExtent = extent;
-    let newZoom = zoom;
-    if (!newExtent && this.isUpdateBboxOnMoveEnd) {
-      newExtent = extent || this.map.getView().calculateExtent();
-      newZoom = Math.floor(this.map.getView().getZoom());
-    }
-    super.setBbox(newExtent, newZoom);
+    super.setBbox(
+      extent || this.map.getView().calculateExtent(),
+      zoom || this.map.getView().getZoom(),
+    );
   }
 
   /**

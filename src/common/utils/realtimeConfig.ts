@@ -14,6 +14,31 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
+export const MOTS_ONLY_RAIL: RealtimeMot[] = ['rail'];
+export const MOTS_WITH_CABLE: RealtimeMot[] = [
+  'cablecar',
+  'gondola',
+  'funicular',
+  'coach',
+];
+export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
+  'tram',
+  'subway',
+  'rail',
+  'bus',
+];
+export const MOTS_ALL: RealtimeMot[] = [
+  'tram',
+  'subway',
+  'rail',
+  'bus',
+  'ferry',
+  'cablecar',
+  'gondola',
+  'funicular',
+  'coach',
+];
+
 /**
  * Trajserv value: 'Tram',  'Subway / Metro / S-Bahn',  'Train', 'Bus', 'Ferry', 'Cable Car', 'Gondola', 'Funicular', 'Long distance bus', 'Rail',
  * New endpoint use Rail instead of Train.
@@ -120,11 +145,12 @@ export const getTextSize = (
   markerSize: number,
   text: string,
   fontSize: number,
+  getTextFont: (fontSize: number, text?: string) => string,
 ): number => {
   if (!ctx) {
     return 0;
   }
-  ctx.font = `bold ${fontSize}px Arial`;
+  ctx.font = getTextFont(fontSize, text);
   let newText = ctx.measureText(text);
 
   const maxiter = 25;
@@ -133,7 +159,7 @@ export const getTextSize = (
   while (newText.width > markerSize - 6 && i < maxiter) {
     // eslint-disable-next-line no-param-reassign
     fontSize -= 0.5;
-    ctx.font = `bold ${fontSize}px arial, sans-serif`;
+    ctx.font = getTextFont(fontSize, text);
     newText = ctx.measureText(text);
     i += 1;
   }

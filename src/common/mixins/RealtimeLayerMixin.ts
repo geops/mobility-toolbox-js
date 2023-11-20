@@ -65,7 +65,7 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
   useRequestAnimationFrame?: boolean;
   useDebounce?: boolean;
   useThrottle?: boolean;
-  getMotsByZoom: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
+  getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
   getGeneralizationLevelByZoom?: (
     zoom: number,
     generalizationLevelByZoom: RealtimeGeneralizationLevel[],
@@ -255,62 +255,38 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.onStart = options.onStart;
       this.onStop = options.onStop;
 
-      // MOTs by zoom
-      const allMots: RealtimeMot[] = [
-        'tram',
-        'subway',
-        'rail',
-        'bus',
-        'ferry',
-        'cablecar',
-        'gondola',
-        'funicular',
-        'coach',
-      ];
-
-      const onlyRail: RealtimeMot[] = ['rail'];
-      const withoutCable: RealtimeMot[] = ['tram', 'subway', 'rail', 'bus'];
-
       // Server will block non train before zoom 9
       this.motsByZoom = options.motsByZoom || [
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        onlyRail,
-        withoutCable,
-        withoutCable,
-        allMots,
-        allMots,
-        allMots,
-        allMots,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_ONLY_RAIL,
+        realtimeConfig.MOTS_WITHOUT_CABLE,
+        realtimeConfig.MOTS_WITHOUT_CABLE,
       ];
+
       this.getMotsByZoom = (zoom) => {
-        return (
-          (options.getMotsByZoom &&
-            options.getMotsByZoom(zoom, this.motsByZoom)) ||
-          this.motsByZoom[zoom] ||
-          this.motsByZoom[this.motsByZoom.length - 1]
-        );
+        if (options.getMotsByZoom) {
+          return options.getMotsByZoom(zoom, this.motsByZoom);
+        }
+        return this.motsByZoom[zoom];
       };
 
       // Generalization levels by zoom
-      this.generalizationLevelByZoom = options.generalizationLevelByZoom || [
-        5, 5, 5, 5, 5, 5, 5, 5, 10, 30, 30, 100, 100, 100,
-      ];
+      this.generalizationLevelByZoom = options.generalizationLevelByZoom || [];
       this.getGeneralizationLevelByZoom = (zoom) => {
-        return (
-          (options.getGeneralizationLevelByZoom &&
-            options.getGeneralizationLevelByZoom(
-              zoom,
-              this.generalizationLevelByZoom,
-            )) ||
-          this.generalizationLevelByZoom[zoom]
-        );
+        if (options.getGeneralizationLevelByZoom) {
+          return options.getGeneralizationLevelByZoom(
+            zoom,
+            this.generalizationLevelByZoom,
+          );
+        }
+        return this.generalizationLevelByZoom[zoom];
       };
 
       // Render time interval by zoom
@@ -320,14 +296,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       ];
 
       this.getRenderTimeIntervalByZoom = (zoom) => {
-        return (
-          (options.getRenderTimeIntervalByZoom &&
-            options.getRenderTimeIntervalByZoom(
-              zoom,
-              this.renderTimeIntervalByZoom,
-            )) ||
-          this.renderTimeIntervalByZoom[zoom]
-        );
+        if (options.getRenderTimeIntervalByZoom) {
+          return options.getRenderTimeIntervalByZoom(
+            zoom,
+            this.renderTimeIntervalByZoom,
+          );
+        }
+        return this.renderTimeIntervalByZoom[zoom];
       };
 
       // This property will call api.setBbox on each movend event
@@ -777,7 +752,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       }
     }
 
-    setBbox(extent?: [number, number, number, number], zoom?: number) {
+    setBbox(extent: [number, number, number, number], zoom: number) {
       // Clean trajectories before sending the new bbox
       // Purge trajectories:
       // - which are outside the extent
@@ -793,19 +768,29 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         return;
       }
 
-      const bbox: (number | string)[] = [...extent];
+      // The extent does not need to be precise under meter, so we round floor/ceil the values.
+      const [minX, minY, maxX, maxY] = extent;
 
-      if (this.isUpdateBboxOnMoveEnd && zoom) {
-        bbox.push(zoom);
+      const bbox: (number | string)[] = [
+        Math.floor(minX),
+        Math.floor(minY),
+        Math.ceil(maxX),
+        Math.ceil(maxY),
+      ];
+
+      if (zoom) {
+        // The backend only supports non float value
+        const zoomFloor = Math.floor(zoom);
+        bbox.push(zoomFloor);
 
         /* @private */
-        this.generalizationLevel = this.getGeneralizationLevelByZoom(zoom);
+        this.generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
         if (this.generalizationLevel) {
           bbox.push(`gen=${this.generalizationLevel}`);
         }
 
         /* @private */
-        this.mots = this.getMotsByZoom(zoom);
+        this.mots = this.getMotsByZoom(zoomFloor);
         if (this.mots) {
           bbox.push(`mots=${this.mots}`);
         }
