@@ -3634,7 +3634,7 @@ mkdirp@^0.5.1:
     minimist "^1.2.6"
 
 mobility-toolbox-js@./../build:
-  version "2.3.5"
+  version "2.3.6"
   dependencies:
     "@turf/helpers" "6.5.0"
     "@turf/transform-rotate" "6.5.0"

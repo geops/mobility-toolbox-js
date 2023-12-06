@@ -210,7 +210,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     getDelayColor = () => '#000',
     getDelayText = () => null,
     getDelayFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
-    getText = (traj: RealtimeTrajectory) => traj?.properties?.line?.name,
+    getText = (text?: string) => text,
     getTextFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
     getTextColor = () => '#000',
     getTextSize = () => 14,
@@ -227,9 +227,9 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     state,
     operator_provides_realtime_journey: operatorProvidesRealtime,
   } = trajectory.properties;
-  let { text_color: textColor, color } = line || {};
+  let { name, text_color: textColor, color } = line || {};
 
-  let name = getText(trajectory);
+  name = getText(name);
 
   const cancelled = state === 'JOURNEY_CANCELLED';
 
