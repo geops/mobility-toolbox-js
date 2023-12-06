@@ -49,6 +49,7 @@ export type RealtimeStyleOptions = {
   ) => string;
   getDelayFont?: (fontSize: number, text?: string) => string;
   getDelayText?: (delay: number | null, cancelled?: boolean) => string;
+  getText?: (trajectory: RealtimeTrajectory) => string;
   getTextColor?: (type: RealtimeMot) => string;
   getTextFont?: (fontSize: number, text?: string) => string;
   getTextSize?: (
