@@ -33,6 +33,7 @@ import {
   RealtimeTrainId,
   ViewState,
   AnyLayer,
+  LayerGetFeatureInfoResponse,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
@@ -913,7 +914,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         layer: this,
         features: vehicles.map((vehicle) => this.format.readFeature(vehicle)),
         coordinate,
-      });
+      } as LayerGetFeatureInfoResponse);
     }
 
     /**

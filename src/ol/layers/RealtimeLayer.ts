@@ -438,7 +438,7 @@ class RealtimeLayer extends mixin(Layer) {
         }
         const features = format.readFeatures(fullTrajectory);
         this.vectorLayer.getSource().addFeatures(features);
-        return features;
+        return features as Feature[];
       });
   }
 
