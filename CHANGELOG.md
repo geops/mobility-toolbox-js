@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.7](https://github.com/geops/mobility-toolbox-js/compare/v2.3.6...v2.3.7) (2023-12-06)
+
+
+### Bug Fixes
+
+* add a getText method in style options ([707d5e7](https://github.com/geops/mobility-toolbox-js/commit/707d5e728c8fe1925d676ae41d3dc0e196588f5d))
+
+### [2.3.6](https://github.com/geops/mobility-toolbox-js/compare/v2.3.5...v2.3.6) (2023-12-06)
+
+
+### Bug Fixes
+
+* add a getText method in style options ([92b4e93](https://github.com/geops/mobility-toolbox-js/commit/92b4e93597e4909e4aa996822fe01ee0ae9adbe2))
+
 ### [2.3.5](https://github.com/geops/mobility-toolbox-js/compare/v2.3.4...v2.3.5) (2023-11-17)
 
 

@@ -6,6 +6,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import OlMap from 'ol/Map';
 import { Coordinate } from 'ol/coordinate';
 import BaseEvent from 'ol/events/Event';
+import { Feature } from 'ol';
 import { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';
 import {
   AnyMapboxMap,
@@ -239,7 +240,7 @@ class MapGlLayer extends Layer {
       // @ts-ignore
       .queryRenderedFeatures(pixels || pixel, options)
       .map((feature) => {
-        const olFeature = this.format.readFeature(feature);
+        const olFeature = this.format.readFeature(feature) as Feature;
         if (olFeature) {
           // We save the original mapbox feature to avoid losing informations
           // potentially needed for other functionnality like highlighting
@@ -253,7 +254,7 @@ class MapGlLayer extends Layer {
       layer: this,
       features,
       coordinate,
-    });
+    } as LayerGetFeatureInfoResponse);
   }
 
   /**

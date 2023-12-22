@@ -456,7 +456,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
         }
         const features = format.readFeatures(fullTrajectory);
         this.vectorLayer.getSource().addFeatures(features);
-        return features;
+        return features as Feature[];
       })
       .catch(() => {
         this.vectorLayer.getSource().clear(true);
