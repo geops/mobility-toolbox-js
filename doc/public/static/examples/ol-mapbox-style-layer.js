@@ -4,7 +4,6 @@ import {
   MapboxStyleLayer,
   CopyrightControl,
 } from 'mobility-toolbox-js/ol';
-import 'ol/ol.css';
 
 export default () => {
   // Define the map

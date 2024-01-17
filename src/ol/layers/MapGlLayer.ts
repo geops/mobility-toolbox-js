@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 // @ts-nocheck
 import { toLonLat } from 'ol/proj';
 import Source from 'ol/source/Source';
@@ -15,6 +14,7 @@ import {
   LayerGetFeatureInfoResponse,
 } from '../../types';
 import Layer, { OlLayerOptions } from './Layer';
+import OlMobilityLayerMixin from '../mixins/OlMobilityLayerMixin';
 
 export type MapGlLayerOptions = OlLayerOptions & {
   url?: string;
@@ -29,7 +29,8 @@ export type MapGlLayerOptions = OlLayerOptions & {
  * Common class for Mapbox and Maplibre and potential other fork from Mapbox.
  * It's used to share code between Mapbox and Maplibre layers without importing both libs.
  */
-class MapGlLayer extends Layer {
+// @ts-expect-error because
+class MapGlLayer extends OlMobilityLayerMixin(Layer) {
   apiKey?: string;
 
   apiKeyName!: string;

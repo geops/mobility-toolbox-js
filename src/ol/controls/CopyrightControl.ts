@@ -25,7 +25,7 @@ export type CopyrightControlOptions = Options & {
  *
  * @see <a href="/example/ol-copyright">Openlayers copyright example</a>
  *
- * @extends {CopyrightControlCommon}
+ * @extends {ol/control/Control}
  */
 class CopyrightControl extends Control {
   constructor(options: CopyrightControlOptions = {}) {

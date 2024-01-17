@@ -6,9 +6,9 @@ import type { FeatureLike } from 'ol/Feature';
 import { Geometry } from 'ol/geom';
 import Feature from 'ol/Feature';
 import Layer from './Layer';
-import type { OlLayerOptions } from './Layer';
+import type { LayerOptions } from './Layer';
 
-export type OlRoutingLayerOptions = OlLayerOptions & {
+export type OlRoutingLayerOptions = LayerOptions & {
   olLayer?: Vector<VectorSource<Feature<Geometry>>>;
   style?: StyleLike;
 };
@@ -78,6 +78,8 @@ const defaultStyleFunction: StyleFunction = (
  *
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
+ * @private
+ * @deprecated
  */
 class RoutingLayer extends Layer {
   olLayer?: Vector<VectorSource<Feature<Geometry>>>;

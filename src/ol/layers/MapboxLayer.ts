@@ -51,7 +51,7 @@ export default class MapboxLayer extends MapGlLayer {
     if (!this.map) {
       return;
     }
-
+    // @ts-ignore
     this.olListenersKeys.push(
       this.map.on('change:size', () => {
         try {

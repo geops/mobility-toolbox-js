@@ -121,8 +121,8 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
       this.userHoverEventsKeys = [];
       this.onUserClickCallback = this.onUserClickCallback.bind(this);
       this.onUserMoveCallback = this.onUserMoveCallback.bind(this);
-      this.onFeatureClick = this.onFeatureClick.bind(this);
-      this.onFeatureHover = this.onFeatureHover.bind(this);
+      this.onFeatureClick = this.onFeatureClick?.bind(this);
+      this.onFeatureHover = this.onFeatureHover?.bind(this);
 
       // Add mouse event callbacks
       const { onClick, onHover } = options;

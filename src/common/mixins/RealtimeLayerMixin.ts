@@ -39,10 +39,10 @@ import {
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
 import LayerCommon from './PropertiesLayerMixin';
-import type { OlLayerOptions } from '../../ol/layers/Layer';
+import type { LayerOptions } from '../../ol/layers/Layer';
 import { FilterFunction, SortFunction } from '../typedefs';
 
-export type RealtimeLayerMixinOptions = OlLayerOptions & {
+export type RealtimeLayerMixinOptions = LayerOptions & {
   debug?: boolean;
   mode?: RealtimeMode;
   api?: RealtimeAPI;

@@ -13,7 +13,7 @@ export default function getMapboxRender(
   // We cretae emptyDiv only in render finction to work with serverside rendering
   let emptyDiv: HTMLElement;
   return (frameState: FrameState) => {
-    const { map, mbMap, renderState, olLayer } = mapoxLayer;
+    const { map, mbMap, renderState } = mapoxLayer;
     if (!map || !mbMap) {
       if (!emptyDiv) {
         emptyDiv = document.createElement('div');
@@ -24,7 +24,7 @@ export default function getMapboxRender(
     const canvas = mbMap.getCanvas();
     const { viewState } = frameState;
 
-    const visible = olLayer?.getVisible();
+    const visible = mapoxLayer.getVisible();
     if (renderState && renderState?.visible !== visible) {
       canvas.style.display = visible ? 'block' : 'none';
       renderState.visible = visible;
@@ -33,7 +33,7 @@ export default function getMapboxRender(
       canvas.style.position = 'absolute';
     }
 
-    const opacity = olLayer?.getOpacity();
+    const opacity = mapoxLayer.getOpacity();
     if (canvas && renderState && renderState.opacity !== opacity) {
       // @ts-ignore
       canvas.style.opacity = opacity;

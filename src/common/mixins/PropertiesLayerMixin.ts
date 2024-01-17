@@ -1,25 +1,35 @@
-// @ts-nocheck
 import { v4 as uuid } from 'uuid';
 import BaseEvent from 'ol/events/Event';
+// @ts-ignore
+import { Layer } from 'ol/layer';
+import { EventsKey } from 'ol/events';
+import { Map } from 'ol';
 import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
 import type {
-  AnyMap,
   LayerGetFeatureInfoOptions,
   LayerGetFeatureInfoResponse,
 } from '../../types';
 
-export type LayerCommonOptions = {
+export type PropertiesLayerMixinOptions = {
   key?: string;
   name?: string;
   group?: string;
   copyrights?: string[];
   children?: any[];
-  visible?: Boolean;
-  disabled?: Boolean;
-  hitTolerance?: Number;
+  visible?: boolean;
+  disabled?: boolean;
+  hitTolerance?: number;
   properties?: { [x: string]: any };
-  map?: AnyMap;
+  map?: Map;
 };
+
+type Constructor<T extends Layer> = new (...args: any[]) => T;
+// type GLayerConstructor = Constructor<Layer>;
+
+// export default <T extends Constructor>(base: T) =>
+//   class SomeClass extends base {
+//     something: boolean = false;
+//   };
 
 /**
  * A class representing a layer to display on map.
@@ -39,32 +49,34 @@ export type LayerCommonOptions = {
  * @classproperty {Object} properties - Custom properties.
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
  */
-function PropertiesLayerMixin(Base: any) {
-  // @ts-ignore
-  return class extends Base {
-    key?: string;
+// @ts-ignore
+function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
+  class PropertiesLayer extends Base {
+    public key?: string;
 
-    name?: string;
+    public name?: string;
 
-    group?: string;
+    public group?: string;
 
-    copyrights?: string[];
+    public copyrights?: string[];
 
-    children?: any[];
+    public children?: any[];
 
-    visible?: boolean;
+    public visible?: boolean;
 
-    disabled?: boolean;
+    public disabled?: boolean;
 
-    hitTolerance?: number;
+    public hitTolerance?: number;
 
-    properties?: { [x: string]: any } = {};
+    public properties?: { [x: string]: any } = {};
 
-    map?: AnyMap;
+    public map?: Map;
 
-    parent?: any;
+    public parent?: any;
 
-    options: LayerCommonOptions = {};
+    public options?: PropertiesLayerMixinOptions = {};
+
+    public olListenersKeys?: EventsKey[] = [];
 
     /**
      * Constructor
@@ -79,8 +91,9 @@ function PropertiesLayerMixin(Base: any) {
      * @param {number} [options.hitTolerance=5] Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
      * @param {Object} [options.properties={}] Application-specific layer properties.
      */
-    constructor(options: LayerCommonOptions = {}) {
-      super(options);
+    constructor(...args: any[]) {
+      super(...args);
+      const options = args[0] as PropertiesLayerMixinOptions;
       this.defineProperties(options);
 
       if (options.properties) {
@@ -89,6 +102,10 @@ function PropertiesLayerMixin(Base: any) {
 
       this.options = options;
 
+      this.name = options.name;
+
+      this.key = options.key || options.name || uuid();
+
       this.visible = options.visible === undefined ? true : !!options.visible;
 
       this.group = options.group;
@@ -96,6 +113,10 @@ function PropertiesLayerMixin(Base: any) {
       this.copyrights = options.copyrights;
 
       this.children = options.children;
+
+      this.hitTolerance = options.hitTolerance || 5;
+
+      this.properties = { ...(options.properties || {}) };
 
       // Listen for group visiblity change
       // if a layer from a group is newly visible we hide the others.
@@ -120,18 +141,20 @@ function PropertiesLayerMixin(Base: any) {
      *
      * @private
      */
-    defineProperties(options: LayerCommonOptions = {}) {
-      const { name, key, properties, hitTolerance } = {
-        ...options,
-      };
-      const uid = uuid();
+    defineProperties(options: PropertiesLayerMixinOptions = {}) {
       Object.defineProperties(this, {
         /* Layer's information properties */
         name: {
-          value: name,
+          get: () => this.get('name'),
+          set: (newName) => {
+            this.set('name', newName);
+          },
         },
         key: {
-          value: key || name || uid,
+          get: () => this.get('key'),
+          set: (newKey) => {
+            this.set('key', newKey);
+          },
         },
         group: {
           get: () => this.get('group'),
@@ -154,7 +177,7 @@ function PropertiesLayerMixin(Base: any) {
           value: options,
         },
         map: {
-          writable: true,
+          get: () => (this as Layer).getMapInternal(),
         },
         /* Layer's state properties */
         visible: {
@@ -209,7 +232,9 @@ function PropertiesLayerMixin(Base: any) {
                 this.parent &&
                 this.parent.visible &&
                 this.parent.children &&
-                !this.parent.children.find((child) => child.visible)
+                !this.parent.children.find(
+                  (child: PropertiesLayer) => child.visible,
+                )
               ) {
                 this.parent.visible = false;
               }
@@ -244,29 +269,16 @@ function PropertiesLayerMixin(Base: any) {
             this.set('children', newValue || []);
           },
         },
-
-        /* Layer's query properties */
-        hitTolerance: {
-          value: hitTolerance || 5,
-          writable: true,
-        },
-
-        /* Custom app specific properties */
-        properties: {
-          value: { ...(properties || {}) },
-        },
       });
     }
 
     /**
      * Initialize the layer with the map passed in parameters.
      *
-     * @param {ol/Map~Map|mapboxgl.Map} map A map.
+     * @param {ol/Map~Map} map A map.
      */
-    attachToMap(map: AnyMap) {
+    attachToMap(map: Map) {
       this.detachFromMap();
-      /** @private */
-      this.map = map;
 
       if (this.children) {
         this.children.forEach((child) => {
@@ -279,10 +291,7 @@ function PropertiesLayerMixin(Base: any) {
      * Terminate what was initialized in init function. Remove layer, events...
      */
     // eslint-disable-next-line class-methods-use-this
-    detachFromMap() {
-      /** @private */
-      this.map = undefined;
-    }
+    detachFromMap() {}
 
     /**
      * Request feature information for a given coordinate.
@@ -319,7 +328,9 @@ function PropertiesLayerMixin(Base: any) {
     flat() {
       return getLayersAsFlatArray(this);
     }
-  };
+  }
+
+  return PropertiesLayer;
 }
 
 export default PropertiesLayerMixin;

@@ -6,7 +6,6 @@ import {
   CopyrightControl,
   OLLayer,
 } from 'mobility-toolbox-js/ol';
-import 'ol/ol.css';
 import { Source } from 'ol/source';
 
 export default () => {

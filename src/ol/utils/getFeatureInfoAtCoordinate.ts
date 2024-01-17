@@ -34,13 +34,9 @@ const getFeatureInfoAtCoordinate = (
   coordinate: Coordinate,
   layers: (BaseLayer | { getFeatureInfoAtCoordinate: () => void })[],
   map: Map,
-  abortController: AbortController,
-  hitTolerance: number,
-) => {
-  const pixel = map?.getPixelFromCoordinate(coordinate);
-  const projection = map?.getView()?.getProjection();
-  const resolution = map?.getView()?.getResolution();
-
+  abortController: AbortController = new AbortController(),
+  hitTolerance: number = 5,
+): Promise<LayerGetFeatureInfoResponse[]> => {
   const promises = layers.map((layer) => {
     // For backward compatibility
     // @ts-ignore
@@ -52,9 +48,11 @@ const getFeatureInfoAtCoordinate = (
       );
     }
     // Here we don't use instanceof, to be able to use this function if a layer comes from 2 different ol versions.
-    const source = (layer as Layer<TileWMS | ImageWMS>).getSource();
+    const source = (layer as Layer<TileWMS | ImageWMS>)?.getSource();
     // @ts-ignore
     if (source?.getFeatureInfoUrl) {
+      const projection = map?.getView()?.getProjection();
+      const resolution = map?.getView()?.getResolution();
       return getFeaturesFromWMS(
         source,
         {
@@ -77,6 +75,8 @@ const getFeatureInfoAtCoordinate = (
     }
 
     // For last resort we try the map function to get the features from the map
+    const pixel = map?.getPixelFromCoordinate(coordinate);
+    console.log('pixel', pixel, coordinate);
     const features = map.getFeaturesAtPixel(pixel, {
       layerFilter: (l) => l === layer,
       hitTolerance:

@@ -5,13 +5,13 @@
     "target": "es6",
     "strict": true,
     // Generate d.ts files
-    "declaration": true,
+    "declaration": false,
     // This compiler run should
     // only output d.ts files
     // "emitDeclarationOnly": true,
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
-    "declarationMap": true,
+    // "declarationMap": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,

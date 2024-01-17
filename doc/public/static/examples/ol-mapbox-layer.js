@@ -1,6 +1,5 @@
 import { Map, View } from 'ol';
 import { MaplibreLayer, CopyrightControl } from 'mobility-toolbox-js/ol';
-import 'ol/ol.css';
 
 export default () => {
   // Define the map
@@ -13,9 +12,9 @@ export default () => {
     controls: [],
   });
 
-  // Add copyright control
-  const control = new CopyrightControl();
-  map.addControl(copyright);
+  // // Add copyright control
+  // const control = new CopyrightControl();
+  // map.addControl(copyright);
 
   // Define the Mapbox style to display
   const layer = new MaplibreLayer({
@@ -23,6 +22,5 @@ export default () => {
     apiKey: window.apiKey,
   });
 
-  // Display the Mapbox style on the map
-  layer.attachToMap(map);
+  map.addLayer(layer);
 };

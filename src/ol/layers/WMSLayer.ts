@@ -1,19 +1,20 @@
-import { Feature } from 'ol';
+// @ts-nocheck
+import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import GeoJSON from 'ol/format/GeoJSON';
 import ImageLayer from 'ol/layer/Image';
 import TileLayer from 'ol/layer/Tile';
 import { ImageWMS, TileWMS } from 'ol/source';
 import { LayerGetFeatureInfoResponse } from '../../types';
-import Layer, { OlLayerOptions } from './Layer';
+import Layer, { LayerOptions } from './Layer';
 
 /**
  * Class use to display a WMS layer.
  *
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
- * @deprecated
  * @private
+ * @deprecated
  */
 class WMSLayer extends Layer {
   abortController?: AbortController;
@@ -22,10 +23,12 @@ class WMSLayer extends Layer {
 
   olLayer?: TileLayer<TileWMS> | ImageLayer<ImageWMS>;
 
+  map?: Map;
+
   /**
    * @override
    */
-  constructor(options: OlLayerOptions) {
+  constructor(options: LayerOptions) {
     super(options);
     // eslint-disable-next-line no-console
     console.warn(
@@ -44,7 +47,7 @@ class WMSLayer extends Layer {
    * @return {ol/layer/Layer~Layer}
    */
   getFeatureInfoUrl(coord: Coordinate): string | undefined {
-    if (!this.map) {
+    if (!this) {
       return;
     }
 

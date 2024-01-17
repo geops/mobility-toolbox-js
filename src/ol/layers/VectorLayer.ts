@@ -12,6 +12,8 @@ import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLaye
  *
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
+ * @private
+ * @deprecated
  */
 class VectorLayer extends UserInteractionsLayerMixin(
   PropertiesLayerMixin(Vector),

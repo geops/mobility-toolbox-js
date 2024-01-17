@@ -842,7 +842,8 @@ class RoutingControl extends ControlCommon {
       }
 
       // Add modify interaction, RoutingLayer and listeners
-      this.routingLayer?.attachToMap(this.map);
+      // @ts-ignore
+      // this.routingLayer?.attachToMap(this.map);
       if (this.modifyInteraction) {
         this.map.addInteraction(this.modifyInteraction);
       }
@@ -854,7 +855,8 @@ class RoutingControl extends ControlCommon {
   deactivate() {
     if (this.map) {
       // Remove modify interaction, RoutingLayer, listeners and viaPoints
-      this.routingLayer?.detachFromMap();
+      // @ts-ignore
+      // this.routingLayer?.detachFromMap();
       if (this.modifyInteraction) {
         this.map.removeInteraction(this.modifyInteraction);
       }

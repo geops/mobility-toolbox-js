@@ -1,18 +1,14 @@
 /* eslint-disable @typescript-eslint/no-useless-constructor */
-// @ts-nocheck
+/* eslint-disable */
 import { Map } from 'ol';
-import Base from 'ol/layer/Layer';
-import { EventsKey } from 'ol/events';
-import LayerGroup from 'ol/layer/Group';
-import { unByKey } from 'ol/Observable';
-import type { LayerCommonOptions } from '../../common/mixins/PropertiesLayerMixin';
-import UserInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
-import type { UserInteractionCallback } from '../../types';
+import OlLayer from 'ol/layer/Layer';
+import type { Options } from 'ol/layer/Layer';
 import PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';
 
-export type OlLayerOptions = LayerCommonOptions & {
-  olLayer?: Base;
-};
+import type { PropertiesLayerMixinOptions } from '../../common/mixins/PropertiesLayerMixin';
+
+export type LayerOptions = Options & PropertiesLayerMixinOptions;
+
 
 /**
  * A class representing a layer to display on an OpenLayers map.
@@ -20,49 +16,16 @@ export type OlLayerOptions = LayerCommonOptions & {
  * @example
  * import { Layer } from 'mobility-toolbox-js/ol';
  *
- * const layer = new Layer({
- *   olLayer: ...,
- * });
+ * const layer = new Layer({});
  *
  * @see <a href="/example/ol-map">Map example</a>
  *
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
- * @extends {LayerCommon}
+ * @extends {ol/layer/Layer}
+ * @implements {PropertiesLayerInterface}
  */
-class Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {
-  olLayer?: Base | LayerGroup;
-
-  olListenersKeys!: EventsKey[];
-
-  /* LayerCommon */
-
-  options!: OlLayerOptions;
-
-  visible!: boolean;
-
-  copyrights!: string[];
-
-  map?: Map;
-
-  singleClickListenerKey!: EventsKey;
-
-  pointerMoveListenerKey!: EventsKey;
-
-  /* userInteractionsMixin */
-
-  userInteractions?: boolean;
-
-  userClickInteractions?: boolean;
-
-  userHoverInteractions?: boolean;
-
-  userClickCallbacks?: UserInteractionCallback[];
-
-  userHoverCallbacks?: UserInteractionCallback[];
-
-  onUserClickCallback!: () => void;
-
-  onUserMoveCallback!: () => void;
+class Layer extends PropertiesLayerMixin(OlLayer) {
+  options?: LayerOptions = {};
 
   /**
    * Constructor.
@@ -75,7 +38,7 @@ class Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {
    * @param {Object} [options.properties={}] Application-specific layer properties.
    * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
    */
-  constructor(options: OlLayerOptions) {
+  constructor(options: LayerOptions = {}) {
     super(options);
   }
 
@@ -88,13 +51,37 @@ class Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  attachToMap(map: Map) {
+    // @ts-ignore
+    if (super.attachToMap) {
+      // @ts-ignore
+      super.attachToMap(map);
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  detachFromMap() {
+    // @ts-ignore
+    if (super.detachFromMap) {
+      // @ts-ignore
+      super.detachFromMap();
+    }
+  }
+
   /**
    * Define layer's properties.
    *
    * @private
    */
-  defineProperties(options: OlLayerOptions) {
-    super.defineProperties(options);
+  defineProperties() {
+    // @ts-ignore
+    if (super.defineProperties) {
+      // @ts-ignore
+      super.defineProperties();
+    }
+
+    // for backward compatibility with v2
     Object.defineProperties(this, {
       olLayer: {
         get: () => {
@@ -111,82 +98,7 @@ class Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {
           );
         },
       },
-      olListenersKeys: {
-        value: [],
-      },
     });
-  }
-
-  /**
-   * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map
-   * @private
-   */
-  attachToMap(map: Map) {
-    super.attachToMap(map);
-
-    if (!this.map) {
-      return;
-    }
-
-    this.toggleVisibleListeners();
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:visible', this.toggleVisibleListeners),
-    );
-  }
-
-  /**
-   * Terminate what was initialized in init function. Remove layer, events...
-   */
-  detachFromMap() {
-    this.deactivateUserInteractions();
-    unByKey(this.olListenersKeys);
-
-    super.detachFromMap();
-  }
-
-  activateUserInteractions() {
-    this.deactivateUserInteractions();
-    if (
-      this.map &&
-      this.userInteractions &&
-      this.userClickInteractions &&
-      this.userClickCallbacks?.length
-    ) {
-      this.singleClickListenerKey = this.map.on(
-        'singleclick',
-        this.onUserClickCallback,
-      );
-      this.olListenersKeys.push(this.singleClickListenerKey);
-    }
-    if (
-      this.map &&
-      this.userInteractions &&
-      this.userHoverInteractions &&
-      this.userHoverCallbacks?.length
-    ) {
-      this.pointerMoveListenerKey = this.map.on(
-        'pointermove',
-        this.onUserMoveCallback,
-      );
-    }
-  }
-
-  deactivateUserInteractions() {
-    unByKey([this.pointerMoveListenerKey, this.singleClickListenerKey]);
-  }
-
-  /**
-   * Toggle listeners needed when a layer is avisible or not.
-   * @private
-   */
-  toggleVisibleListeners() {
-    if (this.visible) {
-      this.activateUserInteractions();
-    } else {
-      this.deactivateUserInteractions();
-    }
   }
 
   /**
@@ -194,7 +106,7 @@ class Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {
    * @param {Object} newOptions Options to override
    * @return {Layer} A Layer
    */
-  clone(newOptions: OlLayerOptions) {
+  clone(newOptions: LayerOptions) {
     return new Layer({ ...this.options, ...newOptions });
   }
 }
