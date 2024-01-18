@@ -7,6 +7,7 @@ import Feature, { FeatureLike } from 'ol/Feature';
 import { MapEvent } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
+import debounce from 'lodash.debounce';
 import Layer from './Layer';
 import mixin, {
   RealtimeLayerMixinOptions,
@@ -161,6 +162,9 @@ class RealtimeLayer extends mixin(Layer) {
       zoom: undefined,
       rotation: 0,
     };
+
+    this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
+    this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
   }
 
   attachToMap(map: AnyMap) {
@@ -180,11 +184,11 @@ class RealtimeLayer extends mixin(Layer) {
 
             // Update the interval between render updates
             if (this.currentZoom !== zoom) {
-              this.onZoomEnd();
+              this.onZoomEndDebounced(evt);
             }
             this.currentZoom = zoom;
 
-            this.onMoveEnd(evt);
+            this.onMoveEndDebounced(evt);
           },
         ),
       );
