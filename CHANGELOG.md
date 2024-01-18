@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.8](https://github.com/geops/mobility-toolbox-js/compare/v2.3.7...v2.3.8) (2024-01-18)
+
+
+### Bug Fixes
+
+* debounce calls to setBbox ([#206](https://github.com/geops/mobility-toolbox-js/issues/206)) ([b50feca](https://github.com/geops/mobility-toolbox-js/commit/b50feca53134856409ac79252e244ea97749435f))
+
 ### [2.3.7](https://github.com/geops/mobility-toolbox-js/compare/v2.3.6...v2.3.7) (2023-12-06)
 
 
