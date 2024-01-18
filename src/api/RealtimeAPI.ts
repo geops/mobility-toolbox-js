@@ -18,6 +18,7 @@ import type {
   RealtimeStationId,
   RealtimeVersion,
   RealtimeTrajectory,
+  RealtimeTenant,
 } from '../types';
 import { StopSequence } from './typedefs';
 
@@ -25,8 +26,6 @@ export type RealtimeAPIOptions = {
   url?: string;
   apiKey?: string;
   version?: RealtimeVersion;
-  prefix?: string;
-  projection?: string;
   bbox?: (number | string)[];
   buffer?: number[];
   pingIntervalMs?: number;
@@ -84,21 +83,17 @@ class RealtimeAPI {
 
   wsApi!: WebSocketAPI;
 
-  projection?: string;
-
   bbox?: (number | string)[];
 
   buffer?: number[];
 
-  prefix!: string;
+  private pingInterval!: number;
 
-  pingInterval!: number;
+  private pingIntervalMs!: number;
 
-  pingIntervalMs!: number;
+  private reconnectTimeout?: number;
 
-  reconnectTimeout?: number;
-
-  reconnectTimeoutMs?: number;
+  private reconnectTimeoutMs?: number;
 
   /**
    * Constructor
@@ -106,30 +101,25 @@ class RealtimeAPI {
    * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Url to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.prefix=''] Service prefix to specify tenant.
-   * @param {string} [options.projection] The epsg code of the projection for features. Default to EPSG:3857.
-   * @param {number[4]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
+   * @param {number[5]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
    */
   constructor(options: RealtimeAPIOptions = {}) {
     this.defineProperties(options);
-
-    /** @private */
-    this.prefix = options.prefix || '';
 
     /** @private */
     this.onOpen = this.onOpen.bind(this);
   }
 
   /* @private */
-  defineProperties(options: RealtimeAPIOptions) {
-    let opt = options;
+  defineProperties(options: RealtimeAPIOptions = {}) {
+    let opt = options || {};
 
     if (typeof options === 'string') {
       opt = { url: options };
     }
 
     const { apiKey, version } = opt;
-    let { url, projection, bbox, buffer = [100, 100] } = opt;
+    let { url, bbox, buffer = [100, 100] } = opt;
     const wsApi = new WebSocketAPI();
 
     if (!url) {
@@ -150,17 +140,6 @@ class RealtimeAPI {
             // Update the websocket only if the url has changed and the websocket is already open or is opening.
             if (this.wsApi.open || this.wsApi.connecting) {
               this.open();
-            }
-          }
-        },
-      },
-      projection: {
-        get: () => projection,
-        set: (newProjection) => {
-          if (newProjection !== projection) {
-            projection = newProjection;
-            if (this.wsApi) {
-              this.wsApi.send(`PROJECTION ${projection}`);
             }
           }
         },
@@ -225,7 +204,6 @@ class RealtimeAPI {
   }
 
   open() {
-    // Register BBOX and PROJECTION messages must be send before previous subscriptions.
     this.wsApi.connect(this.url, this.onOpen);
 
     // Register reconnection on close.
@@ -256,10 +234,6 @@ class RealtimeAPI {
    * It applies the bbox and the projection.
    */
   onOpen() {
-    if (this.projection) {
-      this.wsApi.send(`PROJECTION ${this.projection}`);
-    }
-
     if (this.bbox) {
       this.wsApi.send(`BBOX ${this.bbox.join(' ')}`);
     }
@@ -407,11 +381,12 @@ class RealtimeAPI {
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    */
   subscribeDisruptions(
+    tenant: RealtimeTenant,
     onMessage: WebSocketAPIMessageCallback<RealtimeNews>,
     onError: EventListener = () => {},
     quiet: boolean = false,
   ) {
-    this.subscribe(`${this.prefix}newsticker`, onMessage, onError, quiet);
+    this.subscribe(`${tenant}_newsticker`, onMessage, onError, quiet);
   }
 
   /**
@@ -420,9 +395,10 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeDisruptions(
+    tenant: RealtimeTenant,
     onMessage?: WebSocketAPIMessageCallback<RealtimeNews>,
   ) {
-    this.unsubscribe(`${this.prefix}newsticker`, '', onMessage);
+    this.unsubscribe(`${tenant}_newsticker`, '', onMessage);
   }
 
   /**

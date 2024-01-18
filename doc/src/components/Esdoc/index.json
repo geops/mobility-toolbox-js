@@ -10271,6 +10271,344 @@
   {
     "__docId__": 462,
     "kind": "file",
+    "name": "build/ol/layers/Layer copy.js",
+    "content": "import Base from 'ol/layer/Layer';\nimport { unByKey } from 'ol/Observable';\nimport UserInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';\nimport PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';\n/**\n * A class representing a layer to display on an OpenLayers map.\n *\n * @example\n * import { Layer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new Layer({\n *   olLayer: ...,\n * });\n *\n * @see <a href=\"/example/ol-map\">Map example</a>\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {LayerCommon}\n */\nclass Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {\n    /**\n     * Constructor.\n     *\n     * @param {LayerCommonOptions} options\n     * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.\n     * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.\n     * @param {string} [options.copyright=undefined] Copyright-Statement.\n     * @param {Array<Layer>} [options.children=[]] Sublayers.\n     * @param {Object} [options.properties={}] Application-specific layer properties.\n     * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.\n     */\n    constructor(options) {\n        super(options);\n    }\n    setMapInternal(map) {\n        super.setMapInternal(map);\n        if (map) {\n            this.attachToMap(map);\n        }\n        else {\n            this.detachFromMap();\n        }\n    }\n    /**\n     * Define layer's properties.\n     *\n     * @private\n     */\n    defineProperties(options) {\n        super.defineProperties(options);\n        Object.defineProperties(this, {\n            olLayer: {\n                get: () => {\n                    // eslint-disable-next-line no-console\n                    console.log(\"Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This getter is only a redirect to the current 'this' object.\");\n                    return this;\n                },\n                set: () => {\n                    // eslint-disable-next-line no-console\n                    console.log('Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This setter has no effect.');\n                },\n            },\n            olListenersKeys: {\n                value: [],\n            },\n        });\n    }\n    /**\n     * Initialize the layer and listen to feature clicks.\n     * @param {ol/Map~Map} map\n     * @private\n     */\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (!this.map) {\n            return;\n        }\n        this.toggleVisibleListeners();\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.on('change:visible', this.toggleVisibleListeners));\n    }\n    /**\n     * Terminate what was initialized in init function. Remove layer, events...\n     */\n    detachFromMap() {\n        this.deactivateUserInteractions();\n        unByKey(this.olListenersKeys);\n        super.detachFromMap();\n    }\n    activateUserInteractions() {\n        var _a, _b;\n        this.deactivateUserInteractions();\n        if (this.map &&\n            this.userInteractions &&\n            this.userClickInteractions &&\n            ((_a = this.userClickCallbacks) === null || _a === void 0 ? void 0 : _a.length)) {\n            this.singleClickListenerKey = this.map.on('singleclick', this.onUserClickCallback);\n            this.olListenersKeys.push(this.singleClickListenerKey);\n        }\n        if (this.map &&\n            this.userInteractions &&\n            this.userHoverInteractions &&\n            ((_b = this.userHoverCallbacks) === null || _b === void 0 ? void 0 : _b.length)) {\n            this.pointerMoveListenerKey = this.map.on('pointermove', this.onUserMoveCallback);\n        }\n    }\n    deactivateUserInteractions() {\n        unByKey([this.pointerMoveListenerKey, this.singleClickListenerKey]);\n    }\n    /**\n     * Toggle listeners needed when a layer is avisible or not.\n     * @private\n     */\n    toggleVisibleListeners() {\n        if (this.visible) {\n            this.activateUserInteractions();\n        }\n        else {\n            this.deactivateUserInteractions();\n        }\n    }\n    /**\n     * Create a copy of the Layer.\n     * @param {Object} newOptions Options to override\n     * @return {Layer} A Layer\n     */\n    clone(newOptions) {\n        return new Layer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default Layer;\n",
+    "static": true,
+    "longname": "/home/olivier/GIT/mobility-toolbox-js/build/ol/layers/Layer copy.js",
+    "access": "public",
+    "description": null,
+    "lineNumber": 1
+  },
+  {
+    "__docId__": 472,
+    "kind": "class",
+    "name": "Layer",
+    "memberof": "build/ol/layers/Layer copy.js",
+    "static": true,
+    "longname": "build/ol/layers/Layer copy.js~Layer",
+    "access": "public",
+    "export": true,
+    "importPath": "mobility-toolbox-js/build/ol/layers/Layer copy.js",
+    "importStyle": "Layer",
+    "description": "A class representing a layer to display on an OpenLayers map.",
+    "examples": [
+      "import { Layer } from 'mobility-toolbox-js/ol';\n\nconst layer = new Layer({\n  olLayer: ...,\n});"
+    ],
+    "see": [
+      "<a href=\"/example/ol-map\">Map example</a>"
+    ],
+    "lineNumber": 20,
+    "unknown": [
+      {
+        "tagName": "@classproperty",
+        "tagValue": "{ol/Map~Map} map - The map where the layer is displayed."
+      }
+    ],
+    "interface": false,
+    "extends": [
+      "LayerCommon"
+    ]
+  },
+  {
+    "__docId__": 473,
+    "kind": "constructor",
+    "name": "constructor",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#constructor",
+    "access": "public",
+    "description": "Constructor.",
+    "lineNumber": 32,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "LayerCommonOptions"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "options",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": true,
+        "defaultValue": "uuid()",
+        "defaultRaw": "uuid()",
+        "name": "options.name",
+        "description": "Layer name. Default use a generated uuid."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": true,
+        "defaultValue": "uuid().toLowerCase()",
+        "defaultRaw": "uuid().toLowerCase()",
+        "name": "options.key",
+        "description": "Layer key, will use options.name.toLowerCase() if not specified."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": true,
+        "defaultValue": "undefined",
+        "defaultRaw": "undefined",
+        "name": "options.copyright",
+        "description": "Copyright-Statement."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Array<Layer>"
+        ],
+        "spread": false,
+        "optional": true,
+        "defaultValue": "[]",
+        "defaultRaw": [],
+        "name": "options.children",
+        "description": "Sublayers."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": true,
+        "defaultValue": "{}",
+        "defaultRaw": {},
+        "name": "options.properties",
+        "description": "Application-specific layer properties."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "boolean"
+        ],
+        "spread": false,
+        "optional": true,
+        "defaultValue": "true",
+        "defaultRaw": true,
+        "name": "options.visible",
+        "description": "If true this layer is the currently visible layer on the map."
+      }
+    ]
+  },
+  {
+    "__docId__": 474,
+    "kind": "method",
+    "name": "setMapInternal",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#setMapInternal",
+    "access": "public",
+    "description": null,
+    "lineNumber": 35,
+    "undocument": true,
+    "params": [
+      {
+        "name": "map",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 475,
+    "kind": "method",
+    "name": "defineProperties",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#defineProperties",
+    "access": "private",
+    "description": "Define layer's properties.",
+    "lineNumber": 49,
+    "params": [
+      {
+        "name": "options",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 476,
+    "kind": "method",
+    "name": "attachToMap",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#attachToMap",
+    "access": "private",
+    "description": "Initialize the layer and listen to feature clicks.",
+    "lineNumber": 73,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "ol/Map~Map"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "map",
+        "description": ""
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 477,
+    "kind": "method",
+    "name": "detachFromMap",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#detachFromMap",
+    "access": "public",
+    "description": "Terminate what was initialized in init function. Remove layer, events...",
+    "lineNumber": 86,
+    "params": [],
+    "return": null
+  },
+  {
+    "__docId__": 478,
+    "kind": "method",
+    "name": "activateUserInteractions",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#activateUserInteractions",
+    "access": "public",
+    "description": null,
+    "lineNumber": 91,
+    "undocument": true,
+    "params": [],
+    "return": null
+  },
+  {
+    "__docId__": 479,
+    "kind": "member",
+    "name": "singleClickListenerKey",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#singleClickListenerKey",
+    "access": "public",
+    "description": null,
+    "lineNumber": 98,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 480,
+    "kind": "member",
+    "name": "pointerMoveListenerKey",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#pointerMoveListenerKey",
+    "access": "public",
+    "description": null,
+    "lineNumber": 105,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 481,
+    "kind": "method",
+    "name": "deactivateUserInteractions",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#deactivateUserInteractions",
+    "access": "public",
+    "description": null,
+    "lineNumber": 108,
+    "undocument": true,
+    "params": [],
+    "return": null
+  },
+  {
+    "__docId__": 482,
+    "kind": "method",
+    "name": "toggleVisibleListeners",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#toggleVisibleListeners",
+    "access": "private",
+    "description": "Toggle listeners needed when a layer is avisible or not.",
+    "lineNumber": 115,
+    "params": [],
+    "return": null
+  },
+  {
+    "__docId__": 483,
+    "kind": "method",
+    "name": "clone",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#clone",
+    "access": "public",
+    "description": "Create a copy of the Layer.",
+    "lineNumber": 128,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "newOptions",
+        "description": "Options to override"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Layer"
+      ],
+      "spread": false,
+      "description": "A Layer"
+    }
+  },
+  {
+    "__docId__": 484,
+    "kind": "file",
     "name": "build/ol/layers/Layer.js",
     "content": "import Base from 'ol/layer/Layer';\nimport { unByKey } from 'ol/Observable';\nimport UserInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';\nimport PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';\n/**\n * A class representing a layer to display on an OpenLayers map.\n *\n * @example\n * import { Layer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new Layer({\n *   olLayer: ...,\n * });\n *\n * @see <a href=\"/example/ol-map\">Map example</a>\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {LayerCommon}\n */\nclass Layer extends UserInteractionsMixin(PropertiesLayerMixin(Base)) {\n    /**\n     * Constructor.\n     *\n     * @param {LayerCommonOptions} options\n     * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.\n     * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.\n     * @param {string} [options.copyright=undefined] Copyright-Statement.\n     * @param {Array<Layer>} [options.children=[]] Sublayers.\n     * @param {Object} [options.properties={}] Application-specific layer properties.\n     * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.\n     */\n    constructor(options) {\n        super(options);\n    }\n    setMapInternal(map) {\n        super.setMapInternal(map);\n        if (map) {\n            this.attachToMap(map);\n        }\n        else {\n            this.detachFromMap();\n        }\n    }\n    /**\n     * Define layer's properties.\n     *\n     * @private\n     */\n    defineProperties(options) {\n        super.defineProperties(options);\n        Object.defineProperties(this, {\n            olLayer: {\n                get: () => {\n                    // eslint-disable-next-line no-console\n                    console.log(\"Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This getter is only a redirect to the current 'this' object.\");\n                    return this;\n                },\n                set: () => {\n                    // eslint-disable-next-line no-console\n                    console.log('Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This setter has no effect.');\n                },\n            },\n            olListenersKeys: {\n                value: [],\n            },\n        });\n    }\n    /**\n     * Initialize the layer and listen to feature clicks.\n     * @param {ol/Map~Map} map\n     * @private\n     */\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (!this.map) {\n            return;\n        }\n        this.toggleVisibleListeners();\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.on('change:visible', this.toggleVisibleListeners));\n    }\n    /**\n     * Terminate what was initialized in init function. Remove layer, events...\n     */\n    detachFromMap() {\n        this.deactivateUserInteractions();\n        unByKey(this.olListenersKeys);\n        super.detachFromMap();\n    }\n    activateUserInteractions() {\n        var _a, _b;\n        this.deactivateUserInteractions();\n        if (this.map &&\n            this.userInteractions &&\n            this.userClickInteractions &&\n            ((_a = this.userClickCallbacks) === null || _a === void 0 ? void 0 : _a.length)) {\n            this.singleClickListenerKey = this.map.on('singleclick', this.onUserClickCallback);\n            this.olListenersKeys.push(this.singleClickListenerKey);\n        }\n        if (this.map &&\n            this.userInteractions &&\n            this.userHoverInteractions &&\n            ((_b = this.userHoverCallbacks) === null || _b === void 0 ? void 0 : _b.length)) {\n            this.pointerMoveListenerKey = this.map.on('pointermove', this.onUserMoveCallback);\n        }\n    }\n    deactivateUserInteractions() {\n        unByKey([this.pointerMoveListenerKey, this.singleClickListenerKey]);\n    }\n    /**\n     * Toggle listeners needed when a layer is avisible or not.\n     * @private\n     */\n    toggleVisibleListeners() {\n        if (this.visible) {\n            this.activateUserInteractions();\n        }\n        else {\n            this.deactivateUserInteractions();\n        }\n    }\n    /**\n     * Create a copy of the Layer.\n     * @param {Object} newOptions Options to override\n     * @return {Layer} A Layer\n     */\n    clone(newOptions) {\n        return new Layer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default Layer;\n",
     "static": true,
@@ -10280,7 +10618,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 463,
+=======
+    "__docId__": 485,
+>>>>>>> master
     "kind": "class",
     "name": "Layer",
     "memberof": "build/ol/layers/Layer.js",
@@ -10310,7 +10652,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 464,
+=======
+    "__docId__": 486,
+>>>>>>> master
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10407,6 +10753,7 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 465,
     "kind": "method",
     "name": "setMapInternal",
@@ -10431,6 +10778,9 @@
   },
   {
     "__docId__": 466,
+=======
+    "__docId__": 487,
+>>>>>>> master
     "kind": "method",
     "name": "defineProperties",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10452,7 +10802,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 467,
+=======
+    "__docId__": 488,
+>>>>>>> master
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10478,7 +10832,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 468,
+=======
+    "__docId__": 489,
+>>>>>>> master
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10493,7 +10851,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 469,
+=======
+    "__docId__": 490,
+>>>>>>> master
     "kind": "method",
     "name": "activateUserInteractions",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10509,7 +10871,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 470,
+=======
+    "__docId__": 491,
+>>>>>>> master
     "kind": "member",
     "name": "singleClickListenerKey",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10526,7 +10892,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 471,
+=======
+    "__docId__": 492,
+>>>>>>> master
     "kind": "member",
     "name": "pointerMoveListenerKey",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10543,7 +10913,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 472,
+=======
+    "__docId__": 493,
+>>>>>>> master
     "kind": "method",
     "name": "deactivateUserInteractions",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10559,7 +10933,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 473,
+=======
+    "__docId__": 494,
+>>>>>>> master
     "kind": "method",
     "name": "toggleVisibleListeners",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10574,7 +10952,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 474,
+=======
+    "__docId__": 495,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/Layer.js~Layer",
@@ -10607,7 +10989,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 475,
+=======
+    "__docId__": 496,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/MapGlLayer.js",
     "content": "/* eslint-disable max-classes-per-file */\n// @ts-nocheck\nimport { toLonLat } from 'ol/proj';\nimport Source from 'ol/source/Source';\nimport GeoJSON from 'ol/format/GeoJSON';\nimport BaseEvent from 'ol/events/Event';\nimport { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';\nimport Layer from './Layer';\n/**\n * Common class for Mapbox and Maplibre and potential other fork from Mapbox.\n * It's used to share code between Mapbox and Maplibre layers without importing both libs.\n */\nclass MapGlLayer extends Layer {\n    constructor(options = {}) {\n        super(Object.assign({ source: new Source({}) }, options));\n        this.mapClass = options.mapClass;\n        // if no specific attributions set on the source, we use the default one.\n        if (!this.getSource().getAttributions()) {\n            this.getSource().setAttributions(() => {\n                return getMapboxMapCopyrights(this.mbMap);\n            });\n        }\n        /**\n         * Url of the mapbox style.\n         * @type {string}\n         * @private\n         */\n        this.styleUrl = options.url;\n        /**\n         * Api key for the url of the mapbox style.\n         * If set to false, the apiKey is not required.\n         * @type {string}\n         * @private\n         */\n        this.apiKey = options.apiKey;\n        /**\n         * Name of the apiKey to set in the url request.\n         * Default is 'key'.\n         * @type {string}\n         * @private\n         */\n        this.apiKeyName = options.apiKeyName || 'key';\n    }\n    /**\n     * Initialize the layer and listen to feature clicks.\n     * @param {ol/Map~Map} map\n     */\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (!this.map) {\n            return;\n        }\n        /**\n         * The feature format.\n         * @type {ol/format/GeoJSON}\n         */\n        this.format = new GeoJSON({\n            featureProjection: this.map.getView().getProjection(),\n        });\n        this.loadMbMap();\n    }\n    /**\n     * Terminate what was initialized in init function. Remove layer, events...\n     */\n    detachFromMap() {\n        if (this.mbMap) {\n            // Some asynchrone repaints are triggered even if the mbMap has been removed,\n            // to avoid display of errors we set an empty function.\n            this.mbMap.triggerRepaint = () => { };\n            this.mbMap.remove();\n            this.mbMap = undefined;\n        }\n        this.loaded = false;\n        super.detachFromMap();\n    }\n    /**\n     * Create the mapbox map.\n     * @private\n     */\n    loadMbMap() {\n        var _a, _b, _c;\n        this.olListenersKeys.push(\n        // @ts-ignore\n        (_a = this.map) === null || _a === void 0 ? void 0 : _a.on('change:target', () => {\n            this.loadMbMap();\n        }));\n        if (!((_b = this.map) === null || _b === void 0 ? void 0 : _b.getTargetElement())) {\n            return;\n        }\n        if (!this.visible) {\n            // On next change of visibility we load the map\n            this.olListenersKeys.push(\n            // @ts-ignore\n            this.once('change:visible', () => {\n                this.loadMbMap();\n            }));\n            return;\n        }\n        const container = document.createElement('div');\n        container.style.position = 'absolute';\n        container.style.width = '100%';\n        container.style.height = '100%';\n        if (!this.styleUrl) {\n            // eslint-disable-next-line no-console\n            console.error(`No styleUrl defined for mapbox layer: ${this.styleUrl}`);\n            return;\n        }\n        if (!this.apiKey && !((_c = this.styleUrl) === null || _c === void 0 ? void 0 : _c.includes(this.apiKeyName))) {\n            // eslint-disable-next-line no-console\n            console.error(`No apiKey defined for mapbox layer with style url to ${this.styleUrl}`);\n        }\n        const Map = this.mapClass;\n        /**\n         * A mapbox map\n         * @type {mapboxgl.Map}\n         */\n        this.mbMap = new Map(Object.assign({ style: getUrlWithParams(this.styleUrl, {\n                [this.apiKeyName]: this.apiKey,\n            }).toString(), container, interactive: false, trackResize: false, attributionControl: false }, (this.options.mapOptions || {})));\n        this.mbMap.once('load', () => {\n            /**\n             * Is the map loaded.\n             * @type {boolean}\n             */\n            this.loaded = true;\n            this.dispatchEvent(new BaseEvent('load'));\n        });\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.\n     * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate. The original Mapbox feature is available as a property named 'mapboxFeature'.\n     */\n    getFeatureInfoAtCoordinate(coordinate, options) {\n        // Ignore the getFeatureInfo until the mapbox map is loaded\n        if (!options ||\n            !this.format ||\n            !this.mbMap ||\n            !this.mbMap.isStyleLoaded()) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        const pixel = coordinate &&\n            this.mbMap.project(toLonLat(coordinate));\n        let pixels;\n        if (this.hitTolerance) {\n            const { x, y } = pixel;\n            pixels = [\n                {\n                    x: x - this.hitTolerance,\n                    y: y - this.hitTolerance,\n                },\n                {\n                    x: x + this.hitTolerance,\n                    y: y + this.hitTolerance,\n                },\n            ];\n        }\n        // At this point we get GeoJSON Mapbox feature, we transform it to an OpenLayers\n        // feature to be consistent with other layers.\n        const features = this.mbMap\n            // @ts-ignore\n            .queryRenderedFeatures(pixels || pixel, options)\n            .map((feature) => {\n            const olFeature = this.format.readFeature(feature);\n            if (olFeature) {\n                // We save the original mapbox feature to avoid losing informations\n                // potentially needed for other functionnality like highlighting\n                // (id, layer id, source, sourceLayer ...)\n                olFeature.set('mapboxFeature', feature);\n            }\n            return olFeature;\n        });\n        return Promise.resolve({\n            layer: this,\n            features,\n            coordinate,\n        });\n    }\n    /**\n     * Return the Class to instanciate for the mapbox map.\n     *\n     * @return {mapboxgl.Map|maplibregl.Map} map\n     */\n    // eslint-disable-next-line class-methods-use-this\n    getMapboxMapClass() {\n        // eslint-disable-next-line no-console\n        console.error('This function must be implemented in subclasses');\n        // @ts-ignore\n        return null;\n    }\n}\nexport default MapGlLayer;\n",
@@ -10618,7 +11004,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 476,
+=======
+    "__docId__": 497,
+>>>>>>> master
     "kind": "class",
     "name": "MapGlLayer",
     "memberof": "build/ol/layers/MapGlLayer.js",
@@ -10636,7 +11026,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 477,
+=======
+    "__docId__": 498,
+>>>>>>> master
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10650,7 +11044,11 @@
     "undocument": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 478,
+=======
+    "__docId__": 499,
+>>>>>>> master
     "kind": "member",
     "name": "mapClass",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10667,7 +11065,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 479,
+=======
+    "__docId__": 500,
+>>>>>>> master
     "kind": "member",
     "name": "styleUrl",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10686,7 +11088,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 480,
+=======
+    "__docId__": 501,
+>>>>>>> master
     "kind": "member",
     "name": "apiKey",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10705,7 +11111,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 481,
+=======
+    "__docId__": 502,
+>>>>>>> master
     "kind": "member",
     "name": "apiKeyName",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10724,7 +11134,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 482,
+=======
+    "__docId__": 504,
+>>>>>>> master
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10750,7 +11164,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 483,
+=======
+    "__docId__": 505,
+>>>>>>> master
     "kind": "member",
     "name": "format",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10769,7 +11187,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 484,
+=======
+    "__docId__": 506,
+>>>>>>> master
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10784,7 +11206,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 485,
+=======
+    "__docId__": 507,
+>>>>>>> master
     "kind": "member",
     "name": "mbMap",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10801,7 +11227,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 486,
+=======
+    "__docId__": 508,
+>>>>>>> master
     "kind": "member",
     "name": "loaded",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10818,7 +11248,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 487,
+=======
+    "__docId__": 509,
+>>>>>>> master
     "kind": "method",
     "name": "loadMbMap",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10833,7 +11267,50 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 490,
+=======
+    "__docId__": 512,
+    "kind": "method",
+    "name": "updateAttribution",
+    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#updateAttribution",
+    "access": "private",
+    "description": "Update attributions of the source.",
+    "lineNumber": 134,
+    "params": [
+      {
+        "name": "evt",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 513,
+    "kind": "member",
+    "name": "copyrights",
+    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
+    "static": false,
+    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#copyrights",
+    "access": "public",
+    "description": null,
+    "lineNumber": 138,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 514,
+>>>>>>> master
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10876,7 +11353,30 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 491,
+=======
+    "__docId__": 515,
+    "kind": "method",
+    "name": "getOlLayerRender",
+    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#getOlLayerRender",
+    "access": "public",
+    "description": "Return the render function function for the ol layer.",
+    "lineNumber": 199,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 516,
+>>>>>>> master
     "kind": "method",
     "name": "getMapboxMapClass",
     "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
@@ -10899,7 +11399,11 @@
     "params": []
   },
   {
+<<<<<<< HEAD
     "__docId__": 492,
+=======
+    "__docId__": 517,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/MapboxLayer.js",
     "content": "/* eslint-disable no-underscore-dangle */\nimport { Map } from 'mapbox-gl';\nimport { getMapboxMapCopyrights, getMapboxRender } from '../../common/utils';\nimport MapGlLayer from './MapGlLayer';\n/**\n * A class representing Mapboxlayer to display on BasicMap\n *\n * @example\n * import { MapboxLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new MapboxLayer({\n *   url: 'https://maps.geops.io/styles/travic_v2/style.json',\n *   apikey: 'yourApiKey',\n * });\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nexport default class MapboxLayer extends MapGlLayer {\n    constructor(options = {}) {\n        super(Object.assign(Object.assign({}, options), { mapClass: Map }));\n        this.render = getMapboxRender(this);\n    }\n    /**\n     * Initialize the layer and listen to feature clicks.\n     * @param {ol/Map~Map} map\n     */\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (!this.map) {\n            return;\n        }\n        this.olListenersKeys.push(this.map.on('change:size', () => {\n            try {\n                if (this.mbMap) {\n                    this.mbMap.resize();\n                }\n            }\n            catch (err) {\n                // ignore render errors\n                // eslint-disable-next-line no-console\n                console.warn(err);\n            }\n        }));\n    }\n    /**\n     * Create the mapbox map.\n     * @private\n     */\n    loadMbMap() {\n        var _a;\n        // If the map hasn't been resized, the center could be [NaN,NaN].\n        // We set default good value for the mapbox map, to avoid the app crashes.\n        let [x, y] = ((_a = this.map) === null || _a === void 0 ? void 0 : _a.getView().getCenter()) || [];\n        if (!x || !y) {\n            x = 0;\n            y = 0;\n        }\n        // Options the last render run did happen. If something changes\n        // we have to render again\n        /** @private */\n        this.renderState = {\n            center: [x, y],\n            zoom: undefined,\n            rotation: undefined,\n            visible: undefined,\n            opacity: undefined,\n            size: [0, 0],\n        };\n        super.loadMbMap();\n        if (!this.mbMap) {\n            // mbMap could ne bull if the map is not in the dom yet.\n            return;\n        }\n        this.mbMap.once('load', () => {\n            var _a, _b;\n            if (!this.mbMap) {\n                return;\n            }\n            this.mbMap.resize();\n            /** @private */\n            this.copyrights = getMapboxMapCopyrights(this.mbMap) || [];\n            // @ts-ignore\n            (_b = (_a = this.olLayer) === null || _a === void 0 ? void 0 : _a.getSource()) === null || _b === void 0 ? void 0 : _b.setAttributions(this.copyrights);\n        });\n        const mapboxCanvas = this.mbMap.getCanvas();\n        if (mapboxCanvas) {\n            if (this.options.tabIndex) {\n                mapboxCanvas.setAttribute('tabindex', `${this.options.tabIndex}`);\n            }\n            else {\n                // With a tabIndex='-1' the mouse events works but the map is not focused when we click on it\n                // so we remove completely the tabIndex attribute.\n                mapboxCanvas.removeAttribute('tabindex');\n            }\n        }\n    }\n    /**\n     * Create a copy of the MapboxLayer.\n     * @param {Object} newOptions Options to override\n     * @return {MapboxLayer} A MapboxLayer\n     */\n    clone(newOptions) {\n        return new MapboxLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\n",
@@ -10910,7 +11414,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 493,
+=======
+    "__docId__": 518,
+>>>>>>> master
     "kind": "class",
     "name": "MapboxLayer",
     "memberof": "build/ol/layers/MapboxLayer.js",
@@ -10937,6 +11445,7 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 494,
     "kind": "constructor",
     "name": "constructor",
@@ -10969,6 +11478,9 @@
   },
   {
     "__docId__": 496,
+=======
+    "__docId__": 519,
+>>>>>>> master
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/MapboxLayer.js~MapboxLayer",
@@ -10994,7 +11506,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 497,
+=======
+    "__docId__": 520,
+>>>>>>> master
     "kind": "method",
     "name": "loadMbMap",
     "memberof": "build/ol/layers/MapboxLayer.js~MapboxLayer",
@@ -11009,7 +11525,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 498,
+=======
+    "__docId__": 521,
+>>>>>>> master
     "kind": "member",
     "name": "renderState",
     "memberof": "build/ol/layers/MapboxLayer.js~MapboxLayer",
@@ -11025,7 +11545,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 499,
+=======
+    "__docId__": 522,
+>>>>>>> master
     "kind": "member",
     "name": "copyrights",
     "memberof": "build/ol/layers/MapboxLayer.js~MapboxLayer",
@@ -11041,7 +11565,51 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 500,
+=======
+    "__docId__": 523,
+    "kind": "method",
+    "name": "getOlLayerRender",
+    "memberof": "build/ol/layers/MapboxLayer.js~MapboxLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MapboxLayer.js~MapboxLayer#getOlLayerRender",
+    "access": "public",
+    "description": null,
+    "lineNumber": 94,
+    "undocument": true,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 524,
+    "kind": "method",
+    "name": "getMapboxMapClass",
+    "memberof": "build/ol/layers/MapboxLayer.js~MapboxLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MapboxLayer.js~MapboxLayer#getMapboxMapClass",
+    "access": "public",
+    "description": null,
+    "lineNumber": 98,
+    "undocument": true,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 525,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/MapboxLayer.js~MapboxLayer",
@@ -11074,7 +11642,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 501,
+=======
+    "__docId__": 526,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/MapboxStyleLayer.js",
     "content": "import Layer from './Layer';\n/**\n * Layer for visualizing a specific set of layer from a MapboxLayer.\n *\n * @example\n * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';\n *\n * const mapboxLayer = new MapboxLayer({\n *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',\n * });\n *\n * const layer = new MapboxStyleLayer({\n *   mapboxLayer: mapboxLayer,\n *   styleLayersFilter: () => {},\n * });\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass MapboxStyleLayer extends Layer {\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.\n     * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.\n     */\n    constructor(options) {\n        super(options);\n        /**\n         * MapboxLayer provided for the style Layer.\n         * @type {MapboxLayer}\n         * @private\n         */\n        this.mapboxLayer = options.mapboxLayer;\n        /**\n         * Define if the layer has data to display in the current mapbox layer.\n         */\n        this.disabled = false;\n        /**\n         * Function to filter features to be displayed.\n         * @type {function}\n         * @private\n         */\n        this.styleLayersFilter = options.styleLayersFilter;\n        /**\n         * Mapbox style layer id where to add the style layers.\n         * See [mapbox.map.addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.\n         * @type {String}\n         * @private\n         */\n        this.beforeId = options.beforeId;\n        /**\n         * Function to filter features for getFeatureInfoAtCoordinate method.\n         * @type {function}\n         * @private\n         */\n        this.featureInfoFilter = options.featureInfoFilter || ((obj) => obj);\n        /**\n         * Function to query the rendered features.\n         * @type {function}\n         * @private\n         */\n        this.queryRenderedLayersFilter = options.queryRenderedLayersFilter;\n        /**\n         * Array of features to highlight.\n         * @type {Array<ol/Feature~Feature>}\n         * @private\n         */\n        this.highlightedFeatures = [];\n        /**\n         * Array of selected features.\n         * @type {Array<ol/Feature~Feature>}\n         * @private\n         */\n        this.selectedFeatures = [];\n        /**\n         * Array of mapbox style layers to add.\n         * @type {Array<mapboxgl.styleLayer>}\n         * @private\n         */\n        this.styleLayers =\n            (options.styleLayer ? [options.styleLayer] : options.styleLayers) || [];\n        /**\n         * @private\n         */\n        this.addStyleLayers = this.addStyleLayers.bind(this);\n        /**\n         * @private\n         */\n        this.onLoad = this.onLoad.bind(this);\n        if (options.filters) {\n            /** @private */\n            this.addDynamicFilters = () => {\n                this.setFilter(typeof options.filters === 'function'\n                    ? options.filters(this)\n                    : options.filters);\n            };\n        }\n        if (!this.styleLayersFilter && this.styleLayers) {\n            this.styleLayersFilter = (styleLayer) => {\n                var _a;\n                return !!((_a = this.styleLayers) === null || _a === void 0 ? void 0 : _a.find((sl) => styleLayer.id === sl.id));\n            };\n        }\n    }\n    /**\n     * Initialize the layer.\n     * @param {ol/Map~Map} map the mapbox map.\n     * @override\n     */\n    attachToMap(map) {\n        var _a;\n        if (this.mapboxLayer && !this.mapboxLayer.map) {\n            (_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.attachToMap(map);\n        }\n        super.attachToMap(map);\n        if (!this.map || !this.mapboxLayer) {\n            return;\n        }\n        // Apply the initial visibiltity.\n        const { mbMap } = this.mapboxLayer;\n        if (!mbMap) {\n            // If the mbMap is not yet created because the  map has no target yet, we\n            // relaunch the initialisation when it's the case.\n            this.olListenersKeys.push(this.map.on('change:target', () => {\n                this.attachToMap(map);\n            }));\n            return;\n        }\n        // mbMap.loaded() and mbMap.isStyleLoaded() are reliable only on the first call of init.\n        // On the next call (when a topic change for example), these functions returns false because\n        // the style is being modified.\n        // That's why we rely on a property instead for the next calls.\n        if (this.mapboxLayer.loaded || mbMap.isStyleLoaded() || mbMap.loaded()) {\n            this.onLoad();\n        }\n        else {\n            mbMap.once('load', this.onLoad);\n        }\n        // Apply the visibiltity when layer's visibility change.\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.on('change:visible', (evt) => {\n            // Once the map is loaded we can apply visiblity without waiting\n            // the style. Mapbox take care of the application of style changes.\n            this.applyLayoutVisibility(evt);\n        }));\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.mapboxLayer.on('load', () => {\n            this.onLoad();\n        }));\n    }\n    /**\n     * Terminate the layer.\n     * @override\n     */\n    detachFromMap() {\n        var _a;\n        if ((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap) {\n            const { mbMap } = this.mapboxLayer;\n            mbMap.off('load', this.onLoad);\n            this.removeStyleLayers();\n        }\n        super.detachFromMap();\n    }\n    /** @private */\n    addStyleLayers() {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach((styleLayer) => {\n            const { id, source } = styleLayer;\n            if (mbMap.getSource(source) && id && !mbMap.getLayer(id)) {\n                // @ts-ignore\n                mbMap.addLayer(styleLayer, this.beforeId);\n            }\n        });\n        this.applyLayoutVisibility();\n    }\n    /** @private */\n    removeStyleLayers() {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach((styleLayer) => {\n            const { id } = styleLayer;\n            if (id && mbMap.getLayer(id)) {\n                mbMap.removeLayer(id);\n            }\n        });\n    }\n    /**\n     * On Mapbox map load callback function. Add style layers and dynaimc filters.\n     * @private\n     */\n    onLoad() {\n        var _a;\n        this.addStyleLayers();\n        if (this.addDynamicFilters) {\n            this.addDynamicFilters();\n        }\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        const style = mbMap.getStyle();\n        if (style && this.styleLayersFilter) {\n            // @ts-ignore\n            const styles = style.layers.filter(this.styleLayersFilter);\n            this.disabled = !styles.length;\n        }\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        const { mbMap } = this.mapboxLayer;\n        // Ignore the getFeatureInfo until the mapbox map is loaded\n        if (!mbMap.isStyleLoaded()) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        // We query features only on style layers used by this layer.\n        let layers = this.styleLayers || [];\n        if (this.styleLayersFilter) {\n            // @ts-ignore\n            layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);\n        }\n        if (this.queryRenderedLayersFilter) {\n            // @ts-ignore\n            layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);\n        }\n        return this.mapboxLayer\n            .getFeatureInfoAtCoordinate(coordinate, {\n            layers: layers.map((layer) => layer && layer.id),\n            validate: false,\n        })\n            .then((featureInfo) => {\n            const features = featureInfo.features.filter((feature) => {\n                var _a;\n                // @ts-ignore\n                return this.featureInfoFilter(feature, (_a = this.map) === null || _a === void 0 ? void 0 : _a.getView().getResolution());\n            });\n            this.highlight(features);\n            return Object.assign(Object.assign({}, featureInfo), { features, layer: this });\n        });\n    }\n    /**\n     * Set filter that determines which features should be rendered in a style layer.\n     * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.\n     */\n    setFilter(filter) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach(({ id }) => {\n            if (id && filter && mbMap.getLayer(id)) {\n                // @ts-ignore\n                mbMap.setFilter(id, filter);\n            }\n        });\n    }\n    /**\n     * Set if features are hovered or not.\n     * @param {Array<ol/Feature~Feature>} features\n     * @param {boolean} state Is the feature hovered\n     * @private\n     */\n    setHoverState(features, state) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        if (!features || !mbMap) {\n            return;\n        }\n        features.forEach((feature) => {\n            const { source, sourceLayer } = feature.get('mapboxFeature') || {};\n            if ((!source && !sourceLayer) || !feature.getId()) {\n                if (!feature.getId()) {\n                    // eslint-disable-next-line no-console\n                    console.warn(\"No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/mapbox/tippecanoe#adding-calculated-attributes.\", feature.getId(), feature.getProperties());\n                }\n                return;\n            }\n            mbMap.setFeatureState({\n                id: feature.getId(),\n                source,\n                sourceLayer,\n            }, { hover: state });\n        });\n    }\n    /**\n     * Select a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.\n     * @private\n     */\n    select(features = []) {\n        this.setHoverState(this.selectedFeatures || [], false);\n        this.selectedFeatures = features;\n        this.setHoverState(this.selectedFeatures || [], true);\n    }\n    /**\n     * Highlight a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.\n     * @private\n     */\n    highlight(features = []) {\n        var _a;\n        // Filter out selected features\n        const filtered = ((_a = this.highlightedFeatures) === null || _a === void 0 ? void 0 : _a.filter((feature) => !(this.selectedFeatures || [])\n            .map((feat) => feat.getId())\n            .includes(feature.getId()))) || [];\n        // Remove previous highlight\n        this.setHoverState(filtered, false);\n        this.highlightedFeatures = features;\n        // Add highlight\n        this.setHoverState(this.highlightedFeatures, true);\n    }\n    /**\n     * Apply visibility to style layers that fits the styleLayersFilter function.\n     * @param {Event} evt Layer's event that has called the function.\n     * @private\n     */\n    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars\n    applyLayoutVisibility(evt) {\n        var _a;\n        const { visible } = this;\n        const filterFunc = this.styleLayersFilter;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        const style = mbMap.getStyle();\n        if (!style) {\n            return;\n        }\n        if (filterFunc) {\n            const visibilityValue = visible ? 'visible' : 'none';\n            const layers = style.layers || [];\n            for (let i = 0; i < layers.length; i += 1) {\n                const styleLayer = layers[i];\n                if (filterFunc(styleLayer)) {\n                    if (mbMap.getLayer(styleLayer.id)) {\n                        mbMap.setLayoutProperty(styleLayer.id, 'visibility', visibilityValue);\n                        if (this.get('minZoom') || this.get('maxZoom')) {\n                            mbMap.setLayerZoomRange(styleLayer.id, this.get('minZoom') ? this.get('minZoom') - 1 : 0, // mapbox zoom = ol zoom - 1\n                            this.get('maxZoom') ? this.get('maxZoom') - 1 : 24);\n                        }\n                    }\n                }\n            }\n        }\n    }\n    /**\n     * Create a copy of the MapboxStyleLayer.\n     * @param {Object} newOptions Options to override.\n     * @return {MapboxStyleLayer} A MapboxStyleLayer.\n     */\n    clone(newOptions) {\n        return new MapboxStyleLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default MapboxStyleLayer;\n",
@@ -11085,7 +11657,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 502,
+=======
+    "__docId__": 527,
+>>>>>>> master
     "kind": "class",
     "name": "MapboxStyleLayer",
     "memberof": "build/ol/layers/MapboxStyleLayer.js",
@@ -11112,7 +11688,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 503,
+=======
+    "__docId__": 528,
+>>>>>>> master
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11157,7 +11737,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 504,
+=======
+    "__docId__": 529,
+>>>>>>> master
     "kind": "member",
     "name": "mapboxLayer",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11176,7 +11760,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 505,
+=======
+    "__docId__": 530,
+>>>>>>> master
     "kind": "member",
     "name": "disabled",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11192,7 +11780,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 506,
+=======
+    "__docId__": 531,
+>>>>>>> master
     "kind": "member",
     "name": "styleLayersFilter",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11211,7 +11803,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 507,
+=======
+    "__docId__": 532,
+>>>>>>> master
     "kind": "member",
     "name": "beforeId",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11230,7 +11826,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 508,
+=======
+    "__docId__": 533,
+>>>>>>> master
     "kind": "member",
     "name": "featureInfoFilter",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11249,7 +11849,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 509,
+=======
+    "__docId__": 534,
+>>>>>>> master
     "kind": "member",
     "name": "queryRenderedLayersFilter",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11268,7 +11872,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 510,
+=======
+    "__docId__": 535,
+>>>>>>> master
     "kind": "member",
     "name": "highlightedFeatures",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11287,7 +11895,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 511,
+=======
+    "__docId__": 536,
+>>>>>>> master
     "kind": "member",
     "name": "selectedFeatures",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11306,7 +11918,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 512,
+=======
+    "__docId__": 537,
+>>>>>>> master
     "kind": "member",
     "name": "styleLayers",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11325,7 +11941,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 515,
+=======
+    "__docId__": 540,
+>>>>>>> master
     "kind": "member",
     "name": "addDynamicFilters",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11341,7 +11961,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 517,
+=======
+    "__docId__": 542,
+>>>>>>> master
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11368,7 +11992,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 518,
+=======
+    "__docId__": 543,
+>>>>>>> master
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11384,7 +12012,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 519,
+=======
+    "__docId__": 544,
+>>>>>>> master
     "kind": "method",
     "name": "addStyleLayers",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11399,7 +12031,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 520,
+=======
+    "__docId__": 545,
+>>>>>>> master
     "kind": "method",
     "name": "removeStyleLayers",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11414,7 +12050,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 521,
+=======
+    "__docId__": 546,
+>>>>>>> master
     "kind": "method",
     "name": "onLoad",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11429,7 +12069,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 523,
+=======
+    "__docId__": 548,
+>>>>>>> master
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11462,7 +12106,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 524,
+=======
+    "__docId__": 549,
+>>>>>>> master
     "kind": "method",
     "name": "setFilter",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11488,7 +12136,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 525,
+=======
+    "__docId__": 550,
+>>>>>>> master
     "kind": "method",
     "name": "setHoverState",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11524,7 +12176,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 526,
+=======
+    "__docId__": 551,
+>>>>>>> master
     "kind": "method",
     "name": "select",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11552,7 +12208,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 528,
+=======
+    "__docId__": 553,
+>>>>>>> master
     "kind": "method",
     "name": "highlight",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11580,7 +12240,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 530,
+=======
+    "__docId__": 555,
+>>>>>>> master
     "kind": "method",
     "name": "applyLayoutVisibility",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11606,7 +12270,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 531,
+=======
+    "__docId__": 556,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11639,7 +12307,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 532,
+=======
+    "__docId__": 557,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/MaplibreLayer.js",
     "content": "import { Map } from 'maplibre-gl';\nimport { getMaplibreRender } from '../../common/utils';\nimport MapGlLayer from './MapGlLayer';\n/**\n * A class representing MaplibreLayer to display on BasicMap\n *\n * @example\n * import { MaplibreLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new MaplibreLayer({\n *   url: 'https://maps.geops.io/styles/travic_v2/style.json',\n *   apikey: 'yourApiKey',\n * });\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nexport default class MaplibreLayer extends MapGlLayer {\n    constructor(options = {}) {\n        super(Object.assign(Object.assign({}, options), { mapClass: Map }));\n        this.render = getMaplibreRender(this);\n    }\n    /**\n     * Create a copy of the MapboxLayer.\n     * @param {Object} newOptions Options to override\n     * @return {MapboxLayer} A MapboxLayer\n     */\n    clone(newOptions) {\n        return new MaplibreLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\n",
@@ -11650,7 +12322,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 533,
+=======
+    "__docId__": 558,
+>>>>>>> master
     "kind": "class",
     "name": "MaplibreLayer",
     "memberof": "build/ol/layers/MaplibreLayer.js",
@@ -11677,9 +12353,15 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 534,
     "kind": "constructor",
     "name": "constructor",
+=======
+    "__docId__": 559,
+    "kind": "method",
+    "name": "getOlLayerRender",
+>>>>>>> master
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
     "generator": false,
     "async": false,
@@ -11691,9 +12373,15 @@
     "undocument": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 535,
     "kind": "member",
     "name": "render",
+=======
+    "__docId__": 560,
+    "kind": "method",
+    "name": "getMapboxMapClass",
+>>>>>>> master
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
     "static": false,
     "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#render",
@@ -11708,7 +12396,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 536,
+=======
+    "__docId__": 561,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
@@ -11741,7 +12433,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 537,
+=======
+    "__docId__": 562,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/RealtimeLayer.js",
     "content": "// @ts-nocheck\nimport GeoJSON from 'ol/format/GeoJSON';\nimport { Vector as VectorLayer } from 'ol/layer';\nimport Source from 'ol/source/Source';\nimport { composeCssTransform } from 'ol/transform';\nimport { Vector as VectorSource } from 'ol/source';\nimport Layer from './Layer';\nimport RealtimeLayerMixin from '../../common/mixins/RealtimeLayerMixin';\nimport { fullTrajectoryStyle } from '../styles';\n/** @private */\nconst format = new GeoJSON();\n/**\n * Responsible for loading and display data from a Realtime service.\n *\n * @example\n * import { RealtimeLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new RealtimeLayer({\n *   url: [yourUrl],\n *   apiKey: [yourApiKey],\n * });\n *\n *\n * @see <a href=\"/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html\">RealtimeAPI</a>\n *\n * @extends {Layer}\n * @implements {UserInteractionsLayerInterface}\n * @implements {RealtimeLayerInterface}\n */\n// @ts-ignore\nclass RealtimeLayer extends RealtimeLayerMixin(Layer) {\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @private\n     */\n    constructor(options) {\n        // We use a group to be able to add custom vector layer in extended class.\n        // For example TrajservLayer use a vectorLayer to display the complete trajectory.\n        super(Object.assign({ source: new Source({}) }, options));\n        this.allowRenderWhenAnimating = false;\n        this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;\n        // We store the layer used to highlight the full Trajectory\n        this.vectorLayer = new VectorLayer({\n            updateWhileAnimating: this.allowRenderWhenAnimating,\n            updateWhileInteracting: true,\n            source: new VectorSource({ features: [] }),\n            style: (feature, resolution) => {\n                return (options.fullTrajectoryStyle || fullTrajectoryStyle)(feature, resolution, this.styleOptions);\n            },\n        });\n        // Options the last render run did happen. If something changes\n        // we have to render again\n        /** @private */\n        this.renderState = {\n            center: [0, 0],\n            zoom: undefined,\n            rotation: 0,\n        };\n    }\n    render(frameState) {\n        var _a, _b, _c;\n        if (!this.container) {\n            this.container = document.createElement('div');\n            this.container.className = this.getClassName();\n            this.container.style.position = 'absolute';\n            this.container.style.width = '100%';\n            this.container.style.height = '100%';\n            if (this.canvas) {\n                this.canvas.style.position = 'absolute';\n                this.canvas.style.top = '0';\n                this.canvas.style.left = '0';\n                this.canvas.style.transformOrigin = 'top left';\n                this.container.appendChild(this.canvas);\n            }\n        }\n        if (this.renderedViewState) {\n            const { center, resolution, rotation } = frameState.viewState;\n            const { center: renderedCenter, resolution: renderedResolution, rotation: renderedRotation, } = this.renderedViewState;\n            if (renderedResolution / resolution >= 3) {\n                // Avoid having really big points when zooming fast.\n                const context = (_a = this.canvas) === null || _a === void 0 ? void 0 : _a.getContext('2d');\n                context === null || context === void 0 ? void 0 : context.clearRect(0, 0, (_b = this.canvas) === null || _b === void 0 ? void 0 : _b.width, (_c = this.canvas) === null || _c === void 0 ? void 0 : _c.height);\n            }\n            else {\n                const pixelCenterRendered = this.map.getPixelFromCoordinate(renderedCenter);\n                const pixelCenter = this.map.getPixelFromCoordinate(center);\n                this.container.style.transform = composeCssTransform(pixelCenterRendered[0] - pixelCenter[0], pixelCenterRendered[1] - pixelCenter[1], renderedResolution / resolution, renderedResolution / resolution, rotation - renderedRotation, 0, 0);\n            }\n        }\n        return this.container;\n    }\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (this.map) {\n            // If the layer is visible we start  the rendering clock\n            if (this.visible) {\n                this.start();\n            }\n            const index = this.map.getLayers().getArray().indexOf(this);\n            this.map.getLayers().insertAt(index, this.vectorLayer);\n            this.olListenersKeys.push(...this.map.on(['moveend', 'change:target'], (evt) => {\n                const view = (evt.map || evt.target).getView();\n                if (view.getAnimating() || view.getInteracting()) {\n                    return;\n                }\n                const zoom = view.getZoom();\n                // Update the interval between render updates\n                if (this.currentZoom !== zoom) {\n                    this.onZoomEnd();\n                }\n                this.currentZoom = zoom;\n                this.onMoveEnd(evt);\n            }), this.on('change:visible', (evt) => {\n                if (evt.target.visible) {\n                    this.start();\n                }\n                else {\n                    this.stop();\n                }\n            }), this.on('propertychange', (evt) => {\n                // We apply every property change event related to visiblity to the vectorlayer\n                if (/(opacity|visible|zIndex|minResolution|maxResolution|minZoom|maxZoom)/.test(evt.key)) {\n                    this.vectorLayer.set(evt.key, evt.target.get(evt.key));\n                }\n            }));\n        }\n    }\n    /**\n     * Destroy the container of the tracker.\n     */\n    detachFromMap() {\n        var _a;\n        (_a = this.map) === null || _a === void 0 ? void 0 : _a.removeLayer(this.vectorLayer);\n        super.detachFromMap();\n        this.container = null;\n    }\n    /**\n     * Detect in the canvas if there is data to query at a specific coordinate.\n     * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test\n     * @returns\n     */\n    hasFeatureInfoAtCoordinate(coordinate) {\n        if (this.map && this.canvas) {\n            const context = this.canvas.getContext('2d', {\n                willReadFrequently: true,\n            });\n            const pixel = this.map.getPixelFromCoordinate(coordinate);\n            return !!(context === null || context === void 0 ? void 0 : context.getImageData(pixel[0] * (this.pixelRatio || 1), pixel[1] * (this.pixelRatio || 1), 1, 1).data[3]);\n        }\n        return false;\n    }\n    /**\n     * Render the trajectories using current map's size, resolution and rotation.\n     * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.\n     * @overrides\n     */\n    // @ts-ignore\n    renderTrajectories(noInterpolate) {\n        if (!this.map) {\n            return;\n        }\n        const view = this.map.getView();\n        // it could happen that the view is set but without center yet,\n        // so the calcualteExtent will trigger an error.\n        if (!view.getCenter()) {\n            return;\n        }\n        super.renderTrajectories({\n            size: this.map.getSize(),\n            center: view.getCenter(),\n            extent: view.calculateExtent(),\n            resolution: view.getResolution(),\n            rotation: view.getRotation(),\n            zoom: view.getZoom(),\n            pixelRatio: this.pixelRatio,\n        }, noInterpolate);\n    }\n    /**\n     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.\n     * @private\n     * @override\n     */\n    renderTrajectoriesInternal(viewState, noInterpolate) {\n        if (!this.map) {\n            return false;\n        }\n        let isRendered = false;\n        const blockRendering = this.allowRenderWhenAnimating\n            ? false\n            : this.map.getView().getAnimating() ||\n                this.map.getView().getInteracting();\n        // Don't render the map when the map is animating or interacting.\n        isRendered = blockRendering\n            ? false\n            : super.renderTrajectoriesInternal(viewState, noInterpolate);\n        // We update the current render state.\n        if (isRendered) {\n            this.renderedViewState = Object.assign({}, viewState);\n            if (this.container) {\n                this.container.style.transform = '';\n            }\n        }\n        return isRendered;\n    }\n    /**\n     * Return the delay in ms before the next rendering.\n     */\n    getRefreshTimeInMs() {\n        return super.getRefreshTimeInMs(this.map.getView().getZoom());\n    }\n    getFeatureInfoAtCoordinate(coordinate, options = {}) {\n        if (!this.map || !this.map.getView()) {\n            return Promise.resolve({\n                layer: this,\n                features: [],\n                coordinate,\n            });\n        }\n        const resolution = this.map.getView().getResolution();\n        return super\n            .getFeatureInfoAtCoordinate(coordinate, Object.assign({ resolution }, options))\n            .then((featureInfo) => {\n            const olFeatures = featureInfo.features.map((vehicle) => this.format.readFeature(vehicle));\n            // eslint-disable-next-line no-param-reassign\n            featureInfo.features = olFeatures;\n            return featureInfo;\n        });\n    }\n    /**\n     * On move end we update the websocket with the new bbox.\n     *\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line @typescript-eslint/no-unused-vars\n    onMoveEnd(evt) {\n        if (!this.isUpdateBboxOnMoveEnd || !this.visible) {\n            return;\n        }\n        this.setBbox();\n    }\n    /**\n     * Function called on moveend event only when the zoom has changed.\n     *\n     * @param {ol/MapEvent~MapEvent} evt Moveend event.\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line no-unused-vars\n    onZoomEnd() {\n        super.onZoomEnd();\n        if (!this.isUpdateBboxOnMoveEnd || !this.visible) {\n            return;\n        }\n        if (this.userClickInteractions && this.selectedVehicleId) {\n            this.highlightTrajectory(this.selectedVehicleId);\n        }\n    }\n    /**\n     * Update the cursor style when hovering a vehicle.\n     *\n     * @private\n     * @override\n     */\n    onFeatureHover(features, layer, coordinate) {\n        super.onFeatureHover(features, layer, coordinate);\n        this.map.getTargetElement().style.cursor = features.length\n            ? 'pointer'\n            : 'auto';\n    }\n    /**\n     * Display the complete trajectory of the vehicle.\n     *\n     * @private\n     * @override\n     */\n    onFeatureClick(features, layer, coordinate) {\n        super.onFeatureClick(features, layer, coordinate);\n        this.highlightTrajectory(this.selectedVehicleId);\n    }\n    /**\n     * Remove the trajectory form the list if necessary.\n     *\n     * @private\n     */\n    purgeTrajectory(trajectory, extent, zoom) {\n        const center = this.map.getView().getCenter();\n        if (!extent && !center) {\n            // In that case the view is not zoomed yet so we can't calculate the extent of the map,\n            // it will trigger a js error on calculateExtent function.\n            return false;\n        }\n        return super.purgeTrajectory(trajectory, extent || this.map.getView().calculateExtent(), zoom || this.map.getView().getZoom());\n    }\n    /**\n     * Send the current bbox to the websocket\n     *\n     * @private\n     */\n    setBbox(extent, zoom) {\n        super.setBbox(extent || this.map.getView().calculateExtent(), zoom || this.map.getView().getZoom());\n    }\n    /**\n     * Highlight the trajectory of journey.\n     * @private\n     */\n    highlightTrajectory(id) {\n        if (!id) {\n            this.vectorLayer.getSource().clear(true);\n            return Promise.resolve([]);\n        }\n        return this.api\n            .getFullTrajectory(id, this.mode, this.generalizationLevel)\n            .then((data) => {\n            const fullTrajectory = data.content;\n            this.vectorLayer.getSource().clear(true);\n            if (!fullTrajectory ||\n                !fullTrajectory.features ||\n                !fullTrajectory.features.length) {\n                return undefined;\n            }\n            const features = format.readFeatures(fullTrajectory);\n            this.vectorLayer.getSource().addFeatures(features);\n            return features;\n        })\n            .catch(() => {\n            this.vectorLayer.getSource().clear(true);\n            return [];\n        });\n    }\n    /**\n     * Create a copy of the RealtimeLayer.\n     * @param {Object} newOptions Options to override\n     * @return {RealtimeLayer} A RealtimeLayer\n     */\n    clone(newOptions) {\n        return new RealtimeLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default RealtimeLayer;\n",
@@ -11752,7 +12448,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 538,
+=======
+    "__docId__": 563,
+>>>>>>> master
     "kind": "variable",
     "name": "format",
     "memberof": "build/ol/layers/RealtimeLayer.js",
@@ -11772,7 +12472,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 539,
+=======
+    "__docId__": 564,
+>>>>>>> master
     "kind": "class",
     "name": "RealtimeLayer",
     "memberof": "build/ol/layers/RealtimeLayer.js",
@@ -11800,7 +12504,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 540,
+=======
+    "__docId__": 565,
+>>>>>>> master
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11825,7 +12533,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 541,
+=======
+    "__docId__": 566,
+>>>>>>> master
     "kind": "member",
     "name": "allowRenderWhenAnimating",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11842,12 +12554,36 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 543,
+=======
+    "__docId__": 568,
+>>>>>>> master
     "kind": "member",
     "name": "vectorLayer",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
     "static": false,
+<<<<<<< HEAD
     "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#vectorLayer",
+=======
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#olLayer",
+    "access": "private",
+    "description": null,
+    "lineNumber": 44,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 569,
+    "kind": "member",
+    "name": "container",
+    "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
+    "static": false,
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#container",
+>>>>>>> master
     "access": "public",
     "description": null,
     "lineNumber": 45,
@@ -11859,7 +12595,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 544,
+=======
+    "__docId__": 570,
+>>>>>>> master
     "kind": "member",
     "name": "renderState",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11919,7 +12659,44 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 547,
+=======
+    "__docId__": 571,
+    "kind": "member",
+    "name": "vectorLayer",
+    "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
+    "static": false,
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#vectorLayer",
+    "access": "public",
+    "description": null,
+    "lineNumber": 100,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 572,
+    "kind": "member",
+    "name": "renderState",
+    "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
+    "static": false,
+    "longname": "build/ol/layers/RealtimeLayer.js~RealtimeLayer#renderState",
+    "access": "private",
+    "description": null,
+    "lineNumber": 104,
+    "type": {
+      "types": [
+        "{\"center\": *, \"zoom\": *, \"rotation\": *}"
+      ]
+    }
+  },
+  {
+    "__docId__": 573,
+>>>>>>> master
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11942,7 +12719,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 548,
+=======
+    "__docId__": 574,
+>>>>>>> master
     "kind": "member",
     "name": "currentZoom",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11959,7 +12740,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 549,
+=======
+    "__docId__": 575,
+>>>>>>> master
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11974,7 +12759,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 551,
+=======
+    "__docId__": 577,
+>>>>>>> master
     "kind": "method",
     "name": "hasFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12010,7 +12799,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 552,
+=======
+    "__docId__": 578,
+>>>>>>> master
     "kind": "method",
     "name": "renderTrajectories",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12042,7 +12835,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 553,
+=======
+    "__docId__": 579,
+>>>>>>> master
     "kind": "method",
     "name": "renderTrajectoriesInternal",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12075,7 +12872,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 554,
+=======
+    "__docId__": 580,
+>>>>>>> master
     "kind": "member",
     "name": "renderedViewState",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12092,7 +12893,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 555,
+=======
+    "__docId__": 581,
+>>>>>>> master
     "kind": "method",
     "name": "getRefreshTimeInMs",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12111,7 +12916,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 556,
+=======
+    "__docId__": 582,
+>>>>>>> master
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12147,7 +12956,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 557,
+=======
+    "__docId__": 583,
+>>>>>>> master
     "kind": "method",
     "name": "onMoveEnd",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12170,7 +12983,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 558,
+=======
+    "__docId__": 584,
+>>>>>>> master
     "kind": "method",
     "name": "onZoomEnd",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12197,7 +13014,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 559,
+=======
+    "__docId__": 585,
+>>>>>>> master
     "kind": "method",
     "name": "onFeatureHover",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12232,7 +13053,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 560,
+=======
+    "__docId__": 586,
+>>>>>>> master
     "kind": "method",
     "name": "onFeatureClick",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12267,7 +13092,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 561,
+=======
+    "__docId__": 587,
+>>>>>>> master
     "kind": "method",
     "name": "purgeTrajectory",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12305,7 +13134,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 562,
+=======
+    "__docId__": 588,
+>>>>>>> master
     "kind": "method",
     "name": "setBbox",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12333,7 +13166,11 @@
     "return": null
   },
   {
+<<<<<<< HEAD
     "__docId__": 563,
+=======
+    "__docId__": 589,
+>>>>>>> master
     "kind": "method",
     "name": "highlightTrajectory",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12359,7 +13196,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 564,
+=======
+    "__docId__": 590,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -12392,7 +13233,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 565,
+=======
+    "__docId__": 591,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/RoutingLayer.js",
     "content": "import { Circle, Fill, Stroke, Style } from 'ol/style';\nimport { Vector as VectorSource } from 'ol/source';\nimport { Vector } from 'ol/layer';\nimport Layer from './Layer';\n/** @private */\nconst circleStyle = new Circle({\n    radius: 6,\n    fill: new Fill({\n        color: [255, 0, 0, 1],\n    }),\n    stroke: new Stroke({\n        color: [0, 0, 0, 1],\n        width: 1,\n    }),\n});\n/** @private */\nconst blackBorder = new Style({\n    stroke: new Stroke({\n        color: [0, 0, 0, 1],\n        width: 5,\n    }),\n});\n/** @private */\nconst redLine = new Style({\n    image: circleStyle,\n    stroke: new Stroke({\n        color: [255, 0, 0, 1],\n        width: 3,\n    }),\n});\n/** @private */\nconst dashedRedLine = new Style({\n    image: circleStyle,\n    stroke: new Stroke({\n        color: [255, 0, 0, 1],\n        width: 3,\n        lineDash: [1, 10],\n    }),\n});\n/** @private */\nconst defaultStyleFunction = (feature, resolution) => {\n    const minResolution = feature.get('minResolution');\n    const maxResolution = feature.get('maxResolution');\n    const inRange = resolution <= minResolution && resolution > maxResolution;\n    if (minResolution && maxResolution && !inRange) {\n        return [];\n    }\n    const mot = feature.get('mot');\n    if (mot !== 'foot') {\n        return [blackBorder, redLine];\n    }\n    return [dashedRedLine];\n};\n/**\n * A class use to display vector data.\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass RoutingLayer extends Layer {\n    /**\n     * Constructor.\n     * @param {Object} [options]\n     * @param {ol/style/Style~StyleLike} [options.style] Style to be used for routes, uses (ol/StyleLike) [https://openlayers.org/en/latest/apidoc/module-ol_style_Style.html#~StyleLike] instances\n     */\n    constructor(options) {\n        super(options);\n        this.options = {};\n        this.olLayer =\n            options.olLayer ||\n                new Vector({\n                    source: new VectorSource(),\n                    style: options.style || defaultStyleFunction,\n                });\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. Replace this RoutingLayer by an ol layer with vector source.`);\n    }\n    /**\n     * Create a copy of the RoutingLayer.\n     * @param {Object} newOptions Options to override\n     * @return {RoutingLayer} A RoutingLayer\n     */\n    clone(newOptions) {\n        return new RoutingLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default RoutingLayer;\n",
@@ -12403,7 +13248,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 566,
+=======
+    "__docId__": 592,
+>>>>>>> master
     "kind": "variable",
     "name": "circleStyle",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -12423,7 +13272,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 567,
+=======
+    "__docId__": 593,
+>>>>>>> master
     "kind": "variable",
     "name": "blackBorder",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -12443,7 +13296,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 568,
+=======
+    "__docId__": 594,
+>>>>>>> master
     "kind": "variable",
     "name": "redLine",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -12463,7 +13320,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 569,
+=======
+    "__docId__": 595,
+>>>>>>> master
     "kind": "variable",
     "name": "dashedRedLine",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -12483,7 +13344,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 570,
+=======
+    "__docId__": 596,
+>>>>>>> master
     "kind": "function",
     "name": "defaultStyleFunction",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -12519,7 +13384,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 571,
+=======
+    "__docId__": 597,
+>>>>>>> master
     "kind": "class",
     "name": "RoutingLayer",
     "memberof": "build/ol/layers/RoutingLayer.js",
@@ -12543,7 +13412,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 572,
+=======
+    "__docId__": 598,
+>>>>>>> master
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -12578,7 +13451,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 573,
+=======
+    "__docId__": 599,
+>>>>>>> master
     "kind": "member",
     "name": "options",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -12595,7 +13472,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 574,
+=======
+    "__docId__": 600,
+>>>>>>> master
     "kind": "member",
     "name": "olLayer",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -12612,7 +13493,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 575,
+=======
+    "__docId__": 601,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/RoutingLayer.js~RoutingLayer",
@@ -12645,7 +13530,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 576,
+=======
+    "__docId__": 602,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/VectorLayer.js",
     "content": "import { Vector } from 'ol/layer';\nimport PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';\nimport UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';\n/**\n * A class use to display vector data.\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass VectorLayer extends UserInteractionsLayerMixin(PropertiesLayerMixin(Vector)) {\n    constructor(options) {\n        super(options);\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. Replace this VectorLayer by an ol layer with vector source.`);\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. Use the new utils function getFeatureInfoAtCoordinate instead:\n\n    import { getFeatureInfoAtCoordinate }  from 'mobility-toolbox-js/ol';\n    `);\n        let features = [];\n        if (this.map) {\n            const pixel = this.map.getPixelFromCoordinate(coordinate);\n            features = this.map.getFeaturesAtPixel(pixel, {\n                layerFilter: (l) => l === this.olLayer,\n                hitTolerance: this.hitTolerance,\n            });\n        }\n        return Promise.resolve({\n            features,\n            layer: this,\n            coordinate,\n        });\n    }\n    /**\n     * Create a copy of the VectorLayer.\n     * @param {Object} newOptions Options to override\n     * @return {VectorLayer} A VectorLayer\n     */\n    clone(newOptions) {\n        return new VectorLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default VectorLayer;\n",
@@ -12656,7 +13545,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 577,
+=======
+    "__docId__": 603,
+>>>>>>> master
     "kind": "class",
     "name": "VectorLayer",
     "memberof": "build/ol/layers/VectorLayer.js",
@@ -12680,6 +13573,7 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 578,
     "kind": "constructor",
     "name": "constructor",
@@ -12695,6 +13589,9 @@
   },
   {
     "__docId__": 579,
+=======
+    "__docId__": 604,
+>>>>>>> master
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/VectorLayer.js~VectorLayer",
@@ -12727,7 +13624,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 580,
+=======
+    "__docId__": 605,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/VectorLayer.js~VectorLayer",
@@ -12760,7 +13661,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 581,
+=======
+    "__docId__": 606,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/WMSLayer.js",
     "content": "import GeoJSON from 'ol/format/GeoJSON';\nimport Layer from './Layer';\n/**\n * Class use to display a WMS layer.\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n * @deprecated\n * @private\n */\nclass WMSLayer extends Layer {\n    /**\n     * @override\n     */\n    constructor(options) {\n        super(options);\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Replace this WMSLayer by an ol layer with WMS source.');\n        /** @private */\n        this.abortController = new AbortController();\n        /** @private */\n        this.format = new GeoJSON();\n    }\n    /**\n     * Get features infos' Url.\n     * @param {ol/coordinate~Coordinate} coord\n     * @return {ol/layer/Layer~Layer}\n     */\n    getFeatureInfoUrl(coord) {\n        var _a, _b, _c, _d, _e, _f;\n        if (!this.map) {\n            return;\n        }\n        const projection = this.map.getView().getProjection();\n        const resolution = this.map.getView().getResolution();\n        if (resolution &&\n            projection &&\n            ((_b = (_a = this.olLayer) === null || _a === void 0 ? void 0 : _a.getSource()) === null || _b === void 0 ? void 0 : _b.getFeatureInfoUrl)) {\n            // eslint-disable-next-line consistent-return\n            return (_d = (_c = this.olLayer) === null || _c === void 0 ? void 0 : _c.getSource()) === null || _d === void 0 ? void 0 : _d.getFeatureInfoUrl(coord, resolution, projection, {\n                info_format: 'application/json',\n                query_layers: (_f = (_e = this.olLayer) === null || _e === void 0 ? void 0 : _e.getSource()) === null || _f === void 0 ? void 0 : _f.getParams().layers,\n            });\n        }\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        var _a;\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. Use the new utils function getFeatureInfoAtCoordinate instead:\n\n    import { getFeatureInfoAtCoordinate }  from 'mobility-toolbox-js/ol';\n    `);\n        (_a = this.abortController) === null || _a === void 0 ? void 0 : _a.abort();\n        this.abortController = new AbortController();\n        const { signal } = this.abortController;\n        const url = this.getFeatureInfoUrl(coordinate);\n        if (!url) {\n            // eslint-disable-next-line no-console\n            console.error('No url for the WMS layer.');\n            // resolve an empty feature array something fails\n            return Promise.resolve({\n                features: [],\n                coordinate,\n                layer: this,\n            });\n        }\n        return fetch(url, { signal })\n            .then((resp) => resp.json())\n            .then((r) => r.features)\n            .then((data) => ({\n            layer: this,\n            coordinate,\n            features: data.map((d) => this.format.readFeature(d)),\n        }))\n            .catch(() => \n        // resolve an empty feature array something fails\n        Promise.resolve({\n            features: [],\n            coordinate,\n            layer: this,\n        }));\n    }\n    /**\n     * Create a copy of the WMSLayer.\n     * @param {Object} newOptions Options to override\n     * @return {WMSLayer} A WMSLayer\n     */\n    clone(newOptions) {\n        return new WMSLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default WMSLayer;\n",
@@ -12771,7 +13676,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 582,
+=======
+    "__docId__": 607,
+>>>>>>> master
     "kind": "class",
     "name": "WMSLayer",
     "memberof": "build/ol/layers/WMSLayer.js",
@@ -12796,7 +13705,11 @@
     ]
   },
   {
+<<<<<<< HEAD
     "__docId__": 583,
+=======
+    "__docId__": 608,
+>>>>>>> master
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -12810,7 +13723,11 @@
     "override": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 584,
+=======
+    "__docId__": 609,
+>>>>>>> master
     "kind": "member",
     "name": "abortController",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -12826,7 +13743,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 585,
+=======
+    "__docId__": 610,
+>>>>>>> master
     "kind": "member",
     "name": "format",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -12842,7 +13763,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 586,
+=======
+    "__docId__": 611,
+>>>>>>> master
     "kind": "method",
     "name": "getFeatureInfoUrl",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -12875,7 +13800,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 587,
+=======
+    "__docId__": 612,
+>>>>>>> master
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -12908,7 +13837,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 589,
+=======
+    "__docId__": 614,
+>>>>>>> master
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/WMSLayer.js~WMSLayer",
@@ -12941,7 +13874,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 590,
+=======
+    "__docId__": 615,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/layers/index.js",
     "content": "export { default as Layer } from './Layer';\nexport { default as MapboxLayer } from './MapboxLayer';\nexport { default as MaplibreLayer } from './MaplibreLayer';\nexport { default as MapboxStyleLayer } from './MapboxStyleLayer';\nexport { default as RoutingLayer } from './RoutingLayer';\nexport { default as RealtimeLayer } from './RealtimeLayer';\nexport { default as VectorLayer } from './VectorLayer';\nexport { default as WMSLayer } from './WMSLayer';\nexport { default as OLLayer } from 'ol/layer/Layer';\n",
@@ -12952,7 +13889,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 591,
+=======
+    "__docId__": 616,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/styles/fullTrajectoryDelayStyle.js",
     "content": "import { Style, Fill, Stroke, Circle } from 'ol/style';\n/** @private */\nconst stroke = new Style({\n    zIndex: 2,\n    image: new Circle({\n        radius: 5,\n        fill: new Fill({\n            color: '#000000',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#000000',\n        width: 6,\n    }),\n});\n/** @private */\nconst fill = new Style({\n    zIndex: 3,\n    image: new Circle({\n        radius: 4,\n        fill: new Fill({\n            color: '#a0a0a0',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#a0a0a0',\n        width: 4,\n    }),\n});\nconst fullTrajectoryDelaystyle = () => {\n    return [stroke, fill];\n};\nexport default fullTrajectoryDelaystyle;\n",
@@ -12963,7 +13904,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 592,
+=======
+    "__docId__": 617,
+>>>>>>> master
     "kind": "variable",
     "name": "stroke",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -12983,7 +13928,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 593,
+=======
+    "__docId__": 618,
+>>>>>>> master
     "kind": "variable",
     "name": "fill",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -13003,7 +13952,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 594,
+=======
+    "__docId__": 619,
+>>>>>>> master
     "kind": "function",
     "name": "fullTrajectoryDelaystyle",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -13026,7 +13979,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 595,
+=======
+    "__docId__": 620,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/styles/fullTrajectoryStyle.js",
     "content": "import { Style, Fill, Stroke, Circle } from 'ol/style';\n/** @private */\nconst borderStyle = new Style({\n    zIndex: 2,\n    image: new Circle({\n        radius: 5,\n        fill: new Fill({\n            color: '#000000',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#000000',\n        width: 6,\n    }),\n});\nconst fullTrajectorystyle = (feature, resolution, options) => {\n    let lineColor = '#ffffff'; // white\n    const type = feature.get('type');\n    let stroke = feature.get('stroke');\n    if (stroke && stroke[0] !== '#') {\n        stroke = `#${stroke}`;\n    }\n    lineColor = stroke || (options === null || options === void 0 ? void 0 : options.getBgColor(type));\n    // Don't allow white lines, use red instead.\n    lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;\n    const style = [\n        borderStyle,\n        new Style({\n            zIndex: 3,\n            image: new Circle({\n                radius: 4,\n                fill: new Fill({\n                    color: lineColor,\n                }),\n            }),\n            stroke: new Stroke({\n                color: lineColor,\n                width: 4,\n            }),\n        }),\n    ];\n    return style;\n};\nexport default fullTrajectorystyle;\n",
@@ -13037,7 +13994,11 @@
     "lineNumber": 1
   },
   {
+<<<<<<< HEAD
     "__docId__": 596,
+=======
+    "__docId__": 621,
+>>>>>>> master
     "kind": "variable",
     "name": "borderStyle",
     "memberof": "build/ol/styles/fullTrajectoryStyle.js",
@@ -13057,7 +14018,11 @@
     "ignore": true
   },
   {
+<<<<<<< HEAD
     "__docId__": 597,
+=======
+    "__docId__": 622,
+>>>>>>> master
     "kind": "function",
     "name": "fullTrajectorystyle",
     "memberof": "build/ol/styles/fullTrajectoryStyle.js",
@@ -13099,7 +14064,11 @@
     }
   },
   {
+<<<<<<< HEAD
     "__docId__": 598,
+=======
+    "__docId__": 623,
+>>>>>>> master
     "kind": "file",
     "name": "build/ol/styles/index.js",
     "content": "export { default as fullTrajectoryStyle } from './fullTrajectoryStyle';\nexport { default as fullTrajectoryDelayStyle } from './fullTrajectoryDelayStyle';\n",
@@ -13259,7 +14228,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"2.3.7\",\n  \"homepage\": \"https://mobility-toolbox-js.geops.io/\",\n  \"module\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./mapbox\": \"./mapbox/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"6.5.0\",\n    \"@turf/transform-rotate\": \"6.5.0\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"uuid\": \"9.0.1\"\n  },\n  \"peerDependencies\": {\n    \"mapbox-gl\": \"1 - 2\",\n    \"maplibre-gl\": \"1 - 3\",\n    \"ol\": \"7 - 8\"\n  },\n  \"devDependencies\": {\n    \"@babel/preset-env\": \"^7.23.6\",\n    \"@babel/preset-typescript\": \"^7.23.3\",\n    \"@commitlint/cli\": \"18.4.3\",\n    \"@commitlint/config-conventional\": \"18.4.3\",\n    \"@types/geojson\": \"7946.0.13\",\n    \"@types/lodash.debounce\": \"4.0.9\",\n    \"@types/lodash.throttle\": \"4.1.9\",\n    \"@types/mapbox-gl\": \"2.7.19\",\n    \"@types/offscreencanvas\": \"2019.7.3\",\n    \"@types/topojson\": \"3.2.6\",\n    \"@types/uuid\": \"9.0.7\",\n    \"@typescript-eslint/eslint-plugin\": \"6.15.0\",\n    \"@typescript-eslint/parser\": \"6.15.0\",\n    \"cypress\": \"13.6.1\",\n    \"esbuild\": \"0.19.10\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"1.0.1\",\n    \"eslint\": \"8.56.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"17.1.0\",\n    \"eslint-config-prettier\": \"9.1.0\",\n    \"eslint-plugin-cypress\": \"2.15.1\",\n    \"eslint-plugin-import\": \"2.29.1\",\n    \"eslint-plugin-jsx-a11y\": \"6.8.0\",\n    \"eslint-plugin-prettier\": \"5.1.1\",\n    \"eslint-plugin-react\": \"7.33.2\",\n    \"fixpack\": \"4.0.0\",\n    \"husky\": \"8.0.3\",\n    \"is-ci\": \"3.0.1\",\n    \"jest\": \"29.7.0\",\n    \"jest-canvas-mock\": \"2.5.2\",\n    \"jest-environment-jsdom\": \"29.7.0\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"2.0.1\",\n    \"jest-websocket-mock\": \"2.5.0\",\n    \"lint-staged\": \"15.2.0\",\n    \"mapbox-gl\": \"1.13.2\",\n    \"maplibre-gl\": \"3.6.2\",\n    \"mock-socket\": \"9.3.1\",\n    \"next\": \"14.0.4\",\n    \"next-transpile-modules\": \"10.0.1\",\n    \"ol\": \"8.2.0\",\n    \"openapi-typescript\": \"6.7.3\",\n    \"prettier\": \"3.1.1\",\n    \"raw-loader\": \"4.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"2.0.3\",\n    \"stylelint\": \"16.0.2\",\n    \"stylelint-config-recommended-scss\": \"14.0.0\",\n    \"stylelint-config-standard\": \"35.0.0\",\n    \"stylelint-scss\": \"6.0.0\",\n    \"typescript\": \"5.3.3\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"yarn build:tsc && yarn esbuild:iife\",\n    \"build:tsc\": \"rm -rf build && yarn tsc && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"rm -rf .next && rm -rf doc/.next && yarn doc && yarn dev:examples\",\n    \"dev:examples\": \"rm -rf .next && rm -rf doc/.next && yarn build && cd build && yarn link && cd ../doc && yarn link mobility-toolbox-js && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix --allow-empty-input\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"prepare\": \"is-ci || husky install\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog  && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && && git push origin HEAD && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public\": \"yarn release  && yarn run build && cd build && HUSKY=0 yarn publish && git push origin HEAD && git push --tags \",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest \",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\",\n    \"up\": \"yarn upgrade-interactive --latest\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"realtime\",\n    \"routing\",\n    \"stops\",\n    \"toolbox\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"sideEffects\": false\n}\n",
+    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"2.3.7\",\n  \"homepage\": \"https://mobility-toolbox-js.geops.io/\",\n  \"module\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./mapbox\": \"./mapbox/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"6.5.0\",\n    \"@turf/transform-rotate\": \"6.5.0\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"uuid\": \"9.0.1\"\n  },\n  \"peerDependencies\": {\n    \"mapbox-gl\": \"1 - 2\",\n    \"maplibre-gl\": \"1 - 3\",\n    \"ol\": \"7 - 8\"\n  },\n  \"devDependencies\": {\n    \"@babel/preset-env\": \"^7.23.8\",\n    \"@babel/preset-typescript\": \"^7.23.3\",\n    \"@commitlint/cli\": \"18.4.4\",\n    \"@commitlint/config-conventional\": \"18.4.4\",\n    \"@types/geojson\": \"7946.0.13\",\n    \"@types/lodash.debounce\": \"4.0.9\",\n    \"@types/lodash.throttle\": \"4.1.9\",\n    \"@types/mapbox-gl\": \"2.7.19\",\n    \"@types/offscreencanvas\": \"2019.7.3\",\n    \"@types/topojson\": \"3.2.6\",\n    \"@types/uuid\": \"9.0.7\",\n    \"@typescript-eslint/eslint-plugin\": \"6.19.0\",\n    \"@typescript-eslint/parser\": \"6.19.0\",\n    \"cypress\": \"13.6.3\",\n    \"esbuild\": \"0.19.11\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"1.0.1\",\n    \"eslint\": \"8.56.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"17.1.0\",\n    \"eslint-config-prettier\": \"9.1.0\",\n    \"eslint-plugin-cypress\": \"2.15.1\",\n    \"eslint-plugin-import\": \"2.29.1\",\n    \"eslint-plugin-jsx-a11y\": \"6.8.0\",\n    \"eslint-plugin-prettier\": \"5.1.3\",\n    \"eslint-plugin-react\": \"7.33.2\",\n    \"fixpack\": \"4.0.0\",\n    \"husky\": \"8.0.3\",\n    \"is-ci\": \"3.0.1\",\n    \"jest\": \"29.7.0\",\n    \"jest-canvas-mock\": \"2.5.2\",\n    \"jest-environment-jsdom\": \"29.7.0\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"2.0.2\",\n    \"jest-websocket-mock\": \"2.5.0\",\n    \"lint-staged\": \"15.2.0\",\n    \"mapbox-gl\": \"1.13.2\",\n    \"maplibre-gl\": \"3.6.2\",\n    \"mock-socket\": \"9.3.1\",\n    \"next\": \"14.0.4\",\n    \"next-transpile-modules\": \"10.0.1\",\n    \"ol\": \"8.2.0\",\n    \"openapi-typescript\": \"6.7.3\",\n    \"prettier\": \"3.2.4\",\n    \"raw-loader\": \"4.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"2.0.3\",\n    \"stylelint\": \"16.1.0\",\n    \"stylelint-config-recommended-scss\": \"14.0.0\",\n    \"stylelint-config-standard\": \"36.0.0\",\n    \"stylelint-scss\": \"6.0.0\",\n    \"typescript\": \"5.3.3\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"yarn build:tsc && yarn esbuild:iife\",\n    \"build:tsc\": \"rm -rf build && yarn tsc && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"rm -rf .next && rm -rf doc/.next && yarn doc && yarn dev:examples\",\n    \"dev:examples\": \"rm -rf .next && rm -rf doc/.next && yarn build && cd build && yarn link && cd ../doc && yarn link mobility-toolbox-js && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix --allow-empty-input\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"prepare\": \"is-ci || husky install\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog  && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && && git push origin HEAD && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public\": \"yarn release  && yarn run build && cd build && HUSKY=0 yarn publish && git push origin HEAD && git push --tags \",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest \",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\",\n    \"up\": \"yarn upgrade-interactive --latest\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"realtime\",\n    \"routing\",\n    \"stops\",\n    \"toolbox\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"sideEffects\": false\n}\n",
     "longname": "/home/olivier/GIT/mobility-toolbox-js/package.json",
     "name": "package.json",
     "static": true,
@@ -13519,6 +14488,21 @@
     "type": {
       "types": [
         "boolean"
+      ]
+    }
+  },
+  {
+    "kind": "member",
+    "name": "map",
+    "memberof": "build/ol/layers/Layer copy.js~Layer",
+    "static": false,
+    "longname": "build/ol/layers/Layer copy.js~Layer#map",
+    "access": "public",
+    "description": "The map where the layer is displayed.",
+    "lineNumber": 20,
+    "type": {
+      "types": [
+        "ol/Map~Map"
       ]
     }
   },

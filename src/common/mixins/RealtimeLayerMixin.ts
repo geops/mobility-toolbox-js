@@ -82,7 +82,6 @@ export type RealtimeLayerMixinOptions = LayerOptions & {
   url?: string;
   apiKey?: string;
   prefix?: string;
-  projection?: string;
   bbox?: (number | string)[];
   buffer?: number[];
   pingIntervalMs?: number;
@@ -114,7 +113,7 @@ export class RealtimeLayerInterface {
   /**
    * Set the Realtime api's bbox.
    *
-   * @param {Array<number>} extent  Extent to request, [minX, minY, maxX, maxY, zoom].
+   * @param {Array<number>} extent  Extent to request, [minX, minY, maxX, maxY].
    * @param {number} zoom  Zoom level to request. Must be an integer.
    */
   setBbox(extent: [number, number, number, number], zoom: number) {}
@@ -765,7 +764,10 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         }
       }
 
-      if (!extent) {
+      // The backend only supports non float value
+      const zoomFloor = Math.floor(zoom);
+
+      if (!extent || Number.isNaN(zoomFloor)) {
         return;
       }
 
@@ -777,24 +779,19 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         Math.floor(minY),
         Math.ceil(maxX),
         Math.ceil(maxY),
+        zoomFloor,
       ];
 
-      if (zoom) {
-        // The backend only supports non float value
-        const zoomFloor = Math.floor(zoom);
-        bbox.push(zoomFloor);
+      /* @private */
+      this.generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
+      if (this.generalizationLevel) {
+        bbox.push(`gen=${this.generalizationLevel}`);
+      }
 
-        /* @private */
-        this.generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
-        if (this.generalizationLevel) {
-          bbox.push(`gen=${this.generalizationLevel}`);
-        }
-
-        /* @private */
-        this.mots = this.getMotsByZoom(zoomFloor);
-        if (this.mots) {
-          bbox.push(`mots=${this.mots}`);
-        }
+      /* @private */
+      this.mots = this.getMotsByZoom(zoomFloor);
+      if (this.mots) {
+        bbox.push(`mots=${this.mots}`);
       }
 
       if (this.tenant) {
@@ -811,6 +808,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         });
       }
 
+      // Extent and zoom level are mandatory.
       this.api.bbox = bbox;
     }
 
