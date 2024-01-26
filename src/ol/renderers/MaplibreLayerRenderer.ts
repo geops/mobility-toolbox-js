@@ -11,8 +11,14 @@ import { Geometry } from 'ol/geom';
 import { Pixel } from 'ol/pixel';
 import { Map } from 'maplibre-gl';
 
+/**
+ * @private
+ */
 let emptyDiv: HTMLElement;
 
+/**
+ * @private
+ */
 const formats: {
   [key: string]: GeoJSON;
 } = {
@@ -29,8 +35,7 @@ const formats: {
 // @ts-ignore
 export default class MaplibreLayerRenderer extends LayerRenderer<MaplibreLayer> {
   // eslint-disable-next-line class-methods-use-this
-  prepareFrame(frameState: FrameState) {
-    console.log(frameState.size, this.layer_.getMapInternal()?.getSize());
+  prepareFrame() {
     return true;
   }
 
