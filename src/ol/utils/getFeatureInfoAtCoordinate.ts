@@ -5,6 +5,9 @@ import { ImageWMS, TileWMS } from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
 import { LayerGetFeatureInfoResponse } from '../../types';
 
+/**
+ * @private
+ */
 const format = new GeoJSON();
 
 /**
@@ -32,6 +35,9 @@ const getFeaturesFromWMS = (
     .catch(() => []);
 };
 
+/**
+ * @private
+ */
 let abortControllers: {
   [key: string]: AbortController | undefined;
 } = {};
