@@ -19,6 +19,7 @@ export type ControlCommonOptions = {
  * @classproperty {boolean} active - Active the control.
  * @classproperty {HTMLElement} element - The HTML element used to render the control.
  * @classproperty {HTMLElement} target - The HTML element where to render the element property. Default is the map's element. Read only.
+ * @private
  */
 class ControlCommon extends BaseObject {
   active: Boolean;

@@ -19,7 +19,7 @@ export type StopFinderControlCommonOptions = StopsAPIOptions & {
  * This class only draw the html elements.
  * The geographic logic must be implemented by subclasses.
  *
- * @ignore
+ * @private
  */
 class StopFinderControlCommon {
   apiParams: StopsParameters;
