@@ -16,7 +16,6 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  *   apikey: 'yourApiKey',
  * });
  *
- * @classproperty {string} loaded - True if the Maplibre map has been loaded. Readonly.
  * @classproperty {maplibregl.Map} mbMap - The Maplibre map object. Readonly.
  * @classproperty {maplibregl.QueryRenderedFeaturesOptions} queryRenderedFeaturesOptions. Options used when we query features using ol/Map~Map.getFeaturesAtPixel.
  * @classproperty {string} style - geOps Maps api style.
