@@ -7,7 +7,7 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
 };
 
 /**
- * This class is meant to facilitate the use of the geOps Maps api in an OpenLayers map using Maplibre.
+ * This layer is meant to facilitate the use of the geOps Maps api in an OpenLayers map using Maplibre.
  *
  * @example
  * import { MaplibreLayer } from 'mobility-toolbox-js/ol';
