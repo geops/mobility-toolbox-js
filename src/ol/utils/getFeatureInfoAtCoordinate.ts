@@ -7,6 +7,9 @@ import { LayerGetFeatureInfoResponse } from '../../types';
 
 const format = new GeoJSON();
 
+/**
+ * @private
+ */
 const getFeaturesFromWMS = (
   source: TileWMS | ImageWMS,
   options: any,
@@ -33,6 +36,9 @@ let abortControllers: {
   [key: string]: AbortController | undefined;
 } = {};
 
+/**
+ * @private
+ */
 const getFeatureInfoAtCoordinate = async (
   coordinate: Coordinate,
   layers: Layer[],

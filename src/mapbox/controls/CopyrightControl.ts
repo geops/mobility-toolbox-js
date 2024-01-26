@@ -1,6 +1,9 @@
 import { ControlPosition, IControl } from 'maplibre-gl';
 import { getMapboxMapCopyrights } from '../../common/utils';
 
+/**
+ * @private
+ */
 const DEFAULT_SEPARATOR = ' | ';
 
 /**

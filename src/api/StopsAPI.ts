@@ -7,7 +7,7 @@ export type StopsAPIOptions = {
 };
 
 /**
- * Access to the [Stops service](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
+ * Access to the [geOps Stops api](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
  *
  * @example
  * import { StopsAPI } from 'mobility-toolbox-js/api';

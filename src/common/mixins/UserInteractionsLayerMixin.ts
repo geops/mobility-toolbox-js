@@ -20,6 +20,7 @@ export type UserInteractionsLayerMixinOptions = {
 
 /**
  * UserInteractionsLayerInterface.
+ * @private
  */
 export class UserInteractionsLayerInterface {
   /*

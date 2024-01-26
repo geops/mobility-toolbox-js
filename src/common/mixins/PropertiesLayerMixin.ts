@@ -40,6 +40,7 @@ type Constructor<T extends Layer> = new (...args: any[]) => T;
  * @classproperty {number} hitTolerance - Hit-detection tolerance in css pixels. Pixels inside the radius around the given position will be checked for features.
  * @classproperty {Object} properties - Custom properties.
  * @classproperty {ol/Map~Map|mapboxgl.Map} map - The map where the layer is displayed.
+ * @private
  */
 // @ts-ignore
 function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {

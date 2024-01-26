@@ -97,6 +97,7 @@ export type RealtimeLayerMixinOptions = LayerOptions & {
 
 /**
  * RealtimeLayerInterface.
+ * @private
  */
 export class RealtimeLayerInterface {
   /**
