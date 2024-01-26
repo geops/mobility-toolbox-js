@@ -14,6 +14,9 @@ export type LayerOptions = Options &
 type GConstructor<T = Layer> = new (...args: any[]) => T;
 type GLayerConstructor = GConstructor<Layer>;
 
+/**
+ * @private
+ */
 function OlMobilityLayerMixin<TBase extends GLayerConstructor>(Base: TBase) {
   class OlMobilityLayer extends OlUserInteractionsLayerMixin(
     PropertiesLayerMixin(Base),
