@@ -4,8 +4,8 @@
 const path = require('path');
 const cheerio = require('cheerio');
 const ParamParser = require('esdoc/out/src/Parser/ParamParser').default;
-const DocBuilder = require('esdoc-publish-html-plugin/out/src/Builder/DocBuilder')
-  .default;
+const DocBuilder =
+  require('esdoc-publish-html-plugin/out/src/Builder/DocBuilder').default;
 
 const newTagName = '@classproperty';
 
@@ -26,6 +26,7 @@ class Plugin {
             const matched = item.tagValue.match(
               /^\{(.*?)\} ([\w0-9_]+) -?(.*)$/m,
             );
+            console.log(item, item.tagValue, matched);
             const type = matched[1];
             const name = matched[2];
             const desc = matched[3].trim();

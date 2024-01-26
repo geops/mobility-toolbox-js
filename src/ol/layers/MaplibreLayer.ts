@@ -17,7 +17,7 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  * });
  *
  * @classproperty {maplibregl.Map} mbMap - The Maplibre map object. Readonly.
- * @classproperty {maplibregl.QueryRenderedFeaturesOptions} queryRenderedFeaturesOptions. Options used when we query features using ol/Map~Map.getFeaturesAtPixel.
+ * @classproperty {maplibregl.QueryRenderedFeaturesOptions} queryRenderedFeaturesOptions - Options used when we query features using map.getFeaturesAtPixel().
  * @classproperty {string} style - geOps Maps api style.
  * @extends {ol/layer/Layer~Layer}
  */
