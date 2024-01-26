@@ -1,28 +1,21 @@
+/* eslint-disable no-underscore-dangle */
 // @ts-nocheck
-import { toLonLat } from 'ol/proj';
 import Source from 'ol/source/Source';
-import GeoJSON from 'ol/format/GeoJSON';
 import OlMap from 'ol/Map';
-import { Coordinate } from 'ol/coordinate';
 import BaseEvent from 'ol/events/Event';
-import { Feature } from 'ol';
+import Layer from 'ol/layer/Layer';
+import debounce from 'lodash.debounce';
+import { ObjectEvent } from 'ol/Object';
 import { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';
-import {
-  AnyMapboxMap,
-  AnyMapboxMapClass,
-  AnyMapboxMapOptions,
-  LayerGetFeatureInfoResponse,
-} from '../../types';
-import Layer, { OlLayerOptions } from './Layer';
+import { AnyMapboxMap } from '../../types';
+import { OlLayerOptions } from './Layer';
 import OlMobilityLayerMixin from '../mixins/OlMobilityLayerMixin';
 
 export type MapGlLayerOptions = OlLayerOptions & {
-  url?: string;
   apiKey?: string;
   apiKeyName?: string;
-  mapClass: AnyMapboxMapClass;
-  mapOptions?: AnyMapboxMapOptions;
-  tabIndex?: number;
+  style?: string;
+  url?: string;
 };
 
 /**
@@ -31,29 +24,67 @@ export type MapGlLayerOptions = OlLayerOptions & {
  */
 // @ts-expect-error because
 class MapGlLayer extends OlMobilityLayerMixin(Layer) {
-  apiKey?: string;
-
-  apiKeyName!: string;
-
-  format!: GeoJSON;
-
   loaded!: boolean;
 
   mbMap?: AnyMapboxMap;
 
-  mapClass: AnyMapboxMapClass;
+  get apiKey(): string {
+    return this.get('apiKey');
+  }
 
-  options!: MapGlLayerOptions;
+  set apiKey(newValue: string) {
+    return this.set('apiKey', newValue);
+  }
 
-  styleUrl?: string;
+  get apiKeyName(): string {
+    return this.get('apiKeyName');
+  }
+
+  set apiKeyName(newValue: string) {
+    return this.set('apiKeyName', newValue);
+  }
+
+  get style(): string {
+    return this.get('style');
+  }
+
+  set style(newValue: string) {
+    return this.set('style', newValue);
+  }
+
+  get url(): string {
+    return this.get('url');
+  }
+
+  set url(newValue: string) {
+    return this.set('url', newValue);
+  }
+
+  get queryRenderedFeaturesOptions(): QueryRenderedFeaturesOptions {
+    return this.get('queryRenderedFeaturesOptions');
+  }
+
+  set queryRenderedFeaturesOptions(newValue: QueryRenderedFeaturesOptions) {
+    return this.set('queryRenderedFeaturesOptions', newValue);
+  }
 
   constructor(options: MapGlLayerOptions = {}) {
     super({
       source: new Source({}),
+      apiKeyName: 'key',
+      style: 'travic_v2',
+      url: 'https://maps.geops.io',
       ...options,
+      mapOptions: {
+        interactive: false,
+        trackResize: false,
+        attributionControl: false,
+        ...(options.mapOptions || {}),
+      },
+      queryRenderedFeaturesOptions: {
+        ...(options.queryRenderedFeaturesOptions || {}),
+      },
     });
-
-    this.mapClass = options.mapClass;
 
     // if no specific attributions set on the source, we use the default one.
     if (!this.getSource().getAttributions()) {
@@ -62,28 +93,7 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
       });
     }
 
-    /**
-     * Url of the mapbox style.
-     * @type {string}
-     * @private
-     */
-    this.styleUrl = options.url;
-
-    /**
-     * Api key for the url of the mapbox style.
-     * If set to false, the apiKey is not required.
-     * @type {string}
-     * @private
-     */
-    this.apiKey = options.apiKey;
-
-    /**
-     * Name of the apiKey to set in the url request.
-     * Default is 'key'.
-     * @type {string}
-     * @private
-     */
-    this.apiKeyName = options.apiKeyName || 'key';
+    this.updateMbMapDebounced = debounce(this.updateMbMap, 150);
   }
 
   /**
@@ -92,20 +102,15 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
    */
   attachToMap(map: OlMap) {
     super.attachToMap(map);
-
-    if (!this.map) {
-      return;
-    }
-
-    /**
-     * The feature format.
-     * @type {ol/format/GeoJSON}
-     */
-    this.format = new GeoJSON({
-      featureProjection: this.map.getView().getProjection(),
-    });
-
     this.loadMbMap();
+
+    this.olListenersKeys.push(
+      this.on('propertychange', (evt: ObjectEvent) => {
+        if (/(apiKey|apiKeyName|url|style|)/.test(evt.key)) {
+          this.updateMbMapDebounced();
+        }
+      }),
+    );
   }
 
   /**
@@ -128,11 +133,10 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
    * @private
    */
   loadMbMap() {
+    this.loaded = false;
     this.olListenersKeys.push(
       // @ts-ignore
-      this.map?.on('change:target', () => {
-        this.loadMbMap();
-      }),
+      this.map?.on('change:target', this.loadMbMap),
     );
 
     if (!this.map?.getTargetElement()) {
@@ -143,9 +147,7 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
       // On next change of visibility we load the map
       this.olListenersKeys.push(
         // @ts-ignore
-        this.once('change:visible', () => {
-          this.loadMbMap();
-        }),
+        this.once('change:visible', this.loadMbMap),
       );
       return;
     }
@@ -155,120 +157,37 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
     container.style.width = '100%';
     container.style.height = '100%';
 
-    if (!this.styleUrl) {
-      // eslint-disable-next-line no-console
-      console.error(`No styleUrl defined for mapbox layer: ${this.styleUrl}`);
-      return;
-    }
-
-    if (!this.apiKey && !this.styleUrl?.includes(this.apiKeyName)) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `No apiKey defined for mapbox layer with style url to ${this.styleUrl}`,
-      );
-    }
-
-    const Map = this.mapClass;
-
     /**
      * A mapbox map
      * @type {mapboxgl.Map}
      */
-    this.mbMap = new Map({
-      style: getUrlWithParams(this.styleUrl, {
-        [this.apiKeyName]: this.apiKey,
-      }).toString(),
+    this.mbMap = this.createMap({
+      // https://maps.geops.io/styles/t7ravic_v2/style.json',
+      style: this.getStyleUrl(),
       container,
-      interactive: false,
-      trackResize: false,
-      attributionControl: false,
       ...(this.options.mapOptions || {}),
     });
 
-    this.mbMap.once('load', () => {
-      /**
-       * Is the map loaded.
-       * @type {boolean}
-       */
-      this.loaded = true;
+    this.mbMap.on('sourcedata', () => {
+      this.getSource()?.refresh(); // Refresh attribution
+    });
 
+    this.mbMap.once('load', () => {
+      this.loaded = true;
       this.dispatchEvent(new BaseEvent('load'));
     });
   }
 
-  /**
-   * Request feature information for a given coordinate.
-   * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
-   * @param {Object} options A [mapboxgl.Map#queryrenderedfeatures](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#queryrenderedfeatures) options parameter.
-   * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate. The original Mapbox feature is available as a property named 'mapboxFeature'.
-   */
-  getFeatureInfoAtCoordinate(
-    coordinate: Coordinate,
-    options: any,
-  ): Promise<LayerGetFeatureInfoResponse> {
-    // Ignore the getFeatureInfo until the mapbox map is loaded
-    if (
-      !options ||
-      !this.format ||
-      !this.mbMap ||
-      !this.mbMap.isStyleLoaded()
-    ) {
-      return Promise.resolve({ coordinate, features: [], layer: this });
-    }
-
-    const pixel =
-      coordinate &&
-      this.mbMap.project(toLonLat(coordinate) as [number, number]);
-    let pixels: [mapboxgl.PointLike, mapboxgl.PointLike];
-
-    if (this.hitTolerance) {
-      const { x, y } = pixel;
-      pixels = [
-        {
-          x: x - this.hitTolerance,
-          y: y - this.hitTolerance,
-        } as mapboxgl.PointLike,
-        {
-          x: x + this.hitTolerance,
-          y: y + this.hitTolerance,
-        } as mapboxgl.PointLike,
-      ];
-    }
-
-    // At this point we get GeoJSON Mapbox feature, we transform it to an OpenLayers
-    // feature to be consistent with other layers.
-    const features = this.mbMap
-      // @ts-ignore
-      .queryRenderedFeatures(pixels || pixel, options)
-      .map((feature) => {
-        const olFeature = this.format.readFeature(feature) as Feature;
-        if (olFeature) {
-          // We save the original mapbox feature to avoid losing informations
-          // potentially needed for other functionnality like highlighting
-          // (id, layer id, source, sourceLayer ...)
-          olFeature.set('mapboxFeature', feature);
-        }
-        return olFeature;
-      });
-
-    return Promise.resolve({
-      layer: this,
-      features,
-      coordinate,
-    } as LayerGetFeatureInfoResponse);
+  getStyleUrl() {
+    return getUrlWithParams(`${this.url}/styles/${this.style}/style.json`, {
+      [this.apiKeyName]: this.apiKey,
+    }).toString();
   }
 
-  /**
-   * Return the Class to instanciate for the mapbox map.
-   *
-   * @return {mapboxgl.Map|maplibregl.Map} map
-   */
-  // eslint-disable-next-line class-methods-use-this
-  getMapboxMapClass(): AnyMapboxMapClass {
-    // eslint-disable-next-line no-console
-    console.error('This function must be implemented in subclasses');
-    // @ts-ignore
-    return null;
+  updateMbMap() {
+    if (this.mbMap) {
+      this.mbMap.setStyle(this.getStyleUrl(), { diff: false });
+    }
   }
 }
 

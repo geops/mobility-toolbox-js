@@ -10,7 +10,7 @@ import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { FrameState } from 'ol/Map';
 import debounce from 'lodash.debounce';
-import Layer from './Layer';
+import Layer from 'ol/layer/Layer';
 import RealtimeLayerMixin, {
   RealtimeLayerMixinOptions,
 } from '../../common/mixins/RealtimeLayerMixin';
@@ -24,6 +24,7 @@ import {
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
+import OlMobilityLayerMixin from '../mixins/OlMobilityLayerMixin';
 
 /** @private */
 const format = new GeoJSON();
@@ -56,7 +57,7 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
  * @implements {RealtimeLayerInterface}
  */
 // @ts-ignore
-class RealtimeLayer extends RealtimeLayerMixin(Layer) {
+class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
   allowRenderWhenAnimating?: boolean = false;
 
   /**

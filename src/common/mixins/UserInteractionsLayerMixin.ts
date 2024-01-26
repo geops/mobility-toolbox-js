@@ -3,10 +3,11 @@
 /* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-// @ts-nocheck
 import { fromLonLat } from 'ol/proj';
 import { Coordinate } from 'ol/coordinate';
 import { AnyMap, UserInteractionCallback } from '../../types';
+import { FeatureInfo } from '../typedefs';
+import getFeatureInfoAtCoordinate from '../../ol/utils/getFeatureInfoAtCoordinate';
 
 export type UserInteractionsLayerMixinOptions = {
   userInteractions?: boolean;
@@ -117,8 +118,6 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
       this.defaultUserInteractions = defaultUserInteractions;
       this.userClickCallbacks = [];
       this.userHoverCallbacks = [];
-      this.userClickEventsKeys = [];
-      this.userHoverEventsKeys = [];
       this.onUserClickCallback = this.onUserClickCallback.bind(this);
       this.onUserMoveCallback = this.onUserMoveCallback.bind(this);
       this.onFeatureClick = this.onFeatureClick?.bind(this);
@@ -234,8 +233,11 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
     }
 
     onUserActionCallback(
-      evt: { coordinate: Coordinate } | { lngLat: maplibregl.LngLat },
-      callbacks,
+      evt:
+        | { coordinate: Coordinate }
+        | mapboxgl.MapLayerMouseEvent
+        | maplibregl.MapMouseEvent,
+      callbacks: UserInteractionCallback[],
     ) {
       const coordinate =
         (evt as { coordinate: Coordinate }).coordinate ||
@@ -249,11 +251,21 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
         event: evt,
       };
 
-      return this.getFeatureInfoAtCoordinate(coordinate)
-        .then((featureInfo) => {
+      let promise;
+      // @ts-ignore
+      if (this.getFeatureInfoAtCoordinate) {
+        // @ts-ignore
+        promise = this.getFeatureInfoAtCoordinate(coordinate);
+      } else {
+        // @ts-ignore
+        promise = getFeatureInfoAtCoordinate(coordinate, [this]);
+      }
+      return promise
+        .then((featureInfo: FeatureInfo) => {
           callbacks.forEach((callback) => {
             const { features, layer, coordinate: coord } = featureInfo;
-            callback(features, layer, coord);
+            // @ts-ignore
+            callback(features, layer, coord, evt);
           });
           return featureInfo;
         })
@@ -263,14 +275,14 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
     activateUserInteractions() {
       // eslint-disable-next-line no-console
       console.warn(
-        'The activateUserInteractions function must be impkmented in subclasses',
+        'The activateUserInteractions function must be implemented in subclasses',
       );
     }
 
     deactivateUserInteractions() {
       // eslint-disable-next-line no-console
       console.warn(
-        'The deactivateUserInteractions function must be impkmented in subclasses',
+        'The deactivateUserInteractions function must be implemented in subclasses',
       );
     }
   };

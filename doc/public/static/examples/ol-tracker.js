@@ -19,13 +19,11 @@ export default () => {
   map.addControl(new CopyrightControl());
 
   const layer = new MaplibreLayer({
-    url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
   });
   map.addLayer(layer);
 
   const realtime = new RealtimeLayer({
-    url: 'wss://api.geops.io/tracker-ws/v1/',
     apiKey: window.apiKey,
   });
   map.addLayer(realtime);

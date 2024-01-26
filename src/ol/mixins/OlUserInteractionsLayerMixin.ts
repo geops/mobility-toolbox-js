@@ -1,13 +1,14 @@
+// @ts-nocheck
 /* eslint-disable no-empty-function,@typescript-eslint/no-empty-function */
 /* eslint-disable no-useless-constructor,@typescript-eslint/no-useless-constructor */
 /* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-// @ts-nocheck
-import { fromLonLat } from 'ol/proj';
-import { Coordinate } from 'ol/coordinate';
 import { EventsKey } from 'ol/events';
+import { unByKey } from 'ol/Observable';
+import { Map } from 'ol';
 import { AnyMap, UserInteractionCallback } from '../../types';
+import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
 
 export type UserInteractionsLayerMixinOptions = {
   userInteractions?: boolean;
@@ -76,6 +77,9 @@ export class UserInteractionsLayerInterface {
   unHover(callback: UserInteractionCallback) {}
 }
 
+type GConstructor<T = Layer> = new (...args: any[]) => T;
+type GLayerConstructor = GConstructor<Layer>;
+
 /**
  * Mixin for UserInteractionsLayerInterface. It provide onClick and onHover functions.
  *
@@ -87,8 +91,8 @@ function OlUserInteractionsLayerMixin<UserInteractionsLayerMixin>(
   Base: UserInteractionsLayerMixin,
 ): UserInteractionsLayerMixin {
   // @ts-ignore
-  return class extends Base {
-    olListenersKeys: EventsKey[] = [];
+  return class extends UserInteractionsLayerMixin(Base) {
+    private olListenersKeys: EventsKey[] = [];
 
     /**
      * Initialize the layer and listen to feature clicks.
@@ -97,11 +101,6 @@ function OlUserInteractionsLayerMixin<UserInteractionsLayerMixin>(
      */
     attachToMap(map: Map) {
       super.attachToMap(map);
-
-      if (!this.map) {
-        return;
-      }
-
       this.toggleVisibleListeners();
       this.olListenersKeys.push(
         // @ts-ignore
@@ -115,7 +114,6 @@ function OlUserInteractionsLayerMixin<UserInteractionsLayerMixin>(
     detachFromMap() {
       this.deactivateUserInteractions();
       unByKey(this.olListenersKeys);
-
       super.detachFromMap();
     }
 
@@ -143,6 +141,7 @@ function OlUserInteractionsLayerMixin<UserInteractionsLayerMixin>(
           'pointermove',
           this.onUserMoveCallback,
         );
+        this.olListenersKeys.push(this.pointerMoveListenerKey);
       }
     }
 
@@ -155,7 +154,7 @@ function OlUserInteractionsLayerMixin<UserInteractionsLayerMixin>(
      * @private
      */
     toggleVisibleListeners() {
-      if (this.visible) {
+      if (this.getVisible()) {
         this.activateUserInteractions();
       } else {
         this.deactivateUserInteractions();

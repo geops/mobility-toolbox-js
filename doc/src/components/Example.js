@@ -20,6 +20,9 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     position: 'relative',
     margin: '20px 0',
+    resize: 'horizontal',
+    display: 'block',
+    overflow: 'hidden',
   },
   fileName: {
     padding: '10px 0 5px 15px',

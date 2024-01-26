@@ -6,8 +6,6 @@ export { default as getLayersAsFlatArray } from './getLayersAsFlatArray';
 export * from './timeUtils';
 export { default as sortByDelay } from './sortByDelay';
 export { default as renderTrajectories } from './renderTrajectories';
-export { default as getMaplibreRender } from './getMaplibreRender';
-export { default as getMapboxRender } from './getMapboxRender';
 export { default as debounceDeparturesMessages } from './debounceDeparturesMessages';
 export { default as debounceWebsocketMessages } from './debounceWebsocketMessages';
 export { default as sortAndFilterDepartures } from './sortAndFilterDepartures';

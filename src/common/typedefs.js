@@ -23,7 +23,7 @@
 /**
  * @typedef {Object} FeatureInfo
  * @property {Layer} layer A layer.
- * @property {ol/Feature~Feature[]} features  An array of features.
+ * @property {Feature[]} features  An array of features.
  * @property {number[2]} coordinate The coordinate where to find the featue.
  */
 /**

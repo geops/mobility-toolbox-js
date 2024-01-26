@@ -38,7 +38,6 @@ import {
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
-import LayerCommon from './PropertiesLayerMixin';
 import type { LayerOptions } from '../../ol/layers/Layer';
 import { FilterFunction, SortFunction } from '../typedefs';
 
@@ -244,7 +243,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         hitTolerance: 10,
         ...options,
       });
-      this.defineProperties(options);
 
       this.debug = options.debug || false;
       this.mode = options.mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
@@ -339,6 +337,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @private
      */
     defineProperties(options: RealtimeLayerMixinOptions) {
+      super.defineProperties(options);
       const {
         style,
         speed,
@@ -354,14 +353,11 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         mode,
         bboxParameters,
       } = options;
-      console.log('lalala', canvas);
       let currCanvas = canvas;
       let currSpeed = speed || 1;
       let currTime = time || new Date();
       let currMode = mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
       let currStyle = style || realtimeDefaultStyle;
-
-      super.defineProperties(options);
 
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },

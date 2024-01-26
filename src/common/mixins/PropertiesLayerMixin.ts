@@ -1,9 +1,7 @@
-import { v4 as uuid } from 'uuid';
 import BaseEvent from 'ol/events/Event';
-// @ts-ignore
 import { Layer } from 'ol/layer';
 import { EventsKey } from 'ol/events';
-import { Map } from 'ol';
+import { Map, getUid } from 'ol';
 import getLayersAsFlatArray from '../utils/getLayersAsFlatArray';
 import type {
   LayerGetFeatureInfoOptions,
@@ -24,12 +22,6 @@ export type PropertiesLayerMixinOptions = {
 };
 
 type Constructor<T extends Layer> = new (...args: any[]) => T;
-// type GLayerConstructor = Constructor<Layer>;
-
-// export default <T extends Constructor>(base: T) =>
-//   class SomeClass extends base {
-//     something: boolean = false;
-//   };
 
 /**
  * A class representing a layer to display on map.
@@ -52,10 +44,6 @@ type Constructor<T extends Layer> = new (...args: any[]) => T;
 // @ts-ignore
 function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
   class PropertiesLayer extends Base {
-    public key?: string;
-
-    public name?: string;
-
     public group?: string;
 
     public copyrights?: string[];
@@ -77,6 +65,22 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
     public options?: PropertiesLayerMixinOptions = {};
 
     public olListenersKeys?: EventsKey[] = [];
+
+    get name(): string {
+      return this.get('name');
+    }
+
+    set name(newValue: string) {
+      this.set('name', newValue);
+    }
+
+    get key(): string {
+      return this.get('key');
+    }
+
+    set key(newValue: string) {
+      this.set('key', newValue);
+    }
 
     /**
      * Constructor
@@ -102,9 +106,9 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
 
       this.options = options;
 
-      this.name = options.name;
+      this.name = options.name || '';
 
-      this.key = options.key || options.name || uuid();
+      this.key = options.key || options.name || getUid(this);
 
       this.visible = options.visible === undefined ? true : !!options.visible;
 
@@ -143,19 +147,6 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
      */
     defineProperties(options: PropertiesLayerMixinOptions = {}) {
       Object.defineProperties(this, {
-        /* Layer's information properties */
-        name: {
-          get: () => this.get('name'),
-          set: (newName) => {
-            this.set('name', newName);
-          },
-        },
-        key: {
-          get: () => this.get('key'),
-          set: (newKey) => {
-            this.set('key', newKey);
-          },
-        },
         group: {
           get: () => this.get('group'),
           set: (newGroup) => {

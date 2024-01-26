@@ -1,5 +1,6 @@
 import { Map, View } from 'ol';
 import { MaplibreLayer, CopyrightControl } from 'mobility-toolbox-js/ol';
+import 'ol/ol.css';
 
 export default () => {
   // Define the map
@@ -9,18 +10,37 @@ export default () => {
       center: [0, 0],
       zoom: 1,
     }),
-    controls: [],
   });
-
-  // // Add copyright control
-  // const control = new CopyrightControl();
-  // map.addControl(copyright);
 
   // Define the Mapbox style to display
   const layer = new MaplibreLayer({
-    url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
+    style: 'travic_v2',
+    queryRenderedFeaturesOptions: {
+      layers: ['waters_lakes'],
+    },
   });
 
   map.addLayer(layer);
+
+  // Change mouse cursor if a feature is clickable
+  map.on('pointermove', (evt) => {
+    const has = map.hasFeatureAtPixel(evt.pixel);
+    map.getTargetElement().style.cursor = has ? 'pointer' : '';
+  });
+
+  // Display maplibre feature informations on click.
+  map.on('singleclick', (evt) => {
+    const [feature] = map.getFeaturesAtPixel(evt.pixel);
+
+    // Display the maplibre feature informations
+    document.getElementById('content').innerHTML = feature
+      ? JSON.stringify(feature.get('mapboxFeature'), null, 2)
+      : 'No feature found';
+  });
+
+  // Toggle between 2 different styles
+  document.getElementById('change').onclick = () => {
+    layer.style = layer.style === 'travic_v2' ? 'aerial' : 'travic_v2';
+  };
 };

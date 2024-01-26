@@ -40,6 +40,7 @@ class Layer extends PropertiesLayerMixin(OlLayer) {
    */
   constructor(options: LayerOptions = {}) {
     super(options);
+    this.defineProperties();
   }
 
   setMapInternal(map: Map) {
@@ -75,12 +76,6 @@ class Layer extends PropertiesLayerMixin(OlLayer) {
    * @private
    */
   defineProperties() {
-    // @ts-ignore
-    if (super.defineProperties) {
-      // @ts-ignore
-      super.defineProperties();
-    }
-
     // for backward compatibility with v2
     Object.defineProperties(this, {
       olLayer: {

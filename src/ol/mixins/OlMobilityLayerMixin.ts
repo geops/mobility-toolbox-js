@@ -5,8 +5,11 @@ import PropertiesLayerMixin, {
   PropertiesLayerMixinOptions,
 } from '../../common/mixins/PropertiesLayerMixin';
 import OlUserInteractionsLayerMixin from './OlUserInteractionsLayerMixin';
+import type { UserInteractionsLayerMixinOptions } from '../../common/mixins/UserInteractionsLayerMixin';
 
-export type LayerOptions = Options & PropertiesLayerMixinOptions;
+export type LayerOptions = Options &
+  PropertiesLayerMixinOptions &
+  UserInteractionsLayerMixinOptions;
 
 type GConstructor<T = Layer> = new (...args: any[]) => T;
 type GLayerConstructor = GConstructor<Layer>;
@@ -28,7 +31,6 @@ function OlMobilityLayerMixin<TBase extends GLayerConstructor>(Base: TBase) {
      */
     constructor(options: LayerOptions = {}) {
       super(options);
-      this.key
     }
 
     setMapInternal(map: Map) {
@@ -64,12 +66,7 @@ function OlMobilityLayerMixin<TBase extends GLayerConstructor>(Base: TBase) {
      * @private
      */
     defineProperties() {
-      // @ts-ignore
-      if (super.defineProperties) {
-        // @ts-ignore
-        super.defineProperties();
-      }
-
+      super.defineProperties();
       // for backward compatibility with v2
       Object.defineProperties(this, {
         olLayer: {
