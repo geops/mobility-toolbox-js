@@ -70,7 +70,11 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
 
   constructor(options: MapGlLayerOptions = {}) {
     super({
-      source: new Source({}),
+      source: new Source({
+        attributions: () => {
+          return getMapboxMapCopyrights(this.mbMap);
+        },
+      }),
       apiKeyName: 'key',
       style: 'travic_v2',
       url: 'https://maps.geops.io',
@@ -85,13 +89,6 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
         ...(options.queryRenderedFeaturesOptions || {}),
       },
     });
-
-    // if no specific attributions set on the source, we use the default one.
-    if (!this.getSource().getAttributions()) {
-      this.getSource().setAttributions(() => {
-        return getMapboxMapCopyrights(this.mbMap);
-      });
-    }
 
     this.updateMbMapDebounced = debounce(this.updateMbMap, 150);
   }

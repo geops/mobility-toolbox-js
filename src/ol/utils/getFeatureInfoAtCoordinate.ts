@@ -1,21 +1,11 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { Layer } from 'ol/layer';
-import { Feature, Map, getUid } from 'ol';
+import { Feature, getUid } from 'ol';
 import { ImageWMS, TileWMS } from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
-import { toLonLat } from 'ol/proj';
-import { QueryRenderedFeaturesOptions } from 'maplibre-gl';
 import { LayerGetFeatureInfoResponse } from '../../types';
-import type { MaplibreLayer } from '../layers';
 
 const format = new GeoJSON();
-const formats: {
-  [key: string]: GeoJSON;
-} = {
-  'EPSG:3857': new GeoJSON({
-    featureProjection: 'EPSG:3857',
-  }),
-};
 
 const getFeaturesFromWMS = (
   source: TileWMS | ImageWMS,
