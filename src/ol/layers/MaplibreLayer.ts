@@ -14,6 +14,11 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  *
  * const layer = new MaplibreLayer({
  *   apikey: 'yourApiKey',
+ *   // style: 'travic_v2',
+ *   // url: 'https://maps.geops.io',
+ *   // queryRenderedFeaturesOptions: {
+ *   //   layers: ['waters_lakes'], // map.getFeaturesAtPixel will only return lakes.
+ *   // },
  * });
  *
  * @classproperty {maplibregl.Map} mbMap - The Maplibre map object. Readonly.
