@@ -13,12 +13,18 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  * import { MaplibreLayer } from 'mobility-toolbox-js/ol';
  *
  * const layer = new MaplibreLayer({
- *   apikey: 'yourApiKey',
- *   // style: 'travic_v2',
- *   // url: 'https://maps.geops.io',
+ *   apiKey: 'yourApiKey',
+ *   // apiKeyName: 'key',
+ *   // mapOptions: {
+ *   //   interactive: false,
+ *   //   trackResize: false,
+ *   //   attributionControl: false,
+ *   // }
  *   // queryRenderedFeaturesOptions: {
  *   //   layers: ['waters_lakes'], // map.getFeaturesAtPixel will only return lakes.
  *   // },
+ *   // style: 'travic_v2',
+ *   // url: 'https://maps.geops.io',
  * });
  *
  * @classproperty {maplibregl.Map} mbMap - The Maplibre map object. Readonly.
