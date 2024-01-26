@@ -21,6 +21,7 @@ export type MapGlLayerOptions = OlLayerOptions & {
 /**
  * Common class for Mapbox and Maplibre and potential other fork from Mapbox.
  * It's used to share code between Mapbox and Maplibre layers without importing both libs.
+ * @private
  */
 // @ts-expect-error because
 class MapGlLayer extends OlMobilityLayerMixin(Layer) {

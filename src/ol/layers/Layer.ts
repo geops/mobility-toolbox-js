@@ -23,6 +23,7 @@ export type LayerOptions = Options & PropertiesLayerMixinOptions;
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {ol/layer/Layer}
  * @implements {PropertiesLayerInterface}
+ * @private
  */
 class Layer extends PropertiesLayerMixin(OlLayer) {
   options?: LayerOptions = {};
