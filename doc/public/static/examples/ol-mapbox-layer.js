@@ -16,9 +16,6 @@ export default () => {
   const layer = new MaplibreLayer({
     apiKey: window.apiKey,
     style: 'travic_v2',
-    queryRenderedFeaturesOptions: {
-      layers: ['waters_lakes'],
-    },
   });
 
   map.addLayer(layer);
