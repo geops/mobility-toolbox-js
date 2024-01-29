@@ -24,7 +24,7 @@ class Layer extends Evented implements CustomLayerInterface {
 
   hitTolerance: number = 5;
 
-  map: AnyMapboxMap;
+  map: AnyMapboxMap | undefined;
 
   options: LayerOptions = {};
 
@@ -61,7 +61,7 @@ class Layer extends Evented implements CustomLayerInterface {
   }
 
   detachFromMap() {
-    this.map = null;
+    this.map = undefined;
   }
 
   /**
