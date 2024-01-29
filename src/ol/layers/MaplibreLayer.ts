@@ -27,15 +27,17 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  *   // url: 'https://maps.geops.io',
  * });
  *
- * @classproperty {maplibregl.Map} mbMap - The Maplibre map object. Readonly.
+ * @classproperty {maplibregl.Map} maplibreMap - The Maplibre map object. Readonly.
  * @classproperty {maplibregl.QueryRenderedFeaturesOptions} queryRenderedFeaturesOptions - Options used when we query features using map.getFeaturesAtPixel().
  * @classproperty {string} style - geOps Maps api style.
  * @extends {ol/layer/Layer~Layer}
  */
 export default class MaplibreLayer extends MapGlLayer {
-  readonly mbMap?: maplibregl.Map;
-
   readonly options: MaplibreLayerOptions;
+
+  get maplibreMap(): maplibregl.Map | undefined {
+    return this.mbMap;
+  }
 
   /**
    * Constructor.
