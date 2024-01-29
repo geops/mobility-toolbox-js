@@ -26,6 +26,7 @@ let emptyDiv: HTMLElement;
  * @classproperty {string} style - geOps Maps api style.
  * @classproperty {string} url - geOps Maps api url.
  * @extends {ol/layer/Layer~Layer}
+ * @private
  */
 export default class MapboxLayer extends MapGlLayer {
   readonly mbMap?: maplibregl.Map;
