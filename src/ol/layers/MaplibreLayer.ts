@@ -36,7 +36,7 @@ export default class MaplibreLayer extends MapGlLayer {
   readonly options: MaplibreLayerOptions;
 
   get maplibreMap(): maplibregl.Map | undefined {
-    return this.mbMap;
+    return this.mbMap as maplibregl.Map;
   }
 
   /**

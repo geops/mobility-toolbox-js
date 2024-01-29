@@ -160,7 +160,7 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
      */
     this.mbMap = this.createMap({
       // https://maps.geops.io/styles/t7ravic_v2/style.json',
-      style: this.getStyleUrl(),
+      style: this.getStyle(),
       container,
       ...(this.options.mapOptions || {}),
     });
@@ -175,16 +175,29 @@ class MapGlLayer extends OlMobilityLayerMixin(Layer) {
     });
   }
 
-  getStyleUrl() {
+  getStyle() {
+    // If the style is a complete style object, use it directly.
+    if (
+      this.style &&
+      typeof this.style === 'object' &&
+      this.style.id &&
+      this.style.version
+    ) {
+      return this.style;
+    }
+    // If the url set is already a complete style url, use it directly.
+    if (this.url.includes('style.json')) {
+      return this.url;
+    }
+
+    /// Otherwise build the complete style url.
     return getUrlWithParams(`${this.url}/styles/${this.style}/style.json`, {
       [this.apiKeyName]: this.apiKey,
     }).toString();
   }
 
   updateMbMap() {
-    if (this.mbMap) {
-      this.mbMap.setStyle(this.getStyleUrl(), { diff: false });
-    }
+    this.mbMap?.setStyle(this.getStyle(), { diff: false });
   }
 }
 
