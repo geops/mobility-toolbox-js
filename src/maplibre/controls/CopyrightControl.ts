@@ -10,8 +10,8 @@ const DEFAULT_SEPARATOR = ' | ';
  * Display layer's copyrights.
  *
  * @example
- * import { Map } from 'mapbox-gl';
- * import { CopyrightControl } from 'mobility-toolbox-js/mapbox';
+ * import { Map } from 'Maplibre-gl';
+ * import { CopyrightControl } from 'mobility-toolbox-js/Maplibre';
  *
  * const map = new Map({
  *   container: 'map',
@@ -22,7 +22,7 @@ const DEFAULT_SEPARATOR = ' | ';
  * map.addControl(control);
  *
  *
- * @see <a href="/example/mb-copyright">Mapbox copyright example</a>
+ * @see <a href="/example/mb-copyright">Maplibre copyright example</a>
  *
  */
 class CopyrightControl implements IControl {

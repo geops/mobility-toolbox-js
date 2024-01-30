@@ -1,4 +1,4 @@
-import HttpAPI from '../common/api/HttpAPI';
+import HttpAPI from './HttpAPI';
 import { StopsParameters, StopsResponse } from '../types';
 
 export type StopsAPIOptions = {

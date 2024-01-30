@@ -1,18 +1,16 @@
 import { v4 as uuid } from 'uuid';
 import { CustomLayerInterface, Evented } from 'maplibre-gl';
-import { AnyMapboxMap } from '../../types';
+import type { AnyMapboxMap } from '../../types';
 
 export type LayerOptions = {
   id?: string;
-  visible?: boolean;
-  hitTolerance?: number;
 };
 
 /**
  * A class representing a layer to display on an Maplibre map.
  *
  * @example
- * import { Layer } from 'mobility-toolbox-js/mapbox';
+ * import { Layer } from 'mobility-toolbox-js/Maplibre';
  *
  * const layer = new Layer({ id:'MyLayer' });
  *
@@ -22,8 +20,6 @@ export type LayerOptions = {
  */
 class Layer extends Evented implements CustomLayerInterface {
   id: string;
-
-  hitTolerance: number = 5;
 
   map: AnyMapboxMap | undefined;
 
@@ -36,40 +32,24 @@ class Layer extends Evented implements CustomLayerInterface {
     this.options = options;
     this.id = options.id || uuid();
     this.type = 'custom';
-    this.hitTolerance = 5;
-  }
-
-  onAdd(map: AnyMapboxMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
-    this.attachToMap(map, gl);
-  }
-
-  onRemove() {
-    this.detachFromMap();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  render(gl: WebGLRenderingContext | WebGL2RenderingContext) {}
+  onAdd(map: AnyMapboxMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
+    this.map = map;
+  }
 
-  attachToMap(
+  onRemove(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: AnyMapboxMap,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     gl: WebGLRenderingContext | WebGL2RenderingContext,
   ) {
-    this.map = map;
-  }
-
-  detachFromMap() {
     this.map = undefined;
   }
 
-  /**
-   * Create a copy of the Layer.
-   * @param {Object} newOptions Options to override
-   * @return {Layer} A Layer
-   */
-  clone(newOptions: LayerOptions = {}): Layer {
-    return new Layer({ ...this.options, ...newOptions });
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  render(gl: WebGLRenderingContext | WebGL2RenderingContext) {}
 }
 
 export default Layer;

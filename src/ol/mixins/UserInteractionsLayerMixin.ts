@@ -33,7 +33,7 @@ function UserInteractionsLayerMixin<CommonUserInteractionsLayerMixin>(
   Base: UserInteractionsLayerMixin,
 ): CommonUserInteractionsLayerMixin {
   // @ts-ignore
-  return class extends UserInteractionsLayerMixin(Base) {
+  return class extends CommonUserInteractionsLayerMixin(Base) {
     private olListenersKeys: EventsKey[] = [];
 
     /**

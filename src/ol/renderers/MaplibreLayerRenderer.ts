@@ -55,7 +55,7 @@ export default class MaplibreLayerRenderer extends LayerRenderer<MaplibreLayer> 
     const opacity = layer.getOpacity() || 1;
     canvas.style.opacity = `${opacity}`;
 
-    // adjust view parameters in mapbox
+    // adjust view parameters in Maplibre
     mbMap.jumpTo({
       center: toLonLat(viewState.center) as [number, number],
       zoom: viewState.zoom - 1,
@@ -118,7 +118,7 @@ export default class MaplibreLayerRenderer extends LayerRenderer<MaplibreLayer> 
           ];
         }
 
-        // At this point we get GeoJSON Mapbox feature, we transform it to an OpenLayers
+        // At this point we get GeoJSON Maplibre feature, we transform it to an OpenLayers
         // feature to be consistent with other layers.
         features = (mbMap as Map)
           .queryRenderedFeatures(
@@ -130,7 +130,7 @@ export default class MaplibreLayerRenderer extends LayerRenderer<MaplibreLayer> 
               feature,
             ) as Feature;
             if (olFeature) {
-              // We save the original mapbox feature to avoid losing informations
+              // We save the original Maplibre feature to avoid losing informations
               // potentially needed for other functionnality like highlighting
               // (id, layer id, source, sourceLayer ...)
               // @ts-ignore

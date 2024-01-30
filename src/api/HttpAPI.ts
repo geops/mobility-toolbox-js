@@ -1,5 +1,5 @@
 import BaseObject from 'ol/Object';
-import getUrlWithParams from '../utils/getUrlWithParams';
+import getUrlWithParams from '../common/utils/getUrlWithParams';
 
 export type HttpAPIOptions = {
   url: string;
@@ -27,6 +27,7 @@ class HttpAPI extends BaseObject {
 
   constructor(options: HttpAPIOptions) {
     super();
+
     /** @private */
     this.url = options.url;
 
@@ -36,20 +37,17 @@ class HttpAPI extends BaseObject {
 
   /**
    * Append the apiKey before sending the request.
+   *
    * @private
    */
-  fetch(path: string, params: Object, config: RequestInit): Promise<any> {
+  async fetch(path: string, params: Object, config: RequestInit): Promise<any> {
     if (!this.url) {
-      // eslint-disable-next-line no-console
-      return Promise.reject(
-        new Error(`No url defined for request to ${this.url}/${path}`),
-      );
+      throw new Error(`No url defined for request to ${this.url}/${path}`);
     }
+
     if (!this.url && !this.apiKey && !/key=/.test(this.url)) {
       // eslint-disable-next-line no-console
-      return Promise.reject(
-        new Error(`No apiKey defined for request to ${this.url}`),
-      );
+      throw new Error(`No apiKey defined for request to ${this.url}`);
     }
 
     // Clean requets parameters, removing undefined and null values.
@@ -59,19 +57,18 @@ class HttpAPI extends BaseObject {
       ...searchParams,
     });
 
-    // We use toString  because of TYpeScript bug that only accept a string in fetch method.
-    return fetch(url.toString(), config).then((response) => {
-      try {
-        return response.json().then((data) => {
-          if (data.error) {
-            throw new Error(data.error);
-          }
-          return data;
-        });
-      } catch (err: any | Error) {
-        return Promise.reject(new Error(err));
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
       }
-    });
+
+      return data;
+    } catch (err: any | Error) {
+      throw new Error(err);
+    }
   }
 }
 

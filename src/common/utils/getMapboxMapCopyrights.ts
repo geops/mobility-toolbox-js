@@ -13,8 +13,8 @@ export interface SourceCache {
 }
 
 /**
- * Return the copyright a Mapbox map.
- * @param {mapboxgl.Map | maplibregl.Map} map A Mapbox map
+ * Return the copyright a Maplibre map.
+ * @param {mapboxgl.Map | maplibregl.Map} map A Maplibre map
  * @private
  */
 const getMapboxMapCopyrights = (map: mapboxgl.Map | maplibregl.Map) => {

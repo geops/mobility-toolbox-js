@@ -19,65 +19,6 @@ export type UserInteractionsLayerMixinOptions = {
 };
 
 /**
- * UserInteractionsLayerInterface.
- * @private
- */
-export class UserInteractionsLayerInterface {
-  /*
-   * Constructor
-
-   * @param {Object} options Layer options.
-   * @param {string} options.userInteractions If true, it listens for user mouse hover and click event.
-   * @param {string} options.userClickInteractions If true, it listens for user click event.
-   * @param {string} options.userHoverInteractions If true, it listens for user mouse over event.
-   * @param {string} options.defaultUserInteractions  If true, it adds default listeners for user mouse hover and click event.
-   */
-  constructor(options = {}) {}
-
-  /**
-   * Initialize the layer adding user interactions.
-   *
-   * @param {ol/Map~Map} map
-   */
-  attachToMap(map: AnyMap) {}
-
-  /**
-   * Terminate the layer unsubscribing user interactions.
-   */
-  detachFromMap() {}
-
-  /**
-   * Activate map listeners events.
-   */
-  activateUserInteractions() {}
-
-  /**
-   * Deactivate map listeners events.
-   */
-  deactivateUserInteractions() {}
-
-  /**
-   * Subscribe on user:click event.
-   */
-  onClick(callback: UserInteractionCallback) {}
-
-  /**
-   * Subscribe on user:hover event.
-   */
-  onHover(callback: UserInteractionCallback) {}
-
-  /**
-   * Unsubscribe on user:click event.
-   */
-  unClick(callback: UserInteractionCallback) {}
-
-  /**
-   * Unsubscribe on user:hover event.
-   */
-  unHover(callback: UserInteractionCallback) {}
-}
-
-/**
  * Mixin for UserInteractionsLayerInterface. It provide onClick and onHover functions.
  *
  * @param {Class} Base A class to extend with {UserInteractionsLayerInterface} functionnalities.

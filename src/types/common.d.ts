@@ -7,7 +7,7 @@ import type {
   CopyrightControl as MbCopyrightControl,
   RealtimeLayer as MbRealtimeLayer,
   layer as MbLayer,
-} from '../mapbox';
+} from '../maplibre';
 import type {
   CopyrightControl as OlCopyrightControl,
   MapboxLayer,

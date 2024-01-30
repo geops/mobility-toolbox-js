@@ -2,7 +2,7 @@ import OlMap from 'ol/Map';
 import View from 'ol/View';
 import gllib from 'maplibre-gl';
 import MaplibreLayer from './MaplibreLayer';
-import MapboxStyleLayer from './MaplibreStyleLayer';
+import MaplibreStyleLayer from './MaplibreStyleLayer';
 
 let source;
 let layer;
@@ -21,8 +21,8 @@ describe('MapboxStyleLayer', () => {
       apiKey: 'foo',
       url: 'https://foo.com/styles',
     });
-    layer = new MapboxStyleLayer({
-      name: 'mapbox layer',
+    layer = new MaplibreStyleLayer({
+      name: 'Maplibre layer',
       visible: true,
       mapboxLayer: source,
       styleLayer,
@@ -44,17 +44,17 @@ describe('MapboxStyleLayer', () => {
   });
 
   test('should be instanced.', () => {
-    expect(layer).toBeInstanceOf(MapboxStyleLayer);
+    expect(layer).toBeInstanceOf(MaplibreStyleLayer);
     expect(layer.styleLayers[0]).toBe(styleLayer);
   });
 
-  test('should not initalized mapbox map.', () => {
+  test('should not initalized Maplibre map.', () => {
     layer.attachToMap();
     expect(layer.mbMap).toBe();
     layer.detachFromMap();
   });
 
-  test('should initalized mapbox map.', () => {
+  test('should initalized Maplibre map.', () => {
     source.attachToMap(map);
     layer.attachToMap(map);
     expect(layer.mapboxLayer.mbMap).toBeInstanceOf(gllib.Map);
@@ -75,7 +75,7 @@ describe('MapboxStyleLayer', () => {
     const data = await layer.getFeatureInfoAtCoordinate([50, 50]);
     expect(data.coordinate).toEqual([50, 50]);
     expect(data.features).toEqual([]);
-    expect(data.layer).toBeInstanceOf(MapboxStyleLayer);
+    expect(data.layer).toBeInstanceOf(MaplibreStyleLayer);
     layer.detachFromMap(map);
     source.detachFromMap(map);
   });
@@ -115,7 +115,7 @@ describe('MapboxStyleLayer', () => {
     const clone = layer.clone({ name: 'clone' });
     expect(clone).not.toBe(layer);
     expect(clone.name).toBe('clone');
-    expect(clone).toBeInstanceOf(MapboxStyleLayer);
+    expect(clone).toBeInstanceOf(MaplibreStyleLayer);
   });
 
   test('should add layer on load', () => {
@@ -151,7 +151,7 @@ describe('MapboxStyleLayer', () => {
     test('when layer uses styleLayersFilter property', () => {
       const styles = { layers: [styleLayer] };
       const layer2 = new MapboxStyleLayer({
-        name: 'mapbox layer',
+        name: 'Maplibre layer',
         mapboxLayer: source,
         styleLayersFilter: () => false,
       });
@@ -200,7 +200,7 @@ describe('MapboxStyleLayer', () => {
         layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }, { id: 'foo2' }],
       }));
       const layer2 = new MapboxStyleLayer({
-        name: 'mapbox layer',
+        name: 'Maplibre layer',
         visible: true,
         mapboxLayer: source,
         styleLayer,
@@ -232,7 +232,7 @@ describe('MapboxStyleLayer', () => {
         ],
       }));
       const layer2 = new MapboxStyleLayer({
-        name: 'mapbox layer',
+        name: 'Maplibre layer',
         visible: true,
         mapboxLayer: source,
         styleLayer,

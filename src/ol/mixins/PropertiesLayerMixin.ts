@@ -164,6 +164,7 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
       );
 
       this.options = options;
+      console.log('options', options);
       this.children = options.children || []; // Trigger the on children change event
     }
 

@@ -1,4 +1,4 @@
-import { RealtimeTrajectoryResponse } from '../../types';
+import { RealtimeTrajectoryResponse } from '../types';
 
 export declare type WebSocketAPIParameters = {
   channel?: string;

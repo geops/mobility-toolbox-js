@@ -20,8 +20,8 @@ export type MapGlLayerOptions = MobilityLayerOptions & {
 };
 
 /**
- * Common class for Mapbox and Maplibre and potential other fork from Mapbox.
- * It's used to share code between Mapbox and Maplibre layers without importing both libs.
+ * Common class for Maplibre and Maplibre and potential other fork from Maplibre.
+ * It's used to share code between Maplibre and Maplibre layers without importing both libs.
  * @private
  */
 class MapGlLayer extends MobilityLayerMixin(Layer) {
@@ -90,7 +90,6 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
         ...(options.queryRenderedFeaturesOptions || {}),
       },
     });
-
     this.updateMbMapDebounced = debounce(this.updateMbMap, 150);
   }
 
@@ -127,7 +126,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
   }
 
   /**
-   * Create the mapbox map.
+   * Create the Maplibre map.
    * @private
    */
   loadMbMap() {
@@ -156,7 +155,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
     container.style.height = '100%';
 
     /**
-     * A mapbox map
+     * A Maplibre map
      * @type {mapboxgl.Map}
      */
     this.mbMap = this.createMap({

@@ -18,7 +18,7 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
  * Responsible for loading and display data from a geOps Realtime api.
  *
  * @example
- * import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
+ * import { RealtimeLayer } from 'mobility-toolbox-js/Maplibre';
  *
  * const layer = new RealtimeLayer({
  *   apiKey: "yourApiKey"
@@ -94,42 +94,41 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   }
 
   /**
-   * Initialize the layer.
+   * Add sources, layers and listeners to the map.
    *
-   * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
-   * @param {string} beforeId Layer's id before which we want to add the new layer.
-   * @override
    * @private
    */
-  override attachToMap(map: AnyMapboxMap) {
-    if (!map) {
-      return;
-    }
-    super.attachToMap(map);
+  override onAdd(
+    map: AnyMapboxMap,
+    gl: WebGLRenderingContext | WebGL2RenderingContext,
+  ) {
+    super.onAdd(map, gl);
 
     if (map.isStyleLoaded()) {
       this.onLoad();
     }
 
-    this.map.on('load', this.onLoad);
+    map.on('load', this.onLoad);
   }
 
   /**
-   * Remove listeners from the Mapbox Map.
+   * Remove source, layers and listeners from the map.
+   *
    * @private
    */
-  override detachFromMap() {
-    if (this.map) {
-      this.map.off('load', this.onLoad);
+  override onRemove(
+    map: AnyMapboxMap,
+    gl: WebGLRenderingContext | WebGL2RenderingContext,
+  ) {
+    map.off('load', this.onLoad);
 
-      if (this.map.getLayer(this.layer.id)) {
-        this.map.removeLayer(this.layer.id);
-      }
-      if (this.map.getSource(this.id)) {
-        this.map.removeSource(this.id);
-      }
+    if (map.getLayer(this.layer.id)) {
+      map.removeLayer(this.layer.id);
     }
-    super.detachFromMap();
+    if (map.getSource(this.id)) {
+      map.removeSource(this.id);
+    }
+    super.onRemove(map, gl);
   }
 
   /**

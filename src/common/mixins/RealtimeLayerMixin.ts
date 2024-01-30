@@ -35,7 +35,7 @@ import {
   LayerGetFeatureInfoResponse,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
-import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
+import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import { FilterFunction, SortFunction } from '../typedefs';
 
 export type RealtimeLayerMixinOptions = Options & {
@@ -662,12 +662,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       viewState: ViewState,
       noInterpolate: boolean = false,
     ) {
-      console.log(
-        'renderTrajectoriesInternal',
-        this.map,
-        this.canvas,
-        this.trajetcories,
-      );
       if (!this.map || !this.trajectories) {
         return false;
       }
@@ -686,7 +680,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         return true;
       }
 
-      console.log('renderTrajectories');
       // console.time('render');
       this.renderState = renderTrajectories(
         this.canvas,

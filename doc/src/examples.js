@@ -1,6 +1,6 @@
 // We load statically the readme to have the content when the page use server side rendering.
-import olTrackerReadme from '../public/static/examples/ol-tracker.md';
-import mbTrackerReadme from '../public/static/examples/mb-tracker.md';
+import olTrackerReadme from '../public/static/examples/ol-realtime.md';
+import mbTrackerReadme from '../public/static/examples/mb-realtime.md';
 import olRoutingReadme from '../public/static/examples/ol-routing.md';
 import olStopFinderReadme from '../public/static/examples/ol-stop-finder.md';
 // import tralisLiveMapReadme from '../public/static/examples/tralis-live-map.md';
@@ -12,17 +12,17 @@ import olStopFinderReadme from '../public/static/examples/ol-stop-finder.md';
 export default [
   {
     name: 'Live tracker with OpenLayers',
-    key: 'ol-tracker',
+    key: 'ol-realtime',
     description:
-      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a OpenLayers map.',
     img: '/static/img/live_tracker_ol.jpg',
     readme: olTrackerReadme,
   },
   {
     name: 'Live tracker with Mapbox',
-    key: 'mb-tracker',
+    key: 'mb-realtime',
     description:
-      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
+      'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Maplibre map.',
     img: '/static/img/live_tracker_mb.jpg',
     readme: mbTrackerReadme,
   },

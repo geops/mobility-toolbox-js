@@ -3,6 +3,7 @@
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
+import { Layer } from 'ol/layer';
 import { AnyMapboxLayer, LayerGetFeatureInfoResponse } from '../../types';
 import { FilterFunction } from '../../common/typedefs';
 import { MaplibreLayerOptions } from './MaplibreLayer';
@@ -10,7 +11,7 @@ import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 
 export type MapboxStyleLayerOptions = MaplibreLayerOptions & {
   beforeId?: string;
-  mapboxLayer?: AnyMapboxLayer;
+  maplibreLayer?: AnyMapboxLayer;
   styleLayer?: { [key: string]: any };
   styleLayers?: { [key: string]: any }[];
   styleLayersFilter?: FilterFunction;
@@ -30,22 +31,22 @@ export type StyleLayer = {
  * @example
  * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';
  *
- * const mapboxLayer = new MapboxLayer({
+ * const maplibreLayer = new MapboxLayer({
  *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',
  * });
  *
  * const layer = new MapboxStyleLayer({
- *   mapboxLayer: mapboxLayer,
+ *   maplibreLayer: maplibreLayer,
  *   styleLayersFilter: () => {},
  * });
  *
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
- * @extends {Layer}
+ * @extends {ol/layer/Layer~Layer}
  */
 class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
   beforeId?: string;
 
-  mapboxLayer?: AnyMapboxLayer;
+  readonly maplibreLayer?: AnyMapboxLayer;
 
   styleLayersFilter?: FilterFunction;
 
@@ -63,25 +64,26 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
 
   addDynamicFilters?: () => void;
 
+  get mapboxLayer(): AnyMapboxLayer | undefined {
+    // eslint-disable-next-line no-console
+    console.warn('Deprecated. Use maplibreLayer instead.');
+    return this.get('maplibreLayer');
+  }
+
   /**
    * Constructor.
    *
    * @param {Object} options
-   * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.
+   * @param {MapboxLayer} [options.maplibreLayer] The MapboxLayer to use.
    * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.
    */
   constructor(options: MapboxStyleLayerOptions) {
     super(options);
 
-    /**
-     * MapboxLayer provided for the style Layer.
-     * @type {MapboxLayer}
-     * @private
-     */
-    this.mapboxLayer = options.mapboxLayer;
+    this.maplibreLayer = options.maplibreLayer;
 
     /**
-     * Define if the layer has data to display in the current mapbox layer.
+     * Define if the layer has data to display in the current Maplibre layer.
      */
     this.disabled = false;
 
@@ -93,8 +95,8 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
     this.styleLayersFilter = options.styleLayersFilter;
 
     /**
-     * Mapbox style layer id where to add the style layers.
-     * See [mapbox.map.addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.
+     * Maplibre style layer id where to add the style layers.
+     * See [Maplibre.map.addLayer](https://docs.Maplibre.com/Maplibre-gl-js/api/map/#map#addlayer) documentation.
      * @type {String}
      * @private
      */
@@ -129,7 +131,7 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
     this.selectedFeatures = [];
 
     /**
-     * Array of mapbox style layers to add.
+     * Array of Maplibre style layers to add.
      * @type {Array<mapboxgl.styleLayer>}
      * @private
      */
@@ -163,23 +165,27 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
     }
   }
 
+  render() {
+    return null;
+  }
+
   /**
    * Initialize the layer.
-   * @param {ol/Map~Map} map the mapbox map.
+   * @param {ol/Map~Map} map the Maplibre map.
    * @override
    */
   attachToMap(map: Map) {
-    if (this.mapboxLayer && !this.mapboxLayer.map) {
-      this.mapboxLayer?.attachToMap(map);
+    if (this.maplibreLayer && !this.maplibreLayer.map) {
+      map.addLayer(this.maplibreLayer);
     }
     super.attachToMap(map);
 
-    if (!this.map || !this.mapboxLayer) {
+    if (!this.map || !this.maplibreLayer) {
       return;
     }
 
     // Apply the initial visibiltity.
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
     if (!mbMap) {
       // If the mbMap is not yet created because the  map has no target yet, we
       // relaunch the initialisation when it's the case.
@@ -196,7 +202,7 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
     // On the next call (when a topic change for example), these functions returns false because
     // the style is being modified.
     // That's why we rely on a property instead for the next calls.
-    if (this.mapboxLayer.loaded || mbMap.isStyleLoaded() || mbMap.loaded()) {
+    if (mbMap.loaded()) {
       this.onLoad();
     } else {
       mbMap.once('load', this.onLoad);
@@ -207,14 +213,14 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
       // @ts-ignore
       this.on('change:visible', (evt) => {
         // Once the map is loaded we can apply visiblity without waiting
-        // the style. Mapbox take care of the application of style changes.
+        // the style. Maplibre take care of the application of style changes.
         this.applyLayoutVisibility(evt);
       }),
     );
 
     this.olListenersKeys.push(
       // @ts-ignore
-      this.mapboxLayer.on('load', () => {
+      this.maplibreLayer.on('load', () => {
         this.onLoad();
       }),
     );
@@ -225,8 +231,8 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
    * @override
    */
   detachFromMap() {
-    if (this.mapboxLayer?.mbMap) {
-      const { mbMap } = this.mapboxLayer;
+    if (this.maplibreLayer?.mbMap) {
+      const { mbMap } = this.maplibreLayer;
       mbMap.off('load', this.onLoad);
       this.removeStyleLayers();
     }
@@ -235,10 +241,10 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   addStyleLayers() {
-    if (!this.mapboxLayer?.mbMap) {
+    if (!this.maplibreLayer?.mbMap) {
       return;
     }
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
 
     this.styleLayers.forEach((styleLayer) => {
       const { id, source } = styleLayer;
@@ -252,10 +258,10 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   removeStyleLayers() {
-    if (!this.mapboxLayer?.mbMap) {
+    if (!this.maplibreLayer?.mbMap) {
       return;
     }
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
 
     this.styleLayers.forEach((styleLayer) => {
       const { id } = styleLayer;
@@ -266,7 +272,7 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
   }
 
   /**
-   * On Mapbox map load callback function. Add style layers and dynaimc filters.
+   * On Maplibre map load callback function. Add style layers and dynaimc filters.
    * @private
    */
   onLoad() {
@@ -276,10 +282,10 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
       this.addDynamicFilters();
     }
 
-    if (!this.mapboxLayer?.mbMap) {
+    if (!this.maplibreLayer?.mbMap) {
       return;
     }
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
     const style = mbMap.getStyle();
     if (style && this.styleLayersFilter) {
       // @ts-ignore
@@ -296,12 +302,12 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
   ): Promise<LayerGetFeatureInfoResponse> {
-    if (!this.mapboxLayer?.mbMap) {
+    if (!this.maplibreLayer?.mbMap) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
 
-    // Ignore the getFeatureInfo until the mapbox map is loaded
+    // Ignore the getFeatureInfo until the Maplibre map is loaded
     if (!mbMap.isStyleLoaded()) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
@@ -319,7 +325,7 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
       layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
     }
 
-    return this.mapboxLayer
+    return this.maplibreLayer
       .getFeatureInfoAtCoordinate(coordinate, {
         layers: layers.map((layer) => layer && layer.id),
         validate: false,
@@ -344,10 +350,10 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
    * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.
    */
   setFilter(filter: { [key: string]: any }) {
-    if (!this.mapboxLayer?.mbMap) {
+    if (!this.maplibreLayer?.mbMap) {
       return;
     }
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
 
     this.styleLayers.forEach(({ id }) => {
       if (id && filter && mbMap.getLayer(id)) {
@@ -364,10 +370,10 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   setHoverState(features: Feature[], state: boolean) {
-    if (!this.mapboxLayer?.mbMap) {
+    if (!this.maplibreLayer?.mbMap) {
       return;
     }
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
 
     if (!features || !mbMap) {
       return;
@@ -379,7 +385,7 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
         if (!feature.getId()) {
           // eslint-disable-next-line no-console
           console.warn(
-            "No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/mapbox/tippecanoe#adding-calculated-attributes.",
+            "No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/Maplibre/tippecanoe#adding-calculated-attributes.",
             feature.getId(),
             feature.getProperties(),
           );
@@ -442,11 +448,11 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
     const { visible } = this;
     const filterFunc = this.styleLayersFilter;
 
-    if (!this.mapboxLayer?.mbMap) {
+    if (!this.maplibreLayer?.mbMap) {
       return;
     }
 
-    const { mbMap } = this.mapboxLayer;
+    const { mbMap } = this.maplibreLayer;
     const style = mbMap.getStyle();
 
     if (!style) {
@@ -468,7 +474,7 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
             if (this.get('minZoom') || this.get('maxZoom')) {
               mbMap.setLayerZoomRange(
                 styleLayer.id,
-                this.get('minZoom') ? this.get('minZoom') - 1 : 0, // mapbox zoom = ol zoom - 1
+                this.get('minZoom') ? this.get('minZoom') - 1 : 0, // Maplibre zoom = ol zoom - 1
                 this.get('maxZoom') ? this.get('maxZoom') - 1 : 24,
               );
             }

@@ -1,5 +1,5 @@
-import { Map } from 'maplibre-gl/dist/maplibre-gl-dev';
-import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/mapbox';
+import { Map } from 'maplibre-gl';
+import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
@@ -9,10 +9,8 @@ export default () => {
     style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
     center: [7.47, 46.95],
     zoom: 12,
-    minZoom: 4,
     touchPitch: false,
     pitchWithRotate: false,
-    attributionControl: false,
   });
 
   map.addControl(new CopyrightControl());
@@ -20,22 +18,14 @@ export default () => {
   // Define the layer
   const realtime = new RealtimeLayer({
     apiKey: window.apiKey,
-    id: 'id',
+    id: 'realtime',
   });
 
   map.on('load', () => {
-    const layer = map.addLayer(realtime);
-
-    // Display informations on click in the console
-    realtime.onClick(([feature]) => {
-      if (feature) {
-        // eslint-disable-next-line no-console
-        console.log(feature);
-      }
-    });
+    map.addLayer(realtime);
   });
   document.getElementById('button').onclick = () => {
-    const prop = map.getLayoutProperty('id', 'visibility');
+    const prop = map.getLayoutProperty('realtime', 'visibility');
     map.setLayoutProperty(
       'id-raster',
       'visibility',

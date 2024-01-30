@@ -1,7 +1,7 @@
 import type {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
-} from '../api/WebSocketAPI';
+} from '../../api/WebSocketAPI';
 
 /**
  * This function returns a WebSocket api callback, and call the onUpdate function with the list of of subscribed objects changes.

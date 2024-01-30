@@ -3,7 +3,7 @@ import { fromLonLat } from 'ol/proj';
 import { AnyMapboxMap } from '../../types';
 
 /**
- * Get the current resolution of a Mapbox map.
+ * Get the current resolution of a Maplibre map.
  * @param {mapboxgl.Map} map A map object.
  * @private
  */

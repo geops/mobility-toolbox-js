@@ -1,9 +1,10 @@
 import { Map, View } from 'ol';
 import {
   MaplibreLayer,
-  MapboxStyleLayer,
+  MaplibreStyleLayer,
   CopyrightControl,
 } from 'mobility-toolbox-js/ol';
+import 'ol/ol.css';
 
 export default () => {
   // Define the map
@@ -13,34 +14,26 @@ export default () => {
       center: [950690.34, 6003962.67],
       zoom: 20,
     }),
-    controls: [],
   });
 
-  // Add copyright control
-  const control = new CopyrightControl();
-  map.addControl(copyright);
-
-  // Define the Mapbox style to display
-  const mapboxLayer = new MaplibreLayer({
-    url: 'https://maps.geops.io/styles/travic_v2/style.json',
+  const baseLayer = new MaplibreLayer({
     apiKey: window.apiKey,
   });
-
-  // Display the style on the map
-  mapboxLayer.attachToMap(map);
+  console.log(baseLayer.options);
+  map.addLayer(baseLayer);
+  console.log(baseLayer.options);
 
   // Define the list of Mapbox style layers representing the pois.
-  const poiLayer = new MapboxStyleLayer({
-    mapboxLayer,
+  const poiLayer = new MaplibreStyleLayer({
+    maplibreLayer: baseLayer,
     styleLayersFilter: ({ id }) => /^poi_/.test(id),
   });
 
-  // Display the pois on the map
-  poiLayer.attachToMap(map);
+  map.addLayer(poiLayer);
 
   // Toggle pois visibility
   document.getElementById('button').addEventListener('click', (evt) => {
-    poiLayer.visible = !poiLayer.visible;
+    poiLayer.setVisible(!poiLayer.getVisible());
     const { target } = evt;
     target.innerHTML = `${poiLayer.visible ? 'Hide' : 'Show'} the POIs`;
   });
