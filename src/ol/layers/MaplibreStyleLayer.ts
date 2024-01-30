@@ -4,10 +4,11 @@ import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { AnyMapboxLayer, LayerGetFeatureInfoResponse } from '../../types';
-import Layer, { OlLayerOptions } from './Layer';
 import { FilterFunction } from '../../common/typedefs';
+import { MaplibreLayerOptions } from './MaplibreLayer';
+import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 
-export type MapboxStyleLayerOptions = OlLayerOptions & {
+export type MapboxStyleLayerOptions = MaplibreLayerOptions & {
   beforeId?: string;
   mapboxLayer?: AnyMapboxLayer;
   styleLayer?: { [key: string]: any };
@@ -41,7 +42,7 @@ export type StyleLayer = {
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {Layer}
  */
-class MapboxStyleLayer extends Layer {
+class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
   beforeId?: string;
 
   mapboxLayer?: AnyMapboxLayer;

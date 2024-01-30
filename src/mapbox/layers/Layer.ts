@@ -18,6 +18,7 @@ export type LayerOptions = {
  *
  * @implements {maplibregl.CustomLayer}
  * @extends {maplibregl.Evented}
+ * @private
  */
 class Layer extends Evented implements CustomLayerInterface {
   id: string;
@@ -48,9 +49,6 @@ class Layer extends Evented implements CustomLayerInterface {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   render(gl: WebGLRenderingContext | WebGL2RenderingContext) {}
-
-  // eslint-disable-next-line class-methods-use-this
-  defineProperties() {}
 
   attachToMap(
     map: AnyMapboxMap,

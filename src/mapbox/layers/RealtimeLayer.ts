@@ -3,27 +3,19 @@ import { fromLonLat } from 'ol/proj';
 import { getWidth, getHeight } from 'ol/extent';
 import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
-import { Coordinate } from 'ol/coordinate';
-import { Feature } from 'ol';
-import RealtimeLayerMixin from '../../common/mixins/RealtimeLayerMixin';
+import RealtimeLayerMixin, {
+  RealtimeLayerMixinOptions,
+} from '../../common/mixins/RealtimeLayerMixin';
 import Layer, { LayerOptions } from './Layer';
-import { getSourceCoordinates, getMercatorResolution } from '../utils';
-import type {
-  AnyMapboxMap,
-  LayerGetFeatureInfoResponse,
-  ViewState,
-} from '../../types';
+import { getSourceCoordinates } from '../utils';
+import type { AnyMapboxMap, ViewState } from '../../types';
 import type { RealtimeTrajectory } from '../../api/typedefs';
 import toMercatorExtent from '../../common/utils/toMercatorExtent';
-import UserInteractionsLayerMixin, {
-  UserInteractionsLayerMixinOptions,
-} from '../../common/mixins/UserInteractionsLayerMixin';
 
-export type RealtimeLayerOptions = UserInteractionsLayerMixinOptions &
-  LayerOptions;
+export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
 
 /**
- * Responsible for loading and display data from a Realtime service.
+ * Responsible for loading and display data from a geOps Realtime api.
  *
  * @example
  * import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
@@ -36,16 +28,17 @@ export type RealtimeLayerOptions = UserInteractionsLayerMixinOptions &
  *
  * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
  *
- * @extends {Layer}
- * @implements {UserInteractionsLayerInterface}
- * @implements {RealtimeLayerInterface}
+ * @implements {maplibregl.CustomLayer}
+ * @extends {maplibregl.Evented}
  */
-// @ts-ignore
-class RealtimeLayer extends RealtimeLayerMixin(
-  UserInteractionsLayerMixin(Layer),
-) {
+class RealtimeLayer extends RealtimeLayerMixin(Layer) {
   /**
-   * Extends Layer
+   * Constructor.
+   *
+   * @param {RealtimeLayerOptions} options
+   * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
+   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime api url.
+   *
    */
   constructor(options = {}) {
     const canvas = document.createElement('canvas');
@@ -54,13 +47,7 @@ class RealtimeLayer extends RealtimeLayerMixin(
       ...options,
     });
 
-    if (super.defineProperties) {
-      super.defineProperties({
-        canvas,
-        ...options,
-      });
-    }
-
+    /** @private */
     this.source = {
       id: this.id,
       type: 'canvas',
@@ -78,6 +65,7 @@ class RealtimeLayer extends RealtimeLayerMixin(
       loaded: true,
     };
 
+    /** @private */
     this.layer = {
       id: `${this.id}-raster`,
       type: 'raster',
@@ -95,13 +83,13 @@ class RealtimeLayer extends RealtimeLayerMixin(
     /** @private */
     this.onLoad = this.onLoad.bind(this);
 
-    // /** @private */
+    /** @private */
     this.onMove = this.onMove.bind(this);
 
-    // /** @private */
+    /** @private */
     this.onMoveEnd = this.onMoveEnd.bind(this);
 
-    // /** @private */
+    /** @private */
     this.onZoomEnd = this.onZoomEnd.bind(this);
   }
 
@@ -111,9 +99,9 @@ class RealtimeLayer extends RealtimeLayerMixin(
    * @param {mapboxgl.Map} map A [mapbox Map](https://docs.mapbox.com/mapbox-gl-js/api/map/).
    * @param {string} beforeId Layer's id before which we want to add the new layer.
    * @override
+   * @private
    */
-  // @ts-ignore
-  attachToMap(map: AnyMapboxMap) {
+  override attachToMap(map: AnyMapboxMap) {
     if (!map) {
       return;
     }
@@ -128,8 +116,9 @@ class RealtimeLayer extends RealtimeLayerMixin(
 
   /**
    * Remove listeners from the Mapbox Map.
+   * @private
    */
-  detachFromMap() {
+  override detachFromMap() {
     if (this.map) {
       this.map.off('load', this.onLoad);
 
@@ -143,6 +132,9 @@ class RealtimeLayer extends RealtimeLayerMixin(
     super.detachFromMap();
   }
 
+  /**
+   * @private
+   */
   onLoad() {
     if (!this.map.getSource(this.id)) {
       this.map.addSource(this.id, this.source);
@@ -152,20 +144,11 @@ class RealtimeLayer extends RealtimeLayerMixin(
     }
     this.start();
   }
-  // End extends Layer
-
-  /**
-   * Extends RealtimeLayerMixin
-   */
 
   /**
    * Start updating vehicles position.
-   *
-   * @listens {mapboxgl.map.event:zoomend} Listen to zoom end event.
-   * @listens {mapboxgl.map.event:mousemove} Listen to mousemove end.
-   * @override
    */
-  start() {
+  override start() {
     super.start();
     this.map.on('move', this.onMove);
     this.map.on('moveend', this.onMoveEnd);
@@ -173,11 +156,9 @@ class RealtimeLayer extends RealtimeLayerMixin(
   }
 
   /**
-   * Stop updating vehicles position, and unlisten events.
-   *
-   * @override
+   * Stop updating vehicles position.
    */
-  stop() {
+  override stop() {
     super.stop();
     this.map?.off('move', this.onMove);
     this.map?.off('moveend', this.onMoveEnd);
@@ -187,10 +168,9 @@ class RealtimeLayer extends RealtimeLayerMixin(
   /**
    * Render the trajectories using current map's size, resolution and rotation.
    * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
-   * @overrides
+   * @private
    */
-  // @ts-ignore
-  renderTrajectories(noInterpolate?: boolean = false) {
+  override renderTrajectories(noInterpolate?: boolean = false) {
     if (!this.map) {
       return;
     }
@@ -247,20 +227,11 @@ class RealtimeLayer extends RealtimeLayerMixin(
 
   /**
    * Return the delay in ms before the next rendering.
+   *
+   * @private
    */
-  getRefreshTimeInMs() {
+  override getRefreshTimeInMs() {
     return super.getRefreshTimeInMs(this.map.getZoom());
-  }
-
-  getFeatureInfoAtCoordinate(
-    coordinate: Coordinate,
-    options = {},
-  ): Promise<LayerGetFeatureInfoResponse> {
-    const resolution = getMercatorResolution(this.map);
-    return super.getFeatureInfoAtCoordinate(coordinate, {
-      resolution,
-      ...options,
-    });
   }
 
   /**
@@ -268,7 +239,7 @@ class RealtimeLayer extends RealtimeLayerMixin(
    *
    * @private
    */
-  purgeTrajectory(
+  override purgeTrajectory(
     trajectory: RealtimeTrajectory,
     extent: [number, number, number, number],
     zoom: number,
@@ -282,8 +253,10 @@ class RealtimeLayer extends RealtimeLayerMixin(
 
   /**
    * Send the current bbox to the websocket
+   *
+   * @private
    */
-  setBbox(extent?: [number, number, number, number], zoom?: number) {
+  override setBbox(extent?: [number, number, number, number], zoom?: number) {
     super.setBbox(
       extent || toMercatorExtent(this.map.getBounds()),
       zoom || this.map.getZoom() - 1,
@@ -291,15 +264,9 @@ class RealtimeLayer extends RealtimeLayerMixin(
   }
 
   /**
-   * Callback on 'move' event.
-   *
    * @private
    */
-  onMove() {
-    this.renderTrajectories();
-  }
-
-  renderTrajectoriesInternal(
+  override renderTrajectoriesInternal(
     viewState: ViewState,
     noInterpolate: boolean = false,
   ) {
@@ -315,10 +282,18 @@ class RealtimeLayer extends RealtimeLayerMixin(
   }
 
   /**
+   * Callback on 'move' event.
+   *
+   * @private
+   */
+  onMove() {
+    this.renderTrajectories();
+  }
+
+  /**
    * Send the new BBOX to the websocket.
    *
    * @private
-   * @override
    */
   onMoveEnd() {
     this.renderTrajectories();
@@ -331,17 +306,18 @@ class RealtimeLayer extends RealtimeLayerMixin(
 
   /**
    * Extends UserInteractionsLayerMixin
+   * @private
    */
-  activateUserInteractions() {
-    this.deactivateUserInteractions();
-    this.map?.on('click', this.onUserClickCallback);
-    this.map?.on('mousemove', this.onUserMoveCallback);
-  }
+  // activateUserInteractions() {
+  //   this.deactivateUserInteractions();
+  //   this.map?.on('click', this.onUserClickCallback);
+  //   this.map?.on('mousemove', this.onUserMoveCallback);
+  // }
 
-  deactivateUserInteractions() {
-    this.map?.off('mousemove', this.onUserMoveCallback);
-    this.map?.off('click', this.onUserClickCallback);
-  }
+  // deactivateUserInteractions() {
+  //   this.map?.off('mousemove', this.onUserMoveCallback);
+  //   this.map?.off('click', this.onUserClickCallback);
+  // }
 
   /**
    * Update the cursor style when hovering a vehicle.
@@ -349,18 +325,18 @@ class RealtimeLayer extends RealtimeLayerMixin(
    * @private
    * @override
    */
-  onFeatureHover(
-    features: Feature[],
-    layer: RealtimeLayer,
-    coordinate: Coordinate,
-  ) {
-    super.onFeatureHover(features, layer, coordinate);
-    if (this.userClickCallbacks.length) {
-      this.map.getCanvasContainer().style.cursor = features.length
-        ? 'pointer'
-        : 'auto';
-    }
-  }
+  // onFeatureHover(
+  //   features: Feature[],
+  //   layer: RealtimeLayer,
+  //   coordinate: Coordinate,
+  // ) {
+  //   super.onFeatureHover(features, layer, coordinate);
+  //   if (this.userClickCallbacks.length) {
+  //     this.map.getCanvasContainer().style.cursor = features.length
+  //       ? 'pointer'
+  //       : 'auto';
+  //   }
+  // }
   // End extends UserInteractionsLayerMixin
 }
 

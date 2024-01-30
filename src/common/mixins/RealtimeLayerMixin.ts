@@ -10,10 +10,8 @@ import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
 import { EventsKey } from 'ol/events';
-import { ObjectEvent } from 'ol/Object';
 import { Coordinate } from 'ol/coordinate';
-import { Feature } from 'ol';
-import { GeoJSONFeature } from 'maplibre-gl';
+import { Options } from 'ol/layer/Layer';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
@@ -38,10 +36,9 @@ import {
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
-import type { LayerOptions } from '../../ol/layers/Layer';
 import { FilterFunction, SortFunction } from '../typedefs';
 
-export type RealtimeLayerMixinOptions = LayerOptions & {
+export type RealtimeLayerMixinOptions = Options & {
   debug?: boolean;
   mode?: RealtimeMode;
   api?: RealtimeAPI;

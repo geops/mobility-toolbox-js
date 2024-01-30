@@ -62,6 +62,12 @@
  * @external {mapboxgl.position} https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addcontrol
  */
 /**
+ * @external {maplibregl.CustomLayerInterface} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/maplibregl.CustomLayerInterface/
+ */
+/**
+ * @external {maplibregl.Evented} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Evented/
+ */
+/**
  * @external {maplibregl.Map} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Map/
  */
 /**

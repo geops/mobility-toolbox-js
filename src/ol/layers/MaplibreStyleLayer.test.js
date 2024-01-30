@@ -1,9 +1,8 @@
 import OlMap from 'ol/Map';
 import View from 'ol/View';
 import gllib from 'maplibre-gl';
-import Layer from './Layer';
 import MaplibreLayer from './MaplibreLayer';
-import MapboxStyleLayer from './MapboxStyleLayer';
+import MapboxStyleLayer from './MaplibreStyleLayer';
 
 let source;
 let layer;

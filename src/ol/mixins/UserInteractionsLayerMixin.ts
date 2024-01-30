@@ -7,8 +7,8 @@
 import { EventsKey } from 'ol/events';
 import { unByKey } from 'ol/Observable';
 import { Map } from 'ol';
-import { AnyMap, UserInteractionCallback } from '../../types';
-import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
+import { UserInteractionCallback } from '../../types';
+import CommonUserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
 
 export type UserInteractionsLayerMixinOptions = {
   userInteractions?: boolean;
@@ -29,9 +29,9 @@ type GLayerConstructor = GConstructor<Layer>;
  * @return {Class}  A class that implements {UserInteractionsLayerInterface} class and extends Base;
  * @private
  */
-function OlUserInteractionsLayerMixin<UserInteractionsLayerMixin>(
+function UserInteractionsLayerMixin<CommonUserInteractionsLayerMixin>(
   Base: UserInteractionsLayerMixin,
-): UserInteractionsLayerMixin {
+): CommonUserInteractionsLayerMixin {
   // @ts-ignore
   return class extends UserInteractionsLayerMixin(Base) {
     private olListenersKeys: EventsKey[] = [];
@@ -105,4 +105,4 @@ function OlUserInteractionsLayerMixin<UserInteractionsLayerMixin>(
   };
 }
 
-export default OlUserInteractionsLayerMixin;
+export default UserInteractionsLayerMixin;

@@ -3,21 +3,13 @@ import olTrackerReadme from '../public/static/examples/ol-tracker.md';
 import mbTrackerReadme from '../public/static/examples/mb-tracker.md';
 import olRoutingReadme from '../public/static/examples/ol-routing.md';
 import olStopFinderReadme from '../public/static/examples/ol-stop-finder.md';
-import tralisLiveMapReadme from '../public/static/examples/tralis-live-map.md';
+// import tralisLiveMapReadme from '../public/static/examples/tralis-live-map.md';
 
 // import munichAssets from '../public/static/examples/tralis-live-map';
 
-// To make redirect works properly on netlify it's important that the key
+// It's important that the key
 // are differents from the name of js and html files.
 export default [
-  // {
-  //   name: 'Layers',
-  //   key: 'layers',
-  //   description:
-  //     'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Mapbox map.',
-  //   img: '/static/img/live_tracker_ol.jpg',
-  //   readme: olTrackerReadme,
-  // },
   {
     name: 'Live tracker with OpenLayers',
     key: 'ol-tracker',
@@ -67,19 +59,6 @@ export default [
   //   },
   //   readme: tralisLiveMapReadme,
   // },
-  // These examples are used for the dbug of RealtimeLayer don't remove them pls.
-  // {
-  //   name: 'Tralis tracker with OpenLayers',
-  //   key: 'ol-tralis',
-  //   description: 'Show moving tramway in an OpenLayers map.',
-  //   img: '/static/img/routing.jpg',
-  // },
-  // {
-  //   name: 'Tralis tracker with Mapbox',
-  //   key: 'mapbox-tralis',
-  //   description: 'Show moving tramway in an Mapbox map.',
-  //   img: '/static/img/routing.jpg',
-  // },
   {
     name: 'Mapbox layer',
     key: 'ol-mapbox-layer',
@@ -93,25 +72,25 @@ export default [
       'Display/hide a set of layers of a Mapbox style on an OpenLayers map.',
     img: '/static/img/mapbox_style.jpg',
   },
-  {
-    name: 'Querying objects',
-    key: 'ol-query',
-    description:
-      'This example shows how to query objects in different kinds of layers.',
-    img: '/static/img/query_objects.jpg',
-  },
-  {
-    name: 'Copyrights with OpenLayers',
-    key: 'ol-copyright',
-    description:
-      'This example shows how to use the CopyrightControl component.',
-    img: '/static/img/ol-copyright.png',
-  },
-  {
-    name: 'Copyrights with Mapbox',
-    key: 'mb-copyright',
-    description:
-      'This example shows how to use the CopyrightControl component.',
-    img: '/static/img/ol-copyright.png',
-  },
+  // {
+  //   name: 'Querying objects',
+  //   key: 'ol-query',
+  //   description:
+  //     'This example shows how to query objects in different kinds of layers.',
+  //   img: '/static/img/query_objects.jpg',
+  // },
+  // {
+  //   name: 'Copyrights with OpenLayers',
+  //   key: 'ol-copyright',
+  //   description:
+  //     'This example shows how to use the CopyrightControl component.',
+  //   img: '/static/img/ol-copyright.png',
+  // },
+  // {
+  //   name: 'Copyrights with Mapbox',
+  //   key: 'mb-copyright',
+  //   description:
+  //     'This example shows how to use the CopyrightControl component.',
+  //   img: '/static/img/ol-copyright.png',
+  // },
 ];

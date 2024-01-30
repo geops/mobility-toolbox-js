@@ -33,7 +33,7 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  * @extends {ol/layer/Layer~Layer}
  */
 export default class MaplibreLayer extends MapGlLayer {
-  readonly options: MaplibreLayerOptions;
+  readonly options: MaplibreLayerOptions = {};
 
   /** @private */
   get maplibreMap(): maplibregl.Map | undefined {

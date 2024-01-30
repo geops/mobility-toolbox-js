@@ -8,10 +8,11 @@ import debounce from 'lodash.debounce';
 import { ObjectEvent } from 'ol/Object';
 import { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';
 import { AnyMapboxMap } from '../../types';
-import { OlLayerOptions } from './Layer';
-import OlMobilityLayerMixin from '../mixins/MobilityLayerMixin';
+import MobilityLayerMixin, {
+  MobilityLayerOptions,
+} from '../mixins/MobilityLayerMixin';
 
-export type MapGlLayerOptions = OlLayerOptions & {
+export type MapGlLayerOptions = MobilityLayerOptions & {
   apiKey?: string;
   apiKeyName?: string;
   style?: string;
@@ -23,7 +24,7 @@ export type MapGlLayerOptions = OlLayerOptions & {
  * It's used to share code between Mapbox and Maplibre layers without importing both libs.
  * @private
  */
-class MapGlLayer extends OlMobilityLayerMixin(Layer) {
+class MapGlLayer extends MobilityLayerMixin(Layer) {
   loaded!: boolean;
 
   mbMap?: AnyMapboxMap;

@@ -8,7 +8,7 @@ module.exports = {
   },
   parser: '@typescript-eslint/parser',
   extends: ['airbnb', 'airbnb-typescript', 'prettier'],
-  plugins: ['@typescript-eslint', 'cypress', 'prettier'],
+  plugins: ['cypress', 'prettier'],
   parserOptions: {
     project: './tsconfig.json',
   },

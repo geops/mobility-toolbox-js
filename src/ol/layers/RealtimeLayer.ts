@@ -18,7 +18,7 @@ import {
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
-import OlMobilityLayerMixin from '../mixins/MobilityLayerMixin';
+import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 
 /** @private */
@@ -53,7 +53,7 @@ export type RealtimeLayerOptions = RealtimeLayerMixinOptions & {
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  */
 // @ts-ignore
-class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
+class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
   /** @private */
   allowRenderWhenAnimating?: boolean = false;
 
