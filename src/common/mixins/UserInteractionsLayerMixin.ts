@@ -133,7 +133,7 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
         }
 
         if (this.defaultUserInteractions && this.onFeatureClick) {
-          this.onClick(this.onFeatureClick);
+          // this.onClick(this.onFeatureClick);
         }
       }
 
@@ -142,7 +142,7 @@ function UserInteractionsLayerMixin<T>(Base: T): T {
           this.onHover(onHover);
         }
         if (this.defaultUserInteractions && this.onFeatureHover) {
-          this.onHover(this.onFeatureHover);
+          // this.onHover(this.onFeatureHover);
         }
       }
     }

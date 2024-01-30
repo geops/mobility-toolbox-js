@@ -18,7 +18,7 @@ import type {
 import { RealtimeTrajectory } from '../api/typedefs';
 import CommonLayer, {
   LayerCommonOptions,
-} from '../common/mixins/PropertiesLayerMixin';
+} from '../ol/mixins/PropertiesLayerMixin';
 import type { RoutingParameters } from '.';
 
 export type StyleCache = { [key: string]: AnyCanvas };

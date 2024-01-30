@@ -5,6 +5,7 @@ import type { StyleFunction, StyleLike } from 'ol/style/Style';
 import type { FeatureLike } from 'ol/Feature';
 import { Geometry } from 'ol/geom';
 import Feature from 'ol/Feature';
+import VectorLayer from 'ol/layer/Vector';
 import Layer from './Layer';
 import type { LayerOptions } from './Layer';
 
@@ -82,7 +83,8 @@ const defaultStyleFunction: StyleFunction = (
  * @deprecated
  */
 class RoutingLayer extends Layer {
-  olLayer?: Vector<VectorSource<Feature<Geometry>>>;
+  // @ts-ignore
+  olLayer?: VectorLayer;
 
   options: OlRoutingLayerOptions = {};
 
@@ -112,6 +114,7 @@ class RoutingLayer extends Layer {
    * @param {Object} newOptions Options to override
    * @return {RoutingLayer} A RoutingLayer
    */
+  // @ts-ignore
   clone(newOptions: OlRoutingLayerOptions) {
     return new RoutingLayer({ ...this.options, ...newOptions });
   }

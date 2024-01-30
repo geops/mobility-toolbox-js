@@ -27,7 +27,6 @@ function TrackerExample() {
     map.addControl(control);
 
     const layer = new RealtimeLayer({
-      key: 'test',
       apiKey: window.apiKey,
     });
 

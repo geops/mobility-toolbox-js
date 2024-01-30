@@ -70,6 +70,7 @@ export declare type WebSocketAPIRequest = {
  * Class used to facilitate connection to a WebSocketAPI and
  * also to manage properly messages send to the WebSocketAPI.
  * This class must not contain any specific implementation.
+ * @private
  */
 class WebSocketAPI {
   websocket?: WebSocket;

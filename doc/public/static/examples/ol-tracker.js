@@ -4,6 +4,7 @@ import {
   MaplibreLayer,
   CopyrightControl,
 } from 'mobility-toolbox-js/ol';
+import 'ol/ol.css';
 
 export default () => {
   const map = new Map({
@@ -13,10 +14,7 @@ export default () => {
       zoom: 13,
       minZoom: 5,
     }),
-    controls: [],
   });
-
-  map.addControl(new CopyrightControl());
 
   const layer = new MaplibreLayer({
     apiKey: window.apiKey,
@@ -28,11 +26,32 @@ export default () => {
   });
   map.addLayer(realtime);
 
-  let maxZoom = 20;
-  realtime.onClick(([feature]) => {
-    if (feature) {
-      // eslint-disable-next-line no-console
-      console.log(feature.getProperties());
-    }
+  const queryOptions = {
+    hitTolerance: 5,
+    layerFilter: (layer) => layer === realtime,
+  };
+
+  // Change mouse cursor and highlight feature if clickable
+  map.on('pointermove', (evt) => {
+    const [feature] = map.getFeaturesAtPixel(evt.pixel, queryOptions);
+    realtime.highlight(feature);
+    map.getTargetElement().style.cursor = feature ? 'pointer' : '';
   });
+
+  // Display realtime feature informations on click.
+  map.on('singleclick', (evt) => {
+    const [feature] = map.getFeaturesAtPixel(evt.pixel, queryOptions);
+    realtime.select(feature);
+
+    // Display the realtime feature informations
+    document.getElementById('content').innerHTML = feature
+      ? JSON.stringify(feature.getProperties(), null, 2)
+      : 'No feature found';
+  });
+  // realtime.onClick(([feature]) => {
+  //   if (feature) {
+  //     // eslint-disable-next-line no-console
+  //     console.log(feature.getProperties());
+  //   }
+  // });
 };

@@ -29,8 +29,8 @@ export type RealtimeLayerOptions = UserInteractionsLayerMixinOptions &
  * import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
  *
  * const layer = new RealtimeLayer({
- *   url: [yourUrl],
- *   apiKey: [yourApiKey],
+ *   apiKey: "yourApiKey"
+ *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
  *
@@ -53,6 +53,13 @@ class RealtimeLayer extends RealtimeLayerMixin(
       canvas,
       ...options,
     });
+
+    if (super.defineProperties) {
+      super.defineProperties({
+        canvas,
+        ...options,
+      });
+    }
 
     this.source = {
       id: this.id,

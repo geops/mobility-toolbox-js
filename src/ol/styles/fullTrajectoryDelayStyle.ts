@@ -30,6 +30,9 @@ const fill = new Style({
   }),
 });
 
+/**
+ * @private
+ */
 const fullTrajectoryDelaystyle = (): Style[] => {
   return [stroke, fill];
 };

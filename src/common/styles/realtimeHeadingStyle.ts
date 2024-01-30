@@ -97,6 +97,7 @@ const getBufferArrowCanvas = (
  * @param {ViewState} viewState The view state of the map.
  * @param {RealtimeStyleOptions} options Some options to change the rendering
  * @return a canvas
+ * @private
  */
 const realtimeHeadingStyle: RealtimeStyleFunction = (
   trajectory: RealtimeTrajectory,

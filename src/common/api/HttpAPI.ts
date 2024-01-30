@@ -18,6 +18,7 @@ export type HttpAPIOptions = {
  *
  * @classproperty {string} url Url of the service.
  * @classproperty {string} apiKey Api key to access the service.
+ * @private
  */
 class HttpAPI extends BaseObject {
   url: string;

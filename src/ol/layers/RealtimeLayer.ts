@@ -1,14 +1,10 @@
-// @ts-nocheck
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer } from 'ol/layer';
 import Source from 'ol/source/Source';
-import { composeCssTransform } from 'ol/transform';
 import { Vector as VectorSource } from 'ol/source';
 import Feature, { FeatureLike } from 'ol/Feature';
-import { MapEvent } from 'ol';
-import { Coordinate } from 'ol/coordinate';
+import { Map, MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
-import { FrameState } from 'ol/Map';
 import debounce from 'lodash.debounce';
 import Layer from 'ol/layer/Layer';
 import RealtimeLayerMixin, {
@@ -16,20 +12,19 @@ import RealtimeLayerMixin, {
 } from '../../common/mixins/RealtimeLayerMixin';
 import { fullTrajectoryStyle } from '../styles';
 import {
-  AnyMap,
-  LayerGetFeatureInfoResponse,
   RealtimeFullTrajectory,
   RealtimeTrainId,
   ViewState,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
-import OlMobilityLayerMixin from '../mixins/OlMobilityLayerMixin';
+import OlMobilityLayerMixin from '../mixins/MobilityLayerMixin';
+import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 
 /** @private */
 const format = new GeoJSON();
 
-export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
+export type RealtimeLayerOptions = RealtimeLayerMixinOptions & {
   fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
@@ -39,34 +34,39 @@ export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
 };
 
 /**
- * Responsible for loading and display data from a Realtime service.
+ * Responsible for loading and display data from the geOps Realtime api.
  *
  * @example
  * import { RealtimeLayer } from 'mobility-toolbox-js/ol';
  *
  * const layer = new RealtimeLayer({
- *   url: [yourUrl],
- *   apiKey: [yourApiKey],
+ *   apiKey: "yourApiKey"
+ *   // allowRenderWhenAnimating: false,
+ *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
  *
  * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
  *
- * @extends {Layer}
- * @implements {UserInteractionsLayerInterface}
- * @implements {RealtimeLayerInterface}
+ * @extends {ol/layer/Layer~Layer}
+ *
+ * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  */
 // @ts-ignore
 class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
+  /** @private */
   allowRenderWhenAnimating?: boolean = false;
 
   /**
    * Constructor.
    *
-   * @param {Object} options
-   * @private
+   * @param {RealtimeLayerOptions} options
+   * @param {boolean} [options.allowRenderWhenAnimating=false] Allow rendering of the layer when the map is animating.
+   * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
+   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime api url.
+   *
    */
-  constructor(options: OlRealtimeLayerOptions) {
+  constructor(options: RealtimeLayerOptions) {
     // We use a group to be able to add custom vector layer in extended class.
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
@@ -74,9 +74,11 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
       ...options,
     });
 
+    /** @private */
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
     // We store the layer used to highlight the full Trajectory
+    /** @private */
     this.vectorLayer = new VectorLayer({
       updateWhileAnimating: this.allowRenderWhenAnimating,
       updateWhileInteracting: true,
@@ -99,62 +101,22 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
       rotation: 0,
     };
 
+    /** @private */
     this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
+
+    /** @private */
     this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
   }
 
-  render(frameState: FrameState) {
-    if (!this.container) {
-      this.container = document.createElement('div');
-      this.container.className = this.getClassName();
-      this.container.style.position = 'absolute';
-      this.container.style.width = '100%';
-      this.container.style.height = '100%';
-      if (this.canvas) {
-        (this.canvas as HTMLCanvasElement).style.position = 'absolute';
-        (this.canvas as HTMLCanvasElement).style.top = '0';
-        (this.canvas as HTMLCanvasElement).style.left = '0';
-        (this.canvas as HTMLCanvasElement).style.transformOrigin = 'top left';
-        this.container.appendChild(this.canvas);
-      }
-    }
-
-    if (this.renderedViewState) {
-      const { center, resolution, rotation } = frameState.viewState;
-      const {
-        center: renderedCenter,
-        resolution: renderedResolution,
-        rotation: renderedRotation,
-      } = this.renderedViewState;
-
-      if (renderedResolution / resolution >= 3) {
-        // Avoid having really big points when zooming fast.
-        const context = this.canvas?.getContext('2d');
-        context?.clearRect(
-          0,
-          0,
-          this.canvas?.width as number,
-          this.canvas?.height as number,
-        );
-      } else {
-        const pixelCenterRendered =
-          this.map.getPixelFromCoordinate(renderedCenter);
-        const pixelCenter = this.map.getPixelFromCoordinate(center);
-        this.container.style.transform = composeCssTransform(
-          pixelCenterRendered[0] - pixelCenter[0],
-          pixelCenterRendered[1] - pixelCenter[1],
-          renderedResolution / resolution,
-          renderedResolution / resolution,
-          rotation - renderedRotation,
-          0,
-          0,
-        );
-      }
-    }
-    return this.container;
+  /**
+   * @private
+   */
+  createRenderer() {
+    return new RealtimeLayerRenderer(this);
   }
 
-  attachToMap(map: AnyMap) {
+  /** @private */
+  override attachToMap(map: Map) {
     super.attachToMap(map);
     if (this.map) {
       // If the layer is visible we start  the rendering clock
@@ -179,6 +141,7 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
             if (this.currentZoom !== zoom) {
               this.onZoomEndDebounced(evt);
             }
+            /** @private */
             this.currentZoom = zoom;
 
             this.onMoveEndDebounced(evt);
@@ -207,38 +170,18 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
 
   /**
    * Destroy the container of the tracker.
+   * @private
    */
-  detachFromMap() {
+  override detachFromMap() {
     this.map?.removeLayer(this.vectorLayer);
     super.detachFromMap();
-    this.container = null;
-  }
-
-  /**
-   * Detect in the canvas if there is data to query at a specific coordinate.
-   * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test
-   * @returns
-   */
-  hasFeatureInfoAtCoordinate(coordinate: Coordinate) {
-    if (this.map && this.canvas) {
-      const context = this.canvas.getContext('2d', {
-        willReadFrequently: true,
-      });
-      const pixel = this.map.getPixelFromCoordinate(coordinate);
-      return !!context?.getImageData(
-        pixel[0] * (this.pixelRatio || 1),
-        pixel[1] * (this.pixelRatio || 1),
-        1,
-        1,
-      ).data[3];
-    }
-    return false;
   }
 
   /**
    * Render the trajectories using current map's size, resolution and rotation.
    * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
    * @overrides
+   * @private
    */
   // @ts-ignore
   renderTrajectories(noInterpolate: boolean) {
@@ -291,10 +234,11 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
 
     // We update the current render state.
     if (isRendered) {
+      /** @private */
       this.renderedViewState = { ...viewState };
 
-      if (this.container) {
-        this.container.style.transform = '';
+      if (this.getRenderer().container) {
+        this.getRenderer().container.style.transform = '';
       }
     }
     return isRendered;
@@ -302,37 +246,10 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
 
   /**
    * Return the delay in ms before the next rendering.
+   * @private
    */
   getRefreshTimeInMs() {
     return super.getRefreshTimeInMs(this.map.getView().getZoom());
-  }
-
-  getFeatureInfoAtCoordinate(
-    coordinate: Coordinate,
-    options = {},
-  ): Promise<LayerGetFeatureInfoResponse> {
-    if (!this.map || !this.map.getView()) {
-      return Promise.resolve({
-        layer: this,
-        features: [],
-        coordinate,
-      });
-    }
-
-    const resolution = this.map.getView().getResolution();
-    return super
-      .getFeatureInfoAtCoordinate(coordinate, {
-        resolution,
-        ...options,
-      })
-      .then((featureInfo) => {
-        const olFeatures = featureInfo.features.map((vehicle) =>
-          this.format.readFeature(vehicle),
-        );
-        // eslint-disable-next-line no-param-reassign
-        featureInfo.features = olFeatures;
-        return featureInfo;
-      });
   }
 
   /**
@@ -365,42 +282,51 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
       return;
     }
 
-    if (this.userClickInteractions && this.selectedVehicleId) {
+    if (this.selectedVehicleId) {
       this.highlightTrajectory(this.selectedVehicleId);
     }
   }
 
-  /**
-   * Update the cursor style when hovering a vehicle.
-   *
-   * @private
-   * @override
-   */
-  onFeatureHover(
-    features: Feature[],
-    layer: RealtimeLayer,
-    coordinate: Coordinate,
-  ) {
-    super.onFeatureHover(features, layer, coordinate);
-    this.map.getTargetElement().style.cursor = features.length
-      ? 'pointer'
-      : 'auto';
+  highlight(feature: Feature) {
+    this.highlightVehicle(feature?.get('train_id'));
   }
 
-  /**
-   * Display the complete trajectory of the vehicle.
-   *
-   * @private
-   * @override
-   */
-  onFeatureClick(
-    features: Feature[],
-    layer: RealtimeLayer,
-    coordinate: Coordinate,
-  ) {
-    super.onFeatureClick(features, layer, coordinate);
-    this.highlightTrajectory(this.selectedVehicleId);
+  select(feature: Feature) {
+    this.selectVehicle(feature?.get('train_id'));
+    this.highlightTrajectory(feature?.get('train_id'));
   }
+
+  // /**
+  //  * Update the cursor style when hovering a vehicle.
+  //  *
+  //  * @private
+  //  * @override
+  //  */
+  // onFeatureHover(
+  //   features: Feature[],
+  //   layer: RealtimeLayer,
+  //   coordinate: Coordinate,
+  // ) {
+  //   super.onFeatureHover(features, layer, coordinate);
+  //   this.map.getTargetElement().style.cursor = features.length
+  //     ? 'pointer'
+  //     : 'auto';
+  // }
+
+  // /**
+  //  * Display the complete trajectory of the vehicle.
+  //  *
+  //  * @private
+  //  * @override
+  //  */
+  // onFeatureClick(
+  //   features: Feature[],
+  //   layer: RealtimeLayer,
+  //   coordinate: Coordinate,
+  // ) {
+  //   super.onFeatureClick(features, layer, coordinate);
+  //   this.highlightTrajectory(this.selectedVehicleId);
+  // }
 
   /**
    * Remove the trajectory form the list if necessary.
@@ -450,18 +376,16 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
       .getFullTrajectory(id, this.mode, this.generalizationLevel)
       .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
         const fullTrajectory = data.content;
-        this.vectorLayer.getSource().clear(true);
 
-        if (
-          !fullTrajectory ||
-          !fullTrajectory.features ||
-          !fullTrajectory.features.length
-        ) {
-          return undefined;
+        if (!fullTrajectory?.features?.length) {
+          return [];
         }
-        const features = format.readFeatures(fullTrajectory);
-        this.vectorLayer.getSource().addFeatures(features);
-        return features as Feature[];
+        const features = format.readFeatures(fullTrajectory) as Feature[];
+        this.vectorLayer.getSource().clear(true);
+        if (features.length) {
+          this.vectorLayer.getSource().addFeatures(features);
+        }
+        return features;
       })
       .catch(() => {
         this.vectorLayer.getSource().clear(true);
@@ -474,7 +398,7 @@ class RealtimeLayer extends RealtimeLayerMixin(OlMobilityLayerMixin(Layer)) {
    * @param {Object} newOptions Options to override
    * @return {RealtimeLayer} A RealtimeLayer
    */
-  clone(newOptions: OlRealtimeLayerOptions) {
+  clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
     return new RealtimeLayer({ ...this.options, ...newOptions });
   }
 }

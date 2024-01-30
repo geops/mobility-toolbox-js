@@ -244,6 +244,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         hitTolerance: 10,
         ...options,
       });
+      this.defineProperties(options);
 
       this.debug = options.debug || false;
       this.mode = options.mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
@@ -321,8 +322,8 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       );
 
       // Bind callbacks
-      this.onFeatureHover = this.onFeatureHover.bind(this);
-      this.onFeatureClick = this.onFeatureClick.bind(this);
+      // this.onFeatureHover = this.onFeatureHover.bind(this);
+      // this.onFeatureClick = this.onFeatureClick.bind(this);
       this.renderTrajectoriesInternal =
         this.renderTrajectoriesInternal.bind(this);
       this.onTrajectoryMessage = this.onTrajectoryMessage.bind(this);
@@ -338,7 +339,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @private
      */
     defineProperties(options: RealtimeLayerMixinOptions) {
-      super.defineProperties(options);
+      (super.defineProperties || (() => {}))(options);
       const {
         style,
         speed,
@@ -664,6 +665,12 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       viewState: ViewState,
       noInterpolate: boolean = false,
     ) {
+      console.log(
+        'renderTrajectoriesInternal',
+        this.map,
+        this.canvas,
+        this.trajetcories,
+      );
       if (!this.map || !this.trajectories) {
         return false;
       }
@@ -682,6 +689,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         return true;
       }
 
+      console.log('renderTrajectories');
       // console.time('render');
       this.renderState = renderTrajectories(
         this.canvas,
@@ -1090,25 +1098,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.removeTrajectory(data.content);
     }
 
-    /**
-     * Callback when user moves the mouse/pointer over the map.
-     * It sets the layer's hoverVehicleId property with the current hovered vehicle's id.
-     *
-     * @private
-     * @override
-     */
-    onFeatureHover(
-      features: (Feature | GeoJSONFeature)[],
-      layer: AnyRealtimeLayer,
-      coordinate: Coordinate,
-    ) {
-      const [feature] = features;
-      let id = null;
-      if (feature) {
-        id = (feature as Feature).get
-          ? (feature as Feature).get('train_id')
-          : (feature as GeoJSONFeature).properties.train_id;
-      }
+    highlightVehicle(id: RealtimeTrainId) {
       if (this.hoverVehicleId !== id) {
         /** @private */
         this.hoverVehicleId = id;
@@ -1117,30 +1107,66 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       }
     }
 
-    /**
-     * Callback when user clicks on the map.
-     * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
-     *
-     * @private
-     * @override
-     */
-    onFeatureClick(features: (Feature | GeoJSONFeature)[]) {
-      const [feature] = features;
-      let id = null;
-      if (feature) {
-        id = (feature as Feature).get
-          ? (feature as Feature).get('train_id')
-          : (feature as GeoJSONFeature).properties.train_id;
-      }
+    selectVehicle(id: RealtimeTrainId) {
       if (this.selectedVehicleId !== id) {
         /** @private */
         this.selectedVehicleId = id;
-        this.selectedVehicle = feature;
-
-        // @ts-ignore parameters are provided by subclasses
+        // @ts-ignore
         this.renderTrajectories(true);
       }
     }
+
+    // /**
+    //  * Callback when user moves the mouse/pointer over the map.
+    //  * It sets the layer's hoverVehicleId property with the current hovered vehicle's id.
+    //  *
+    //  * @private
+    //  * @override
+    //  */
+    // onFeatureHover(
+    //   features: (Feature | GeoJSONFeature)[],
+    //   layer: AnyRealtimeLayer,
+    //   coordinate: Coordinate,
+    // ) {
+    //   const [feature] = features;
+    //   let id = null;
+    //   if (feature) {
+    //     id = (feature as Feature).get
+    //       ? (feature as Feature).get('train_id')
+    //       : (feature as GeoJSONFeature).properties.train_id;
+    //   }
+    //   if (this.hoverVehicleId !== id) {
+    //     /** @private */
+    //     this.hoverVehicleId = id;
+    //     // @ts-ignore
+    //     this.renderTrajectories(true);
+    //   }
+    // }
+
+    // /**
+    //  * Callback when user clicks on the map.
+    //  * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
+    //  *
+    //  * @private
+    //  * @override
+    //  */
+    // onFeatureClick(features: (Feature | GeoJSONFeature)[]) {
+    //   const [feature] = features;
+    //   let id = null;
+    //   if (feature) {
+    //     id = (feature as Feature).get
+    //       ? (feature as Feature).get('train_id')
+    //       : (feature as GeoJSONFeature).properties.train_id;
+    //   }
+    //   if (this.selectedVehicleId !== id) {
+    //     /** @private */
+    //     this.selectedVehicleId = id;
+    //     this.selectedVehicle = feature;
+
+    //     // @ts-ignore parameters are provided by subclasses
+    //     this.renderTrajectories(true);
+    //   }
+    // }
   };
 }
 

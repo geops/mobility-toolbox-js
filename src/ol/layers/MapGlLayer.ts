@@ -9,7 +9,7 @@ import { ObjectEvent } from 'ol/Object';
 import { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';
 import { AnyMapboxMap } from '../../types';
 import { OlLayerOptions } from './Layer';
-import OlMobilityLayerMixin from '../mixins/OlMobilityLayerMixin';
+import OlMobilityLayerMixin from '../mixins/MobilityLayerMixin';
 
 export type MapGlLayerOptions = OlLayerOptions & {
   apiKey?: string;

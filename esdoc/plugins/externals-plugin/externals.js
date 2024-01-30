@@ -62,6 +62,15 @@
  * @external {mapboxgl.position} https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addcontrol
  */
 /**
+ * @external {maplibregl.Map} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Map/
+ */
+/**
+ * @external {maplibregl.MapOptions} https://maplibre.org/maplibre-gl-js/docs/API/types/maplibregl.MapOptions/
+ */
+/**
+ * @external {maplibregl.QueryRenderedFeaturesOptions} https://maplibre.org/maplibre-gl-js/docs/API/types/maplibregl.QueryRenderedFeaturesOptions/
+ */
+/**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
  */
 /**

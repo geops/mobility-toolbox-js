@@ -30,7 +30,6 @@ const map = new Map({
 
 const codeTracker = `
 const layer = new RealtimeLayer({
-  url: 'wss://api.geops.io/tracker-ws/v1/',
   apiKey: window.apiKey,
 });
 

@@ -4,7 +4,7 @@ import { Coordinate } from 'ol/coordinate';
 import { Vector } from 'ol/layer';
 import { LayerGetFeatureInfoResponse } from '../../types';
 import { OlLayerOptions } from './Layer';
-import PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';
+import PropertiesLayerMixin from '../mixins/PropertiesLayerMixin';
 import UserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
 
 /**

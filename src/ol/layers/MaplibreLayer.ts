@@ -35,6 +35,7 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
 export default class MaplibreLayer extends MapGlLayer {
   readonly options: MaplibreLayerOptions;
 
+  /** @private */
   get maplibreMap(): maplibregl.Map | undefined {
     return this.mbMap as maplibregl.Map;
   }
@@ -43,11 +44,11 @@ export default class MaplibreLayer extends MapGlLayer {
    * Constructor.
    *
    * @param {MaplibreLayerOptions} options
-   * @param {string} options.apiKey geOps Maps api key.
-   * @param {string} [options.apiKeyName="key"] geOps Maps api key name.
+   * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
+   * @param {string} [options.apiKeyName="key"] The geOps Maps api key name.
    * @param {maplibregl.MapOptions} [options.mapOptions={ interactive: false, trackResize: false, attributionControl: false }] Maplibre map options.
-   * @param {string} [options.style="travic_v2"] geOps Maps api style.
-   * @param {string} [options.url="https://maps.geops.io"] geOps Maps api url.
+   * @param {string} [options.style="travic_v2"] The geOps Maps api style.
+   * @param {string} [options.url="https://maps.geops.io"] The geOps Maps api url.
    */
   constructor(options: MaplibreLayerOptions = {}) {
     super({ ...options });

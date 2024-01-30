@@ -6,6 +6,8 @@ import createCanvas from '../utils/createCanvas';
  * Display blue point for each train.
  */
 let canvas: AnyCanvas | null;
+
+/** @private */
 const realtimeSimpleStyle: RealtimeStyleFunction = () => {
   if (!canvas) {
     canvas = createCanvas(15, 15);

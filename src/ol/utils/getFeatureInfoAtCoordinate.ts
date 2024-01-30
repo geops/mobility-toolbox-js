@@ -4,6 +4,7 @@ import { Feature, getUid } from 'ol';
 import { ImageWMS, TileWMS } from 'ol/source';
 import GeoJSON from 'ol/format/GeoJSON';
 import { LayerGetFeatureInfoResponse } from '../../types';
+import { getLayersAsFlatArray } from '../../common';
 
 /**
  * @private
@@ -56,7 +57,9 @@ const getFeatureInfoAtCoordinate = async (
   });
   abortControllers = {};
 
-  const promises = layers.map((layer) => {
+  const flatLayers = getLayersAsFlatArray(layers);
+
+  const promises = flatLayers.map((layer) => {
     const map = layer.getMapInternal();
     const projection = map?.getView()?.getProjection()?.getCode();
     const emptyResponse = { features: [], layer, coordinate };
@@ -124,7 +127,7 @@ const getFeatureInfoAtCoordinate = async (
     }
 
     const features = map?.getFeaturesAtPixel(pixel, {
-      layerFilter: (l) => l === layer,
+      layerFilter: (l: Layer) => l === layer,
       hitTolerance:
         // @ts-ignore
         layer.get('hitTolerance') || hitTolerance || 5,

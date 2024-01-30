@@ -16,6 +16,7 @@ const borderStyle = new Style({
   }),
 });
 
+/** @private */
 const fullTrajectorystyle = (
   feature: FeatureLike,
   resolution: number,

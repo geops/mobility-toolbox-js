@@ -3,9 +3,9 @@
 import { Map } from 'ol';
 import OlLayer from 'ol/layer/Layer';
 import type { Options } from 'ol/layer/Layer';
-import PropertiesLayerMixin from '../../common/mixins/PropertiesLayerMixin';
+import PropertiesLayerMixin from '../mixins/PropertiesLayerMixin';
 
-import type { PropertiesLayerMixinOptions } from '../../common/mixins/PropertiesLayerMixin';
+import type { PropertiesLayerMixinOptions } from '../mixins/PropertiesLayerMixin';
 
 export type LayerOptions = Options & PropertiesLayerMixinOptions;
 

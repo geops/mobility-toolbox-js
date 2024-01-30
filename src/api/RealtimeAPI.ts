@@ -61,20 +61,23 @@ export const RealtimeModes = {
 };
 
 /**
- * This class provides convenience methods to access to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
+ * This class provides convenience methods to access to the [geOps Realtime api](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { RealtimeAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new RealtimeAPI({
- *   url: "yourUrl",
  *   apiKey: "yourApiKey"
+ *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
- * @example
- * import { RealtimeAPI } from 'mobility-toolbox-js/api';
+ * api.subscribeTrajectory('topographic', (data) => {
+ *    console.log('Log trajectories:', JSON.stringify(data.content));
+ * });
  *
- * const api = new RealtimeAPI("yourUrl");
+ * @classproperty {string} apiKey - Access key for [geOps apis](https://developer.geops.io/).
+ * @classproperty {number[]} bbox - The bounding box to receive data from. [minX, minY, maxX, maxY, zoom, tenant].
+ * @classproperty {string} url - The geOps Realtime api url.
  */
 class RealtimeAPI {
   url!: string;
@@ -110,7 +113,7 @@ class RealtimeAPI {
     this.onOpen = this.onOpen.bind(this);
   }
 
-  /* @private */
+  /** @private */
   defineProperties(options: RealtimeAPIOptions = {}) {
     let opt = options || {};
 
@@ -232,6 +235,7 @@ class RealtimeAPI {
   /**
    * Callback when the websocket is opened and ready.
    * It applies the bbox and the projection.
+   * @private
    */
   onOpen() {
     if (this.bbox) {
@@ -257,6 +261,7 @@ class RealtimeAPI {
   /**
    * Callback when the websocket is closed by the server.
    * It auto reconnects after a timeout.
+   * @private
    */
   onClose() {
     window.clearTimeout(this.pingInterval);
