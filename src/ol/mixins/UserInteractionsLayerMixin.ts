@@ -1,16 +1,13 @@
-// @ts-nocheck
-/* eslint-disable no-empty-function,@typescript-eslint/no-empty-function */
-/* eslint-disable no-useless-constructor,@typescript-eslint/no-useless-constructor */
-/* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable max-classes-per-file */
-import { EventsKey } from 'ol/events';
 import { unByKey } from 'ol/Observable';
 import { Map } from 'ol';
+import { Layer } from 'ol/layer';
 import { UserInteractionCallback } from '../../types';
 import CommonUserInteractionsLayerMixin from '../../common/mixins/UserInteractionsLayerMixin';
+import PropertiesLayerMixin, {
+  PropertiesLayerMixinOptions,
+} from './PropertiesLayerMixin';
 
-export type UserInteractionsLayerMixinOptions = {
+export type UserInteractionsLayerMixinOptions = PropertiesLayerMixinOptions & {
   userInteractions?: boolean;
   userClickInteractions?: boolean;
   userHoverInteractions?: boolean;
@@ -19,23 +16,15 @@ export type UserInteractionsLayerMixinOptions = {
   onHover?: UserInteractionCallback;
 };
 
-type GConstructor<T = Layer> = new (...args: any[]) => T;
-type GLayerConstructor = GConstructor<Layer>;
-
 /**
- * Mixin for UserInteractionsLayerInterface. It provide onClick and onHover functions.
+ * This mixin provides onClick and onHover functions.
  *
- * @param {Class} Base A class to extend with {UserInteractionsLayerInterface} functionnalities.
- * @return {Class}  A class that implements {UserInteractionsLayerInterface} class and extends Base;
  * @private
  */
-function UserInteractionsLayerMixin<CommonUserInteractionsLayerMixin>(
-  Base: UserInteractionsLayerMixin,
-): CommonUserInteractionsLayerMixin {
-  // @ts-ignore
-  return class extends CommonUserInteractionsLayerMixin(Base) {
-    private olListenersKeys: EventsKey[] = [];
-
+function UserInteractionsLayerMixin(Base: typeof Layer) {
+  return class extends CommonUserInteractionsLayerMixin(
+    PropertiesLayerMixin(Base),
+  ) {
     /**
      * Initialize the layer and listen to feature clicks.
      * @param {ol/Map~Map} map

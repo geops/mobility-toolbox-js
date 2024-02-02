@@ -33,7 +33,7 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  * @extends {ol/layer/Layer~Layer}
  */
 export default class MaplibreLayer extends MapGlLayer {
-  readonly options: MaplibreLayerOptions = {};
+  options?: MaplibreLayerOptions;
 
   /** @private */
   get maplibreMap(): maplibregl.Map | undefined {
@@ -50,7 +50,7 @@ export default class MaplibreLayer extends MapGlLayer {
    * @param {string} [options.style="travic_v2"] The geOps Maps api style.
    * @param {string} [options.url="https://maps.geops.io"] The geOps Maps api url.
    */
-  constructor(options: MaplibreLayerOptions = {}) {
+  constructor(options: MaplibreLayerOptions) {
     super({ ...options });
   }
 
@@ -74,7 +74,7 @@ export default class MaplibreLayer extends MapGlLayer {
    * @param {MaplibreLayerOptions} newOptions Options to override
    * @return {MaplibreLayer} A MaplibreLayer layer
    */
-  clone(newOptions: MaplibreLayerOptions = {}): MaplibreLayer {
+  clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
     return new MaplibreLayer({
       ...(this.options || {}),
       ...(newOptions || {}),

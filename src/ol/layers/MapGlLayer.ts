@@ -1,5 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-// @ts-nocheck
 import Source from 'ol/source/Source';
 import OlMap from 'ol/Map';
 import BaseEvent from 'ol/events/Event';
@@ -15,8 +13,10 @@ import MobilityLayerMixin, {
 export type MapGlLayerOptions = MobilityLayerOptions & {
   apiKey?: string;
   apiKeyName?: string;
-  style?: string;
+  style?: string | maplibregl.StyleSpecification;
   url?: string;
+  mapOptions: maplibregl.MapOptions;
+  queryRenderedFeaturesOptions: maplibregl.QueryRenderedFeaturesOptions;
 };
 
 /**
@@ -34,7 +34,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
   }
 
   set apiKey(newValue: string) {
-    return this.set('apiKey', newValue);
+    this.set('apiKey', newValue);
   }
 
   get apiKeyName(): string {
@@ -42,7 +42,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
   }
 
   set apiKeyName(newValue: string) {
-    return this.set('apiKeyName', newValue);
+    this.set('apiKeyName', newValue);
   }
 
   get style(): string {
@@ -50,7 +50,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
   }
 
   set style(newValue: string) {
-    return this.set('style', newValue);
+    this.set('style', newValue);
   }
 
   get url(): string {
@@ -58,39 +58,40 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
   }
 
   set url(newValue: string) {
-    return this.set('url', newValue);
+    this.set('url', newValue);
   }
 
-  get queryRenderedFeaturesOptions(): QueryRenderedFeaturesOptions {
+  get queryRenderedFeaturesOptions(): maplibregl.QueryRenderedFeaturesOptions {
     return this.get('queryRenderedFeaturesOptions');
   }
 
-  set queryRenderedFeaturesOptions(newValue: QueryRenderedFeaturesOptions) {
-    return this.set('queryRenderedFeaturesOptions', newValue);
+  set queryRenderedFeaturesOptions(
+    newValue: maplibregl.QueryRenderedFeaturesOptions,
+  ) {
+    this.set('queryRenderedFeaturesOptions', newValue);
   }
 
-  constructor(options: MapGlLayerOptions = {}) {
+  constructor(options: MapGlLayerOptions) {
     super({
       source: new Source({
         attributions: () => {
-          return getMapboxMapCopyrights(this.mbMap);
+          return (this.mbMap && getMapboxMapCopyrights(this.mbMap)) || [];
         },
       }),
       apiKeyName: 'key',
       style: 'travic_v2',
       url: 'https://maps.geops.io',
-      ...options,
+      ...(options || {}),
       mapOptions: {
         interactive: false,
         trackResize: false,
         attributionControl: false,
-        ...(options.mapOptions || {}),
+        ...(options?.mapOptions || {}),
       },
       queryRenderedFeaturesOptions: {
-        ...(options.queryRenderedFeaturesOptions || {}),
+        ...(options?.queryRenderedFeaturesOptions || {}),
       },
     });
-    this.updateMbMapDebounced = debounce(this.updateMbMap, 150);
   }
 
   /**
@@ -101,10 +102,11 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
     super.attachToMap(map);
     this.loadMbMap();
 
+    const updateMbMapDebounced = debounce(this.updateMbMap.bind(this), 150);
     this.olListenersKeys.push(
       this.on('propertychange', (evt: ObjectEvent) => {
         if (/(apiKey|apiKeyName|url|style|)/.test(evt.key)) {
-          this.updateMbMapDebounced();
+          updateMbMapDebounced();
         }
       }),
     );
@@ -162,7 +164,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
       // https://maps.geops.io/styles/t7ravic_v2/style.json',
       style: this.getStyle(),
       container,
-      ...(this.options.mapOptions || {}),
+      ...(this.options?.mapOptions || {}),
     });
 
     this.mbMap.on('sourcedata', () => {
@@ -180,8 +182,8 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
     if (
       this.style &&
       typeof this.style === 'object' &&
-      this.style.id &&
-      this.style.version
+      (this.style as maplibregl.StyleSpecification).name &&
+      (this.style as maplibregl.StyleSpecification).version
     ) {
       return this.style;
     }
@@ -194,6 +196,11 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
     return getUrlWithParams(`${this.url}/styles/${this.style}/style.json`, {
       [this.apiKeyName]: this.apiKey,
     }).toString();
+  }
+
+  // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
+  createMap(options: { [id: string]: any }): AnyMapboxMap {
+    throw new Error('createMap must be implemented in child class');
   }
 
   updateMbMap() {

@@ -2,28 +2,20 @@ import Layer from 'ol/layer/Layer';
 import PropertiesLayerMixin, {
   PropertiesLayerMixinOptions,
 } from './PropertiesLayerMixin';
-import type { UserInteractionsLayerMixinOptions } from '../../common/mixins/UserInteractionsLayerMixin';
-import UserInteractionsLayerMixin from './UserInteractionsLayerMixin';
 
-export type MobilityLayerOptions = PropertiesLayerMixinOptions &
-  UserInteractionsLayerMixinOptions;
-
-type GConstructor<T = Layer> = new (...args: any[]) => T;
-type GLayerConstructor = GConstructor<Layer>;
+export type MobilityLayerOptions = PropertiesLayerMixinOptions & {
+  [x: string]: any;
+};
 
 /**
  * @private
  */
-function MobilityLayerMixin<TBase extends GLayerConstructor>(Base: TBase) {
-  // @ts-ignore
-  class MobilityLayer extends UserInteractionsLayerMixin(
-    PropertiesLayerMixin(Base),
-  ) {
+function MobilityLayerMixin(Base: typeof Layer) {
+  return class extends PropertiesLayerMixin(Base) {
     constructor(options: MobilityLayerOptions = {}) {
       super(options);
     }
-  }
-  return MobilityLayer;
+  };
 }
 
 export default MobilityLayerMixin;

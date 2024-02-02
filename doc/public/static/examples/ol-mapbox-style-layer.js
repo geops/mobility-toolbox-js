@@ -19,14 +19,12 @@ export default () => {
   const baseLayer = new MaplibreLayer({
     apiKey: window.apiKey,
   });
-  console.log(baseLayer.options);
   map.addLayer(baseLayer);
-  console.log(baseLayer.options);
 
   // Define the list of Mapbox style layers representing the pois.
   const poiLayer = new MaplibreStyleLayer({
     maplibreLayer: baseLayer,
-    styleLayersFilter: ({ id }) => /^poi_/.test(id),
+    layersFilter: ({ id }) => /^poi_/.test(id),
   });
 
   map.addLayer(poiLayer);
@@ -36,5 +34,27 @@ export default () => {
     poiLayer.setVisible(!poiLayer.getVisible());
     const { target } = evt;
     target.innerHTML = `${poiLayer.visible ? 'Hide' : 'Show'} the POIs`;
+  });
+
+  // Change mouse cursor if a POI is clickable
+  map.on('pointermove', (evt) => {
+    const has = map.hasFeatureAtPixel(evt.pixel, {
+      layerFilter: (layer) => layer === poiLayer,
+      hitTolerance: 5,
+    });
+    map.getTargetElement().style.cursor = has ? 'pointer' : '';
+  });
+
+  // Display POI feature informations on click.
+  map.on('singleclick', (evt) => {
+    const [feature] = map.getFeaturesAtPixel(evt.pixel, {
+      layerFilter: (layer) => layer === poiLayer,
+      hitTolerance: 5,
+    });
+
+    // Display the maplibre feature informations
+    document.getElementById('content').innerHTML = feature
+      ? JSON.stringify(feature.get('mapboxFeature'), null, 2)
+      : 'No feature found';
   });
 };

@@ -17,20 +17,20 @@ export type PropertiesLayerMixinOptions = Options & {
   hitTolerance?: number;
   properties?: { [x: string]: any };
   map?: Map;
+} & {
+  [x: string]: any;
 };
-
-type Constructor<T extends Layer> = new (...args: any[]) => T;
 
 /**
  * This mixin adds some properties to access some ol properties easily ansd also
  * the management of a hierarchy of layers using children, parent and group property.
  * @private
  */
-function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
-  class PropertiesLayer extends Base {
+function PropertiesLayerMixin(Base: typeof Layer) {
+  return class extends Base {
     public options?: PropertiesLayerMixinOptions = {};
 
-    public olListenersKeys?: EventsKey[] = [];
+    public olListenersKeys: EventsKey[] = [];
 
     get children(): Layer[] {
       return this.get('children') || [];
@@ -120,9 +120,8 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
       this.setVisible(newValue);
     }
 
-    constructor(...args: any[]) {
-      super(...args);
-      const options = args?.[0] || ({} as PropertiesLayerMixinOptions);
+    constructor(options: PropertiesLayerMixinOptions) {
+      super(options);
 
       if (options.properties) {
         // eslint-disable-next-line no-console
@@ -164,7 +163,6 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
       );
 
       this.options = options;
-      console.log('options', options);
       this.children = options.children || []; // Trigger the on children change event
     }
 
@@ -229,9 +227,7 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
         // If the parent has no more visible child we also hide it.
         if (
           parent?.getVisible() &&
-          !parent
-            ?.get('children')
-            .find((child: PropertiesLayer) => child.visible)
+          !parent?.get('children').find((child: Layer) => child.getVisible())
         ) {
           parent.setVisible(false);
         }
@@ -269,9 +265,7 @@ function PropertiesLayerMixin<TBase extends Constructor<Layer>>(Base: TBase) {
     flat() {
       return getLayersAsFlatArray(this);
     }
-  }
-
-  return PropertiesLayer;
+  };
 }
 
 export default PropertiesLayerMixin;

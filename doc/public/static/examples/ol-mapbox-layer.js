@@ -15,7 +15,6 @@ export default () => {
   // Define the Mapbox style to display
   const layer = new MaplibreLayer({
     apiKey: window.apiKey,
-    style: 'travic_v2',
   });
 
   map.addLayer(layer);

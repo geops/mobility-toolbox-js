@@ -14,11 +14,6 @@ import { Map } from 'maplibre-gl';
 /**
  * @private
  */
-let emptyDiv: HTMLElement;
-
-/**
- * @private
- */
 const formats: {
   [key: string]: GeoJSON;
 } = {
@@ -34,50 +29,6 @@ const formats: {
  */
 // @ts-ignore
 export default class MaplibreLayerRenderer extends LayerRenderer<MaplibreLayer> {
-  // eslint-disable-next-line class-methods-use-this
-  prepareFrame() {
-    return true;
-  }
-
-  renderFrame(frameState: FrameState) {
-    const layer = this.getLayer();
-    const { map, mbMap } = layer;
-    if (!layer || !map || !mbMap) {
-      if (!emptyDiv) {
-        emptyDiv = document.createElement('div');
-      }
-      return emptyDiv;
-    }
-
-    const canvas = mbMap.getCanvas();
-    const { viewState } = frameState;
-
-    const opacity = layer.getOpacity() || 1;
-    canvas.style.opacity = `${opacity}`;
-
-    // adjust view parameters in Maplibre
-    mbMap.jumpTo({
-      center: toLonLat(viewState.center) as [number, number],
-      zoom: viewState.zoom - 1,
-      bearing: toDegrees(-viewState.rotation),
-    });
-
-    if (!canvas.isConnected) {
-      // The canvas is not connected to the DOM, request a map rendering at the next animation frame
-      // to set the canvas size.
-      map.render();
-    } else if (
-      canvas.width !== frameState.size[0] ||
-      canvas.height !== frameState.size[1]
-    ) {
-      mbMap.resize();
-    }
-
-    mbMap.redraw();
-
-    return mbMap.getContainer();
-  }
-
   getFeaturesAtCoordinate(
     coordinate: Coordinate | undefined,
     hitTolerance: number = 5,
@@ -141,6 +92,47 @@ export default class MaplibreLayerRenderer extends LayerRenderer<MaplibreLayer> 
       }
     }
     return features;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  override prepareFrame() {
+    return true;
+  }
+
+  override renderFrame(frameState: FrameState) {
+    const layer = this.getLayer();
+    const { map, mbMap } = layer;
+    if (!layer || !map || !mbMap) {
+      return null;
+    }
+
+    const canvas = mbMap.getCanvas();
+    const { viewState } = frameState;
+
+    const opacity = layer.getOpacity() || 1;
+    canvas.style.opacity = `${opacity}`;
+
+    // adjust view parameters in Maplibre
+    mbMap.jumpTo({
+      center: toLonLat(viewState.center) as [number, number],
+      zoom: viewState.zoom - 1,
+      bearing: toDegrees(-viewState.rotation),
+    });
+
+    if (!canvas.isConnected) {
+      // The canvas is not connected to the DOM, request a map rendering at the next animation frame
+      // to set the canvas size.
+      map.render();
+    } else if (
+      canvas.width !== frameState.size[0] ||
+      canvas.height !== frameState.size[1]
+    ) {
+      mbMap.resize();
+    }
+
+    mbMap.redraw();
+
+    return mbMap.getContainer();
   }
 
   override getFeatures(pixel: Pixel) {

@@ -5,7 +5,11 @@ import {
   CopyrightControl,
   RoutingControl,
   RoutingAPI,
+  routingStyle,
 } from 'mobility-toolbox-js/ol';
+import 'ol/ol.css';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
 
 export default () => {
   const map = new Map({
@@ -14,23 +18,25 @@ export default () => {
       center: [950690.34, 6003962.67],
       zoom: 15,
     }),
-    controls: [],
   });
 
-  const mapboxLayer = new MaplibreLayer({
-    url: `https://maps.geops.io/styles/travic_v2/style.json`,
+  const baseLayer = new MaplibreLayer({
     apiKey: window.apiKey,
   });
-  mapboxLayer.attachToMap(map);
+  map.addLayer(baseLayer);
 
-  const copyright = new CopyrightControl();
-  copyright.attachToMap(map);
+  const routingLayer = new VectorLayer({
+    source: new VectorSource(),
+    style: routingStyle,
+  });
+  map.addLayer(routingLayer);
 
   const control = new RoutingControl({
     element: document.createElement('div'),
     apiKey: window.apiKey,
+    routingLayer: routingLayer,
   });
-  control.attachToMap(map);
+  map.addControl(control);
 
   control.addViaPoint([950476.4055933182, 6003322.253698345]);
   control.addViaPoint([950389.0813034325, 6003656.659274571]);

@@ -25,8 +25,7 @@ export type UserInteractionsLayerMixinOptions = {
  * @return {Class}  A class that implements {UserInteractionsLayerInterface} class and extends Base;
  * @private
  */
-function UserInteractionsLayerMixin<T>(Base: T): T {
-  // @ts-ignore
+function UserInteractionsLayerMixin(Base: any) {
   return class extends Base {
     userInteractions: boolean;
 

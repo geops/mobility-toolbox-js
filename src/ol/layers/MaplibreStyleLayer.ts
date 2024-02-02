@@ -1,28 +1,21 @@
-/* eslint-disable no-param-reassign */
-// @ts-nocheck
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { Layer } from 'ol/layer';
-import { AnyMapboxLayer, LayerGetFeatureInfoResponse } from '../../types';
+import { LayerSpecification } from 'maplibre-gl';
+import { Source } from 'ol/source';
+import { LayerGetFeatureInfoResponse } from '../../types';
 import { FilterFunction } from '../../common/typedefs';
-import { MaplibreLayerOptions } from './MaplibreLayer';
+import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
 import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
+import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
 
-export type MapboxStyleLayerOptions = MaplibreLayerOptions & {
+export type MaplibreStyleLayerOptions = MaplibreLayerOptions & {
   beforeId?: string;
-  maplibreLayer?: AnyMapboxLayer;
-  styleLayer?: { [key: string]: any };
-  styleLayers?: { [key: string]: any }[];
+  maplibreLayer?: MaplibreLayer;
+  styleLayers?: maplibregl.AddLayerObject[];
   styleLayersFilter?: FilterFunction;
-  filters?: FilterFunction | { [key: string]: any }[];
-  featureInfoFilter?: FilterFunction;
   queryRenderedLayersFilter?: FilterFunction;
-};
-
-export type StyleLayer = {
-  id?: string;
-  [key: string]: any;
 };
 
 /**
@@ -43,130 +36,134 @@ export type StyleLayer = {
  * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {ol/layer/Layer~Layer}
  */
-class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
-  beforeId?: string;
+class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
+  highlightedFeatures: Feature[] = [];
 
-  readonly maplibreLayer?: AnyMapboxLayer;
+  selectedFeatures: Feature[] = [];
 
-  styleLayersFilter?: FilterFunction;
+  get beforeId(): string {
+    return this.get('beforeId');
+  }
 
-  featureInfoFilter?: FilterFunction;
+  set beforeId(newValue: string[]) {
+    this.set('beforeId', newValue);
+  }
 
-  queryRenderedLayersFilter?: FilterFunction;
+  get layers(): maplibregl.AddLayerObject[] {
+    return this.get('layers');
+  }
 
-  selectedFeatures?: Feature[];
+  set layers(newValue: maplibregl.AddLayerObject[]) {
+    this.set('layers', newValue);
+  }
 
-  highlightedFeatures?: Feature[];
+  get layersFilter(): (layer: maplibregl.LayerSpecification) => boolean {
+    return this.get('layersFilter');
+  }
 
-  styleLayer?: StyleLayer;
+  set layersFilter(
+    newValue: (layer: maplibregl.LayerSpecification) => boolean,
+  ) {
+    this.set('layersFilter', newValue);
+  }
 
-  styleLayers: StyleLayer[];
-
-  addDynamicFilters?: () => void;
-
-  get mapboxLayer(): AnyMapboxLayer | undefined {
+  get mapboxLayer(): MaplibreLayer | undefined {
     // eslint-disable-next-line no-console
     console.warn('Deprecated. Use maplibreLayer instead.');
     return this.get('maplibreLayer');
+  }
+
+  get maplibreLayer(): MaplibreLayer {
+    return this.get('maplibreLayer');
+  }
+
+  set maplibreLayer(newValue: MaplibreLayer) {
+    this.set('maplibreLayer', newValue);
+  }
+
+  get queryRenderedLayersFilter(): (
+    layer: maplibregl.LayerSpecification,
+  ) => boolean {
+    return this.get('queryRenderedLayersFilter');
+  }
+
+  set queryRenderedLayersFilter(
+    newValue: (layer: maplibregl.LayerSpecification) => boolean,
+  ) {
+    this.set('queryRenderedLayersFilter', newValue);
+  }
+
+  get sources(): (maplibregl.SourceSpecification & { id: string })[] {
+    return this.get('sources');
+  }
+
+  set sources(newValue: (maplibregl.SourceSpecification & { id: string })[]) {
+    this.set('sources', newValue);
+  }
+
+  /**
+   * @deprecated
+   */
+  get styleLayer(): maplibregl.AddLayerObject {
+    // eslint-disable-next-line no-console
+    console.warn('Deprecated. Use layers instead.');
+    return this.layers[0];
+  }
+
+  /**
+   * @deprecated
+   */
+  set styleLayer(newValue: maplibregl.AddLayerObject) {
+    // eslint-disable-next-line no-console
+    console.warn('Deprecated. Use layers instead.');
+    this.layers = [newValue];
+  }
+
+  /**
+   * @deprecated
+   */
+  get styleLayers(): maplibregl.AddLayerObject[] {
+    // eslint-disable-next-line no-console
+    console.warn('Deprecated. Use layers instead.');
+    return this.layers;
+  }
+
+  /**
+   * @deprecated
+   */
+  set styleLayers(newValue: maplibregl.AddLayerObject[]) {
+    // eslint-disable-next-line no-console
+    console.warn('Deprecated. Use layers instead.');
+    this.layers = newValue;
   }
 
   /**
    * Constructor.
    *
    * @param {Object} options
-   * @param {MapboxLayer} [options.maplibreLayer] The MapboxLayer to use.
-   * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.
+   * @param {MapboxLayer} [options.maplibreLayer] The MaplibreLayer to use.
+   * @param {maplibregl.SourceSpecification[]} [options.sources] The source to add to the style on load.
+   * @param {maplibregl.AddLayerObject[]} [options.layers] The layers to add to the style on load.
+   * @param {FilterFunction} [options.layersFilter] Filter function to decide which style layer to apply visiblity on. If not provided, the 'layers' property is used.
+   * @param {FilterFunction} [options.queryRenderedLayersFilter] Filter function to decide which style layer are available for query.
    */
-  constructor(options: MapboxStyleLayerOptions) {
-    super(options);
-
-    this.maplibreLayer = options.maplibreLayer;
-
-    /**
-     * Define if the layer has data to display in the current Maplibre layer.
-     */
-    this.disabled = false;
-
-    /**
-     * Function to filter features to be displayed.
-     * @type {function}
-     * @private
-     */
-    this.styleLayersFilter = options.styleLayersFilter;
-
-    /**
-     * Maplibre style layer id where to add the style layers.
-     * See [Maplibre.map.addLayer](https://docs.Maplibre.com/Maplibre-gl-js/api/map/#map#addlayer) documentation.
-     * @type {String}
-     * @private
-     */
-    this.beforeId = options.beforeId;
-
-    /**
-     * Function to filter features for getFeatureInfoAtCoordinate method.
-     * @type {function}
-     * @private
-     */
-    this.featureInfoFilter = options.featureInfoFilter || ((obj: any) => obj);
-
-    /**
-     * Function to query the rendered features.
-     * @type {function}
-     * @private
-     */
-    this.queryRenderedLayersFilter = options.queryRenderedLayersFilter;
-
-    /**
-     * Array of features to highlight.
-     * @type {Array<ol/Feature~Feature>}
-     * @private
-     */
-    this.highlightedFeatures = [];
-
-    /**
-     * Array of selected features.
-     * @type {Array<ol/Feature~Feature>}
-     * @private
-     */
-    this.selectedFeatures = [];
-
-    /**
-     * Array of Maplibre style layers to add.
-     * @type {Array<mapboxgl.styleLayer>}
-     * @private
-     */
-    this.styleLayers =
-      (options.styleLayer ? [options.styleLayer] : options.styleLayers) || [];
-
-    /**
-     * @private
-     */
-    this.addStyleLayers = this.addStyleLayers.bind(this);
+  constructor(options: MaplibreStyleLayerOptions) {
+    super({ source: new Source({}), ...(options || {}) });
 
     /**
      * @private
      */
     this.onLoad = this.onLoad.bind(this);
-    if (options.filters) {
-      /** @private */
-      this.addDynamicFilters = () => {
-        this.setFilter(
-          typeof options.filters === 'function'
-            ? options.filters(this)
-            : options.filters,
-        );
-      };
-    }
 
-    if (!this.styleLayersFilter && this.styleLayers) {
-      this.styleLayersFilter = (styleLayer: StyleLayer) => {
-        return !!this.styleLayers?.find((sl) => styleLayer.id === sl.id);
+    if (!this.layersFilter && this.layers) {
+      this.layersFilter = (layer: maplibregl.LayerSpecification) => {
+        return !!this.layers.find((l) => layer.id === l.id);
       };
     }
   }
 
-  render() {
-    return null;
+  createRenderer() {
+    return new MaplibreStyleLayerRenderer(this);
   }
 
   /**
@@ -185,9 +182,10 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
     }
 
     // Apply the initial visibiltity.
-    const { mbMap } = this.maplibreLayer;
-    if (!mbMap) {
-      // If the mbMap is not yet created because the  map has no target yet, we
+    const { maplibreMap } = this.maplibreLayer;
+
+    if (!maplibreMap) {
+      // If the maplibreMap is not yet created because the  map has no target yet, we
       // relaunch the initialisation when it's the case.
       this.olListenersKeys.push(
         this.map.on('change:target', () => {
@@ -198,30 +196,34 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
       return;
     }
 
-    // mbMap.loaded() and mbMap.isStyleLoaded() are reliable only on the first call of init.
+    // maplibreMap.loaded() and maplibreMap.isStyleLoaded() are reliable only on the first call of init.
     // On the next call (when a topic change for example), these functions returns false because
     // the style is being modified.
     // That's why we rely on a property instead for the next calls.
-    if (mbMap.loaded()) {
+    if (maplibreMap.loaded()) {
       this.onLoad();
     } else {
-      mbMap.once('load', this.onLoad);
+      maplibreMap.once('load', this.onLoad);
     }
 
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
-      // @ts-ignore
       this.on('change:visible', (evt) => {
         // Once the map is loaded we can apply visiblity without waiting
         // the style. Maplibre take care of the application of style changes.
         this.applyLayoutVisibility(evt);
       }),
-    );
 
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.maplibreLayer.on('load', () => {
-        this.onLoad();
+      // @ts-expect-error 'load' is a custom event form mobility-toolbox-js
+      this.maplibreLayer.on('load', this.onLoad),
+
+      this.on('propertychange', (evt: ObjectEvent) => {
+        if (
+          /(sources|layers|layersFilter|maplibreLayer|beforeId|)/.test(evt.key)
+        ) {
+          this.detachFromMap();
+          this.attachToMap(map);
+        }
       }),
     );
   }
@@ -231,44 +233,86 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
    * @override
    */
   detachFromMap() {
-    if (this.maplibreLayer?.mbMap) {
-      const { mbMap } = this.maplibreLayer;
-      mbMap.off('load', this.onLoad);
-      this.removeStyleLayers();
+    if (this.maplibreLayer?.maplibreMap) {
+      this.maplibreLayer.maplibreMap.off('load', this.onLoad);
+      this.removeLayers();
+      this.removeSources();
     }
     super.detachFromMap();
   }
 
   /** @private */
-  addStyleLayers() {
-    if (!this.maplibreLayer?.mbMap) {
+  addSources() {
+    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.sources)) {
       return;
     }
-    const { mbMap } = this.maplibreLayer;
+    const { maplibreMap } = this.maplibreLayer;
 
-    this.styleLayers.forEach((styleLayer) => {
-      const { id, source } = styleLayer;
-      if (mbMap.getSource(source) && id && !mbMap.getLayer(id)) {
-        // @ts-ignore
-        mbMap.addLayer(styleLayer, this.beforeId);
-      }
-    });
-    this.applyLayoutVisibility();
+    if (maplibreMap) {
+      this.sources.forEach((source) => {
+        const { id } = source;
+        if (!maplibreMap.getSource(id)) {
+          maplibreMap.addSource(id, source);
+        }
+      });
+    }
   }
 
   /** @private */
-  removeStyleLayers() {
-    if (!this.maplibreLayer?.mbMap) {
+  removeSources() {
+    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.layers)) {
       return;
     }
-    const { mbMap } = this.maplibreLayer;
+    const { maplibreMap } = this.maplibreLayer;
 
-    this.styleLayers.forEach((styleLayer) => {
-      const { id } = styleLayer;
-      if (id && mbMap.getLayer(id)) {
-        mbMap.removeLayer(id);
-      }
-    });
+    if (maplibreMap) {
+      this.sources.forEach((source) => {
+        const { id } = source;
+        if (maplibreMap.getSource(id)) {
+          maplibreMap.removeSource(id);
+        }
+      });
+    }
+  }
+
+  /** @private */
+  addLayers() {
+    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.layers)) {
+      return;
+    }
+    const { maplibreMap } = this.maplibreLayer;
+
+    if (maplibreMap) {
+      this.layers.forEach((layer) => {
+        // @ts-expect-error source is optional but exists in TS definition
+        const { id, source } = layer;
+        if (
+          (!source || (source && maplibreMap.getSource(source))) &&
+          id &&
+          !maplibreMap.getLayer(id)
+        ) {
+          maplibreMap.addLayer(layer, this.beforeId);
+        }
+      });
+      this.applyLayoutVisibility();
+    }
+  }
+
+  /** @private */
+  removeLayers() {
+    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.layers)) {
+      return;
+    }
+    const { maplibreMap } = this.maplibreLayer;
+
+    if (maplibreMap) {
+      this.layers.forEach((styleLayer) => {
+        const { id } = styleLayer;
+        if (id && maplibreMap.getLayer(id)) {
+          maplibreMap.removeLayer(id);
+        }
+      });
+    }
   }
 
   /**
@@ -276,20 +320,16 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   onLoad() {
-    this.addStyleLayers();
-
-    if (this.addDynamicFilters) {
-      this.addDynamicFilters();
-    }
-
-    if (!this.maplibreLayer?.mbMap) {
+    if (!this.maplibreLayer?.maplibreMap) {
       return;
     }
-    const { mbMap } = this.maplibreLayer;
-    const style = mbMap.getStyle();
-    if (style && this.styleLayersFilter) {
-      // @ts-ignore
-      const styles = style.layers.filter(this.styleLayersFilter);
+    this.addSources();
+    this.addLayers();
+
+    const { maplibreMap } = this.maplibreLayer;
+    const style = maplibreMap.getStyle();
+    if (style?.layers && this.layersFilter) {
+      const styles = style.layers.filter(this.layersFilter);
       this.disabled = !styles.length;
     }
   }
@@ -302,66 +342,74 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
   ): Promise<LayerGetFeatureInfoResponse> {
-    if (!this.maplibreLayer?.mbMap) {
+    if (!this.maplibreLayer?.maplibreMap) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
-    const { mbMap } = this.maplibreLayer;
+    const { maplibreMap } = this.maplibreLayer;
 
     // Ignore the getFeatureInfo until the Maplibre map is loaded
-    if (!mbMap.isStyleLoaded()) {
+    if (!maplibreMap.isStyleLoaded()) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
 
     // We query features only on style layers used by this layer.
-    let layers = this.styleLayers || [];
+    let layers = this.layers || [];
 
-    if (this.styleLayersFilter) {
-      // @ts-ignore
-      layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);
+    if (this.layersFilter) {
+      layers = maplibreMap.getStyle().layers.filter(this.layersFilter);
     }
 
     if (this.queryRenderedLayersFilter) {
       // @ts-ignore
-      layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      layers = maplibreMap
+        .getStyle()
+        .layers.filter(this.queryRenderedLayersFilter);
     }
 
-    return this.maplibreLayer
-      .getFeatureInfoAtCoordinate(coordinate, {
-        layers: layers.map((layer) => layer && layer.id),
-        validate: false,
-      })
-      .then((featureInfo: LayerGetFeatureInfoResponse) => {
-        const features: Feature[] = featureInfo.features.filter(
-          (feature: Feature) => {
-            // @ts-ignore
-            return this.featureInfoFilter(
-              feature,
-              this.map?.getView().getResolution(),
-            ) as Feature[];
-          },
-        );
-        this.highlight(features);
-        return { ...featureInfo, features, layer: this };
-      });
-  }
-
-  /**
-   * Set filter that determines which features should be rendered in a style layer.
-   * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.
-   */
-  setFilter(filter: { [key: string]: any }) {
-    if (!this.maplibreLayer?.mbMap) {
-      return;
-    }
-    const { mbMap } = this.maplibreLayer;
-
-    this.styleLayers.forEach(({ id }) => {
-      if (id && filter && mbMap.getLayer(id)) {
-        // @ts-ignore
-        mbMap.setFilter(id, filter);
-      }
+    return Promise.resolve({
+      features: [],
+      layer: this,
+      coordinate,
     });
+
+    // this.maplibreLayer
+    //   .getFeatureInfoAtCoordinate(coordinate, {
+    //     layers: layers.map((layer) => layer && layer.id),
+    //     validate: false,
+    //   })
+    //   .then((featureInfo: LayerGetFeatureInfoResponse) => {
+    //     const features: Feature[] = featureInfo.features.filter(
+    //       (feature: Feature) => {
+    //         // @ts-ignore
+    //         return this.featureInfoFilter(
+    //           feature,
+    //           this.map?.getView().getResolution(),
+    //         ) as Feature[];
+    //       },
+    //     );
+    //     this.highlight(features);
+    //     return { ...featureInfo, features, layer: this };
+    //   });
   }
+
+  // /**
+  //  * Set filter that determines which features should be rendered in a style layer.
+  //  * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.
+  //  */
+  // setFilter(filter: { [key: string]: any }) {
+  //   if (!this.maplibreLayer?.maplibreMap) {
+  //     return;
+  //   }
+  //   const { maplibreMap } = this.maplibreLayer;
+
+  //   this.styleLayers.forEach(({ id }) => {
+  //     if (id && filter && maplibreMap.getLayer(id)) {
+  //       // @ts-ignore
+  //       maplibreMap.setFilter(id, filter);
+  //     }
+  //   });
+  // }
 
   /**
    * Set if features are hovered or not.
@@ -370,14 +418,10 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   setHoverState(features: Feature[], state: boolean) {
-    if (!this.maplibreLayer?.mbMap) {
+    if (!this.maplibreLayer?.maplibreMap || !features.length) {
       return;
     }
-    const { mbMap } = this.maplibreLayer;
-
-    if (!features || !mbMap) {
-      return;
-    }
+    const { maplibreMap } = this.maplibreLayer;
 
     features.forEach((feature: Feature) => {
       const { source, sourceLayer } = feature.get('mapboxFeature') || {};
@@ -393,7 +437,7 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
         return;
       }
 
-      mbMap.setFeatureState(
+      maplibreMap.setFeatureState(
         {
           id: feature.getId(),
           source,
@@ -440,44 +484,35 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
 
   /**
    * Apply visibility to style layers that fits the styleLayersFilter function.
-   * @param {Event} evt Layer's event that has called the function.
+   *
    * @private
    */
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   applyLayoutVisibility(evt?: ObjectEvent) {
-    const { visible } = this;
-    const filterFunc = this.styleLayersFilter;
-
-    if (!this.maplibreLayer?.mbMap) {
+    if (!this.maplibreLayer?.maplibreMap?.getStyle() || !this.layersFilter) {
       return;
     }
 
-    const { mbMap } = this.maplibreLayer;
-    const style = mbMap.getStyle();
+    const { maplibreMap } = this.maplibreLayer;
+    const style = maplibreMap.getStyle();
+    const visibilityValue = this.getVisible() ? 'visible' : 'none';
+    const layers = style.layers || [];
 
-    if (!style) {
-      return;
-    }
+    for (let i = 0; i < layers.length; i += 1) {
+      const layer = layers[i];
 
-    if (filterFunc) {
-      const visibilityValue = visible ? 'visible' : 'none';
-      const layers = style.layers || [];
-      for (let i = 0; i < layers.length; i += 1) {
-        const styleLayer = layers[i];
-        if (filterFunc(styleLayer)) {
-          if (mbMap.getLayer(styleLayer.id)) {
-            mbMap.setLayoutProperty(
-              styleLayer.id,
-              'visibility',
-              visibilityValue,
+      if (this.layersFilter(layer)) {
+        const { id } = layer;
+
+        if (maplibreMap.getLayer(id)) {
+          maplibreMap.setLayoutProperty(id, 'visibility', visibilityValue);
+
+          if (this.getMinZoom() || this.getMaxZoom()) {
+            maplibreMap.setLayerZoomRange(
+              id,
+              this.getMinZoom() ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1
+              this.getMaxZoom() ? this.getMaxZoom() - 1 : 24,
             );
-            if (this.get('minZoom') || this.get('maxZoom')) {
-              mbMap.setLayerZoomRange(
-                styleLayer.id,
-                this.get('minZoom') ? this.get('minZoom') - 1 : 0, // Maplibre zoom = ol zoom - 1
-                this.get('maxZoom') ? this.get('maxZoom') - 1 : 24,
-              );
-            }
           }
         }
       }
@@ -489,9 +524,9 @@ class MapboxStyleLayer extends MobilityLayerMixin(Layer) {
    * @param {Object} newOptions Options to override.
    * @return {MapboxStyleLayer} A MapboxStyleLayer.
    */
-  clone(newOptions: MapboxStyleLayerOptions) {
-    return new MapboxStyleLayer({ ...this.options, ...newOptions });
+  clone(newOptions: MaplibreStyleLayerOptions): MaplibreStyleLayer {
+    return new MaplibreStyleLayer({ ...this.options, ...newOptions });
   }
 }
 
-export default MapboxStyleLayer;
+export default MaplibreStyleLayer;
