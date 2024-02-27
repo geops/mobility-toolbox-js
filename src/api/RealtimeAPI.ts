@@ -68,6 +68,7 @@ export const RealtimeModes = {
  *
  * const api = new RealtimeAPI({
  *   apiKey: "yourApiKey"
+ *   bbox: [minX, minY, maxX, maxY, zoom, tenant],
  *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
@@ -78,6 +79,7 @@ export const RealtimeModes = {
  * @classproperty {string} apiKey - Access key for [geOps apis](https://developer.geops.io/).
  * @classproperty {number[]} bbox - The bounding box to receive data from. [minX, minY, maxX, maxY, zoom, tenant].
  * @classproperty {string} url - The geOps Realtime api url.
+ * @public
  */
 class RealtimeAPI {
   url!: string;
@@ -109,11 +111,9 @@ class RealtimeAPI {
   constructor(options: RealtimeAPIOptions = {}) {
     this.defineProperties(options);
 
-    /** @private */
     this.onOpen = this.onOpen.bind(this);
   }
 
-  /** @private */
   defineProperties(options: RealtimeAPIOptions = {}) {
     let opt = options || {};
 
@@ -169,9 +169,6 @@ class RealtimeAPI {
           }
         },
       },
-      /**
-       * The RealtimeApi version
-       */
       version: {
         value: version,
         writable: true,
@@ -251,7 +248,7 @@ class RealtimeAPI {
      */
     if (this.pingIntervalMs) {
       window.clearInterval(this.pingInterval);
-      /** @private */
+
       this.pingInterval = window.setInterval(() => {
         this.wsApi.send('PING');
       }, this.pingIntervalMs);
@@ -268,7 +265,6 @@ class RealtimeAPI {
     window.clearTimeout(this.reconnectTimeout);
 
     if (this.reconnectTimeoutMs) {
-      /** @private */
       this.reconnectTimeout = window.setTimeout(
         () => this.open(),
         this.reconnectTimeoutMs,

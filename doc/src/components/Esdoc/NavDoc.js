@@ -42,7 +42,7 @@ function NavDoc() {
     memberof: 'src/index.js',
     name: 'typedefs',
     static: true,
-    undocument: true,
+    // undocument: true,
   });
 
   // see: IdentifiersDocBuilder#_buildIdentifierDoc
@@ -66,44 +66,46 @@ function NavDoc() {
   return (
     <div>
       <ul>
-        {allDocs.map((doc) => {
-          const filePath = doc.longname.split('~')[0].replace(/^.*?[/]/, '');
-          const dirPath = path.dirname(filePath);
-          const kind = doc.interface ? 'interface' : doc.kind;
-          const kindText = kind.charAt(0).toUpperCase();
-          const kindClass = `kind-${kind}`;
-          //   ice.load('name', this._buildDocLinkHTML(doc.longname));
-          //   ice.load('kind', kindText);
-          //   ice.attr('kind', 'class', kindClass);
-          //   ice.text('dirPath', dirPath);
-          //   ice.attr(
-          //     'dirPath',
-          //     'href',
-          //     `identifiers.html#${escapeURLHash(dirPath)}`,
-          //   );
-          //   ice.drop('dirPath', lastDirPath === dirPath);
-          const displayDir = lastDirPath !== dirPath;
-          lastDirPath = dirPath;
-          return (
-            <li data-ice="doc" key={doc.longname}>
-              {displayDir && (
-                <Anchor
-                  data-ice="dirPath"
-                  className="nav-dir-path"
-                  path={`/doc/identifiers%20html#${escapeURLHash(dirPath)}`}
-                >
-                  {dirPath || 'api'}
-                </Anchor>
-              )}
-              <span data-ice="kind" className={kindClass}>
-                {kindText}
-              </span>
-              <span data-ice="name">
-                <DocLinkHTML longname={doc.longname} />
-              </span>
-            </li>
-          );
-        })}
+        {allDocs
+          .filter((doc) => !doc.undocument)
+          .map((doc) => {
+            const filePath = doc.longname.split('~')[0].replace(/^.*?[/]/, '');
+            const dirPath = path.dirname(filePath);
+            const kind = doc.interface ? 'interface' : doc.kind;
+            const kindText = kind.charAt(0).toUpperCase();
+            const kindClass = `kind-${kind}`;
+            //   ice.load('name', this._buildDocLinkHTML(doc.longname));
+            //   ice.load('kind', kindText);
+            //   ice.attr('kind', 'class', kindClass);
+            //   ice.text('dirPath', dirPath);
+            //   ice.attr(
+            //     'dirPath',
+            //     'href',
+            //     `identifiers.html#${escapeURLHash(dirPath)}`,
+            //   );
+            //   ice.drop('dirPath', lastDirPath === dirPath);
+            const displayDir = lastDirPath !== dirPath;
+            lastDirPath = dirPath;
+            return (
+              <li data-ice="doc" key={doc.longname}>
+                {displayDir && (
+                  <Anchor
+                    data-ice="dirPath"
+                    className="nav-dir-path"
+                    path={`/doc/identifiers%20html#${escapeURLHash(dirPath)}`}
+                  >
+                    {dirPath || 'api'}
+                  </Anchor>
+                )}
+                <span data-ice="kind" className={kindClass}>
+                  {kindText}
+                </span>
+                <span data-ice="name">
+                  <DocLinkHTML longname={doc.longname} />
+                </span>
+              </li>
+            );
+          })}
       </ul>
     </div>
   );
