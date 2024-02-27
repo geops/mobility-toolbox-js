@@ -431,11 +431,8 @@ class RealtimeLayer extends mixin(Layer) {
       .getFullTrajectory(
         id,
         this.mode,
-        // highlightTrajectory is call on zoom end so before map moveend event
-        // where this.generalizationLevel is updated
-        // soe we make sure we have the good generalization level.
         this.getGeneralizationLevelByZoom(
-          Math.floor(this.map?.getView()?.getZoom()) || 0,
+          Math.floor(this.map?.getView()?.getZoom() || 0),
         ),
       )
       .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
