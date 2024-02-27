@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.3.9](https://github.com/geops/mobility-toolbox-js/compare/v2.3.8...v2.3.9) (2024-02-27)
+
+
+### Bug Fixes
+
+* calculate the correct gen level when we highlight a trajectory ([#208](https://github.com/geops/mobility-toolbox-js/issues/208)) ([3d06bb7](https://github.com/geops/mobility-toolbox-js/commit/3d06bb71846572bdec185d4a66a5b5fd500d55c6))
+
 ### [2.3.8](https://github.com/geops/mobility-toolbox-js/compare/v2.3.7...v2.3.8) (2024-01-18)
 
 

@@ -778,9 +778,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       ];
 
       /* @private */
-      this.generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
+      const generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
       if (this.generalizationLevel) {
-        bbox.push(`gen=${this.generalizationLevel}`);
+        bbox.push(`gen=${generalizationLevel}`);
       }
 
       /* @private */
@@ -909,7 +909,13 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       // Then we combine them in one response and send them to inherited layers.
       const promises = [
         this.api.getStopSequence(id),
-        this.api.getFullTrajectory(id, this.mode, this.generalizationLevel),
+        this.api.getFullTrajectory(
+          id,
+          this.mode,
+          this.getGeneralizationLevelByZoom(
+            Math.floor(this.map?.getView()?.getZoom() || 0),
+          ),
+        ),
       ];
 
       return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
