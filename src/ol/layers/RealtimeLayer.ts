@@ -428,7 +428,13 @@ class RealtimeLayer extends mixin(Layer) {
    */
   highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
     return this.api
-      .getFullTrajectory(id, this.mode, this.generalizationLevel)
+      .getFullTrajectory(
+        id,
+        this.mode,
+        this.getGeneralizationLevelByZoom(
+          Math.floor(this.map?.getView()?.getZoom() || 0),
+        ),
+      )
       .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
         const fullTrajectory = data.content;
         this.vectorLayer.getSource().clear();
