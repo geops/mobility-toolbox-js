@@ -1,4 +1,3 @@
-import BaseObject from 'ol/Object';
 import getUrlWithParams from '../common/utils/getUrlWithParams';
 
 export type HttpAPIOptions = {
