@@ -12,7 +12,7 @@ export default () => {
     }),
   });
 
-  // Define the Mapbox style to display
+  // Define the Maplibre style to display
   const layer = new MaplibreLayer({
     apiKey: window.apiKey,
   });

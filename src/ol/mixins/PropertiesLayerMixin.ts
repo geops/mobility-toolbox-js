@@ -24,7 +24,6 @@ export type PropertiesLayerMixinOptions = Options & {
 /**
  * This mixin adds some properties to access some ol properties easily ansd also
  * the management of a hierarchy of layers using children, parent and group property.
- * @private
  */
 function PropertiesLayerMixin(Base: typeof Layer) {
   return class extends Base {

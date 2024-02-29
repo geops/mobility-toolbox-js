@@ -1,15 +1,13 @@
 import View from 'ol/View';
 import Map from 'ol/Map';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
 import {
   MaplibreLayer,
-  CopyrightControl,
   RoutingControl,
-  RoutingAPI,
   routingStyle,
 } from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
 
 export default () => {
   const map = new Map({

@@ -332,6 +332,7 @@ class RoutingControl extends Control {
    * @param {number[]|string} coordinates Array of coordinates
    * @param {number} [index=-1] Integer representing the index of the added viaPoint. If not specified, the viaPoint is added at the end of the array.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
+   * @public
    */
   addViaPoint(
     coordinatesOrString: RoutingViaPoint,
@@ -352,6 +353,7 @@ class RoutingControl extends Control {
    * Removes a viaPoint at the passed array index and redraws route
    * By default the last viaPoint is removed.
    * @param {number} index Integer representing the index of the viaPoint to delete.
+   * @public
    */
   removeViaPoint(index = (this.viaPoints || []).length - 1) {
     /* Remove viapoint and redraw route */
@@ -365,6 +367,7 @@ class RoutingControl extends Control {
   /**
    * Replaces the current viaPoints with a new coordinate array.
    * @param {Array<Array<number>>} coordinateArray Array of nested coordinates
+   * @public
    */
   setViaPoints(coordinateArray: Coordinate[]) {
     this.viaPoints = [...coordinateArray];
@@ -374,6 +377,7 @@ class RoutingControl extends Control {
 
   /**
    * Removes all viaPoints, clears the source and triggers a change event
+   * @public
    */
   reset() {
     // Clear viaPoints and source

@@ -11,6 +11,7 @@ import { Geometry } from 'ol/geom';
 import { Pixel } from 'ol/pixel';
 import { Map } from 'maplibre-gl';
 import { MaplibreStyleLayer } from '../layers';
+import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 
 /**
  * @private
@@ -103,7 +104,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
               // potentially needed for other functionnality like highlighting
               // (id, layer id, source, sourceLayer ...)
               // @ts-ignore
-              olFeature.set('mapboxFeature', feature);
+              olFeature.set(VECTOR_TILE_FEATURE_PROPERTY, feature);
             }
             return olFeature;
           });

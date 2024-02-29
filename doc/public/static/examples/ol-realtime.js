@@ -1,9 +1,5 @@
 import { Map, View } from 'ol';
-import {
-  RealtimeLayer,
-  MaplibreLayer,
-  CopyrightControl,
-} from 'mobility-toolbox-js/ol';
+import { RealtimeLayer, MaplibreLayer } from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {
@@ -48,10 +44,4 @@ export default () => {
       ? JSON.stringify(feature.getProperties(), null, 2)
       : 'No feature found';
   });
-  // realtime.onClick(([feature]) => {
-  //   if (feature) {
-  //     // eslint-disable-next-line no-console
-  //     console.log(feature.getProperties());
-  //   }
-  // });
 };

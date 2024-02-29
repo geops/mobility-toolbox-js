@@ -4,8 +4,8 @@ import BaseEvent from 'ol/events/Event';
 import Layer from 'ol/layer/Layer';
 import debounce from 'lodash.debounce';
 import { ObjectEvent } from 'ol/Object';
-import { getUrlWithParams, getMapboxMapCopyrights } from '../../common/utils';
-import { AnyMapboxMap } from '../../types';
+import { getUrlWithParams, getMapGlCopyrights } from '../../common/utils';
+import { AnyMapGlMap } from '../../types';
 import MobilityLayerMixin, {
   MobilityLayerOptions,
 } from '../mixins/MobilityLayerMixin';
@@ -27,7 +27,7 @@ export type MapGlLayerOptions = MobilityLayerOptions & {
 class MapGlLayer extends MobilityLayerMixin(Layer) {
   loaded!: boolean;
 
-  mbMap?: AnyMapboxMap;
+  mbMap?: AnyMapGlMap;
 
   get apiKey(): string {
     return this.get('apiKey');
@@ -75,7 +75,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
     super({
       source: new Source({
         attributions: () => {
-          return (this.mbMap && getMapboxMapCopyrights(this.mbMap)) || [];
+          return (this.mbMap && getMapGlCopyrights(this.mbMap)) || [];
         },
       }),
       apiKeyName: 'key',
@@ -158,7 +158,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
 
     /**
      * A Maplibre map
-     * @type {mapboxgl.Map}
+     * @type {maplibregl.Map}
      */
     this.mbMap = this.createMap({
       // https://maps.geops.io/styles/t7ravic_v2/style.json',
@@ -199,7 +199,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
   }
 
   // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars
-  createMap(options: { [id: string]: any }): AnyMapboxMap {
+  createMap(options: { [id: string]: any }): AnyMapGlMap {
     throw new Error('createMap must be implemented in child class');
   }
 

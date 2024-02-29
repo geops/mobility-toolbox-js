@@ -1,5 +1,5 @@
 import { ControlPosition, IControl } from 'maplibre-gl';
-import { getMapboxMapCopyrights } from '../../common/utils';
+import { getMapGlCopyrights } from '../../common/utils';
 
 /**
  * @private
@@ -79,7 +79,7 @@ class CopyrightControl implements IControl {
       const separator = this.options?.separator || DEFAULT_SEPARATOR;
 
       const attribs =
-        this.options?.customAttribution || getMapboxMapCopyrights(this.map);
+        this.options?.customAttribution || getMapGlCopyrights(this.map);
       const content = (Array.isArray(attribs) ? attribs : [attribs]).join(
         separator,
       );

@@ -7,9 +7,6 @@ export type MobilityLayerOptions = PropertiesLayerMixinOptions & {
   [x: string]: any;
 };
 
-/**
- * @private
- */
 function MobilityLayerMixin(Base: typeof Layer) {
   return class extends PropertiesLayerMixin(Base) {
     constructor(options: MobilityLayerOptions = {}) {

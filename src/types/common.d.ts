@@ -89,8 +89,8 @@ export type AnyOlLayer = OlLayer;
 export type AnyMapboxLayer = MapboxLayer | MaplibreLayer;
 export type AnyRealtimeLayer = MbRealtimeLayer | OlRealtimeLayer;
 export type AnyCopyrightControl = MbCopyrightControl | OlCopyrightControl;
-export type AnyMapboxMap = mapboxgl.Map | maplibregl.Map;
-export type AnyMapboxMapOptions = mapboxgl.MapOptions | maplibregl.MapOptions;
+export type AnyMapGlMap = maplibregl.Map | maplibregl.Map;
+export type AnyMapGlMapOptions = maplibregl.MapOptions | maplibregl.MapOptions;
 export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type AnyCanvasContext =
   | CanvasRenderingContext2D
@@ -103,7 +103,7 @@ export type AnyLayerClass = GConstructor<AnyLayer>;
 
 export type AnyMapboxLayerClass = GConstructor<AnyMapboxLayer>;
 export type AnyRealtimeLayerClass = GConstructor<AnyRealtimeLayer>;
-export type AnyMapboxMapClass = GConstructor<AnyMapboxMap>;
+export type AnyMapGlMapClass = GConstructor<AnyMapGlMap>;
 export type AnyCopyrightControlClass = GConstructor<AnyCopyrightControl>;
 
 export type LayerGetFeatureInfoResponse = {

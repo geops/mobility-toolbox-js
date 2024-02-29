@@ -1,17 +1,17 @@
-import getMapboxMapCopyrights from './getMapboxMapCopyrights';
+import getMapGlCopyrights from './getMapGlCopyrights';
 
-describe('getMapboxMapCopyrights()', () => {
+describe('getMapGlCopyrights()', () => {
   test('returns an empty array if map is not defined', () => {
-    expect(getMapboxMapCopyrights().length).toBe(0);
+    expect(getMapGlCopyrights().length).toBe(0);
   });
 
   test('returns an empty array if map.style is not defined', () => {
-    expect(getMapboxMapCopyrights({}).length).toBe(0);
+    expect(getMapGlCopyrights({}).length).toBe(0);
   });
 
   test('returns non depluicated copyrights in an array', () => {
     expect(
-      getMapboxMapCopyrights({
+      getMapGlCopyrights({
         style: {
           sourceCaches: {
             used: {

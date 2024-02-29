@@ -1,11 +1,11 @@
-import { AnyMapboxMap } from '../../types';
+import { AnyMapGlMap } from '../../types';
 
 /**
  * Get the canvas source coordinates of the current map's extent.
- * @param {mapboxgl.Map} map A map object.
+ * @param {maplibregl.Map} map A map object.
  */
 export const getSourceCoordinates = (
-  map: AnyMapboxMap,
+  map: AnyMapGlMap,
   pixelRatio: number = 1,
 ) => {
   // Requesting getBounds is not enough when we rotate the map, so we request manually each corner.

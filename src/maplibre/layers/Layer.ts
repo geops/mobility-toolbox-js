@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 import { CustomLayerInterface, Evented } from 'maplibre-gl';
-import type { AnyMapboxMap } from '../../types';
+import type { AnyMapGlMap } from '../../types';
 
 export type LayerOptions = {
   id?: string;
@@ -21,7 +21,7 @@ export type LayerOptions = {
 class Layer extends Evented implements CustomLayerInterface {
   id: string;
 
-  map: AnyMapboxMap | undefined;
+  map: AnyMapGlMap | undefined;
 
   options: LayerOptions = {};
 
@@ -35,13 +35,13 @@ class Layer extends Evented implements CustomLayerInterface {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onAdd(map: AnyMapboxMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
+  onAdd(map: AnyMapGlMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
     this.map = map;
   }
 
   onRemove(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    map: AnyMapboxMap,
+    map: AnyMapGlMap,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     gl: WebGLRenderingContext | WebGL2RenderingContext,
   ) {

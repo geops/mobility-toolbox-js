@@ -8,7 +8,7 @@ import RealtimeLayerMixin, {
 } from '../../common/mixins/RealtimeLayerMixin';
 import Layer, { LayerOptions } from './Layer';
 import { getSourceCoordinates } from '../utils';
-import type { AnyMapboxMap, ViewState } from '../../types';
+import type { AnyMapGlMap, ViewState } from '../../types';
 import type { RealtimeTrajectory } from '../../api/typedefs';
 import toMercatorExtent from '../../common/utils/toMercatorExtent';
 
@@ -98,7 +98,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    * Add sources, layers and listeners to the map.
    */
   override onAdd(
-    map: AnyMapboxMap,
+    map: AnyMapGlMap,
     gl: WebGLRenderingContext | WebGL2RenderingContext,
   ) {
     super.onAdd(map, gl);
@@ -114,7 +114,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    * Remove source, layers and listeners from the map.
    */
   override onRemove(
-    map: AnyMapboxMap,
+    map: AnyMapGlMap,
     gl: WebGLRenderingContext | WebGL2RenderingContext,
   ) {
     map.off('load', this.onLoad);

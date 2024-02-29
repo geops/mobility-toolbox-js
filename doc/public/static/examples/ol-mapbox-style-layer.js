@@ -21,7 +21,7 @@ export default () => {
   });
   map.addLayer(baseLayer);
 
-  // Define the list of Mapbox style layers representing the pois.
+  // Define the list of Maplibre style layers representing the pois.
   const poiLayer = new MaplibreStyleLayer({
     maplibreLayer: baseLayer,
     layersFilter: ({ id }) => /^poi_/.test(id),

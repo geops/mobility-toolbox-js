@@ -9,6 +9,7 @@ import { FilterFunction } from '../../common/typedefs';
 import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
 import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
+import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 
 export type MaplibreStyleLayerOptions = MaplibreLayerOptions & {
   beforeId?: string;
@@ -395,7 +396,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   // /**
   //  * Set filter that determines which features should be rendered in a style layer.
-  //  * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.
+  //  * @param {maplibregl.filter} filter Determines which features should be rendered in a style layer.
   //  */
   // setFilter(filter: { [key: string]: any }) {
   //   if (!this.maplibreLayer?.maplibreMap) {
@@ -424,7 +425,8 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     const { maplibreMap } = this.maplibreLayer;
 
     features.forEach((feature: Feature) => {
-      const { source, sourceLayer } = feature.get('mapboxFeature') || {};
+      const { source, sourceLayer } =
+        feature.get(VECTOR_TILE_FEATURE_PROPERTY) || {};
       if ((!source && !sourceLayer) || !feature.getId()) {
         if (!feature.getId()) {
           // eslint-disable-next-line no-console

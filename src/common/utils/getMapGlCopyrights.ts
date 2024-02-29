@@ -14,10 +14,10 @@ export interface SourceCache {
 
 /**
  * Return the copyright a Maplibre map.
- * @param {mapboxgl.Map | maplibregl.Map} map A Maplibre map
+ * @param {maplibregl.Map} map A Maplibre map
  * @private
  */
-const getMapboxMapCopyrights = (map: mapboxgl.Map | maplibregl.Map) => {
+const getMapGlCopyrights = (map: maplibregl.Map) => {
   if (!map) {
     return [];
   }
@@ -49,4 +49,4 @@ const getMapboxMapCopyrights = (map: mapboxgl.Map | maplibregl.Map) => {
   return removeDuplicate(copyrights);
 };
 
-export default getMapboxMapCopyrights;
+export default getMapGlCopyrights;

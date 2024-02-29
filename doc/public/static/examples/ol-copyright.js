@@ -1,11 +1,5 @@
 import { Map, View } from 'ol';
-import Base from 'ol/layer/Base';
-import Layer from 'ol/layer/Layer';
-import {
-  MaplibreLayer,
-  CopyrightControl,
-  OLLayer,
-} from 'mobility-toolbox-js/ol';
+import { MaplibreLayer, CopyrightControl } from 'mobility-toolbox-js/ol';
 import { Source } from 'ol/source';
 
 export default () => {
@@ -28,16 +22,13 @@ export default () => {
   // Attach to the map
   map.addControl(control);
 
-  // Define the Mapbox style to display
+  // Define the Maplibre style to display
   const layer = new MaplibreLayer({
-    url: 'https://maps.geops.io/styles/travic_v2/style.json',
     apiKey: window.apiKey,
     source: new Source({
       attributions: ['My Custom Attribution'],
     }),
   });
-
-  // Display the Mapbox style on the map
   map.addLayer(layer);
 
   // Toggle the copyright control.

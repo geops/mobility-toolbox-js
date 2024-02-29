@@ -1,12 +1,12 @@
 import { getWidth, getHeight } from 'ol/extent';
 import { fromLonLat } from 'ol/proj';
-import { AnyMapboxMap } from '../../types';
+import { AnyMapGlMap } from '../../types';
 
 /**
  * Get the current resolution of a Maplibre map.
- * @param {mapboxgl.Map} map A map object.
+ * @param {maplibregl.Map} map A map object.
  */
-const getMercatorResolution = (map: AnyMapboxMap) => {
+const getMercatorResolution = (map: AnyMapGlMap) => {
   const bounds = map.getBounds().toArray();
   const a = fromLonLat(bounds[0]);
   const b = fromLonLat(bounds[1]);
