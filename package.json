@@ -24,10 +24,10 @@
     "ol": ">=7"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-env": "^7.24.0",
     "@babel/preset-typescript": "^7.23.3",
-    "@commitlint/cli": "19.0.0",
-    "@commitlint/config-conventional": "19.0.0",
+    "@commitlint/cli": "19.0.3",
+    "@commitlint/config-conventional": "19.0.3",
     "@types/geojson": "7946.0.14",
     "@types/lodash.debounce": "4.0.9",
     "@types/lodash.throttle": "4.1.9",

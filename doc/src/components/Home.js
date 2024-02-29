@@ -18,7 +18,7 @@ const codeHtmlPage = `
 
 const codeMapObject = `
 import { Map } from 'maplibre-gl;
-import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
+import { RealtimeLayer } from 'mobility-toolbox-js/maplibre';
 
 const map = new Map({
   container: 'map',

@@ -29,22 +29,20 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
   const { sourceCaches } = style;
   let copyrights: string[] = [];
 
-  Object.values(sourceCaches as SourceCache[]).forEach(
-    (sourceCache: SourceCache) => {
-      if (sourceCache.used as boolean) {
-        const source = sourceCache.getSource();
+  Object.values(sourceCaches).forEach((value) => {
+    if (value.used as boolean) {
+      const source = value.getSource();
 
-        const attribution = // @ts-ignore
-          source.attribution || (source.options && source.options.attribution);
+      const attribution = // @ts-ignore
+        source.attribution || (source.options && source.options.attribution);
 
-        if (attribution) {
-          copyrights = copyrights.concat(
-            attribution.replace(/&copy;/g, '©').split(/(<a.*?<\/a>)/),
-          );
-        }
+      if (attribution) {
+        copyrights = copyrights.concat(
+          attribution.replace(/&copy;/g, '©').split(/(<a.*?<\/a>)/),
+        );
       }
-    },
-  );
+    }
+  });
 
   return removeDuplicate(copyrights);
 };

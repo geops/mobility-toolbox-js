@@ -19,7 +19,7 @@ export default [
     readme: olTrackerReadme,
   },
   {
-    name: 'Live tracker with Mapbox',
+    name: 'Live tracker with Maplibre',
     key: 'mb-realtime',
     description:
       'Use the [geOps Realtime API](https://developer.geops.io/apis/realtime/) to show moving trains in a Maplibre map.',
@@ -46,51 +46,17 @@ export default [
       js: 'ol-routing.js',
     },
   },
-  // {
-  //   name: 'Live train positions for Munich',
-  //   key: 'tralis-live-map',
-  //   description:
-  //     'Realtime vehicle positions and prognosis data based on scheduled times, realtime updates and GPS locations.',
-  //   img: '/static/img/routing.jpg',
-  //   extraFiles: {
-  //     'assets/tralis-live-map/index.js': {
-  //       content: `export default ${JSON.stringify(munichAssets)};`,
-  //     },
-  //   },
-  //   readme: tralisLiveMapReadme,
-  // },
   {
-    name: 'Mapbox layer',
-    key: 'ol-mapbox-layer',
-    description: 'Display a Mapbox style on an OpenLayers map.',
+    name: 'Maplibre layer',
+    key: 'ol-maplibre-layer',
+    description: 'Display a Maplibre style on an OpenLayers map.',
     img: '/static/img/mapbox.jpg',
   },
   {
-    name: 'Mapbox Style layer',
-    key: 'ol-mapbox-style-layer',
+    name: 'Maplibre Style layer',
+    key: 'ol-maplibre-style-layer',
     description:
-      'Display/hide a set of layers of a Mapbox style on an OpenLayers map.',
+      'Display/hide a set of layers of a Maplibre style on an OpenLayers map.',
     img: '/static/img/mapbox_style.jpg',
   },
-  // {
-  //   name: 'Querying objects',
-  //   key: 'ol-query',
-  //   description:
-  //     'This example shows how to query objects in different kinds of layers.',
-  //   img: '/static/img/query_objects.jpg',
-  // },
-  // {
-  //   name: 'Copyrights with OpenLayers',
-  //   key: 'ol-copyright',
-  //   description:
-  //     'This example shows how to use the CopyrightControl component.',
-  //   img: '/static/img/ol-copyright.png',
-  // },
-  // {
-  //   name: 'Copyrights with Mapbox',
-  //   key: 'mb-copyright',
-  //   description:
-  //     'This example shows how to use the CopyrightControl component.',
-  //   img: '/static/img/ol-copyright.png',
-  // },
 ];

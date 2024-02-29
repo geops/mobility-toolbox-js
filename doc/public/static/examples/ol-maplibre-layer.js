@@ -31,7 +31,7 @@ export default () => {
 
     // Display the maplibre feature informations
     document.getElementById('content').innerHTML = feature
-      ? JSON.stringify(feature.get('mapboxFeature'), null, 2)
+      ? JSON.stringify(feature.get('vectorTileFeature'), null, 2)
       : 'No feature found';
   });
 

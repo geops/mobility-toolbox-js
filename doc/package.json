@@ -6,10 +6,10 @@
     "@material-ui/core": "4.12.4",
     "@material-ui/icons": "4.11.3",
     "codesandbox": "2.2.3",
-    "maplibre-gl": "3.6.2",
+    "maplibre-gl": "4.0.2",
     "mobility-toolbox-js": "./../build",
-    "next": "14.0.4",
-    "ol": "8.2.0",
+    "next": "14.1.0",
+    "ol": "9.0.0",
     "path": "^0.12.7",
     "prop-types": "15.8.1",
     "react": "^18.2.0",
@@ -22,10 +22,10 @@
     "typeface-lato": "1.1.13"
   },
   "devDependencies": {
-    "eslint": "8.56.0",
-    "eslint-config-next": "14.0.4",
+    "eslint": "8.57.0",
+    "eslint-config-next": "14.1.0",
     "raw-loader": "4.0.2",
-    "sass": "1.69.7"
+    "sass": "1.71.1"
   },
   "scripts": {
     "build": "next build",

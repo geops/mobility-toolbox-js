@@ -27,7 +27,7 @@
  * @property {number[2]} coordinate The coordinate where to find the featue.
  */
 /**
- * @typedef {ol/Map~Map|mapboxgl.Map|maplibregl.Map} AnyMap
+ * @typedef {ol/Map~Map|maplibregl.Map} AnyMap
  */
 /**
  * @typedef {Object} MaplibreLayerOptions

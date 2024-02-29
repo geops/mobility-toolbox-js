@@ -38,7 +38,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    *
    * @param {RealtimeLayerOptions} options
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime api url.
+   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
    *
    */
   constructor(options = {}) {
