@@ -111,7 +111,11 @@ function DetailDocs({ docs, title }) {
               <ExperimentalHTML doc={doc} />
             </div>
             <div data-ice="description">
-              {doc.description || <OverrideMethodDescription doc={doc} />}
+              {doc.description ? (
+                <Markdown>{doc.description}</Markdown>
+              ) : (
+                <OverrideMethodDescription doc={doc} />
+              )}
             </div>
             <div data-ice="override" className="hide-no-content">
               <h4>Override:</h4>

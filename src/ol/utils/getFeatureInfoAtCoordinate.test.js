@@ -9,7 +9,7 @@ import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import getFeatureInfoAtCoordinate from './getFeatureInfoAtCoordinate';
 
-describe.only('getFeatureInfoAtCoordinate', () => {
+describe('getFeatureInfoAtCoordinate', () => {
   let map;
 
   beforeEach(() => {

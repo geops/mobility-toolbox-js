@@ -3,7 +3,6 @@ import { AnyMapboxMap } from '../../types';
 /**
  * Get the canvas source coordinates of the current map's extent.
  * @param {mapboxgl.Map} map A map object.
- * @private
  */
 export const getSourceCoordinates = (
   map: AnyMapboxMap,

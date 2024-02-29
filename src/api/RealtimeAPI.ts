@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import WebSocketAPI, {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
@@ -19,14 +20,18 @@ import type {
   RealtimeVersion,
   RealtimeTrajectory,
   RealtimeTenant,
+  RealtimeBbox,
 } from '../types';
 import { StopSequence } from './typedefs';
 
+/**
+ * @typedef RealtimeAPIOptions
+ */
 export type RealtimeAPIOptions = {
   url?: string;
   apiKey?: string;
   version?: RealtimeVersion;
-  bbox?: (number | string)[];
+  bbox?: RealtimeBbox;
   buffer?: number[];
   pingIntervalMs?: number;
 };
@@ -61,24 +66,26 @@ export const RealtimeModes = {
 };
 
 /**
- * This class provides convenience methods to access to the [geOps Realtime api](https://developer.geops.io/apis/realtime/).
+ * This class provides convenience methods to use to the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { RealtimeAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new RealtimeAPI({
- *   apiKey: "yourApiKey"
- *   bbox: [minX, minY, maxX, maxY, zoom, tenant],
+ *   apiKey: "yourApiKey",
+ *   bbox: [782001, 5888803, 923410, 5923660, 11, "mots=rail],
  *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
+ *
+ * api.open();
  *
  * api.subscribeTrajectory('topographic', (data) => {
  *    console.log('Log trajectories:', JSON.stringify(data.content));
  * });
  *
- * @classproperty {string} apiKey - Access key for [geOps apis](https://developer.geops.io/).
- * @classproperty {number[]} bbox - The bounding box to receive data from. [minX, minY, maxX, maxY, zoom, tenant].
- * @classproperty {string} url - The geOps Realtime api url.
+ * @classproperty {string} apiKey - Access key for [geOps APIs](https://developer.geops.io/)
+ * @classproperty {RealtimeBbox} bbox - The bounding box to receive data from. \ Example: \ [ minX, minY, maxX, maxY, zoom, "tenant=tenant1", "gen_level=5", "mots=mot1,mot2" ]. \ tenant, gen_level and mots are optional.
+ * @classproperty {string} url - The [geOps Realtime API](https://developer.geops.io/apis/realtime/) url.
  * @public
  */
 class RealtimeAPI {
@@ -88,7 +95,7 @@ class RealtimeAPI {
 
   wsApi!: WebSocketAPI;
 
-  bbox?: (number | string)[];
+  bbox?: RealtimeBbox;
 
   buffer?: number[];
 
@@ -103,10 +110,10 @@ class RealtimeAPI {
   /**
    * Constructor
    *
-   * @param {Object|string} options A string representing the url of the service or an object containing the url and the apiKey.
+   * @param {RealtimeAPIOptions} options A string representing the url of the service or an object containing the url and the apiKey.
    * @param {string} options.url Url to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {number[5]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant] The bounding box to receive data from.
+   * @param {number[5]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant]] The bounding box to receive data from.
    */
   constructor(options: RealtimeAPIOptions = {}) {
     this.defineProperties(options);
@@ -203,6 +210,11 @@ class RealtimeAPI {
     });
   }
 
+  /**
+   * Open the websocket connection.
+   *
+   * @public
+   */
   open() {
     this.wsApi.connect(this.url, this.onOpen);
 
@@ -216,6 +228,8 @@ class RealtimeAPI {
 
   /**
    * Close the websocket connection without reconnection.
+   *
+   * @public
    */
   close() {
     this.wsApi.close();
@@ -352,6 +366,7 @@ class RealtimeAPI {
    * @param {function(departures:Departure[])} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
    */
   subscribeDepartures(
     stationId: number,
@@ -366,6 +381,7 @@ class RealtimeAPI {
    * Unsubscribe from current departures channel.
    * @param {RealtimeStationId} id Station's id
    * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @public
    */
   unsubscribeDepartures(
     id: RealtimeStationId,
@@ -380,6 +396,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeNews[] })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
    */
   subscribeDisruptions(
     tenant: RealtimeTenant,
@@ -394,6 +411,7 @@ class RealtimeAPI {
    * Unsubscribe disruptions.
    *
    * @param {function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @public
    */
   unsubscribeDisruptions(
     tenant: RealtimeTenant,
@@ -408,6 +426,7 @@ class RealtimeAPI {
    * @param {number} uic UIC of the station.
    * @param {RealtimeMode} mode Realtime mode.
    * @return {Promise<{data: { content: RealtimeStation }}>} A station.
+   * @public
    */
   getStation(
     uic: RealtimeStationId,
@@ -426,6 +445,7 @@ class RealtimeAPI {
    * @param {RealtimeMode} mode Realtime mode.
    * @param {number} timeout = 100 Duration in ms between each promise resolve calls.
    * @return {Promise<RealtimeStation[]>} An array of stations.
+   * @public
    */
   getStations(mode: RealtimeMode, timeout = 100): Promise<RealtimeStation[]> {
     return new Promise((resolve) => {
@@ -443,6 +463,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeStation })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
    */
   subscribeStations(
     mode: RealtimeMode,
@@ -461,6 +482,7 @@ class RealtimeAPI {
   /**
    * Unsubscribe to stations channel.
    * @param {function(data: { content: RealtimeStation })} onMessage The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.
+   * @public
    */
   unsubscribeStations(
     onMessage?: WebSocketAPIMessageCallback<RealtimeStation>,
@@ -499,6 +521,7 @@ class RealtimeAPI {
    * @param {number} trainId The identifier of a trajectory.
    * @param {RealtimeMode} mode Realtime mode.
    * @return {Promise<{data: { content: RealtimeTrajectory }}>} A trajectory.
+   * @public
    */
   getTrajectory(
     id: RealtimeTrainId,
@@ -516,6 +539,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
    */
   subscribeTrajectory(
     mode: RealtimeMode,
@@ -538,6 +562,7 @@ class RealtimeAPI {
   /**
    * Unsubscribe to trajectory channels.
    * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @public
    */
   unsubscribeTrajectory(
     onMessage: WebSocketAPIMessageCallback<RealtimeTrajectoryResponse[]>,
@@ -586,6 +611,7 @@ class RealtimeAPI {
    * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
    * @return {Promise<{ data: { content: RealtimeFullTrajectory } }>} Return a full trajectory.
+   * @public
    */
   getFullTrajectory(
     id: RealtimeTrainId,
@@ -617,6 +643,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
    */
   subscribeFullTrajectory(
     id: RealtimeTrainId,
@@ -638,6 +665,7 @@ class RealtimeAPI {
    *
    * @param {string} id A vehicle id.
    * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @public
    */
   unsubscribeFullTrajectory(
     id: RealtimeTrainId,
@@ -651,6 +679,7 @@ class RealtimeAPI {
    *
    * @param {string} id A vehicle id.
    * @return {Promise<{ data: { content: StopSequence[] } }>} Returns a stop sequence object.
+   * @public
    */
   getStopSequence(
     id: RealtimeTrainId,
@@ -665,6 +694,7 @@ class RealtimeAPI {
    * @param {function(data: { content: StopSequence[] })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
    */
   subscribeStopSequence(
     id: RealtimeTrainId,
@@ -680,6 +710,7 @@ class RealtimeAPI {
    *
    * @param {string} id A vehicle id.
    * @param {function(data: { content: StopSequence[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @public
    */
   unsubscribeStopSequence(
     id: RealtimeTrainId,

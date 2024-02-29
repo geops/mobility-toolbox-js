@@ -51,6 +51,7 @@ export type RealtimeLayerOptions = RealtimeLayerMixinOptions & {
  * @extends {ol/layer/Layer~Layer}
  *
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
+ * @public
  */
 // @ts-ignore
 class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {

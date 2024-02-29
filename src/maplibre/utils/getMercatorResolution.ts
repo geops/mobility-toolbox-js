@@ -5,7 +5,6 @@ import { AnyMapboxMap } from '../../types';
 /**
  * Get the current resolution of a Maplibre map.
  * @param {mapboxgl.Map} map A map object.
- * @private
  */
 const getMercatorResolution = (map: AnyMapboxMap) => {
   const bounds = map.getBounds().toArray();

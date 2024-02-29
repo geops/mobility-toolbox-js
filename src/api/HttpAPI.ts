@@ -20,14 +20,12 @@ export type HttpAPIOptions = {
  * @classproperty {string} apiKey Api key to access the service.
  * @private
  */
-class HttpAPI extends BaseObject {
+class HttpAPI {
   url: string;
 
   apiKey?: string;
 
   constructor(options: HttpAPIOptions) {
-    super();
-
     /** @private */
     this.url = options.url;
 
@@ -57,18 +55,14 @@ class HttpAPI extends BaseObject {
       ...searchParams,
     });
 
-    try {
-      const response = await fetch(url, config);
-      const data = await response.json();
+    const response = await fetch(url.toString(), config);
+    const data = await response.json();
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      return data;
-    } catch (err: any | Error) {
-      throw new Error(err);
+    if (data.error) {
+      throw new Error(data.error);
     }
+
+    return data;
   }
 }
 

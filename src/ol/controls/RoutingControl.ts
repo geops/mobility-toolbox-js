@@ -128,6 +128,7 @@ const getFlatCoordinatesFromSegments = (
  *
  * @extends {Control}
  * @implements {RoutingInterface}
+ * @public
  */
 class RoutingControl extends Control {
   map?: Map;

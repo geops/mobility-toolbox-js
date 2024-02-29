@@ -33,6 +33,7 @@ import {
   ViewState,
   AnyLayer,
   LayerGetFeatureInfoResponse,
+  RealtimeBbox,
 } from '../../types';
 import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
@@ -769,7 +770,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       // The extent does not need to be precise under meter, so we round floor/ceil the values.
       const [minX, minY, maxX, maxY] = extent;
 
-      const bbox: (number | string)[] = [
+      const bbox: RealtimeBbox = [
         Math.floor(minX),
         Math.floor(minY),
         Math.ceil(maxX),

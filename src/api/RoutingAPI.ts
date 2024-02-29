@@ -16,6 +16,7 @@ export type RoutingAPIOptions = {
  *   apiKey: [yourApiKey]
  * });
  *
+ * @public
  */
 class RoutingAPI extends HttpAPI {
   /**

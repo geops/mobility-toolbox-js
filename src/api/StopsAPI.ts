@@ -17,6 +17,7 @@ export type StopsAPIOptions = {
  *   apiKey: [yourApiKey]
  * });
  *
+ * @public
  */
 class StopsAPI extends HttpAPI {
   /**

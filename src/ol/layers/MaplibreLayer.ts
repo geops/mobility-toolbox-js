@@ -31,6 +31,7 @@ export type MaplibreLayerOptions = MapGlLayerOptions & {
  * @classproperty {maplibregl.QueryRenderedFeaturesOptions} queryRenderedFeaturesOptions - Options used when we query features using map.getFeaturesAtPixel().
  * @classproperty {string} style - geOps Maps api style.
  * @extends {ol/layer/Layer~Layer}
+ * @public
  */
 export default class MaplibreLayer extends MapGlLayer {
   options?: MaplibreLayerOptions;

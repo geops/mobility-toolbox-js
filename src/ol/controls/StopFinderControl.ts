@@ -28,6 +28,7 @@ export type StopFinderControlOptions = Options &
  *
  *
  * @see <a href="/example/ol-search">Openlayers search example</a>
+ * @public
  */
 class StopFinderControl extends Control {
   controller: StopFinderControlCommon;
