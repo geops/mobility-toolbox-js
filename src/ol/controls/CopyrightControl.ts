@@ -6,6 +6,7 @@ import createDefaultCopyrightElement from '../../common/utils/createDefaultCopyr
 
 export type CopyrightControlOptions = Options & {
   className?: 'string';
+  format?: (copyrights: string[]) => string;
 };
 
 /**
@@ -28,6 +29,8 @@ export type CopyrightControlOptions = Options & {
  * @extends {ol/control/Control}
  */
 class CopyrightControl extends Control {
+  format: (copyrights: string[]) => string;
+
   constructor(options: CopyrightControlOptions = {}) {
     const element = createDefaultCopyrightElement();
     element.className = options.className || 'mbt-copyright';
@@ -35,6 +38,11 @@ class CopyrightControl extends Control {
       element,
       ...options,
     });
+    this.format =
+      options.format ||
+      ((copyrights) => {
+        return copyrights?.join(' | ');
+      });
   }
 
   render({ frameState }: MapEvent) {
@@ -61,7 +69,7 @@ class CopyrightControl extends Control {
       }
     });
     const unique = removeDuplicate(copyrights) || [];
-    this.element.innerHTML = unique.join(' | ');
+    this.element.innerHTML = this.format(unique);
   }
 }
 
