@@ -75,6 +75,19 @@ map.addLayer(layer);
 
 We also have removed the onClick, onHover properties. Because we never used it.
 
+```js
+// Before:
+layer.onClick(([feature])=> {
+  setFeature(feature);
+});
+
+// after
+map.on('singleclick', (evt) => {
+  const [feature] = map.getFeaturesAtPixel(evt.pixel, {layerFilter: l => l=== layer}) || [];
+  setFeature(feature);
+});
+```
+
 ### for all Control classes
 
 Controls classes impments now the  [`IControl`](https://maplibre.org/maplibre-gl-js/docs/API/interfaces/IControl/) interface directly.

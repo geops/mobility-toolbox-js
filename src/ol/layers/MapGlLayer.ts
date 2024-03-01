@@ -135,7 +135,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
     this.loaded = false;
     this.olListenersKeys.push(
       // @ts-ignore
-      this.map?.on('change:target', this.loadMbMap),
+      this.map?.on('change:target', this.loadMbMap.bind(this)),
     );
 
     if (!this.map?.getTargetElement()) {
@@ -146,7 +146,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
       // On next change of visibility we load the map
       this.olListenersKeys.push(
         // @ts-ignore
-        this.once('change:visible', this.loadMbMap),
+        this.once('change:visible', this.loadMbMap.bind(this)),
       );
       return;
     }
@@ -161,8 +161,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
      * @type {maplibregl.Map}
      */
     this.mbMap = this.createMap({
-      // https://maps.geops.io/styles/t7ravic_v2/style.json',
-      style: this.getStyle(),
+      style: this.getStyle() || { version: '8', sources: {}, layers: [] },
       container,
       ...(this.options?.mapOptions || {}),
     });
