@@ -182,11 +182,8 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
       return;
     }
 
-    // Apply the initial visibiltity.
-    const { maplibreMap } = this.maplibreLayer;
-
-    if (!maplibreMap) {
-      // If the maplibreMap is not yet created because the  map has no target yet, we
+    if (!this.map.getTargetElement()) {
+      // If ther e is no target element the maplibreMap is not yet created, we
       // relaunch the initialisation when it's the case.
       this.olListenersKeys.push(
         this.map.on('change:target', () => {
@@ -197,16 +194,19 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
       return;
     }
 
-    // maplibreMap.loaded() and maplibreMap.isStyleLoaded() are reliable only on the first call of init.
-    // On the next call (when a topic change for example), these functions returns false because
-    // the style is being modified.
-    // That's why we rely on a property instead for the next calls.
-    if (maplibreMap.loaded()) {
-      this.onLoad();
-    } else {
-      maplibreMap.once('load', this.onLoad);
+    // Apply the initial visibility if possible otherwise we wait for the load event of the layer
+    const { maplibreMap } = this.maplibreLayer;
+    if (maplibreMap) {
+      // maplibreMap.loaded() and maplibreMap.isStyleLoaded() are reliable only on the first call of init.
+      // On the next call (when a topic change for example), these functions returns false because
+      // the style is being modified.
+      // That's why we rely on a property instead for the next calls.
+      if (maplibreMap.loaded()) {
+        this.onLoad();
+      } else {
+        maplibreMap.once('load', this.onLoad);
+      }
     }
-
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
       // @ts-expect-error 'load' is a custom event form mobility-toolbox-js

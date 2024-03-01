@@ -9,7 +9,6 @@ import 'ol/ol.css';
 export default () => {
   // Define the map
   const map = new Map({
-    target: 'map',
     view: new View({
       center: [950690.34, 6003962.67],
       zoom: 20,
@@ -51,6 +50,10 @@ export default () => {
     target.innerHTML = `${poiLayer.visible ? 'Hide' : 'Show'} the POIs`;
   });
 
+  // Toggle pois visibility
+  document.getElementById('button2').addEventListener('click', (evt) => {
+    map.setTarget('map');
+  });
   // Change mouse cursor if a POI is clickable
   map.on('pointermove', (evt) => {
     const has = map.hasFeatureAtPixel(evt.pixel, {
