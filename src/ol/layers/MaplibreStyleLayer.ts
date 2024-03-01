@@ -220,7 +220,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
       this.on('propertychange', (evt: ObjectEvent) => {
         if (
-          /(sources|layers|layersFilter|maplibreLayer|beforeId|)/.test(evt.key)
+          /(sources|layers|layersFilter|maplibreLayer|beforeId)/.test(evt.key)
         ) {
           this.detachFromMap();
           this.attachToMap(map);

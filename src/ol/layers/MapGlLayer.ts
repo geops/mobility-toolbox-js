@@ -105,7 +105,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
     const updateMbMapDebounced = debounce(this.updateMbMap.bind(this), 150);
     this.olListenersKeys.push(
       this.on('propertychange', (evt: ObjectEvent) => {
-        if (/(apiKey|apiKeyName|url|style|)/.test(evt.key)) {
+        if (/(apiKey|apiKeyName|url|style)/.test(evt.key)) {
           updateMbMapDebounced();
         }
       }),

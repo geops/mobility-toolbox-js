@@ -255,7 +255,7 @@ function PropertiesLayerMixin(Base: typeof Layer) {
         this.map.removeLayer(child);
       });
       // @ts-ignore
-      (super.detachFromMap || (() => {}))(map);
+      (super.detachFromMap || (() => {}))();
     }
 
     /**
