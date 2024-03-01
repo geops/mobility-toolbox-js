@@ -161,7 +161,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
      * @type {maplibregl.Map}
      */
     this.mbMap = this.createMap({
-      style: this.getStyle() || { version: '8', sources: {}, layers: [] },
+      style: this.getStyle(),
       container,
       ...(this.options?.mapOptions || {}),
     });

@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import { FrameState } from 'ol/Map';
-import { toDegrees } from 'ol/math';
 import { toLonLat } from 'ol/proj';
 import LayerRenderer from 'ol/renderer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -9,8 +8,7 @@ import { FeatureCallback } from 'ol/renderer/vector';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
 import { Pixel } from 'ol/pixel';
-import { Map } from 'maplibre-gl';
-import { MaplibreStyleLayer } from '../layers';
+import type { MaplibreStyleLayer } from '../layers';
 import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 
 /**

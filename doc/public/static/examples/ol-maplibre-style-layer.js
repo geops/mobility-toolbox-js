@@ -19,14 +19,29 @@ export default () => {
   const baseLayer = new MaplibreLayer({
     apiKey: window.apiKey,
   });
-  map.addLayer(baseLayer);
 
   // Define the list of Maplibre style layers representing the pois.
   const poiLayer = new MaplibreStyleLayer({
     maplibreLayer: baseLayer,
-    layersFilter: ({ id }) => /^poi_/.test(id),
+    layers: [
+      {
+        id: 'rail',
+        type: 'line',
+        source: 'base',
+        'source-layer': 'osm_edges',
+        // filter: ['==', 'vehicle_type_prior', 'Zug'],
+        paint: {
+          'line-color': 'rgba(255, 0, 0, 1)',
+          'line-width': 2,
+        },
+        layout: {
+          visibility: 'visible',
+        },
+      },
+    ],
   });
 
+  map.addLayer(baseLayer);
   map.addLayer(poiLayer);
 
   // Toggle pois visibility

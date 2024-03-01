@@ -94,11 +94,11 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     this.set('queryRenderedLayersFilter', newValue);
   }
 
-  get sources(): (maplibregl.SourceSpecification & { id: string })[] {
+  get sources(): { [key: string]: maplibregl.SourceSpecification } {
     return this.get('sources');
   }
 
-  set sources(newValue: (maplibregl.SourceSpecification & { id: string })[]) {
+  set sources(newValue: { [key: string]: maplibregl.SourceSpecification }) {
     this.set('sources', newValue);
   }
 
@@ -209,14 +209,14 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
+      // @ts-expect-error 'load' is a custom event form mobility-toolbox-js
+      this.maplibreLayer.on('load', this.onLoad.bind(this)),
+
       this.on('change:visible', (evt) => {
         // Once the map is loaded we can apply visiblity without waiting
         // the style. Maplibre take care of the application of style changes.
         this.applyLayoutVisibility(evt);
       }),
-
-      // @ts-expect-error 'load' is a custom event form mobility-toolbox-js
-      this.maplibreLayer.on('load', this.onLoad),
 
       this.on('propertychange', (evt: ObjectEvent) => {
         if (
@@ -244,14 +244,13 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   addSources() {
-    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.sources)) {
+    if (!this.maplibreLayer?.maplibreMap || !this.sources) {
       return;
     }
     const { maplibreMap } = this.maplibreLayer;
 
     if (maplibreMap) {
-      this.sources.forEach((source) => {
-        const { id } = source;
+      Object.entries(this.sources).forEach(([id, source]) => {
         if (!maplibreMap.getSource(id)) {
           maplibreMap.addSource(id, source);
         }
@@ -261,14 +260,13 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   removeSources() {
-    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.layers)) {
+    if (!this.maplibreLayer?.maplibreMap || !this.sources) {
       return;
     }
     const { maplibreMap } = this.maplibreLayer;
 
     if (maplibreMap) {
-      this.sources.forEach((source) => {
-        const { id } = source;
+      Object.keys(this.sources).forEach((id) => {
         if (maplibreMap.getSource(id)) {
           maplibreMap.removeSource(id);
         }
