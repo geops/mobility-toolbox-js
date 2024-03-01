@@ -137,28 +137,6 @@ function PropertiesLayerMixin(Base: typeof Layer) {
             this.onChildrenChange(evt.oldValue);
           }
         }),
-
-        // Manage group visiblity
-        this.on('change:visible', () => {
-          this.onVisibleChange();
-        }),
-
-        // Listen for group visiblity change
-        // if a layer from a group is newly visible we hide the others.
-        // @ts-ignore
-        this.on(`change:visible:group`, (evt) => {
-          // We hide layer of the same group
-          if (
-            this.group === evt.target.group &&
-            this !== evt.target &&
-            this.visible
-          ) {
-            this.visible = false;
-            // Propagate event to parent
-          } else if (this.children) {
-            this.children.forEach((child) => child.dispatchEvent(evt));
-          }
-        }),
       );
 
       this.options = options;
@@ -183,54 +161,6 @@ function PropertiesLayerMixin(Base: typeof Layer) {
       (this.children || []).forEach((child) => {
         child.set('parent', this);
       });
-    }
-
-    /** @private */
-    onVisibleChange() {
-      const parent = this.get('parent');
-      const children = this.get('children') || [];
-
-      if (this.getVisible()) {
-        const group = this.get('group');
-
-        // We make the parent visible
-        if (parent) {
-          parent.setVisible(true);
-        }
-
-        // If children doesn't contain any visible layers, we display all children.
-        if (children && !children.some((child: Layer) => child.getVisible())) {
-          children.forEach((child: Layer) => {
-            child.setVisible(true);
-          });
-        }
-
-        // Warn the same group that a new layer is visible
-        if (parent && group) {
-          // We search for the higher parent then it will dispatch to all the tree.
-          let higherParent = parent;
-
-          while (higherParent.get('parent')) {
-            higherParent = higherParent.get('parent');
-          }
-          const evt = new BaseEvent(`change:visible:group`);
-          evt.target = this;
-          higherParent.dispatchEvent(evt);
-        }
-      } else {
-        // We hide all the children
-        children.forEach((child: Layer) => {
-          child.setVisible(false);
-        });
-
-        // If the parent has no more visible child we also hide it.
-        if (
-          parent?.getVisible() &&
-          !parent?.get('children').find((child: Layer) => child.getVisible())
-        ) {
-          parent.setVisible(false);
-        }
-      }
     }
 
     /**
