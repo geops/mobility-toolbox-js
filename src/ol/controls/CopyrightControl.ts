@@ -55,21 +55,20 @@ class CopyrightControl extends Control {
     // This code loop comes mainly from ol.
     frameState?.layerStatesArray.forEach((layerState: any) => {
       const { layer } = layerState;
-      if (
-        frameState &&
-        inView(layerState, frameState.viewState) &&
-        layer &&
-        layer.getSource &&
-        layer.getSource() &&
-        layer.getSource().getAttributions()
-      ) {
-        copyrights = copyrights.concat(
-          layer.getSource().getAttributions()(frameState),
-        );
-        let copyProp = layer.get('copyrights');
-        copyProp = !Array.isArray(copyProp) ? [copyProp] : copyProp;
-        if (copyProp?.length) {
-          copyrights.push(...copyProp);
+
+      if (frameState && inView(layerState, frameState.viewState)) {
+        if (layer?.getSource()?.getAttributions()) {
+          copyrights = copyrights.concat(
+            layer.getSource().getAttributions()(frameState),
+          );
+        }
+
+        if (layer?.get('copyrights')) {
+          let copyProp = layer.get('copyrights');
+          copyProp = !Array.isArray(copyProp) ? [copyProp] : copyProp;
+          if (copyProp?.length) {
+            copyrights.push(...copyProp);
+          }
         }
       }
     });
