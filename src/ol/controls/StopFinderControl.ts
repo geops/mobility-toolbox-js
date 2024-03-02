@@ -51,6 +51,10 @@ class StopFinderControl extends Control {
     const coord = fromLonLat((suggestion.geometry as Point).coordinates);
     this.getMap()?.getView().setCenter(coord);
   }
+
+  search(q: string, abortController: AbortController) {
+    return this.controller.search(q, abortController);
+  }
 }
 
 export default StopFinderControl;
