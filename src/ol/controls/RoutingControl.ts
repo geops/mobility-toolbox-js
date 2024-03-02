@@ -214,6 +214,10 @@ class RoutingControl extends Control {
   constructor(options: RoutingControlOptions = {}) {
     super(options);
 
+    if (!this.element) {
+      this.createDefaultElement();
+    }
+
     /** True if the control is requesting the backend. */
     this.loading = false;
 

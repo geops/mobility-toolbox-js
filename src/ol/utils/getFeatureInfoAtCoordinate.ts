@@ -83,7 +83,7 @@ const getFeatureInfoAtCoordinate = async (
     const source = (layer as Layer<TileWMS | ImageWMS>)?.getSource();
     // @ts-ignore
     if (source?.getFeatureInfoUrl) {
-      const id = getUid(this);
+      const id = getUid(layer);
 
       // Abort and recreates one controller per layer
       abortControllers[id]?.abort();

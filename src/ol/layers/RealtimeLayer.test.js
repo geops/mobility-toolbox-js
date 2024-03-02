@@ -44,15 +44,6 @@ describe('RealtimeLayer', () => {
     expect(layer).toBeInstanceOf(RealtimeLayer);
   });
 
-  test('should called terminate on initalization.', () => {
-    const spy = jest.spyOn(layer, 'detachFromMap');
-
-    fetch.mockResponseOnce(JSON.stringify(global.fetchTrajectoriesResponse));
-
-    layer.attachToMap(olMap);
-    expect(spy).toHaveBeenCalledTimes(1);
-  });
-
   test('should clone', () => {
     const clone = layer.clone({ name: 'clone' });
     expect(clone).not.toBe(layer);

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable class-methods-use-this */
 import WebSocketAPI, {
   WebSocketAPIMessageCallback,
@@ -34,6 +35,7 @@ export type RealtimeAPIOptions = {
   bbox?: RealtimeBbox;
   buffer?: number[];
   pingIntervalMs?: number;
+  reconnectTimeoutMs?: number;
 };
 
 export declare type RealtimeAPIExtraGeomsById = {
@@ -66,14 +68,14 @@ export const RealtimeModes = {
 };
 
 /**
- * This class provides convenience methods to use to the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
+ * This class provides convenience methods to use to the [geOps realtime API](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { RealtimeAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new RealtimeAPI({
  *   apiKey: "yourApiKey",
- *   bbox: [782001, 5888803, 923410, 5923660, 11, "mots=rail],
+ *   bbox: [782001, 5888803, 923410, 5923660, 11, "mots=rail"],
  *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
@@ -83,21 +85,89 @@ export const RealtimeModes = {
  *    console.log('Log trajectories:', JSON.stringify(data.content));
  * });
  *
- * @classproperty {string} apiKey - Access key for [geOps APIs](https://developer.geops.io/)
- * @classproperty {RealtimeBbox} bbox - The bounding box to receive data from. \ Example: \ [ minX, minY, maxX, maxY, zoom, "tenant=tenant1", "gen_level=5", "mots=mot1,mot2" ]. \ tenant, gen_level and mots are optional.
- * @classproperty {string} url - The [geOps Realtime API](https://developer.geops.io/apis/realtime/) url.
  * @public
  */
 class RealtimeAPI {
-  url!: string;
+  _url!: string;
+
+  get url() {
+    return this._url;
+  }
+
+  set url(newUrl) {
+    if (this._url !== newUrl) {
+      this._url = newUrl;
+
+      // Update the websocket only if the url has changed and the websocket is already open or is opening.
+      if (this.wsApi.open || this.wsApi.connecting) {
+        this.open();
+      }
+    }
+  }
+
+  _bbox?: RealtimeBbox;
+
+  /**
+   * The bounding box to receive data from.\
+   * Example: [minX, minY, maxX, maxY, zoom, mots , gen_level, tenant, ...]\
+   * &nbsp;\
+   * Where:
+   * - **minX**: a string representation of an integer (not a float) representing the minimal X coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **minY**: a string representation of an integer (not a float) representing the minimal Y coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **maxX**: a string representation of an integer (not a float) representing the maximal X coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **maxY**: a string representation of an integer (not a float) representing the maximal Y coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **zoom**: a string representation of an integer representing the zoom level (from 4 to 22). When zoom < 8 only the trains are displayed for performance reasons.\
+   * &nbsp;
+   * - **mots**: A comma separated list of modes of transport. **Optional**.\
+   *         Example: "mots=rail,subway".\
+   * &nbsp;
+   * - **gen_level**: An integer representing the generalization level. **Optional**.\
+   *              Example: "gen_level=5"\
+   * &nbsp;
+   * - **tenant**: A string representing the tenant. **Optional**.\
+   *           Example: "tenant=sbb"\
+   * &nbsp;
+   * - ...: Any other values added to the bbox will be send to the server
+   *
+   * @type {string[]}
+   *
+   * @public
+   */
+  get bbox() {
+    return this._bbox;
+  }
+
+  set bbox(newBbox) {
+    if (JSON.stringify(newBbox) !== JSON.stringify(this._bbox)) {
+      this._bbox = newBbox;
+      if (this.wsApi && this._bbox) {
+        this.wsApi.send(`BBOX ${this._bbox.join(' ')}`);
+      }
+    }
+  }
+
+  _buffer?: number[];
+
+  get buffer() {
+    return this._buffer;
+  }
+
+  set buffer(newBuffer) {
+    if (JSON.stringify(newBuffer) !== JSON.stringify(this._buffer)) {
+      this._buffer = newBuffer;
+      if (this.wsApi && this._buffer) {
+        this.wsApi.send(`BUFFER ${this._buffer.join(' ')}`);
+      }
+    }
+  }
 
   version: RealtimeVersion = '2';
 
   wsApi!: WebSocketAPI;
-
-  bbox?: RealtimeBbox;
-
-  buffer?: number[];
 
   private pingInterval!: number;
 
@@ -110,104 +180,51 @@ class RealtimeAPI {
   /**
    * Constructor
    *
-   * @param {RealtimeAPIOptions} options A string representing the url of the service or an object containing the url and the apiKey.
-   * @param {string} options.url Url to the [geOps realtime api](https://developer.geops.io/apis/realtime/).
+   * @param {Object} options A string representing the url of the service or an object containing the url and the apiKey.
+   * @param {string} options.url Url to the [geOps realtime API](https://developer.geops.io/apis/realtime/).
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {number[5]} [options.bbox=[minX, minY, maxX, maxY, zoom, tenant]] The bounding box to receive data from.
+   * @param {string[]} options.bbox The bounding box to receive data from.
+   * @public
    */
   constructor(options: RealtimeAPIOptions = {}) {
-    this.defineProperties(options);
-
-    this.onOpen = this.onOpen.bind(this);
-  }
-
-  defineProperties(options: RealtimeAPIOptions = {}) {
-    let opt = options || {};
+    let opt = options;
 
     if (typeof options === 'string') {
       opt = { url: options };
     }
 
-    const { apiKey, version } = opt;
-    let { url, bbox, buffer = [100, 100] } = opt;
+    const { apiKey } = opt;
+    const { url } = opt;
     const wsApi = new WebSocketAPI();
+    let suffix = '';
 
-    if (!url) {
-      url = 'wss://api.geops.io/tracker-ws/v1/';
+    if (apiKey && !url?.includes('key=')) {
+      suffix = `?key=${apiKey}`;
     }
 
-    if (apiKey) {
-      url = `${url}?key=${apiKey}`;
-    }
+    this._url = (url || 'wss://api.geops.io/tracker-ws/v1/') + suffix;
 
-    Object.defineProperties(this, {
-      url: {
-        get: () => url,
-        set: (newUrl) => {
-          if (url !== newUrl) {
-            url = newUrl;
+    this._buffer = opt.buffer || [100, 100];
 
-            // Update the websocket only if the url has changed and the websocket is already open or is opening.
-            if (this.wsApi.open || this.wsApi.connecting) {
-              this.open();
-            }
-          }
-        },
-      },
-      bbox: {
-        get: () => bbox,
-        set: (newBbox) => {
-          if (JSON.stringify(newBbox) !== JSON.stringify(bbox)) {
-            bbox = newBbox;
-            if (this.wsApi && bbox) {
-              this.wsApi.send(`BBOX ${bbox.join(' ')}`);
-            }
-          }
-        },
-      },
-      buffer: {
-        get: () => buffer,
-        set: (newBuffer) => {
-          if (JSON.stringify(newBuffer) !== JSON.stringify(buffer)) {
-            buffer = newBuffer;
-            if (this.wsApi) {
-              this.wsApi.send(`BUFFER ${buffer.join(' ')}`);
-            }
-          }
-        },
-      },
-      version: {
-        value: version,
-        writable: true,
-      },
-      /**
-       * The websocket helper class to connect the websocket.
-       *
-       * @private
-       */
-      wsApi: {
-        value: wsApi,
-        writable: true,
-      },
-      /**
-       * Interval between PING request in ms.
-       * If equal to 0,  no PING request are sent.
-       * @type {number}
-       * @private
-       */
-      pingIntervalMs: {
-        value: options.pingIntervalMs || 10000,
-        writable: true,
-      },
-      /**
-       * Timeout in ms after an automatic reconnection when the websoscket has been closed by the server.
-       * @type {number}
-       */
-      reconnectTimeoutMs: {
-        value: options.pingIntervalMs || 100,
-        writable: true,
-      },
-    });
+    this.version = opt.version || '2';
+
+    /**
+     * Interval between PING request in ms.
+     * If equal to 0,  no PING request are sent.
+     * @type {number}
+     */
+    this.pingIntervalMs = opt.pingIntervalMs || 10000;
+
+    /**
+     * Timeout in ms after an automatic reconnection when the websoscket has been closed by the server.
+     * @type {number}
+     */
+    this.reconnectTimeoutMs = opt.reconnectTimeoutMs || 100;
+
+    /**
+     * The websocket helper class to connect the websocket.
+     */
+    this.wsApi = wsApi;
   }
 
   /**
@@ -216,7 +233,7 @@ class RealtimeAPI {
    * @public
    */
   open() {
-    this.wsApi.connect(this.url, this.onOpen);
+    this.wsApi.connect(this.url, this.onOpen.bind(this));
 
     // Register reconnection on close.
     if (this.wsApi.websocket) {
@@ -238,7 +255,6 @@ class RealtimeAPI {
   /**
    * Unsubscribe trajectory and deleted_vehicles channels. To resubscribe you have to set a new BBOX.
    */
-  // eslint-disable-next-line class-methods-use-this
   reset() {
     this.wsApi.send('RESET');
   }

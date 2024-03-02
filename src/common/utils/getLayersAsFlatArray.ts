@@ -8,7 +8,11 @@ const getLayersAsFlatArray = (layersOrLayer: any | any[]): any[] => {
   let flatLayers: any[] = [];
   layers.forEach((layer: any) => {
     flatLayers.push(layer);
-    const children = layer.children || layer.get('children') || {};
+    // Handle children property and ol.layer.Group
+    const children =
+      layer.children ||
+      layer.get('children') ||
+      layer.getLayers?.()?.getArray();
     flatLayers = flatLayers.concat(getLayersAsFlatArray(children || []));
   });
   return flatLayers;

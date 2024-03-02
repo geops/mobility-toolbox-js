@@ -66,6 +66,11 @@ class CopyrightControl extends Control {
         copyrights = copyrights.concat(
           layer.getSource().getAttributions()(frameState),
         );
+        let copyProp = layer.get('copyrights');
+        copyProp = !Array.isArray(copyProp) ? [copyProp] : copyProp;
+        if (copyProp?.length) {
+          copyrights.push(...copyProp);
+        }
       }
     });
     const unique = removeDuplicate(copyrights) || [];

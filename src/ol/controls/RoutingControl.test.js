@@ -49,7 +49,7 @@ describe('RoutingControl', () => {
       url: 'https://foo.ch',
       apiKey: 'foo',
     });
-    control.attachToMap(map);
+    map.addControl(control);
     expect(
       map.getTargetElement().querySelector('#ol-toggle-routing'),
     ).toBeDefined();
@@ -63,9 +63,7 @@ describe('RoutingControl', () => {
         'https://foo.ch/?key=foo&graph=osm&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
       );
       // routingLayer should contain three features (2 x viapoints, 1 x route)
-      expect(
-        control.routingLayer.olLayer.getSource().getFeatures().length,
-      ).toEqual(3);
+      expect(control.routingLayer.getSource().getFeatures().length).toEqual(3);
       done();
     });
   });
@@ -93,7 +91,7 @@ describe('RoutingControl', () => {
         ['osm', 14, 99],
       ],
     });
-    control.attachToMap(map);
+    map.addControl(control);
     control.viaPoints = ['a4dca961d199ff76', 'e3666f03cba06b2b'];
     control.drawRoute(control.viaPoints).then(() => {
       // Should use correct URL
@@ -119,9 +117,7 @@ describe('RoutingControl', () => {
         'https://foo.ch/?key=foo&graph=osm&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
       );
       // routingLayer should contain seven features (2 x viapoints, 5 x route for each graph)
-      expect(
-        control.routingLayer.olLayer.getSource().getFeatures().length,
-      ).toEqual(7);
+      expect(control.routingLayer.getSource().getFeatures().length).toEqual(7);
       done();
     });
   });
@@ -131,7 +127,7 @@ describe('RoutingControl', () => {
       url: 'https://foo.ch',
       apiKey: 'foo',
     });
-    control.attachToMap(map);
+    map.addControl(control);
     control.viaPoints = [
       [950476.4055933182, 6003322.253698345],
       [950389.0813034325, 6003656.659274571],
@@ -155,7 +151,7 @@ describe('RoutingControl', () => {
       apiKey: 'foo',
       snapToClosestStation: true,
     });
-    control.attachToMap(map);
+    map.addControl(control);
     expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
     control.viaPoints = [
       [950476.4055933182, 6003322.253698345],
@@ -182,7 +178,7 @@ describe('RoutingControl', () => {
       apiKey: 'foo',
       useRawViaPoints: true,
     });
-    control.attachToMap(map);
+    map.addControl(control);
     expect(map.getTarget().querySelector('#ol-toggle-routing')).toBeDefined();
     control.viaPoints = [
       '46.2,7.1',

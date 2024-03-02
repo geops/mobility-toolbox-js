@@ -85,8 +85,10 @@ describe('getFeatureInfoAtCoordinate', () => {
 
     test('should return features info', async () => {
       map.getFeaturesAtPixel = jest.fn(() => [feature]);
+      map.getPixelFromCoordinate = jest.fn(() => [50, 50]);
 
-      const data = await getFeatureInfoAtCoordinate([50, 50], [layer], map);
+      const data = await getFeatureInfoAtCoordinate([50, 50], [layer]);
+
       expect(data.length).toEqual(1);
       expect(data[0].features[0]).toEqual(feature);
       expect(data[0].layer).toEqual(layer);
