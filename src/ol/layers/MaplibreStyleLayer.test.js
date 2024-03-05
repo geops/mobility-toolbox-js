@@ -7,7 +7,6 @@ import MaplibreStyleLayer from './MaplibreStyleLayer';
 let source;
 let layer;
 let map;
-let onClick;
 
 const layers = [
   {
@@ -17,7 +16,6 @@ const layers = [
 
 describe('MaplibreStyleLayer', () => {
   beforeEach(() => {
-    onClick = jest.fn();
     source = new MaplibreLayer({
       name: 'Layer',
       apiKey: 'foo',
@@ -148,8 +146,7 @@ describe('MaplibreStyleLayer', () => {
         name: 'Maplibre layer',
         visible: true,
         maplibreLayer: source,
-        styleLayer,
-        styleLayersFilter: ({ id }) => /foo/.test(id),
+        layersFilter: ({ id }) => /foo/.test(id),
       });
       layer2.attachToMap(map);
       layer2.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
@@ -180,7 +177,6 @@ describe('MaplibreStyleLayer', () => {
         name: 'Maplibre layer',
         visible: true,
         maplibreLayer: source,
-        styleLayer,
         styleLayersFilter: ({ id }) => /foo/.test(id),
         queryRenderedLayersFilter: ({ id }) => /bar/.test(id),
       });

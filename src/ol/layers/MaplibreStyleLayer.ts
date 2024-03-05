@@ -14,8 +14,8 @@ import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 export type MaplibreStyleLayerOptions = MaplibreLayerOptions & {
   beforeId?: string;
   maplibreLayer?: MaplibreLayer;
-  styleLayers?: maplibregl.AddLayerObject[];
-  styleLayersFilter?: FilterFunction;
+  layers?: maplibregl.AddLayerObject[];
+  layersFilter?: FilterFunction;
   queryRenderedLayersFilter?: FilterFunction;
 };
 
@@ -174,7 +174,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    */
   attachToMap(map: Map) {
     if (this.maplibreLayer && !this.maplibreLayer.map) {
-      map.addLayer(this.maplibreLayer);
+      map.addLayer(this.maplibreLayer as unknown as Layer);
     }
     super.attachToMap(map);
 
@@ -209,7 +209,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     }
     // Apply the visibiltity when layer's visibility change.
     this.olListenersKeys.push(
-      // @ts-expect-error 'load' is a custom event form mobility-toolbox-js
+      // @ts-expect-error 'load' is a custom event
       this.maplibreLayer.on('load', this.onLoad.bind(this)),
 
       this.on('change:visible', (evt) => {

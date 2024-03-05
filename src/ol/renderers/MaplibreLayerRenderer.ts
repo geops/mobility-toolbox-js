@@ -11,6 +11,7 @@ import { Geometry } from 'ol/geom';
 import { Pixel } from 'ol/pixel';
 import { Map } from 'maplibre-gl';
 import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
+import type MaplibreLayer from '../layers/MaplibreLayer';
 
 /**
  * @private

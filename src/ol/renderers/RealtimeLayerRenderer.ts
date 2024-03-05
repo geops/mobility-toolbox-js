@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import { FrameState } from 'ol/Map';
-import LayerRenderer from 'ol/renderer/Layer';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Coordinate } from 'ol/coordinate';
 import { FeatureCallback } from 'ol/renderer/vector';
@@ -11,6 +10,7 @@ import { composeCssTransform } from 'ol/transform';
 import { buffer, containsCoordinate } from 'ol/extent';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import { RealtimeTrajectory } from '../../api/typedefs';
+import type RealtimeLayer from '../layers/RealtimeLayer';
 
 /** @private */
 const format = new GeoJSON();
@@ -39,7 +39,7 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
       this.container.style.position = 'absolute';
       this.container.style.width = '100%';
       this.container.style.height = '100%';
-      if (canvas) {
+      if (canvas instanceof HTMLCanvasElement) {
         canvas.style.position = 'absolute';
         canvas.style.top = '0';
         canvas.style.left = '0';
@@ -66,22 +66,21 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
           canvas?.height as number,
         );
       } else {
-        const pixelCenterRendered = this.getLayer()
-          .getMapInternal()
-          ?.getPixelFromCoordinate(renderedCenter);
-        const pixelCenter = this.getLayer()
-          .getMapInternal()
-          .getPixelFromCoordinate(center);
+        const map = this.getLayer().getMapInternal();
+        const pixelCenterRendered = map?.getPixelFromCoordinate(renderedCenter);
+        const pixelCenter = map?.getPixelFromCoordinate(center);
 
-        this.container.style.transform = composeCssTransform(
-          pixelCenterRendered[0] - pixelCenter[0],
-          pixelCenterRendered[1] - pixelCenter[1],
-          renderedResolution / resolution,
-          renderedResolution / resolution,
-          rotation - renderedRotation,
-          0,
-          0,
-        );
+        if (pixelCenterRendered && pixelCenter) {
+          this.container.style.transform = composeCssTransform(
+            pixelCenterRendered[0] - pixelCenter[0],
+            pixelCenterRendered[1] - pixelCenter[1],
+            renderedResolution / resolution,
+            renderedResolution / resolution,
+            rotation - renderedRotation,
+            0,
+            0,
+          );
+        }
       }
     }
     return this.container;
@@ -140,7 +139,7 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
 
     const layer = this.getLayer();
     const map = layer.getMapInternal();
-    const resolution = map.getView().getResolution();
+    const resolution = map?.getView()?.getResolution() || 1;
     const nb = 10;
     const ext = buffer(
       [...coordinate, ...coordinate],

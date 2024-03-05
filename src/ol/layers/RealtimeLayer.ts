@@ -124,11 +124,13 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
       if (this.visible) {
         this.start();
       }
+      // @ts-expect-error - bad ts check RealtimeLayer is a BaseLayer
       const index = this.map.getLayers().getArray().indexOf(this);
       this.map.getLayers().insertAt(index, this.vectorLayer);
       this.olListenersKeys.push(
         ...this.map.on(
           ['moveend', 'change:target'],
+          // @ts-expect-error - bad ol definitions
           (evt: MapEvent | ObjectEvent) => {
             const view = (
               (evt as MapEvent).map || (evt as ObjectEvent).target
@@ -237,9 +239,10 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
     if (isRendered) {
       /** @private */
       this.renderedViewState = { ...viewState };
-
-      if (this.getRenderer().container) {
-        this.getRenderer().container.style.transform = '';
+      // @ts-expect-error - we are in the same class
+      const { container } = this.getRenderer() as RealtimeLayerRenderer;
+      if (container) {
+        container.style.transform = '';
       }
     }
     return isRendered;
@@ -348,7 +351,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
     return super.purgeTrajectory(
       trajectory,
       extent || this.map.getView().calculateExtent(),
-      zoom || this.map.getView().getZoom(),
+      zoom || this.map.getView().getZoom() || 0,
     );
   }
 
@@ -359,8 +362,14 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    */
   setBbox(extent?: [number, number, number, number], zoom?: number) {
     super.setBbox(
-      extent || this.map.getView().calculateExtent(),
-      zoom || this.map.getView().getZoom(),
+      extent ||
+        (this.map.getView().calculateExtent() as [
+          number,
+          number,
+          number,
+          number,
+        ]),
+      zoom || this.map.getView().getZoom() || 0,
     );
   }
 

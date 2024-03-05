@@ -17,12 +17,18 @@ Here is an exhaustive list of what you have to change in your application code.
 
 ## in mobility-toolbox/ol module
 
+## Removed classes
+
+- `Layer` has been removed , simply use the `ol/layer/Layer` class directly instead
+- `WMSLayer` has been removed , simply use the `ol/layer/WMSLayer` class directly instead
+- `VectorLayer` has been removed , simply use the `ol/layer/VectorLayer` class directly instead
+  
 ### for all Layer classes
 
-Layes classes inherits now from `ol/layer/Base` directly.
+Layers classes inherits now from `ol/layer/Base` directly.
 So now native ol function like `setVisible()` are available directly on the layer.
 
-THe `olLayer` property has been removed. Use the layer itself directly instead.
+The `olLayer` property has been removed. Use the layer itself directly instead.
 
 ```js
 // Before:
@@ -40,6 +46,22 @@ layer.attachToMap(map);
 
 // After
 map.addLayer(layer);
+```
+
+All custorm properties must be send at the root level of the options, not into a `properties` property
+  
+```js
+// Before:
+const layer = new Layer({
+  properties: {
+    myProperty: 'myProperty'
+  }
+});
+
+// After
+const layer = new Layer({
+  myProperty: 'myProperty'
+});
 ```
 
 ### for all Control classes
@@ -61,7 +83,7 @@ map.addControl(control);
 
 ### for all Layer classes
 
-Layes classes inherits now from [`Evented`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Evented/) and implements the [`CustomLayerInterface`](https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/).
+Layer classes inherits now from [`Evented`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Evented/) and implements the [`CustomLayerInterface`](https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/).
 
 To add a layer use the `addLayer()` method of the map instead of the `attachToMap()` method of the layer.
 

@@ -1,10 +1,11 @@
-import BaseEvent from 'ol/events/Event';
+// eslint-disable-next-line max-classes-per-file
 import { Layer } from 'ol/layer';
 import { EventsKey } from 'ol/events';
 import { Map, getUid } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import type { Options } from 'ol/layer/Layer';
 import getLayersAsFlatArray from '../../common/utils/getLayersAsFlatArray';
+import type { Layerable } from './MobilityLayerMixin';
 
 export type PropertiesLayerMixinOptions = Options & {
   key?: string;
@@ -22,11 +23,10 @@ export type PropertiesLayerMixinOptions = Options & {
 };
 
 /**
- * This mixin adds some properties to access some ol properties easily ansd also
- * the management of a hierarchy of layers using children, parent and group property.
+ * This mixin adds some properties to access ol custom properties easily.
  */
-function PropertiesLayerMixin(Base: typeof Layer) {
-  return class extends Base {
+function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
+  return class PropertiesLayer extends Base {
     public options?: PropertiesLayerMixinOptions = {};
 
     public olListenersKeys: EventsKey[] = [];
@@ -92,7 +92,7 @@ function PropertiesLayerMixin(Base: typeof Layer) {
       console.warn(
         "Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This getter is only a redirect to the current 'this' object.",
       );
-      return this;
+      return this as unknown as Layer;
     }
 
     // eslint-disable-next-line class-methods-use-this
@@ -119,7 +119,8 @@ function PropertiesLayerMixin(Base: typeof Layer) {
       this.setVisible(newValue);
     }
 
-    constructor(options: PropertiesLayerMixinOptions) {
+    constructor(...args: any[]) {
+      const options = args[0];
       super(options);
 
       if (options.properties) {
@@ -143,7 +144,8 @@ function PropertiesLayerMixin(Base: typeof Layer) {
       this.children = options.children || []; // Trigger the on children change event
     }
 
-    setMapInternal(map: Map) {
+    // @ts-expect-error - this is a mixin
+    override setMapInternal(map: Map) {
       super.setMapInternal(map);
       if (map) {
         this.attachToMap(map);

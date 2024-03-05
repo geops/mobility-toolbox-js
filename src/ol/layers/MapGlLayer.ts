@@ -9,6 +9,7 @@ import { AnyMapGlMap } from '../../types';
 import MobilityLayerMixin, {
   MobilityLayerOptions,
 } from '../mixins/MobilityLayerMixin';
+import PropertiesLayerMixin from '../mixins/PropertiesLayerMixin';
 
 export type MapGlLayerOptions = MobilityLayerOptions & {
   apiKey?: string;
@@ -82,6 +83,7 @@ class MapGlLayer extends MobilityLayerMixin(Layer) {
       style: 'travic_v2',
       url: 'https://maps.geops.io',
       ...(options || {}),
+      // @ts-expect-error mapOptions must be saved by the mixin in this.options
       mapOptions: {
         interactive: false,
         trackResize: false,

@@ -5,7 +5,7 @@
     "target": "es6",
     "strict": true,
     // Generate d.ts files
-    "declaration": false,
+    "declaration": true,
     // This compiler run should
     // only output d.ts files
     // "emitDeclarationOnly": true,
@@ -19,5 +19,5 @@
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],
-  "exclude": ["./node_modules/**/*", "./node_modules/*", "./__mocks__/maplibre-gl.js"]
+  "exclude": ["./node_modules/**/*", "./node_modules/*", "./__mocks__/maplibre-gl.js","ol"]
 }
