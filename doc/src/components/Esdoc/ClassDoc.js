@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable react/prop-types */
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import Markdown from 'react-markdown';
 import FileDocLinkHTML from './FileDocLinkHTML';

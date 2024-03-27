@@ -1,5 +1,6 @@
 import React from 'react';
-import { Container, makeStyles } from '@material-ui/core';
+import { Container } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import EXAMPLES from '../../src/examples';
 import Example from '../../src/components/Example';
 
