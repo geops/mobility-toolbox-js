@@ -98,14 +98,10 @@ function DetailDocs({ docs, title }) {
               </span>
             </h3>
             {/* {doc.export && doc.importPath && doc.importStyle && (
-              <div data-ice="importPath" className="import-path">
-                <SyntaxHighlighter language="js">
-                  {`import ${doc.importStyle} from '${doc.importPath}';`}
-                </SyntaxHighlighter>
-              </div>
-            )} */}
-            <div className="deprecated" data-ice="deprecated">
-              <DeprecatedHTML doc={doc} />
+            <div data-ice="importPath" className="import-path">
+              <SyntaxHighlighter language="js">
+                {`import ${doc.importStyle} from '${doc.importPath}';`}
+              </SyntaxHighlighter>
             </div>
             <div className="experimental" data-ice="experimental">
               <ExperimentalHTML doc={doc} />
@@ -129,113 +125,80 @@ function DetailDocs({ docs, title }) {
                 <Properties properties={doc.properties} title="Properties:" />
               )}
             </div>
-            {doc.return && (
-              <div className="return-params" data-ice="returnParams">
-                <h4>Return:</h4>
-                <table>
-                  <tbody>
-                    <tr>
-                      <td className="return-type code" data-ice="returnType">
-                        {doc.return.types.map((typeName, idx) => {
-                          return (
-                            <React.Fragment key={idx}>
-                              <TypeDocLinkHTML typeName={typeName} />
-                              {idx !== doc.return.types.length - 1 ? ' | ' : ''}
-                            </React.Fragment>
-                          );
-                        })}
-                        {typeof doc.return.nullable === 'boolean' &&
-                          `(nullable: ${doc.return.nullable})`}
-                      </td>
-                      <td className="return-desc" data-ice="returnDescription">
-                        <Markdown>{doc.return.description}</Markdown>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                {doc.properties && (
-                  <div data-ice="returnProperties">
-                    <Properties
-                      properties={doc.properties}
-                      title="Return Properties:"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-            {doc.emits && (
-              <div data-ice="emitWrap">
-                <h4>Emit:</h4>
-                <table>
-                  <tbody>
-                    {doc.emits.map((emitDoc, idx) => {
-                      return (
-                        <tr key={idx} className="emit" data-ice="emit">
-                          <td>
-                            <p data-ice="emitName">
-                              <DocLinkHTML longname={emitDoc.types[0]} />
-                            </p>
-                          </td>
-                          <td data-ice="emitDesc">
-                            <Markdown>{emitDoc.description}</Markdown>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {doc.listens && (
-              <div data-ice="listenWrap">
-                <h4>Listen:</h4>
-                <table>
-                  <tbody>
-                    {doc.listens.map((listenDoc, idx) => {
-                      return (
-                        <tr key={idx} className="listen" data-ice="listen">
-                          <td>
-                            <p data-ice="listenName">
-                              <DocLinkHTML longname={listenDoc.types[0]} />
-                            </p>
-                          </td>
-                          <td data-ice="listenDesc">
-                            <Markdown>{listenDoc.description}</Markdown>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {doc.throws && (
-              <div data-ice="throwWrap">
-                <h4>Throw:</h4>
-                <table>
-                  <tbody>
-                    {doc.throws.map((exceptionDoc, idx) => {
-                      return (
-                        <tr key={idx} className="throw" data-ice="throw">
-                          <td>
-                            <p data-ice="throwName">
-                              <DocLinkHTML longname={exceptionDoc.types[0]} />
-                            </p>
-                          </td>
-                          <td data-ice="throwDesc">
-                            <Markdown>{exceptionDoc.description}</Markdown>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {/* TODO
-        <div data-ice="decorator">
-          <h4>Decorators:</h4>
-        </div> */}
+          )}
+          {doc.emits && (
+            <div data-ice="emitWrap">
+              <h4>Emit:</h4>
+              <table>
+                <tbody>
+                  {doc.emits.map((emitDoc, idx) => {
+                    return (
+                      <tr key={idx} className="emit" data-ice="emit">
+                        <td>
+                          <p data-ice="emitName">
+                            <DocLinkHTML longname={emitDoc.types[0]} />
+                          </p>
+                        </td>
+                        <td data-ice="emitDesc">
+                          <Markdown>{emitDoc.description}</Markdown>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {doc.listens && (
+            <div data-ice="listenWrap">
+              <h4>Listen:</h4>
+              <table>
+                <tbody>
+                  {doc.listens.map((listenDoc, idx) => {
+                    return (
+                      <tr key={idx} className="listen" data-ice="listen">
+                        <td>
+                          <p data-ice="listenName">
+                            <DocLinkHTML longname={listenDoc.types[0]} />
+                          </p>
+                        </td>
+                        <td data-ice="listenDesc">
+                          <Markdown>{listenDoc.description}</Markdown>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {doc.throws && (
+            <div data-ice="throwWrap">
+              <h4>Throw:</h4>
+              <table>
+                <tbody>
+                  {doc.throws.map((exceptionDoc, idx) => {
+                    return (
+                      <tr key={idx} className="throw" data-ice="throw">
+                        <td>
+                          <p data-ice="throwName">
+                            <DocLinkHTML longname={exceptionDoc.types[0]} />
+                          </p>
+                        </td>
+                        <td data-ice="throwDesc">
+                          <Markdown>{exceptionDoc.description}</Markdown>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {/* TODO
+      <div data-ice="decorator">
+        <h4>Decorators:</h4>
+      </div> */}
             {doc.examples && doc.examples.length && (
               <div data-ice="example">
                 <h4>Example:</h4>
@@ -262,20 +225,20 @@ function DetailDocs({ docs, title }) {
               </div>
             )}
             {/* TODO
-        <div data-ice="tests">
-          <h4>Test:</h4>
-          <ul>
-            <li data-ice="test" />
-          </ul>
-        </div> */}
+      <div data-ice="tests">
+        <h4>Test:</h4>
+        <ul>
+          <li data-ice="test" />
+        </ul>
+      </div> */}
             <div data-ice="see" className="hide-no-content">
               <h4>See:</h4>
               <DocsLinkHTML longnames={doc.see} />
             </div>
             {/* TODO
-        <div data-ice="todo">
-          <h4>TODO:</h4>
-        </div> */}
+      <div data-ice="todo">
+        <h4>TODO:</h4>
+      </div> */}
           </div>
         );
       })}

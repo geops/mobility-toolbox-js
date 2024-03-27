@@ -1,43 +1,22 @@
 import React, { useState } from 'react';
-import Card from '@material-ui/core/Card';
-import CardMedia from '@material-ui/core/CardMedia';
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import Icon from '@material-ui/core/Icon';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core';
+import Card from '@mui/material/Card';
+import CardMedia from '@mui/material/CardMedia';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import CardActionArea from '@mui/material/CardActionArea';
+import Icon from '@mui/material/Icon';
+import Typography from '@mui/material/Typography';
+import makeStyles from '@mui/styles/makeStyles';
 import { CgArrowRight } from 'react-icons/cg';
 import Markdown from 'react-markdown';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    padding: theme.spacing(2),
-  },
-  filterField: {
-    width: '100%',
-  },
-  example: {
-    '&.MuiGrid-item': {
-      padding: '0 !important',
-    },
-  },
   exampleLink: {
     height: '100%',
     width: '100%',
     color: '#353535',
-  },
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: '100%',
-  },
-  header: {
-    marginBottom: 40,
   },
   cardWrapper: {
     position: 'relative',

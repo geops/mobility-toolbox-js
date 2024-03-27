@@ -1,5 +1,6 @@
 import React from 'react';
-import { Container, makeStyles } from '@material-ui/core';
+import { Container } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import Documentation from '../../src/components/Documentation';
 
 const useStyles = makeStyles({

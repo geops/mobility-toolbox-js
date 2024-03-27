@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Grid, Paper, Typography, makeStyles } from '@material-ui/core';
+import { Grid, Paper, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import Markdown from 'react-markdown';
 import CodeSandboxButton from './CodeSandboxButton';
@@ -13,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
   },
   noPointer: {
     // Remove pointer events for mobile devices on load
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       pointerEvents: 'none',
     },
   },
