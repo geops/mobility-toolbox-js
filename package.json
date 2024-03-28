@@ -2,13 +2,13 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "2.3.9",
+  "version": "3.0.0-beta.9",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "module": "index.js",
   "exports": {
     ".": "./index.js",
     "./api": "./api/index.js",
-    "./mapbox": "./mapbox/index.js",
+    "./maplibre": "./maplibre/index.js",
     "./ol": "./ol/index.js",
     "./types": "./types/index.d.ts"
   },
@@ -20,9 +20,8 @@
     "uuid": "9.0.1"
   },
   "peerDependencies": {
-    "mapbox-gl": "1 - 2",
-    "maplibre-gl": "1 - 3",
-    "ol": "7 - 8"
+    "maplibre-gl": ">=1",
+    "ol": ">=7"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.3",
@@ -65,7 +64,6 @@
     "jest-transformer-svg": "2.0.2",
     "jest-websocket-mock": "2.5.0",
     "lint-staged": "15.2.2",
-    "mapbox-gl": "1.13.2",
     "maplibre-gl": "4.1.2",
     "mock-socket": "9.3.1",
     "next": "14.1.4",
@@ -86,16 +84,17 @@
   "scripts": {
     "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
     "build": "yarn build:tsc && yarn esbuild:iife",
-    "build:tsc": "rm -rf build && yarn tsc && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
+    "build:tsc": "rm -rf build && yarn tsc && cp package.json build/ && cp README.md build/ && cp LICENSE build/  && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
+    "clean": "rm -rf .next && rm -rf doc/.next",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
     "cy:test": "start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'",
     "cy:test:chrome": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'",
     "cy:test:edge": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'",
     "cy:test:firefox": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'",
-    "dev": "rm -rf .next && rm -rf doc/.next && yarn doc && yarn dev:examples",
-    "dev:examples": "rm -rf .next && rm -rf doc/.next && yarn build && cd build && yarn link && cd ../doc && yarn link mobility-toolbox-js && yarn dev",
-    "doc": "yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build",
+    "dev": "yarn clean && yarn build && yarn apidoc && yarn dev:examples",
+    "dev:examples": "yarn clean && yarn build && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn dev",
+    "doc": "yarn build && yarn apidoc && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build",
     "esbuild": "yarn esbuild:all && yarn esbuild:iife",
     "esbuild:all": "esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx",
     "esbuild:iife": "yarn esbuild:iife:unminify && yarn esbuild:iife:minify",

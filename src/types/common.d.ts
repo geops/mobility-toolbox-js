@@ -7,7 +7,7 @@ import type {
   CopyrightControl as MbCopyrightControl,
   RealtimeLayer as MbRealtimeLayer,
   layer as MbLayer,
-} from '../mapbox';
+} from '../maplibre';
 import type {
   CopyrightControl as OlCopyrightControl,
   MapboxLayer,
@@ -16,7 +16,9 @@ import type {
   layer as OlLayer,
 } from '../ol';
 import { RealtimeTrajectory } from '../api/typedefs';
-import CommonLayer, { LayerCommonOptions } from '../common/layers/LayerCommon';
+import CommonLayer, {
+  LayerCommonOptions,
+} from '../ol/mixins/PropertiesLayerMixin';
 import type { RoutingParameters } from '.';
 
 export type StyleCache = { [key: string]: AnyCanvas };
@@ -87,7 +89,8 @@ export type AnyOlLayer = OlLayer;
 export type AnyMapboxLayer = MapboxLayer | MaplibreLayer;
 export type AnyRealtimeLayer = MbRealtimeLayer | OlRealtimeLayer;
 export type AnyCopyrightControl = MbCopyrightControl | OlCopyrightControl;
-export type AnyMapboxMap = mapboxgl.Map | maplibregl.Map;
+export type AnyMapGlMap = maplibregl.Map | maplibregl.Map;
+export type AnyMapGlMapOptions = maplibregl.MapOptions | maplibregl.MapOptions;
 export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type AnyCanvasContext =
   | CanvasRenderingContext2D
@@ -100,7 +103,7 @@ export type AnyLayerClass = GConstructor<AnyLayer>;
 
 export type AnyMapboxLayerClass = GConstructor<AnyMapboxLayer>;
 export type AnyRealtimeLayerClass = GConstructor<AnyRealtimeLayer>;
-export type AnyMapboxMapClass = GConstructor<AnyMapboxMap>;
+export type AnyMapGlMapClass = GConstructor<AnyMapGlMap>;
 export type AnyCopyrightControlClass = GConstructor<AnyCopyrightControl>;
 
 export type LayerGetFeatureInfoResponse = {

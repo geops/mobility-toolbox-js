@@ -1,4 +1,4 @@
-import HttpAPI from '../common/api/HttpAPI';
+import HttpAPI from './HttpAPI';
 import { RoutingParameters, RoutingResponse } from '../types';
 
 export type RoutingAPIOptions = {
@@ -7,7 +7,7 @@ export type RoutingAPIOptions = {
 };
 
 /**
- * Access to the [geOps Routing service](https://developer.geops.io/apis/routing).
+ * Access to the [geOps Routing API](https://developer.geops.io/apis/routing).
  *
  * @example
  * import { RoutingAPI } from 'mobility-toolbox-js';
@@ -16,6 +16,7 @@ export type RoutingAPIOptions = {
  *   apiKey: [yourApiKey]
  * });
  *
+ * @public
  */
 class RoutingAPI extends HttpAPI {
   /**

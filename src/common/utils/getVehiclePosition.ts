@@ -14,6 +14,7 @@ export type VehiclePosition = {
  * @param {RealtimeTrajectory} trajectory The trajectory to interpolate.
  * @param {boolean} noInterpolate If true, the vehicle position is not interpolated on each render but only once.
  * @returns {VehiclePosition}
+ * @private
  */
 const getVehiclePosition = (
   now: number,

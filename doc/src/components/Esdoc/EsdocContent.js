@@ -9,6 +9,7 @@ import {
   _resolveNecessary,
   _resolveIgnore,
   _resolveLink,
+  _resolveUndocument,
 } from './DocBuilderUtils';
 
 // Preprocess the index.json content.
@@ -27,6 +28,7 @@ function EsdocContent({ path }) {
     docs = _resolveExtendsChain(docss);
     docs = _resolveNecessary(docs);
     docs = _resolveIgnore(docs);
+    docs = _resolveUndocument(docs);
     docs = _resolveLink(docs);
   }
 
