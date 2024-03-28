@@ -79,11 +79,16 @@ export const RealtimeModes = {
  *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
+ * // Open the websocket connection
  * api.open();
  *
+ * // Subscribe to channel
  * api.subscribeTrajectory('topographic', (data) => {
  *    console.log('Log trajectories:', JSON.stringify(data.content));
  * });
+ *
+ * // Close the websocket connection
+ * // api.close();
  *
  * @public
  */

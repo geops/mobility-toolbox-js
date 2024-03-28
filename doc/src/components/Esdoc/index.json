@@ -1143,7 +1143,7 @@
     "__docId__": 92,
     "kind": "file",
     "name": "build/api/RealtimeAPI.js",
-    "content": "/* eslint-disable no-underscore-dangle */\n/* eslint-disable class-methods-use-this */\nimport WebSocketAPI from './WebSocketAPI';\nimport debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';\nimport getModeSuffix from '../common/utils/getRealtimeModeSuffix';\n/**\n * Enum for Realtime modes.\n * @readonly\n * @typedef {string} RealtimeMode\n * @property {string} RAW \"raw\"\n * @property {string} SCHEMATIC \"schematic\"\n * @property {string} TOPOGRAPHIC \"topographic\"\n * @enum {RealtimeMode}\n */\nexport const RealtimeModes = {\n    RAW: 'raw',\n    TOPOGRAPHIC: 'topographic',\n    SCHEMATIC: 'schematic',\n};\n/**\n * This class provides convenience methods to use to the [geOps realtime API](https://developer.geops.io/apis/realtime/).\n *\n * @example\n * import { RealtimeAPI } from 'mobility-toolbox-js/api';\n *\n * const api = new RealtimeAPI({\n *   apiKey: \"yourApiKey\",\n *   bbox: [782001, 5888803, 923410, 5923660, 11, \"mots=rail\"],\n *   // url: \"wss://api.geops.io/tracker-ws/v1/\",\n * });\n *\n * api.open();\n *\n * api.subscribeTrajectory('topographic', (data) => {\n *    console.log('Log trajectories:', JSON.stringify(data.content));\n * });\n *\n * @public\n */\nclass RealtimeAPI {\n    get url() {\n        return this._url;\n    }\n    set url(newUrl) {\n        if (this._url !== newUrl) {\n            this._url = newUrl;\n            // Update the websocket only if the url has changed and the websocket is already open or is opening.\n            if (this.wsApi.open || this.wsApi.connecting) {\n                this.open();\n            }\n        }\n    }\n    /**\n     * The bounding box to receive data from.\\\n     * Example: [minX, minY, maxX, maxY, zoom, mots , gen_level, tenant, ...]\\\n     * &nbsp;\\\n     * Where:\n     * - **minX**: a string representation of an integer (not a float) representing the minimal X coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **minY**: a string representation of an integer (not a float) representing the minimal Y coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **maxX**: a string representation of an integer (not a float) representing the maximal X coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **maxY**: a string representation of an integer (not a float) representing the maximal Y coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **zoom**: a string representation of an integer representing the zoom level (from 4 to 22). When zoom < 8 only the trains are displayed for performance reasons.\\\n     * &nbsp;\n     * - **mots**: A comma separated list of modes of transport. **Optional**.\\\n     *         Example: \"mots=rail,subway\".\\\n     * &nbsp;\n     * - **gen_level**: An integer representing the generalization level. **Optional**.\\\n     *              Example: \"gen_level=5\"\\\n     * &nbsp;\n     * - **tenant**: A string representing the tenant. **Optional**.\\\n     *           Example: \"tenant=sbb\"\\\n     * &nbsp;\n     * - ...: Any other values added to the bbox will be send to the server\n     *\n     * @type {string[]}\n     *\n     * @public\n     */\n    get bbox() {\n        return this._bbox;\n    }\n    set bbox(newBbox) {\n        if (JSON.stringify(newBbox) !== JSON.stringify(this._bbox)) {\n            this._bbox = newBbox;\n            if (this.wsApi && this._bbox) {\n                this.wsApi.send(`BBOX ${this._bbox.join(' ')}`);\n            }\n        }\n    }\n    get buffer() {\n        return this._buffer;\n    }\n    set buffer(newBuffer) {\n        if (JSON.stringify(newBuffer) !== JSON.stringify(this._buffer)) {\n            this._buffer = newBuffer;\n            if (this.wsApi && this._buffer) {\n                this.wsApi.send(`BUFFER ${this._buffer.join(' ')}`);\n            }\n        }\n    }\n    /**\n     * Constructor\n     *\n     * @param {Object} options A string representing the url of the service or an object containing the url and the apiKey.\n     * @param {string} options.url Url to the [geOps realtime API](https://developer.geops.io/apis/realtime/).\n     * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).\n     * @param {string[]} options.bbox The bounding box to receive data from.\n     * @public\n     */\n    constructor(options = {}) {\n        this.version = '2';\n        let opt = options;\n        if (typeof options === 'string') {\n            opt = { url: options };\n        }\n        const { apiKey } = opt;\n        const { url } = opt;\n        const wsApi = new WebSocketAPI();\n        let suffix = '';\n        if (apiKey && !(url === null || url === void 0 ? void 0 : url.includes('key='))) {\n            suffix = `?key=${apiKey}`;\n        }\n        this._url = (url || 'wss://api.geops.io/tracker-ws/v1/') + suffix;\n        this._buffer = opt.buffer || [100, 100];\n        this.version = opt.version || '2';\n        /**\n         * Interval between PING request in ms.\n         * If equal to 0,  no PING request are sent.\n         * @type {number}\n         */\n        this.pingIntervalMs = opt.pingIntervalMs || 10000;\n        /**\n         * Timeout in ms after an automatic reconnection when the websoscket has been closed by the server.\n         * @type {number}\n         */\n        this.reconnectTimeoutMs = opt.reconnectTimeoutMs || 100;\n        /**\n         * The websocket helper class to connect the websocket.\n         */\n        this.wsApi = wsApi;\n    }\n    /**\n     * Open the websocket connection.\n     *\n     * @public\n     */\n    open() {\n        this.wsApi.connect(this.url, this.onOpen.bind(this));\n        // Register reconnection on close.\n        if (this.wsApi.websocket) {\n            this.wsApi.websocket.onclose = () => {\n                this.onClose();\n            };\n        }\n    }\n    /**\n     * Close the websocket connection without reconnection.\n     *\n     * @public\n     */\n    close() {\n        this.wsApi.close();\n    }\n    /**\n     * Unsubscribe trajectory and deleted_vehicles channels. To resubscribe you have to set a new BBOX.\n     */\n    reset() {\n        this.wsApi.send('RESET');\n    }\n    /**\n     * Callback when the websocket is opened and ready.\n     * It applies the bbox and the projection.\n     * @private\n     */\n    onOpen() {\n        if (this.bbox) {\n            this.wsApi.send(`BBOX ${this.bbox.join(' ')}`);\n        }\n        if (this.buffer) {\n            this.wsApi.send(`BUFFER ${this.buffer.join(' ')}`);\n        }\n        /**\n         * Keep websocket alive\n         */\n        if (this.pingIntervalMs) {\n            window.clearInterval(this.pingInterval);\n            this.pingInterval = window.setInterval(() => {\n                this.wsApi.send('PING');\n            }, this.pingIntervalMs);\n        }\n    }\n    /**\n     * Callback when the websocket is closed by the server.\n     * It auto reconnects after a timeout.\n     * @private\n     */\n    onClose() {\n        window.clearTimeout(this.pingInterval);\n        window.clearTimeout(this.reconnectTimeout);\n        if (this.reconnectTimeoutMs) {\n            this.reconnectTimeout = window.setTimeout(() => this.open(), this.reconnectTimeoutMs);\n        }\n    }\n    /**\n     * Send GET to a channel.\n     *\n     * @param {string | WebSocketAPIParameters} channelOrParams Name of the websocket channel to send GET or an object representing parameters to send\n     * @return {Promise<WebSocketAPIMessageEventData<?>>} A websocket response.\n     */\n    get(channelOrParams) {\n        let params = channelOrParams;\n        if (typeof channelOrParams === 'string') {\n            params = { channel: channelOrParams };\n        }\n        return new Promise((resolve, reject) => {\n            this.wsApi.get(params, resolve, reject);\n        });\n    }\n    /**\n     * Subscribe to a channel.\n     *\n     * @param {string} channel Name of the websocket channel to subscribe.\n     * @param {function} onSuccess Callback when the subscription succeeds.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @private\n     */\n    subscribe(channel, onSuccess, onError = () => { }, quiet = false) {\n        if (!channel || !onSuccess) {\n            return;\n        }\n        this.wsApi.subscribe({ channel }, onSuccess, onError, quiet);\n    }\n    /**\n     * Unsubscribe both modes of a channel.\n     *\n     * @param {string} channel Name of the websocket channel to unsubscribe.\n     * @param {string} suffix Suffix to add to the channel name.\n     * @param {function} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @private\n     */\n    unsubscribe(channel, suffix = '', onMessage) {\n        const suffixSchenatic = getModeSuffix(RealtimeModes.SCHEMATIC, RealtimeModes);\n        const suffixTopographic = getModeSuffix(RealtimeModes.TOPOGRAPHIC, RealtimeModes);\n        this.wsApi.unsubscribe(`${channel}${suffixSchenatic}${suffix || ''}`, onMessage);\n        this.wsApi.unsubscribe(`${channel}${suffixTopographic}${suffix || ''}`, onMessage);\n    }\n    /**\n     * Subscribe to departures channel of a given station.\n     *\n     * @param {number} stationId UIC of the station.\n     * @param {Boolean} sortByMinArrivalTime Sort by minimum arrival time\n     * @param {function(departures:Departure[])} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeDepartures(stationId, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`timetable_${stationId}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe from current departures channel.\n     * @param {RealtimeStationId} id Station's id\n     * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeDepartures(id, onMessage) {\n        this.unsubscribe(`timetable_${id}`, '', onMessage);\n    }\n    /**\n     * Subscribe to the disruptions channel for tenant.\n     *\n     * @param {function(data: { content: RealtimeNews[] })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeDisruptions(tenant, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`${tenant}_newsticker`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe disruptions.\n     *\n     * @param {function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeDisruptions(tenant, onMessage) {\n        this.unsubscribe(`${tenant}_newsticker`, '', onMessage);\n    }\n    /**\n     * Return a station with a given uic number and a mode.\n     *\n     * @param {number} uic UIC of the station.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @return {Promise<{data: { content: RealtimeStation }}>} A station.\n     * @public\n     */\n    getStation(uic, mode) {\n        const params = {\n            channel: `station${getModeSuffix(mode, RealtimeModes)}`,\n            args: uic,\n        };\n        return this.get(params);\n    }\n    /**\n     * Get the list of ststions available for a specifc mode. The promise is resolved every 100ms\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {number} timeout = 100 Duration in ms between each promise resolve calls.\n     * @return {Promise<RealtimeStation[]>} An array of stations.\n     * @public\n     */\n    getStations(mode, timeout = 100) {\n        return new Promise((resolve) => {\n            this.get(`station${getModeSuffix(mode, RealtimeModes)}`).then(debounceWebsocketMessages(resolve, undefined, timeout));\n        });\n    }\n    /**\n     * Subscribe to stations channel.\n     * One message pro station.\n     *\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeStation })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeStations(mode, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`station${getModeSuffix(mode, RealtimeModes)}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to stations channel.\n     * @param {function(data: { content: RealtimeStation })} onMessage The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.\n     * @public\n     */\n    unsubscribeStations(onMessage) {\n        this.unsubscribe('station', '', onMessage);\n    }\n    /**\n     * Subscribe to extra_geoms channel.\n     *\n     * @param {function(data: { content: RealtimeExtraGeom })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     */\n    subscribeExtraGeoms(onMessage, onError = () => { }, quiet = false) {\n        this.subscribe('extra_geoms', onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to extra_geoms channel.\n     * @param {function(data: { content: RealtimeExtraGeom })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     */\n    unsubscribeExtraGeoms(onMessage) {\n        this.unsubscribe('extra_geoms', '', onMessage);\n    }\n    /**\n     * Return a partial trajectory with a given id and a mode.\n     *\n     * @param {number} trainId The identifier of a trajectory.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @return {Promise<{data: { content: RealtimeTrajectory }}>} A trajectory.\n     * @public\n     */\n    getTrajectory(id, mode) {\n        return this.get(`partial_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`);\n    }\n    /**\n     * Subscribe to trajectory channel.\n     *\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeTrajectory(mode, onMessage, onError = () => { }, quiet = false) {\n        this.unsubscribeTrajectory(onMessage);\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        this.subscribe(`trajectory${suffix}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to trajectory channels.\n     * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeTrajectory(onMessage) {\n        this.unsubscribe(`trajectory`, '', onMessage);\n    }\n    /**\n     * Subscribe to deleted_vhicles channel.\n     *\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeTrainId })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     */\n    subscribeDeletedVehicles(mode, onMessage, onError = () => { }, quiet = false) {\n        this.unsubscribeDeletedVehicles(onMessage);\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        this.subscribe(`deleted_vehicles${suffix}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to deleted_vhicles channels.\n     * @param {function(data: { content: RealtimeTrainId })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     */\n    unsubscribeDeletedVehicles(onMessage) {\n        this.unsubscribe('deleted_vehicles', '', onMessage);\n    }\n    /**\n     * Get a full trajectory of a vehicule .\n     *\n     * @param {string} id A vehicle id.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).\n     * @return {Promise<{ data: { content: RealtimeFullTrajectory } }>} Return a full trajectory.\n     * @public\n     */\n    getFullTrajectory(id, mode, generalizationLevel) {\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        const channel = [`full_trajectory${suffix}`];\n        if (id) {\n            channel.push(id);\n        }\n        if ((!mode || mode === RealtimeModes.TOPOGRAPHIC) && generalizationLevel) {\n            channel.push(`gen${generalizationLevel}`);\n        }\n        return this.get(channel.join('_'));\n    }\n    /**\n     * Subscribe to full_trajectory channel of a given vehicle.\n     *\n     * @param {string} id A vehicle id.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeFullTrajectory(id, mode, onMessage, onError = () => { }, quiet = false) {\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        this.subscribe(`full_trajectory${suffix}_${id}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe from full_trajectory channel\n     *\n     * @param {string} id A vehicle id.\n     * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeFullTrajectory(id, onMessage) {\n        this.unsubscribe('full_trajectory', `_${id}`, onMessage);\n    }\n    /**\n     * Get the list of stops for this vehicle.\n     *\n     * @param {string} id A vehicle id.\n     * @return {Promise<{ data: { content: StopSequence[] } }>} Returns a stop sequence object.\n     * @public\n     */\n    getStopSequence(id) {\n        return this.get(`stopsequence_${id}`);\n    }\n    /**\n     * Subscribe to stopsequence channel of a given vehicle.\n     *\n     * @param {string} id A vehicle id.\n     * @param {function(data: { content: StopSequence[] })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeStopSequence(id, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`stopsequence_${id}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe from stopsequence channel\n     *\n     * @param {string} id A vehicle id.\n     * @param {function(data: { content: StopSequence[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeStopSequence(id, onMessage) {\n        this.unsubscribe(`stopsequence`, `_${id}`, onMessage);\n    }\n    /**\n     * Subscribe to healthcheck channel.\n     * @param {function(data: { content: string })} onMessage Callback when the subscribe to healthcheck channel succeeds.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     */\n    subscribeHealthCheck(onMessage, onError = () => { }, quiet = false) {\n        this.subscribe('healthcheck', onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to healthcheck channel.\n     * @param {function(data: { content: string })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     */\n    unsubscribeHealthCheck(onMessage) {\n        this.unsubscribe('healthcheck', '', onMessage);\n    }\n}\nexport default RealtimeAPI;\n",
+    "content": "/* eslint-disable no-underscore-dangle */\n/* eslint-disable class-methods-use-this */\nimport WebSocketAPI from './WebSocketAPI';\nimport debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';\nimport getModeSuffix from '../common/utils/getRealtimeModeSuffix';\n/**\n * Enum for Realtime modes.\n * @readonly\n * @typedef {string} RealtimeMode\n * @property {string} RAW \"raw\"\n * @property {string} SCHEMATIC \"schematic\"\n * @property {string} TOPOGRAPHIC \"topographic\"\n * @enum {RealtimeMode}\n */\nexport const RealtimeModes = {\n    RAW: 'raw',\n    TOPOGRAPHIC: 'topographic',\n    SCHEMATIC: 'schematic',\n};\n/**\n * This class provides convenience methods to use to the [geOps realtime API](https://developer.geops.io/apis/realtime/).\n *\n * @example\n * import { RealtimeAPI } from 'mobility-toolbox-js/api';\n *\n * const api = new RealtimeAPI({\n *   apiKey: \"yourApiKey\",\n *   bbox: [782001, 5888803, 923410, 5923660, 11, \"mots=rail\"],\n *   // url: \"wss://api.geops.io/tracker-ws/v1/\",\n * });\n *\n * // Open the websocket connection\n * api.open();\n *\n * // Subscribe to channel\n * api.subscribeTrajectory('topographic', (data) => {\n *    console.log('Log trajectories:', JSON.stringify(data.content));\n * });\n *\n * // Close the websocket connection\n * // api.close();\n *\n * @public\n */\nclass RealtimeAPI {\n    get url() {\n        return this._url;\n    }\n    set url(newUrl) {\n        if (this._url !== newUrl) {\n            this._url = newUrl;\n            // Update the websocket only if the url has changed and the websocket is already open or is opening.\n            if (this.wsApi.open || this.wsApi.connecting) {\n                this.open();\n            }\n        }\n    }\n    /**\n     * The bounding box to receive data from.\\\n     * Example: [minX, minY, maxX, maxY, zoom, mots , gen_level, tenant, ...]\\\n     * &nbsp;\\\n     * Where:\n     * - **minX**: a string representation of an integer (not a float) representing the minimal X coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **minY**: a string representation of an integer (not a float) representing the minimal Y coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **maxX**: a string representation of an integer (not a float) representing the maximal X coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **maxY**: a string representation of an integer (not a float) representing the maximal Y coordinate (in EPSG:3857) of a bounding box\\\n     * &nbsp;\n     * - **zoom**: a string representation of an integer representing the zoom level (from 4 to 22). When zoom < 8 only the trains are displayed for performance reasons.\\\n     * &nbsp;\n     * - **mots**: A comma separated list of modes of transport. **Optional**.\\\n     *         Example: \"mots=rail,subway\".\\\n     * &nbsp;\n     * - **gen_level**: An integer representing the generalization level. **Optional**.\\\n     *              Example: \"gen_level=5\"\\\n     * &nbsp;\n     * - **tenant**: A string representing the tenant. **Optional**.\\\n     *           Example: \"tenant=sbb\"\\\n     * &nbsp;\n     * - ...: Any other values added to the bbox will be send to the server\n     *\n     * @type {string[]}\n     *\n     * @public\n     */\n    get bbox() {\n        return this._bbox;\n    }\n    set bbox(newBbox) {\n        if (JSON.stringify(newBbox) !== JSON.stringify(this._bbox)) {\n            this._bbox = newBbox;\n            if (this.wsApi && this._bbox) {\n                this.wsApi.send(`BBOX ${this._bbox.join(' ')}`);\n            }\n        }\n    }\n    get buffer() {\n        return this._buffer;\n    }\n    set buffer(newBuffer) {\n        if (JSON.stringify(newBuffer) !== JSON.stringify(this._buffer)) {\n            this._buffer = newBuffer;\n            if (this.wsApi && this._buffer) {\n                this.wsApi.send(`BUFFER ${this._buffer.join(' ')}`);\n            }\n        }\n    }\n    /**\n     * Constructor\n     *\n     * @param {Object} options A string representing the url of the service or an object containing the url and the apiKey.\n     * @param {string} options.url Url to the [geOps realtime API](https://developer.geops.io/apis/realtime/).\n     * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).\n     * @param {string[]} options.bbox The bounding box to receive data from.\n     * @public\n     */\n    constructor(options = {}) {\n        this.version = '2';\n        let opt = options;\n        if (typeof options === 'string') {\n            opt = { url: options };\n        }\n        const { apiKey } = opt;\n        const { url } = opt;\n        const wsApi = new WebSocketAPI();\n        let suffix = '';\n        if (apiKey && !(url === null || url === void 0 ? void 0 : url.includes('key='))) {\n            suffix = `?key=${apiKey}`;\n        }\n        this._url = (url || 'wss://api.geops.io/tracker-ws/v1/') + suffix;\n        this._buffer = opt.buffer || [100, 100];\n        this.version = opt.version || '2';\n        /**\n         * Interval between PING request in ms.\n         * If equal to 0,  no PING request are sent.\n         * @type {number}\n         */\n        this.pingIntervalMs = opt.pingIntervalMs || 10000;\n        /**\n         * Timeout in ms after an automatic reconnection when the websoscket has been closed by the server.\n         * @type {number}\n         */\n        this.reconnectTimeoutMs = opt.reconnectTimeoutMs || 100;\n        /**\n         * The websocket helper class to connect the websocket.\n         */\n        this.wsApi = wsApi;\n    }\n    /**\n     * Open the websocket connection.\n     *\n     * @public\n     */\n    open() {\n        this.wsApi.connect(this.url, this.onOpen.bind(this));\n        // Register reconnection on close.\n        if (this.wsApi.websocket) {\n            this.wsApi.websocket.onclose = () => {\n                this.onClose();\n            };\n        }\n    }\n    /**\n     * Close the websocket connection without reconnection.\n     *\n     * @public\n     */\n    close() {\n        this.wsApi.close();\n    }\n    /**\n     * Unsubscribe trajectory and deleted_vehicles channels. To resubscribe you have to set a new BBOX.\n     */\n    reset() {\n        this.wsApi.send('RESET');\n    }\n    /**\n     * Callback when the websocket is opened and ready.\n     * It applies the bbox and the projection.\n     * @private\n     */\n    onOpen() {\n        if (this.bbox) {\n            this.wsApi.send(`BBOX ${this.bbox.join(' ')}`);\n        }\n        if (this.buffer) {\n            this.wsApi.send(`BUFFER ${this.buffer.join(' ')}`);\n        }\n        /**\n         * Keep websocket alive\n         */\n        if (this.pingIntervalMs) {\n            window.clearInterval(this.pingInterval);\n            this.pingInterval = window.setInterval(() => {\n                this.wsApi.send('PING');\n            }, this.pingIntervalMs);\n        }\n    }\n    /**\n     * Callback when the websocket is closed by the server.\n     * It auto reconnects after a timeout.\n     * @private\n     */\n    onClose() {\n        window.clearTimeout(this.pingInterval);\n        window.clearTimeout(this.reconnectTimeout);\n        if (this.reconnectTimeoutMs) {\n            this.reconnectTimeout = window.setTimeout(() => this.open(), this.reconnectTimeoutMs);\n        }\n    }\n    /**\n     * Send GET to a channel.\n     *\n     * @param {string | WebSocketAPIParameters} channelOrParams Name of the websocket channel to send GET or an object representing parameters to send\n     * @return {Promise<WebSocketAPIMessageEventData<?>>} A websocket response.\n     */\n    get(channelOrParams) {\n        let params = channelOrParams;\n        if (typeof channelOrParams === 'string') {\n            params = { channel: channelOrParams };\n        }\n        return new Promise((resolve, reject) => {\n            this.wsApi.get(params, resolve, reject);\n        });\n    }\n    /**\n     * Subscribe to a channel.\n     *\n     * @param {string} channel Name of the websocket channel to subscribe.\n     * @param {function} onSuccess Callback when the subscription succeeds.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @private\n     */\n    subscribe(channel, onSuccess, onError = () => { }, quiet = false) {\n        if (!channel || !onSuccess) {\n            return;\n        }\n        this.wsApi.subscribe({ channel }, onSuccess, onError, quiet);\n    }\n    /**\n     * Unsubscribe both modes of a channel.\n     *\n     * @param {string} channel Name of the websocket channel to unsubscribe.\n     * @param {string} suffix Suffix to add to the channel name.\n     * @param {function} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @private\n     */\n    unsubscribe(channel, suffix = '', onMessage) {\n        const suffixSchenatic = getModeSuffix(RealtimeModes.SCHEMATIC, RealtimeModes);\n        const suffixTopographic = getModeSuffix(RealtimeModes.TOPOGRAPHIC, RealtimeModes);\n        this.wsApi.unsubscribe(`${channel}${suffixSchenatic}${suffix || ''}`, onMessage);\n        this.wsApi.unsubscribe(`${channel}${suffixTopographic}${suffix || ''}`, onMessage);\n    }\n    /**\n     * Subscribe to departures channel of a given station.\n     *\n     * @param {number} stationId UIC of the station.\n     * @param {Boolean} sortByMinArrivalTime Sort by minimum arrival time\n     * @param {function(departures:Departure[])} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeDepartures(stationId, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`timetable_${stationId}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe from current departures channel.\n     * @param {RealtimeStationId} id Station's id\n     * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeDepartures(id, onMessage) {\n        this.unsubscribe(`timetable_${id}`, '', onMessage);\n    }\n    /**\n     * Subscribe to the disruptions channel for tenant.\n     *\n     * @param {function(data: { content: RealtimeNews[] })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeDisruptions(tenant, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`${tenant}_newsticker`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe disruptions.\n     *\n     * @param {function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeDisruptions(tenant, onMessage) {\n        this.unsubscribe(`${tenant}_newsticker`, '', onMessage);\n    }\n    /**\n     * Return a station with a given uic number and a mode.\n     *\n     * @param {number} uic UIC of the station.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @return {Promise<{data: { content: RealtimeStation }}>} A station.\n     * @public\n     */\n    getStation(uic, mode) {\n        const params = {\n            channel: `station${getModeSuffix(mode, RealtimeModes)}`,\n            args: uic,\n        };\n        return this.get(params);\n    }\n    /**\n     * Get the list of ststions available for a specifc mode. The promise is resolved every 100ms\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {number} timeout = 100 Duration in ms between each promise resolve calls.\n     * @return {Promise<RealtimeStation[]>} An array of stations.\n     * @public\n     */\n    getStations(mode, timeout = 100) {\n        return new Promise((resolve) => {\n            this.get(`station${getModeSuffix(mode, RealtimeModes)}`).then(debounceWebsocketMessages(resolve, undefined, timeout));\n        });\n    }\n    /**\n     * Subscribe to stations channel.\n     * One message pro station.\n     *\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeStation })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeStations(mode, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`station${getModeSuffix(mode, RealtimeModes)}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to stations channel.\n     * @param {function(data: { content: RealtimeStation })} onMessage The listener callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribe.\n     * @public\n     */\n    unsubscribeStations(onMessage) {\n        this.unsubscribe('station', '', onMessage);\n    }\n    /**\n     * Subscribe to extra_geoms channel.\n     *\n     * @param {function(data: { content: RealtimeExtraGeom })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     */\n    subscribeExtraGeoms(onMessage, onError = () => { }, quiet = false) {\n        this.subscribe('extra_geoms', onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to extra_geoms channel.\n     * @param {function(data: { content: RealtimeExtraGeom })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     */\n    unsubscribeExtraGeoms(onMessage) {\n        this.unsubscribe('extra_geoms', '', onMessage);\n    }\n    /**\n     * Return a partial trajectory with a given id and a mode.\n     *\n     * @param {number} trainId The identifier of a trajectory.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @return {Promise<{data: { content: RealtimeTrajectory }}>} A trajectory.\n     * @public\n     */\n    getTrajectory(id, mode) {\n        return this.get(`partial_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`);\n    }\n    /**\n     * Subscribe to trajectory channel.\n     *\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeTrajectory(mode, onMessage, onError = () => { }, quiet = false) {\n        this.unsubscribeTrajectory(onMessage);\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        this.subscribe(`trajectory${suffix}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to trajectory channels.\n     * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeTrajectory(onMessage) {\n        this.unsubscribe(`trajectory`, '', onMessage);\n    }\n    /**\n     * Subscribe to deleted_vhicles channel.\n     *\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeTrainId })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     */\n    subscribeDeletedVehicles(mode, onMessage, onError = () => { }, quiet = false) {\n        this.unsubscribeDeletedVehicles(onMessage);\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        this.subscribe(`deleted_vehicles${suffix}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to deleted_vhicles channels.\n     * @param {function(data: { content: RealtimeTrainId })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     */\n    unsubscribeDeletedVehicles(onMessage) {\n        this.unsubscribe('deleted_vehicles', '', onMessage);\n    }\n    /**\n     * Get a full trajectory of a vehicule .\n     *\n     * @param {string} id A vehicle id.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).\n     * @return {Promise<{ data: { content: RealtimeFullTrajectory } }>} Return a full trajectory.\n     * @public\n     */\n    getFullTrajectory(id, mode, generalizationLevel) {\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        const channel = [`full_trajectory${suffix}`];\n        if (id) {\n            channel.push(id);\n        }\n        if ((!mode || mode === RealtimeModes.TOPOGRAPHIC) && generalizationLevel) {\n            channel.push(`gen${generalizationLevel}`);\n        }\n        return this.get(channel.join('_'));\n    }\n    /**\n     * Subscribe to full_trajectory channel of a given vehicle.\n     *\n     * @param {string} id A vehicle id.\n     * @param {RealtimeMode} mode Realtime mode.\n     * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeFullTrajectory(id, mode, onMessage, onError = () => { }, quiet = false) {\n        let suffix = '';\n        if (this.version === '1') {\n            suffix = getModeSuffix(mode, RealtimeModes);\n        }\n        this.subscribe(`full_trajectory${suffix}_${id}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe from full_trajectory channel\n     *\n     * @param {string} id A vehicle id.\n     * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeFullTrajectory(id, onMessage) {\n        this.unsubscribe('full_trajectory', `_${id}`, onMessage);\n    }\n    /**\n     * Get the list of stops for this vehicle.\n     *\n     * @param {string} id A vehicle id.\n     * @return {Promise<{ data: { content: StopSequence[] } }>} Returns a stop sequence object.\n     * @public\n     */\n    getStopSequence(id) {\n        return this.get(`stopsequence_${id}`);\n    }\n    /**\n     * Subscribe to stopsequence channel of a given vehicle.\n     *\n     * @param {string} id A vehicle id.\n     * @param {function(data: { content: StopSequence[] })} onMessage Function called on each message of the channel.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     * @public\n     */\n    subscribeStopSequence(id, onMessage, onError = () => { }, quiet = false) {\n        this.subscribe(`stopsequence_${id}`, onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe from stopsequence channel\n     *\n     * @param {string} id A vehicle id.\n     * @param {function(data: { content: StopSequence[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     * @public\n     */\n    unsubscribeStopSequence(id, onMessage) {\n        this.unsubscribe(`stopsequence`, `_${id}`, onMessage);\n    }\n    /**\n     * Subscribe to healthcheck channel.\n     * @param {function(data: { content: string })} onMessage Callback when the subscribe to healthcheck channel succeeds.\n     * @param {function} onError Callback when the subscription fails.\n     * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.\n     */\n    subscribeHealthCheck(onMessage, onError = () => { }, quiet = false) {\n        this.subscribe('healthcheck', onMessage, onError, quiet);\n    }\n    /**\n     * Unsubscribe to healthcheck channel.\n     * @param {function(data: { content: string })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.\n     */\n    unsubscribeHealthCheck(onMessage) {\n        this.unsubscribe('healthcheck', '', onMessage);\n    }\n}\nexport default RealtimeAPI;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/api/RealtimeAPI.js",
     "access": "private",
@@ -1223,9 +1223,9 @@
     "importStyle": "RealtimeAPI",
     "description": "This class provides convenience methods to use to the [geOps realtime API](https://developer.geops.io/apis/realtime/).",
     "examples": [
-      "import { RealtimeAPI } from 'mobility-toolbox-js/api';\n\nconst api = new RealtimeAPI({\n  apiKey: \"yourApiKey\",\n  bbox: [782001, 5888803, 923410, 5923660, 11, \"mots=rail\"],\n  // url: \"wss://api.geops.io/tracker-ws/v1/\",\n});\n\napi.open();\n\napi.subscribeTrajectory('topographic', (data) => {\n   console.log('Log trajectories:', JSON.stringify(data.content));\n});"
+      "import { RealtimeAPI } from 'mobility-toolbox-js/api';\n\nconst api = new RealtimeAPI({\n  apiKey: \"yourApiKey\",\n  bbox: [782001, 5888803, 923410, 5923660, 11, \"mots=rail\"],\n  // url: \"wss://api.geops.io/tracker-ws/v1/\",\n});\n\n// Open the websocket connection\napi.open();\n\n// Subscribe to channel\napi.subscribeTrajectory('topographic', (data) => {\n   console.log('Log trajectories:', JSON.stringify(data.content));\n});\n\n// Close the websocket connection\n// api.close();"
     ],
-    "lineNumber": 40,
+    "lineNumber": 45,
     "interface": false
   },
   {
@@ -1239,7 +1239,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#url",
     "access": "private",
     "description": null,
-    "lineNumber": 41,
+    "lineNumber": 46,
     "undocument": true,
     "type": {
       "types": [
@@ -1258,7 +1258,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#url",
     "access": "private",
     "description": null,
-    "lineNumber": 44,
+    "lineNumber": 49,
     "undocument": true
   },
   {
@@ -1270,7 +1270,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#_url",
     "access": "private",
     "description": null,
-    "lineNumber": 46,
+    "lineNumber": 51,
     "undocument": true,
     "type": {
       "types": [
@@ -1289,7 +1289,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#bbox",
     "access": "public",
     "description": "The bounding box to receive data from.\\\nExample: [minX, minY, maxX, maxY, zoom, mots , gen_level, tenant, ...]\\\n&nbsp;\\\nWhere:\n- **minX**: a string representation of an integer (not a float) representing the minimal X coordinate (in EPSG:3857) of a bounding box\\\n&nbsp;\n- **minY**: a string representation of an integer (not a float) representing the minimal Y coordinate (in EPSG:3857) of a bounding box\\\n&nbsp;\n- **maxX**: a string representation of an integer (not a float) representing the maximal X coordinate (in EPSG:3857) of a bounding box\\\n&nbsp;\n- **maxY**: a string representation of an integer (not a float) representing the maximal Y coordinate (in EPSG:3857) of a bounding box\\\n&nbsp;\n- **zoom**: a string representation of an integer representing the zoom level (from 4 to 22). When zoom < 8 only the trains are displayed for performance reasons.\\\n&nbsp;\n- **mots**: A comma separated list of modes of transport. **Optional**.\\\n        Example: \"mots=rail,subway\".\\\n&nbsp;\n- **gen_level**: An integer representing the generalization level. **Optional**.\\\n             Example: \"gen_level=5\"\\\n&nbsp;\n- **tenant**: A string representing the tenant. **Optional**.\\\n          Example: \"tenant=sbb\"\\\n&nbsp;\n- ...: Any other values added to the bbox will be send to the server",
-    "lineNumber": 83,
+    "lineNumber": 88,
     "type": {
       "nullable": null,
       "types": [
@@ -1310,7 +1310,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#bbox",
     "access": "private",
     "description": null,
-    "lineNumber": 86,
+    "lineNumber": 91,
     "undocument": true
   },
   {
@@ -1322,7 +1322,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#_bbox",
     "access": "private",
     "description": null,
-    "lineNumber": 88,
+    "lineNumber": 93,
     "undocument": true,
     "type": {
       "types": [
@@ -1341,7 +1341,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#buffer",
     "access": "private",
     "description": null,
-    "lineNumber": 94,
+    "lineNumber": 99,
     "undocument": true,
     "type": {
       "types": [
@@ -1360,7 +1360,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#buffer",
     "access": "private",
     "description": null,
-    "lineNumber": 97,
+    "lineNumber": 102,
     "undocument": true
   },
   {
@@ -1372,7 +1372,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#_buffer",
     "access": "private",
     "description": null,
-    "lineNumber": 99,
+    "lineNumber": 104,
     "undocument": true,
     "type": {
       "types": [
@@ -1391,7 +1391,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#constructor",
     "access": "public",
     "description": "Constructor",
-    "lineNumber": 114,
+    "lineNumber": 119,
     "params": [
       {
         "nullable": null,
@@ -1444,7 +1444,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#version",
     "access": "private",
     "description": null,
-    "lineNumber": 115,
+    "lineNumber": 120,
     "undocument": true,
     "type": {
       "types": [
@@ -1461,7 +1461,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#pingIntervalMs",
     "access": "private",
     "description": "Interval between PING request in ms.\nIf equal to 0,  no PING request are sent.",
-    "lineNumber": 135,
+    "lineNumber": 140,
     "type": {
       "nullable": null,
       "types": [
@@ -1480,7 +1480,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#reconnectTimeoutMs",
     "access": "private",
     "description": "Timeout in ms after an automatic reconnection when the websoscket has been closed by the server.",
-    "lineNumber": 140,
+    "lineNumber": 145,
     "type": {
       "nullable": null,
       "types": [
@@ -1499,7 +1499,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#wsApi",
     "access": "private",
     "description": "The websocket helper class to connect the websocket.",
-    "lineNumber": 144,
+    "lineNumber": 149,
     "type": {
       "types": [
         "*"
@@ -1517,7 +1517,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#open",
     "access": "public",
     "description": "Open the websocket connection.",
-    "lineNumber": 151,
+    "lineNumber": 156,
     "params": [],
     "return": null
   },
@@ -1532,7 +1532,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#close",
     "access": "public",
     "description": "Close the websocket connection without reconnection.",
-    "lineNumber": 165,
+    "lineNumber": 170,
     "params": [],
     "return": null
   },
@@ -1547,7 +1547,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#reset",
     "access": "private",
     "description": "Unsubscribe trajectory and deleted_vehicles channels. To resubscribe you have to set a new BBOX.",
-    "lineNumber": 171,
+    "lineNumber": 176,
     "params": [],
     "return": null
   },
@@ -1562,7 +1562,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#onOpen",
     "access": "private",
     "description": "Callback when the websocket is opened and ready.\nIt applies the bbox and the projection.",
-    "lineNumber": 179,
+    "lineNumber": 184,
     "params": [],
     "return": null
   },
@@ -1575,7 +1575,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#pingInterval",
     "access": "private",
     "description": null,
-    "lineNumber": 191,
+    "lineNumber": 196,
     "undocument": true,
     "type": {
       "types": [
@@ -1594,7 +1594,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#onClose",
     "access": "private",
     "description": "Callback when the websocket is closed by the server.\nIt auto reconnects after a timeout.",
-    "lineNumber": 201,
+    "lineNumber": 206,
     "params": [],
     "return": null
   },
@@ -1607,7 +1607,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#reconnectTimeout",
     "access": "private",
     "description": null,
-    "lineNumber": 205,
+    "lineNumber": 210,
     "undocument": true,
     "type": {
       "types": [
@@ -1626,7 +1626,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#get",
     "access": "private",
     "description": "Send GET to a channel.",
-    "lineNumber": 214,
+    "lineNumber": 219,
     "params": [
       {
         "nullable": null,
@@ -1660,7 +1660,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribe",
     "access": "private",
     "description": "Subscribe to a channel.",
-    "lineNumber": 232,
+    "lineNumber": 237,
     "params": [
       {
         "nullable": null,
@@ -1718,7 +1718,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribe",
     "access": "private",
     "description": "Unsubscribe both modes of a channel.",
-    "lineNumber": 246,
+    "lineNumber": 251,
     "params": [
       {
         "nullable": null,
@@ -1764,7 +1764,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeDepartures",
     "access": "public",
     "description": "Subscribe to departures channel of a given station.",
-    "lineNumber": 262,
+    "lineNumber": 267,
     "params": [
       {
         "nullable": null,
@@ -1832,7 +1832,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeDepartures",
     "access": "public",
     "description": "Unsubscribe from current departures channel.",
-    "lineNumber": 271,
+    "lineNumber": 276,
     "params": [
       {
         "nullable": null,
@@ -1868,7 +1868,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeDisruptions",
     "access": "public",
     "description": "Subscribe to the disruptions channel for tenant.",
-    "lineNumber": 282,
+    "lineNumber": 287,
     "params": [
       {
         "nullable": null,
@@ -1916,7 +1916,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeDisruptions",
     "access": "public",
     "description": "Unsubscribe disruptions.",
-    "lineNumber": 291,
+    "lineNumber": 296,
     "params": [
       {
         "nullable": null,
@@ -1942,7 +1942,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#getStation",
     "access": "public",
     "description": "Return a station with a given uic number and a mode.",
-    "lineNumber": 302,
+    "lineNumber": 307,
     "params": [
       {
         "nullable": null,
@@ -1985,7 +1985,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#getStations",
     "access": "public",
     "description": "Get the list of ststions available for a specifc mode. The promise is resolved every 100ms",
-    "lineNumber": 316,
+    "lineNumber": 321,
     "params": [
       {
         "nullable": null,
@@ -2028,7 +2028,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeStations",
     "access": "public",
     "description": "Subscribe to stations channel.\nOne message pro station.",
-    "lineNumber": 331,
+    "lineNumber": 336,
     "params": [
       {
         "nullable": null,
@@ -2086,7 +2086,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeStations",
     "access": "public",
     "description": "Unsubscribe to stations channel.",
-    "lineNumber": 339,
+    "lineNumber": 344,
     "params": [
       {
         "nullable": null,
@@ -2112,7 +2112,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeExtraGeoms",
     "access": "private",
     "description": "Subscribe to extra_geoms channel.",
-    "lineNumber": 349,
+    "lineNumber": 354,
     "params": [
       {
         "nullable": null,
@@ -2160,7 +2160,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeExtraGeoms",
     "access": "private",
     "description": "Unsubscribe to extra_geoms channel.",
-    "lineNumber": 356,
+    "lineNumber": 361,
     "params": [
       {
         "nullable": null,
@@ -2186,7 +2186,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#getTrajectory",
     "access": "public",
     "description": "Return a partial trajectory with a given id and a mode.",
-    "lineNumber": 367,
+    "lineNumber": 372,
     "params": [
       {
         "nullable": null,
@@ -2229,7 +2229,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeTrajectory",
     "access": "public",
     "description": "Subscribe to trajectory channel.",
-    "lineNumber": 379,
+    "lineNumber": 384,
     "params": [
       {
         "nullable": null,
@@ -2287,7 +2287,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeTrajectory",
     "access": "public",
     "description": "Unsubscribe to trajectory channels.",
-    "lineNumber": 392,
+    "lineNumber": 397,
     "params": [
       {
         "nullable": null,
@@ -2313,7 +2313,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeDeletedVehicles",
     "access": "private",
     "description": "Subscribe to deleted_vhicles channel.",
-    "lineNumber": 403,
+    "lineNumber": 408,
     "params": [
       {
         "nullable": null,
@@ -2371,7 +2371,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeDeletedVehicles",
     "access": "private",
     "description": "Unsubscribe to deleted_vhicles channels.",
-    "lineNumber": 415,
+    "lineNumber": 420,
     "params": [
       {
         "nullable": null,
@@ -2397,7 +2397,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#getFullTrajectory",
     "access": "public",
     "description": "Get a full trajectory of a vehicule .",
-    "lineNumber": 427,
+    "lineNumber": 432,
     "params": [
       {
         "nullable": null,
@@ -2450,7 +2450,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeFullTrajectory",
     "access": "public",
     "description": "Subscribe to full_trajectory channel of a given vehicle.",
-    "lineNumber": 451,
+    "lineNumber": 456,
     "params": [
       {
         "nullable": null,
@@ -2518,7 +2518,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeFullTrajectory",
     "access": "public",
     "description": "Unsubscribe from full_trajectory channel",
-    "lineNumber": 465,
+    "lineNumber": 470,
     "params": [
       {
         "nullable": null,
@@ -2554,7 +2554,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#getStopSequence",
     "access": "public",
     "description": "Get the list of stops for this vehicle.",
-    "lineNumber": 475,
+    "lineNumber": 480,
     "params": [
       {
         "nullable": null,
@@ -2587,7 +2587,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeStopSequence",
     "access": "public",
     "description": "Subscribe to stopsequence channel of a given vehicle.",
-    "lineNumber": 487,
+    "lineNumber": 492,
     "params": [
       {
         "nullable": null,
@@ -2645,7 +2645,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeStopSequence",
     "access": "public",
     "description": "Unsubscribe from stopsequence channel",
-    "lineNumber": 497,
+    "lineNumber": 502,
     "params": [
       {
         "nullable": null,
@@ -2681,7 +2681,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#subscribeHealthCheck",
     "access": "private",
     "description": "Subscribe to healthcheck channel.",
-    "lineNumber": 506,
+    "lineNumber": 511,
     "params": [
       {
         "nullable": null,
@@ -2729,7 +2729,7 @@
     "longname": "build/api/RealtimeAPI.js~RealtimeAPI#unsubscribeHealthCheck",
     "access": "private",
     "description": "Unsubscribe to healthcheck channel.",
-    "lineNumber": 513,
+    "lineNumber": 518,
     "params": [
       {
         "nullable": null,

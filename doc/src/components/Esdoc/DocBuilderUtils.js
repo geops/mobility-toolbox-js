@@ -523,7 +523,6 @@ export const _findAccessDocs = (doc, kind, isStatic = true) => {
       break;
   }
 
-  console.log(cond);
   const publicDocs = _find(cond, { access: 'public' }).filter(
     (v) => !v.builtinExternal,
   );
