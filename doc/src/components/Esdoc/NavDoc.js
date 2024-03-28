@@ -17,8 +17,10 @@ import DocLinkHTML from './DocLinkHTML';
 function NavDoc() {
   const kinds = ['class', 'function', 'variable']; // , 'typedef', 'external'];
 
-  // we display only public doc and not externals, feel free to reactivate them if you want.
-  const allDocs = _find({ kind: kinds }).filter((v) => v.access === 'public');
+  // we display only public doc and externals and typedef.
+  const allDocs = _find({ kind: kinds }).filter(
+    (v) => v.access === 'public' || v.kind === 'external',
+  );
 
   const kindOrder = {
     class: 0,

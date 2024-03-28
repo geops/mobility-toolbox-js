@@ -60,6 +60,7 @@ export type RealtimeModesType = {
  * @property {string} SCHEMATIC "schematic"
  * @property {string} TOPOGRAPHIC "topographic"
  * @enum {RealtimeMode}
+ * @public
  */
 export const RealtimeModes = {
   RAW: 'raw' as RealtimeMode,
@@ -185,10 +186,10 @@ class RealtimeAPI {
   /**
    * Constructor
    *
-   * @param {Object} options A string representing the url of the service or an object containing the url and the apiKey.
-   * @param {string} options.url Url to the [geOps realtime API](https://developer.geops.io/apis/realtime/).
+   * @param {Object} options Options.
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
    * @param {string[]} options.bbox The bounding box to receive data from.
+   * @param {string} [options.url='wss://api.geops.io/tracker-ws/v1/'] Url of the [geOps realtime API](https://developer.geops.io/apis/realtime/).
    * @public
    */
   constructor(options: RealtimeAPIOptions = {}) {

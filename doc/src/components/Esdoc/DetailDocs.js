@@ -126,6 +126,40 @@ function DetailDocs({ docs, title }) {
                 <Properties properties={doc.properties} title="Properties:" />
               )}
             </div>
+            {doc.return && (
+              <div className="return-params" data-ice="returnParams">
+                <h4>Return:</h4>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td className="return-type code" data-ice="returnType">
+                        {doc.return.types.map((typeName, idx) => {
+                          return (
+                            <React.Fragment key={idx}>
+                              <TypeDocLinkHTML typeName={typeName} />
+                              {idx !== doc.return.types.length - 1 ? ' | ' : ''}
+                            </React.Fragment>
+                          );
+                        })}
+                        {typeof doc.return.nullable === 'boolean' &&
+                          `(nullable: ${doc.return.nullable})`}
+                      </td>
+                      <td className="return-desc" data-ice="returnDescription">
+                        <Markdown>{doc.return.description}</Markdown>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                {doc.properties && (
+                  <div data-ice="returnProperties">
+                    <Properties
+                      properties={doc.properties}
+                      title="Return Properties:"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
             {doc.emits && (
               <div data-ice="emitWrap">
                 <h4>Emit:</h4>

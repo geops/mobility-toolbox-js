@@ -6,17 +6,6 @@ export type HttpAPIOptions = {
 };
 /**
  * Common class to access to a geOps api using http.
- *
- * @example
- * import { API } from 'mobility-toolbox-js/api';
- *
- * const api = new HttpApi({
- *   url: [yourUrl],
- *   apiKey: [yourApiKey]
- * });
- *
- * @classproperty {string} url Url of the service.
- * @classproperty {string} apiKey Api key to access the service.
  * @private
  */
 class HttpAPI {
@@ -53,7 +42,7 @@ class HttpAPI {
       key: this.apiKey,
       ...searchParams,
     });
-
+    fetch;
     const response = await fetch(url.toString(), config);
     const data = await response.json();
 

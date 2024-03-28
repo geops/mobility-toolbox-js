@@ -35,33 +35,6 @@
  * @external {ol/Object~BaseObject} https://openlayers.org/en/latest/apidoc/module-ol_Object-BaseObject.html
  */
 /**
- * @external {mapboxgl.Map} https://docs.mapbox.com/mapbox-gl-js/api/map/
- */
-/**
- * @external {mapboxgl.Layer} https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/
- */
-/**
- * @external {mapboxgl.map.event:mousemove} https://docs.mapbox.com/mapbox-gl-js/api/map/#map.event:mousemove
- */
-/**
- * @external {mapboxgl.map.event:zoomend} https://docs.mapbox.com/mapbox-gl-js/api/map/#map.event:zoomend
- */
-/**
- * @external {mapboxgl.MapMouseEvent} https://docs.mapbox.com/mapbox-gl-js/api/events/#mapmouseevent
- */
-/**
- * @external {mapboxgl.styleLayer} https://docs.mapbox.com/help/glossary/layer/
- */
-/**
- * @external {mapboxgl.filter} https://docs.mapbox.com/help/glossary/filter/
- */
-/**
- * @external {mapboxgl.IControl} https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol
- */
-/**
- * @external {mapboxgl.position} https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addcontrol
- */
-/**
  * @external {maplibregl.CustomLayerInterface} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/maplibregl.CustomLayerInterface/
  */
 /**
@@ -86,6 +59,9 @@
  * @external {GeoJSONFeature} https://tools.ietf.org/html/rfc7946#section-3.2
  */
 /**
+ * @external {GeoJSONFeatureCollection} https://tools.ietf.org/html/rfc7946#section-3.3
+ */
+/**
  * @external {Canvas} https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
  */
 /**
@@ -105,4 +81,13 @@
  */
 /**
  * @external {HTMLElement} https://developer.mozilla.org/fr/docs/Web/API/HTMLElement
+ */
+/**
+ * @external {FetchOptions} https://developer.mozilla.org/en-US/docs/Web/API/fetch#options
+ */
+/**
+ * @external {StopsAPIParameters} https://developer.geops.io/apis/stops
+ */
+/**
+ * @external {StopsAPIResponse} https://developer.geops.io/apis/stops
  */

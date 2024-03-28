@@ -15,7 +15,9 @@ module.exports = {
       name: 'esdoc-publish-html-plugin',
     },
     { name: './esdoc/plugins/dynamic-property-plugin/Plugin.js' },
-    { name: './esdoc/plugins/externals-plugin/Plugin.js' },
+    {
+      name: './esdoc/plugins/externals-plugin/Plugin.js',
+    },
     { name: './esdoc/plugins/optional-chaining-plugin/Plugin.js' },
     // { name: 'esdoc-typescript-plugin', option: { enable: true } },
   ],
