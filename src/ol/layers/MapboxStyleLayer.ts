@@ -307,10 +307,14 @@ class MapboxStyleLayer extends Layer {
       layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
     }
 
-    return this.mapboxLayer.getFeatureInfoAtCoordinate(coordinate, {
-      layers: layers.map((layer) => layer && layer.id),
-      validate: false,
-    });
+    return this.mapboxLayer
+      .getFeatureInfoAtCoordinate(coordinate, {
+        layers: layers.map((layer) => layer && layer.id),
+        validate: false,
+      })
+      .then((featureInfo) => {
+        return { ...featureInfo, layer: this };
+      });
   }
 
   /**
