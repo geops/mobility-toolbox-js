@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [2.3.11](https://github.com/geops/mobility-toolbox-js/compare/v2.3.9...v2.3.11) (2024-04-02)
 
+
+### Bug Fixes
+
 * remove default highlighting of feature and featureInfoFilter property. Too application specific.
 
 ### [2.3.9](https://github.com/geops/mobility-toolbox-js/compare/v2.3.8...v2.3.9) (2024-02-27)
