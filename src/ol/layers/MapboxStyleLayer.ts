@@ -2,7 +2,6 @@
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
-import { feature } from 'topojson-client';
 import { AnyMapboxLayer, LayerGetFeatureInfoResponse } from '../../types';
 import Layer, { OlLayerOptions } from './Layer';
 import { FilterFunction } from '../../common/typedefs';
@@ -332,13 +331,7 @@ class MapboxStyleLayer extends Layer {
     });
   }
 
-  /**
-   * Set if features are hovered or not.
-   * @param {Array<ol/Feature~Feature>} features
-   * @param {boolean} state Is the feature hovered
-   * @private
-   */
-  setHoverState(features: Feature[], state: boolean) {
+  setFeatureState(features: Feature[], state: { [key: string]: any }) {
     if (!this.mapboxLayer?.mbMap) {
       return;
     }
@@ -368,9 +361,19 @@ class MapboxStyleLayer extends Layer {
           source,
           sourceLayer,
         },
-        { hover: state },
+        state,
       );
     });
+  }
+
+  /**
+   * Set if features are hovered or not.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {boolean} state Is the feature hovered
+   * @private
+   */
+  setHoverState(features: Feature[], state: boolean) {
+    this.setFeatureState(features, { hover: state });
   }
 
   /**
