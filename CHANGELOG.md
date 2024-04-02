@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.0](https://github.com/geops/mobility-toolbox-js/compare/v2.3.11...v2.4.0) (2024-04-02)
+
+
+### Features
+
+* add a more generic setFeatureState function ([d5d3f96](https://github.com/geops/mobility-toolbox-js/commit/d5d3f962c305e1f945949399b09c7d012b14ad02))
+
+
+### Bug Fixes
+
+* returns the proper layer value in feature info ([fd72024](https://github.com/geops/mobility-toolbox-js/commit/fd720243d7369596950fb2521e537869b49c8abf))
+
 ### [2.3.11](https://github.com/geops/mobility-toolbox-js/compare/v2.3.9...v2.3.11) (2024-04-02)
 
 
