@@ -2,6 +2,7 @@
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
+import { feature } from 'topojson-client';
 import { AnyMapboxLayer, LayerGetFeatureInfoResponse } from '../../types';
 import Layer, { OlLayerOptions } from './Layer';
 import { FilterFunction } from '../../common/typedefs';
@@ -13,7 +14,6 @@ export type MapboxStyleLayerOptions = OlLayerOptions & {
   styleLayers?: { [key: string]: any }[];
   styleLayersFilter?: FilterFunction;
   filters?: FilterFunction | { [key: string]: any }[];
-  featureInfoFilter?: FilterFunction;
   queryRenderedLayersFilter?: FilterFunction;
 };
 
@@ -46,8 +46,6 @@ class MapboxStyleLayer extends Layer {
   mapboxLayer?: AnyMapboxLayer;
 
   styleLayersFilter?: FilterFunction;
-
-  featureInfoFilter?: FilterFunction;
 
   queryRenderedLayersFilter?: FilterFunction;
 
@@ -97,13 +95,6 @@ class MapboxStyleLayer extends Layer {
      * @private
      */
     this.beforeId = options.beforeId;
-
-    /**
-     * Function to filter features for getFeatureInfoAtCoordinate method.
-     * @type {function}
-     * @private
-     */
-    this.featureInfoFilter = options.featureInfoFilter || ((obj: any) => obj);
 
     /**
      * Function to query the rendered features.
@@ -317,24 +308,10 @@ class MapboxStyleLayer extends Layer {
       layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);
     }
 
-    return this.mapboxLayer
-      .getFeatureInfoAtCoordinate(coordinate, {
-        layers: layers.map((layer) => layer && layer.id),
-        validate: false,
-      })
-      .then((featureInfo: LayerGetFeatureInfoResponse) => {
-        const features: Feature[] = featureInfo.features.filter(
-          (feature: Feature) => {
-            // @ts-ignore
-            return this.featureInfoFilter(
-              feature,
-              this.map?.getView().getResolution(),
-            ) as Feature[];
-          },
-        );
-        this.highlight(features);
-        return { ...featureInfo, features, layer: this };
-      });
+    return this.mapboxLayer.getFeatureInfoAtCoordinate(coordinate, {
+      layers: layers.map((layer) => layer && layer.id),
+      validate: false,
+    });
   }
 
   /**
