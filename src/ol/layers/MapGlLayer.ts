@@ -16,8 +16,8 @@ export type MapGlLayerOptions = MobilityLayerOptions & {
   apiKeyName?: string;
   style?: string | maplibregl.StyleSpecification;
   url?: string;
-  mapOptions: maplibregl.MapOptions;
-  queryRenderedFeaturesOptions: maplibregl.QueryRenderedFeaturesOptions;
+  mapOptions?: maplibregl.MapOptions;
+  queryRenderedFeaturesOptions?: maplibregl.QueryRenderedFeaturesOptions;
 };
 
 /**
