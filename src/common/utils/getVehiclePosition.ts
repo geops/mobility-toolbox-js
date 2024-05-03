@@ -25,14 +25,15 @@ const getVehiclePosition = (
     olGeometry,
     coordinate,
   } = trajectory.properties;
-  const { coordinates } = trajectory.geometry;
-  let { type } = trajectory.geometry;
+  let { type, coordinates } = trajectory.geometry;
   let geometry = olGeometry;
   let coord;
   let rotation;
 
+  // If an olGeometry exists we use it. It avoids to create one each time.
   if (olGeometry) {
     type = geometry.getType();
+    coordinates = geometry.getCoordinates();
   }
 
   if (noInterpolate && coordinate) {
