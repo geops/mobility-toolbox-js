@@ -2,7 +2,7 @@ import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { Layer } from 'ol/layer';
-import { LayerSpecification } from 'maplibre-gl';
+import { FeatureState, LayerSpecification } from 'maplibre-gl';
 import { Source } from 'ol/source';
 import { LayerGetFeatureInfoResponse } from '../../types';
 import { FilterFunction } from '../../common/typedefs';
@@ -334,6 +334,44 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   }
 
   /**
+   * Set the feature state of the features.
+   * @param {Array<ol/Feature~Feature>} features
+   * @param {{[key:string]:boolean}} state The feature state
+   * @public
+   */
+  setFeatureState(features: Feature[], state: FeatureState) {
+    if (!this.maplibreLayer?.maplibreMap || !features.length) {
+      return;
+    }
+    const { maplibreMap } = this.maplibreLayer;
+
+    features.forEach((feature: Feature) => {
+      const { source, sourceLayer } =
+        feature.get(VECTOR_TILE_FEATURE_PROPERTY) || {};
+      if ((!source && !sourceLayer) || !feature.getId()) {
+        if (!feature.getId()) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            "No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/Maplibre/tippecanoe#adding-calculated-attributes.",
+            feature.getId(),
+            feature.getProperties(),
+          );
+        }
+        return;
+      }
+
+      maplibreMap.setFeatureState(
+        {
+          id: feature.getId(),
+          source,
+          sourceLayer,
+        },
+        state,
+      );
+    });
+  }
+
+  /**
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
@@ -341,6 +379,10 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
   ): Promise<LayerGetFeatureInfoResponse> {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. getFeatureInfoAtCoordinate([layer], coordinate) from ol package instead.`,
+    );
     if (!this.maplibreLayer?.maplibreMap) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
@@ -417,35 +459,11 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   setHoverState(features: Feature[], state: boolean) {
-    if (!this.maplibreLayer?.maplibreMap || !features.length) {
-      return;
-    }
-    const { maplibreMap } = this.maplibreLayer;
-
-    features.forEach((feature: Feature) => {
-      const { source, sourceLayer } =
-        feature.get(VECTOR_TILE_FEATURE_PROPERTY) || {};
-      if ((!source && !sourceLayer) || !feature.getId()) {
-        if (!feature.getId()) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            "No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/Maplibre/tippecanoe#adding-calculated-attributes.",
-            feature.getId(),
-            feature.getProperties(),
-          );
-        }
-        return;
-      }
-
-      maplibreMap.setFeatureState(
-        {
-          id: feature.getId(),
-          source,
-          sourceLayer,
-        },
-        { hover: state },
-      );
-    });
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. Use layer.setFeatureState(features, {hover: ${state}}) instead.`,
+    );
+    this.setFeatureState(features, { hover: state });
   }
 
   /**
@@ -454,6 +472,10 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   select(features: Feature[] = []) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. Use layer.setFeatureState(features, {selected: true}) instead.`,
+    );
     this.setHoverState(this.selectedFeatures || [], false);
     this.selectedFeatures = features;
     this.setHoverState(this.selectedFeatures || [], true);
@@ -465,6 +487,10 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   highlight(features: Feature[] = []) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `Deprecated. Use layer.setFeatureState(features, {highlighted: true}) instead.`,
+    );
     // Filter out selected features
     const filtered: Feature[] =
       this.highlightedFeatures?.filter(
@@ -484,8 +510,6 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /**
    * Apply visibility to style layers that fits the styleLayersFilter function.
-   *
-   * @private
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   applyLayoutVisibility(evt?: ObjectEvent) {

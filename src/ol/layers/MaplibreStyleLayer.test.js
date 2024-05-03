@@ -50,7 +50,7 @@ describe('MaplibreStyleLayer', () => {
   test('should initalized Maplibre map.', () => {
     map.addLayer(source);
     map.addLayer(layer);
-    expect(layer.maplibreLayer.mbMap).toBeInstanceOf(gllib.Map);
+    expect(layer.maplibreLayer.maplibreMap).toBeInstanceOf(gllib.Map);
     map.removeLayer(layer);
     map.removeLayer(source);
   });
@@ -64,7 +64,7 @@ describe('MaplibreStyleLayer', () => {
 
   test('should add layer on load', () => {
     const style = { layers: [] };
-    layer.maplibreLayer.mbMap = {
+    layer.maplibreLayer.maplibreMap = {
       getStyle: () => style,
       getSource: () => ({}),
       getLayer: () => null,
@@ -78,7 +78,7 @@ describe('MaplibreStyleLayer', () => {
   describe('should set disabled property to false on load', () => {
     test('when layer uses styleLayer property', () => {
       const styles = { layers: [] };
-      layer.maplibreLayer.mbMap = {
+      layer.maplibreLayer.maplibreMap = {
         getStyle: () => styles,
         getSource: () => ({}),
         getLayer: () => null,
@@ -99,7 +99,7 @@ describe('MaplibreStyleLayer', () => {
         maplibreLayer: source,
         layersFilter: () => false,
       });
-      layer2.maplibreLayer.mbMap = {
+      layer2.maplibreLayer.maplibreMap = {
         getStyle: () => styles,
         getSource: () => ({}),
         getLayer: () => null,
@@ -114,16 +114,16 @@ describe('MaplibreStyleLayer', () => {
   describe.skip('#getFeatureInfoAtCoordinate()', () => {
     beforeEach(() => {
       source.attachToMap(map);
-      source.mbMap.isStyleLoaded = jest.fn(() => true);
-      source.mbMap.getSource = jest.fn(() => true);
+      source.maplibreMap.isStyleLoaded = jest.fn(() => true);
+      source.maplibreMap.getSource = jest.fn(() => true);
     });
     afterEach(() => {
-      source.mbMap.getSource.mockRestore();
-      source.mbMap.isStyleLoaded.mockRestore();
+      source.maplibreMap.getSource.mockRestore();
+      source.maplibreMap.isStyleLoaded.mockRestore();
     });
 
     test('should request features on layers ids from styleLayers property', () => {
-      source.mbMap.getStyle = jest.fn(() => ({
+      source.maplibreMap.getStyle = jest.fn(() => ({
         layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }],
       }));
       layer.attachToMap(map);
@@ -135,11 +135,11 @@ describe('MaplibreStyleLayer', () => {
         layer.maplibreLayer.getFeatureInfoAtCoordinate,
       ).toHaveBeenCalledWith([0, 0], { layers: ['layer'], validate: false });
       layer.maplibreLayer.getFeatureInfoAtCoordinate.mockRestore();
-      source.mbMap.getStyle.mockRestore();
+      source.maplibreMap.getStyle.mockRestore();
     });
 
     test('should request features on layers ids from styleLayersFilter property', () => {
-      source.mbMap.getStyle = jest.fn(() => ({
+      source.maplibreMap.getStyle = jest.fn(() => ({
         layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }, { id: 'foo2' }],
       }));
       const layer2 = new MaplibreStyleLayer({
@@ -160,11 +160,11 @@ describe('MaplibreStyleLayer', () => {
         validate: false,
       });
       layer2.maplibreLayer.getFeatureInfoAtCoordinate.mockRestore();
-      source.mbMap.getStyle.mockRestore();
+      source.maplibreMap.getStyle.mockRestore();
     });
 
     test('should request features on layers ids from queryRenderedLayersFilter property', () => {
-      source.mbMap.getStyle = jest.fn(() => ({
+      source.maplibreMap.getStyle = jest.fn(() => ({
         layers: [
           { id: 'foo' },
           { id: 'bar2' },
@@ -192,7 +192,7 @@ describe('MaplibreStyleLayer', () => {
         validate: false,
       });
       layer2.maplibreLayer.getFeatureInfoAtCoordinate.mockRestore();
-      source.mbMap.getStyle.mockRestore();
+      source.maplibreMap.getStyle.mockRestore();
     });
   });
 });

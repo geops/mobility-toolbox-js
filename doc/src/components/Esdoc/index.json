@@ -9825,363 +9825,8 @@
   {
     "__docId__": 449,
     "kind": "file",
-    "name": "build/ol/layers/MapGlLayer.js",
-    "content": "import Source from 'ol/source/Source';\nimport BaseEvent from 'ol/events/Event';\nimport Layer from 'ol/layer/Layer';\nimport debounce from 'lodash.debounce';\nimport { getUrlWithParams, getMapGlCopyrights } from '../../common/utils';\nimport MobilityLayerMixin from '../mixins/MobilityLayerMixin';\n/**\n * Common class for Maplibre and Maplibre and potential other fork from Maplibre.\n * It's used to share code between Maplibre and Maplibre layers without importing both libs.\n * @private\n */\nclass MapGlLayer extends MobilityLayerMixin(Layer) {\n    get apiKey() {\n        return this.get('apiKey');\n    }\n    set apiKey(newValue) {\n        this.set('apiKey', newValue);\n    }\n    get apiKeyName() {\n        return this.get('apiKeyName');\n    }\n    set apiKeyName(newValue) {\n        this.set('apiKeyName', newValue);\n    }\n    get style() {\n        return this.get('style');\n    }\n    set style(newValue) {\n        this.set('style', newValue);\n    }\n    get url() {\n        return this.get('url');\n    }\n    set url(newValue) {\n        this.set('url', newValue);\n    }\n    get queryRenderedFeaturesOptions() {\n        return this.get('queryRenderedFeaturesOptions');\n    }\n    set queryRenderedFeaturesOptions(newValue) {\n        this.set('queryRenderedFeaturesOptions', newValue);\n    }\n    constructor(options) {\n        super(Object.assign(Object.assign({ source: new Source({\n                attributions: () => {\n                    return (this.mbMap && getMapGlCopyrights(this.mbMap)) || [];\n                },\n            }), apiKeyName: 'key', style: 'travic_v2', url: 'https://maps.geops.io' }, (options || {})), { \n            // @ts-expect-error mapOptions must be saved by the mixin in this.options\n            mapOptions: Object.assign({ interactive: false, trackResize: false, attributionControl: false }, ((options === null || options === void 0 ? void 0 : options.mapOptions) || {})), queryRenderedFeaturesOptions: Object.assign({}, ((options === null || options === void 0 ? void 0 : options.queryRenderedFeaturesOptions) || {})) }));\n    }\n    /**\n     * Initialize the layer and listen to feature clicks.\n     * @param {ol/Map~Map} map\n     */\n    attachToMap(map) {\n        super.attachToMap(map);\n        this.loadMbMap();\n        const updateMbMapDebounced = debounce(this.updateMbMap.bind(this), 150);\n        this.olListenersKeys.push(this.on('propertychange', (evt) => {\n            if (/(apiKey|apiKeyName|url|style)/.test(evt.key)) {\n                updateMbMapDebounced();\n            }\n        }));\n    }\n    /**\n     * Terminate what was initialized in init function. Remove layer, events...\n     */\n    detachFromMap() {\n        if (this.mbMap) {\n            // Some asynchrone repaints are triggered even if the mbMap has been removed,\n            // to avoid display of errors we set an empty function.\n            this.mbMap.triggerRepaint = () => { };\n            this.mbMap.remove();\n            this.mbMap = undefined;\n        }\n        this.loaded = false;\n        super.detachFromMap();\n    }\n    /**\n     * Create the Maplibre map.\n     * @private\n     */\n    loadMbMap() {\n        var _a, _b, _c;\n        this.loaded = false;\n        this.olListenersKeys.push(\n        // @ts-ignore\n        (_a = this.map) === null || _a === void 0 ? void 0 : _a.on('change:target', this.loadMbMap.bind(this)));\n        if (!((_b = this.map) === null || _b === void 0 ? void 0 : _b.getTargetElement())) {\n            return;\n        }\n        if (!this.visible) {\n            // On next change of visibility we load the map\n            this.olListenersKeys.push(\n            // @ts-ignore\n            this.once('change:visible', this.loadMbMap.bind(this)));\n            return;\n        }\n        const container = document.createElement('div');\n        container.style.position = 'absolute';\n        container.style.width = '100%';\n        container.style.height = '100%';\n        /**\n         * A Maplibre map\n         * @type {maplibregl.Map}\n         */\n        this.mbMap = this.createMap(Object.assign({ style: this.getStyle(), container }, (((_c = this.options) === null || _c === void 0 ? void 0 : _c.mapOptions) || {})));\n        this.mbMap.on('sourcedata', () => {\n            var _a;\n            (_a = this.getSource()) === null || _a === void 0 ? void 0 : _a.refresh(); // Refresh attribution\n        });\n        this.mbMap.once('load', () => {\n            this.loaded = true;\n            this.dispatchEvent(new BaseEvent('load'));\n        });\n    }\n    getStyle() {\n        // If the style is a complete style object, use it directly.\n        if (this.style &&\n            typeof this.style === 'object' &&\n            this.style.name &&\n            this.style.version) {\n            return this.style;\n        }\n        // If the url set is already a complete style url, use it directly.\n        if (this.url.includes('style.json')) {\n            return this.url;\n        }\n        /// Otherwise build the complete style url.\n        return getUrlWithParams(`${this.url}/styles/${this.style}/style.json`, {\n            [this.apiKeyName]: this.apiKey,\n        }).toString();\n    }\n    // eslint-disable-next-line class-methods-use-this, @typescript-eslint/no-unused-vars\n    createMap(options) {\n        throw new Error('createMap must be implemented in child class');\n    }\n    updateMbMap() {\n        var _a;\n        (_a = this.mbMap) === null || _a === void 0 ? void 0 : _a.setStyle(this.getStyle(), { diff: false });\n    }\n}\nexport default MapGlLayer;\n",
-    "static": true,
-    "longname": "/home/olivier/GIT/mobility-toolbox-js/build/ol/layers/MapGlLayer.js",
-    "access": "private",
-    "description": null,
-    "lineNumber": 1
-  },
-  {
-    "__docId__": 450,
-    "kind": "class",
-    "name": "MapGlLayer",
-    "memberof": "build/ol/layers/MapGlLayer.js",
-    "static": true,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "access": "private",
-    "export": true,
-    "importPath": "mobility-toolbox-js/build/ol/layers/MapGlLayer.js",
-    "importStyle": "MapGlLayer",
-    "description": "Common class for Maplibre and Maplibre and potential other fork from Maplibre.\nIt's used to share code between Maplibre and Maplibre layers without importing both libs.",
-    "lineNumber": 12,
-    "interface": false,
-    "expressionExtends": "MobilityLayerMixin(Layer)"
-  },
-  {
-    "__docId__": 451,
-    "kind": "get",
-    "name": "apiKey",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#apiKey",
-    "access": "private",
-    "description": null,
-    "lineNumber": 13,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 452,
-    "kind": "set",
-    "name": "apiKey",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#apiKey",
-    "access": "private",
-    "description": null,
-    "lineNumber": 16,
-    "undocument": true
-  },
-  {
-    "__docId__": 453,
-    "kind": "get",
-    "name": "apiKeyName",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#apiKeyName",
-    "access": "private",
-    "description": null,
-    "lineNumber": 19,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 454,
-    "kind": "set",
-    "name": "apiKeyName",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#apiKeyName",
-    "access": "private",
-    "description": null,
-    "lineNumber": 22,
-    "undocument": true
-  },
-  {
-    "__docId__": 455,
-    "kind": "get",
-    "name": "style",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#style",
-    "access": "private",
-    "description": null,
-    "lineNumber": 25,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 456,
-    "kind": "set",
-    "name": "style",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#style",
-    "access": "private",
-    "description": null,
-    "lineNumber": 28,
-    "undocument": true
-  },
-  {
-    "__docId__": 457,
-    "kind": "get",
-    "name": "url",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#url",
-    "access": "private",
-    "description": null,
-    "lineNumber": 31,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 458,
-    "kind": "set",
-    "name": "url",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#url",
-    "access": "private",
-    "description": null,
-    "lineNumber": 34,
-    "undocument": true
-  },
-  {
-    "__docId__": 459,
-    "kind": "get",
-    "name": "queryRenderedFeaturesOptions",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#queryRenderedFeaturesOptions",
-    "access": "private",
-    "description": null,
-    "lineNumber": 37,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 460,
-    "kind": "set",
-    "name": "queryRenderedFeaturesOptions",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#queryRenderedFeaturesOptions",
-    "access": "private",
-    "description": null,
-    "lineNumber": 40,
-    "undocument": true
-  },
-  {
-    "__docId__": 461,
-    "kind": "constructor",
-    "name": "constructor",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#constructor",
-    "access": "private",
-    "description": null,
-    "lineNumber": 43,
-    "undocument": true
-  },
-  {
-    "__docId__": 462,
-    "kind": "method",
-    "name": "attachToMap",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#attachToMap",
-    "access": "private",
-    "description": "Initialize the layer and listen to feature clicks.",
-    "lineNumber": 56,
-    "params": [
-      {
-        "nullable": null,
-        "types": [
-          "ol/Map~Map"
-        ],
-        "spread": false,
-        "optional": false,
-        "name": "map",
-        "description": ""
-      }
-    ],
-    "return": null
-  },
-  {
-    "__docId__": 463,
-    "kind": "method",
-    "name": "detachFromMap",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#detachFromMap",
-    "access": "private",
-    "description": "Terminate what was initialized in init function. Remove layer, events...",
-    "lineNumber": 69,
-    "params": [],
-    "return": null
-  },
-  {
-    "__docId__": 464,
-    "kind": "member",
-    "name": "mbMap",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#mbMap",
-    "access": "private",
-    "description": null,
-    "lineNumber": 75,
-    "undocument": true,
-    "type": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 465,
-    "kind": "member",
-    "name": "loaded",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#loaded",
-    "access": "private",
-    "description": null,
-    "lineNumber": 77,
-    "undocument": true,
-    "type": {
-      "types": [
-        "boolean"
-      ]
-    }
-  },
-  {
-    "__docId__": 466,
-    "kind": "method",
-    "name": "loadMbMap",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#loadMbMap",
-    "access": "private",
-    "description": "Create the Maplibre map.",
-    "lineNumber": 84,
-    "params": [],
-    "return": null
-  },
-  {
-    "__docId__": 470,
-    "kind": "method",
-    "name": "getStyle",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#getStyle",
-    "access": "private",
-    "description": null,
-    "lineNumber": 118,
-    "undocument": true,
-    "params": [],
-    "return": {
-      "types": [
-        "*"
-      ]
-    }
-  },
-  {
-    "__docId__": 471,
-    "kind": "method",
-    "name": "createMap",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#createMap",
-    "access": "private",
-    "description": null,
-    "lineNumber": 136,
-    "undocument": true,
-    "params": [
-      {
-        "name": "options",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "return": null
-  },
-  {
-    "__docId__": 472,
-    "kind": "method",
-    "name": "updateMbMap",
-    "memberof": "build/ol/layers/MapGlLayer.js~MapGlLayer",
-    "generator": false,
-    "async": false,
-    "static": false,
-    "longname": "build/ol/layers/MapGlLayer.js~MapGlLayer#updateMbMap",
-    "access": "private",
-    "description": null,
-    "lineNumber": 139,
-    "undocument": true,
-    "params": [],
-    "return": null
-  },
-  {
-    "__docId__": 473,
-    "kind": "file",
     "name": "build/ol/layers/MaplibreLayer.js",
-    "content": "import { Map } from 'maplibre-gl';\nimport MapGlLayer from './MapGlLayer';\nimport MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';\n/**\n * This layer is meant to facilitate the use of the geOps Maps api in an OpenLayers map using Maplibre.\n *\n * @example\n * import { MaplibreLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new MaplibreLayer({\n *   apiKey: 'yourApiKey',\n *   // apiKeyName: 'key',\n *   // mapOptions: {\n *   //   interactive: false,\n *   //   trackResize: false,\n *   //   attributionControl: false,\n *   // }\n *   // queryRenderedFeaturesOptions: {\n *   //   layers: ['waters_lakes'], // map.getFeaturesAtPixel will only return lakes.\n *   // },\n *   // style: 'travic_v2',\n *   // url: 'https://maps.geops.io',\n * });\n *\n * @classproperty {maplibregl.Map} maplibreMap - The Maplibre map object. Readonly.\n * @classproperty {maplibregl.QueryRenderedFeaturesOptions} queryRenderedFeaturesOptions - Options used when we query features using map.getFeaturesAtPixel().\n * @classproperty {string} style - geOps Maps api style.\n * @extends {ol/layer/Layer~Layer}\n * @public\n */\nexport default class MaplibreLayer extends MapGlLayer {\n    /** @private */\n    get maplibreMap() {\n        return this.mbMap;\n    }\n    /**\n     * Constructor.\n     *\n     * @param {MaplibreLayerOptions} options\n     * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).\n     * @param {string} [options.apiKeyName=\"key\"] The geOps Maps api key name.\n     * @param {maplibregl.MapOptions} [options.mapOptions={ interactive: false, trackResize: false, attributionControl: false }] Maplibre map options.\n     * @param {string} [options.style=\"travic_v2\"] The geOps Maps api style.\n     * @param {string} [options.url=\"https://maps.geops.io\"] The geOps Maps api url.\n     */\n    constructor(options) {\n        super(Object.assign({}, options));\n    }\n    /**\n     * @private\n     */\n    createRenderer() {\n        return new MaplibreLayerRenderer(this);\n    }\n    /**\n     * @private\n     */\n    // eslint-disable-next-line class-methods-use-this\n    createMap(options) {\n        return new Map(options);\n    }\n    /**\n     * Create a copy of the MaplibreLayer.\n     * @param {MaplibreLayerOptions} newOptions Options to override\n     * @return {MaplibreLayer} A MaplibreLayer layer\n     */\n    clone(newOptions) {\n        return new MaplibreLayer(Object.assign(Object.assign({}, (this.options || {})), (newOptions || {})));\n    }\n}\n",
+    "content": "import Source from 'ol/source/Source';\nimport BaseEvent from 'ol/events/Event';\nimport Layer from 'ol/layer/Layer';\nimport debounce from 'lodash.debounce';\nimport { Map } from 'maplibre-gl';\nimport { getUrlWithParams, getMapGlCopyrights } from '../../common/utils';\nimport MobilityLayerMixin from '../mixins/MobilityLayerMixin';\nimport MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';\n/**\n * This layer is meant to facilitate the use of the geOps Maps api in an OpenLayers map using Maplibre.\n *\n * @example\n * import { MaplibreLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new MaplibreLayer({\n *   apiKey: 'yourApiKey',\n *   // apiKeyName: 'key',\n *   // mapOptions: {\n *   //   interactive: false,\n *   //   trackResize: false,\n *   //   attributionControl: false,\n *   // }\n *   // queryRenderedFeaturesOptions: {\n *   //   layers: ['waters_lakes'], // map.getFeaturesAtPixel will only return lakes.\n *   // },\n *   // style: 'travic_v2',\n *   // url: 'https://maps.geops.io',\n * });\n *\n * @classproperty {maplibregl.Map} maplibreMap - The Maplibre map object. Readonly.\n * @classproperty {maplibregl.QueryRenderedFeaturesOptions} queryRenderedFeaturesOptions - Options used when we query features using map.getFeaturesAtPixel().\n * @classproperty {string} style - geOps Maps api style.\n * @extends {ol/layer/Layer~Layer}\n * @public\n */\nclass MaplibreLayer extends MobilityLayerMixin(Layer) {\n    get apiKey() {\n        return this.get('apiKey');\n    }\n    set apiKey(newValue) {\n        this.set('apiKey', newValue);\n    }\n    get apiKeyName() {\n        return this.get('apiKeyName');\n    }\n    set apiKeyName(newValue) {\n        this.set('apiKeyName', newValue);\n    }\n    get mbMap() {\n        console.warn('Deprecated. Use layer.maplibreMap.');\n        return this.maplibreMap;\n    }\n    get queryRenderedFeaturesOptions() {\n        return this.get('queryRenderedFeaturesOptions');\n    }\n    set queryRenderedFeaturesOptions(newValue) {\n        this.set('queryRenderedFeaturesOptions', newValue);\n    }\n    get style() {\n        return this.get('style');\n    }\n    set style(newValue) {\n        this.set('style', newValue);\n    }\n    get url() {\n        return this.get('url');\n    }\n    set url(newValue) {\n        this.set('url', newValue);\n    }\n    /**\n     * Constructor.\n     *\n     * @param {MaplibreLayerOptions} options\n     * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).\n     * @param {string} [options.apiKeyName=\"key\"] The geOps Maps api key name.\n     * @param {maplibregl.MapOptions} [options.mapOptions={ interactive: false, trackResize: false, attributionControl: false }] Maplibre map options.\n     * @param {string} [options.style=\"travic_v2\"] The geOps Maps api style.\n     * @param {string} [options.url=\"https://maps.geops.io\"] The geOps Maps api url.\n     */\n    constructor(options) {\n        super(Object.assign(Object.assign({ source: new Source({\n                attributions: () => {\n                    return ((this.maplibreMap && getMapGlCopyrights(this.maplibreMap)) || []);\n                },\n            }), apiKeyName: 'key', style: 'travic_v2', url: 'https://maps.geops.io' }, (options || {})), { \n            // @ts-expect-error mapOptions must be saved by the mixin in this.options\n            mapOptions: Object.assign({ interactive: false, trackResize: false, attributionControl: false }, ((options === null || options === void 0 ? void 0 : options.mapOptions) || {})), queryRenderedFeaturesOptions: Object.assign({}, ((options === null || options === void 0 ? void 0 : options.queryRenderedFeaturesOptions) || {})) }));\n    }\n    /**\n     * Initialize the layer and listen to feature clicks.\n     * @param {ol/Map~Map} map\n     */\n    attachToMap(map) {\n        super.attachToMap(map);\n        this.loadMbMap();\n        const updateMaplibreMapDebounced = debounce(this.updateMaplibreMap.bind(this), 150);\n        this.olListenersKeys.push(this.on('propertychange', (evt) => {\n            if (/(apiKey|apiKeyName|url|style)/.test(evt.key)) {\n                updateMaplibreMapDebounced();\n            }\n        }));\n    }\n    /**\n     * Terminate what was initialized in init function. Remove layer, events...\n     */\n    detachFromMap() {\n        if (this.maplibreMap) {\n            // Some asynchrone repaints are triggered even if the mbMap has been removed,\n            // to avoid display of errors we set an empty function.\n            this.maplibreMap.triggerRepaint = () => { };\n            this.maplibreMap.remove();\n            this.maplibreMap = undefined;\n        }\n        this.loaded = false;\n        super.detachFromMap();\n    }\n    /**\n     * Create the Maplibre map.\n     * @private\n     */\n    loadMbMap() {\n        var _a, _b, _c;\n        this.loaded = false;\n        this.olListenersKeys.push(\n        // @ts-ignore\n        (_a = this.map) === null || _a === void 0 ? void 0 : _a.on('change:target', this.loadMbMap.bind(this)));\n        if (!((_b = this.map) === null || _b === void 0 ? void 0 : _b.getTargetElement())) {\n            return;\n        }\n        if (!this.visible) {\n            // On next change of visibility we load the map\n            this.olListenersKeys.push(\n            // @ts-ignore\n            this.once('change:visible', this.loadMbMap.bind(this)));\n            return;\n        }\n        const container = document.createElement('div');\n        container.style.position = 'absolute';\n        container.style.width = '100%';\n        container.style.height = '100%';\n        /**\n         * A Maplibre map\n         * @type {maplibregl.Map}\n         */\n        this.maplibreMap = this.createMap(Object.assign({ style: this.getStyle(), container }, (((_c = this.options) === null || _c === void 0 ? void 0 : _c.mapOptions) || {})));\n        this.maplibreMap.on('sourcedata', () => {\n            var _a;\n            (_a = this.getSource()) === null || _a === void 0 ? void 0 : _a.refresh(); // Refresh attribution\n        });\n        this.maplibreMap.once('load', () => {\n            this.loaded = true;\n            this.dispatchEvent(new BaseEvent('load'));\n        });\n    }\n    getStyle() {\n        // If the style is a complete style object, use it directly.\n        if (this.style &&\n            typeof this.style === 'object' &&\n            this.style.name &&\n            this.style.version) {\n            return this.style;\n        }\n        // If the url set is already a complete style url, use it directly.\n        if (this.url.includes('style.json')) {\n            return this.url;\n        }\n        /// Otherwise build the complete style url.\n        return getUrlWithParams(`${this.url}/styles/${this.style}/style.json`, {\n            [this.apiKeyName]: this.apiKey,\n        }).toString();\n    }\n    // eslint-disable-next-line class-methods-use-this\n    createMap(options) {\n        return new Map(options);\n    }\n    createRenderer() {\n        return new MaplibreLayerRenderer(this);\n    }\n    updateMaplibreMap() {\n        var _a;\n        (_a = this.maplibreMap) === null || _a === void 0 ? void 0 : _a.setStyle(this.getStyle(), { diff: false });\n    }\n    /**\n     * Create a copy of the MaplibreLayer.\n     * @param {MaplibreLayerOptions} newOptions Options to override\n     * @return {MaplibreLayer} A MaplibreLayer layer\n     */\n    clone(newOptions) {\n        return new MaplibreLayer(Object.assign(Object.assign({}, (this.options || {})), (newOptions || {})));\n    }\n}\nexport default MaplibreLayer;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/ol/layers/MaplibreLayer.js",
     "access": "private",
@@ -10189,7 +9834,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 474,
+    "__docId__": 450,
     "kind": "class",
     "name": "MaplibreLayer",
     "memberof": "build/ol/layers/MaplibreLayer.js",
@@ -10203,7 +9848,7 @@
     "examples": [
       "import { MaplibreLayer } from 'mobility-toolbox-js/ol';\n\nconst layer = new MaplibreLayer({\n  apiKey: 'yourApiKey',\n  // apiKeyName: 'key',\n  // mapOptions: {\n  //   interactive: false,\n  //   trackResize: false,\n  //   attributionControl: false,\n  // }\n  // queryRenderedFeaturesOptions: {\n  //   layers: ['waters_lakes'], // map.getFeaturesAtPixel will only return lakes.\n  // },\n  // style: 'travic_v2',\n  // url: 'https://maps.geops.io',\n});"
     ],
-    "lineNumber": 31,
+    "lineNumber": 36,
     "unknown": [
       {
         "tagName": "@classproperty",
@@ -10224,17 +9869,18 @@
     ]
   },
   {
-    "__docId__": 475,
+    "__docId__": 451,
     "kind": "get",
-    "name": "maplibreMap",
+    "name": "apiKey",
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#maplibreMap",
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#apiKey",
     "access": "private",
     "description": null,
-    "lineNumber": 33,
+    "lineNumber": 37,
+    "undocument": true,
     "type": {
       "types": [
         "*"
@@ -10242,7 +9888,172 @@
     }
   },
   {
-    "__docId__": 476,
+    "__docId__": 452,
+    "kind": "set",
+    "name": "apiKey",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#apiKey",
+    "access": "private",
+    "description": null,
+    "lineNumber": 40,
+    "undocument": true
+  },
+  {
+    "__docId__": 453,
+    "kind": "get",
+    "name": "apiKeyName",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#apiKeyName",
+    "access": "private",
+    "description": null,
+    "lineNumber": 43,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 454,
+    "kind": "set",
+    "name": "apiKeyName",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#apiKeyName",
+    "access": "private",
+    "description": null,
+    "lineNumber": 46,
+    "undocument": true
+  },
+  {
+    "__docId__": 455,
+    "kind": "get",
+    "name": "mbMap",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#mbMap",
+    "access": "private",
+    "description": null,
+    "lineNumber": 49,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 456,
+    "kind": "get",
+    "name": "queryRenderedFeaturesOptions",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#queryRenderedFeaturesOptions",
+    "access": "private",
+    "description": null,
+    "lineNumber": 53,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 457,
+    "kind": "set",
+    "name": "queryRenderedFeaturesOptions",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#queryRenderedFeaturesOptions",
+    "access": "private",
+    "description": null,
+    "lineNumber": 56,
+    "undocument": true
+  },
+  {
+    "__docId__": 458,
+    "kind": "get",
+    "name": "style",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#style",
+    "access": "private",
+    "description": null,
+    "lineNumber": 59,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 459,
+    "kind": "set",
+    "name": "style",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#style",
+    "access": "private",
+    "description": null,
+    "lineNumber": 62,
+    "undocument": true
+  },
+  {
+    "__docId__": 460,
+    "kind": "get",
+    "name": "url",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#url",
+    "access": "private",
+    "description": null,
+    "lineNumber": 65,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 461,
+    "kind": "set",
+    "name": "url",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#url",
+    "access": "private",
+    "description": null,
+    "lineNumber": 68,
+    "undocument": true
+  },
+  {
+    "__docId__": 462,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
@@ -10252,7 +10063,7 @@
     "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#constructor",
     "access": "private",
     "description": "Constructor.",
-    "lineNumber": 46,
+    "lineNumber": 81,
     "params": [
       {
         "nullable": null,
@@ -10325,17 +10136,108 @@
     ]
   },
   {
-    "__docId__": 477,
+    "__docId__": 463,
     "kind": "method",
-    "name": "createRenderer",
+    "name": "attachToMap",
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
     "generator": false,
     "async": false,
     "static": false,
-    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#createRenderer",
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#attachToMap",
     "access": "private",
-    "description": "",
-    "lineNumber": 52,
+    "description": "Initialize the layer and listen to feature clicks.",
+    "lineNumber": 94,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "ol/Map~Map"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "map",
+        "description": ""
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 464,
+    "kind": "method",
+    "name": "detachFromMap",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#detachFromMap",
+    "access": "private",
+    "description": "Terminate what was initialized in init function. Remove layer, events...",
+    "lineNumber": 107,
+    "params": [],
+    "return": null
+  },
+  {
+    "__docId__": 465,
+    "kind": "member",
+    "name": "maplibreMap",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#maplibreMap",
+    "access": "private",
+    "description": null,
+    "lineNumber": 113,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 466,
+    "kind": "member",
+    "name": "loaded",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#loaded",
+    "access": "private",
+    "description": null,
+    "lineNumber": 115,
+    "undocument": true,
+    "type": {
+      "types": [
+        "boolean"
+      ]
+    }
+  },
+  {
+    "__docId__": 467,
+    "kind": "method",
+    "name": "loadMbMap",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#loadMbMap",
+    "access": "private",
+    "description": "Create the Maplibre map.",
+    "lineNumber": 122,
+    "params": [],
+    "return": null
+  },
+  {
+    "__docId__": 471,
+    "kind": "method",
+    "name": "getStyle",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#getStyle",
+    "access": "private",
+    "description": null,
+    "lineNumber": 156,
+    "undocument": true,
     "params": [],
     "return": {
       "types": [
@@ -10344,7 +10246,7 @@
     }
   },
   {
-    "__docId__": 478,
+    "__docId__": 472,
     "kind": "method",
     "name": "createMap",
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
@@ -10353,8 +10255,9 @@
     "static": false,
     "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#createMap",
     "access": "private",
-    "description": "",
-    "lineNumber": 59,
+    "description": null,
+    "lineNumber": 174,
+    "undocument": true,
     "params": [
       {
         "name": "options",
@@ -10370,7 +10273,43 @@
     }
   },
   {
-    "__docId__": 479,
+    "__docId__": 473,
+    "kind": "method",
+    "name": "createRenderer",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#createRenderer",
+    "access": "private",
+    "description": null,
+    "lineNumber": 177,
+    "undocument": true,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 474,
+    "kind": "method",
+    "name": "updateMaplibreMap",
+    "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#updateMaplibreMap",
+    "access": "private",
+    "description": null,
+    "lineNumber": 180,
+    "undocument": true,
+    "params": [],
+    "return": null
+  },
+  {
+    "__docId__": 475,
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/MaplibreLayer.js~MaplibreLayer",
@@ -10380,7 +10319,7 @@
     "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#clone",
     "access": "private",
     "description": "Create a copy of the MaplibreLayer.",
-    "lineNumber": 67,
+    "lineNumber": 189,
     "params": [
       {
         "nullable": null,
@@ -10403,10 +10342,10 @@
     }
   },
   {
-    "__docId__": 480,
+    "__docId__": 476,
     "kind": "file",
     "name": "build/ol/layers/MaplibreStyleLayer.js",
-    "content": "import { Layer } from 'ol/layer';\nimport { Source } from 'ol/source';\nimport MobilityLayerMixin from '../mixins/MobilityLayerMixin';\nimport MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';\nimport { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';\n/**\n * Layer for visualizing a specific set of layer from a MapboxLayer.\n *\n * @example\n * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';\n *\n * const maplibreLayer = new MapboxLayer({\n *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',\n * });\n *\n * const layer = new MapboxStyleLayer({\n *   maplibreLayer: maplibreLayer,\n *   styleLayersFilter: () => {},\n * });\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {ol/layer/Layer~Layer}\n */\nclass MaplibreStyleLayer extends MobilityLayerMixin(Layer) {\n    get beforeId() {\n        return this.get('beforeId');\n    }\n    set beforeId(newValue) {\n        this.set('beforeId', newValue);\n    }\n    get layers() {\n        return this.get('layers');\n    }\n    set layers(newValue) {\n        this.set('layers', newValue);\n    }\n    get layersFilter() {\n        return this.get('layersFilter');\n    }\n    set layersFilter(newValue) {\n        this.set('layersFilter', newValue);\n    }\n    get mapboxLayer() {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use maplibreLayer instead.');\n        return this.get('maplibreLayer');\n    }\n    get maplibreLayer() {\n        return this.get('maplibreLayer');\n    }\n    set maplibreLayer(newValue) {\n        this.set('maplibreLayer', newValue);\n    }\n    get queryRenderedLayersFilter() {\n        return this.get('queryRenderedLayersFilter');\n    }\n    set queryRenderedLayersFilter(newValue) {\n        this.set('queryRenderedLayersFilter', newValue);\n    }\n    get sources() {\n        return this.get('sources');\n    }\n    set sources(newValue) {\n        this.set('sources', newValue);\n    }\n    /**\n     * @deprecated\n     */\n    get styleLayer() {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        return this.layers[0];\n    }\n    /**\n     * @deprecated\n     */\n    set styleLayer(newValue) {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        this.layers = [newValue];\n    }\n    /**\n     * @deprecated\n     */\n    get styleLayers() {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        return this.layers;\n    }\n    /**\n     * @deprecated\n     */\n    set styleLayers(newValue) {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        this.layers = newValue;\n    }\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @param {MapboxLayer} [options.maplibreLayer] The MaplibreLayer to use.\n     * @param {maplibregl.SourceSpecification[]} [options.sources] The source to add to the style on load.\n     * @param {maplibregl.AddLayerObject[]} [options.layers] The layers to add to the style on load.\n     * @param {FilterFunction} [options.layersFilter] Filter function to decide which style layer to apply visiblity on. If not provided, the 'layers' property is used.\n     * @param {FilterFunction} [options.queryRenderedLayersFilter] Filter function to decide which style layer are available for query.\n     */\n    constructor(options) {\n        super(Object.assign({ source: new Source({}) }, (options || {})));\n        this.highlightedFeatures = [];\n        this.selectedFeatures = [];\n        /**\n         * @private\n         */\n        this.onLoad = this.onLoad.bind(this);\n        if (!this.layersFilter && this.layers) {\n            this.layersFilter = (layer) => {\n                return !!this.layers.find((l) => layer.id === l.id);\n            };\n        }\n    }\n    createRenderer() {\n        return new MaplibreStyleLayerRenderer(this);\n    }\n    /**\n     * Initialize the layer.\n     * @param {ol/Map~Map} map the Maplibre map.\n     * @override\n     */\n    attachToMap(map) {\n        if (this.maplibreLayer && !this.maplibreLayer.map) {\n            map.addLayer(this.maplibreLayer);\n        }\n        super.attachToMap(map);\n        if (!this.map || !this.maplibreLayer) {\n            return;\n        }\n        if (!this.map.getTargetElement()) {\n            // If ther e is no target element the maplibreMap is not yet created, we\n            // relaunch the initialisation when it's the case.\n            this.olListenersKeys.push(this.map.on('change:target', () => {\n                this.attachToMap(map);\n            }));\n            return;\n        }\n        // Apply the initial visibility if possible otherwise we wait for the load event of the layer\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            // maplibreMap.loaded() and maplibreMap.isStyleLoaded() are reliable only on the first call of init.\n            // On the next call (when a topic change for example), these functions returns false because\n            // the style is being modified.\n            // That's why we rely on a property instead for the next calls.\n            if (maplibreMap.loaded()) {\n                this.onLoad();\n            }\n            else {\n                maplibreMap.once('load', this.onLoad);\n            }\n        }\n        // Apply the visibiltity when layer's visibility change.\n        this.olListenersKeys.push(\n        // @ts-expect-error 'load' is a custom event\n        this.maplibreLayer.on('load', this.onLoad.bind(this)), this.on('change:visible', (evt) => {\n            // Once the map is loaded we can apply visiblity without waiting\n            // the style. Maplibre take care of the application of style changes.\n            this.applyLayoutVisibility(evt);\n        }), this.on('propertychange', (evt) => {\n            if (/(sources|layers|layersFilter|maplibreLayer|beforeId)/.test(evt.key)) {\n                this.detachFromMap();\n                this.attachToMap(map);\n            }\n        }));\n    }\n    /**\n     * Terminate the layer.\n     * @override\n     */\n    detachFromMap() {\n        var _a;\n        if ((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) {\n            this.maplibreLayer.maplibreMap.off('load', this.onLoad);\n            this.removeLayers();\n            this.removeSources();\n        }\n        super.detachFromMap();\n    }\n    /** @private */\n    addSources() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !this.sources) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            Object.entries(this.sources).forEach(([id, source]) => {\n                if (!maplibreMap.getSource(id)) {\n                    maplibreMap.addSource(id, source);\n                }\n            });\n        }\n    }\n    /** @private */\n    removeSources() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !this.sources) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            Object.keys(this.sources).forEach((id) => {\n                if (maplibreMap.getSource(id)) {\n                    maplibreMap.removeSource(id);\n                }\n            });\n        }\n    }\n    /** @private */\n    addLayers() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !Array.isArray(this.layers)) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            this.layers.forEach((layer) => {\n                // @ts-expect-error source is optional but exists in TS definition\n                const { id, source } = layer;\n                if ((!source || (source && maplibreMap.getSource(source))) &&\n                    id &&\n                    !maplibreMap.getLayer(id)) {\n                    maplibreMap.addLayer(layer, this.beforeId);\n                }\n            });\n            this.applyLayoutVisibility();\n        }\n    }\n    /** @private */\n    removeLayers() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !Array.isArray(this.layers)) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            this.layers.forEach((styleLayer) => {\n                const { id } = styleLayer;\n                if (id && maplibreMap.getLayer(id)) {\n                    maplibreMap.removeLayer(id);\n                }\n            });\n        }\n    }\n    /**\n     * On Maplibre map load callback function. Add style layers and dynaimc filters.\n     * @private\n     */\n    onLoad() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap)) {\n            return;\n        }\n        this.addSources();\n        this.addLayers();\n        const { maplibreMap } = this.maplibreLayer;\n        const style = maplibreMap.getStyle();\n        if ((style === null || style === void 0 ? void 0 : style.layers) && this.layersFilter) {\n            const styles = style.layers.filter(this.layersFilter);\n            this.disabled = !styles.length;\n        }\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap)) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        // Ignore the getFeatureInfo until the Maplibre map is loaded\n        if (!maplibreMap.isStyleLoaded()) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        // We query features only on style layers used by this layer.\n        let layers = this.layers || [];\n        if (this.layersFilter) {\n            layers = maplibreMap.getStyle().layers.filter(this.layersFilter);\n        }\n        if (this.queryRenderedLayersFilter) {\n            // @ts-ignore\n            // eslint-disable-next-line @typescript-eslint/no-unused-vars\n            layers = maplibreMap\n                .getStyle()\n                .layers.filter(this.queryRenderedLayersFilter);\n        }\n        return Promise.resolve({\n            features: [],\n            layer: this,\n            coordinate,\n        });\n        // this.maplibreLayer\n        //   .getFeatureInfoAtCoordinate(coordinate, {\n        //     layers: layers.map((layer) => layer && layer.id),\n        //     validate: false,\n        //   })\n        //   .then((featureInfo: LayerGetFeatureInfoResponse) => {\n        //     const features: Feature[] = featureInfo.features.filter(\n        //       (feature: Feature) => {\n        //         // @ts-ignore\n        //         return this.featureInfoFilter(\n        //           feature,\n        //           this.map?.getView().getResolution(),\n        //         ) as Feature[];\n        //       },\n        //     );\n        //     this.highlight(features);\n        //     return { ...featureInfo, features, layer: this };\n        //   });\n    }\n    // /**\n    //  * Set filter that determines which features should be rendered in a style layer.\n    //  * @param {maplibregl.filter} filter Determines which features should be rendered in a style layer.\n    //  */\n    // setFilter(filter: { [key: string]: any }) {\n    //   if (!this.maplibreLayer?.maplibreMap) {\n    //     return;\n    //   }\n    //   const { maplibreMap } = this.maplibreLayer;\n    //   this.styleLayers.forEach(({ id }) => {\n    //     if (id && filter && maplibreMap.getLayer(id)) {\n    //       // @ts-ignore\n    //       maplibreMap.setFilter(id, filter);\n    //     }\n    //   });\n    // }\n    /**\n     * Set if features are hovered or not.\n     * @param {Array<ol/Feature~Feature>} features\n     * @param {boolean} state Is the feature hovered\n     * @private\n     */\n    setHoverState(features, state) {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !features.length) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        features.forEach((feature) => {\n            const { source, sourceLayer } = feature.get(VECTOR_TILE_FEATURE_PROPERTY) || {};\n            if ((!source && !sourceLayer) || !feature.getId()) {\n                if (!feature.getId()) {\n                    // eslint-disable-next-line no-console\n                    console.warn(\"No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/Maplibre/tippecanoe#adding-calculated-attributes.\", feature.getId(), feature.getProperties());\n                }\n                return;\n            }\n            maplibreMap.setFeatureState({\n                id: feature.getId(),\n                source,\n                sourceLayer,\n            }, { hover: state });\n        });\n    }\n    /**\n     * Select a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.\n     * @private\n     */\n    select(features = []) {\n        this.setHoverState(this.selectedFeatures || [], false);\n        this.selectedFeatures = features;\n        this.setHoverState(this.selectedFeatures || [], true);\n    }\n    /**\n     * Highlight a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.\n     * @private\n     */\n    highlight(features = []) {\n        var _a;\n        // Filter out selected features\n        const filtered = ((_a = this.highlightedFeatures) === null || _a === void 0 ? void 0 : _a.filter((feature) => !(this.selectedFeatures || [])\n            .map((feat) => feat.getId())\n            .includes(feature.getId()))) || [];\n        // Remove previous highlight\n        this.setHoverState(filtered, false);\n        this.highlightedFeatures = features;\n        // Add highlight\n        this.setHoverState(this.highlightedFeatures, true);\n    }\n    /**\n     * Apply visibility to style layers that fits the styleLayersFilter function.\n     *\n     * @private\n     */\n    // eslint-disable-next-line @typescript-eslint/no-unused-vars\n    applyLayoutVisibility(evt) {\n        var _a, _b;\n        if (!((_b = (_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) === null || _b === void 0 ? void 0 : _b.getStyle()) || !this.layersFilter) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        const style = maplibreMap.getStyle();\n        const visibilityValue = this.getVisible() ? 'visible' : 'none';\n        const layers = style.layers || [];\n        for (let i = 0; i < layers.length; i += 1) {\n            const layer = layers[i];\n            if (this.layersFilter(layer)) {\n                const { id } = layer;\n                if (maplibreMap.getLayer(id)) {\n                    maplibreMap.setLayoutProperty(id, 'visibility', visibilityValue);\n                    if (this.getMinZoom() || this.getMaxZoom()) {\n                        maplibreMap.setLayerZoomRange(id, this.getMinZoom() ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1\n                        this.getMaxZoom() ? this.getMaxZoom() - 1 : 24);\n                    }\n                }\n            }\n        }\n    }\n    /**\n     * Create a copy of the MapboxStyleLayer.\n     * @param {Object} newOptions Options to override.\n     * @return {MapboxStyleLayer} A MapboxStyleLayer.\n     */\n    clone(newOptions) {\n        return new MaplibreStyleLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default MaplibreStyleLayer;\n",
+    "content": "import { Layer } from 'ol/layer';\nimport { Source } from 'ol/source';\nimport MobilityLayerMixin from '../mixins/MobilityLayerMixin';\nimport MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';\nimport { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';\n/**\n * Layer for visualizing a specific set of layer from a MapboxLayer.\n *\n * @example\n * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';\n *\n * const maplibreLayer = new MapboxLayer({\n *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',\n * });\n *\n * const layer = new MapboxStyleLayer({\n *   maplibreLayer: maplibreLayer,\n *   styleLayersFilter: () => {},\n * });\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {ol/layer/Layer~Layer}\n */\nclass MaplibreStyleLayer extends MobilityLayerMixin(Layer) {\n    get beforeId() {\n        return this.get('beforeId');\n    }\n    set beforeId(newValue) {\n        this.set('beforeId', newValue);\n    }\n    get layers() {\n        return this.get('layers');\n    }\n    set layers(newValue) {\n        this.set('layers', newValue);\n    }\n    get layersFilter() {\n        return this.get('layersFilter');\n    }\n    set layersFilter(newValue) {\n        this.set('layersFilter', newValue);\n    }\n    get mapboxLayer() {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use maplibreLayer instead.');\n        return this.get('maplibreLayer');\n    }\n    get maplibreLayer() {\n        return this.get('maplibreLayer');\n    }\n    set maplibreLayer(newValue) {\n        this.set('maplibreLayer', newValue);\n    }\n    get queryRenderedLayersFilter() {\n        return this.get('queryRenderedLayersFilter');\n    }\n    set queryRenderedLayersFilter(newValue) {\n        this.set('queryRenderedLayersFilter', newValue);\n    }\n    get sources() {\n        return this.get('sources');\n    }\n    set sources(newValue) {\n        this.set('sources', newValue);\n    }\n    /**\n     * @deprecated\n     */\n    get styleLayer() {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        return this.layers[0];\n    }\n    /**\n     * @deprecated\n     */\n    set styleLayer(newValue) {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        this.layers = [newValue];\n    }\n    /**\n     * @deprecated\n     */\n    get styleLayers() {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        return this.layers;\n    }\n    /**\n     * @deprecated\n     */\n    set styleLayers(newValue) {\n        // eslint-disable-next-line no-console\n        console.warn('Deprecated. Use layers instead.');\n        this.layers = newValue;\n    }\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @param {MapboxLayer} [options.maplibreLayer] The MaplibreLayer to use.\n     * @param {maplibregl.SourceSpecification[]} [options.sources] The source to add to the style on load.\n     * @param {maplibregl.AddLayerObject[]} [options.layers] The layers to add to the style on load.\n     * @param {FilterFunction} [options.layersFilter] Filter function to decide which style layer to apply visiblity on. If not provided, the 'layers' property is used.\n     * @param {FilterFunction} [options.queryRenderedLayersFilter] Filter function to decide which style layer are available for query.\n     */\n    constructor(options) {\n        super(Object.assign({ source: new Source({}) }, (options || {})));\n        this.highlightedFeatures = [];\n        this.selectedFeatures = [];\n        /**\n         * @private\n         */\n        this.onLoad = this.onLoad.bind(this);\n        if (!this.layersFilter && this.layers) {\n            this.layersFilter = (layer) => {\n                return !!this.layers.find((l) => layer.id === l.id);\n            };\n        }\n    }\n    createRenderer() {\n        return new MaplibreStyleLayerRenderer(this);\n    }\n    /**\n     * Initialize the layer.\n     * @param {ol/Map~Map} map the Maplibre map.\n     * @override\n     */\n    attachToMap(map) {\n        if (this.maplibreLayer && !this.maplibreLayer.map) {\n            map.addLayer(this.maplibreLayer);\n        }\n        super.attachToMap(map);\n        if (!this.map || !this.maplibreLayer) {\n            return;\n        }\n        if (!this.map.getTargetElement()) {\n            // If ther e is no target element the maplibreMap is not yet created, we\n            // relaunch the initialisation when it's the case.\n            this.olListenersKeys.push(this.map.on('change:target', () => {\n                this.attachToMap(map);\n            }));\n            return;\n        }\n        // Apply the initial visibility if possible otherwise we wait for the load event of the layer\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            // maplibreMap.loaded() and maplibreMap.isStyleLoaded() are reliable only on the first call of init.\n            // On the next call (when a topic change for example), these functions returns false because\n            // the style is being modified.\n            // That's why we rely on a property instead for the next calls.\n            if (maplibreMap.loaded()) {\n                this.onLoad();\n            }\n            else {\n                maplibreMap.once('load', this.onLoad);\n            }\n        }\n        // Apply the visibiltity when layer's visibility change.\n        this.olListenersKeys.push(\n        // @ts-expect-error 'load' is a custom event\n        this.maplibreLayer.on('load', this.onLoad.bind(this)), this.on('change:visible', (evt) => {\n            // Once the map is loaded we can apply visiblity without waiting\n            // the style. Maplibre take care of the application of style changes.\n            this.applyLayoutVisibility(evt);\n        }), this.on('propertychange', (evt) => {\n            if (/(sources|layers|layersFilter|maplibreLayer|beforeId)/.test(evt.key)) {\n                this.detachFromMap();\n                this.attachToMap(map);\n            }\n        }));\n    }\n    /**\n     * Terminate the layer.\n     * @override\n     */\n    detachFromMap() {\n        var _a;\n        if ((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) {\n            this.maplibreLayer.maplibreMap.off('load', this.onLoad);\n            this.removeLayers();\n            this.removeSources();\n        }\n        super.detachFromMap();\n    }\n    /** @private */\n    addSources() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !this.sources) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            Object.entries(this.sources).forEach(([id, source]) => {\n                if (!maplibreMap.getSource(id)) {\n                    maplibreMap.addSource(id, source);\n                }\n            });\n        }\n    }\n    /** @private */\n    removeSources() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !this.sources) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            Object.keys(this.sources).forEach((id) => {\n                if (maplibreMap.getSource(id)) {\n                    maplibreMap.removeSource(id);\n                }\n            });\n        }\n    }\n    /** @private */\n    addLayers() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !Array.isArray(this.layers)) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            this.layers.forEach((layer) => {\n                // @ts-expect-error source is optional but exists in TS definition\n                const { id, source } = layer;\n                if ((!source || (source && maplibreMap.getSource(source))) &&\n                    id &&\n                    !maplibreMap.getLayer(id)) {\n                    maplibreMap.addLayer(layer, this.beforeId);\n                }\n            });\n            this.applyLayoutVisibility();\n        }\n    }\n    /** @private */\n    removeLayers() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !Array.isArray(this.layers)) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        if (maplibreMap) {\n            this.layers.forEach((styleLayer) => {\n                const { id } = styleLayer;\n                if (id && maplibreMap.getLayer(id)) {\n                    maplibreMap.removeLayer(id);\n                }\n            });\n        }\n    }\n    /**\n     * On Maplibre map load callback function. Add style layers and dynaimc filters.\n     * @private\n     */\n    onLoad() {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap)) {\n            return;\n        }\n        this.addSources();\n        this.addLayers();\n        const { maplibreMap } = this.maplibreLayer;\n        const style = maplibreMap.getStyle();\n        if ((style === null || style === void 0 ? void 0 : style.layers) && this.layersFilter) {\n            const styles = style.layers.filter(this.layersFilter);\n            this.disabled = !styles.length;\n        }\n    }\n    /**\n     * Set the feature state of the features.\n     * @param {Array<ol/Feature~Feature>} features\n     * @param {{[key:string]:boolean}} state The feature state\n     * @public\n     */\n    setFeatureState(features, state) {\n        var _a;\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) || !features.length) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        features.forEach((feature) => {\n            const { source, sourceLayer } = feature.get(VECTOR_TILE_FEATURE_PROPERTY) || {};\n            if ((!source && !sourceLayer) || !feature.getId()) {\n                if (!feature.getId()) {\n                    // eslint-disable-next-line no-console\n                    console.warn(\"No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/Maplibre/tippecanoe#adding-calculated-attributes.\", feature.getId(), feature.getProperties());\n                }\n                return;\n            }\n            maplibreMap.setFeatureState({\n                id: feature.getId(),\n                source,\n                sourceLayer,\n            }, state);\n        });\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        var _a;\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. getFeatureInfoAtCoordinate([layer], coordinate) from ol package instead.`);\n        if (!((_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap)) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        // Ignore the getFeatureInfo until the Maplibre map is loaded\n        if (!maplibreMap.isStyleLoaded()) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        // We query features only on style layers used by this layer.\n        let layers = this.layers || [];\n        if (this.layersFilter) {\n            layers = maplibreMap.getStyle().layers.filter(this.layersFilter);\n        }\n        if (this.queryRenderedLayersFilter) {\n            // @ts-ignore\n            // eslint-disable-next-line @typescript-eslint/no-unused-vars\n            layers = maplibreMap\n                .getStyle()\n                .layers.filter(this.queryRenderedLayersFilter);\n        }\n        return Promise.resolve({\n            features: [],\n            layer: this,\n            coordinate,\n        });\n        // this.maplibreLayer\n        //   .getFeatureInfoAtCoordinate(coordinate, {\n        //     layers: layers.map((layer) => layer && layer.id),\n        //     validate: false,\n        //   })\n        //   .then((featureInfo: LayerGetFeatureInfoResponse) => {\n        //     const features: Feature[] = featureInfo.features.filter(\n        //       (feature: Feature) => {\n        //         // @ts-ignore\n        //         return this.featureInfoFilter(\n        //           feature,\n        //           this.map?.getView().getResolution(),\n        //         ) as Feature[];\n        //       },\n        //     );\n        //     this.highlight(features);\n        //     return { ...featureInfo, features, layer: this };\n        //   });\n    }\n    // /**\n    //  * Set filter that determines which features should be rendered in a style layer.\n    //  * @param {maplibregl.filter} filter Determines which features should be rendered in a style layer.\n    //  */\n    // setFilter(filter: { [key: string]: any }) {\n    //   if (!this.maplibreLayer?.maplibreMap) {\n    //     return;\n    //   }\n    //   const { maplibreMap } = this.maplibreLayer;\n    //   this.styleLayers.forEach(({ id }) => {\n    //     if (id && filter && maplibreMap.getLayer(id)) {\n    //       // @ts-ignore\n    //       maplibreMap.setFilter(id, filter);\n    //     }\n    //   });\n    // }\n    /**\n     * Set if features are hovered or not.\n     * @param {Array<ol/Feature~Feature>} features\n     * @param {boolean} state Is the feature hovered\n     * @private\n     */\n    setHoverState(features, state) {\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. Use layer.setFeatureState(features, {hover: ${state}}) instead.`);\n        this.setFeatureState(features, { hover: state });\n    }\n    /**\n     * Select a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.\n     * @private\n     */\n    select(features = []) {\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. Use layer.setFeatureState(features, {selected: true}) instead.`);\n        this.setHoverState(this.selectedFeatures || [], false);\n        this.selectedFeatures = features;\n        this.setHoverState(this.selectedFeatures || [], true);\n    }\n    /**\n     * Highlight a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.\n     * @private\n     */\n    highlight(features = []) {\n        var _a;\n        // eslint-disable-next-line no-console\n        console.warn(`Deprecated. Use layer.setFeatureState(features, {highlighted: true}) instead.`);\n        // Filter out selected features\n        const filtered = ((_a = this.highlightedFeatures) === null || _a === void 0 ? void 0 : _a.filter((feature) => !(this.selectedFeatures || [])\n            .map((feat) => feat.getId())\n            .includes(feature.getId()))) || [];\n        // Remove previous highlight\n        this.setHoverState(filtered, false);\n        this.highlightedFeatures = features;\n        // Add highlight\n        this.setHoverState(this.highlightedFeatures, true);\n    }\n    /**\n     * Apply visibility to style layers that fits the styleLayersFilter function.\n     */\n    // eslint-disable-next-line @typescript-eslint/no-unused-vars\n    applyLayoutVisibility(evt) {\n        var _a, _b;\n        if (!((_b = (_a = this.maplibreLayer) === null || _a === void 0 ? void 0 : _a.maplibreMap) === null || _b === void 0 ? void 0 : _b.getStyle()) || !this.layersFilter) {\n            return;\n        }\n        const { maplibreMap } = this.maplibreLayer;\n        const style = maplibreMap.getStyle();\n        const visibilityValue = this.getVisible() ? 'visible' : 'none';\n        const layers = style.layers || [];\n        for (let i = 0; i < layers.length; i += 1) {\n            const layer = layers[i];\n            if (this.layersFilter(layer)) {\n                const { id } = layer;\n                if (maplibreMap.getLayer(id)) {\n                    maplibreMap.setLayoutProperty(id, 'visibility', visibilityValue);\n                    if (this.getMinZoom() || this.getMaxZoom()) {\n                        maplibreMap.setLayerZoomRange(id, this.getMinZoom() ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1\n                        this.getMaxZoom() ? this.getMaxZoom() - 1 : 24);\n                    }\n                }\n            }\n        }\n    }\n    /**\n     * Create a copy of the MapboxStyleLayer.\n     * @param {Object} newOptions Options to override.\n     * @return {MapboxStyleLayer} A MapboxStyleLayer.\n     */\n    clone(newOptions) {\n        return new MaplibreStyleLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default MaplibreStyleLayer;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/ol/layers/MaplibreStyleLayer.js",
     "access": "private",
@@ -10414,7 +10353,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 481,
+    "__docId__": 477,
     "kind": "class",
     "name": "MaplibreStyleLayer",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js",
@@ -10441,7 +10380,7 @@
     ]
   },
   {
-    "__docId__": 482,
+    "__docId__": 478,
     "kind": "get",
     "name": "beforeId",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10460,7 +10399,7 @@
     }
   },
   {
-    "__docId__": 483,
+    "__docId__": 479,
     "kind": "set",
     "name": "beforeId",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10474,7 +10413,7 @@
     "undocument": true
   },
   {
-    "__docId__": 484,
+    "__docId__": 480,
     "kind": "get",
     "name": "layers",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10493,7 +10432,7 @@
     }
   },
   {
-    "__docId__": 485,
+    "__docId__": 481,
     "kind": "set",
     "name": "layers",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10507,7 +10446,7 @@
     "undocument": true
   },
   {
-    "__docId__": 486,
+    "__docId__": 482,
     "kind": "get",
     "name": "layersFilter",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10526,7 +10465,7 @@
     }
   },
   {
-    "__docId__": 487,
+    "__docId__": 483,
     "kind": "set",
     "name": "layersFilter",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10540,7 +10479,7 @@
     "undocument": true
   },
   {
-    "__docId__": 488,
+    "__docId__": 484,
     "kind": "get",
     "name": "mapboxLayer",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10559,7 +10498,7 @@
     }
   },
   {
-    "__docId__": 489,
+    "__docId__": 485,
     "kind": "get",
     "name": "maplibreLayer",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10578,7 +10517,7 @@
     }
   },
   {
-    "__docId__": 490,
+    "__docId__": 486,
     "kind": "set",
     "name": "maplibreLayer",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10592,7 +10531,7 @@
     "undocument": true
   },
   {
-    "__docId__": 491,
+    "__docId__": 487,
     "kind": "get",
     "name": "queryRenderedLayersFilter",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10611,7 +10550,7 @@
     }
   },
   {
-    "__docId__": 492,
+    "__docId__": 488,
     "kind": "set",
     "name": "queryRenderedLayersFilter",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10625,7 +10564,7 @@
     "undocument": true
   },
   {
-    "__docId__": 493,
+    "__docId__": 489,
     "kind": "get",
     "name": "sources",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10644,7 +10583,7 @@
     }
   },
   {
-    "__docId__": 494,
+    "__docId__": 490,
     "kind": "set",
     "name": "sources",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10658,7 +10597,7 @@
     "undocument": true
   },
   {
-    "__docId__": 495,
+    "__docId__": 491,
     "kind": "get",
     "name": "styleLayer",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10677,7 +10616,7 @@
     }
   },
   {
-    "__docId__": 496,
+    "__docId__": 492,
     "kind": "set",
     "name": "styleLayer",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10691,7 +10630,7 @@
     "deprecated": true
   },
   {
-    "__docId__": 498,
+    "__docId__": 494,
     "kind": "get",
     "name": "styleLayers",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10710,7 +10649,7 @@
     }
   },
   {
-    "__docId__": 499,
+    "__docId__": 495,
     "kind": "set",
     "name": "styleLayers",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10724,7 +10663,7 @@
     "deprecated": true
   },
   {
-    "__docId__": 501,
+    "__docId__": 497,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10799,7 +10738,7 @@
     ]
   },
   {
-    "__docId__": 502,
+    "__docId__": 498,
     "kind": "member",
     "name": "highlightedFeatures",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10816,7 +10755,7 @@
     }
   },
   {
-    "__docId__": 503,
+    "__docId__": 499,
     "kind": "member",
     "name": "selectedFeatures",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10833,7 +10772,7 @@
     }
   },
   {
-    "__docId__": 506,
+    "__docId__": 502,
     "kind": "method",
     "name": "createRenderer",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10853,7 +10792,7 @@
     }
   },
   {
-    "__docId__": 507,
+    "__docId__": 503,
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10880,7 +10819,7 @@
     "return": null
   },
   {
-    "__docId__": 508,
+    "__docId__": 504,
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10896,7 +10835,7 @@
     "return": null
   },
   {
-    "__docId__": 509,
+    "__docId__": 505,
     "kind": "method",
     "name": "addSources",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10911,7 +10850,7 @@
     "return": null
   },
   {
-    "__docId__": 510,
+    "__docId__": 506,
     "kind": "method",
     "name": "removeSources",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10926,7 +10865,7 @@
     "return": null
   },
   {
-    "__docId__": 511,
+    "__docId__": 507,
     "kind": "method",
     "name": "addLayers",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10941,7 +10880,7 @@
     "return": null
   },
   {
-    "__docId__": 512,
+    "__docId__": 508,
     "kind": "method",
     "name": "removeLayers",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10956,7 +10895,7 @@
     "return": null
   },
   {
-    "__docId__": 513,
+    "__docId__": 509,
     "kind": "method",
     "name": "onLoad",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10971,7 +10910,7 @@
     "return": null
   },
   {
-    "__docId__": 514,
+    "__docId__": 510,
     "kind": "member",
     "name": "disabled",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10988,7 +10927,43 @@
     }
   },
   {
-    "__docId__": 515,
+    "__docId__": 511,
+    "kind": "method",
+    "name": "setFeatureState",
+    "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer#setFeatureState",
+    "access": "public",
+    "description": "Set the feature state of the features.",
+    "lineNumber": 277,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Array<ol/Feature~Feature>"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "features",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "{[key:string]:boolean}"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "state",
+        "description": "The feature state"
+      }
+    ],
+    "return": null
+  },
+  {
+    "__docId__": 512,
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -10998,7 +10973,7 @@
     "longname": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer#getFeatureInfoAtCoordinate",
     "access": "private",
     "description": "Request feature information for a given coordinate.",
-    "lineNumber": 276,
+    "lineNumber": 304,
     "params": [
       {
         "nullable": null,
@@ -11021,7 +10996,7 @@
     }
   },
   {
-    "__docId__": 516,
+    "__docId__": 513,
     "kind": "method",
     "name": "setHoverState",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -11031,7 +11006,7 @@
     "longname": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer#setHoverState",
     "access": "private",
     "description": "Set if features are hovered or not.",
-    "lineNumber": 344,
+    "lineNumber": 374,
     "params": [
       {
         "nullable": null,
@@ -11057,7 +11032,7 @@
     "return": null
   },
   {
-    "__docId__": 517,
+    "__docId__": 514,
     "kind": "method",
     "name": "select",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -11067,7 +11042,7 @@
     "longname": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer#select",
     "access": "private",
     "description": "Select a list of features.",
-    "lineNumber": 371,
+    "lineNumber": 384,
     "params": [
       {
         "nullable": null,
@@ -11085,7 +11060,7 @@
     "return": null
   },
   {
-    "__docId__": 519,
+    "__docId__": 516,
     "kind": "method",
     "name": "highlight",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -11095,7 +11070,7 @@
     "longname": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer#highlight",
     "access": "private",
     "description": "Highlight a list of features.",
-    "lineNumber": 381,
+    "lineNumber": 396,
     "params": [
       {
         "nullable": null,
@@ -11113,7 +11088,7 @@
     "return": null
   },
   {
-    "__docId__": 521,
+    "__docId__": 518,
     "kind": "method",
     "name": "applyLayoutVisibility",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -11123,7 +11098,7 @@
     "longname": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer#applyLayoutVisibility",
     "access": "private",
     "description": "Apply visibility to style layers that fits the styleLayersFilter function.",
-    "lineNumber": 399,
+    "lineNumber": 414,
     "params": [
       {
         "name": "evt",
@@ -11135,7 +11110,7 @@
     "return": null
   },
   {
-    "__docId__": 522,
+    "__docId__": 519,
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer",
@@ -11145,7 +11120,7 @@
     "longname": "build/ol/layers/MaplibreStyleLayer.js~MaplibreStyleLayer#clone",
     "access": "private",
     "description": "Create a copy of the MapboxStyleLayer.",
-    "lineNumber": 427,
+    "lineNumber": 442,
     "params": [
       {
         "nullable": null,
@@ -11168,7 +11143,7 @@
     }
   },
   {
-    "__docId__": 523,
+    "__docId__": 520,
     "kind": "file",
     "name": "build/ol/layers/RealtimeLayer.js",
     "content": "import GeoJSON from 'ol/format/GeoJSON';\nimport { Vector as VectorLayer } from 'ol/layer';\nimport Source from 'ol/source/Source';\nimport { Vector as VectorSource } from 'ol/source';\nimport debounce from 'lodash.debounce';\nimport Layer from 'ol/layer/Layer';\nimport RealtimeLayerMixin from '../../common/mixins/RealtimeLayerMixin';\nimport { fullTrajectoryStyle } from '../styles';\nimport MobilityLayerMixin from '../mixins/MobilityLayerMixin';\nimport RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';\n/** @private */\nconst format = new GeoJSON();\n/**\n * Responsible for loading and display data from the geOps realtime API.\n *\n * @example\n * import { RealtimeLayer } from 'mobility-toolbox-js/ol';\n *\n * const layer = new RealtimeLayer({\n *   apiKey: \"yourApiKey\"\n *   // allowRenderWhenAnimating: false,\n *   // url: \"wss://api.geops.io/tracker-ws/v1/\",\n * });\n *\n *\n * @see <a href=\"/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html\">RealtimeAPI</a>\n *\n * @extends {ol/layer/Layer~Layer}\n *\n * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.\n * @public\n */\n// @ts-ignore\nclass RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {\n    /**\n     * Constructor.\n     *\n     * @param {RealtimeLayerOptions} options\n     * @param {boolean} [options.allowRenderWhenAnimating=false] Allow rendering of the layer when the map is animating.\n     * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).\n     * @param {string} [options.url=\"wss://api.geops.io/tracker-ws/v1/\"] The geOps realtime API url.\n     *\n     */\n    constructor(options) {\n        // We use a group to be able to add custom vector layer in extended class.\n        // For example TrajservLayer use a vectorLayer to display the complete trajectory.\n        super(Object.assign({ source: new Source({}) }, options));\n        /** @private */\n        this.allowRenderWhenAnimating = false;\n        /** @private */\n        this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;\n        // We store the layer used to highlight the full Trajectory\n        /** @private */\n        this.vectorLayer = new VectorLayer({\n            updateWhileAnimating: this.allowRenderWhenAnimating,\n            updateWhileInteracting: true,\n            source: new VectorSource({ features: [] }),\n            style: (feature, resolution) => {\n                return (options.fullTrajectoryStyle || fullTrajectoryStyle)(feature, resolution, this.styleOptions);\n            },\n        });\n        // Options the last render run did happen. If something changes\n        // we have to render again\n        /** @private */\n        this.renderState = {\n            center: [0, 0],\n            zoom: undefined,\n            rotation: 0,\n        };\n        /** @private */\n        this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);\n        /** @private */\n        this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);\n    }\n    /**\n     * @private\n     */\n    createRenderer() {\n        return new RealtimeLayerRenderer(this);\n    }\n    /** @private */\n    attachToMap(map) {\n        super.attachToMap(map);\n        if (this.map) {\n            // If the layer is visible we start  the rendering clock\n            if (this.visible) {\n                this.start();\n            }\n            // @ts-expect-error - bad ts check RealtimeLayer is a BaseLayer\n            const index = this.map.getLayers().getArray().indexOf(this);\n            this.map.getLayers().insertAt(index, this.vectorLayer);\n            this.olListenersKeys.push(...this.map.on(['moveend', 'change:target'], \n            // @ts-expect-error - bad ol definitions\n            (evt) => {\n                const view = (evt.map || evt.target).getView();\n                if (view.getAnimating() || view.getInteracting()) {\n                    return;\n                }\n                const zoom = view.getZoom();\n                // Update the interval between render updates\n                if (this.currentZoom !== zoom) {\n                    this.onZoomEndDebounced(evt);\n                }\n                /** @private */\n                this.currentZoom = zoom;\n                this.onMoveEndDebounced(evt);\n            }), this.on('change:visible', (evt) => {\n                if (evt.target.visible) {\n                    this.start();\n                }\n                else {\n                    this.stop();\n                }\n            }), this.on('propertychange', (evt) => {\n                // We apply every property change event related to visiblity to the vectorlayer\n                if (/(opacity|visible|zIndex|minResolution|maxResolution|minZoom|maxZoom)/.test(evt.key)) {\n                    this.vectorLayer.set(evt.key, evt.target.get(evt.key));\n                }\n            }));\n        }\n    }\n    /**\n     * Destroy the container of the tracker.\n     * @private\n     */\n    detachFromMap() {\n        var _a;\n        (_a = this.map) === null || _a === void 0 ? void 0 : _a.removeLayer(this.vectorLayer);\n        super.detachFromMap();\n    }\n    /**\n     * Render the trajectories using current map's size, resolution and rotation.\n     * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.\n     * @overrides\n     * @private\n     */\n    // @ts-ignore\n    renderTrajectories(noInterpolate) {\n        if (!this.map) {\n            return;\n        }\n        const view = this.map.getView();\n        // it could happen that the view is set but without center yet,\n        // so the calcualteExtent will trigger an error.\n        if (!view.getCenter()) {\n            return;\n        }\n        super.renderTrajectories({\n            size: this.map.getSize(),\n            center: view.getCenter(),\n            extent: view.calculateExtent(),\n            resolution: view.getResolution(),\n            rotation: view.getRotation(),\n            zoom: view.getZoom(),\n            pixelRatio: this.pixelRatio,\n        }, noInterpolate);\n    }\n    /**\n     * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.\n     * @private\n     * @override\n     */\n    renderTrajectoriesInternal(viewState, noInterpolate) {\n        if (!this.map) {\n            return false;\n        }\n        let isRendered = false;\n        const blockRendering = this.allowRenderWhenAnimating\n            ? false\n            : this.map.getView().getAnimating() ||\n                this.map.getView().getInteracting();\n        // Don't render the map when the map is animating or interacting.\n        isRendered = blockRendering\n            ? false\n            : super.renderTrajectoriesInternal(viewState, noInterpolate);\n        // We update the current render state.\n        if (isRendered) {\n            /** @private */\n            this.renderedViewState = Object.assign({}, viewState);\n            // @ts-expect-error - we are in the same class\n            const { container } = this.getRenderer();\n            if (container) {\n                container.style.transform = '';\n            }\n        }\n        return isRendered;\n    }\n    /**\n     * Return the delay in ms before the next rendering.\n     * @private\n     */\n    getRefreshTimeInMs() {\n        return super.getRefreshTimeInMs(this.map.getView().getZoom());\n    }\n    /**\n     * On move end we update the websocket with the new bbox.\n     *\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line @typescript-eslint/no-unused-vars\n    onMoveEnd(evt) {\n        if (!this.isUpdateBboxOnMoveEnd || !this.visible) {\n            return;\n        }\n        this.setBbox();\n    }\n    /**\n     * Function called on moveend event only when the zoom has changed.\n     *\n     * @param {ol/MapEvent~MapEvent} evt Moveend event.\n     * @private\n     * @override\n     */\n    // eslint-disable-next-line no-unused-vars\n    onZoomEnd() {\n        super.onZoomEnd();\n        if (!this.isUpdateBboxOnMoveEnd || !this.visible) {\n            return;\n        }\n        if (this.selectedVehicleId) {\n            this.highlightTrajectory(this.selectedVehicleId);\n        }\n    }\n    highlight(feature) {\n        this.highlightVehicle(feature === null || feature === void 0 ? void 0 : feature.get('train_id'));\n    }\n    select(feature) {\n        this.selectVehicle(feature === null || feature === void 0 ? void 0 : feature.get('train_id'));\n        this.highlightTrajectory(feature === null || feature === void 0 ? void 0 : feature.get('train_id'));\n    }\n    // /**\n    //  * Update the cursor style when hovering a vehicle.\n    //  *\n    //  * @private\n    //  * @override\n    //  */\n    // onFeatureHover(\n    //   features: Feature[],\n    //   layer: RealtimeLayer,\n    //   coordinate: Coordinate,\n    // ) {\n    //   super.onFeatureHover(features, layer, coordinate);\n    //   this.map.getTargetElement().style.cursor = features.length\n    //     ? 'pointer'\n    //     : 'auto';\n    // }\n    // /**\n    //  * Display the complete trajectory of the vehicle.\n    //  *\n    //  * @private\n    //  * @override\n    //  */\n    // onFeatureClick(\n    //   features: Feature[],\n    //   layer: RealtimeLayer,\n    //   coordinate: Coordinate,\n    // ) {\n    //   super.onFeatureClick(features, layer, coordinate);\n    //   this.highlightTrajectory(this.selectedVehicleId);\n    // }\n    /**\n     * Remove the trajectory form the list if necessary.\n     *\n     * @private\n     */\n    purgeTrajectory(trajectory, extent, zoom) {\n        const center = this.map.getView().getCenter();\n        if (!extent && !center) {\n            // In that case the view is not zoomed yet so we can't calculate the extent of the map,\n            // it will trigger a js error on calculateExtent function.\n            return false;\n        }\n        return super.purgeTrajectory(trajectory, extent || this.map.getView().calculateExtent(), zoom || this.map.getView().getZoom() || 0);\n    }\n    /**\n     * Send the current bbox to the websocket\n     *\n     * @private\n     */\n    setBbox(extent, zoom) {\n        super.setBbox(extent ||\n            this.map.getView().calculateExtent(), zoom || this.map.getView().getZoom() || 0);\n    }\n    /**\n     * Highlight the trajectory of journey.\n     * @private\n     */\n    highlightTrajectory(id) {\n        var _a, _b;\n        if (!id) {\n            this.vectorLayer.getSource().clear(true);\n            return Promise.resolve([]);\n        }\n        return this.api\n            .getFullTrajectory(id, this.mode, this.getGeneralizationLevelByZoom(Math.floor(((_b = (_a = this.map) === null || _a === void 0 ? void 0 : _a.getView()) === null || _b === void 0 ? void 0 : _b.getZoom()) || 0)))\n            .then((data) => {\n            var _a;\n            const fullTrajectory = data.content;\n            if (!((_a = fullTrajectory === null || fullTrajectory === void 0 ? void 0 : fullTrajectory.features) === null || _a === void 0 ? void 0 : _a.length)) {\n                return [];\n            }\n            const features = format.readFeatures(fullTrajectory);\n            this.vectorLayer.getSource().clear(true);\n            if (features.length) {\n                this.vectorLayer.getSource().addFeatures(features);\n            }\n            return features;\n        })\n            .catch(() => {\n            this.vectorLayer.getSource().clear(true);\n            return [];\n        });\n    }\n    /**\n     * Create a copy of the RealtimeLayer.\n     * @param {Object} newOptions Options to override\n     * @return {RealtimeLayer} A RealtimeLayer\n     */\n    clone(newOptions) {\n        return new RealtimeLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default RealtimeLayer;\n",
@@ -11179,7 +11154,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 524,
+    "__docId__": 521,
     "kind": "variable",
     "name": "format",
     "memberof": "build/ol/layers/RealtimeLayer.js",
@@ -11199,7 +11174,7 @@
     "ignore": true
   },
   {
-    "__docId__": 525,
+    "__docId__": 522,
     "kind": "class",
     "name": "RealtimeLayer",
     "memberof": "build/ol/layers/RealtimeLayer.js",
@@ -11229,7 +11204,7 @@
     ]
   },
   {
-    "__docId__": 526,
+    "__docId__": 523,
     "kind": "constructor",
     "name": "constructor",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11288,7 +11263,7 @@
     ]
   },
   {
-    "__docId__": 527,
+    "__docId__": 524,
     "kind": "member",
     "name": "allowRenderWhenAnimating",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11304,7 +11279,7 @@
     }
   },
   {
-    "__docId__": 529,
+    "__docId__": 526,
     "kind": "member",
     "name": "vectorLayer",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11320,7 +11295,7 @@
     }
   },
   {
-    "__docId__": 530,
+    "__docId__": 527,
     "kind": "member",
     "name": "renderState",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11336,7 +11311,7 @@
     }
   },
   {
-    "__docId__": 531,
+    "__docId__": 528,
     "kind": "member",
     "name": "onZoomEndDebounced",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11352,7 +11327,7 @@
     }
   },
   {
-    "__docId__": 532,
+    "__docId__": 529,
     "kind": "member",
     "name": "onMoveEndDebounced",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11368,7 +11343,7 @@
     }
   },
   {
-    "__docId__": 533,
+    "__docId__": 530,
     "kind": "method",
     "name": "createRenderer",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11387,7 +11362,7 @@
     }
   },
   {
-    "__docId__": 534,
+    "__docId__": 531,
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11409,7 +11384,7 @@
     "return": null
   },
   {
-    "__docId__": 535,
+    "__docId__": 532,
     "kind": "member",
     "name": "currentZoom",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11425,7 +11400,7 @@
     }
   },
   {
-    "__docId__": 536,
+    "__docId__": 533,
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11440,7 +11415,7 @@
     "return": null
   },
   {
-    "__docId__": 537,
+    "__docId__": 534,
     "kind": "method",
     "name": "renderTrajectories",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11472,7 +11447,7 @@
     "return": null
   },
   {
-    "__docId__": 538,
+    "__docId__": 535,
     "kind": "method",
     "name": "renderTrajectoriesInternal",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11505,7 +11480,7 @@
     }
   },
   {
-    "__docId__": 539,
+    "__docId__": 536,
     "kind": "member",
     "name": "renderedViewState",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11521,7 +11496,7 @@
     }
   },
   {
-    "__docId__": 540,
+    "__docId__": 537,
     "kind": "method",
     "name": "getRefreshTimeInMs",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11540,7 +11515,7 @@
     }
   },
   {
-    "__docId__": 541,
+    "__docId__": 538,
     "kind": "method",
     "name": "onMoveEnd",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11563,7 +11538,7 @@
     "return": null
   },
   {
-    "__docId__": 542,
+    "__docId__": 539,
     "kind": "method",
     "name": "onZoomEnd",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11590,7 +11565,7 @@
     "return": null
   },
   {
-    "__docId__": 543,
+    "__docId__": 540,
     "kind": "method",
     "name": "highlight",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11613,7 +11588,7 @@
     "return": null
   },
   {
-    "__docId__": 544,
+    "__docId__": 541,
     "kind": "method",
     "name": "select",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11636,7 +11611,7 @@
     "return": null
   },
   {
-    "__docId__": 545,
+    "__docId__": 542,
     "kind": "method",
     "name": "purgeTrajectory",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11674,7 +11649,7 @@
     }
   },
   {
-    "__docId__": 546,
+    "__docId__": 543,
     "kind": "method",
     "name": "setBbox",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11702,7 +11677,7 @@
     "return": null
   },
   {
-    "__docId__": 547,
+    "__docId__": 544,
     "kind": "method",
     "name": "highlightTrajectory",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11728,7 +11703,7 @@
     }
   },
   {
-    "__docId__": 548,
+    "__docId__": 545,
     "kind": "method",
     "name": "clone",
     "memberof": "build/ol/layers/RealtimeLayer.js~RealtimeLayer",
@@ -11761,7 +11736,7 @@
     }
   },
   {
-    "__docId__": 549,
+    "__docId__": 546,
     "kind": "file",
     "name": "build/ol/layers/index.js",
     "content": "export { default as MaplibreLayer } from './MaplibreLayer';\nexport { default as MaplibreStyleLayer } from './MaplibreStyleLayer';\nexport { default as RealtimeLayer } from './RealtimeLayer';\n",
@@ -11772,7 +11747,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 550,
+    "__docId__": 547,
     "kind": "file",
     "name": "build/ol/mixins/MobilityLayerMixin.js",
     "content": "import PropertiesLayerMixin from './PropertiesLayerMixin';\nfunction MobilityLayerMixin(Base) {\n    return class MobilityLayer extends PropertiesLayerMixin(Base) {\n    };\n}\nexport default MobilityLayerMixin;\n",
@@ -11783,7 +11758,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 551,
+    "__docId__": 548,
     "kind": "function",
     "name": "MobilityLayerMixin",
     "memberof": "build/ol/mixins/MobilityLayerMixin.js",
@@ -11813,7 +11788,7 @@
     }
   },
   {
-    "__docId__": 552,
+    "__docId__": 549,
     "kind": "file",
     "name": "build/ol/mixins/PropertiesLayerMixin.js",
     "content": "import { getUid } from 'ol';\nimport getLayersAsFlatArray from '../../common/utils/getLayersAsFlatArray';\n/**\n * This mixin adds some properties to access ol custom properties easily.\n */\nfunction PropertiesLayerMixin(Base) {\n    return class PropertiesLayer extends Base {\n        get children() {\n            return this.get('children') || [];\n        }\n        set children(newValue) {\n            this.set('children', newValue || []);\n        }\n        get copyrights() {\n            // eslint-disable-next-line no-console\n            console.warn('Deprecated. Use the source object to get the attributions');\n            return this.get('copyrights');\n        }\n        set copyrights(newCopyrights) {\n            // eslint-disable-next-line no-console\n            console.warn('Deprecated. Use the source object to set the attributions');\n            const arrValue = newCopyrights && !Array.isArray(newCopyrights)\n                ? [newCopyrights]\n                : newCopyrights;\n            this.set('copyrights', arrValue || []);\n        }\n        get disabled() {\n            return this.get('disabled');\n        }\n        set disabled(newValue) {\n            this.set('disabled', newValue);\n        }\n        get group() {\n            return this.get('group');\n        }\n        get hitTolerance() {\n            // eslint-disable-next-line no-console\n            console.warn('Deprecated. Pass the pixelTolerance when you request the features.');\n            return this.get('hitTolerance') || 5;\n        }\n        get key() {\n            return this.get('key') || this.get('name') || getUid(this);\n        }\n        get map() {\n            return this.getMapInternal();\n        }\n        get name() {\n            return this.get('name');\n        }\n        get olLayer() {\n            // eslint-disable-next-line no-console\n            console.warn(\"Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This getter is only a redirect to the current 'this' object.\");\n            return this;\n        }\n        // eslint-disable-next-line class-methods-use-this\n        set olLayer(newValue) {\n            // eslint-disable-next-line no-console\n            console.log('Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This setter has no effect.');\n        }\n        get parent() {\n            return this.get('parent');\n        }\n        set parent(newValue) {\n            this.set('parent', newValue);\n        }\n        get visible() {\n            return this.getVisible();\n        }\n        set visible(newValue) {\n            this.setVisible(newValue);\n        }\n        constructor(...args) {\n            var _a;\n            const options = args[0];\n            super(options);\n            this.options = {};\n            this.olListenersKeys = [];\n            if (options.properties) {\n                // eslint-disable-next-line no-console\n                console.warn(\"Deprecated. Don't use properties options. Pass the values directly in options object.\");\n                this.setProperties(options.properties);\n            }\n            (_a = this.olListenersKeys) === null || _a === void 0 ? void 0 : _a.push(\n            // Update parent property\n            this.on('propertychange', (evt) => {\n                if (evt.key === 'children') {\n                    this.onChildrenChange(evt.oldValue);\n                }\n            }));\n            this.options = options;\n            this.children = options.children || []; // Trigger the on children change event\n        }\n        // @ts-expect-error - this is a mixin\n        setMapInternal(map) {\n            super.setMapInternal(map);\n            if (map) {\n                this.attachToMap(map);\n            }\n            else {\n                this.detachFromMap();\n            }\n        }\n        /** @private */\n        onChildrenChange(oldValue) {\n            // Set the parent property\n            (oldValue || []).forEach((child) => {\n                child.set('parent', undefined);\n            });\n            (this.children || []).forEach((child) => {\n                child.set('parent', this);\n            });\n        }\n        /**\n         * Initialize the layer with the map passed in parameters.\n         *\n         * @param {ol/Map~Map} map A map.\n         */\n        attachToMap(map) {\n            // @ts-ignore\n            (super.attachToMap || (() => { }))(map);\n            (this.get('children') || []).forEach((child) => {\n                map.addLayer(child);\n            });\n        }\n        /**\n         * Terminate what was initialized in init function. Remove layer, events...\n         */\n        detachFromMap() {\n            (this.get('children') || []).forEach((child) => {\n                this.map.removeLayer(child);\n            });\n            // @ts-ignore\n            (super.detachFromMap || (() => { }))();\n        }\n        /**\n         * Return the an array containing all the descendants of the layer in a flat array. Including the current layer.\n         */\n        flat() {\n            return getLayersAsFlatArray(this);\n        }\n    };\n}\nexport default PropertiesLayerMixin;\n",
@@ -11824,7 +11799,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 553,
+    "__docId__": 550,
     "kind": "function",
     "name": "PropertiesLayerMixin",
     "memberof": "build/ol/mixins/PropertiesLayerMixin.js",
@@ -11853,7 +11828,7 @@
     }
   },
   {
-    "__docId__": 554,
+    "__docId__": 551,
     "kind": "file",
     "name": "build/ol/renderers/MaplibreLayerRenderer.js",
     "content": "import { toDegrees } from 'ol/math';\nimport { toLonLat } from 'ol/proj';\nimport LayerRenderer from 'ol/renderer/Layer';\nimport GeoJSON from 'ol/format/GeoJSON';\nimport { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';\n/**\n * @private\n */\nconst formats = {\n    'EPSG:3857': new GeoJSON({\n        featureProjection: 'EPSG:3857',\n    }),\n};\n/**\n * This class is a renderer for Maplibre Layer to be able to use the native ol\n * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.\n * @private\n */\n// @ts-ignore\nexport default class MaplibreLayerRenderer extends LayerRenderer {\n    getFeaturesAtCoordinate(coordinate, hitTolerance = 5) {\n        var _a, _b;\n        if (!coordinate) {\n            return [];\n        }\n        const layer = this.getLayer();\n        const map = layer.getMapInternal();\n        const { mbMap } = layer;\n        const projection = ((_b = (_a = map === null || map === void 0 ? void 0 : map.getView()) === null || _a === void 0 ? void 0 : _a.getProjection()) === null || _b === void 0 ? void 0 : _b.getCode()) || 'EPSG:3857';\n        let features = [];\n        if (!formats[projection]) {\n            formats[projection] = new GeoJSON({\n                featureProjection: projection,\n            });\n        }\n        if (mbMap === null || mbMap === void 0 ? void 0 : mbMap.isStyleLoaded()) {\n            const pixel = coordinate && mbMap.project(toLonLat(coordinate));\n            if ((pixel === null || pixel === void 0 ? void 0 : pixel.x) && (pixel === null || pixel === void 0 ? void 0 : pixel.y)) {\n                let pixels = [\n                    pixel.x,\n                    pixel.y,\n                ];\n                if (hitTolerance) {\n                    const [x, y] = pixels;\n                    pixels = [\n                        [x - hitTolerance, y - hitTolerance],\n                        [x + hitTolerance, y + hitTolerance],\n                    ];\n                }\n                // At this point we get GeoJSON Maplibre feature, we transform it to an OpenLayers\n                // feature to be consistent with other layers.\n                features = mbMap\n                    .queryRenderedFeatures(pixels, layer.queryRenderedFeaturesOptions || {})\n                    .map((feature) => {\n                    const olFeature = formats[projection].readFeature(feature);\n                    if (olFeature) {\n                        // We save the original Maplibre feature to avoid losing informations\n                        // potentially needed for other functionnality like highlighting\n                        // (id, layer id, source, sourceLayer ...)\n                        // @ts-ignore\n                        olFeature.set(VECTOR_TILE_FEATURE_PROPERTY, feature);\n                    }\n                    return olFeature;\n                });\n            }\n        }\n        return features;\n    }\n    // eslint-disable-next-line class-methods-use-this\n    prepareFrame() {\n        return true;\n    }\n    renderFrame(frameState) {\n        const layer = this.getLayer();\n        const { map, mbMap } = layer;\n        if (!layer || !map || !mbMap) {\n            return null;\n        }\n        const canvas = mbMap.getCanvas();\n        const { viewState } = frameState;\n        const opacity = layer.getOpacity() || 1;\n        canvas.style.opacity = `${opacity}`;\n        // adjust view parameters in Maplibre\n        mbMap.jumpTo({\n            center: toLonLat(viewState.center),\n            zoom: viewState.zoom - 1,\n            bearing: toDegrees(-viewState.rotation),\n        });\n        if (!canvas.isConnected) {\n            // The canvas is not connected to the DOM, request a map rendering at the next animation frame\n            // to set the canvas size.\n            map.render();\n        }\n        else if (canvas.width !== frameState.size[0] ||\n            canvas.height !== frameState.size[1]) {\n            mbMap.resize();\n        }\n        mbMap.redraw();\n        return mbMap.getContainer();\n    }\n    getFeatures(pixel) {\n        var _a, _b;\n        const coordinate = (_b = (_a = this.getLayer()) === null || _a === void 0 ? void 0 : _a.getMapInternal()) === null || _b === void 0 ? void 0 : _b.getCoordinateFromPixel(pixel);\n        return Promise.resolve(this.getFeaturesAtCoordinate(coordinate));\n    }\n    forEachFeatureAtCoordinate(coordinate, frameState, hitTolerance, callback) {\n        const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);\n        features.forEach((feature) => {\n            // @ts-ignore\n            callback(feature, this.layer_, feature.getGeometry());\n        });\n        return features === null || features === void 0 ? void 0 : features[0];\n    }\n}\n",
@@ -11864,7 +11839,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 555,
+    "__docId__": 552,
     "kind": "variable",
     "name": "formats",
     "memberof": "build/ol/renderers/MaplibreLayerRenderer.js",
@@ -11884,7 +11859,7 @@
     "ignore": true
   },
   {
-    "__docId__": 556,
+    "__docId__": 553,
     "kind": "class",
     "name": "MaplibreLayerRenderer",
     "memberof": "build/ol/renderers/MaplibreLayerRenderer.js",
@@ -11902,7 +11877,7 @@
     ]
   },
   {
-    "__docId__": 557,
+    "__docId__": 554,
     "kind": "method",
     "name": "getFeaturesAtCoordinate",
     "memberof": "build/ol/renderers/MaplibreLayerRenderer.js~MaplibreLayerRenderer",
@@ -11938,7 +11913,7 @@
     }
   },
   {
-    "__docId__": 558,
+    "__docId__": 555,
     "kind": "method",
     "name": "prepareFrame",
     "memberof": "build/ol/renderers/MaplibreLayerRenderer.js~MaplibreLayerRenderer",
@@ -11958,7 +11933,7 @@
     }
   },
   {
-    "__docId__": 559,
+    "__docId__": 556,
     "kind": "method",
     "name": "renderFrame",
     "memberof": "build/ol/renderers/MaplibreLayerRenderer.js~MaplibreLayerRenderer",
@@ -11985,7 +11960,7 @@
     }
   },
   {
-    "__docId__": 560,
+    "__docId__": 557,
     "kind": "method",
     "name": "getFeatures",
     "memberof": "build/ol/renderers/MaplibreLayerRenderer.js~MaplibreLayerRenderer",
@@ -12012,7 +11987,7 @@
     }
   },
   {
-    "__docId__": 561,
+    "__docId__": 558,
     "kind": "method",
     "name": "forEachFeatureAtCoordinate",
     "memberof": "build/ol/renderers/MaplibreLayerRenderer.js~MaplibreLayerRenderer",
@@ -12057,7 +12032,7 @@
     }
   },
   {
-    "__docId__": 562,
+    "__docId__": 559,
     "kind": "file",
     "name": "build/ol/renderers/MaplibreStyleLayerRenderer.js",
     "content": "import { toLonLat } from 'ol/proj';\nimport LayerRenderer from 'ol/renderer/Layer';\nimport GeoJSON from 'ol/format/GeoJSON';\nimport { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';\n/**\n * @private\n */\nconst formats = {\n    'EPSG:3857': new GeoJSON({\n        featureProjection: 'EPSG:3857',\n    }),\n};\n/**\n * This class is a renderer for Maplibre Layer to be able to use the native ol\n * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.\n * @private\n */\n// @ts-ignore\nexport default class MaplibreStyleLayerRenderer extends LayerRenderer {\n    getFeaturesAtCoordinate(coordinate, hitTolerance = 5) {\n        var _a, _b;\n        if (!coordinate) {\n            return [];\n        }\n        const layer = this.getLayer();\n        const map = layer.getMapInternal();\n        const { maplibreMap } = layer.maplibreLayer;\n        const projection = ((_b = (_a = map === null || map === void 0 ? void 0 : map.getView()) === null || _a === void 0 ? void 0 : _a.getProjection()) === null || _b === void 0 ? void 0 : _b.getCode()) || 'EPSG:3857';\n        let features = [];\n        if (!formats[projection]) {\n            formats[projection] = new GeoJSON({\n                featureProjection: projection,\n            });\n        }\n        if (maplibreMap === null || maplibreMap === void 0 ? void 0 : maplibreMap.isStyleLoaded()) {\n            const pixel = coordinate &&\n                maplibreMap.project(toLonLat(coordinate));\n            if ((pixel === null || pixel === void 0 ? void 0 : pixel.x) && (pixel === null || pixel === void 0 ? void 0 : pixel.y)) {\n                let pixels = [\n                    pixel.x,\n                    pixel.y,\n                ];\n                if (hitTolerance) {\n                    const [x, y] = pixels;\n                    pixels = [\n                        [x - hitTolerance, y - hitTolerance],\n                        [x + hitTolerance, y + hitTolerance],\n                    ];\n                }\n                // We query features only on style layers used by this layer.\n                let layers = layer.layers || [];\n                if (layer.layersFilter) {\n                    layers = maplibreMap.getStyle().layers.filter(layer.layersFilter);\n                }\n                if (layer.queryRenderedLayersFilter) {\n                    // @ts-ignore\n                    // eslint-disable-next-line @typescript-eslint/no-unused-vars\n                    layers = maplibreMap\n                        .getStyle()\n                        .layers.filter(layer.queryRenderedLayersFilter);\n                }\n                // At this point we get GeoJSON Maplibre feature, we transform it to an OpenLayers\n                // feature to be consistent with other layers.\n                features = maplibreMap\n                    .queryRenderedFeatures(pixels, {\n                    layers: layers.map((l) => l.id),\n                    validate: false,\n                    // ...layer.queryRenderedFeaturesOptions,\n                })\n                    .map((feature) => {\n                    const olFeature = formats[projection].readFeature(feature);\n                    if (olFeature) {\n                        // We save the original Maplibre feature to avoid losing informations\n                        // potentially needed for other functionnality like highlighting\n                        // (id, layer id, source, sourceLayer ...)\n                        // @ts-ignore\n                        olFeature.set(VECTOR_TILE_FEATURE_PROPERTY, feature);\n                    }\n                    return olFeature;\n                });\n            }\n        }\n        return features;\n    }\n    // eslint-disable-next-line class-methods-use-this\n    prepareFrame() {\n        return true;\n    }\n    // eslint-disable-next-line class-methods-use-this\n    renderFrame() {\n        return null;\n    }\n    getFeatures(pixel) {\n        var _a, _b;\n        const coordinate = (_b = (_a = this.getLayer()) === null || _a === void 0 ? void 0 : _a.getMapInternal()) === null || _b === void 0 ? void 0 : _b.getCoordinateFromPixel(pixel);\n        return Promise.resolve(this.getFeaturesAtCoordinate(coordinate));\n    }\n    forEachFeatureAtCoordinate(coordinate, frameState, hitTolerance, callback) {\n        const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);\n        features.forEach((feature) => {\n            // @ts-ignore\n            callback(feature, this.layer_, feature.getGeometry());\n        });\n        return features === null || features === void 0 ? void 0 : features[0];\n    }\n}\n",
@@ -12068,7 +12043,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 563,
+    "__docId__": 560,
     "kind": "variable",
     "name": "formats",
     "memberof": "build/ol/renderers/MaplibreStyleLayerRenderer.js",
@@ -12088,7 +12063,7 @@
     "ignore": true
   },
   {
-    "__docId__": 564,
+    "__docId__": 561,
     "kind": "class",
     "name": "MaplibreStyleLayerRenderer",
     "memberof": "build/ol/renderers/MaplibreStyleLayerRenderer.js",
@@ -12106,7 +12081,7 @@
     ]
   },
   {
-    "__docId__": 565,
+    "__docId__": 562,
     "kind": "method",
     "name": "getFeaturesAtCoordinate",
     "memberof": "build/ol/renderers/MaplibreStyleLayerRenderer.js~MaplibreStyleLayerRenderer",
@@ -12142,7 +12117,7 @@
     }
   },
   {
-    "__docId__": 566,
+    "__docId__": 563,
     "kind": "method",
     "name": "prepareFrame",
     "memberof": "build/ol/renderers/MaplibreStyleLayerRenderer.js~MaplibreStyleLayerRenderer",
@@ -12162,7 +12137,7 @@
     }
   },
   {
-    "__docId__": 567,
+    "__docId__": 564,
     "kind": "method",
     "name": "renderFrame",
     "memberof": "build/ol/renderers/MaplibreStyleLayerRenderer.js~MaplibreStyleLayerRenderer",
@@ -12182,7 +12157,7 @@
     }
   },
   {
-    "__docId__": 568,
+    "__docId__": 565,
     "kind": "method",
     "name": "getFeatures",
     "memberof": "build/ol/renderers/MaplibreStyleLayerRenderer.js~MaplibreStyleLayerRenderer",
@@ -12209,7 +12184,7 @@
     }
   },
   {
-    "__docId__": 569,
+    "__docId__": 566,
     "kind": "method",
     "name": "forEachFeatureAtCoordinate",
     "memberof": "build/ol/renderers/MaplibreStyleLayerRenderer.js~MaplibreStyleLayerRenderer",
@@ -12254,7 +12229,7 @@
     }
   },
   {
-    "__docId__": 570,
+    "__docId__": 567,
     "kind": "file",
     "name": "build/ol/renderers/RealtimeLayerRenderer.js",
     "content": "import GeoJSON from 'ol/format/GeoJSON';\nimport { composeCssTransform } from 'ol/transform';\nimport { buffer, containsCoordinate } from 'ol/extent';\nimport CanvasLayerRenderer from 'ol/renderer/canvas/Layer';\n/** @private */\nconst format = new GeoJSON();\n/**\n * This class is a renderer for Maplibre Layer to be able to use the native ol\n * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.\n * @private\n */\n// @ts-ignore\nexport default class RealtimeLayerRenderer extends CanvasLayerRenderer {\n    // eslint-disable-next-line class-methods-use-this\n    prepareFrame() {\n        return true;\n    }\n    renderFrame(frameState) {\n        const { canvas, renderedViewState } = this.getLayer();\n        if (!this.container) {\n            this.container = document.createElement('div');\n            this.container.className = this.getLayer().getClassName();\n            this.container.style.position = 'absolute';\n            this.container.style.width = '100%';\n            this.container.style.height = '100%';\n            if (canvas instanceof HTMLCanvasElement) {\n                canvas.style.position = 'absolute';\n                canvas.style.top = '0';\n                canvas.style.left = '0';\n                canvas.style.transformOrigin = 'top left';\n                this.container.appendChild(canvas);\n            }\n        }\n        if (renderedViewState) {\n            const { center, resolution, rotation } = frameState.viewState;\n            const { center: renderedCenter, resolution: renderedResolution, rotation: renderedRotation, } = renderedViewState;\n            if (renderedResolution / resolution >= 3) {\n                // Avoid having really big points when zooming fast.\n                const context = canvas === null || canvas === void 0 ? void 0 : canvas.getContext('2d');\n                context === null || context === void 0 ? void 0 : context.clearRect(0, 0, canvas === null || canvas === void 0 ? void 0 : canvas.width, canvas === null || canvas === void 0 ? void 0 : canvas.height);\n            }\n            else {\n                const map = this.getLayer().getMapInternal();\n                const pixelCenterRendered = map === null || map === void 0 ? void 0 : map.getPixelFromCoordinate(renderedCenter);\n                const pixelCenter = map === null || map === void 0 ? void 0 : map.getPixelFromCoordinate(center);\n                if (pixelCenterRendered && pixelCenter) {\n                    this.container.style.transform = composeCssTransform(pixelCenterRendered[0] - pixelCenter[0], pixelCenterRendered[1] - pixelCenter[1], renderedResolution / resolution, renderedResolution / resolution, rotation - renderedRotation, 0, 0);\n                }\n            }\n        }\n        return this.container;\n    }\n    getData(pixel) {\n        var _a;\n        let data;\n        try {\n            const { pixelRatio } = this.getLayer();\n            const context = (_a = this.canvas) === null || _a === void 0 ? void 0 : _a.getContext('2d', {\n                willReadFrequently: true,\n            });\n            data =\n                (context === null || context === void 0 ? void 0 : context.getImageData(pixel[0] * (pixelRatio || 1), pixel[1] * (pixelRatio || 1), 1, 1).data) || null; // [3];\n            return data;\n        }\n        catch (err) {\n            // eslint-disable-next-line no-console\n            console.error('error getting data', err);\n        }\n        return null;\n    }\n    getFeatures(pixel) {\n        var _a, _b;\n        const coordinate = (_b = (_a = this.getLayer()) === null || _a === void 0 ? void 0 : _a.getMapInternal()) === null || _b === void 0 ? void 0 : _b.getCoordinateFromPixel(pixel);\n        return Promise.resolve(this.getFeaturesAtCoordinate(coordinate));\n    }\n    forEachFeatureAtCoordinate(coordinate, frameState, hitTolerance, callback) {\n        const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);\n        features.forEach((feature) => {\n            // @ts-ignore\n            callback(feature, this.layer_, feature.getGeometry());\n        });\n        return features === null || features === void 0 ? void 0 : features[0];\n    }\n    getFeaturesAtCoordinate(coordinate, hitTolerance = 5) {\n        var _a;\n        if (!coordinate) {\n            return [];\n        }\n        const layer = this.getLayer();\n        const map = layer.getMapInternal();\n        const resolution = ((_a = map === null || map === void 0 ? void 0 : map.getView()) === null || _a === void 0 ? void 0 : _a.getResolution()) || 1;\n        const nb = 10;\n        const ext = buffer([...coordinate, ...coordinate], hitTolerance * resolution);\n        let features = [];\n        let trajectories = Object.values(layer.trajectories || {});\n        if (layer.sort) {\n            // @ts-ignore\n            trajectories = trajectories.sort(this.sort);\n        }\n        const vehicles = [];\n        for (let i = 0; i < trajectories.length; i += 1) {\n            const trajectory = trajectories[i];\n            if (trajectory.properties.coordinate &&\n                containsCoordinate(ext, trajectory.properties.coordinate)) {\n                vehicles.push(trajectories[i]);\n            }\n            if (vehicles.length === nb) {\n                break;\n            }\n        }\n        features = vehicles.map((vehicle) => format.readFeature(vehicle));\n        return features;\n    }\n}\n",
@@ -12265,7 +12240,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 571,
+    "__docId__": 568,
     "kind": "variable",
     "name": "format",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js",
@@ -12285,7 +12260,7 @@
     "ignore": true
   },
   {
-    "__docId__": 572,
+    "__docId__": 569,
     "kind": "class",
     "name": "RealtimeLayerRenderer",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js",
@@ -12303,7 +12278,7 @@
     ]
   },
   {
-    "__docId__": 573,
+    "__docId__": 570,
     "kind": "method",
     "name": "prepareFrame",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js~RealtimeLayerRenderer",
@@ -12323,7 +12298,7 @@
     }
   },
   {
-    "__docId__": 574,
+    "__docId__": 571,
     "kind": "method",
     "name": "renderFrame",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js~RealtimeLayerRenderer",
@@ -12350,7 +12325,7 @@
     }
   },
   {
-    "__docId__": 575,
+    "__docId__": 572,
     "kind": "member",
     "name": "container",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js~RealtimeLayerRenderer",
@@ -12367,7 +12342,7 @@
     }
   },
   {
-    "__docId__": 576,
+    "__docId__": 573,
     "kind": "method",
     "name": "getData",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js~RealtimeLayerRenderer",
@@ -12394,7 +12369,7 @@
     }
   },
   {
-    "__docId__": 577,
+    "__docId__": 574,
     "kind": "method",
     "name": "getFeatures",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js~RealtimeLayerRenderer",
@@ -12421,7 +12396,7 @@
     }
   },
   {
-    "__docId__": 578,
+    "__docId__": 575,
     "kind": "method",
     "name": "forEachFeatureAtCoordinate",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js~RealtimeLayerRenderer",
@@ -12466,7 +12441,7 @@
     }
   },
   {
-    "__docId__": 579,
+    "__docId__": 576,
     "kind": "method",
     "name": "getFeaturesAtCoordinate",
     "memberof": "build/ol/renderers/RealtimeLayerRenderer.js~RealtimeLayerRenderer",
@@ -12502,7 +12477,7 @@
     }
   },
   {
-    "__docId__": 580,
+    "__docId__": 577,
     "kind": "file",
     "name": "build/ol/styles/fullTrajectoryDelayStyle.js",
     "content": "import { Style, Fill, Stroke, Circle } from 'ol/style';\n/** @private */\nconst stroke = new Style({\n    zIndex: 2,\n    image: new Circle({\n        radius: 5,\n        fill: new Fill({\n            color: '#000000',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#000000',\n        width: 6,\n    }),\n});\n/** @private */\nconst fill = new Style({\n    zIndex: 3,\n    image: new Circle({\n        radius: 4,\n        fill: new Fill({\n            color: '#a0a0a0',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#a0a0a0',\n        width: 4,\n    }),\n});\n/**\n * @private\n */\nconst fullTrajectoryDelaystyle = () => {\n    return [stroke, fill];\n};\nexport default fullTrajectoryDelaystyle;\n",
@@ -12513,7 +12488,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 581,
+    "__docId__": 578,
     "kind": "variable",
     "name": "stroke",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -12533,7 +12508,7 @@
     "ignore": true
   },
   {
-    "__docId__": 582,
+    "__docId__": 579,
     "kind": "variable",
     "name": "fill",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -12553,7 +12528,7 @@
     "ignore": true
   },
   {
-    "__docId__": 583,
+    "__docId__": 580,
     "kind": "function",
     "name": "fullTrajectoryDelaystyle",
     "memberof": "build/ol/styles/fullTrajectoryDelayStyle.js",
@@ -12575,7 +12550,7 @@
     }
   },
   {
-    "__docId__": 584,
+    "__docId__": 581,
     "kind": "file",
     "name": "build/ol/styles/fullTrajectoryStyle.js",
     "content": "import { Style, Fill, Stroke, Circle } from 'ol/style';\n/** @private */\nconst borderStyle = new Style({\n    zIndex: 2,\n    image: new Circle({\n        radius: 5,\n        fill: new Fill({\n            color: '#000000',\n        }),\n    }),\n    stroke: new Stroke({\n        color: '#000000',\n        width: 6,\n    }),\n});\n/** @private */\nconst fullTrajectorystyle = (feature, resolution, options) => {\n    let lineColor = '#ffffff'; // white\n    const type = feature.get('type');\n    let stroke = feature.get('stroke');\n    if (stroke && stroke[0] !== '#') {\n        stroke = `#${stroke}`;\n    }\n    lineColor = stroke || (options === null || options === void 0 ? void 0 : options.getBgColor(type));\n    // Don't allow white lines, use red instead.\n    lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;\n    const style = [\n        borderStyle,\n        new Style({\n            zIndex: 3,\n            image: new Circle({\n                radius: 4,\n                fill: new Fill({\n                    color: lineColor,\n                }),\n            }),\n            stroke: new Stroke({\n                color: lineColor,\n                width: 4,\n            }),\n        }),\n    ];\n    return style;\n};\nexport default fullTrajectorystyle;\n",
@@ -12586,7 +12561,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 585,
+    "__docId__": 582,
     "kind": "variable",
     "name": "borderStyle",
     "memberof": "build/ol/styles/fullTrajectoryStyle.js",
@@ -12606,7 +12581,7 @@
     "ignore": true
   },
   {
-    "__docId__": 586,
+    "__docId__": 583,
     "kind": "function",
     "name": "fullTrajectorystyle",
     "memberof": "build/ol/styles/fullTrajectoryStyle.js",
@@ -12647,7 +12622,7 @@
     }
   },
   {
-    "__docId__": 587,
+    "__docId__": 584,
     "kind": "file",
     "name": "build/ol/styles/index.js",
     "content": "export { default as fullTrajectoryStyle } from './fullTrajectoryStyle';\nexport { default as fullTrajectoryDelayStyle } from './fullTrajectoryDelayStyle';\nexport { default as routingStyle } from './routingStyle';\n",
@@ -12658,7 +12633,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 588,
+    "__docId__": 585,
     "kind": "file",
     "name": "build/ol/styles/routingStyle.js",
     "content": "import { Circle, Fill, Stroke } from 'ol/style';\nimport Style from 'ol/style/Style';\n/** @private */\nconst circleStyle = new Circle({\n    radius: 6,\n    fill: new Fill({\n        color: [255, 0, 0, 1],\n    }),\n    stroke: new Stroke({\n        color: [0, 0, 0, 1],\n        width: 1,\n    }),\n});\n/** @private */\nconst blackBorder = new Style({\n    stroke: new Stroke({\n        color: [0, 0, 0, 1],\n        width: 5,\n    }),\n});\n/** @private */\nconst redLine = new Style({\n    image: circleStyle,\n    stroke: new Stroke({\n        color: [255, 0, 0, 1],\n        width: 3,\n    }),\n});\n/** @private */\nconst dashedRedLine = new Style({\n    image: circleStyle,\n    stroke: new Stroke({\n        color: [255, 0, 0, 1],\n        width: 3,\n        lineDash: [1, 10],\n    }),\n});\n/** @private */\nconst routingStyle = (feature, resolution) => {\n    const minResolution = feature.get('minResolution');\n    const maxResolution = feature.get('maxResolution');\n    const inRange = resolution <= minResolution && resolution > maxResolution;\n    if (minResolution && maxResolution && !inRange) {\n        return [];\n    }\n    const mot = feature.get('mot');\n    if (mot !== 'foot') {\n        return [blackBorder, redLine];\n    }\n    return [dashedRedLine];\n};\nexport default routingStyle;\n",
@@ -12669,7 +12644,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 589,
+    "__docId__": 586,
     "kind": "variable",
     "name": "circleStyle",
     "memberof": "build/ol/styles/routingStyle.js",
@@ -12689,7 +12664,7 @@
     "ignore": true
   },
   {
-    "__docId__": 590,
+    "__docId__": 587,
     "kind": "variable",
     "name": "blackBorder",
     "memberof": "build/ol/styles/routingStyle.js",
@@ -12709,7 +12684,7 @@
     "ignore": true
   },
   {
-    "__docId__": 591,
+    "__docId__": 588,
     "kind": "variable",
     "name": "redLine",
     "memberof": "build/ol/styles/routingStyle.js",
@@ -12729,7 +12704,7 @@
     "ignore": true
   },
   {
-    "__docId__": 592,
+    "__docId__": 589,
     "kind": "variable",
     "name": "dashedRedLine",
     "memberof": "build/ol/styles/routingStyle.js",
@@ -12749,7 +12724,7 @@
     "ignore": true
   },
   {
-    "__docId__": 593,
+    "__docId__": 590,
     "kind": "function",
     "name": "routingStyle",
     "memberof": "build/ol/styles/routingStyle.js",
@@ -12784,7 +12759,7 @@
     }
   },
   {
-    "__docId__": 594,
+    "__docId__": 591,
     "kind": "file",
     "name": "build/ol/utils/getFeatureInfoAtCoordinate.js",
     "content": "var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {\n    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }\n    return new (P || (P = Promise))(function (resolve, reject) {\n        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }\n        function rejected(value) { try { step(generator[\"throw\"](value)); } catch (e) { reject(e); } }\n        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }\n        step((generator = generator.apply(thisArg, _arguments || [])).next());\n    });\n};\nimport { getUid } from 'ol';\nimport GeoJSON from 'ol/format/GeoJSON';\nimport { getLayersAsFlatArray } from '../../common';\n/**\n * @private\n */\nconst format = new GeoJSON();\n/**\n * @private\n */\nconst getFeaturesFromWMS = (source, options, abortController) => {\n    let url;\n    const { coordinate, resolution, projection, params } = options;\n    if (source && resolution && projection) {\n        url = source.getFeatureInfoUrl(coordinate, resolution, projection, Object.assign({ info_format: 'application/json', query_layers: source.getParams().layers }, params));\n    }\n    // @ts-ignore\n    return fetch(url, { signal: abortController.signal })\n        .then((resp) => resp.json())\n        .then((featureCollection) => format.readFeatures(featureCollection))\n        .catch(() => []);\n};\n/**\n * @private\n */\nlet abortControllers = {};\n/**\n * @private\n */\nconst getFeatureInfoAtCoordinate = (coordinate_1, layers_1, ...args_1) => __awaiter(void 0, [coordinate_1, layers_1, ...args_1], void 0, function* (coordinate, layers, hitTolerance = 5) {\n    // Kill all previous requests\n    Object.values(abortControllers).forEach((abortController) => {\n        abortController === null || abortController === void 0 ? void 0 : abortController.abort();\n    });\n    abortControllers = {};\n    const flatLayers = getLayersAsFlatArray(layers);\n    const promises = flatLayers.map((layer) => {\n        var _a, _b, _c, _d;\n        const map = layer.getMapInternal();\n        const projection = (_b = (_a = map === null || map === void 0 ? void 0 : map.getView()) === null || _a === void 0 ? void 0 : _a.getProjection()) === null || _b === void 0 ? void 0 : _b.getCode();\n        const emptyResponse = { features: [], layer, coordinate };\n        if (!projection) {\n            return Promise.resolve(emptyResponse);\n        }\n        // For backward compatibility\n        // @ts-ignore\n        if (layer.getFeatureInfoAtCoordinate) {\n            return (layer\n                // @ts-ignore\n                .getFeatureInfoAtCoordinate(coordinate));\n        }\n        // WMS sources\n        // Here we don't use instanceof, to be able to use this function if a layer comes from 2 different ol versions.\n        const source = layer === null || layer === void 0 ? void 0 : layer.getSource();\n        // @ts-ignore\n        if (source === null || source === void 0 ? void 0 : source.getFeatureInfoUrl) {\n            const id = getUid(layer);\n            // Abort and recreates one controller per layer\n            (_c = abortControllers[id]) === null || _c === void 0 ? void 0 : _c.abort();\n            abortControllers[id] = new AbortController();\n            const resolution = (_d = map === null || map === void 0 ? void 0 : map.getView()) === null || _d === void 0 ? void 0 : _d.getResolution();\n            return getFeaturesFromWMS(source, {\n                coordinate,\n                resolution,\n                projection,\n                params: {\n                    info_format: 'application/json',\n                    query_layers: source.getParams().layers,\n                },\n            }, abortControllers[id])\n                .then((features) => {\n                return {\n                    features,\n                    layer,\n                    coordinate,\n                };\n            })\n                .catch(() => {\n                return {\n                    features: [],\n                    layer,\n                    coordinate,\n                };\n            });\n        }\n        // Other layers\n        // For last resort we try the map function to get the features from the map\n        const pixel = map === null || map === void 0 ? void 0 : map.getPixelFromCoordinate(coordinate);\n        if (!pixel) {\n            return Promise.resolve(emptyResponse);\n        }\n        const features = map === null || map === void 0 ? void 0 : map.getFeaturesAtPixel(pixel, {\n            layerFilter: (l) => l === layer,\n            hitTolerance: \n            // @ts-ignore\n            layer.get('hitTolerance') || hitTolerance || 5,\n        });\n        return Promise.resolve({\n            features,\n            layer,\n            coordinate,\n        });\n    });\n    return Promise.all(promises);\n});\nexport default getFeatureInfoAtCoordinate;\n",
@@ -12795,7 +12770,7 @@
     "lineNumber": 1
   },
   {
-    "__docId__": 595,
+    "__docId__": 592,
     "kind": "variable",
     "name": "__awaiter",
     "memberof": "build/ol/utils/getFeatureInfoAtCoordinate.js",
@@ -12816,7 +12791,7 @@
     "ignore": true
   },
   {
-    "__docId__": 596,
+    "__docId__": 593,
     "kind": "variable",
     "name": "format",
     "memberof": "build/ol/utils/getFeatureInfoAtCoordinate.js",
@@ -12836,7 +12811,7 @@
     "ignore": true
   },
   {
-    "__docId__": 597,
+    "__docId__": 594,
     "kind": "function",
     "name": "getFeaturesFromWMS",
     "memberof": "build/ol/utils/getFeatureInfoAtCoordinate.js",
@@ -12878,7 +12853,7 @@
     "ignore": true
   },
   {
-    "__docId__": 598,
+    "__docId__": 595,
     "kind": "variable",
     "name": "abortControllers",
     "memberof": "build/ol/utils/getFeatureInfoAtCoordinate.js",
@@ -12898,7 +12873,7 @@
     "ignore": true
   },
   {
-    "__docId__": 599,
+    "__docId__": 596,
     "kind": "function",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/utils/getFeatureInfoAtCoordinate.js",
@@ -12936,7 +12911,7 @@
     "return": null
   },
   {
-    "__docId__": 600,
+    "__docId__": 597,
     "kind": "file",
     "name": "build/ol/utils/index.js",
     "content": "// eslint-disable-next-line import/prefer-default-export\nexport { default as getFeatureInfoAtCoordinate } from './getFeatureInfoAtCoordinate';\n",
@@ -12956,7 +12931,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"3.0.0-beta.9\",\n  \"homepage\": \"https://mobility-toolbox-js.geops.io/\",\n  \"module\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./maplibre\": \"./maplibre/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"6.5.0\",\n    \"@turf/transform-rotate\": \"6.5.0\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"uuid\": \"9.0.1\"\n  },\n  \"peerDependencies\": {\n    \"maplibre-gl\": \">=1\",\n    \"ol\": \">=7\"\n  },\n  \"devDependencies\": {\n    \"@babel/preset-env\": \"^7.24.3\",\n    \"@babel/preset-typescript\": \"^7.24.1\",\n    \"@commitlint/cli\": \"19.2.1\",\n    \"@commitlint/config-conventional\": \"19.1.0\",\n    \"@types/geojson\": \"7946.0.14\",\n    \"@types/lodash.debounce\": \"4.0.9\",\n    \"@types/lodash.throttle\": \"4.1.9\",\n    \"@types/mapbox-gl\": \"3.1.0\",\n    \"@types/offscreencanvas\": \"2019.7.3\",\n    \"@types/topojson\": \"3.2.6\",\n    \"@types/uuid\": \"9.0.8\",\n    \"@typescript-eslint/eslint-plugin\": \"7.4.0\",\n    \"@typescript-eslint/parser\": \"7.4.0\",\n    \"cypress\": \"13.7.1\",\n    \"esbuild\": \"0.20.2\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"1.0.1\",\n    \"eslint\": \"8.57.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"18.0.0\",\n    \"eslint-config-prettier\": \"9.1.0\",\n    \"eslint-plugin-cypress\": \"2.15.1\",\n    \"eslint-plugin-import\": \"2.29.1\",\n    \"eslint-plugin-jsx-a11y\": \"6.8.0\",\n    \"eslint-plugin-prettier\": \"5.1.3\",\n    \"eslint-plugin-react\": \"7.34.1\",\n    \"fixpack\": \"4.0.0\",\n    \"husky\": \"9.0.11\",\n    \"is-ci\": \"3.0.1\",\n    \"jest\": \"29.7.0\",\n    \"jest-canvas-mock\": \"2.5.2\",\n    \"jest-environment-jsdom\": \"29.7.0\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"2.0.2\",\n    \"jest-websocket-mock\": \"2.5.0\",\n    \"lint-staged\": \"15.2.2\",\n    \"maplibre-gl\": \"4.1.2\",\n    \"mock-socket\": \"9.3.1\",\n    \"next\": \"14.1.4\",\n    \"next-transpile-modules\": \"10.0.1\",\n    \"ol\": \"9.1.0\",\n    \"openapi-typescript\": \"6.7.5\",\n    \"prettier\": \"3.2.5\",\n    \"raw-loader\": \"4.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"2.0.3\",\n    \"stylelint\": \"16.3.1\",\n    \"stylelint-config-recommended-scss\": \"14.0.0\",\n    \"stylelint-config-standard\": \"36.0.0\",\n    \"stylelint-scss\": \"6.2.1\",\n    \"typescript\": \"5.4.3\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"yarn build:tsc && yarn esbuild:iife\",\n    \"build:tsc\": \"rm -rf build && yarn tsc && cp package.json build/ && cp README.md build/ && cp LICENSE build/  && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"clean\": \"rm -rf .next && rm -rf doc/.next\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"yarn clean && yarn build && yarn apidoc && yarn dev:examples\",\n    \"dev:examples\": \"yarn clean && yarn build && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix --allow-empty-input\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"prepare\": \"is-ci || husky\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog  && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push origin HEAD && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public\": \"yarn release  && yarn run build && cd build && HUSKY=0 yarn publish && git push origin HEAD && git push --tags \",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest \",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\",\n    \"up\": \"yarn upgrade-interactive --latest\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"realtime\",\n    \"routing\",\n    \"stops\",\n    \"toolbox\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"sideEffects\": false\n}\n",
+    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"3.0.0-beta.10\",\n  \"homepage\": \"https://mobility-toolbox-js.geops.io/\",\n  \"module\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./maplibre\": \"./maplibre/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"6.5.0\",\n    \"@turf/transform-rotate\": \"6.5.0\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"uuid\": \"9.0.1\"\n  },\n  \"peerDependencies\": {\n    \"maplibre-gl\": \">=1\",\n    \"ol\": \">=7\"\n  },\n  \"devDependencies\": {\n    \"@babel/preset-env\": \"^7.24.3\",\n    \"@babel/preset-typescript\": \"^7.24.1\",\n    \"@commitlint/cli\": \"19.2.1\",\n    \"@commitlint/config-conventional\": \"19.1.0\",\n    \"@types/geojson\": \"7946.0.14\",\n    \"@types/lodash.debounce\": \"4.0.9\",\n    \"@types/lodash.throttle\": \"4.1.9\",\n    \"@types/mapbox-gl\": \"3.1.0\",\n    \"@types/offscreencanvas\": \"2019.7.3\",\n    \"@types/topojson\": \"3.2.6\",\n    \"@types/uuid\": \"9.0.8\",\n    \"@typescript-eslint/eslint-plugin\": \"7.4.0\",\n    \"@typescript-eslint/parser\": \"7.4.0\",\n    \"cypress\": \"13.7.1\",\n    \"esbuild\": \"0.20.2\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"1.0.1\",\n    \"eslint\": \"8.57.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"18.0.0\",\n    \"eslint-config-prettier\": \"9.1.0\",\n    \"eslint-plugin-cypress\": \"2.15.1\",\n    \"eslint-plugin-import\": \"2.29.1\",\n    \"eslint-plugin-jsx-a11y\": \"6.8.0\",\n    \"eslint-plugin-prettier\": \"5.1.3\",\n    \"eslint-plugin-react\": \"7.34.1\",\n    \"fixpack\": \"4.0.0\",\n    \"husky\": \"9.0.11\",\n    \"is-ci\": \"3.0.1\",\n    \"jest\": \"29.7.0\",\n    \"jest-canvas-mock\": \"2.5.2\",\n    \"jest-environment-jsdom\": \"29.7.0\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"2.0.2\",\n    \"jest-websocket-mock\": \"2.5.0\",\n    \"lint-staged\": \"15.2.2\",\n    \"maplibre-gl\": \"4.1.2\",\n    \"mock-socket\": \"9.3.1\",\n    \"next\": \"14.1.4\",\n    \"next-transpile-modules\": \"10.0.1\",\n    \"ol\": \"9.1.0\",\n    \"openapi-typescript\": \"6.7.5\",\n    \"prettier\": \"3.2.5\",\n    \"raw-loader\": \"4.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"2.0.3\",\n    \"stylelint\": \"16.3.1\",\n    \"stylelint-config-recommended-scss\": \"14.0.0\",\n    \"stylelint-config-standard\": \"36.0.0\",\n    \"stylelint-scss\": \"6.2.1\",\n    \"typescript\": \"5.4.3\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"yarn build:tsc && yarn esbuild:iife\",\n    \"build:tsc\": \"rm -rf build && yarn tsc && cp package.json build/ && cp README.md build/ && cp LICENSE build/  && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"clean\": \"rm -rf .next && rm -rf doc/.next\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"yarn clean && yarn build && yarn apidoc && yarn dev:examples\",\n    \"dev:examples\": \"yarn clean && yarn build && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix --allow-empty-input\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"prepare\": \"is-ci || husky\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog  && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push origin HEAD && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public\": \"yarn release  && yarn run build && cd build && HUSKY=0 yarn publish && git push origin HEAD && git push --tags \",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest \",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\",\n    \"up\": \"yarn upgrade-interactive --latest\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"realtime\",\n    \"routing\",\n    \"stops\",\n    \"toolbox\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"sideEffects\": false\n}\n",
     "longname": "/home/olivier/GIT/mobility-toolbox-js/package.json",
     "name": "package.json",
     "static": true,
@@ -13135,7 +13110,7 @@
     "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#maplibreMap",
     "access": "public",
     "description": "The Maplibre map object. Readonly.",
-    "lineNumber": 31,
+    "lineNumber": 36,
     "type": {
       "types": [
         "maplibregl.Map"
@@ -13150,7 +13125,7 @@
     "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#queryRenderedFeaturesOptions",
     "access": "public",
     "description": "Options used when we query features using map.getFeaturesAtPixel().",
-    "lineNumber": 31,
+    "lineNumber": 36,
     "type": {
       "types": [
         "maplibregl.QueryRenderedFeaturesOptions"
@@ -13165,7 +13140,7 @@
     "longname": "build/ol/layers/MaplibreLayer.js~MaplibreLayer#style",
     "access": "public",
     "description": "geOps Maps api style.",
-    "lineNumber": 31,
+    "lineNumber": 36,
     "type": {
       "types": [
         "string"
