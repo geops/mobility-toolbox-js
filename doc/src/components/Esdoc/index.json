@@ -7353,7 +7353,7 @@
     "__docId__": 298,
     "kind": "file",
     "name": "build/common/utils/getVehiclePosition.js",
-    "content": "import { LineString } from 'ol/geom';\n/**\n * Interpolate or not the vehicle position from a trajectory at a specific date.\n *\n * @param {number} now Current date to interpolate a position with. In ms.\n * @param {RealtimeTrajectory} trajectory The trajectory to interpolate.\n * @param {boolean} noInterpolate If true, the vehicle position is not interpolated on each render but only once.\n * @returns {VehiclePosition}\n */\nconst getVehiclePosition = (now, trajectory, noInterpolate) => {\n    const { time_intervals: timeIntervals, olGeometry, coordinate, } = trajectory.properties;\n    const { coordinates } = trajectory.geometry;\n    let { type } = trajectory.geometry;\n    let geometry = olGeometry;\n    let coord;\n    let rotation;\n    if (olGeometry) {\n        type = geometry.getType();\n    }\n    if (noInterpolate && coordinate) {\n        coord = coordinate;\n    }\n    else if (type === 'Point') {\n        coord = coordinates;\n    }\n    else if (type === 'LineString') {\n        if (!geometry) {\n            geometry = new LineString(coordinates);\n        }\n        const intervals = timeIntervals || [[]];\n        const firstInterval = intervals[0];\n        const lastInterval = intervals[intervals.length - 1];\n        // Between the last time interval of a trajectory event and the beginning\n        // of the new trajectory event, there is few seconds, can be 6 to 30\n        // seconds (that's why the vehicle jumps sometimes).\n        // So we make the choice here to display the last (or the first) position\n        // of an trajectory event instead of removing them, if the current date is\n        // outside the time intervals we display the vehicle at the last (or first) position known.\n        if (now < firstInterval[0]) {\n            // Display first position known.\n            [, , rotation] = firstInterval;\n            coord = geometry.getFirstCoordinate();\n        }\n        else if (now > lastInterval[0]) {\n            // Display last position known.\n            [, , rotation] = lastInterval;\n            coord = geometry.getLastCoordinate();\n        }\n        else {\n            // Interpolate position using time intervals.\n            for (let j = 0; j < intervals.length - 1; j += 1) {\n                // Rotation only available in realtime layer.\n                const [start, startFrac] = intervals[j];\n                const [end, endFrac] = intervals[j + 1];\n                if (start <= now && now <= end) {\n                    // interpolate position inside the time interval.\n                    const timeFrac = Math.min((now - start) / (end - start), 1);\n                    const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;\n                    coord = geometry.getCoordinateAt(geomFrac);\n                    [, , rotation] = intervals[j];\n                    break;\n                }\n            }\n        }\n    }\n    else {\n        // eslint-disable-next-line no-console\n        console.error('This geometry type is not supported. Only Point or LineString are. Current geometry: ', geometry);\n    }\n    return { coord, rotation };\n};\nexport default getVehiclePosition;\n",
+    "content": "import { LineString } from 'ol/geom';\n/**\n * Interpolate or not the vehicle position from a trajectory at a specific date.\n *\n * @param {number} now Current date to interpolate a position with. In ms.\n * @param {RealtimeTrajectory} trajectory The trajectory to interpolate.\n * @param {boolean} noInterpolate If true, the vehicle position is not interpolated on each render but only once.\n * @returns {VehiclePosition}\n */\nconst getVehiclePosition = (now, trajectory, noInterpolate) => {\n    const { time_intervals: timeIntervals, olGeometry, coordinate, } = trajectory.properties;\n    let { type, coordinates } = trajectory.geometry;\n    let geometry = olGeometry;\n    let coord;\n    let rotation;\n    // If an olGeometry exists we use it. It avoids to create one each time.\n    if (olGeometry) {\n        type = geometry.getType();\n        coordinates = geometry.getCoordinates();\n    }\n    if (noInterpolate && coordinate) {\n        coord = coordinate;\n    }\n    else if (type === 'Point') {\n        coord = coordinates;\n    }\n    else if (type === 'LineString') {\n        if (!geometry) {\n            geometry = new LineString(coordinates);\n        }\n        const intervals = timeIntervals || [[]];\n        const firstInterval = intervals[0];\n        const lastInterval = intervals[intervals.length - 1];\n        // Between the last time interval of a trajectory event and the beginning\n        // of the new trajectory event, there is few seconds, can be 6 to 30\n        // seconds (that's why the vehicle jumps sometimes).\n        // So we make the choice here to display the last (or the first) position\n        // of an trajectory event instead of removing them, if the current date is\n        // outside the time intervals we display the vehicle at the last (or first) position known.\n        if (now < firstInterval[0]) {\n            // Display first position known.\n            [, , rotation] = firstInterval;\n            coord = geometry.getFirstCoordinate();\n        }\n        else if (now > lastInterval[0]) {\n            // Display last position known.\n            [, , rotation] = lastInterval;\n            coord = geometry.getLastCoordinate();\n        }\n        else {\n            // Interpolate position using time intervals.\n            for (let j = 0; j < intervals.length - 1; j += 1) {\n                // Rotation only available in realtime layer.\n                const [start, startFrac] = intervals[j];\n                const [end, endFrac] = intervals[j + 1];\n                if (start <= now && now <= end) {\n                    // interpolate position inside the time interval.\n                    const timeFrac = Math.min((now - start) / (end - start), 1);\n                    const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;\n                    coord = geometry.getCoordinateAt(geomFrac);\n                    [, , rotation] = intervals[j];\n                    break;\n                }\n            }\n        }\n    }\n    else {\n        // eslint-disable-next-line no-console\n        console.error('This geometry type is not supported. Only Point or LineString are. Current geometry: ', geometry);\n    }\n    return { coord, rotation };\n};\nexport default getVehiclePosition;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/common/utils/getVehiclePosition.js",
     "access": "public",
@@ -11355,7 +11355,7 @@
     "__docId__": 512,
     "kind": "file",
     "name": "build/ol/layers/MapboxStyleLayer.js",
-    "content": "import Layer from './Layer';\n/**\n * Layer for visualizing a specific set of layer from a MapboxLayer.\n *\n * @example\n * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';\n *\n * const mapboxLayer = new MapboxLayer({\n *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',\n * });\n *\n * const layer = new MapboxStyleLayer({\n *   mapboxLayer: mapboxLayer,\n *   styleLayersFilter: () => {},\n * });\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass MapboxStyleLayer extends Layer {\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.\n     * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.\n     */\n    constructor(options) {\n        super(options);\n        /**\n         * MapboxLayer provided for the style Layer.\n         * @type {MapboxLayer}\n         * @private\n         */\n        this.mapboxLayer = options.mapboxLayer;\n        /**\n         * Define if the layer has data to display in the current mapbox layer.\n         */\n        this.disabled = false;\n        /**\n         * Function to filter features to be displayed.\n         * @type {function}\n         * @private\n         */\n        this.styleLayersFilter = options.styleLayersFilter;\n        /**\n         * Mapbox style layer id where to add the style layers.\n         * See [mapbox.map.addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.\n         * @type {String}\n         * @private\n         */\n        this.beforeId = options.beforeId;\n        /**\n         * Function to filter features for getFeatureInfoAtCoordinate method.\n         * @type {function}\n         * @private\n         */\n        this.featureInfoFilter = options.featureInfoFilter || ((obj) => obj);\n        /**\n         * Function to query the rendered features.\n         * @type {function}\n         * @private\n         */\n        this.queryRenderedLayersFilter = options.queryRenderedLayersFilter;\n        /**\n         * Array of features to highlight.\n         * @type {Array<ol/Feature~Feature>}\n         * @private\n         */\n        this.highlightedFeatures = [];\n        /**\n         * Array of selected features.\n         * @type {Array<ol/Feature~Feature>}\n         * @private\n         */\n        this.selectedFeatures = [];\n        /**\n         * Array of mapbox style layers to add.\n         * @type {Array<mapboxgl.styleLayer>}\n         * @private\n         */\n        this.styleLayers =\n            (options.styleLayer ? [options.styleLayer] : options.styleLayers) || [];\n        /**\n         * @private\n         */\n        this.addStyleLayers = this.addStyleLayers.bind(this);\n        /**\n         * @private\n         */\n        this.onLoad = this.onLoad.bind(this);\n        if (options.filters) {\n            /** @private */\n            this.addDynamicFilters = () => {\n                this.setFilter(typeof options.filters === 'function'\n                    ? options.filters(this)\n                    : options.filters);\n            };\n        }\n        if (!this.styleLayersFilter && this.styleLayers) {\n            this.styleLayersFilter = (styleLayer) => {\n                var _a;\n                return !!((_a = this.styleLayers) === null || _a === void 0 ? void 0 : _a.find((sl) => styleLayer.id === sl.id));\n            };\n        }\n    }\n    /**\n     * Initialize the layer.\n     * @param {ol/Map~Map} map the mapbox map.\n     * @override\n     */\n    attachToMap(map) {\n        var _a;\n        if (this.mapboxLayer && !this.mapboxLayer.map) {\n            (_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.attachToMap(map);\n        }\n        super.attachToMap(map);\n        if (!this.map || !this.mapboxLayer) {\n            return;\n        }\n        // Apply the initial visibiltity.\n        const { mbMap } = this.mapboxLayer;\n        if (!mbMap) {\n            // If the mbMap is not yet created because the  map has no target yet, we\n            // relaunch the initialisation when it's the case.\n            this.olListenersKeys.push(this.map.on('change:target', () => {\n                this.attachToMap(map);\n            }));\n            return;\n        }\n        // mbMap.loaded() and mbMap.isStyleLoaded() are reliable only on the first call of init.\n        // On the next call (when a topic change for example), these functions returns false because\n        // the style is being modified.\n        // That's why we rely on a property instead for the next calls.\n        if (this.mapboxLayer.loaded || mbMap.isStyleLoaded() || mbMap.loaded()) {\n            this.onLoad();\n        }\n        else {\n            mbMap.once('load', this.onLoad);\n        }\n        // Apply the visibiltity when layer's visibility change.\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.on('change:visible', (evt) => {\n            // Once the map is loaded we can apply visiblity without waiting\n            // the style. Mapbox take care of the application of style changes.\n            this.applyLayoutVisibility(evt);\n        }));\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.mapboxLayer.on('load', () => {\n            this.onLoad();\n        }));\n    }\n    /**\n     * Terminate the layer.\n     * @override\n     */\n    detachFromMap() {\n        var _a;\n        if ((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap) {\n            const { mbMap } = this.mapboxLayer;\n            mbMap.off('load', this.onLoad);\n            this.removeStyleLayers();\n        }\n        super.detachFromMap();\n    }\n    /** @private */\n    addStyleLayers() {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach((styleLayer) => {\n            const { id, source } = styleLayer;\n            if (mbMap.getSource(source) && id && !mbMap.getLayer(id)) {\n                // @ts-ignore\n                mbMap.addLayer(styleLayer, this.beforeId);\n            }\n        });\n        this.applyLayoutVisibility();\n    }\n    /** @private */\n    removeStyleLayers() {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach((styleLayer) => {\n            const { id } = styleLayer;\n            if (id && mbMap.getLayer(id)) {\n                mbMap.removeLayer(id);\n            }\n        });\n    }\n    /**\n     * On Mapbox map load callback function. Add style layers and dynaimc filters.\n     * @private\n     */\n    onLoad() {\n        var _a;\n        this.addStyleLayers();\n        if (this.addDynamicFilters) {\n            this.addDynamicFilters();\n        }\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        const style = mbMap.getStyle();\n        if (style && this.styleLayersFilter) {\n            // @ts-ignore\n            const styles = style.layers.filter(this.styleLayersFilter);\n            this.disabled = !styles.length;\n        }\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        const { mbMap } = this.mapboxLayer;\n        // Ignore the getFeatureInfo until the mapbox map is loaded\n        if (!mbMap.isStyleLoaded()) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        // We query features only on style layers used by this layer.\n        let layers = this.styleLayers || [];\n        if (this.styleLayersFilter) {\n            // @ts-ignore\n            layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);\n        }\n        if (this.queryRenderedLayersFilter) {\n            // @ts-ignore\n            layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);\n        }\n        return this.mapboxLayer\n            .getFeatureInfoAtCoordinate(coordinate, {\n            layers: layers.map((layer) => layer && layer.id),\n            validate: false,\n        })\n            .then((featureInfo) => {\n            const features = featureInfo.features.filter((feature) => {\n                var _a;\n                // @ts-ignore\n                return this.featureInfoFilter(feature, (_a = this.map) === null || _a === void 0 ? void 0 : _a.getView().getResolution());\n            });\n            this.highlight(features);\n            return Object.assign(Object.assign({}, featureInfo), { features, layer: this });\n        });\n    }\n    /**\n     * Set filter that determines which features should be rendered in a style layer.\n     * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.\n     */\n    setFilter(filter) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach(({ id }) => {\n            if (id && filter && mbMap.getLayer(id)) {\n                // @ts-ignore\n                mbMap.setFilter(id, filter);\n            }\n        });\n    }\n    /**\n     * Set if features are hovered or not.\n     * @param {Array<ol/Feature~Feature>} features\n     * @param {boolean} state Is the feature hovered\n     * @private\n     */\n    setHoverState(features, state) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        if (!features || !mbMap) {\n            return;\n        }\n        features.forEach((feature) => {\n            const { source, sourceLayer } = feature.get('mapboxFeature') || {};\n            if ((!source && !sourceLayer) || !feature.getId()) {\n                if (!feature.getId()) {\n                    // eslint-disable-next-line no-console\n                    console.warn(\"No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/mapbox/tippecanoe#adding-calculated-attributes.\", feature.getId(), feature.getProperties());\n                }\n                return;\n            }\n            mbMap.setFeatureState({\n                id: feature.getId(),\n                source,\n                sourceLayer,\n            }, { hover: state });\n        });\n    }\n    /**\n     * Select a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.\n     * @private\n     */\n    select(features = []) {\n        this.setHoverState(this.selectedFeatures || [], false);\n        this.selectedFeatures = features;\n        this.setHoverState(this.selectedFeatures || [], true);\n    }\n    /**\n     * Highlight a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.\n     * @private\n     */\n    highlight(features = []) {\n        var _a;\n        // Filter out selected features\n        const filtered = ((_a = this.highlightedFeatures) === null || _a === void 0 ? void 0 : _a.filter((feature) => !(this.selectedFeatures || [])\n            .map((feat) => feat.getId())\n            .includes(feature.getId()))) || [];\n        // Remove previous highlight\n        this.setHoverState(filtered, false);\n        this.highlightedFeatures = features;\n        // Add highlight\n        this.setHoverState(this.highlightedFeatures, true);\n    }\n    /**\n     * Apply visibility to style layers that fits the styleLayersFilter function.\n     * @param {Event} evt Layer's event that has called the function.\n     * @private\n     */\n    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars\n    applyLayoutVisibility(evt) {\n        var _a;\n        const { visible } = this;\n        const filterFunc = this.styleLayersFilter;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        const style = mbMap.getStyle();\n        if (!style) {\n            return;\n        }\n        if (filterFunc) {\n            const visibilityValue = visible ? 'visible' : 'none';\n            const layers = style.layers || [];\n            for (let i = 0; i < layers.length; i += 1) {\n                const styleLayer = layers[i];\n                if (filterFunc(styleLayer)) {\n                    if (mbMap.getLayer(styleLayer.id)) {\n                        mbMap.setLayoutProperty(styleLayer.id, 'visibility', visibilityValue);\n                        if (this.get('minZoom') || this.get('maxZoom')) {\n                            mbMap.setLayerZoomRange(styleLayer.id, this.get('minZoom') ? this.get('minZoom') - 1 : 0, // mapbox zoom = ol zoom - 1\n                            this.get('maxZoom') ? this.get('maxZoom') - 1 : 24);\n                        }\n                    }\n                }\n            }\n        }\n    }\n    /**\n     * Create a copy of the MapboxStyleLayer.\n     * @param {Object} newOptions Options to override.\n     * @return {MapboxStyleLayer} A MapboxStyleLayer.\n     */\n    clone(newOptions) {\n        return new MapboxStyleLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default MapboxStyleLayer;\n",
+    "content": "import Layer from './Layer';\n/**\n * Layer for visualizing a specific set of layer from a MapboxLayer.\n *\n * @example\n * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';\n *\n * const mapboxLayer = new MapboxLayer({\n *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',\n * });\n *\n * const layer = new MapboxStyleLayer({\n *   mapboxLayer: mapboxLayer,\n *   styleLayersFilter: () => {},\n * });\n *\n * @classproperty {ol/Map~Map} map - The map where the layer is displayed.\n * @extends {Layer}\n */\nclass MapboxStyleLayer extends Layer {\n    /**\n     * Constructor.\n     *\n     * @param {Object} options\n     * @param {MapboxLayer} [options.mapboxLayer] The MapboxLayer to use.\n     * @param {Function} [options.styleLayersFilter] Filter function to decide which style layer to display.\n     */\n    constructor(options) {\n        super(options);\n        /**\n         * MapboxLayer provided for the style Layer.\n         * @type {MapboxLayer}\n         * @private\n         */\n        this.mapboxLayer = options.mapboxLayer;\n        /**\n         * Define if the layer has data to display in the current mapbox layer.\n         */\n        this.disabled = false;\n        /**\n         * Function to filter features to be displayed.\n         * @type {function}\n         * @private\n         */\n        this.styleLayersFilter = options.styleLayersFilter;\n        /**\n         * Mapbox style layer id where to add the style layers.\n         * See [mapbox.map.addLayer](https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addlayer) documentation.\n         * @type {String}\n         * @private\n         */\n        this.beforeId = options.beforeId;\n        /**\n         * Function to query the rendered features.\n         * @type {function}\n         * @private\n         */\n        this.queryRenderedLayersFilter = options.queryRenderedLayersFilter;\n        /**\n         * Array of features to highlight.\n         * @type {Array<ol/Feature~Feature>}\n         * @private\n         */\n        this.highlightedFeatures = [];\n        /**\n         * Array of selected features.\n         * @type {Array<ol/Feature~Feature>}\n         * @private\n         */\n        this.selectedFeatures = [];\n        /**\n         * Array of mapbox style layers to add.\n         * @type {Array<mapboxgl.styleLayer>}\n         * @private\n         */\n        this.styleLayers =\n            (options.styleLayer ? [options.styleLayer] : options.styleLayers) || [];\n        /**\n         * @private\n         */\n        this.addStyleLayers = this.addStyleLayers.bind(this);\n        /**\n         * @private\n         */\n        this.onLoad = this.onLoad.bind(this);\n        if (options.filters) {\n            /** @private */\n            this.addDynamicFilters = () => {\n                this.setFilter(typeof options.filters === 'function'\n                    ? options.filters(this)\n                    : options.filters);\n            };\n        }\n        if (!this.styleLayersFilter && this.styleLayers) {\n            this.styleLayersFilter = (styleLayer) => {\n                var _a;\n                return !!((_a = this.styleLayers) === null || _a === void 0 ? void 0 : _a.find((sl) => styleLayer.id === sl.id));\n            };\n        }\n    }\n    /**\n     * Initialize the layer.\n     * @param {ol/Map~Map} map the mapbox map.\n     * @override\n     */\n    attachToMap(map) {\n        var _a;\n        if (this.mapboxLayer && !this.mapboxLayer.map) {\n            (_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.attachToMap(map);\n        }\n        super.attachToMap(map);\n        if (!this.map || !this.mapboxLayer) {\n            return;\n        }\n        // Apply the initial visibiltity.\n        const { mbMap } = this.mapboxLayer;\n        if (!mbMap) {\n            // If the mbMap is not yet created because the  map has no target yet, we\n            // relaunch the initialisation when it's the case.\n            this.olListenersKeys.push(this.map.on('change:target', () => {\n                this.attachToMap(map);\n            }));\n            return;\n        }\n        // mbMap.loaded() and mbMap.isStyleLoaded() are reliable only on the first call of init.\n        // On the next call (when a topic change for example), these functions returns false because\n        // the style is being modified.\n        // That's why we rely on a property instead for the next calls.\n        if (this.mapboxLayer.loaded || mbMap.isStyleLoaded() || mbMap.loaded()) {\n            this.onLoad();\n        }\n        else {\n            mbMap.once('load', this.onLoad);\n        }\n        // Apply the visibiltity when layer's visibility change.\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.on('change:visible', (evt) => {\n            // Once the map is loaded we can apply visiblity without waiting\n            // the style. Mapbox take care of the application of style changes.\n            this.applyLayoutVisibility(evt);\n        }));\n        this.olListenersKeys.push(\n        // @ts-ignore\n        this.mapboxLayer.on('load', () => {\n            this.onLoad();\n        }));\n    }\n    /**\n     * Terminate the layer.\n     * @override\n     */\n    detachFromMap() {\n        var _a;\n        if ((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap) {\n            const { mbMap } = this.mapboxLayer;\n            mbMap.off('load', this.onLoad);\n            this.removeStyleLayers();\n        }\n        super.detachFromMap();\n    }\n    /** @private */\n    addStyleLayers() {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach((styleLayer) => {\n            const { id, source } = styleLayer;\n            if (mbMap.getSource(source) && id && !mbMap.getLayer(id)) {\n                // @ts-ignore\n                mbMap.addLayer(styleLayer, this.beforeId);\n            }\n        });\n        this.applyLayoutVisibility();\n    }\n    /** @private */\n    removeStyleLayers() {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach((styleLayer) => {\n            const { id } = styleLayer;\n            if (id && mbMap.getLayer(id)) {\n                mbMap.removeLayer(id);\n            }\n        });\n    }\n    /**\n     * On Mapbox map load callback function. Add style layers and dynaimc filters.\n     * @private\n     */\n    onLoad() {\n        var _a;\n        this.addStyleLayers();\n        if (this.addDynamicFilters) {\n            this.addDynamicFilters();\n        }\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        const style = mbMap.getStyle();\n        if (style && this.styleLayersFilter) {\n            // @ts-ignore\n            const styles = style.layers.filter(this.styleLayersFilter);\n            this.disabled = !styles.length;\n        }\n    }\n    /**\n     * Request feature information for a given coordinate.\n     * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.\n     * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.\n     */\n    getFeatureInfoAtCoordinate(coordinate) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        const { mbMap } = this.mapboxLayer;\n        // Ignore the getFeatureInfo until the mapbox map is loaded\n        if (!mbMap.isStyleLoaded()) {\n            return Promise.resolve({ coordinate, features: [], layer: this });\n        }\n        // We query features only on style layers used by this layer.\n        let layers = this.styleLayers || [];\n        if (this.styleLayersFilter) {\n            // @ts-ignore\n            layers = mbMap.getStyle().layers.filter(this.styleLayersFilter);\n        }\n        if (this.queryRenderedLayersFilter) {\n            // @ts-ignore\n            layers = mbMap.getStyle().layers.filter(this.queryRenderedLayersFilter);\n        }\n        return this.mapboxLayer\n            .getFeatureInfoAtCoordinate(coordinate, {\n            layers: layers.map((layer) => layer && layer.id),\n            validate: false,\n        })\n            .then((featureInfo) => {\n            return Object.assign(Object.assign({}, featureInfo), { layer: this });\n        });\n    }\n    /**\n     * Set filter that determines which features should be rendered in a style layer.\n     * @param {mapboxgl.filter} filter Determines which features should be rendered in a style layer.\n     */\n    setFilter(filter) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        this.styleLayers.forEach(({ id }) => {\n            if (id && filter && mbMap.getLayer(id)) {\n                // @ts-ignore\n                mbMap.setFilter(id, filter);\n            }\n        });\n    }\n    setFeatureState(features, state) {\n        var _a;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        if (!features || !mbMap) {\n            return;\n        }\n        features.forEach((feature) => {\n            const { source, sourceLayer } = feature.get('mapboxFeature') || {};\n            if ((!source && !sourceLayer) || !feature.getId()) {\n                if (!feature.getId()) {\n                    // eslint-disable-next-line no-console\n                    console.warn(\"No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/mapbox/tippecanoe#adding-calculated-attributes.\", feature.getId(), feature.getProperties());\n                }\n                return;\n            }\n            mbMap.setFeatureState({\n                id: feature.getId(),\n                source,\n                sourceLayer,\n            }, state);\n        });\n    }\n    /**\n     * Set if features are hovered or not.\n     * @param {Array<ol/Feature~Feature>} features\n     * @param {boolean} state Is the feature hovered\n     * @private\n     */\n    setHoverState(features, state) {\n        this.setFeatureState(features, { hover: state });\n    }\n    /**\n     * Select a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.\n     * @private\n     */\n    select(features = []) {\n        this.setHoverState(this.selectedFeatures || [], false);\n        this.selectedFeatures = features;\n        this.setHoverState(this.selectedFeatures || [], true);\n    }\n    /**\n     * Highlight a list of features.\n     * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.\n     * @private\n     */\n    highlight(features = []) {\n        var _a;\n        // Filter out selected features\n        const filtered = ((_a = this.highlightedFeatures) === null || _a === void 0 ? void 0 : _a.filter((feature) => !(this.selectedFeatures || [])\n            .map((feat) => feat.getId())\n            .includes(feature.getId()))) || [];\n        // Remove previous highlight\n        this.setHoverState(filtered, false);\n        this.highlightedFeatures = features;\n        // Add highlight\n        this.setHoverState(this.highlightedFeatures, true);\n    }\n    /**\n     * Apply visibility to style layers that fits the styleLayersFilter function.\n     * @param {Event} evt Layer's event that has called the function.\n     * @private\n     */\n    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars\n    applyLayoutVisibility(evt) {\n        var _a;\n        const { visible } = this;\n        const filterFunc = this.styleLayersFilter;\n        if (!((_a = this.mapboxLayer) === null || _a === void 0 ? void 0 : _a.mbMap)) {\n            return;\n        }\n        const { mbMap } = this.mapboxLayer;\n        const style = mbMap.getStyle();\n        if (!style) {\n            return;\n        }\n        if (filterFunc) {\n            const visibilityValue = visible ? 'visible' : 'none';\n            const layers = style.layers || [];\n            for (let i = 0; i < layers.length; i += 1) {\n                const styleLayer = layers[i];\n                if (filterFunc(styleLayer)) {\n                    if (mbMap.getLayer(styleLayer.id)) {\n                        mbMap.setLayoutProperty(styleLayer.id, 'visibility', visibilityValue);\n                        if (this.get('minZoom') || this.get('maxZoom')) {\n                            mbMap.setLayerZoomRange(styleLayer.id, this.get('minZoom') ? this.get('minZoom') - 1 : 0, // mapbox zoom = ol zoom - 1\n                            this.get('maxZoom') ? this.get('maxZoom') - 1 : 24);\n                        }\n                    }\n                }\n            }\n        }\n    }\n    /**\n     * Create a copy of the MapboxStyleLayer.\n     * @param {Object} newOptions Options to override.\n     * @return {MapboxStyleLayer} A MapboxStyleLayer.\n     */\n    clone(newOptions) {\n        return new MapboxStyleLayer(Object.assign(Object.assign({}, this.options), newOptions));\n    }\n}\nexport default MapboxStyleLayer;\n",
     "static": true,
     "longname": "/home/olivier/GIT/mobility-toolbox-js/build/ol/layers/MapboxStyleLayer.js",
     "access": "public",
@@ -11510,12 +11510,12 @@
   {
     "__docId__": 519,
     "kind": "member",
-    "name": "featureInfoFilter",
+    "name": "queryRenderedLayersFilter",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
     "static": false,
-    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#featureInfoFilter",
+    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#queryRenderedLayersFilter",
     "access": "private",
-    "description": "Function to filter features for getFeatureInfoAtCoordinate method.",
+    "description": "Function to query the rendered features.",
     "lineNumber": 58,
     "type": {
       "nullable": null,
@@ -11529,17 +11529,17 @@
   {
     "__docId__": 520,
     "kind": "member",
-    "name": "queryRenderedLayersFilter",
+    "name": "highlightedFeatures",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
     "static": false,
-    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#queryRenderedLayersFilter",
+    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#highlightedFeatures",
     "access": "private",
-    "description": "Function to query the rendered features.",
+    "description": "Array of features to highlight.",
     "lineNumber": 64,
     "type": {
       "nullable": null,
       "types": [
-        "function"
+        "Array<ol/Feature~Feature>"
       ],
       "spread": false,
       "description": null
@@ -11548,12 +11548,12 @@
   {
     "__docId__": 521,
     "kind": "member",
-    "name": "highlightedFeatures",
+    "name": "selectedFeatures",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
     "static": false,
-    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#highlightedFeatures",
+    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#selectedFeatures",
     "access": "private",
-    "description": "Array of features to highlight.",
+    "description": "Array of selected features.",
     "lineNumber": 70,
     "type": {
       "nullable": null,
@@ -11567,32 +11567,13 @@
   {
     "__docId__": 522,
     "kind": "member",
-    "name": "selectedFeatures",
-    "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
-    "static": false,
-    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#selectedFeatures",
-    "access": "private",
-    "description": "Array of selected features.",
-    "lineNumber": 76,
-    "type": {
-      "nullable": null,
-      "types": [
-        "Array<ol/Feature~Feature>"
-      ],
-      "spread": false,
-      "description": null
-    }
-  },
-  {
-    "__docId__": 523,
-    "kind": "member",
     "name": "styleLayers",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
     "static": false,
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#styleLayers",
     "access": "private",
     "description": "Array of mapbox style layers to add.",
-    "lineNumber": 82,
+    "lineNumber": 76,
     "type": {
       "nullable": null,
       "types": [
@@ -11603,7 +11584,7 @@
     }
   },
   {
-    "__docId__": 526,
+    "__docId__": 525,
     "kind": "member",
     "name": "addDynamicFilters",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11611,7 +11592,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#addDynamicFilters",
     "access": "private",
     "description": null,
-    "lineNumber": 94,
+    "lineNumber": 88,
     "type": {
       "types": [
         "*"
@@ -11619,7 +11600,7 @@
     }
   },
   {
-    "__docId__": 528,
+    "__docId__": 527,
     "kind": "method",
     "name": "attachToMap",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11629,7 +11610,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#attachToMap",
     "access": "public",
     "description": "Initialize the layer.",
-    "lineNumber": 112,
+    "lineNumber": 106,
     "params": [
       {
         "nullable": null,
@@ -11646,7 +11627,7 @@
     "return": null
   },
   {
-    "__docId__": 529,
+    "__docId__": 528,
     "kind": "method",
     "name": "detachFromMap",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11656,13 +11637,13 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#detachFromMap",
     "access": "public",
     "description": "Terminate the layer.",
-    "lineNumber": 159,
+    "lineNumber": 153,
     "override": true,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 530,
+    "__docId__": 529,
     "kind": "method",
     "name": "addStyleLayers",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11672,12 +11653,12 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#addStyleLayers",
     "access": "private",
     "description": null,
-    "lineNumber": 169,
+    "lineNumber": 163,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 531,
+    "__docId__": 530,
     "kind": "method",
     "name": "removeStyleLayers",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11687,12 +11668,12 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#removeStyleLayers",
     "access": "private",
     "description": null,
-    "lineNumber": 185,
+    "lineNumber": 179,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 532,
+    "__docId__": 531,
     "kind": "method",
     "name": "onLoad",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11702,12 +11683,12 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#onLoad",
     "access": "private",
     "description": "On Mapbox map load callback function. Add style layers and dynaimc filters.",
-    "lineNumber": 202,
+    "lineNumber": 196,
     "params": [],
     "return": null
   },
   {
-    "__docId__": 534,
+    "__docId__": 533,
     "kind": "method",
     "name": "getFeatureInfoAtCoordinate",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11717,7 +11698,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#getFeatureInfoAtCoordinate",
     "access": "public",
     "description": "Request feature information for a given coordinate.",
-    "lineNumber": 224,
+    "lineNumber": 218,
     "params": [
       {
         "nullable": null,
@@ -11740,7 +11721,7 @@
     }
   },
   {
-    "__docId__": 535,
+    "__docId__": 534,
     "kind": "method",
     "name": "setFilter",
     "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
@@ -11750,7 +11731,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#setFilter",
     "access": "public",
     "description": "Set filter that determines which features should be rendered in a style layer.",
-    "lineNumber": 263,
+    "lineNumber": 251,
     "params": [
       {
         "nullable": null,
@@ -11766,6 +11747,35 @@
     "return": null
   },
   {
+    "__docId__": 535,
+    "kind": "method",
+    "name": "setFeatureState",
+    "memberof": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer",
+    "generator": false,
+    "async": false,
+    "static": false,
+    "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#setFeatureState",
+    "access": "public",
+    "description": null,
+    "lineNumber": 264,
+    "undocument": true,
+    "params": [
+      {
+        "name": "features",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "state",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": null
+  },
+  {
     "__docId__": 536,
     "kind": "method",
     "name": "setHoverState",
@@ -11776,7 +11786,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#setHoverState",
     "access": "private",
     "description": "Set if features are hovered or not.",
-    "lineNumber": 282,
+    "lineNumber": 295,
     "params": [
       {
         "nullable": null,
@@ -11812,7 +11822,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#select",
     "access": "private",
     "description": "Select a list of features.",
-    "lineNumber": 312,
+    "lineNumber": 303,
     "params": [
       {
         "nullable": null,
@@ -11840,7 +11850,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#highlight",
     "access": "private",
     "description": "Highlight a list of features.",
-    "lineNumber": 322,
+    "lineNumber": 313,
     "params": [
       {
         "nullable": null,
@@ -11868,7 +11878,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#applyLayoutVisibility",
     "access": "private",
     "description": "Apply visibility to style layers that fits the styleLayersFilter function.",
-    "lineNumber": 340,
+    "lineNumber": 331,
     "params": [
       {
         "nullable": null,
@@ -11894,7 +11904,7 @@
     "longname": "build/ol/layers/MapboxStyleLayer.js~MapboxStyleLayer#clone",
     "access": "public",
     "description": "Create a copy of the MapboxStyleLayer.",
-    "lineNumber": 374,
+    "lineNumber": 365,
     "params": [
       {
         "nullable": null,
@@ -13431,7 +13441,7 @@
   },
   {
     "kind": "packageJSON",
-    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"2.3.9\",\n  \"homepage\": \"https://mobility-toolbox-js.geops.io/\",\n  \"module\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./mapbox\": \"./mapbox/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"6.5.0\",\n    \"@turf/transform-rotate\": \"6.5.0\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"uuid\": \"9.0.1\"\n  },\n  \"peerDependencies\": {\n    \"mapbox-gl\": \"1 - 2\",\n    \"maplibre-gl\": \"1 - 3\",\n    \"ol\": \"7 - 8\"\n  },\n  \"devDependencies\": {\n    \"@babel/preset-env\": \"^7.24.3\",\n    \"@babel/preset-typescript\": \"^7.24.1\",\n    \"@commitlint/cli\": \"19.2.1\",\n    \"@commitlint/config-conventional\": \"19.1.0\",\n    \"@types/geojson\": \"7946.0.14\",\n    \"@types/lodash.debounce\": \"4.0.9\",\n    \"@types/lodash.throttle\": \"4.1.9\",\n    \"@types/mapbox-gl\": \"3.1.0\",\n    \"@types/offscreencanvas\": \"2019.7.3\",\n    \"@types/topojson\": \"3.2.6\",\n    \"@types/uuid\": \"9.0.8\",\n    \"@typescript-eslint/eslint-plugin\": \"7.4.0\",\n    \"@typescript-eslint/parser\": \"7.4.0\",\n    \"cypress\": \"13.7.1\",\n    \"esbuild\": \"0.20.2\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"1.0.1\",\n    \"eslint\": \"8.57.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"18.0.0\",\n    \"eslint-config-prettier\": \"9.1.0\",\n    \"eslint-plugin-cypress\": \"2.15.1\",\n    \"eslint-plugin-import\": \"2.29.1\",\n    \"eslint-plugin-jsx-a11y\": \"6.8.0\",\n    \"eslint-plugin-prettier\": \"5.1.3\",\n    \"eslint-plugin-react\": \"7.34.1\",\n    \"fixpack\": \"4.0.0\",\n    \"husky\": \"9.0.11\",\n    \"is-ci\": \"3.0.1\",\n    \"jest\": \"29.7.0\",\n    \"jest-canvas-mock\": \"2.5.2\",\n    \"jest-environment-jsdom\": \"29.7.0\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"2.0.2\",\n    \"jest-websocket-mock\": \"2.5.0\",\n    \"lint-staged\": \"15.2.2\",\n    \"mapbox-gl\": \"1.13.2\",\n    \"maplibre-gl\": \"4.1.2\",\n    \"mock-socket\": \"9.3.1\",\n    \"next\": \"14.1.4\",\n    \"next-transpile-modules\": \"10.0.1\",\n    \"ol\": \"9.1.0\",\n    \"openapi-typescript\": \"6.7.5\",\n    \"prettier\": \"3.2.5\",\n    \"raw-loader\": \"4.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"2.0.3\",\n    \"stylelint\": \"16.3.1\",\n    \"stylelint-config-recommended-scss\": \"14.0.0\",\n    \"stylelint-config-standard\": \"36.0.0\",\n    \"stylelint-scss\": \"6.2.1\",\n    \"typescript\": \"5.4.3\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"yarn build:tsc && yarn esbuild:iife\",\n    \"build:tsc\": \"rm -rf build && yarn tsc && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"rm -rf .next && rm -rf doc/.next && yarn doc && yarn dev:examples\",\n    \"dev:examples\": \"rm -rf .next && rm -rf doc/.next && yarn build && cd build && yarn link && cd ../doc && yarn link mobility-toolbox-js && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix --allow-empty-input\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"prepare\": \"is-ci || husky\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog  && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push origin HEAD && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public\": \"yarn release  && yarn run build && cd build && HUSKY=0 yarn publish && git push origin HEAD && git push --tags \",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest \",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\",\n    \"up\": \"yarn upgrade-interactive --latest\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"realtime\",\n    \"routing\",\n    \"stops\",\n    \"toolbox\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"sideEffects\": false\n}\n",
+    "content": "{\n  \"name\": \"mobility-toolbox-js\",\n  \"license\": \"MIT\",\n  \"description\": \"Toolbox for JavaScript applications in the domains of mobility and logistics.\",\n  \"version\": \"2.4.0\",\n  \"homepage\": \"https://mobility-toolbox-js.geops.io/\",\n  \"module\": \"index.js\",\n  \"exports\": {\n    \".\": \"./index.js\",\n    \"./api\": \"./api/index.js\",\n    \"./mapbox\": \"./mapbox/index.js\",\n    \"./ol\": \"./ol/index.js\",\n    \"./types\": \"./types/index.d.ts\"\n  },\n  \"dependencies\": {\n    \"@turf/helpers\": \"6.5.0\",\n    \"@turf/transform-rotate\": \"6.5.0\",\n    \"lodash.debounce\": \"4.0.8\",\n    \"lodash.throttle\": \"4.1.1\",\n    \"uuid\": \"9.0.1\"\n  },\n  \"peerDependencies\": {\n    \"mapbox-gl\": \"1 - 2\",\n    \"maplibre-gl\": \"1 - 3\",\n    \"ol\": \"7 - 8\"\n  },\n  \"devDependencies\": {\n    \"@babel/preset-env\": \"^7.24.5\",\n    \"@babel/preset-typescript\": \"^7.24.1\",\n    \"@commitlint/cli\": \"19.3.0\",\n    \"@commitlint/config-conventional\": \"19.2.2\",\n    \"@types/geojson\": \"7946.0.14\",\n    \"@types/lodash.debounce\": \"4.0.9\",\n    \"@types/lodash.throttle\": \"4.1.9\",\n    \"@types/mapbox-gl\": \"3.1.0\",\n    \"@types/offscreencanvas\": \"2019.7.3\",\n    \"@types/topojson\": \"3.2.6\",\n    \"@types/uuid\": \"9.0.8\",\n    \"@typescript-eslint/eslint-plugin\": \"7.8.0\",\n    \"@typescript-eslint/parser\": \"7.8.0\",\n    \"cypress\": \"13.8.1\",\n    \"esbuild\": \"0.20.2\",\n    \"esdoc\": \"1.1.0\",\n    \"esdoc-ecmascript-proposal-plugin\": \"1.0.0\",\n    \"esdoc-publish-html-plugin\": \"1.1.2\",\n    \"esdoc-standard-plugin\": \"1.0.0\",\n    \"esdoc-typescript-plugin\": \"1.0.1\",\n    \"eslint\": \"8.57.0\",\n    \"eslint-config-airbnb\": \"19.0.4\",\n    \"eslint-config-airbnb-typescript\": \"18.0.0\",\n    \"eslint-config-prettier\": \"9.1.0\",\n    \"eslint-plugin-cypress\": \"2.15.1\",\n    \"eslint-plugin-import\": \"2.29.1\",\n    \"eslint-plugin-jsx-a11y\": \"6.8.0\",\n    \"eslint-plugin-prettier\": \"5.1.3\",\n    \"eslint-plugin-react\": \"7.34.1\",\n    \"fixpack\": \"4.0.0\",\n    \"husky\": \"9.0.11\",\n    \"is-ci\": \"3.0.1\",\n    \"jest\": \"29.7.0\",\n    \"jest-canvas-mock\": \"2.5.2\",\n    \"jest-environment-jsdom\": \"29.7.0\",\n    \"jest-fetch-mock\": \"3.0.3\",\n    \"jest-serializer-html\": \"7.1.0\",\n    \"jest-transformer-svg\": \"2.0.2\",\n    \"jest-websocket-mock\": \"2.5.0\",\n    \"lint-staged\": \"15.2.2\",\n    \"mapbox-gl\": \"1.13.2\",\n    \"maplibre-gl\": \"4.1.3\",\n    \"mock-socket\": \"9.3.1\",\n    \"next\": \"14.2.3\",\n    \"next-transpile-modules\": \"10.0.1\",\n    \"ol\": \"9.1.0\",\n    \"openapi-typescript\": \"6.7.5\",\n    \"prettier\": \"3.2.5\",\n    \"raw-loader\": \"4.0.2\",\n    \"sort-json\": \"2.0.1\",\n    \"standard-version\": \"9.5.0\",\n    \"start-server-and-test\": \"2.0.3\",\n    \"stylelint\": \"16.5.0\",\n    \"stylelint-config-recommended-scss\": \"14.0.0\",\n    \"stylelint-config-standard\": \"36.0.0\",\n    \"stylelint-scss\": \"6.2.1\",\n    \"typescript\": \"5.4.5\"\n  },\n  \"scripts\": {\n    \"apidoc\": \"esdoc && cp apidoc/index.json doc/src/components/Esdoc\",\n    \"build\": \"yarn build:tsc && yarn esbuild:iife\",\n    \"build:tsc\": \"rm -rf build && yarn tsc && cp package.json build/ && cp -R src/types build/ && find build -type f -name '*.test.*' -delete\",\n    \"coverage\": \"yarn test  --watchAll=false  --coverage --coverageDirectory=coverage\",\n    \"cy:open\": \"cypress open\",\n    \"cy:test\": \"start-server-and-test dev http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:chrome\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser chrome'\",\n    \"cy:test:edge\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser edge'\",\n    \"cy:test:firefox\": \"yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'\",\n    \"dev\": \"rm -rf .next && rm -rf doc/.next && yarn doc && yarn dev:examples\",\n    \"dev:examples\": \"rm -rf .next && rm -rf doc/.next && yarn build && cd build && yarn link && cd ../doc && yarn link mobility-toolbox-js && yarn dev\",\n    \"doc\": \"yarn build && yarn apidoc && cd doc && rm -rf .next && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build\",\n    \"esbuild\": \"yarn esbuild:all && yarn esbuild:iife\",\n    \"esbuild:all\": \"esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx\",\n    \"esbuild:iife\": \"yarn esbuild:iife:unminify && yarn esbuild:iife:minify\",\n    \"esbuild:iife:base\": \"esbuild src/iife.js --bundle --sourcemap --target=chrome100\",\n    \"esbuild:iife:minify\": \"yarn esbuild:iife:base --minify --outfile=build/mbt.min.js\",\n    \"esbuild:iife:unminify\": \"yarn esbuild:iife:base --outfile=build/mbt.js\",\n    \"format\": \"prettier --write 'src/**/*.js' && eslint 'src/**/*.js' --fix && stylelint 'src/**/*.css' 'src/**/*.scss' --fix --allow-empty-input\",\n    \"lib\": \"REACT_APP_LIB_MODE=1  webpack --mode production\",\n    \"lib:dev\": \"REACT_APP_LIB_MODE=1  webpack --mode development\",\n    \"link2\": \"cmdToAdd=$(node ./scripts/read-pkg-json.js add) && $cmdToAdd && yarn build && cmdToRemove=$(node ./scripts/read-pkg-json.js remove) && $cmdToRemove && cd build && yarn link\",\n    \"lint\": \"eslint src/**/*.js src/**/*.ts && stylelint src/**/*.css src/**/*.scss --allow-empty-input\",\n    \"prepare\": \"is-ci || husky\",\n    \"publish:beta\": \"HUSKY=0 yarn release -- --prerelease beta --skip.changelog  && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push origin HEAD && git push --tags \",\n    \"publish:beta:dryrun\": \"yarn release -- --prerelease beta --dry-run --skip.changelog\",\n    \"publish:public\": \"yarn release  && yarn run build && cd build && HUSKY=0 yarn publish && git push origin HEAD && git push --tags \",\n    \"publish:public:dryrun\": \"yarn release --dry-run\",\n    \"release\": \"standard-version\",\n    \"start\": \"yarn doc && cd doc && yarn start\",\n    \"start:examples\": \"cd doc && yarn build && yarn start\",\n    \"test\": \"TZ='UTC' jest \",\n    \"test:watch\": \"yarn test --watchAll\",\n    \"tsc\": \"tsc\",\n    \"types:backend\": \"openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts && openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts\",\n    \"up\": \"yarn upgrade-interactive --latest\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not op_mini all\",\n    \"not ie <= 11\",\n    \"not android < 5\"\n  ],\n  \"keywords\": [\n    \"mobility\",\n    \"realtime\",\n    \"routing\",\n    \"stops\",\n    \"toolbox\"\n  ],\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"https://github.com/geops/mobility-toolbox-js\"\n  },\n  \"sideEffects\": false\n}\n",
     "longname": "/home/olivier/GIT/mobility-toolbox-js/package.json",
     "name": "package.json",
     "static": true,
