@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/geops/mobility-toolbox-js/compare/v2.4.0...v2.4.1) (2024-05-03)
+
+
+### Bug Fixes
+
+* use the type and coordinates of the olGeometry ([e60a58d](https://github.com/geops/mobility-toolbox-js/commit/e60a58d8c506d247ba1d155c223b833b004163e6))
+* use the type and coordinates of the olGeometry ([9a07a80](https://github.com/geops/mobility-toolbox-js/commit/9a07a801e7d4cf6552d79a8115e8484ed45c4950))
+
 ## [2.4.0](https://github.com/geops/mobility-toolbox-js/compare/v2.3.11...v2.4.0) (2024-04-02)
 
 
