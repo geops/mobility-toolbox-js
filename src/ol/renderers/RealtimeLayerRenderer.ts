@@ -9,8 +9,8 @@ import { Pixel } from 'ol/pixel';
 import { composeCssTransform } from 'ol/transform';
 import { buffer, containsCoordinate } from 'ol/extent';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
-import { RealtimeTrajectory } from '../../api/typedefs';
 import type RealtimeLayer from '../layers/RealtimeLayer';
+import { RealtimeTrajectory } from '../../types';
 
 /** @private */
 const format = new GeoJSON();
@@ -157,7 +157,9 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
     for (let i = 0; i < trajectories.length; i += 1) {
       const trajectory = trajectories[i] as RealtimeTrajectory;
       if (
+        // @ts-expect-error coordinate is added by the RealtimeLayer
         trajectory.properties.coordinate &&
+        // @ts-expect-error coordinate is added by the RealtimeLayer
         containsCoordinate(ext, trajectory.properties.coordinate)
       ) {
         vehicles.push(trajectories[i]);

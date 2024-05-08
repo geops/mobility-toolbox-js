@@ -60,26 +60,6 @@
  * @property {string[]} lines Array of lines name (ex: ["U4", "U5"]).
  */
 
-/**
- * @typedef {GeoJSONFeature} StopSequence
- */
-
-/**
- * @typedef {GeoJSONFeature} RealtimeTrajectory
- */
-
-/**
- * @typedef {GeoJSONFeature} FullTrajectory
- */
-
-/**
- * @typedef {GeoJSONFeature} Vehicle
- */
-
-/**
- * @typedef {GeoJSONFeature} ExtraGeom
- */
-
 // These lines is to block TypeScript to add "use strict;" in the outputed file.
 const dummy = () => {};
 export default dummy;

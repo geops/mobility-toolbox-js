@@ -86,8 +86,26 @@
  * @external {FetchOptions} https://developer.mozilla.org/en-US/docs/Web/API/fetch#options
  */
 /**
- * @external {StopsAPIParameters} https://developer.geops.io/apis/stops
+ * @external {StopsParameters} https://developer.geops.io/apis/stops
  */
 /**
- * @external {StopsAPIResponse} https://developer.geops.io/apis/stops
+ * @external {StopsResponse} https://developer.geops.io/apis/stops
+ */
+/**
+ * @external {RealtimeFullTrajectory} https://developer.geops.io/apis/realtime#model-FullTrajectory
+ */
+/**
+ * @external {RealtimeStation} https://developer.geops.io/apis/realtime
+ */
+/**
+ * @external {RealtimeNews} https://developer.geops.io/apis/realtime
+ */
+/**
+ * @external {RealtimeStopSequence} https://developer.geops.io/apis/realtime#model-StopSequence
+ */
+/**
+ * @external {RealtimeTrajectory} https://developer.geops.io/apis/realtime#model-TrackerTrajectory
+ */
+/**
+ * @external {RealtimeDeparture} https://developer.geops.io/apis/realtime#model-Departure
  */

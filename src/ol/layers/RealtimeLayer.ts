@@ -14,9 +14,9 @@ import { fullTrajectoryStyle } from '../styles';
 import {
   RealtimeFullTrajectory,
   RealtimeTrainId,
+  RealtimeTrajectory,
   ViewState,
 } from '../../types';
-import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';

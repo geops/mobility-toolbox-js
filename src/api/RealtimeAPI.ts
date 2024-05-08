@@ -22,8 +22,8 @@ import type {
   RealtimeTrajectory,
   RealtimeTenant,
   RealtimeBbox,
+  RealtimeStopSequence,
 } from '../types';
-import { StopSequence } from './typedefs';
 
 /**
  * @typedef RealtimeAPIOptions
@@ -558,16 +558,14 @@ class RealtimeAPI {
    * Subscribe to trajectory channel.
    *
    * @param {RealtimeMode} mode Realtime mode.
-   * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Function called on each message of the channel.
+   * @param {function(data: { content: RealtimeTrajectory })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
    */
   subscribeTrajectory(
     mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<
-      RealtimeTrajectoryResponse[] | RealtimeTrajectoryResponse
-    >,
+    onMessage: WebSocketAPIMessageCallback<RealtimeTrajectory>,
     onError: EventListener = () => {},
     quiet: boolean = false,
   ) {
@@ -583,11 +581,11 @@ class RealtimeAPI {
 
   /**
    * Unsubscribe to trajectory channels.
-   * @param {function(data: { content: RealtimeTrajectoryResponse[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {function(data: { content: RealtimeTrajectory })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
   unsubscribeTrajectory(
-    onMessage: WebSocketAPIMessageCallback<RealtimeTrajectoryResponse[]>,
+    onMessage: WebSocketAPIMessageCallback<RealtimeTrajectory>,
   ) {
     this.unsubscribe(`trajectory`, '', onMessage);
   }
@@ -700,12 +698,12 @@ class RealtimeAPI {
    * Get the list of stops for this vehicle.
    *
    * @param {string} id A vehicle id.
-   * @return {Promise<{ data: { content: StopSequence[] } }>} Returns a stop sequence object.
+   * @return {Promise<{ data: { content: RealtimeStopSequence[] } }>} Returns a stop sequence object.
    * @public
    */
   getStopSequence(
     id: RealtimeTrainId,
-  ): Promise<WebSocketAPIMessageEventData<StopSequence[]>> {
+  ): Promise<WebSocketAPIMessageEventData<RealtimeStopSequence[]>> {
     return this.get(`stopsequence_${id}`);
   }
 
@@ -713,14 +711,14 @@ class RealtimeAPI {
    * Subscribe to stopsequence channel of a given vehicle.
    *
    * @param {string} id A vehicle id.
-   * @param {function(data: { content: StopSequence[] })} onMessage Function called on each message of the channel.
+   * @param {function(data: { content: RealtimeStopSequence[] })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
    */
   subscribeStopSequence(
     id: RealtimeTrainId,
-    onMessage: WebSocketAPIMessageCallback<StopSequence[]>,
+    onMessage: WebSocketAPIMessageCallback<RealtimeStopSequence[]>,
     onError: EventListener = () => {},
     quiet: boolean = false,
   ) {
@@ -731,12 +729,12 @@ class RealtimeAPI {
    * Unsubscribe from stopsequence channel
    *
    * @param {string} id A vehicle id.
-   * @param {function(data: { content: StopSequence[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {function(data: { content: RealtimeStopSequence[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
   unsubscribeStopSequence(
     id: RealtimeTrainId,
-    onMessage?: WebSocketAPIMessageCallback<StopSequence[]>,
+    onMessage?: WebSocketAPIMessageCallback<RealtimeStopSequence[]>,
   ) {
     this.unsubscribe(`stopsequence`, `_${id}`, onMessage);
   }

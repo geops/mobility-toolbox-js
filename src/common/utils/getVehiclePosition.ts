@@ -1,10 +1,10 @@
 import { Coordinate } from 'ol/coordinate';
 import { LineString } from 'ol/geom';
-import type { RealtimeTrajectory } from '../../api/typedefs';
+import { RealtimeTrajectory } from '../../types';
 
 export type VehiclePosition = {
   coord: Coordinate;
-  rotation: number;
+  rotation?: number;
 };
 
 /**
@@ -23,9 +23,12 @@ const getVehiclePosition = (
 ): VehiclePosition => {
   const {
     time_intervals: timeIntervals,
+    // @ts-expect-error olGeometry is added by the RealtimeLayer
     olGeometry,
+    // @ts-expect-error coordinate is added by the RealtimeLayer
     coordinate,
   } = trajectory.properties;
+  // @ts-ignore
   let { type, coordinates } = trajectory.geometry;
   let geometry = olGeometry;
   let coord;

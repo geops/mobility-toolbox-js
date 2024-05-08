@@ -34,8 +34,8 @@ import {
   AnyLayer,
   LayerGetFeatureInfoResponse,
   RealtimeBbox,
+  RealtimeTrajectory,
 } from '../../types';
-import { RealtimeTrajectory } from '../../api/typedefs';
 import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import { FilterFunction, SortFunction } from '../typedefs';
 
@@ -126,7 +126,7 @@ export class RealtimeLayerInterface {
    *
    * @param {string} id The vehicle identifier (the  train_id property).
    * @param {RealtimeMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.
-   * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
+   * @return {Promise<{stopSequence: RealtimeStopSequence, fullTrajectory: RealtimeFullTrajectory>} A promise that will be resolved with the trajectory informations.
    */
   getTrajectoryInfos(id: string, mode: RealtimeMode) {}
 }
@@ -215,7 +215,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
     visibilityRef!: EventsKey;
 
-    selectedVehicle: RealtimeTrajectory;
+    selectedVehicle!: RealtimeTrajectory;
 
     getMotsByZoom: (zoom: number) => RealtimeMot[];
 
@@ -881,10 +881,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       const vehicles = [];
       for (let i = 0; i < trajectories.length; i += 1) {
-        if (
-          trajectories[i].properties.coordinate &&
-          containsCoordinate(ext, trajectories[i].properties.coordinate)
-        ) {
+        // @ts-expect-error coordinate is added by the RealtimeLayer
+        const { coordinate: trajcoord } = trajectories[i].properties;
+        if (trajcoord && containsCoordinate(ext, trajcoord)) {
           vehicles.push(trajectories[i]);
         }
         if (vehicles.length === nb) {
@@ -894,7 +893,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       return Promise.resolve({
         layer: this,
-        features: vehicles,
+        features: vehicles.map((vehicle) => this.format.readFeature(vehicle)),
         coordinate,
       } as LayerGetFeatureInfoResponse);
     }
@@ -903,7 +902,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * Request the stopSequence and the fullTrajectory informations for a vehicle.
      *
      * @param {string} id The vehicle identifier (the  train_id property).
-     * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
+     * @return {Promise<{stopSequence: RealtimeStopSequence, fullTrajectory: RealtimeFullTrajectory>} A promise that will be resolved with the trajectory informations.
      */
     getTrajectoryInfos(id: RealtimeTrainId) {
       // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
@@ -934,9 +933,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     purgeOutOfDateTrajectories() {
       Object.entries(this.trajectories || {}).forEach(([key, trajectory]) => {
         const timeIntervals = trajectory?.properties?.time_intervals;
-        if (this.time && timeIntervals.length) {
+        if (this.time && timeIntervals?.length) {
           const lastTimeInterval = timeIntervals[timeIntervals.length - 1][0];
-          if (lastTimeInterval < this.time) {
+          if (lastTimeInterval < this.time.getTime()) {
             this.removeTrajectory(key);
           }
         }
@@ -981,19 +980,22 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       if (!this.trajectories) {
         this.trajectories = {};
       }
-      this.trajectories[trajectory.properties.train_id] = trajectory;
+      const id = trajectory.properties.train_id;
+      if (id !== undefined) {
+        this.trajectories[id] = trajectory;
+      }
       // @ts-ignore the parameter are set by subclasses
       this.renderTrajectories();
     }
 
     removeTrajectory(trajectoryOrId: RealtimeTrajectory | RealtimeTrainId) {
-      let id: string;
+      let id: string | undefined;
       if (typeof trajectoryOrId !== 'string') {
         id = trajectoryOrId?.properties?.train_id;
       } else {
         id = trajectoryOrId;
       }
-      if (this.trajectories) {
+      if (id !== undefined && this.trajectories) {
         delete this.trajectories[id];
       }
     }
@@ -1048,6 +1050,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       } = trajectory;
 
       // ignore old events [SBAHNM-97]
+      // @ts-ignore
       if (timeSinceUpdate < 0) {
         return;
       }
@@ -1063,6 +1066,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         this.mode === RealtimeModes.TOPOGRAPHIC &&
         rawCoordinates
       ) {
+        // @ts-ignore
         trajectory.properties.olGeometry = this.format.readGeometry({
           type: 'Point',
           coordinates: fromLonLat(
@@ -1071,10 +1075,12 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
           ),
         });
       } else {
+        // @ts-ignore
         trajectory.properties.olGeometry = this.format.readGeometry(geometry);
       }
 
       // TODO Make sure the timeOffset is useful. May be we can remove it.
+      // @ts-ignore
       trajectory.properties.timeOffset = Date.now() - data.timestamp;
       this.addTrajectory(trajectory);
     }
