@@ -13,8 +13,16 @@ export type RoutingAPIOptions = {
  * import { RoutingAPI } from 'mobility-toolbox-js';
  *
  * const api = new RoutingAPI({
- *   apiKey: [yourApiKey]
+ *   apiKey: [yourApiKey],
+ *   // url: 'https://api.geops.io/routing/v1/',
  * });
+ *
+ * const route = await api.route({
+ *   via: "freiburg|basel%20sbb|bern",
+ *   mot: "rail"
+ * });
+ *
+ * console.log('Log route:', JSON.stringify(route));
  *
  * @public
  */
@@ -22,20 +30,22 @@ class RoutingAPI extends HttpAPI {
   /**
    * Constructor
    *
-   * @param {RoutingAPIOptions} options Options.
-   * @param {string} [options.url='https://api.geops.io/routing/v1/'] Service url.
+   * @param {Object} options Options.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/).
+   * @param {string} [options.url='https://api.geops.io/routing/v1/'] Service url.
+   * @public
    */
   constructor(options: RoutingAPIOptions = {}) {
     super({ url: 'https://api.geops.io/routing/v1/', ...options });
   }
 
   /**
-   * Route.
+   * Calculate a route.
    *
-   * @param {RoutingParameters} params Request parameters. See [Routing service documentation](https://developer.geops.io/apis/routing/).
-   * @param {RequestInit} config Options for the fetch request.
+   * @param {RoutingParameters} params Request parameters. See [geOps Routing API](https://developer.geops.io/apis/routing/).
+   * @param {FetchOptions} config Options for the fetch request.
    * @return {Promise<RoutingResponse>} An GeoJSON feature collection with coordinates in [EPSG:4326](http://epsg.io/4326).
+   * @public
    */
   route(
     params: RoutingParameters,

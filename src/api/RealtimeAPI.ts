@@ -16,7 +16,6 @@ import type {
   RealtimeTrainId,
   RealtimeGeneralizationLevel,
   RealtimeFullTrajectory,
-  RealtimeTrajectoryResponse,
   RealtimeStationId,
   RealtimeVersion,
   RealtimeTrajectory,
@@ -385,7 +384,7 @@ class RealtimeAPI {
    *
    * @param {number} stationId UIC of the station.
    * @param {Boolean} sortByMinArrivalTime Sort by minimum arrival time
-   * @param {function(departures:Departure[])} onMessage Function called on each message of the channel.
+   * @param {function(departures: RealtimeDeparture[])} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
@@ -401,7 +400,7 @@ class RealtimeAPI {
 
   /**
    * Unsubscribe from current departures channel.
-   * @param {RealtimeStationId} id Station's id
+   * @param {number} id Station's id
    * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
@@ -431,8 +430,8 @@ class RealtimeAPI {
 
   /**
    * Unsubscribe disruptions.
-   *
-   * @param {function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {RealtimeTenant} tenant Tenant's id
+   * @param {Function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
   unsubscribeDisruptions(
@@ -630,7 +629,7 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
-   * @return {Promise<{ data: { content: RealtimeFullTrajectory } }>} Return a full trajectory.
+   * @return {Promise<{data: { content: RealtimeFullTrajectory }}>} Return a full trajectory.
    * @public
    */
   getFullTrajectory(
@@ -660,7 +659,7 @@ class RealtimeAPI {
    *
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
-   * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Function called on each message of the channel.
+   * @param {function(data:{content: RealtimeFullTrajectory})} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
@@ -681,10 +680,17 @@ class RealtimeAPI {
   }
 
   /**
+   * This callback type is called `requestCallback` and is displayed as a global symbol.
+   *
+   * @callback onFullTrajectoryMessageCallback
+   * @param {number} responseCode
+   * @param {string} responseMessage
+   */
+  /**
    * Unsubscribe from full_trajectory channel
    *
    * @param {string} id A vehicle id.
-   * @param {function(data: { content: RealtimeFullTrajectory })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @param {onFullTrajectoryMessageCallback} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
   unsubscribeFullTrajectory(
@@ -698,7 +704,7 @@ class RealtimeAPI {
    * Get the list of stops for this vehicle.
    *
    * @param {string} id A vehicle id.
-   * @return {Promise<{ data: { content: RealtimeStopSequence[] } }>} Returns a stop sequence object.
+   * @return {Promise<{data: { content: RealtimeStopSequence[] }}>} Returns a stop sequence object.
    * @public
    */
   getStopSequence(

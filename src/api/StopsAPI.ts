@@ -1,4 +1,3 @@
-import { GeoJSONFeatureCollection } from 'ol/format/GeoJSON';
 import HttpAPI from './HttpAPI';
 import { StopsParameters, StopsResponse } from '../types';
 
@@ -38,7 +37,7 @@ class StopsAPI extends HttpAPI {
   }
 
   /**
-   * Search fo stops.
+   * Search for stops.
    *
    * @param {StopsParameters} params Request parameters. See [Stops API documentation](https://developer.geops.io/apis/stops).
    * @param {FetchOptions} config Options for the fetch request.

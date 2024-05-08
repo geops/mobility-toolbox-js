@@ -109,3 +109,12 @@
 /**
  * @external {RealtimeDeparture} https://developer.geops.io/apis/realtime#model-Departure
  */
+/**
+ * @external {RealtimeStationId} https://developer.geops.io/apis/realtime
+ */
+/**
+ * @external {RoutingParameters} https://developer.geops.io/apis/routing
+ */
+/**
+ * @external {RoutingResponse} https://developer.geops.io/apis/routing
+ */

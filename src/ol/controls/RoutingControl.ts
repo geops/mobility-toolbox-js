@@ -99,7 +99,7 @@ const getFlatCoordinatesFromSegments = (
 };
 
 /**
- * This control allows the user to add and modifiy via points to a map and request a route from the [geOps Routing API](https://developer.geops.io/apis/routing/).
+ * This OpenLayers control allows the user to add and modifiy via points to a map and request a route from the [geOps Routing API](https://developer.geops.io/apis/routing/).
  *
  * @example
  * import { Map } from 'ol';
