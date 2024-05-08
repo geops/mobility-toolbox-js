@@ -370,8 +370,8 @@ class WebSocketAPI {
    * The callback is called only once, when the response is received or when the call returns an error.
    *
    * @param {Object} params Parameters for the websocket get request
-   * @param {function} onMessage callback on message event
-   * @param {function} onError Callback on error and close event
+   * @param {function} cb callback on message event
+   * @param {function} errorCb Callback on error and close event
    * @private
    */
   get(

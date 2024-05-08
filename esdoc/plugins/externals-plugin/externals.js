@@ -113,6 +113,9 @@
  * @external {RealtimeStationId} https://developer.geops.io/apis/realtime
  */
 /**
+ * @external {RealtimeTenant} https://developer.geops.io/apis/realtime
+ */
+/**
  * @external {RoutingParameters} https://developer.geops.io/apis/routing
  */
 /**

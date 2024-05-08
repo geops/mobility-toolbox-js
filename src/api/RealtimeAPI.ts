@@ -383,7 +383,6 @@ class RealtimeAPI {
    * Subscribe to departures channel of a given station.
    *
    * @param {number} stationId UIC of the station.
-   * @param {Boolean} sortByMinArrivalTime Sort by minimum arrival time
    * @param {function(departures: RealtimeDeparture[])} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
@@ -400,20 +399,21 @@ class RealtimeAPI {
 
   /**
    * Unsubscribe from current departures channel.
-   * @param {number} id Station's id
+   * @param {number} stationId UIC of the station.
    * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
   unsubscribeDepartures(
-    id: RealtimeStationId,
+    stationId: RealtimeStationId,
     onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
   ) {
-    this.unsubscribe(`timetable_${id}`, '', onMessage);
+    this.unsubscribe(`timetable_${stationId}`, '', onMessage);
   }
 
   /**
    * Subscribe to the disruptions channel for tenant.
    *
+   * @param {RealtimeTenant} tenant Tenant's id
    * @param {function(data: { content: RealtimeNews[] })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
@@ -539,7 +539,7 @@ class RealtimeAPI {
   /**
    * Return a partial trajectory with a given id and a mode.
    *
-   * @param {number} trainId The identifier of a trajectory.
+   * @param {number} id The identifier of a trajectory.
    * @param {RealtimeMode} mode Realtime mode.
    * @return {Promise<{data: { content: RealtimeTrajectory }}>} A trajectory.
    * @public

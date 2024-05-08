@@ -142,7 +142,7 @@ class StopFinderControlCommon {
   /**
    * Launch a search.
    *
-   * @param {String} query The query to search for.
+   * @param {String} q The query to search for.
    * @param {AbortController} abortController Abort controller used to cancel the request.
    * @return {Promise<Array<GeoJSONFeature>>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
