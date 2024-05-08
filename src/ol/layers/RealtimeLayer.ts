@@ -34,7 +34,7 @@ export type RealtimeLayerOptions = RealtimeLayerMixinOptions & {
 };
 
 /**
- * Responsible for loading and display data from the geOps realtime API.
+ * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { RealtimeLayer } from 'mobility-toolbox-js/ol';
@@ -64,7 +64,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    * @param {RealtimeLayerOptions} options
    * @param {boolean} [options.allowRenderWhenAnimating=false] Allow rendering of the layer when the map is animating.
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps realtime API url.
+   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
    *
    */
   constructor(options: RealtimeLayerOptions) {

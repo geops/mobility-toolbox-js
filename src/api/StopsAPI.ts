@@ -8,7 +8,7 @@ export type StopsAPIOptions = {
 };
 
 /**
- * This class provides convenience methods to use to the [geOps Stops api](https://developer.geops.io/apis/stops/).
+ * This class provides convenience methods to use to the [geOps Stops API](https://developer.geops.io/apis/stops/).
  *
  * @example
  * import { StopsAPI } from 'mobility-toolbox-js/api';

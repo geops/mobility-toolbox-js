@@ -69,7 +69,7 @@ export const RealtimeModes = {
 };
 
 /**
- * This class provides convenience methods to use to the [geOps realtime API](https://developer.geops.io/apis/realtime/).
+ * This class provides convenience methods to use to the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { RealtimeAPI } from 'mobility-toolbox-js/api';
@@ -189,7 +189,7 @@ class RealtimeAPI {
    * @param {Object} options Options.
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
    * @param {string[]} options.bbox The bounding box to receive data from.
-   * @param {string} [options.url='wss://api.geops.io/tracker-ws/v1/'] Url of the [geOps realtime API](https://developer.geops.io/apis/realtime/).
+   * @param {string} [options.url='wss://api.geops.io/tracker-ws/v1/'] Url of the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
    * @public
    */
   constructor(options: RealtimeAPIOptions = {}) {

@@ -15,10 +15,10 @@ import toMercatorExtent from '../../common/utils/toMercatorExtent';
 export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
 
 /**
- * Responsible for loading and display data from a geOps realtime API.
+ * A Maplibre layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
  *
  * @example
- * import { RealtimeLayer } from 'mobility-toolbox-js/Maplibre';
+ * import { RealtimeLayer } from 'mobility-toolbox-js/maplibre';
  *
  * const layer = new RealtimeLayer({
  *   apiKey: "yourApiKey"
@@ -38,7 +38,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    *
    * @param {RealtimeLayerOptions} options
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps realtime API url.
+   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
    *
    */
   constructor(options = {}) {

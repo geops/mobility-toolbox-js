@@ -10,7 +10,7 @@ export type StopFinderControlOptions = Options &
   };
 
 /**
- * Search stations.
+ * This OpenLayers control allows to search stations from the [geOps Stops API](https://developer.geops.io/apis/stops/).
  *
  * @example
  * import { Map } from 'ol';

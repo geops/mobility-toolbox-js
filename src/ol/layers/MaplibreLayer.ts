@@ -21,7 +21,7 @@ export type MaplibreLayerOptions = MobilityLayerOptions & {
 };
 
 /**
- * This layer is meant to facilitate the use of the geOps Maps api in an OpenLayers map using Maplibre.
+ * An OpenLayers layer able to display data from the [geOps Maps API](https://developer.geops.io/apis/maps).
  *
  * @example
  * import { MaplibreLayer } from 'mobility-toolbox-js/ol';

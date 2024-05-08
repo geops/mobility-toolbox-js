@@ -7,7 +7,7 @@ export type RoutingAPIOptions = {
 };
 
 /**
- * Access to the [geOps Routing API](https://developer.geops.io/apis/routing).
+ * This class provides convenience methods to use to the [geOps Routing API](https://developer.geops.io/apis/routing).
  *
  * @example
  * import { RoutingAPI } from 'mobility-toolbox-js';
