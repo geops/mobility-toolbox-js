@@ -148,8 +148,20 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @param {FilterFunction} [options.layersFilter] Filter function to decide which style layer to apply visiblity on. If not provided, the 'layers' property is used.
    * @param {FilterFunction} [options.queryRenderedLayersFilter] Filter function to decide which style layer are available for query.
    */
-  constructor(options: MaplibreStyleLayerOptions) {
-    super({ source: new Source({}), ...(options || {}) });
+  constructor(options: MaplibreStyleLayerOptions = {}) {
+    /** Manage renamed property for backward compatibility with v2  */
+    if (options.mapboxLayer) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'options.mapboxLayer is deprecated. Use options.maplibreLayer instead.',
+      );
+      // eslint-disable-next-line no-param-reassign
+      options.maplibreLayer = options.mapboxLayer;
+      // eslint-disable-next-line no-param-reassign
+      delete options.mapboxLayer;
+    }
+
+    super({ source: new Source({}), ...options });
 
     /**
      * @private
