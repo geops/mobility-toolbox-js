@@ -9,6 +9,13 @@
  * @param {any} b Object b to compare.
  * @returns number
  */
+
+/**
+ * @typedef {function} getMotsByZoomFunction
+ * @param {number} zoom Curent zoom level.
+ * @param {RealtimeMot[][]} motsByZoom Default array of mots by zoom.
+ * @returns number
+ */
 /**
  * @typedef {Object} ViewState
  * @property {number|undefined} time A time in ms.

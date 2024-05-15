@@ -35,7 +35,7 @@
  * @external {ol/Object~BaseObject} https://openlayers.org/en/latest/apidoc/module-ol_Object-BaseObject.html
  */
 /**
- * @external {maplibregl.CustomLayerInterface} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/maplibregl.CustomLayerInterface/
+ * @external {maplibregl.CustomLayerInterface} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
  */
 /**
  * @external {maplibregl.Evented} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Evented/
@@ -121,3 +121,4 @@
 /**
  * @external {RoutingResponse} https://developer.geops.io/apis/routing
  */
+

@@ -104,10 +104,10 @@ class MaplibreLayer extends MobilityLayerMixin(Layer) {
    *
    * @param {MaplibreLayerOptions} options
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.apiKeyName="key"] The geOps Maps api key name.
+   * @param {string} [options.apiKeyName="key"] The geOps Maps API key name.
    * @param {maplibregl.MapOptions} [options.mapOptions={ interactive: false, trackResize: false, attributionControl: false }] Maplibre map options.
-   * @param {string} [options.style="travic_v2"] The geOps Maps api style.
-   * @param {string} [options.url="https://maps.geops.io"] The geOps Maps api url.
+   * @param {string} [options.style="travic_v2"] The geOps Maps API style.
+   * @param {string} [options.url="https://maps.geops.io"] The geOps Maps API url.
    */
   constructor(options: MaplibreLayerOptions) {
     super({

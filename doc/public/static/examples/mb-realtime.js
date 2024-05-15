@@ -11,6 +11,7 @@ export default () => {
     zoom: 12,
     touchPitch: false,
     pitchWithRotate: false,
+    attributionControl: false,
   });
 
   map.addControl(new CopyrightControl());
@@ -18,12 +19,12 @@ export default () => {
   // Define the layer
   const realtime = new RealtimeLayer({
     apiKey: window.apiKey,
-    id: 'realtime',
   });
 
   map.on('load', () => {
     map.addLayer(realtime);
   });
+  
   document.getElementById('button').onclick = () => {
     const prop = map.getLayoutProperty('realtime', 'visibility');
     map.setLayoutProperty(

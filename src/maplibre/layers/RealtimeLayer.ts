@@ -11,6 +11,7 @@ import { getSourceCoordinates } from '../utils';
 import type { AnyMapGlMap, ViewState } from '../../types';
 import type { RealtimeTrajectory } from '../../api/typedefs';
 import toMercatorExtent from '../../common/utils/toMercatorExtent';
+import { FilterFunction, SortFunction } from '../../common/typedefs';
 
 export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
 
@@ -18,18 +19,36 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
  * A Maplibre layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
  *
  * @example
+ * import { Map } from 'maplibre-gl';
  * import { RealtimeLayer } from 'mobility-toolbox-js/maplibre';
  *
+ * // Define the map
+ * const map = new Map({ ... });
+ *
+ * // Define your layer map
  * const layer = new RealtimeLayer({
  *   apiKey: "yourApiKey"
  *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
+ * // Add the layer to your map *
+ * map.on('load', () => {
+ *   map.addLayer(layer);
+ * });
+ *
  *
  * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
+ * @see <a href="/example/mb-realtime>Live example</a>
  *
- * @implements {maplibregl.CustomLayer}
+ * @implements {maplibregl.CustomLayerInterface}
  * @extends {maplibregl.Evented}
+ * @classproperty {function} filter
+ * @classproperty {RealtimeMode} mode
+ * @classproperty {RealtimeMot[]} mots
+ * @classproperty {RealtimeTenant} tenant
+ * @classproperty {function} sort
+ * @classproperty {function} style
+ 
  * @public
  */
 class RealtimeLayer extends RealtimeLayerMixin(Layer) {
@@ -38,13 +57,20 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    *
    * @param {RealtimeLayerOptions} options
    * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
+   * @param {FilterFunction} options.filter Filter out a train. This function must be fast, it is executed for every trajectory on every render frame.
+   * @param {getMotsByZoomFunction} options.getMotsByZoom Returns for each zoom level the list of MOTs to display. It filters trains on backend side.
+   * @param {number} [options.minZoomInterpolation=8] Minimal zoom level where to start to interpolate train positions.
+   * @param {RealtimeMode} [options.mode='topographic'] The realtime mode to use.
+   * @param {SortFunction} options.sort Sort trains. This function must be fast, it is executed on every render frame.
+   * @param {RealtimeStyleFunction} options.style Function to style the trajectories.
+   * @param {RealtimeTenant} options.tenant Filter trains by its tenant. It filters trains on backend side.
    * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
-   *
    */
   constructor(options = {}) {
     const canvas = document.createElement('canvas');
     super({
       canvas,
+      id: 'realtime',
       ...options,
     });
 

@@ -14,7 +14,7 @@ export type LayerOptions = {
  *
  * const layer = new Layer({ id:'MyLayer' });
  *
- * @implements {maplibregl.CustomLayer}
+ * @implements {maplibregl.CustomLayerInterface}
  * @extends {maplibregl.Evented}
  * @private
  */
