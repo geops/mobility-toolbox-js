@@ -795,9 +795,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       ];
 
       /* @private */
-      const generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
+      this.generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
       if (this.generalizationLevel) {
-        bbox.push(`gen=${generalizationLevel}`);
+        bbox.push(`gen=${this.generalizationLevel}`);
       }
 
       /* @private */
