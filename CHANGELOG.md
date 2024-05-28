@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.2](https://github.com/geops/mobility-toolbox-js/compare/v2.4.1...v2.4.2) (2024-05-28)
+
+
+### Bug Fixes
+
+* set the proper generalization level ([f30d2f5](https://github.com/geops/mobility-toolbox-js/commit/f30d2f50fafbd6668db64d1b74dc124bf9a0b618))
+
 ### [2.4.1](https://github.com/geops/mobility-toolbox-js/compare/v2.4.0...v2.4.1) (2024-05-03)
 
 
