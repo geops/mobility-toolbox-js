@@ -40,7 +40,7 @@
  * @typedef {Object} MaplibreLayerOptions
  * @property {string} apiKey Access key for [geOps apis](https://developer.geops.io/).
  * @property {string} apiKeyName geOps Maps api key name.
- * @property {maplibregl.MapOptions} options.mapOptions Maplibre map options.
+ * @property {maplibregl.MapOptions} options.mapLibreOptions Maplibre map options.
  * @property {string} style geOps Maps api style.
  * @property {string} url geOps Maps api url.
  */

@@ -1664,6 +1664,11 @@
   resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.1.0.tgz#0709e9f4cb252351c609c6e6d8d6779a8d25edff"
   integrity sha512-+KpH+QxZU7O4675t3mnkQKcZZg56u+K/Ct2K+N2AZYNVK8kyeo/bI18tI8aPm3tvNNRyTWfj6s5tnGNlcbQRsA==
 
+"@geoblocks/ol-maplibre-layer@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@geoblocks/ol-maplibre-layer/-/ol-maplibre-layer-1.0.0.tgz#177862a71785a9676cb929f4e530fb6c585207b4"
+  integrity sha512-18EWTRBBt6xB2pJaEas3k887VZUAHGgk2U3v7D/5XtPTR91kUb0OAAOfShnfrET3iwO3SnJ6c0NrJ4anw0qobA==
+
 "@hapi/hoek@^9.0.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"

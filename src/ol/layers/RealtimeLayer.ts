@@ -127,7 +127,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
       // @ts-expect-error - bad ts check RealtimeLayer is a BaseLayer
       const index = this.map.getLayers().getArray().indexOf(this);
       this.map.getLayers().insertAt(index, this.vectorLayer);
-      this.olListenersKeys.push(
+      this.olEventsKeys.push(
         ...this.map.on(
           ['moveend', 'change:target'],
           // @ts-expect-error - bad ol definitions

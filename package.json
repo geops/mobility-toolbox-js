@@ -12,6 +12,7 @@
     "./types": "./types/index.d.ts"
   },
   "dependencies": {
+    "@geoblocks/ol-maplibre-layer": "^1.0.0",
     "@turf/helpers": "6.5.0",
     "@turf/transform-rotate": "6.5.0",
     "lodash.debounce": "4.0.8",

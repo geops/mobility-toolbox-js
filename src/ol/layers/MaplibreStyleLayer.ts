@@ -148,7 +148,11 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @param {FilterFunction} [options.layersFilter] Filter function to decide which style layer to apply visiblity on. If not provided, the 'layers' property is used.
    * @param {FilterFunction} [options.queryRenderedLayersFilter] Filter function to decide which style layer are available for query.
    */
-  constructor(options: MaplibreStyleLayerOptions = {}) {
+  constructor(
+    options: MaplibreStyleLayerOptions = {
+      mapLibreOptions: { style: { version: 8, sources: {}, layers: [] } },
+    },
+  ) {
     /** Manage renamed property for backward compatibility with v2  */
     if (options.mapboxLayer) {
       // eslint-disable-next-line no-console
@@ -197,7 +201,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     if (!this.map.getTargetElement()) {
       // If ther e is no target element the maplibreMap is not yet created, we
       // relaunch the initialisation when it's the case.
-      this.olListenersKeys.push(
+      this.olEventsKeys.push(
         this.map.on('change:target', () => {
           this.attachToMap(map);
         }),
@@ -220,7 +224,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
       }
     }
     // Apply the visibiltity when layer's visibility change.
-    this.olListenersKeys.push(
+    this.olEventsKeys.push(
       // @ts-expect-error 'load' is a custom event
       this.maplibreLayer.on('load', this.onLoad.bind(this)),
 

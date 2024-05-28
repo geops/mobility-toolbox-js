@@ -35,7 +35,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
   return class PropertiesLayer extends Base {
     public options?: PropertiesLayerMixinOptions = {};
 
-    public olListenersKeys: EventsKey[] = [];
+    public olEventsKeys: EventsKey[] = [];
 
     /** @deprecated */
     get children(): Layer[] {
@@ -180,7 +180,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
         this.setProperties(options.properties);
       }
 
-      this.olListenersKeys?.push(
+      this.olEventsKeys?.push(
         // Update parent property
         this.on('propertychange', (evt: ObjectEvent) => {
           if (evt.key === 'children') {

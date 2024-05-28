@@ -249,6 +249,11 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.1.tgz#16308cea045f0fc777b6ff20a9f25474dd8293d2"
   integrity sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==
 
+"@geoblocks/ol-maplibre-layer@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@geoblocks/ol-maplibre-layer/-/ol-maplibre-layer-1.0.0.tgz#177862a71785a9676cb929f4e530fb6c585207b4"
+  integrity sha512-18EWTRBBt6xB2pJaEas3k887VZUAHGgk2U3v7D/5XtPTR91kUb0OAAOfShnfrET3iwO3SnJ6c0NrJ4anw0qobA==
+
 "@geops/geops-ui@0.3.2":
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.3.2.tgz#f06013310029f4f6f72bfe9ca77350938ea0d395"
@@ -4029,6 +4034,7 @@ mkdirp@^0.5.1:
 mobility-toolbox-js@./../build:
   version "3.0.0-beta.14"
   dependencies:
+    "@geoblocks/ol-maplibre-layer" "^1.0.0"
     "@turf/helpers" "6.5.0"
     "@turf/transform-rotate" "6.5.0"
     lodash.debounce "4.0.8"

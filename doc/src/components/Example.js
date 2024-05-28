@@ -139,9 +139,9 @@ function Example({ example }) {
   }
 
   return (
-    <div style={{ margin: 'auto', marginTop: 30 }}>
+    <div style={{ marginTop: 30 }}>
       <Grid container direction="column" spacing={3}>
-        <Grid item xs={12}>
+        <Grid item xs={12} style={{ maxWidth: '100%' }}>
           <Typography variant="h1" className="headline">
             {example.name}
           </Typography>
@@ -150,7 +150,7 @@ function Example({ example }) {
           </Markdown>
           <Markdown className={classes.readme}>{example.readme || ''}</Markdown>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} style={{ maxWidth: '100%' }}>
           <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
             <div
               className={`${classes.htmlContainer} ${
@@ -163,7 +163,7 @@ function Example({ example }) {
         </Grid>
         {js && html && (
           <>
-            <Grid item xs={12}>
+            <Grid item xs={12} style={{ maxWidth: '100%' }}>
               <Paper className={classes.paper}>
                 <Typography className={classes.fileName}>
                   {jsFileName}
@@ -179,7 +179,7 @@ function Example({ example }) {
                 />
               </Paper>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} style={{ maxWidth: '100%' }}>
               <Paper className={classes.paper}>
                 <Typography className={classes.fileName}>
                   {htmlFileName}
