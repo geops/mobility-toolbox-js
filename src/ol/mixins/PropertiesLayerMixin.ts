@@ -4,6 +4,7 @@ import { EventsKey } from 'ol/events';
 import { Map, getUid } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import type { Options } from 'ol/layer/Layer';
+import debounce from 'lodash.debounce';
 import getLayersAsFlatArray from '../../common/utils/getLayersAsFlatArray';
 import type { Layerable } from './MobilityLayerMixin';
 
@@ -22,6 +23,11 @@ export type PropertiesLayerMixinOptions = Options & {
   [x: string]: any;
 };
 
+const deprecated = debounce((message: string) => {
+  // eslint-disable-next-line no-console
+  console.warn(message);
+}, 1000);
+
 /**
  * This mixin adds some properties to access ol custom properties easily.
  */
@@ -31,23 +37,35 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
 
     public olListenersKeys: EventsKey[] = [];
 
+    /** @deprecated */
     get children(): Layer[] {
+      deprecated(
+        "Layer.children is deprecated. Use the Layer.get('children') method instead.",
+      );
       return this.get('children') || [];
     }
 
+    /** @deprecated */
     set children(newValue: Layer[]) {
+      deprecated(
+        "Layer.children is deprecated. Use the Layer.set('children', children) method instead.",
+      );
       this.set('children', newValue || []);
     }
 
+    /** @deprecated */
     get copyrights(): string {
-      // eslint-disable-next-line no-console
-      console.warn('Deprecated. Use the source object to get the attributions');
+      deprecated(
+        'Layer.copyrights is deprecated. Get the attributions from the source object',
+      );
       return this.get('copyrights');
     }
 
+    /** @deprecated */
     set copyrights(newCopyrights: string | string[]) {
-      // eslint-disable-next-line no-console
-      console.warn('Deprecated. Use the source object to set the attributions');
+      deprecated(
+        'Layer.copyrights is deprecated. Set the attributions to the source object.',
+      );
       const arrValue =
         newCopyrights && !Array.isArray(newCopyrights)
           ? [newCopyrights]
@@ -55,22 +73,34 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       this.set('copyrights', arrValue || []);
     }
 
+    /** @deprecated */
     get disabled(): boolean {
+      deprecated(
+        "Layer.disabled is deprecated. Use the Layer.get('disabled') method instead.",
+      );
       return this.get('disabled');
     }
 
+    /** @deprecated */
     set disabled(newValue: boolean) {
+      deprecated(
+        "Layer.disabled is deprecated. Use the Layer.set('disabled', newValue) method instead.",
+      );
       this.set('disabled', newValue);
     }
 
+    /** @deprecated */
     get group(): string {
+      deprecated(
+        "Layer.group is deprecated. Use the Layer.get('group') method instead.",
+      );
       return this.get('group');
     }
 
-    get hitTolerance(): boolean {
-      // eslint-disable-next-line no-console
-      console.warn(
-        'Deprecated. Pass the pixelTolerance when you request the features.',
+    /** @deprecated */
+    get hitTolerance(): number {
+      deprecated(
+        'Layer.hitTolerance is deprecated.Pass the hitTolerance when you request the features.',
       );
       return this.get('hitTolerance') || 5;
     }
@@ -83,39 +113,59 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       return this.getMapInternal() as Map;
     }
 
+    /** @deprecated */
     get name(): string {
+      deprecated(
+        "Layer.name is deprecated. Use the Layer.get('name') method instead.",
+      );
       return this.get('name');
     }
 
+    /** @deprecated */
     get olLayer(): Layer {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This getter is only a redirect to the current 'this' object.",
+      deprecated(
+        "Layer.olLayer is deprecated. mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This getter is only a redirect to the current 'this' object.",
       );
       return this as unknown as Layer;
     }
 
+    /** @deprecated */
     // eslint-disable-next-line class-methods-use-this
     set olLayer(newValue: Layer) {
-      // eslint-disable-next-line no-console
-      console.log(
-        'Deprecated property: mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This setter has no effect.',
+      deprecated(
+        'Layer.olLayer is deprecated. mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. This setter has no effect.',
       );
     }
 
+    /** @deprecated */
     get parent(): Layer {
+      deprecated(
+        "Layer.parent is deprecated. Use the Layer.get('parent') method instead.",
+      );
       return this.get('parent');
     }
 
+    /** @deprecated */
     set parent(newValue: Layer) {
+      deprecated(
+        "Layer.parent is deprecated. Use the Layer.set('parent', parent) method instead.",
+      );
       this.set('parent', newValue);
     }
 
+    /** @deprecated */
     get visible(): boolean {
+      deprecated(
+        'Layer.visible is deprecated. Use the Layer.getVisible() method instead.',
+      );
       return this.getVisible();
     }
 
+    /** @deprecated */
     set visible(newValue: boolean) {
+      deprecated(
+        'Layer.visible is deprecated. Use the Layer.setVisible(newValue) method instead.',
+      );
       this.setVisible(newValue);
     }
 
@@ -124,8 +174,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       super(options);
 
       if (options.properties) {
-        // eslint-disable-next-line no-console
-        console.warn(
+        deprecated(
           "Deprecated. Don't use properties options. Pass the values directly in options object.",
         );
         this.setProperties(options.properties);
@@ -192,8 +241,12 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
 
     /**
      * Return the an array containing all the descendants of the layer in a flat array. Including the current layer.
+     * @deprecated
      */
     flat() {
+      deprecated(
+        'Layer.flat is deprecated. Use getLayersAsFlatArray utils method instead.',
+      );
       return getLayersAsFlatArray(this);
     }
   };
