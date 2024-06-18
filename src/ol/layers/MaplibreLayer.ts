@@ -60,13 +60,15 @@ const buildStyleUrl = (
 class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
   get mbMap(): maplibregl.Map | undefined {
     // eslint-disable-next-line no-console
-    console.warn('.mbMap deprecated. Use layer.maplibreMap.');
+    console.warn('MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.');
     return this.maplibreMap as maplibregl.Map;
   }
 
   get maplibreMap(): maplibregl.Map | undefined {
     // eslint-disable-next-line no-console
-    console.warn('.maplibreMap eprecated. Use layer.mapLibreMap.');
+    console.warn(
+      'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
+    );
     return this.mapLibreMap as maplibregl.Map;
   }
 

@@ -199,7 +199,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     }
 
     if (!this.map.getTargetElement()) {
-      // If ther e is no target element the maplibreMap is not yet created, we
+      // If ther e is no target element the mapLibreMap is not yet created, we
       // relaunch the initialisation when it's the case.
       this.olEventsKeys.push(
         this.map.on('change:target', () => {
@@ -211,16 +211,16 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     }
 
     // Apply the initial visibility if possible otherwise we wait for the load event of the layer
-    const { maplibreMap } = this.maplibreLayer;
-    if (maplibreMap) {
-      // maplibreMap.loaded() and maplibreMap.isStyleLoaded() are reliable only on the first call of init.
+    const { mapLibreMap } = this.maplibreLayer;
+    if (mapLibreMap) {
+      // mapLibreMap.loaded() and mapLibreMap.isStyleLoaded() are reliable only on the first call of init.
       // On the next call (when a topic change for example), these functions returns false because
       // the style is being modified.
       // That's why we rely on a property instead for the next calls.
-      if (maplibreMap.loaded()) {
+      if (mapLibreMap.loaded()) {
         this.onLoad();
       } else {
-        maplibreMap.once('load', this.onLoad);
+        mapLibreMap.once('load', this.onLoad);
       }
     }
     // Apply the visibiltity when layer's visibility change.
@@ -250,8 +250,8 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @override
    */
   detachFromMap() {
-    if (this.maplibreLayer?.maplibreMap) {
-      this.maplibreLayer.maplibreMap.off('load', this.onLoad);
+    if (this.maplibreLayer?.mapLibreMap) {
+      this.maplibreLayer.mapLibreMap.off('load', this.onLoad);
       this.removeLayers();
       this.removeSources();
     }
@@ -260,15 +260,15 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   addSources() {
-    if (!this.maplibreLayer?.maplibreMap || !this.sources) {
+    if (!this.maplibreLayer?.mapLibreMap || !this.sources) {
       return;
     }
-    const { maplibreMap } = this.maplibreLayer;
+    const { mapLibreMap } = this.maplibreLayer;
 
-    if (maplibreMap) {
+    if (mapLibreMap) {
       Object.entries(this.sources).forEach(([id, source]) => {
-        if (!maplibreMap.getSource(id)) {
-          maplibreMap.addSource(id, source);
+        if (!mapLibreMap.getSource(id)) {
+          mapLibreMap.addSource(id, source);
         }
       });
     }
@@ -276,15 +276,15 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   removeSources() {
-    if (!this.maplibreLayer?.maplibreMap || !this.sources) {
+    if (!this.maplibreLayer?.mapLibreMap || !this.sources) {
       return;
     }
-    const { maplibreMap } = this.maplibreLayer;
+    const { mapLibreMap } = this.maplibreLayer;
 
-    if (maplibreMap) {
+    if (mapLibreMap) {
       Object.keys(this.sources).forEach((id) => {
-        if (maplibreMap.getSource(id)) {
-          maplibreMap.removeSource(id);
+        if (mapLibreMap.getSource(id)) {
+          mapLibreMap.removeSource(id);
         }
       });
     }
@@ -292,21 +292,21 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   addLayers() {
-    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.layers)) {
+    if (!this.maplibreLayer?.mapLibreMap || !Array.isArray(this.layers)) {
       return;
     }
-    const { maplibreMap } = this.maplibreLayer;
+    const { mapLibreMap } = this.maplibreLayer;
 
-    if (maplibreMap) {
+    if (mapLibreMap) {
       this.layers.forEach((layer) => {
         // @ts-expect-error source is optional but exists in TS definition
         const { id, source } = layer;
         if (
-          (!source || (source && maplibreMap.getSource(source))) &&
+          (!source || (source && mapLibreMap.getSource(source))) &&
           id &&
-          !maplibreMap.getLayer(id)
+          !mapLibreMap.getLayer(id)
         ) {
-          maplibreMap.addLayer(layer, this.beforeId);
+          mapLibreMap.addLayer(layer, this.beforeId);
         }
       });
       this.applyLayoutVisibility();
@@ -315,16 +315,16 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /** @private */
   removeLayers() {
-    if (!this.maplibreLayer?.maplibreMap || !Array.isArray(this.layers)) {
+    if (!this.maplibreLayer?.mapLibreMap || !Array.isArray(this.layers)) {
       return;
     }
-    const { maplibreMap } = this.maplibreLayer;
+    const { mapLibreMap } = this.maplibreLayer;
 
-    if (maplibreMap) {
+    if (mapLibreMap) {
       this.layers.forEach((styleLayer) => {
         const { id } = styleLayer;
-        if (id && maplibreMap.getLayer(id)) {
-          maplibreMap.removeLayer(id);
+        if (id && mapLibreMap.getLayer(id)) {
+          mapLibreMap.removeLayer(id);
         }
       });
     }
@@ -335,18 +335,19 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   onLoad() {
-    if (!this.maplibreLayer?.maplibreMap) {
+    if (!this.maplibreLayer?.mapLibreMap) {
       return;
     }
     this.addSources();
     this.addLayers();
 
-    const { maplibreMap } = this.maplibreLayer;
-    const style = maplibreMap.getStyle();
+    const { mapLibreMap } = this.maplibreLayer;
+    const style = mapLibreMap.getStyle();
     if (style?.layers && this.layersFilter) {
       const styles = style.layers.filter(this.layersFilter);
-      this.disabled = !styles.length;
+      this.set('disabled', !styles.length);
     }
+    this.applyLayoutVisibility();
   }
 
   /**
@@ -356,10 +357,10 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @public
    */
   setFeatureState(features: Feature[], state: FeatureState) {
-    if (!this.maplibreLayer?.maplibreMap || !features.length) {
+    if (!this.maplibreLayer?.mapLibreMap || !features.length) {
       return;
     }
-    const { maplibreMap } = this.maplibreLayer;
+    const { mapLibreMap } = this.maplibreLayer;
 
     features.forEach((feature: Feature) => {
       const { source, sourceLayer } =
@@ -376,7 +377,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
         return;
       }
 
-      maplibreMap.setFeatureState(
+      mapLibreMap.setFeatureState(
         {
           id: feature.getId(),
           source,
@@ -399,13 +400,13 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     console.warn(
       `Deprecated. getFeatureInfoAtCoordinate([layer], coordinate) from ol package instead.`,
     );
-    if (!this.maplibreLayer?.maplibreMap) {
+    if (!this.maplibreLayer?.mapLibreMap) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
-    const { maplibreMap } = this.maplibreLayer;
+    const { mapLibreMap } = this.maplibreLayer;
 
     // Ignore the getFeatureInfo until the Maplibre map is loaded
-    if (!maplibreMap.isStyleLoaded()) {
+    if (!mapLibreMap.isStyleLoaded()) {
       return Promise.resolve({ coordinate, features: [], layer: this });
     }
 
@@ -413,13 +414,13 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     let layers = this.layers || [];
 
     if (this.layersFilter) {
-      layers = maplibreMap.getStyle().layers.filter(this.layersFilter);
+      layers = mapLibreMap.getStyle().layers.filter(this.layersFilter);
     }
 
     if (this.queryRenderedLayersFilter) {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      layers = maplibreMap
+      layers = mapLibreMap
         .getStyle()
         .layers.filter(this.queryRenderedLayersFilter);
     }
@@ -455,15 +456,15 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   //  * @param {maplibregl.filter} filter Determines which features should be rendered in a style layer.
   //  */
   // setFilter(filter: { [key: string]: any }) {
-  //   if (!this.maplibreLayer?.maplibreMap) {
+  //   if (!this.maplibreLayer?.mapLibreMap) {
   //     return;
   //   }
-  //   const { maplibreMap } = this.maplibreLayer;
+  //   const { mapLibreMap } = this.maplibreLayer;
 
   //   this.styleLayers.forEach(({ id }) => {
-  //     if (id && filter && maplibreMap.getLayer(id)) {
+  //     if (id && filter && mapLibreMap.getLayer(id)) {
   //       // @ts-ignore
-  //       maplibreMap.setFilter(id, filter);
+  //       mapLibreMap.setFilter(id, filter);
   //     }
   //   });
   // }
@@ -529,12 +530,12 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   applyLayoutVisibility(evt?: ObjectEvent) {
-    if (!this.maplibreLayer?.maplibreMap?.getStyle() || !this.layersFilter) {
+    if (!this.maplibreLayer?.mapLibreMap?.getStyle() || !this.layersFilter) {
       return;
     }
 
-    const { maplibreMap } = this.maplibreLayer;
-    const style = maplibreMap.getStyle();
+    const { mapLibreMap } = this.maplibreLayer;
+    const style = mapLibreMap.getStyle();
     const visibilityValue = this.getVisible() ? 'visible' : 'none';
     const layers = style.layers || [];
 
@@ -544,11 +545,11 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
       if (this.layersFilter(layer)) {
         const { id } = layer;
 
-        if (maplibreMap.getLayer(id)) {
-          maplibreMap.setLayoutProperty(id, 'visibility', visibilityValue);
+        if (mapLibreMap.getLayer(id)) {
+          mapLibreMap.setLayoutProperty(id, 'visibility', visibilityValue);
 
           if (this.getMinZoom() || this.getMaxZoom()) {
-            maplibreMap.setLayerZoomRange(
+            mapLibreMap.setLayerZoomRange(
               id,
               this.getMinZoom() ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1
               this.getMaxZoom() ? this.getMaxZoom() - 1 : 24,
