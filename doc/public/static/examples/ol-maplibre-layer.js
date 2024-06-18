@@ -3,21 +3,20 @@ import { MaplibreLayer, CopyrightControl } from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {
-  // Define the map
-  const map = new Map({
-    target: 'map',
-    view: new View({
-      center: [0, 0],
-      zoom: 1,
-    }),
-  });
-
   // Define the Maplibre style to display
   const layer = new MaplibreLayer({
     apiKey: window.apiKey,
   });
 
-  map.addLayer(layer);
+  // Define the map
+  const map = new Map({
+    target: 'map',
+    layers: [layer],
+    view: new View({
+      center: [0, 0],
+      zoom: 1,
+    }),
+  });
 
   // Change mouse cursor if a feature is clickable
   map.on('pointermove', (evt) => {

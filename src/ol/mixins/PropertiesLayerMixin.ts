@@ -190,7 +190,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       );
 
       this.options = options;
-      this.children = options.children || []; // Trigger the on children change event
+      this.set('children', options.children || []); // Trigger the on children change event
     }
 
     // @ts-expect-error - this is a mixin
@@ -209,7 +209,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       (oldValue || []).forEach((child) => {
         child.set('parent', undefined);
       });
-      (this.children || []).forEach((child) => {
+      (this.get('children') || []).forEach((child: Layer) => {
         child.set('parent', this);
       });
     }

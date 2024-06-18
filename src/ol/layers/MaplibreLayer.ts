@@ -2,7 +2,10 @@ import OlMap from 'ol/Map';
 import debounce from 'lodash.debounce';
 import { ObjectEvent } from 'ol/Object';
 import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer';
-import type { MapLibreLayerOptions } from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
+import type {
+  MapLibreLayerOptions,
+  MapLibreOptions,
+} from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
 import { getUrlWithParams } from '../../common/utils';
 import MobilityLayerMixin, {
   MobilityLayerOptions,
@@ -14,7 +17,19 @@ export type MaplibreLayerOptions = MobilityLayerOptions &
     apiKeyName?: string;
     style?: string | maplibregl.StyleSpecification;
     url?: string;
+    mapLibreOptions?: MapLibreOptions;
   };
+
+const buildStyleUrl = (
+  url: string,
+  style: string,
+  apiKey: string,
+  apiKeyName: string,
+) => {
+  return getUrlWithParams(`${url}/styles/${style}/style.json`, {
+    [apiKeyName]: apiKey,
+  }).toString();
+};
 
 /**
  * An OpenLayers layer able to display data from the [geOps Maps API](https://developer.geops.io/apis/maps).
@@ -45,13 +60,13 @@ export type MaplibreLayerOptions = MobilityLayerOptions &
 class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
   get mbMap(): maplibregl.Map | undefined {
     // eslint-disable-next-line no-console
-    console.warn('Deprecated. Use layer.maplibreMap.');
+    console.warn('.mbMap deprecated. Use layer.maplibreMap.');
     return this.maplibreMap as maplibregl.Map;
   }
 
   get maplibreMap(): maplibregl.Map | undefined {
     // eslint-disable-next-line no-console
-    console.warn('Deprecated. Use layer.mapLibreMap.');
+    console.warn('.maplibreMap eprecated. Use layer.mapLibreMap.');
     return this.mapLibreMap as maplibregl.Map;
   }
 
@@ -92,7 +107,7 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
    * @param {string} [options.url="https://maps.geops.io"] The geOps Maps API url.
    */
   constructor(options: MaplibreLayerOptions) {
-    super({
+    const newOptions = {
       apiKeyName: 'key',
       style: 'travic_v2',
       url: 'https://maps.geops.io',
@@ -100,7 +115,16 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
       mapLibreOptions: {
         ...(options.mapLibreOptions || {}),
       },
-    });
+    };
+    if (!newOptions.mapLibreOptions.style && newOptions.apiKey) {
+      newOptions.mapLibreOptions.style = buildStyleUrl(
+        newOptions.url,
+        newOptions.style as string,
+        newOptions.apiKey,
+        newOptions.apiKeyName,
+      );
+    }
+    super(newOptions);
   }
 
   /**
@@ -140,22 +164,16 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     }
 
     /// Otherwise build the complete style url.
-    return getUrlWithParams(`${this.url}/styles/${this.style}/style.json`, {
-      [this.get('apiKeyName')]: this.get('apiKey'),
-    }).toString();
+    return buildStyleUrl(
+      this.url,
+      this.style,
+      this.get('apiKey'),
+      this.get('apiKeyName'),
+    );
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  // createMap(options: MapOptions): Map {
-  //   return new Map(options);
-  // }
-
-  // createRenderer(): MaplibreLayerRenderer {
-  //   return new MaplibreLayerRenderer(this);
-  // }
-
   updateMaplibreMap() {
-    this.maplibreMap?.setStyle(this.getStyle(), { diff: false });
+    this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
   }
 
   /**
