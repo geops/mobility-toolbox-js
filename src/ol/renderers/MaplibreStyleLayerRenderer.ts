@@ -39,7 +39,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
 
     const layer = this.getLayer();
     const map = layer.getMapInternal();
-    const { maplibreMap } = layer.maplibreLayer;
+    const { mapLibreMap } = layer.maplibreLayer;
 
     const projection =
       map?.getView()?.getProjection()?.getCode() || 'EPSG:3857';
@@ -51,10 +51,10 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
       });
     }
 
-    if (maplibreMap?.isStyleLoaded()) {
+    if (mapLibreMap?.isStyleLoaded()) {
       const pixel =
         coordinate &&
-        maplibreMap.project(toLonLat(coordinate) as [number, number]);
+        mapLibreMap.project(toLonLat(coordinate) as [number, number]);
 
       if (pixel?.x && pixel?.y) {
         let pixels: [[number, number], [number, number]] | [number, number] = [
@@ -74,20 +74,20 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
         let layers = layer.layers || [];
 
         if (layer.layersFilter) {
-          layers = maplibreMap.getStyle().layers.filter(layer.layersFilter);
+          layers = mapLibreMap.getStyle().layers.filter(layer.layersFilter);
         }
 
         if (layer.queryRenderedLayersFilter) {
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          layers = maplibreMap
+          layers = mapLibreMap
             .getStyle()
             .layers.filter(layer.queryRenderedLayersFilter);
         }
 
         // At this point we get GeoJSON Maplibre feature, we transform it to an OpenLayers
         // feature to be consistent with other layers.
-        features = (maplibreMap as maplibregl.Map)
+        features = (mapLibreMap as maplibregl.Map)
           .queryRenderedFeatures(pixels, {
             layers: layers.map((l) => l.id),
             validate: false,
