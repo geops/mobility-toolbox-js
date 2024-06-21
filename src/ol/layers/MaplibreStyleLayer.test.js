@@ -64,8 +64,9 @@ describe('MaplibreStyleLayer', () => {
 
   test('should add layer on load', () => {
     const style = { layers: [] };
-    layer.maplibreLayer.maplibreMap = {
+    layer.maplibreLayer.mapLibreMap = {
       getStyle: () => style,
+      setStyle: () => {},
       getSource: () => ({}),
       getLayer: () => null,
       setLayoutProperty: () => null,
@@ -78,8 +79,9 @@ describe('MaplibreStyleLayer', () => {
   describe('should set disabled property to false on load', () => {
     test('when layer uses styleLayer property', () => {
       const styles = { layers: [] };
-      layer.maplibreLayer.maplibreMap = {
+      layer.maplibreLayer.mapLibreMap = {
         getStyle: () => styles,
+        setStyle: () => {},
         getSource: () => ({}),
         getLayer: () => null,
         setLayoutProperty: () => null,
@@ -99,8 +101,9 @@ describe('MaplibreStyleLayer', () => {
         maplibreLayer: source,
         layersFilter: () => false,
       });
-      layer2.maplibreLayer.maplibreMap = {
+      layer2.maplibreLayer.mapLibreMap = {
         getStyle: () => styles,
+        setStyle: () => {},
         getSource: () => ({}),
         getLayer: () => null,
         setLayoutProperty: () => null,

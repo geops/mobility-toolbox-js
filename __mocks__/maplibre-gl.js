@@ -77,6 +77,8 @@ class Map {
   unproject() {
     return { lng: 0, lat: 0 };
   }
+
+  setStyle() {}
 }
 module.exports = {
   Map,

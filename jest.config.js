@@ -20,6 +20,10 @@ const config = {
   testMatch: ['<rootDir>/src/**/?(*.)+(spec|test).(j|t)s'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  moduleNameMapper: {
+    '@geoblocks/ol-maplibre-layer':
+      '<rootDir>/node_modules/@geoblocks/ol-maplibre-layer/src/index.ts',
+  },
 };
 
 module.exports = config;
