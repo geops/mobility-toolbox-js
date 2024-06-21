@@ -107,7 +107,9 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    */
   get styleLayer(): maplibregl.AddLayerObject {
     // eslint-disable-next-line no-console
-    console.warn('Deprecated. Use layers instead.');
+    console.warn(
+      'MaplibreStyleLayer.styleLayer is deprecated. Use MaplibreStyleLayer.layer instead.',
+    );
     return this.layers[0];
   }
 
@@ -116,7 +118,9 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    */
   set styleLayer(newValue: maplibregl.AddLayerObject) {
     // eslint-disable-next-line no-console
-    console.warn('Deprecated. Use layers instead.');
+    console.warn(
+      'MaplibreStyleLayer.styleLayer is deprecated. Use MaplibreStyleLayer.layer instead.',
+    );
     this.layers = [newValue];
   }
 
@@ -125,7 +129,9 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    */
   get styleLayers(): maplibregl.AddLayerObject[] {
     // eslint-disable-next-line no-console
-    console.warn('Deprecated. Use layers instead.');
+    console.warn(
+      'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
+    );
     return this.layers;
   }
 
@@ -134,7 +140,9 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    */
   set styleLayers(newValue: maplibregl.AddLayerObject[]) {
     // eslint-disable-next-line no-console
-    console.warn('Deprecated. Use layers instead.');
+    console.warn(
+      'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
+    );
     this.layers = newValue;
   }
 

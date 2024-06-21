@@ -58,6 +58,8 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
   /** @private */
   allowRenderWhenAnimating?: boolean = false;
 
+  vectorLayer: VectorLayer<Feature>;
+
   /**
    * Constructor.
    *
@@ -80,10 +82,10 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
 
     // We store the layer used to highlight the full Trajectory
     /** @private */
-    this.vectorLayer = new VectorLayer({
+    this.vectorLayer = new VectorLayer<Feature>({
       updateWhileAnimating: this.allowRenderWhenAnimating,
       updateWhileInteracting: true,
-      source: new VectorSource({ features: [] }),
+      source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
         return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
           feature,
@@ -379,7 +381,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    */
   highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
     if (!id) {
-      this.vectorLayer.getSource().clear(true);
+      this.vectorLayer?.getSource()?.clear(true);
       return Promise.resolve([]);
     }
     return this.api
@@ -397,14 +399,14 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
           return [];
         }
         const features = format.readFeatures(fullTrajectory) as Feature[];
-        this.vectorLayer.getSource().clear(true);
+        this.vectorLayer?.getSource()?.clear(true);
         if (features.length) {
-          this.vectorLayer.getSource().addFeatures(features);
+          this.vectorLayer?.getSource()?.addFeatures(features);
         }
         return features;
       })
       .catch(() => {
-        this.vectorLayer.getSource().clear(true);
+        this.vectorLayer?.getSource()?.clear(true);
         return [];
       });
   }

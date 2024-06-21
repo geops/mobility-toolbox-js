@@ -101,6 +101,9 @@ export type GConstructor2<T extends OlLayer> = new (options?: any) => T;
 export type OlLayerClass = GConstructor<AnyOlLayer>;
 export type AnyLayerClass = GConstructor<AnyLayer>;
 
+type GConstructor3<T = {}> = new (...args: any[]) => T;
+export type AnyLayerable = GConstructor3<Omit<AnyLayer, keyof string>>;
+
 export type AnyMapboxLayerClass = GConstructor<AnyMapboxLayer>;
 export type AnyRealtimeLayerClass = GConstructor<AnyRealtimeLayer>;
 export type AnyMapGlMapClass = GConstructor<AnyMapGlMap>;

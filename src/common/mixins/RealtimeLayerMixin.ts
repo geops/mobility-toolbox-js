@@ -35,6 +35,7 @@ import {
   LayerGetFeatureInfoResponse,
   RealtimeBbox,
   RealtimeTrajectory,
+  AnyLayerable,
 } from '../../types';
 import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import { FilterFunction, SortFunction } from '../typedefs';
@@ -138,7 +139,7 @@ export class RealtimeLayerInterface {
  * @return {Class}  A class that implements {RealtimeLayerInterface} class and extends Base;
  * @private
  */
-function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
+function RealtimeLayerMixin<T extends AnyLayerable>(Base: T) {
   // @ts-ignore
   return class Mixin extends Base {
     debug: boolean;
@@ -779,9 +780,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       ];
 
       /* @private */
-      const generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
+      this.generalizationLevel = this.getGeneralizationLevelByZoom(zoomFloor);
       if (this.generalizationLevel) {
-        bbox.push(`gen=${generalizationLevel}`);
+        bbox.push(`gen=${this.generalizationLevel}`);
       }
 
       /* @private */

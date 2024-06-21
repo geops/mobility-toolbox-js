@@ -42,7 +42,6 @@ class HttpAPI {
       key: this.apiKey,
       ...searchParams,
     });
-    fetch;
     const response = await fetch(url.toString(), config);
     const data = await response.json();
 

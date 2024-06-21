@@ -33,7 +33,7 @@ export type RoutingControlOptions = Options & {
 
   stopsApiUrl?: string;
 
-  routingLayer?: VectorLayer<VectorSource<Feature<Geometry>>>;
+  routingLayer?: VectorLayer<Feature>;
 
   graphs?: RoutingGraph[];
 
@@ -135,7 +135,7 @@ class RoutingControl extends Control {
 
   viaPoints: RoutingViaPoint[] = [];
 
-  routingLayer?: VectorLayer<VectorSource<Feature<Geometry>>>;
+  routingLayer?: VectorLayer<Feature>;
 
   graphs: RoutingGraph[] = [];
 
