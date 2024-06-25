@@ -118,7 +118,11 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
         ...(options.mapLibreOptions || {}),
       },
     };
-    if (!newOptions.mapLibreOptions.style && newOptions.apiKey) {
+    if (
+      !newOptions.mapLibreOptions.style &&
+      newOptions.apiKey &&
+      newOptions.style
+    ) {
       newOptions.mapLibreOptions.style = buildStyleUrl(
         newOptions.url,
         newOptions.style as string,
