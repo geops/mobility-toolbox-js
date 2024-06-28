@@ -3,8 +3,17 @@ import { RealtimeLayer, MaplibreLayer } from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {
+  const layer = new MaplibreLayer({
+    apiKey: window.apiKey,
+  });
+
+  const realtime = new RealtimeLayer({
+    apiKey: window.apiKey,
+  });
+
   const map = new Map({
     target: 'map',
+    layers: [layer, realtime],
     view: new View({
       center: [831634, 5933959],
       zoom: 13,
@@ -12,16 +21,8 @@ export default () => {
     }),
   });
 
-  const layer = new MaplibreLayer({
-    apiKey: window.apiKey,
-  });
-  map.addLayer(layer);
-
-  const realtime = new RealtimeLayer({
-    apiKey: window.apiKey,
-  });
-  map.addLayer(realtime);
-
+  realtime.setVisible(false);
+  realtime.setVisible(true);
   const queryOptions = {
     hitTolerance: 5,
     layerFilter: (layer) => layer === realtime,

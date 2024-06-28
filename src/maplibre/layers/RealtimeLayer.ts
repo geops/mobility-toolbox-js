@@ -11,7 +11,6 @@ import { getSourceCoordinates } from '../utils';
 import type { AnyMapGlMap, ViewState } from '../../types';
 import type { RealtimeTrajectory } from '../../api/typedefs';
 import toMercatorExtent from '../../common/utils/toMercatorExtent';
-import { FilterFunction, SortFunction } from '../../common/typedefs';
 
 export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
 

@@ -1020,7 +1020,7 @@ function RealtimeLayerMixin<T extends AnyLayerable>(Base: T) {
         // start when the document is visible again.
         this.trajectories = {};
       } else {
-        if (this.visible === false) {
+        if (this.getVisible() === false) {
           return;
         }
         this.start();

@@ -123,7 +123,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
     super.attachToMap(map);
     if (this.map) {
       // If the layer is visible we start  the rendering clock
-      if (this.visible) {
+      if (this.getVisible()) {
         this.start();
       }
       // @ts-expect-error - bad ts check RealtimeLayer is a BaseLayer
@@ -137,7 +137,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
             const view = (
               (evt as MapEvent).map || (evt as ObjectEvent).target
             ).getView();
-            if (view.getAnimating() || view.getInteracting()) {
+            if (!view || view?.getAnimating() || view?.getInteracting()) {
               return;
             }
             const zoom = view.getZoom();
@@ -153,7 +153,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
           },
         ),
         this.on('change:visible', (evt: ObjectEvent) => {
-          if ((evt.target as any).visible) {
+          if ((evt.target as any).getVisible()) {
             this.start();
           } else {
             this.stop();
@@ -198,7 +198,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
 
     // it could happen that the view is set but without center yet,
     // so the calcualteExtent will trigger an error.
-    if (!view.getCenter()) {
+    if (!view?.getCenter()) {
       return;
     }
 
@@ -222,7 +222,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    * @override
    */
   renderTrajectoriesInternal(viewState: ViewState, noInterpolate: boolean) {
-    if (!this.map) {
+    if (!this.map?.getView()) {
       return false;
     }
     let isRendered = false;
@@ -255,7 +255,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    * @private
    */
   getRefreshTimeInMs() {
-    return super.getRefreshTimeInMs(this.map.getView().getZoom());
+    return super.getRefreshTimeInMs(this.map.getView()?.getZoom() || 0);
   }
 
   /**
@@ -266,7 +266,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onMoveEnd(evt: MapEvent | ObjectEvent) {
-    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
+    if (!this.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
 
@@ -284,7 +284,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
   onZoomEnd() {
     super.onZoomEnd();
 
-    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
+    if (!this.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
 
@@ -344,7 +344,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
     extent: [number, number, number, number],
     zoom: number,
   ) {
-    const center = this.map.getView().getCenter();
+    const center = this.map.getView()?.getCenter();
     if (!extent && !center) {
       // In that case the view is not zoomed yet so we can't calculate the extent of the map,
       // it will trigger a js error on calculateExtent function.
@@ -363,16 +363,18 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    * @private
    */
   setBbox(extent?: [number, number, number, number], zoom?: number) {
-    super.setBbox(
+    const extentt =
       extent ||
-        (this.map.getView().calculateExtent() as [
-          number,
-          number,
-          number,
-          number,
-        ]),
-      zoom || this.map.getView().getZoom() || 0,
-    );
+      (this.map?.getView()?.calculateExtent() as [
+        number,
+        number,
+        number,
+        number,
+      ]);
+    if (!extentt) {
+      return;
+    }
+    super.setBbox(extentt, zoom || this.map?.getView()?.getZoom() || 0);
   }
 
   /**

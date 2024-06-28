@@ -140,7 +140,6 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
    */
   attachToMap(map: OlMap) {
     super.attachToMap(map);
-    this.updateMaplibreMap();
 
     const updateMaplibreMapDebounced = debounce(
       this.updateMaplibreMap.bind(this),
@@ -180,7 +179,12 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
   }
 
   updateMaplibreMap() {
-    this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
+    try {
+      this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Error while updating MaplibreMap', e);
+    }
   }
 
   /**
