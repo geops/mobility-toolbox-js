@@ -10,9 +10,8 @@ import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { fromLonLat } from 'ol/proj';
 import { EventsKey } from 'ol/events';
-import { ObjectEvent } from 'ol/Object';
 import { Coordinate } from 'ol/coordinate';
-import { Feature } from 'ol';
+import { Options } from 'ol/layer/Layer';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { RealtimeAPI, RealtimeModes } from '../../api';
 import renderTrajectories from '../utils/renderTrajectories';
@@ -34,14 +33,14 @@ import {
   ViewState,
   AnyLayer,
   LayerGetFeatureInfoResponse,
+  RealtimeBbox,
+  RealtimeTrajectory,
+  AnyLayerable,
 } from '../../types';
-import { RealtimeTrajectory } from '../../api/typedefs';
-import { WebSocketAPIMessageEventData } from '../api/WebSocketAPI';
-import LayerCommon from '../layers/LayerCommon';
-import type { OlLayerOptions } from '../../ol/layers/Layer';
+import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import { FilterFunction, SortFunction } from '../typedefs';
 
-export type RealtimeLayerMixinOptions = OlLayerOptions & {
+export type RealtimeLayerMixinOptions = Options & {
   debug?: boolean;
   mode?: RealtimeMode;
   api?: RealtimeAPI;
@@ -97,6 +96,7 @@ export type RealtimeLayerMixinOptions = OlLayerOptions & {
 
 /**
  * RealtimeLayerInterface.
+ * @private
  */
 export class RealtimeLayerInterface {
   /**
@@ -127,7 +127,7 @@ export class RealtimeLayerInterface {
    *
    * @param {string} id The vehicle identifier (the  train_id property).
    * @param {RealtimeMode} mode The mode to request. If not defined, the layer´s mode propetrty will be used.
-   * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
+   * @return {Promise<{stopSequence: RealtimeStopSequence, fullTrajectory: RealtimeFullTrajectory>} A promise that will be resolved with the trajectory informations.
    */
   getTrajectoryInfos(id: string, mode: RealtimeMode) {}
 }
@@ -139,7 +139,7 @@ export class RealtimeLayerInterface {
  * @return {Class}  A class that implements {RealtimeLayerInterface} class and extends Base;
  * @private
  */
-function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
+function RealtimeLayerMixin<T extends AnyLayerable>(Base: T) {
   // @ts-ignore
   return class Mixin extends Base {
     debug: boolean;
@@ -216,7 +216,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
     visibilityRef!: EventsKey;
 
-    selectedVehicle: RealtimeTrajectory;
+    selectedVehicle!: RealtimeTrajectory;
 
     getMotsByZoom: (zoom: number) => RealtimeMot[];
 
@@ -243,6 +243,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         hitTolerance: 10,
         ...options,
       });
+      this.defineProperties(options);
 
       this.debug = options.debug || false;
       this.mode = options.mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
@@ -320,8 +321,8 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       );
 
       // Bind callbacks
-      this.onFeatureHover = this.onFeatureHover.bind(this);
-      this.onFeatureClick = this.onFeatureClick.bind(this);
+      // this.onFeatureHover = this.onFeatureHover.bind(this);
+      // this.onFeatureClick = this.onFeatureClick.bind(this);
       this.renderTrajectoriesInternal =
         this.renderTrajectoriesInternal.bind(this);
       this.onTrajectoryMessage = this.onTrajectoryMessage.bind(this);
@@ -337,6 +338,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * @private
      */
     defineProperties(options: RealtimeLayerMixinOptions) {
+      (super.defineProperties || (() => {}))(options);
       const {
         style,
         speed,
@@ -352,14 +354,11 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         mode,
         bboxParameters,
       } = options;
-
       let currCanvas = canvas;
       let currSpeed = speed || 1;
       let currTime = time || new Date();
       let currMode = mode || (RealtimeModes.TOPOGRAPHIC as RealtimeMode);
       let currStyle = style || realtimeDefaultStyle;
-
-      super.defineProperties(options);
 
       Object.defineProperties(this, {
         isTrackerLayer: { value: true },
@@ -544,20 +543,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
     attachToMap(map: AnyMap) {
       super.attachToMap(map);
-
-      // If the layer is visible we start  the rendering clock
-      if (this.visible) {
-        this.start();
-      }
-
-      // On change of visibility we start/stop the rendering clock
-      this.visibilityRef = this.on('change:visible', (evt: ObjectEvent) => {
-        if ((evt.target as unknown as LayerCommon).visible) {
-          this.start();
-        } else {
-          this.stop();
-        }
-      });
 
       // To avoid browser hanging when the tab is not visible for a certain amount of time,
       // We stop the rendering and the websocket when hide and start again when show.
@@ -786,7 +771,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       // The extent does not need to be precise under meter, so we round floor/ceil the values.
       const [minX, minY, maxX, maxY] = extent;
 
-      const bbox: (number | string)[] = [
+      const bbox: RealtimeBbox = [
         Math.floor(minX),
         Math.floor(minY),
         Math.ceil(maxX),
@@ -897,10 +882,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
 
       const vehicles = [];
       for (let i = 0; i < trajectories.length; i += 1) {
-        if (
-          trajectories[i].properties.coordinate &&
-          containsCoordinate(ext, trajectories[i].properties.coordinate)
-        ) {
+        // @ts-expect-error coordinate is added by the RealtimeLayer
+        const { coordinate: trajcoord } = trajectories[i].properties;
+        if (trajcoord && containsCoordinate(ext, trajcoord)) {
           vehicles.push(trajectories[i]);
         }
         if (vehicles.length === nb) {
@@ -919,7 +903,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
      * Request the stopSequence and the fullTrajectory informations for a vehicle.
      *
      * @param {string} id The vehicle identifier (the  train_id property).
-     * @return {Promise<{stopSequence: StopSequence, fullTrajectory: FullTrajectory>} A promise that will be resolved with the trajectory informations.
+     * @return {Promise<{stopSequence: RealtimeStopSequence, fullTrajectory: RealtimeFullTrajectory>} A promise that will be resolved with the trajectory informations.
      */
     getTrajectoryInfos(id: RealtimeTrainId) {
       // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
@@ -950,9 +934,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     purgeOutOfDateTrajectories() {
       Object.entries(this.trajectories || {}).forEach(([key, trajectory]) => {
         const timeIntervals = trajectory?.properties?.time_intervals;
-        if (this.time && timeIntervals.length) {
+        if (this.time && timeIntervals?.length) {
           const lastTimeInterval = timeIntervals[timeIntervals.length - 1][0];
-          if (lastTimeInterval < this.time) {
+          if (lastTimeInterval < this.time.getTime()) {
             this.removeTrajectory(key);
           }
         }
@@ -997,19 +981,22 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       if (!this.trajectories) {
         this.trajectories = {};
       }
-      this.trajectories[trajectory.properties.train_id] = trajectory;
+      const id = trajectory.properties.train_id;
+      if (id !== undefined) {
+        this.trajectories[id] = trajectory;
+      }
       // @ts-ignore the parameter are set by subclasses
       this.renderTrajectories();
     }
 
     removeTrajectory(trajectoryOrId: RealtimeTrajectory | RealtimeTrainId) {
-      let id: string;
+      let id: string | undefined;
       if (typeof trajectoryOrId !== 'string') {
         id = trajectoryOrId?.properties?.train_id;
       } else {
         id = trajectoryOrId;
       }
-      if (this.trajectories) {
+      if (id !== undefined && this.trajectories) {
         delete this.trajectories[id];
       }
     }
@@ -1025,9 +1012,6 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
     }
 
     onDocumentVisibilityChange() {
-      if (!this.visible) {
-        return;
-      }
       if (document.hidden) {
         this.stop();
 
@@ -1036,6 +1020,9 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         // start when the document is visible again.
         this.trajectories = {};
       } else {
+        if (this.getVisible() === false) {
+          return;
+        }
         this.start();
       }
     }
@@ -1064,6 +1051,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       } = trajectory;
 
       // ignore old events [SBAHNM-97]
+      // @ts-ignore
       if (timeSinceUpdate < 0) {
         return;
       }
@@ -1079,6 +1067,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
         this.mode === RealtimeModes.TOPOGRAPHIC &&
         rawCoordinates
       ) {
+        // @ts-ignore
         trajectory.properties.olGeometry = this.format.readGeometry({
           type: 'Point',
           coordinates: fromLonLat(
@@ -1087,10 +1076,12 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
           ),
         });
       } else {
+        // @ts-ignore
         trajectory.properties.olGeometry = this.format.readGeometry(geometry);
       }
 
       // TODO Make sure the timeOffset is useful. May be we can remove it.
+      // @ts-ignore
       trajectory.properties.timeOffset = Date.now() - data.timestamp;
       this.addTrajectory(trajectory);
     }
@@ -1111,23 +1102,7 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       this.removeTrajectory(data.content);
     }
 
-    /**
-     * Callback when user moves the mouse/pointer over the map.
-     * It sets the layer's hoverVehicleId property with the current hovered vehicle's id.
-     *
-     * @private
-     * @override
-     */
-    onFeatureHover(
-      features: Feature[],
-      layer: AnyRealtimeLayer,
-      coordinate: Coordinate,
-    ) {
-      const [feature] = features;
-      let id = null;
-      if (feature) {
-        id = feature.get('train_id');
-      }
+    highlightVehicle(id: RealtimeTrainId) {
       if (this.hoverVehicleId !== id) {
         /** @private */
         this.hoverVehicleId = id;
@@ -1136,32 +1111,66 @@ function RealtimeLayerMixin<T extends AnyLayerClass>(Base: T) {
       }
     }
 
-    /**
-     * Callback when user clicks on the map.
-     * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
-     *
-     * @private
-     * @override
-     */
-    onFeatureClick(
-      features: Feature[],
-      layer: AnyRealtimeLayer,
-      coordinate: Coordinate,
-    ) {
-      const [feature] = features;
-      let id = null;
-      if (feature) {
-        id = feature.get('train_id');
-      }
+    selectVehicle(id: RealtimeTrainId) {
       if (this.selectedVehicleId !== id) {
         /** @private */
         this.selectedVehicleId = id;
-        this.selectedVehicle = feature;
-
-        // @ts-ignore parameters are provided by subclasses
+        // @ts-ignore
         this.renderTrajectories(true);
       }
     }
+
+    // /**
+    //  * Callback when user moves the mouse/pointer over the map.
+    //  * It sets the layer's hoverVehicleId property with the current hovered vehicle's id.
+    //  *
+    //  * @private
+    //  * @override
+    //  */
+    // onFeatureHover(
+    //   features: (Feature | GeoJSONFeature)[],
+    //   layer: AnyRealtimeLayer,
+    //   coordinate: Coordinate,
+    // ) {
+    //   const [feature] = features;
+    //   let id = null;
+    //   if (feature) {
+    //     id = (feature as Feature).get
+    //       ? (feature as Feature).get('train_id')
+    //       : (feature as GeoJSONFeature).properties.train_id;
+    //   }
+    //   if (this.hoverVehicleId !== id) {
+    //     /** @private */
+    //     this.hoverVehicleId = id;
+    //     // @ts-ignore
+    //     this.renderTrajectories(true);
+    //   }
+    // }
+
+    // /**
+    //  * Callback when user clicks on the map.
+    //  * It sets the layer's selectedVehicleId property with the current selected vehicle's id.
+    //  *
+    //  * @private
+    //  * @override
+    //  */
+    // onFeatureClick(features: (Feature | GeoJSONFeature)[]) {
+    //   const [feature] = features;
+    //   let id = null;
+    //   if (feature) {
+    //     id = (feature as Feature).get
+    //       ? (feature as Feature).get('train_id')
+    //       : (feature as GeoJSONFeature).properties.train_id;
+    //   }
+    //   if (this.selectedVehicleId !== id) {
+    //     /** @private */
+    //     this.selectedVehicleId = id;
+    //     this.selectedVehicle = feature;
+
+    //     // @ts-ignore parameters are provided by subclasses
+    //     this.renderTrajectories(true);
+    //   }
+    // }
   };
 }
 

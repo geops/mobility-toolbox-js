@@ -37,7 +37,7 @@ function IdentifiersDoc({ docs }) {
     memberof: 'src/index.js',
     name: 'typedefs',
     static: true,
-    undocument: true,
+    // undocument: true,
   });
 
   for (const doc of filteredDocs) {

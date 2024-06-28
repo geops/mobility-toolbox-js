@@ -43,6 +43,22 @@ export type RealtimeMot =
   | 'funicular'
   | 'coach';
 
+/**
+ * @type RealtimeBbox
+ */
+export type RealtimeBbox = (number | string)[];
+// minX: number,
+// minY: number,
+// maxX: number,
+// maxY: number,
+// zoom: number,
+// string?,
+// `gen_level=${RealtimeGeneralizationLevel}`| undefined,
+// `tenant=${UnionConcat<RealtimeTenant, ','>}`!,
+// `mots=${UnionConcat<RealtimeMot, ','>}`!,
+
+export type RealtimeBuffer = [number, number];
+
 export type RealtimeChannelName =
   | 'websocket'
   | 'buffer'

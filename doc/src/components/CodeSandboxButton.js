@@ -10,7 +10,7 @@ const useStyles = makeStyles({
   },
 });
 
-function CodeSandboxButton({ html, js, extraFiles, ...props }) {
+function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
   const classes = useStyles();
 
   if (!html || !js) {
@@ -93,10 +93,5 @@ CodeSandboxButton.propTypes = {
   extraFiles: PropTypes.shape(),
 };
 
-CodeSandboxButton.defaultProps = {
-  html: null,
-  js: null,
-  extraFiles: {},
-};
 
 export default React.memo(CodeSandboxButton);

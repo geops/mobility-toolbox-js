@@ -1,6 +1,6 @@
 import { Map, View } from 'ol';
 import { MaplibreLayer, CopyrightControl } from 'mobility-toolbox-js/ol';
-import 'ol/ol.css';
+import { Source } from 'ol/source';
 
 export default () => {
   // Define the map
@@ -17,27 +17,26 @@ export default () => {
   const control = new CopyrightControl({
     target: document.getElementById('copyright'),
     element: document.createElement('div'),
-    render() {
-      this.element.innerHTML = this.active
-        ? this.getCopyrights().join(' | ')
-        : '';
-    },
   });
 
   // Attach to the map
-  control.attachToMap(map);
+  map.addControl(control);
 
-  // Define the Mapbox style to display
-  const mapboxLayer = new MaplibreLayer({
-    url: 'https://maps.geops.io/styles/travic_v2/style.json',
+  // Define the Maplibre style to display
+  const layer = new MaplibreLayer({
     apiKey: window.apiKey,
+    source: new Source({
+      attributions: ['My Custom Attribution'],
+    }),
   });
-
-  // Display the Mapbox style on the map
-  mapboxLayer.attachToMap(map);
+  map.addLayer(layer);
 
   // Toggle the copyright control.
   document.getElementById('button').addEventListener('click', () => {
-    control.map = control.map ? null : map;
+    if (control.getMap()) {
+      map.removeControl(control);
+    } else {
+      map.addControl(control);
+    }
   });
 };

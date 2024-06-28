@@ -17,7 +17,6 @@ function FileDocLinkHTML({ doc, text }) {
   if (!doc) return null;
 
   if (text === 'source' && doc.memberof) {
-    console.log(doc);
     return (
       <span>
         <a

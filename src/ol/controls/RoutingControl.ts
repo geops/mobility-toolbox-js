@@ -12,10 +12,11 @@ import type { StyleLike } from 'ol/style/Style';
 import BaseEvent from 'ol/events/Event';
 import { EventsKey } from 'ol/events';
 import { ModifyEvent } from 'ol/interaction/Modify';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import Control, { Options } from 'ol/control/Control';
+import { ObjectEvent } from 'ol/Object';
 import { RoutingAPI } from '../../api';
-import ControlCommon from '../../common/controls/ControlCommon';
-import type { ControlCommonOptions } from '../../common/controls/ControlCommon';
-import RoutingLayer from '../layers/RoutingLayer';
 import type {
   RoutingGraph,
   RoutingMot,
@@ -23,14 +24,16 @@ import type {
   RoutingViaPoint,
 } from '../../types';
 
-export type RoutingControlOptions = ControlCommonOptions & {
+export type RoutingControlOptions = Options & {
   apiKey?: string;
+
+  active?: boolean;
 
   stopsApiKey?: string;
 
   stopsApiUrl?: string;
 
-  routingLayer?: RoutingLayer;
+  routingLayer?: VectorLayer<Feature>;
 
   graphs?: RoutingGraph[];
 
@@ -96,7 +99,7 @@ const getFlatCoordinatesFromSegments = (
 };
 
 /**
- * Display a route of a specified mean of transport.
+ * This OpenLayers control allows the user to add and modifiy via points to a map and request a route from the [geOps Routing API](https://developer.geops.io/apis/routing/).
  *
  * @example
  * import { Map } from 'ol';
@@ -118,28 +121,23 @@ const getFlatCoordinatesFromSegments = (
  * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.
  * @classproperty {object} snapToClosestStation - If true, the routing will snap the coordinate to the closest station. Default to false.
  * @classproperty {boolean} useRawViaPoints - Experimental property. Wen true, it allows the user to add via points using different kind of string. See "via" parameter defined by the [geOps Routing API](https://developer.geops.io/apis/routing/). Default to false, only array of coordinates and station's id are supported as via points.
- * @classproperty {RoutingLayer|Layer} routingLayer - Layer for adding route features.
+ * @classproperty {VectorLayer} routingLayer - Layer for adding route features.
  * @classproperty {function} onRouteError - Callback on error.
  * @classproperty {boolean} loading - True if the control is requesting the backend.
  * @see <a href="/example/ol-routing">Openlayers routing example</a>
  *
  * @extends {Control}
  * @implements {RoutingInterface}
+ * @public
  */
-class RoutingControl extends ControlCommon {
+class RoutingControl extends Control {
   map?: Map;
 
   viaPoints: RoutingViaPoint[] = [];
 
-  routingLayer?: RoutingLayer;
-
-  loading: boolean = false;
+  routingLayer?: VectorLayer<Feature>;
 
   graphs: RoutingGraph[] = [];
-
-  mot?: RoutingMot;
-
-  modify: boolean = true;
 
   routingApiParams?: RoutingParameters;
 
@@ -181,37 +179,50 @@ class RoutingControl extends ControlCommon {
     segmentIndex?: number;
   } = {};
 
+  get active(): boolean {
+    return this.get('active');
+  }
+
+  set active(newValue: boolean) {
+    this.set('active', newValue);
+  }
+
+  get loading(): boolean {
+    return this.get('loading');
+  }
+
+  set loading(newValue: boolean) {
+    this.set('loading', newValue);
+  }
+
+  get modify() {
+    return this.get('modify');
+  }
+
+  set modify(newValue) {
+    this.set('modify', newValue);
+  }
+
+  get mot(): RoutingMot {
+    return this.get('mot');
+  }
+
+  set mot(newValue: RoutingMot) {
+    this.set('mot', newValue);
+  }
+
   constructor(options: RoutingControlOptions = {}) {
     super(options);
 
-    Object.defineProperties(this, {
-      mot: {
-        get: () => this.get('mot'),
-        set: (newMot) => {
-          if (newMot) {
-            this.set('mot', newMot);
-            if (this.viaPoints) {
-              this.drawRoute();
-            }
-          }
-        },
-      },
-      loading: {
-        get: () => this.get('loading'),
-        set: (newLoading) => {
-          this.set('loading', newLoading);
-        },
-      },
-      modify: {
-        get: () => this.get('modify'),
-        set: (modify) => {
-          this.set('modify', modify);
-        },
-      },
-    });
+    if (!this.element) {
+      this.createDefaultElement();
+    }
 
     /** True if the control is requesting the backend. */
     this.loading = false;
+
+    /** @private */
+    this.active = options.active || true;
 
     /** @private */
     this.graphs = options.graphs || [['osm', 0, 99]];
@@ -248,8 +259,8 @@ class RoutingControl extends ControlCommon {
     /** @private */
     this.routingLayer =
       options.routingLayer ||
-      new RoutingLayer({
-        name: 'routing-layer',
+      new VectorLayer({
+        source: new VectorSource(),
         style: options.style,
       });
 
@@ -274,6 +285,17 @@ class RoutingControl extends ControlCommon {
 
     /** @private */
     this.createModifyInteraction();
+
+    this.on('propertychange', (evt: ObjectEvent) => {
+      if (evt.key === 'active') {
+        this.onActiveChange();
+      }
+      if (evt.key === 'mot') {
+        if (this.viaPoints) {
+          this.drawRoute();
+        }
+      }
+    });
   }
 
   /**
@@ -293,6 +315,19 @@ class RoutingControl extends ControlCommon {
   }
 
   /**
+   * Activet7deactivate the control when activ eproperty changes
+   * @private
+   */
+  onActiveChange() {
+    if (this.get('active')) {
+      this.activate();
+    } else {
+      this.deactivate();
+    }
+    this.render();
+  }
+
+  /**
    * Adds/Replaces a viaPoint to the viaPoints array and redraws route:
    *   Adds a viaPoint at end of array by default.
    *   If an index is passed a viaPoint is added at the specified index.
@@ -301,6 +336,7 @@ class RoutingControl extends ControlCommon {
    * @param {number[]|string} coordinates Array of coordinates
    * @param {number} [index=-1] Integer representing the index of the added viaPoint. If not specified, the viaPoint is added at the end of the array.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
+   * @public
    */
   addViaPoint(
     coordinatesOrString: RoutingViaPoint,
@@ -321,6 +357,7 @@ class RoutingControl extends ControlCommon {
    * Removes a viaPoint at the passed array index and redraws route
    * By default the last viaPoint is removed.
    * @param {number} index Integer representing the index of the viaPoint to delete.
+   * @public
    */
   removeViaPoint(index = (this.viaPoints || []).length - 1) {
     /* Remove viapoint and redraw route */
@@ -334,6 +371,7 @@ class RoutingControl extends ControlCommon {
   /**
    * Replaces the current viaPoints with a new coordinate array.
    * @param {Array<Array<number>>} coordinateArray Array of nested coordinates
+   * @public
    */
   setViaPoints(coordinateArray: Coordinate[]) {
     this.viaPoints = [...coordinateArray];
@@ -343,12 +381,13 @@ class RoutingControl extends ControlCommon {
 
   /**
    * Removes all viaPoints, clears the source and triggers a change event
+   * @public
    */
   reset() {
     // Clear viaPoints and source
     this.abortRequests();
     this.viaPoints = [];
-    this.routingLayer?.olLayer?.getSource()?.clear();
+    this.routingLayer?.getSource()?.clear();
     this.dispatchEvent(new BaseEvent('change:route'));
   }
 
@@ -384,7 +423,7 @@ class RoutingControl extends ControlCommon {
   drawRoute() {
     /* Calls RoutingAPI to draw a route using the viaPoints array */
     this.abortRequests();
-    this.routingLayer?.olLayer?.getSource()?.clear();
+    this.routingLayer?.getSource()?.clear(true);
 
     if (!this.viaPoints.length) {
       return null;
@@ -401,7 +440,7 @@ class RoutingControl extends ControlCommon {
 
     const formattedViaPoints = this.viaPoints.map((viaPoint) => {
       if (Array.isArray(viaPoint)) {
-        const projection = this.map?.getView().getProjection();
+        const projection = this.getMap()?.getView().getProjection();
         // viaPoint is a coordinate
         // Coordinates need to be reversed as required by the backend RoutingAPI
         const [lon, lat] = toLonLat(viaPoint, projection);
@@ -413,9 +452,6 @@ class RoutingControl extends ControlCommon {
     });
 
     this.loading = true;
-
-    // Clear source
-    this.routingLayer?.olLayer?.getSource()?.clear();
 
     // Create point features for the viaPoints
     this.viaPoints.forEach((viaPoint, idx) =>
@@ -503,11 +539,11 @@ class RoutingControl extends ControlCommon {
               );
             }
 
-            this.routingLayer?.olLayer?.getSource()?.addFeature(routeFeature);
+            this.routingLayer?.getSource()?.addFeature(routeFeature);
             this.loading = false;
           })
           .catch((error) => {
-            if (error.name === 'AbortError') {
+            if (/AbortError/.test(error.message)) {
               // Ignore abort error
               return;
             }
@@ -515,6 +551,7 @@ class RoutingControl extends ControlCommon {
             // Dispatch error event and execute error function
             this.dispatchEvent(new BaseEvent('error'));
             this.onRouteError(error, this);
+            this.routingLayer?.getSource()?.clear();
             this.loading = false;
           });
       }),
@@ -537,7 +574,7 @@ class RoutingControl extends ControlCommon {
     // The via point is a coordinate using the current map's projection
     if (Array.isArray(viaPoint)) {
       pointFeature.setGeometry(new Point(viaPoint));
-      this.routingLayer?.olLayer?.getSource()?.addFeature(pointFeature);
+      this.routingLayer?.getSource()?.addFeature(pointFeature);
       return Promise.resolve(pointFeature);
     }
 
@@ -565,11 +602,11 @@ class RoutingControl extends ControlCommon {
           this.cacheStationData[viaPoint] = fromLonLat(coordinates);
           pointFeature.set('viaPointTrack', track);
           pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
-          this.routingLayer?.olLayer?.getSource()?.addFeature(pointFeature);
+          this.routingLayer?.getSource()?.addFeature(pointFeature);
           return pointFeature;
         })
         .catch((error) => {
-          if (error.name === 'AbortError') {
+          if (/AbortError/.test(error.message)) {
             // Ignore abort error
             return;
           }
@@ -591,10 +628,10 @@ class RoutingControl extends ControlCommon {
         const floatLat = parseFloat(lat);
         const coordinates = fromLonLat(
           [floatLon, floatLat],
-          this.map?.getView().getProjection(),
+          this.getMap()?.getView().getProjection(),
         );
         pointFeature.setGeometry(new Point(coordinates));
-        this.routingLayer?.olLayer?.getSource()?.addFeature(pointFeature);
+        this.routingLayer?.getSource()?.addFeature(pointFeature);
         return Promise.resolve(pointFeature);
       }
     }
@@ -613,11 +650,11 @@ class RoutingControl extends ControlCommon {
     if (lon && lat) {
       const coordinates = fromLonLat(
         [parseFloat(lon), parseFloat(lat)],
-        this.map?.getView().getProjection(),
+        this.getMap()?.getView().getProjection(),
       );
       pointFeature.set('viaPointTrack', track);
       pointFeature.setGeometry(new Point(coordinates));
-      this.routingLayer?.olLayer?.getSource()?.addFeature(pointFeature);
+      this.routingLayer?.getSource()?.addFeature(pointFeature);
       return Promise.resolve(pointFeature);
     }
 
@@ -632,7 +669,7 @@ class RoutingControl extends ControlCommon {
           this.cacheStationData[viaPoint] = fromLonLat(coordinates);
           pointFeature.set('viaPointTrack', track);
           pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
-          this.routingLayer?.olLayer?.getSource()?.addFeature(pointFeature);
+          this.routingLayer?.getSource()?.addFeature(pointFeature);
           return pointFeature;
         })
         .catch((error) => {
@@ -653,9 +690,10 @@ class RoutingControl extends ControlCommon {
    * @private
    */
   onMapClick(evt: MapBrowserEvent<MouseEvent>) {
-    const feats = (evt.target as Map).getFeaturesAtPixel(
-      evt.pixel,
-    ) as Feature<Geometry>[];
+    const feats = (evt.target as Map).getFeaturesAtPixel(evt.pixel, {
+      layerFilter: (layer) => layer === this.routingLayer,
+      hitTolerance: 5,
+    }) as Feature<Geometry>[];
     const viaPoint = feats.find(
       (feat: Feature<Geometry>) =>
         feat.getGeometry()?.getType() === 'Point' &&
@@ -696,8 +734,8 @@ class RoutingControl extends ControlCommon {
         0.001,
       );
 
-      segmentIndex = this.segments.findIndex(
-        (segment) => segment.getGeometry()?.intersectsExtent(closestExtent),
+      segmentIndex = this.segments.findIndex((segment) =>
+        segment.getGeometry()?.intersectsExtent(closestExtent),
       );
     }
 
@@ -775,13 +813,16 @@ class RoutingControl extends ControlCommon {
      */
     // Define and add modify interaction
     this.modifyInteraction = new Modify({
-      source: this.routingLayer?.olLayer?.getSource() || undefined,
-      pixelTolerance: 4,
-      hitDetection: this.routingLayer?.olLayer,
+      source: this.routingLayer?.getSource() || undefined,
+      pixelTolerance: 6,
+      // hitDetection: this.routingLayer, // Create a bug, the first point is always selected even if the mous eis far away
       deleteCondition: (e) => {
-        const feats = e.target.getFeaturesAtPixel(e.pixel, {
-          hitTolerance: 5,
-        }) as Feature<Geometry>[];
+        const feats = e.target?.getFeaturesAtPixel(
+          e.pixel,
+          {
+            hitTolerance: 5,
+          } || [],
+        ) as Feature<Geometry>[];
         const viaPoint = feats.find(
           (feat) =>
             feat.getGeometry()?.getType() === 'Point' && feat.get('index'),
@@ -809,7 +850,7 @@ class RoutingControl extends ControlCommon {
     }
     this.removeListeners();
     /** @private */
-    this.onMapClickKey = this.map?.on('singleclick', this.onMapClick);
+    this.onMapClickKey = this.getMap()?.on('singleclick', this.onMapClick);
   }
 
   /**
@@ -822,29 +863,39 @@ class RoutingControl extends ControlCommon {
     }
   }
 
+  setMap(map: Map) {
+    super.setMap(map);
+    if (map && this.active) {
+      this.activate();
+    } else if (!map) {
+      this.active = false;
+    }
+  }
+
   activate() {
-    super.activate();
-    if (this.map) {
+    const map = this.getMap();
+    if (map) {
       /** @private */
       this.format = new GeoJSON({
-        featureProjection: this.map.getView().getProjection(),
+        featureProjection: map.getView().getProjection(),
       });
 
       /** @private */
       this.graphsResolutions = RoutingControl.getGraphsResolutions(
         this.graphs,
-        this.map,
+        map,
       );
 
       // Clean the modifyInteraction if present
       if (this.modifyInteraction) {
-        this.map.removeInteraction(this.modifyInteraction);
+        map.removeInteraction(this.modifyInteraction);
       }
 
       // Add modify interaction, RoutingLayer and listeners
-      this.routingLayer?.attachToMap(this.map);
+      // @ts-ignore
+      // this.routingLayer?.attachToMap(this.getMap());
       if (this.modifyInteraction) {
-        this.map.addInteraction(this.modifyInteraction);
+        map.addInteraction(this.modifyInteraction);
       }
       this.modifyInteraction?.setActive(this.modify);
       this.addListeners();
@@ -852,11 +903,14 @@ class RoutingControl extends ControlCommon {
   }
 
   deactivate() {
-    if (this.map) {
+    const map = this.getMap();
+
+    if (map) {
       // Remove modify interaction, RoutingLayer, listeners and viaPoints
-      this.routingLayer?.detachFromMap();
+      // @ts-ignore
+      // this.routingLayer?.detachFromMap();
       if (this.modifyInteraction) {
-        this.map.removeInteraction(this.modifyInteraction);
+        map.removeInteraction(this.modifyInteraction);
       }
       this.removeListeners();
       this.reset();

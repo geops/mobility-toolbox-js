@@ -9,6 +9,13 @@
  * @param {any} b Object b to compare.
  * @returns number
  */
+
+/**
+ * @typedef {function} getMotsByZoomFunction
+ * @param {number} zoom Curent zoom level.
+ * @param {RealtimeMot[][]} motsByZoom Default array of mots by zoom.
+ * @returns number
+ */
 /**
  * @typedef {Object} ViewState
  * @property {number|undefined} time A time in ms.
@@ -23,11 +30,19 @@
 /**
  * @typedef {Object} FeatureInfo
  * @property {Layer} layer A layer.
- * @property {ol/Feature~Feature[]} features  An array of features.
+ * @property {Feature[]} features  An array of features.
  * @property {number[2]} coordinate The coordinate where to find the featue.
  */
 /**
- * @typedef {ol/Map~Map|mapboxgl.Map|maplibregl.Map} AnyMap
+ * @typedef {ol/Map~Map|maplibregl.Map} AnyMap
+ */
+/**
+ * @typedef {Object} MaplibreLayerOptions
+ * @property {string} apiKey Access key for [geOps apis](https://developer.geops.io/).
+ * @property {string} apiKeyName geOps Maps api key name.
+ * @property {maplibregl.MapOptions} options.mapLibreOptions Maplibre map options.
+ * @property {string} style geOps Maps api style.
+ * @property {string} url geOps Maps api url.
  */
 /**
  * @typedef {Object} ControlCommonOptions

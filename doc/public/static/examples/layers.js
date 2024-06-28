@@ -6,7 +6,6 @@ import {
   sortByDelay,
   Layer,
 } from 'mobility-toolbox-js/ol';
-import 'ol/ol.css';
 
 export default () => {
   const map = new Map({

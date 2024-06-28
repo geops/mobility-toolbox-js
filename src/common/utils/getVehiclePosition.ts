@@ -1,10 +1,10 @@
 import { Coordinate } from 'ol/coordinate';
 import { LineString } from 'ol/geom';
-import type { RealtimeTrajectory } from '../../api/typedefs';
+import { RealtimeTrajectory } from '../../types';
 
 export type VehiclePosition = {
   coord: Coordinate;
-  rotation: number;
+  rotation?: number;
 };
 
 /**
@@ -14,6 +14,7 @@ export type VehiclePosition = {
  * @param {RealtimeTrajectory} trajectory The trajectory to interpolate.
  * @param {boolean} noInterpolate If true, the vehicle position is not interpolated on each render but only once.
  * @returns {VehiclePosition}
+ * @private
  */
 const getVehiclePosition = (
   now: number,
@@ -22,9 +23,12 @@ const getVehiclePosition = (
 ): VehiclePosition => {
   const {
     time_intervals: timeIntervals,
+    // @ts-expect-error olGeometry is added by the RealtimeLayer
     olGeometry,
+    // @ts-expect-error coordinate is added by the RealtimeLayer
     coordinate,
   } = trajectory.properties;
+  // @ts-ignore
   let { type, coordinates } = trajectory.geometry;
   let geometry = olGeometry;
   let coord;

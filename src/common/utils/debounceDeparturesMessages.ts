@@ -3,7 +3,7 @@ import type { RealtimeDeparture, RealtimeDepartureExtended } from '../../types';
 import type {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
-} from '../api/WebSocketAPI';
+} from '../../api/WebSocketAPI';
 import sortAndFilterDepartures from './sortAndFilterDepartures';
 
 /**

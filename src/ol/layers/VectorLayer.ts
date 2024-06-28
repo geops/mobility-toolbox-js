@@ -1,19 +1,15 @@
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { LayerGetFeatureInfoResponse } from '../../types';
-import Layer, { OlLayerOptions } from './Layer';
+import Layer from './Layer';
+import { MobilityLayerOptions } from '../mixins/MobilityLayerMixin';
 
 /**
- * A class use to display vector data.
- *
- * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
- * @extends {Layer}
+ * @deprecated
  */
 class VectorLayer extends Layer {
   /**
-   * Request feature information for a given coordinate.
-   * @param {ol/coordinate~Coordinate} coordinate the coordinate to request the information at.
-   * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+   * @deprecated
    */
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
@@ -24,7 +20,7 @@ class VectorLayer extends Layer {
       const pixel = this.map.getPixelFromCoordinate(coordinate);
       features = this.map.getFeaturesAtPixel(pixel, {
         layerFilter: (l) => l === this.olLayer,
-        hitTolerance: this.hitTolerance,
+        hitTolerance: this.hitTolerance || 5,
       }) as Feature[];
     }
 
@@ -36,11 +32,9 @@ class VectorLayer extends Layer {
   }
 
   /**
-   * Create a copy of the VectorLayer.
-   * @param {Object} newOptions Options to override
-   * @return {VectorLayer} A VectorLayer
+   * @deprecated
    */
-  clone(newOptions: OlLayerOptions) {
+  clone(newOptions: MobilityLayerOptions) {
     return new VectorLayer({ ...this.options, ...newOptions });
   }
 }

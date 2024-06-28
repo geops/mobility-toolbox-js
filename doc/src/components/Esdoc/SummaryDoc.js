@@ -42,8 +42,9 @@ function SummaryDoc({
   style,
 }) {
   const showInherited = useMemo(() => {
-    if (docs.length === 0) return null;
-    return ['member', 'method'].includes(docs[0].kind);
+    return null;
+    // if (docs.length === 0) return null;
+    // return ['member', 'method'].includes(docs[0].kind);
   }, [docs]);
 
   if (docs.length === 0) return null;

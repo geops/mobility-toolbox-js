@@ -13,7 +13,7 @@ import getVehiclePosition from './getVehiclePosition';
 
 /**
  * Draw all the trajectories available in a canvas.
- * @param {HTMLCanvas|HTMLOffscreenCanvas} The canvas where to draw the trajectories.
+ * @param {HTMLCanvas|HTMLOffscreenCanvas} canvas The canvas where to draw the trajectories.
  * @param {ViewState} trajectories An array of trajectories.
  * @param {Function} style A function that returns a canvas representing a vehicle of a specific trajectory.
  * @param {ViewState} viewState The view state of the map.

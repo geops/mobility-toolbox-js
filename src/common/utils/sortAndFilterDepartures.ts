@@ -10,7 +10,7 @@ import compareDepartures from './compareDepartures';
  *
  * @param {Object} depObject The object containing departures by id.
  * @param {boolean} [sortByMinArrivalTime=false] If true sort departures by arrival time.
- * @return {Array<Departure>} Return departures array.
+ * @return {RealtimeDeparture[]} Return departures array.
  * @private
  */
 const sortAndfilterDepartures = (

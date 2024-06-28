@@ -353,6 +353,26 @@ export const _resolveIgnore = (docs) => {
 };
 
 /**
+ * resolve undocument property.
+ * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js#L43
+ * remove docs that has undocument property.
+ * @private
+ */
+export const _resolveUndocument = (docs) => {
+  if (_data.__RESOLVED_UNDOCUMENT__) return;
+
+  const ignoreDocs = _find({ undocument: true });
+  for (const doc of ignoreDocs) {
+    const longname = doc.longname.replace(/[$]/g, '\\$');
+    const regex = new RegExp(`^${longname}[.~#]`);
+    _data({ longname: { regex: regex } }).remove();
+  }
+  _data({ undocument: true }).remove();
+
+  _data.__RESOLVED_UNDOCUMENT__ = true;
+  return docs;
+};
+/**
  * resolve @link as html link.
  * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/DocResolver.js#L89
  * @private
