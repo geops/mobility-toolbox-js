@@ -42,12 +42,12 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
  *
  * @implements {maplibregl.CustomLayerInterface}
  * @extends {maplibregl.Evented}
- * @classproperty {function} filter
- * @classproperty {RealtimeMode} mode
- * @classproperty {RealtimeMot[]} mots
- * @classproperty {RealtimeTenant} tenant
- * @classproperty {function} sort
- * @classproperty {function} style
+ * @classproperty {function} filter - Filter out a train. This function must be fast, it is executed for every trajectory on every render frame.
+ * @classproperty {RealtimeMode} mode - The realtime mode to use.
+ * @classproperty {RealtimeMot[]} mots - Filter trains by its mode of transportation. It filters trains on backend side.
+ * @classproperty {RealtimeTenant} tenant - Filter trains by its tenant. It filters trains on backend side.
+ * @classproperty {function} sort - Sort trains. This function must be fast, it is executed on every render frame.
+ * @classproperty {function} style - Style for each train.
  
  * @public
  */
