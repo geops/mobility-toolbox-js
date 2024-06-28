@@ -47,8 +47,8 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
  * @classproperty {RealtimeMot[]} mots - Filter trains by its mode of transportation. It filters trains on backend side.
  * @classproperty {RealtimeTenant} tenant - Filter trains by its tenant. It filters trains on backend side.
  * @classproperty {function} sort - Sort trains. This function must be fast, it is executed on every render frame.
- * @classproperty {function} style - Style for each train.
- 
+ * @classproperty {function} style - Function to style the vehicles.
+ s
  * @public
  */
 class RealtimeLayer extends RealtimeLayerMixin(Layer) {
@@ -62,7 +62,7 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    * @param {number} [options.minZoomInterpolation=8] Minimal zoom level where to start to interpolate train positions.
    * @param {RealtimeMode} [options.mode='topographic'] The realtime mode to use.
    * @param {SortFunction} options.sort Sort trains. This function must be fast, it is executed on every render frame.
-   * @param {RealtimeStyleFunction} options.style Function to style the trajectories.
+   * @param {RealtimeStyleFunction} options.style Function to style the vehicles.
    * @param {RealtimeTenant} options.tenant Filter trains by its tenant. It filters trains on backend side.
    * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
    */
