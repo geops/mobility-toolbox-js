@@ -15,7 +15,7 @@ export type MaplibreLayerOptions = MobilityLayerOptions &
   MapLibreLayerOptions & {
     apiKey?: string;
     apiKeyName?: string;
-    style?: string | maplibregl.StyleSpecification;
+    style?: null | string | maplibregl.StyleSpecification;
     url?: string;
     mapLibreOptions?: MapLibreOptions;
   };
@@ -121,7 +121,8 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     if (
       !newOptions.mapLibreOptions.style &&
       newOptions.apiKey &&
-      newOptions.style
+      newOptions.style &&
+      typeof newOptions.style === 'string'
     ) {
       newOptions.mapLibreOptions.style = buildStyleUrl(
         newOptions.url,
