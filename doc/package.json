@@ -9,7 +9,7 @@
     "@mui/material": "^5.15.20",
     "@mui/styles": "^5.15.20",
     "codesandbox": "2.2.3",
-    "maplibre-gl": "4.4.1",
+    "maplibre-gl": "4.5.0",
     "mobility-toolbox-js": "./../build",
     "next": "14.2.4",
     "ol": "9.2.4",
