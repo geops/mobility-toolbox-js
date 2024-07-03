@@ -2,55 +2,58 @@ import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
 import { Pixel } from 'ol/pixel';
-import type { RealtimeMot, RealtimeTrainId } from './realtime';
-import type {
-  CopyrightControl as MbCopyrightControl,
-  RealtimeLayer as MbRealtimeLayer,
-  layer as MbLayer,
-} from '../maplibre';
-import type {
-  CopyrightControl as OlCopyrightControl,
-  MapboxLayer,
-  MaplibreLayer,
-  RealtimeLayer as OlRealtimeLayer,
-  layer as OlLayer,
-} from '../ol';
+
 import { RealtimeTrajectory } from '../api/typedefs';
 import CommonLayer, {
   LayerCommonOptions,
 } from '../ol/mixins/PropertiesLayerMixin';
+
+import type {
+  CopyrightControl as MbCopyrightControl,
+  layer as MbLayer,
+  RealtimeLayer as MbRealtimeLayer,
+} from '../maplibre';
+import type {
+  MapboxLayer,
+  MaplibreLayer,
+  CopyrightControl as OlCopyrightControl,
+  layer as OlLayer,
+  RealtimeLayer as OlRealtimeLayer,
+} from '../ol';
+
+import type { RealtimeMot, RealtimeTrainId } from './realtime';
+
 import type { RoutingParameters } from '.';
 
-export type StyleCache = { [key: string]: AnyCanvas };
+export type StyleCache = Record<string, AnyCanvas>;
 
-export type ViewState = {
-  time?: number;
+export interface ViewState {
   center?: number[];
   extent?: number[];
-  size?: number[];
-  rotation?: number;
-  resolution?: number;
-  zoom?: number;
   pixelRatio?: number;
-};
+  resolution?: number;
+  rotation?: number;
+  size?: number[];
+  time?: number;
+  zoom?: number;
+}
 
-export type RealtimeStyleOptions = {
-  hoverVehicleId?: RealtimeTrainId;
-  selectedVehicleId?: RealtimeTrainId;
-  useDelayStyle?: boolean;
-  delayOutlineColor?: string;
+export interface RealtimeStyleOptions {
   delayDisplay?: number;
-  noInterpolate?: boolean;
+  delayOutlineColor?: string;
   filter?: FilterFunction;
-  getRadius?: (type: RealtimeMot, z: number) => number;
   getBgColor?: (type: RealtimeMot) => string;
   getDelayColor?: (
-    delay: number | null,
+    delay: null | number,
     cancelled?: boolean,
     isDelayText?: boolean,
   ) => string;
   getDelayFont?: (fontSize: number, text?: string) => string;
-  getDelayText?: (delay: number | null, cancelled?: boolean) => string;
+  getDelayText?: (delay: null | number, cancelled?: boolean) => string;
+  getMaxRadiusForStrokeAndDelay?: () => number;
+  getMaxRadiusForText?: () => number;
+  getRadius?: (type: RealtimeMot, z: number) => number;
+  getScreenPixel?: (pixel: Pixel, viewState: ViewState) => Pixel;
   getText?: (text?: string) => string;
   getTextColor?: (type: RealtimeMot) => string;
   getTextFont?: (fontSize: number, text?: string) => string;
@@ -61,14 +64,13 @@ export type RealtimeStyleOptions = {
     fontSize: number,
     getFont: (fontSize: number, text?: string) => string,
   ) => number;
-  getMaxRadiusForText?: () => number;
-  getMaxRadiusForStrokeAndDelay?: () => number;
-  getScreenPixel?: (pixel: Pixel, viewState: ViewState) => Pixel;
-};
+  hoverVehicleId?: RealtimeTrainId;
+  noInterpolate?: boolean;
+  selectedVehicleId?: RealtimeTrainId;
+  useDelayStyle?: boolean;
+}
 
-export type RealtimeTrajectories = {
-  [key: RealtimeTrainId]: RealtimeTrajectory;
-};
+export type RealtimeTrajectories = Record<RealtimeTrainId, RealtimeTrajectory>;
 
 export type RealtimeStyleFunction = (
   trajectory: RealtimeTrajectory,
@@ -76,32 +78,34 @@ export type RealtimeStyleFunction = (
   options: RealtimeStyleOptions,
 ) => AnyCanvas | null;
 
-export type RealtimeRenderState = {
+export interface RealtimeRenderState {
   center?: Coordinate;
-  zoom?: number;
-  rotation?: number;
   renderedTrajectories?: RealtimeTrajectory[];
-};
+  rotation?: number;
+  zoom?: number;
+}
 
-export type AnyMap = OlMap | MaplibreMap | MapboxMap;
-export type AnyLayer = OlLayer | MbLayer;
+export type AnyMap = MapboxMap | MaplibreMap | OlMap;
+export type AnyLayer = MbLayer | OlLayer;
 export type AnyOlLayer = OlLayer;
 export type AnyMapboxLayer = MapboxLayer | MaplibreLayer;
 export type AnyRealtimeLayer = MbRealtimeLayer | OlRealtimeLayer;
 export type AnyCopyrightControl = MbCopyrightControl | OlCopyrightControl;
-export type AnyMapGlMap = maplibregl.Map | maplibregl.Map;
-export type AnyMapGlMapOptions = maplibregl.MapOptions | maplibregl.MapOptions;
+export type AnyMapGlMap = maplibregl.Map;
+export type AnyMapGlMapOptions = maplibregl.MapOptions;
 export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
 export type AnyCanvasContext =
   | CanvasRenderingContext2D
-  | OffscreenCanvasRenderingContext2D;
+  | null
+  | OffscreenCanvasRenderingContext2D
+  | undefined;
 export type GConstructor<T extends CommonLayer> = new (options?: any) => T;
 export type CommonLayerClass = GConstructor<CommonLayer>;
 export type GConstructor2<T extends OlLayer> = new (options?: any) => T;
 export type OlLayerClass = GConstructor<AnyOlLayer>;
 export type AnyLayerClass = GConstructor<AnyLayer>;
 
-type GConstructor3<T = {}> = new (...args: any[]) => T;
+type GConstructor3<T = object> = new (...args: any[]) => T;
 export type AnyLayerable = GConstructor3<Omit<AnyLayer, keyof string>>;
 
 export type AnyMapboxLayerClass = GConstructor<AnyMapboxLayer>;
@@ -109,16 +113,16 @@ export type AnyRealtimeLayerClass = GConstructor<AnyRealtimeLayer>;
 export type AnyMapGlMapClass = GConstructor<AnyMapGlMap>;
 export type AnyCopyrightControlClass = GConstructor<AnyCopyrightControl>;
 
-export type LayerGetFeatureInfoResponse = {
-  layer: Layer;
-  features: Feature[];
+export interface LayerGetFeatureInfoResponse {
   coordinate: Coordinate;
-};
+  features: Feature[];
+  layer: Layer;
+}
 
-export type LayerGetFeatureInfoOptions = {
-  resolution: number;
+export interface LayerGetFeatureInfoOptions {
   nb?: number;
-};
+  resolution: number;
+}
 
 export type UserInteractionCallback = (
   features: Feature[],
@@ -129,4 +133,4 @@ export type UserInteractionCallback = (
 
 export type RoutingGraph = [RoutingParameters.graph, number, number];
 export type RoutingMot = RoutingParameters.mot;
-export type RoutingViaPoint = string | Coordinate;
+export type RoutingViaPoint = Coordinate | string;

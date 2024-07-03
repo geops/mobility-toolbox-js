@@ -1,10 +1,11 @@
-import HttpAPI from './HttpAPI';
 import { StopsParameters, StopsResponse } from '../types';
 
-export type StopsAPIOptions = {
-  url?: string;
+import HttpAPI from './HttpAPI';
+
+export interface StopsAPIOptions {
   apiKey?: string;
-};
+  url?: string;
+}
 
 /**
  * This class provides convenience methods to use to the [geOps Stops API](https://developer.geops.io/apis/stops/).

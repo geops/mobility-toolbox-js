@@ -1,4 +1,5 @@
 import fetch from 'jest-fetch-mock';
+
 import API from './HttpAPI';
 
 let api;
@@ -8,7 +9,7 @@ describe('HttpAPI', () => {
     global.fetch = fetch;
     fetch.resetMocks();
 
-    api = new API({ url: 'https://foo.ch', apiKey: 'apiKey' });
+    api = new API({ apiKey: 'apiKey', url: 'https://foo.ch' });
   });
 
   describe('#fetch', () => {
@@ -17,10 +18,10 @@ describe('HttpAPI', () => {
 
       api
         .fetch('/path', {
-          q: 'Bern',
-          fooUndefined: undefined,
-          fooNull: null,
           fooEmpty: '',
+          fooNull: null,
+          fooUndefined: undefined,
+          q: 'Bern',
         })
         .then((response) => {
           // Correct url

@@ -1,4 +1,5 @@
 import WS from 'jest-websocket-mock';
+
 import WebSocketAPI from './WebSocketAPI';
 
 describe('WebSocketAPI', () => {
@@ -17,7 +18,7 @@ describe('WebSocketAPI', () => {
   });
 
   describe('#constructor', () => {
-    test("doesn't connect.", async () => {
+    test("doesn't connect.", () => {
       const client = new WebSocketAPI();
       expect(client.websocket).toBe();
       expect(client.closed).toBe(true);
@@ -32,9 +33,9 @@ describe('WebSocketAPI', () => {
       // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       const subsc2 = {
-        params: 'foo',
         cb: () => {},
         errorCb: () => {},
+        params: 'foo',
         quiet: false,
       };
       client.subscriptions = [subsc2];
@@ -90,15 +91,15 @@ describe('WebSocketAPI', () => {
       client.subscribe = jest.fn();
       client.send = jest.fn();
       const subsc = {
-        params: 'foo',
         cb: () => {},
         errorCb: () => {},
+        params: 'foo',
         quiet: true,
       };
       const subsc2 = {
-        params: 'foo',
         cb: () => {},
         errorCb: () => {},
+        params: 'foo',
         quiet: false,
       };
       client.subscriptions = [subsc, subsc2];
@@ -125,9 +126,9 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.send = jest.fn();
       const subsc = {
-        params: { channel: 'foo' },
         cb: () => {},
         errorCb: () => {},
+        params: { channel: 'foo' },
         quiet: false,
       };
       client.subscriptions = [subsc];
@@ -157,9 +158,9 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.send = jest.fn();
       const subsc = {
-        params: { channel: 'foo' },
         cb: () => {},
         errorCb: () => {},
+        params: { channel: 'foo' },
         quiet: true,
       };
       client.subscriptions = [subsc];
@@ -187,13 +188,13 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
-      const params = { channel: 'get', args: ['baz'], id: 'id' };
+      const params = { args: ['baz'], channel: 'get', id: 'id' };
       const cb = jest.fn();
       const errorCb = jest.fn();
       client.get(params, cb, errorCb);
 
       expect(cb).toHaveBeenCalledTimes(0);
-      const obj = { source: 'get baz', client_reference: 'id' };
+      const obj = { client_reference: 'id', source: 'get baz' };
       server.send(JSON.stringify(obj));
       expect(cb).toHaveBeenCalledTimes(1);
       expect(cb).toHaveBeenCalledWith(obj);
@@ -204,13 +205,13 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
-      const params = { channel: 'get', args: ['baz'], id: 'id' };
+      const params = { args: ['baz'], channel: 'get', id: 'id' };
       const cb = jest.fn();
       const errorCb = jest.fn();
       client.get(params, cb, errorCb);
 
       expect(cb).toHaveBeenCalledTimes(0);
-      const obj = { source: 'get baz', client_reference: 'id' };
+      const obj = { client_reference: 'id', source: 'get baz' };
       server.send(JSON.stringify(obj));
       expect(cb).toHaveBeenCalledTimes(1);
       server.send(JSON.stringify(obj));
@@ -225,24 +226,24 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
-      const params = { channel: 'get', args: ['baz'], id: 'id' };
+      const params = { args: ['baz'], channel: 'get', id: 'id' };
       const cb = jest.fn();
       const errorCb = jest.fn();
       client.get(params, cb, errorCb);
 
-      const params2 = { channel: 'get', args: ['foo'], id: 'id' };
+      const params2 = { args: ['foo'], channel: 'get', id: 'id' };
       const cb2 = jest.fn();
       const errorCb2 = jest.fn();
       client.get(params2, cb2, errorCb2);
       client.get(params, cb2, errorCb);
 
       expect(cb).toHaveBeenCalledTimes(0);
-      const obj = { source: 'get baz', client_reference: 'id' };
+      const obj = { client_reference: 'id', source: 'get baz' };
       server.send(JSON.stringify(obj));
       expect(cb).toHaveBeenCalledTimes(1);
       expect(cb2).toHaveBeenCalledTimes(1);
       server.send(
-        JSON.stringify({ source: 'get foo', client_reference: 'id' }),
+        JSON.stringify({ client_reference: 'id', source: 'get foo' }),
       );
       expect(cb).toHaveBeenCalledTimes(1);
       expect(cb2).toHaveBeenCalledTimes(2);
@@ -254,7 +255,7 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
-      const params = { channel: 'bar', args: ['baz'], id: 'id' };
+      const params = { args: ['baz'], channel: 'bar', id: 'id' };
       const cb = jest.fn();
       const errorCb = jest.fn();
       client.subscribe(params, cb, errorCb);
@@ -264,7 +265,7 @@ describe('WebSocketAPI', () => {
       expect(client.subscriptions[0].errorCb).toBe(errorCb);
       expect(client.subscriptions[0].quiet).toBe(false);
 
-      const obj = { source: 'bar baz', client_reference: 'id' };
+      const obj = { client_reference: 'id', source: 'bar baz' };
       server.send(JSON.stringify(obj));
 
       expect(cb).toHaveBeenCalledTimes(1);
@@ -276,26 +277,26 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
-      const params = { channel: 'bar', args: ['baz'], id: 'id' };
+      const params = { args: ['baz'], channel: 'bar', id: 'id' };
       const cb = jest.fn();
       const errorCb = jest.fn();
       client.subscribe(params, cb, errorCb, true);
       client.subscribe(params, cb, errorCb, true);
       expect(client.subscriptions.length).toBe(1);
 
-      const obj = { source: 'bar baz', client_reference: 'id' };
+      const obj = { client_reference: 'id', source: 'bar baz' };
       server.send(JSON.stringify(obj));
 
       expect(cb).toHaveBeenCalledTimes(1);
       expect(cb).toHaveBeenCalledWith(obj);
     });
 
-    test('send GET and SUB requests.', async () => {
+    test('send GET and SUB requests.', () => {
       // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       client.send = jest.fn();
-      const params = { channel: 'bar', args: ['baz'], id: 'id' };
+      const params = { args: ['baz'], channel: 'bar', id: 'id' };
       const cb = jest.fn();
       const errorCb = jest.fn();
       client.subscribe(params, cb, errorCb);
@@ -310,7 +311,7 @@ describe('WebSocketAPI', () => {
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
-      const params = { channel: 'bar', args: ['baz'], id: 'id' };
+      const params = { args: ['baz'], channel: 'bar', id: 'id' };
       const cb = jest.fn();
       const errorCb = jest.fn();
       client.send = jest.fn();
@@ -347,7 +348,7 @@ describe('WebSocketAPI', () => {
 
       expect(cb).toHaveBeenCalledTimes(0);
       expect(cb2).toHaveBeenCalledTimes(0);
-      const obj = { source: 'foo', client_reference: 'id' };
+      const obj = { client_reference: 'id', source: 'foo' };
       server.send(JSON.stringify(obj));
 
       expect(cb2).toHaveBeenCalledTimes(1);

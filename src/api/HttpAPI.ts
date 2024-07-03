@@ -1,17 +1,17 @@
 import getUrlWithParams from '../common/utils/getUrlWithParams';
 
-export type HttpAPIOptions = {
-  url: string;
+export interface HttpAPIOptions {
   apiKey?: string;
-};
+  url: string;
+}
 /**
  * Common class to access to a geOps api using http.
  * @private
  */
 class HttpAPI {
-  url: string;
-
   apiKey?: string;
+
+  url: string;
 
   constructor(options: HttpAPIOptions) {
     /** @private */
@@ -26,7 +26,7 @@ class HttpAPI {
    *
    * @private
    */
-  async fetch(path: string, params: Object, config: RequestInit): Promise<any> {
+  async fetch(path: string, params: object, config: RequestInit): Promise<any> {
     if (!this.url) {
       throw new Error(`No url defined for request to ${this.url}/${path}`);
     }

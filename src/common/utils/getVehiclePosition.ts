@@ -1,11 +1,12 @@
 import { Coordinate } from 'ol/coordinate';
 import { LineString } from 'ol/geom';
+
 import { RealtimeTrajectory } from '../../types';
 
-export type VehiclePosition = {
+export interface VehiclePosition {
   coord: Coordinate;
   rotation?: number;
-};
+}
 
 /**
  * Interpolate or not the vehicle position from a trajectory at a specific date.
@@ -22,14 +23,14 @@ const getVehiclePosition = (
   noInterpolate: boolean,
 ): VehiclePosition => {
   const {
-    time_intervals: timeIntervals,
-    // @ts-expect-error olGeometry is added by the RealtimeLayer
-    olGeometry,
-    // @ts-expect-error coordinate is added by the RealtimeLayer
+    // @ts-expect-error  coordinate is added by the RealtimeLayer
     coordinate,
+    // @ts-expect-error  olGeometry is added by the RealtimeLayer
+    olGeometry,
+    time_intervals: timeIntervals,
   } = trajectory.properties;
-  // @ts-ignore
-  let { type, coordinates } = trajectory.geometry;
+  // @ts-expect-error
+  let { coordinates, type } = trajectory.geometry;
   let geometry = olGeometry;
   let coord;
   let rotation;

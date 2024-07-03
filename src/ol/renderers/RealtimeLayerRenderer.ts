@@ -1,16 +1,16 @@
 /* eslint-disable no-underscore-dangle */
-import { FrameState } from 'ol/Map';
-import GeoJSON from 'ol/format/GeoJSON';
-import { Coordinate } from 'ol/coordinate';
-import { FeatureCallback } from 'ol/renderer/vector';
 import { Feature } from 'ol';
-import { Geometry } from 'ol/geom';
-import { Pixel } from 'ol/pixel';
-import { composeCssTransform } from 'ol/transform';
+import { Coordinate } from 'ol/coordinate';
 import { buffer, containsCoordinate } from 'ol/extent';
+import GeoJSON from 'ol/format/GeoJSON';
+import { Geometry } from 'ol/geom';
+import { FrameState } from 'ol/Map';
+import { Pixel } from 'ol/pixel';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
+import { FeatureCallback } from 'ol/renderer/vector';
+import { composeCssTransform } from 'ol/transform';
+
 import type RealtimeLayer from '../layers/RealtimeLayer';
-import { RealtimeTrajectory } from '../../types';
 
 /** @private */
 const format = new GeoJSON();
@@ -20,11 +20,100 @@ const format = new GeoJSON();
  * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
  * @private
  */
-// @ts-ignore
+// @ts-expect-error
 export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeLayer> {
   // private container: HTMLElement | undefined;
 
   private canvas: HTMLCanvasElement | undefined;
+
+  override forEachFeatureAtCoordinate<Feature>(
+    coordinate: Coordinate,
+    frameState: FrameState,
+    hitTolerance: number,
+    callback: FeatureCallback<Feature>,
+  ): Feature | undefined {
+    const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);
+    features.forEach((feature) => {
+      // @ts-expect-error
+      callback(feature, this.layer_, feature.getGeometry());
+    });
+    return features?.[0] as Feature;
+  }
+
+  override getData(pixel: Pixel) {
+    let data;
+    try {
+      const { pixelRatio } = this.getLayer();
+      const context = this.canvas?.getContext('2d', {
+        willReadFrequently: true,
+      });
+      data =
+        context?.getImageData(
+          pixel[0] * (pixelRatio || 1),
+          pixel[1] * (pixelRatio || 1),
+          1,
+          1,
+        ).data || null; // [3];
+      return data;
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('error getting data', err);
+    }
+    return null;
+  }
+
+  override getFeatures(pixel: Pixel) {
+    const coordinate = this.getLayer()
+      ?.getMapInternal()
+      ?.getCoordinateFromPixel(pixel);
+    return Promise.resolve(this.getFeaturesAtCoordinate(coordinate));
+  }
+
+  getFeaturesAtCoordinate(
+    coordinate: Coordinate | undefined,
+    hitTolerance = 5,
+  ): Feature<Geometry>[] {
+    if (!coordinate) {
+      return [];
+    }
+
+    const layer = this.getLayer();
+    const map = layer.getMapInternal();
+    const resolution = map?.getView()?.getResolution() || 1;
+    const nb = 10;
+    const ext = buffer(
+      [...coordinate, ...coordinate],
+      hitTolerance * resolution,
+    );
+    let features: Feature[] = [];
+
+    let trajectories = Object.values(layer.trajectories || {});
+    if (layer.sort) {
+      // @ts-expect-error
+      trajectories = trajectories.sort(this.sort);
+    }
+
+    const vehicles = [];
+    for (let i = 0; i < trajectories.length; i += 1) {
+      const trajectory = trajectories[i];
+      if (
+        // @ts-expect-error  coordinate is added by the RealtimeLayer
+        trajectory.properties.coordinate &&
+        // @ts-expect-error  coordinate is added by the RealtimeLayer
+        containsCoordinate(ext, trajectory.properties.coordinate)
+      ) {
+        vehicles.push(trajectories[i]);
+      }
+      if (vehicles.length === nb) {
+        break;
+      }
+    }
+
+    features = vehicles.map(
+      (vehicle) => format.readFeature(vehicle) as Feature,
+    );
+    return features;
+  }
 
   // eslint-disable-next-line class-methods-use-this
   prepareFrame() {
@@ -59,12 +148,14 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
       if (renderedResolution / resolution >= 3) {
         // Avoid having really big points when zooming fast.
         const context = canvas?.getContext('2d');
-        context?.clearRect(
-          0,
-          0,
-          canvas?.width as number,
-          canvas?.height as number,
-        );
+        if (canvas?.width && canvas?.height) {
+          (context as CanvasRenderingContext2D)?.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height,
+          );
+        }
       } else {
         const map = this.getLayer().getMapInternal();
         const pixelCenterRendered = map?.getPixelFromCoordinate(renderedCenter);
@@ -84,94 +175,5 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
       }
     }
     return this.container;
-  }
-
-  override getData(pixel: Pixel) {
-    let data;
-    try {
-      const { pixelRatio } = this.getLayer();
-      const context = this.canvas?.getContext('2d', {
-        willReadFrequently: true,
-      });
-      data =
-        context?.getImageData(
-          pixel[0] * (pixelRatio || 1),
-          pixel[1] * (pixelRatio || 1),
-          1,
-          1,
-        ).data || null; // [3];
-      return data;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('error getting data', err);
-    }
-    return null;
-  }
-
-  override getFeatures(pixel: Pixel) {
-    const coordinate = this.getLayer()
-      ?.getMapInternal()
-      ?.getCoordinateFromPixel(pixel);
-    return Promise.resolve(this.getFeaturesAtCoordinate(coordinate));
-  }
-
-  override forEachFeatureAtCoordinate<Feature>(
-    coordinate: Coordinate,
-    frameState: FrameState,
-    hitTolerance: number,
-    callback: FeatureCallback<Feature>,
-  ): Feature | undefined {
-    const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);
-    features.forEach((feature) => {
-      // @ts-ignore
-      callback(feature, this.layer_, feature.getGeometry());
-    });
-    return features?.[0] as Feature;
-  }
-
-  getFeaturesAtCoordinate(
-    coordinate: Coordinate | undefined,
-    hitTolerance: number = 5,
-  ): Feature<Geometry>[] {
-    if (!coordinate) {
-      return [];
-    }
-
-    const layer = this.getLayer();
-    const map = layer.getMapInternal();
-    const resolution = map?.getView()?.getResolution() || 1;
-    const nb = 10;
-    const ext = buffer(
-      [...coordinate, ...coordinate],
-      hitTolerance * resolution,
-    );
-    let features: Feature[] = [];
-
-    let trajectories = Object.values(layer.trajectories || {});
-    if (layer.sort) {
-      // @ts-ignore
-      trajectories = trajectories.sort(this.sort);
-    }
-
-    const vehicles = [];
-    for (let i = 0; i < trajectories.length; i += 1) {
-      const trajectory = trajectories[i] as RealtimeTrajectory;
-      if (
-        // @ts-expect-error coordinate is added by the RealtimeLayer
-        trajectory.properties.coordinate &&
-        // @ts-expect-error coordinate is added by the RealtimeLayer
-        containsCoordinate(ext, trajectory.properties.coordinate)
-      ) {
-        vehicles.push(trajectories[i]);
-      }
-      if (vehicles.length === nb) {
-        break;
-      }
-    }
-
-    features = vehicles.map(
-      (vehicle) => format.readFeature(vehicle) as Feature,
-    );
-    return features;
   }
 }

@@ -1,10 +1,11 @@
-import HttpAPI from './HttpAPI';
 import { RoutingParameters, RoutingResponse } from '../types';
 
-export type RoutingAPIOptions = {
-  url?: string;
+import HttpAPI from './HttpAPI';
+
+export interface RoutingAPIOptions {
   apiKey?: string;
-};
+  url?: string;
+}
 
 /**
  * This class provides convenience methods to use to the [geOps Routing API](https://developer.geops.io/apis/routing).

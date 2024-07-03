@@ -1,10 +1,12 @@
+import { Feature, getUid } from 'ol';
+import GeoJSON from 'ol/format/GeoJSON';
+import { ImageWMS, TileWMS } from 'ol/source';
+
+import { getLayersAsFlatArray } from '../../common';
+import { LayerGetFeatureInfoResponse } from '../../types';
+
 import type { Coordinate } from 'ol/coordinate';
 import type { Layer } from 'ol/layer';
-import { Feature, getUid } from 'ol';
-import { ImageWMS, TileWMS } from 'ol/source';
-import GeoJSON from 'ol/format/GeoJSON';
-import { LayerGetFeatureInfoResponse } from '../../types';
-import { getLayersAsFlatArray } from '../../common';
 
 /**
  * @private
@@ -15,12 +17,12 @@ const format = new GeoJSON();
  * @private
  */
 const getFeaturesFromWMS = (
-  source: TileWMS | ImageWMS,
+  source: ImageWMS | TileWMS,
   options: any,
   abortController: AbortController,
 ): Promise<LayerGetFeatureInfoResponse> => {
   let url;
-  const { coordinate, resolution, projection, params } = options;
+  const { coordinate, params, projection, resolution } = options;
   if (source && resolution && projection) {
     url = source.getFeatureInfoUrl(coordinate, resolution, projection, {
       info_format: 'application/json',
@@ -29,7 +31,7 @@ const getFeaturesFromWMS = (
     });
   }
 
-  // @ts-ignore
+  // @ts-expect-error
   return fetch(url, { signal: abortController.signal })
     .then((resp) => resp.json())
     .then((featureCollection) => format.readFeatures(featureCollection))
@@ -39,9 +41,7 @@ const getFeaturesFromWMS = (
 /**
  * @private
  */
-let abortControllers: {
-  [key: string]: AbortController | undefined;
-} = {};
+let abortControllers: Record<string, AbortController | undefined> = {};
 
 /**
  * @private
@@ -49,7 +49,7 @@ let abortControllers: {
 const getFeatureInfoAtCoordinate = async (
   coordinate: Coordinate,
   layers: Layer[],
-  hitTolerance: number = 5,
+  hitTolerance = 5,
 ): Promise<LayerGetFeatureInfoResponse[]> => {
   // Kill all previous requests
   Object.values(abortControllers).forEach((abortController) => {
@@ -62,26 +62,20 @@ const getFeatureInfoAtCoordinate = async (
   const promises = flatLayers.map((layer) => {
     const map = layer.getMapInternal();
     const projection = map?.getView()?.getProjection()?.getCode();
-    const emptyResponse = { features: [], layer, coordinate };
+    const emptyResponse = { coordinate, features: [], layer };
 
     if (!projection) {
       return Promise.resolve(emptyResponse);
     }
 
     // For backward compatibility
-    // @ts-ignore
     if (layer.getFeatureInfoAtCoordinate) {
-      return (
-        layer
-          // @ts-ignore
-          .getFeatureInfoAtCoordinate(coordinate)
-      );
+      return layer.getFeatureInfoAtCoordinate(coordinate);
     }
 
     // WMS sources
     // Here we don't use instanceof, to be able to use this function if a layer comes from 2 different ol versions.
-    const source = (layer as Layer<TileWMS | ImageWMS>)?.getSource();
-    // @ts-ignore
+    const source = (layer as Layer<ImageWMS | TileWMS>)?.getSource();
     if (source?.getFeatureInfoUrl) {
       const id = getUid(layer);
 
@@ -94,27 +88,27 @@ const getFeatureInfoAtCoordinate = async (
         source,
         {
           coordinate,
-          resolution,
-          projection,
           params: {
             info_format: 'application/json',
             query_layers: source.getParams().layers,
           },
+          projection,
+          resolution,
         },
-        abortControllers[id] as AbortController,
+        abortControllers[id],
       )
         .then((features) => {
           return {
+            coordinate,
             features,
             layer,
-            coordinate,
           };
         })
         .catch(() => {
           return {
+            coordinate,
             features: [],
             layer,
-            coordinate,
           };
         });
     }
@@ -127,16 +121,14 @@ const getFeatureInfoAtCoordinate = async (
     }
 
     const features = map?.getFeaturesAtPixel(pixel, {
+      hitTolerance: layer.get('hitTolerance') || hitTolerance || 5,
       layerFilter: (l: Layer) => l === layer,
-      hitTolerance:
-        // @ts-ignore
-        layer.get('hitTolerance') || hitTolerance || 5,
     }) as Feature[];
 
     return Promise.resolve({
+      coordinate,
       features,
       layer,
-      coordinate,
     });
   });
   return Promise.all(promises);

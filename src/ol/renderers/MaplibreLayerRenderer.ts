@@ -29,7 +29,7 @@
 //  * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
 //  * @private
 //  */
-// // @ts-ignore
+// // @ts-expect-error
 // export default class MaplibreLayerRenderer extends LayerRenderer<MaplibreLayer> {
 //   getFeaturesAtCoordinate(
 //     coordinate: Coordinate | undefined,
@@ -86,7 +86,7 @@
 //               // We save the original Maplibre feature to avoid losing informations
 //               // potentially needed for other functionnality like highlighting
 //               // (id, layer id, source, sourceLayer ...)
-//               // @ts-ignore
+//               // @ts-expect-error
 //               olFeature.set(VECTOR_TILE_FEATURE_PROPERTY, feature);
 //             }
 //             return olFeature;
@@ -152,7 +152,7 @@
 //   ): Feature | undefined {
 //     const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);
 //     features.forEach((feature) => {
-//       // @ts-ignore
+//       // @ts-expect-error
 //       callback(feature, this.layer_, feature.getGeometry());
 //     });
 //     return features?.[0] as Feature;

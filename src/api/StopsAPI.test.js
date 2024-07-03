@@ -1,4 +1,5 @@
 import fetch from 'jest-fetch-mock';
+
 import StopsAPI from './StopsAPI';
 
 let api;

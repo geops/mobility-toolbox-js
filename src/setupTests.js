@@ -1,10 +1,10 @@
-/* eslint-disable import/no-extraneous-dependencies */
-import 'jest-canvas-mock';
-import fetchTrajectoryByIdResponse from '../data/fetchTrajectoryById.json';
+import fetchRouteResponse from '../data/fetchRoute.json';
 import fetchTrajectoriesResponse from '../data/fetchTrajectories.json';
+import fetchTrajectoryByIdResponse from '../data/fetchTrajectoryById.json';
 import fetchTrajectoryStationsResponse from '../data/fetchTrajectoryStations.json';
 import stopsSearchResponse from '../data/stopsSearch.json';
-import fetchRouteResponse from '../data/fetchRoute.json';
+
+import 'jest-canvas-mock';
 
 global.fetchTrajectoryByIdResponse = fetchTrajectoryByIdResponse;
 global.fetchTrajectoriesResponse = fetchTrajectoriesResponse;

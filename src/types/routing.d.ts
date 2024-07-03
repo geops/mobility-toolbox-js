@@ -10,6 +10,58 @@ export interface Paths {
       parameters: {
         query: {
           /**
+           * Whether to use beelines (line strings with 2 points) between
+           * mutually unreachable hops as a fallback for "Route not found"
+           * errors. "true", "on", "yes", "y", "1" will enable the
+           * fallback. Default: enabled
+           */
+          'beeline-fallback'?: string;
+          /**
+           * Distance punishment factor for edge snapping of coordinates (see
+           * "Note on coordinates" at the top). Large: prefer close edge. Small:
+           * prefer short total route. Negative value: like worst edge
+           * category. Default: -1.0
+           */
+          'coord-punish'?: number;
+          /**
+           * Search radius for candidate edges during snapping of coordinates
+           * (see "Note on coordinates" at the top) Default: -1.0
+           */
+          'coord-radius'?: number;
+          /** Only for mot=rail. Default is a detailed network based on OpenStreetMap. gen1 to gen4 provide rail networks with increasing levels of generalization */
+          graph?: 'gen1' | 'gen2' | 'gen3' | 'gen4';
+          /**
+           * Whether to include intermediate hops (stations/stops) found on the
+           * route to the response. "true", "on", "yes", "y", "1" will enable
+           * intermediate hops. Default: disabled
+           */
+          hops?: string;
+          /** A line name that should be preferred */
+          line?: string;
+          /** Name of origin of the preferred line */
+          'line-from'?: string;
+          /** Name of destination of the preferred line */
+          'line-to'?: string;
+          /**
+           * Maximum allowed ratio of hops to skip if not found. Only non-start
+           * and non-end hops are counted in ratio numerator and denominator.
+           */
+          'max-skip-hop-ratio'?: number;
+          /** Mode of transport */
+          mot:
+            | 'bus'
+            | 'car'
+            | 'coach'
+            | 'ferry'
+            | 'foot'
+            | 'funicular'
+            | 'gondola'
+            | 'rail'
+            | 'subway'
+            | 'tram';
+          /** Douglas-Peucker distance parameter for simplification. Default 0.5 in Mercator units */
+          simplify?: number;
+          /**
            * A pipe separated list of hops. A hop describes a station with either
            *  - a name or abbreviation
            *  - a station id, prefixed with `!`
@@ -52,58 +104,6 @@ export interface Paths {
            *  - `freiburg|basel%20sbb|bern` - from Freiburg (Breisgau) Hbf via Basel SBB to Bern
            */
           via: string;
-          /** Mode of transport */
-          mot:
-            | 'rail'
-            | 'bus'
-            | 'coach'
-            | 'foot'
-            | 'tram'
-            | 'subway'
-            | 'gondola'
-            | 'funicular'
-            | 'ferry'
-            | 'car';
-          /** Only for mot=rail. Default is a detailed network based on OpenStreetMap. gen1 to gen4 provide rail networks with increasing levels of generalization */
-          graph?: 'gen1' | 'gen2' | 'gen3' | 'gen4';
-          /** A line name that should be preferred */
-          line?: string;
-          /** Name of origin of the preferred line */
-          'line-from'?: string;
-          /** Name of destination of the preferred line */
-          'line-to'?: string;
-          /** Douglas-Peucker distance parameter for simplification. Default 0.5 in Mercator units */
-          simplify?: number;
-          /**
-           * Maximum allowed ratio of hops to skip if not found. Only non-start
-           * and non-end hops are counted in ratio numerator and denominator.
-           */
-          'max-skip-hop-ratio'?: number;
-          /**
-           * Whether to include intermediate hops (stations/stops) found on the
-           * route to the response. "true", "on", "yes", "y", "1" will enable
-           * intermediate hops. Default: disabled
-           */
-          hops?: string;
-          /**
-           * Whether to use beelines (line strings with 2 points) between
-           * mutually unreachable hops as a fallback for "Route not found"
-           * errors. "true", "on", "yes", "y", "1" will enable the
-           * fallback. Default: enabled
-           */
-          'beeline-fallback'?: string;
-          /**
-           * Search radius for candidate edges during snapping of coordinates
-           * (see "Note on coordinates" at the top) Default: -1.0
-           */
-          'coord-radius'?: number;
-          /**
-           * Distance punishment factor for edge snapping of coordinates (see
-           * "Note on coordinates" at the top). Large: prefer close edge. Small:
-           * prefer short total route. Negative value: like worst edge
-           * category. Default: -1.0
-           */
-          'coord-punish'?: number;
           /**
            * Whether to output OSM way ids in Feature properties.
            * "true", "on", "yes", "y", "1" will enable output. Default: disabled
@@ -147,14 +147,14 @@ export interface Paths {
                  * @example
                  */
                 id?: string;
-                /** @example Freiburg Littenweiler */
-                name?: string;
-                /** @example 1 */
-                platform?: string;
                 /** @description Latitude of the stop, in WGS84 */
                 latitude?: number;
                 /** @description Latitude of the stop, in WGS84 */
                 longitude?: number;
+                /** @example Freiburg Littenweiler */
+                name?: string;
+                /** @example 1 */
+                platform?: string;
               };
               station_to?: {
                 /**
@@ -162,14 +162,14 @@ export interface Paths {
                  * @example 8004158
                  */
                 id?: string;
-                /** @example Muenchen Pasing */
-                name?: string;
-                /** @example 4 */
-                platform?: string;
                 /** @description Latitude of the stop, in WGS84 */
                 latitude?: number;
                 /** @description Latitude of the stop, in WGS84 */
                 longitude?: number;
+                /** @example Muenchen Pasing */
+                name?: string;
+                /** @example 4 */
+                platform?: string;
               };
               /** @enum {string} */
               type?: 'Feature';

@@ -1,22 +1,22 @@
 /* eslint-disable no-underscore-dangle */
+import { Feature } from 'ol';
+import { Coordinate } from 'ol/coordinate';
+import GeoJSON from 'ol/format/GeoJSON';
+import { Geometry } from 'ol/geom';
 import { FrameState } from 'ol/Map';
+import { Pixel } from 'ol/pixel';
 import { toLonLat } from 'ol/proj';
 import LayerRenderer from 'ol/renderer/Layer';
-import GeoJSON from 'ol/format/GeoJSON';
-import { Coordinate } from 'ol/coordinate';
 import { FeatureCallback } from 'ol/renderer/vector';
-import { Feature } from 'ol';
-import { Geometry } from 'ol/geom';
-import { Pixel } from 'ol/pixel';
-import type { MaplibreStyleLayer } from '../layers';
+
 import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
+
+import type { MaplibreStyleLayer } from '../layers';
 
 /**
  * @private
  */
-const formats: {
-  [key: string]: GeoJSON;
-} = {
+const formats: Record<string, GeoJSON> = {
   'EPSG:3857': new GeoJSON({
     featureProjection: 'EPSG:3857',
   }),
@@ -27,11 +27,31 @@ const formats: {
  * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
  * @private
  */
-// @ts-ignore
 export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreStyleLayer> {
+  override forEachFeatureAtCoordinate<Feature>(
+    coordinate: Coordinate,
+    frameState: FrameState,
+    hitTolerance: number,
+    callback: FeatureCallback<Feature>,
+  ): Feature | undefined {
+    const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);
+    features.forEach((feature) => {
+      // @ts-expect-error
+      callback(feature, this.layer_, feature.getGeometry());
+    });
+    return features?.[0] as Feature;
+  }
+
+  override getFeatures(pixel: Pixel) {
+    const coordinate = this.getLayer()
+      ?.getMapInternal()
+      ?.getCoordinateFromPixel(pixel);
+    return Promise.resolve(this.getFeaturesAtCoordinate(coordinate));
+  }
+
   getFeaturesAtCoordinate(
     coordinate: Coordinate | undefined,
-    hitTolerance: number = 5,
+    hitTolerance = 5,
   ): Feature<Geometry>[] {
     if (!coordinate) {
       return [];
@@ -78,7 +98,6 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
         }
 
         if (layer.queryRenderedLayersFilter) {
-          // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           layers = mapLibreMap
             .getStyle()
@@ -101,7 +120,6 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
               // We save the original Maplibre feature to avoid losing informations
               // potentially needed for other functionnality like highlighting
               // (id, layer id, source, sourceLayer ...)
-              // @ts-ignore
               olFeature.set(VECTOR_TILE_FEATURE_PROPERTY, feature);
             }
             return olFeature;
@@ -119,26 +137,5 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
   // eslint-disable-next-line class-methods-use-this
   renderFrame() {
     return null;
-  }
-
-  override getFeatures(pixel: Pixel) {
-    const coordinate = this.getLayer()
-      ?.getMapInternal()
-      ?.getCoordinateFromPixel(pixel);
-    return Promise.resolve(this.getFeaturesAtCoordinate(coordinate));
-  }
-
-  override forEachFeatureAtCoordinate<Feature>(
-    coordinate: Coordinate,
-    frameState: FrameState,
-    hitTolerance: number,
-    callback: FeatureCallback<Feature>,
-  ): Feature | undefined {
-    const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);
-    features.forEach((feature) => {
-      // @ts-ignore
-      callback(feature, this.layer_, feature.getGeometry());
-    });
-    return features?.[0] as Feature;
   }
 }

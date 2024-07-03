@@ -1,27 +1,29 @@
 // eslint-disable-next-line max-classes-per-file
-import { Layer } from 'ol/layer';
-import { EventsKey } from 'ol/events';
-import { Map, getUid } from 'ol';
-import { ObjectEvent } from 'ol/Object';
-import type { Options } from 'ol/layer/Layer';
 import debounce from 'lodash.debounce';
+import { getUid, Map } from 'ol';
+import { EventsKey } from 'ol/events';
+import { Layer } from 'ol/layer';
+import { ObjectEvent } from 'ol/Object';
+
 import getLayersAsFlatArray from '../../common/utils/getLayersAsFlatArray';
+
+import type { Options } from 'ol/layer/Layer';
+
 import type { Layerable } from './MobilityLayerMixin';
 
-export type PropertiesLayerMixinOptions = Options & {
-  key?: string;
-  name?: string;
-  group?: string;
-  copyrights?: string[];
+export type PropertiesLayerMixinOptions = {
   children?: any[];
-  visible?: boolean;
+  copyrights?: string[];
   disabled?: boolean;
+  group?: string;
   hitTolerance?: number;
-  properties?: { [x: string]: any };
+  key?: string;
   map?: Map;
-} & {
-  [x: string]: any;
-};
+  name?: string;
+  properties?: Record<string, any>;
+  visible?: boolean;
+} & Options &
+  Record<string, any>;
 
 const deprecated = debounce((message: string) => {
   // eslint-disable-next-line no-console
@@ -33,9 +35,90 @@ const deprecated = debounce((message: string) => {
  */
 function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
   return class PropertiesLayer extends Base {
+    public olEventsKeys: EventsKey[] = [];
+
     public options?: PropertiesLayerMixinOptions = {};
 
-    public olEventsKeys: EventsKey[] = [];
+    constructor(...args: any[]) {
+      const options = args[0];
+      super(options);
+
+      if (options.properties) {
+        deprecated(
+          "Deprecated. Don't use properties options. Pass the values directly in options object.",
+        );
+        this.setProperties(options.properties);
+      }
+
+      this.olEventsKeys?.push(
+        // Update parent property
+        this.on('propertychange', (evt: ObjectEvent) => {
+          if (evt.key === 'children') {
+            this.onChildrenChange(evt.oldValue);
+          }
+        }),
+      );
+
+      this.options = options;
+      this.set('children', options.children || []); // Trigger the on children change event
+    }
+
+    /**
+     * Initialize the layer with the map passed in parameters.
+     *
+     * @param {ol/Map~Map} map A map.
+     */
+    attachToMap(map: Map) {
+      // @ts-expect-error
+      (super.attachToMap || (() => {}))(map);
+
+      (this.get('children') || []).forEach((child: Layer) => {
+        map.addLayer(child);
+      });
+    }
+
+    /**
+     * Terminate what was initialized in init function. Remove layer, events...
+     */
+    detachFromMap() {
+      (this.get('children') || []).forEach((child: Layer) => {
+        this.map.removeLayer(child);
+      });
+      // @ts-expect-error
+      (super.detachFromMap || (() => {}))();
+    }
+
+    /**
+     * Return the an array containing all the descendants of the layer in a flat array. Including the current layer.
+     * @deprecated
+     */
+    flat() {
+      deprecated(
+        'Layer.flat is deprecated. Use getLayersAsFlatArray utils method instead.',
+      );
+      return getLayersAsFlatArray(this);
+    }
+
+    /** @private */
+    onChildrenChange(oldValue: Layer[]) {
+      // Set the parent property
+      (oldValue || []).forEach((child) => {
+        child.set('parent', undefined);
+      });
+      (this.get('children') || []).forEach((child: Layer) => {
+        child.set('parent', this);
+      });
+    }
+
+    // @ts-expect-error  - this is a mixin
+    override setMapInternal(map: Map) {
+      super.setMapInternal(map);
+      if (map) {
+        this.attachToMap(map);
+      } else {
+        this.detachFromMap();
+      }
+    }
 
     /** @deprecated */
     get children(): Layer[] {
@@ -90,6 +173,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
     }
 
     /** @deprecated */
+    /** @deprecated */
     get group(): string {
       deprecated(
         "Layer.group is deprecated. Use the Layer.get('group') method instead.",
@@ -110,7 +194,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
     }
 
     get map(): Map {
-      return this.getMapInternal() as Map;
+      return this.getMapInternal()!;
     }
 
     /** @deprecated */
@@ -129,7 +213,6 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       return this as unknown as Layer;
     }
 
-    /** @deprecated */
     // eslint-disable-next-line class-methods-use-this
     set olLayer(newValue: Layer) {
       deprecated(
@@ -167,87 +250,6 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
         'Layer.visible is deprecated. Use the Layer.setVisible(newValue) method instead.',
       );
       this.setVisible(newValue);
-    }
-
-    constructor(...args: any[]) {
-      const options = args[0];
-      super(options);
-
-      if (options.properties) {
-        deprecated(
-          "Deprecated. Don't use properties options. Pass the values directly in options object.",
-        );
-        this.setProperties(options.properties);
-      }
-
-      this.olEventsKeys?.push(
-        // Update parent property
-        this.on('propertychange', (evt: ObjectEvent) => {
-          if (evt.key === 'children') {
-            this.onChildrenChange(evt.oldValue);
-          }
-        }),
-      );
-
-      this.options = options;
-      this.set('children', options.children || []); // Trigger the on children change event
-    }
-
-    // @ts-expect-error - this is a mixin
-    override setMapInternal(map: Map) {
-      super.setMapInternal(map);
-      if (map) {
-        this.attachToMap(map);
-      } else {
-        this.detachFromMap();
-      }
-    }
-
-    /** @private */
-    onChildrenChange(oldValue: Layer[]) {
-      // Set the parent property
-      (oldValue || []).forEach((child) => {
-        child.set('parent', undefined);
-      });
-      (this.get('children') || []).forEach((child: Layer) => {
-        child.set('parent', this);
-      });
-    }
-
-    /**
-     * Initialize the layer with the map passed in parameters.
-     *
-     * @param {ol/Map~Map} map A map.
-     */
-    attachToMap(map: Map) {
-      // @ts-ignore
-      (super.attachToMap || (() => {}))(map);
-
-      (this.get('children') || []).forEach((child: Layer) => {
-        map.addLayer(child);
-      });
-    }
-
-    /**
-     * Terminate what was initialized in init function. Remove layer, events...
-     */
-    detachFromMap() {
-      (this.get('children') || []).forEach((child: Layer) => {
-        this.map.removeLayer(child);
-      });
-      // @ts-ignore
-      (super.detachFromMap || (() => {}))();
-    }
-
-    /**
-     * Return the an array containing all the descendants of the layer in a flat array. Including the current layer.
-     * @deprecated
-     */
-    flat() {
-      deprecated(
-        'Layer.flat is deprecated. Use getLayersAsFlatArray utils method instead.',
-      );
-      return getLayersAsFlatArray(this);
     }
   };
 }

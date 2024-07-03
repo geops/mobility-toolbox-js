@@ -3,16 +3,17 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
 import { Feature, FeatureCollection } from 'geojson';
+
 import { StopsAPI } from '../../api';
 import { StopsAPIOptions } from '../../api/StopsAPI';
 import { StopsParameters } from '../../types';
 
-export type StopFinderControlCommonOptions = StopsAPIOptions & {
-  element: HTMLElement;
-  placeholder?: string;
+export type StopFinderControlCommonOptions = {
   apiParams: StopsParameters;
+  element: HTMLElement;
   onSuggestionClick?: (suggestion: Feature, evt: MouseEvent) => void;
-};
+  placeholder?: string;
+} & StopsAPIOptions;
 
 /**
  * A class representing a stop finder control to display on map.
@@ -22,21 +23,21 @@ export type StopFinderControlCommonOptions = StopsAPIOptions & {
  * @private
  */
 class StopFinderControlCommon {
-  apiParams: StopsParameters;
-
-  placeholder: string;
+  abortController?: AbortController;
 
   api: StopsAPI;
 
-  abortController?: AbortController;
-
-  suggestionsElt?: HTMLElement;
-
-  inputElt?: HTMLInputElement;
+  apiParams: StopsParameters;
 
   clearElt?: HTMLDivElement;
 
+  inputElt?: HTMLInputElement;
+
   options?: StopFinderControlCommonOptions;
+
+  placeholder: string;
+
+  suggestionsElt?: HTMLElement;
 
   /**
    * Constructor.
@@ -49,7 +50,7 @@ class StopFinderControlCommon {
    * @param {StopsSearchParams} [options.apiParams={ limit: 20 }] Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
    */
   constructor(options: StopFinderControlCommonOptions) {
-    const { apiParams, apiKey, url, placeholder } = options || {};
+    const { apiKey, apiParams, placeholder, url } = options || {};
 
     this.apiParams = { limit: 20, ...(apiParams || {}) };
     this.placeholder = placeholder || 'Search for a stop...';
@@ -62,6 +63,59 @@ class StopFinderControlCommon {
     this.abortController = new AbortController();
     this.createElement(options);
     this.options = options;
+  }
+
+  /**
+   * Clear the search field and close the control.
+   */
+  clear() {
+    if (!this.suggestionsElt || !this.inputElt || !this.clearElt) {
+      return;
+    }
+
+    this.inputElt.value = '';
+    this.suggestionsElt.innerHTML = '';
+    this.clearElt.style.display = 'none';
+  }
+
+  createElement({ element }: StopFinderControlCommonOptions) {
+    // Create input element
+    this.inputElt = document.createElement('input');
+    this.inputElt.type = 'text';
+    this.inputElt.placeholder = this.placeholder;
+    this.inputElt.autocomplete = 'off';
+    this.inputElt.onkeyup = (evt) => {
+      this.abortController?.abort();
+      this.abortController = new AbortController();
+      // @ts-expect-error
+      this.search(evt.target.value, this.abortController);
+    };
+    Object.assign(this.inputElt.style, {
+      padding: '10px 30px 10px 10px',
+    });
+    element.appendChild(this.inputElt);
+
+    // Create suggestions list element
+    this.suggestionsElt = document.createElement('div');
+    Object.assign(this.suggestionsElt.style, {
+      backgroundColor: 'white',
+      cursor: 'pointer',
+      overflowY: 'auto',
+    });
+    element.appendChild(this.suggestionsElt);
+
+    this.clearElt = document.createElement('div');
+    Object.assign(this.clearElt.style, {
+      cursor: 'pointer',
+      display: 'none',
+      fontSize: '200%',
+      padding: '0 10px',
+      position: 'absolute',
+      right: '0',
+    });
+    this.clearElt.innerHTML = '×';
+    this.clearElt.onclick = () => this.clear();
+    element.appendChild(this.clearElt);
   }
 
   render(featureCollection?: FeatureCollection) {
@@ -84,59 +138,6 @@ class StopFinderControlCommon {
       });
       this.suggestionsElt?.appendChild(suggElt);
     });
-  }
-
-  createElement({ element }: StopFinderControlCommonOptions) {
-    // Create input element
-    this.inputElt = document.createElement('input');
-    this.inputElt.type = 'text';
-    this.inputElt.placeholder = this.placeholder;
-    this.inputElt.autocomplete = 'off';
-    this.inputElt.onkeyup = (evt) => {
-      this.abortController?.abort();
-      this.abortController = new AbortController();
-      // @ts-ignore
-      this.search(evt.target.value, this.abortController);
-    };
-    Object.assign(this.inputElt.style, {
-      padding: '10px 30px 10px 10px',
-    });
-    element.appendChild(this.inputElt);
-
-    // Create suggestions list element
-    this.suggestionsElt = document.createElement('div');
-    Object.assign(this.suggestionsElt.style, {
-      backgroundColor: 'white',
-      overflowY: 'auto',
-      cursor: 'pointer',
-    });
-    element.appendChild(this.suggestionsElt);
-
-    this.clearElt = document.createElement('div');
-    Object.assign(this.clearElt.style, {
-      display: 'none',
-      position: 'absolute',
-      right: '0',
-      padding: '0 10px',
-      fontSize: '200%',
-      cursor: 'pointer',
-    });
-    this.clearElt.innerHTML = '×';
-    this.clearElt.onclick = () => this.clear();
-    element.appendChild(this.clearElt);
-  }
-
-  /**
-   * Clear the search field and close the control.
-   */
-  clear() {
-    if (!this.suggestionsElt || !this.inputElt || !this.clearElt) {
-      return;
-    }
-
-    this.inputElt.value = '';
-    this.suggestionsElt.innerHTML = '';
-    this.clearElt.style.display = 'none';
   }
 
   /**

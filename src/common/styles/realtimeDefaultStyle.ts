@@ -1,11 +1,13 @@
-import type {
-  RealtimeTrajectory,
-  ViewState,
-  StyleCache,
-  RealtimeStyleOptions,
-  RealtimeStyleFunction,
-} from '../../types';
 import createCanvas from '../utils/createCanvas';
+
+import type {
+  AnyCanvasContext,
+  RealtimeStyleFunction,
+  RealtimeStyleOptions,
+  RealtimeTrajectory,
+  StyleCache,
+  ViewState,
+} from '../../types';
 
 /** @private */
 const cacheDelayBg: StyleCache = {};
@@ -24,7 +26,7 @@ export const getDelayBgCanvas = (
   if (!cacheDelayBg[key]) {
     const canvas = createCanvas(origin * 2, origin * 2);
     if (canvas) {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d') as AnyCanvasContext;
       if (!ctx) {
         return null;
       }
@@ -52,8 +54,8 @@ export const getDelayTextCanvas = (
   fontSize: number,
   font: string,
   delayColor: string,
-  delayOutlineColor: string = '#000',
-  pixelRatio: number = 1,
+  delayOutlineColor = '#000',
+  pixelRatio = 1,
 ) => {
   const key = `${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
   if (!cacheDelayText[key]) {
@@ -101,7 +103,7 @@ export const getCircleCanvas = (
   if (!cacheCircle[key]) {
     const canvas = createCanvas(origin * 2, origin * 2);
     if (canvas) {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d') as AnyCanvasContext;
       if (!ctx) {
         return null;
       }
@@ -152,7 +154,7 @@ export const getTextCanvas = (
   if (!cacheText[key]) {
     const canvas = createCanvas(origin * 2, origin * 2);
     if (canvas) {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d') as AnyCanvasContext;
       if (!ctx) {
         return null;
       }
@@ -201,34 +203,34 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   options: RealtimeStyleOptions,
 ) => {
   const {
+    delayDisplay = 300000,
+    delayOutlineColor = '#000',
+    getBgColor = () => '#000',
+    getDelayColor = () => '#000',
+    getDelayFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
+    getDelayText = () => null,
+    getMaxRadiusForStrokeAndDelay = () => 7,
+    getMaxRadiusForText = () => 10,
+    getRadius = () => 0,
+    getText = (text?: string) => text,
+    getTextColor = () => '#000',
+    getTextFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
+    getTextSize = () => 14,
     hoverVehicleId,
     selectedVehicleId,
     useDelayStyle,
-    delayOutlineColor = '#000',
-    delayDisplay = 300000,
-    getRadius = () => 0,
-    getBgColor = () => '#000',
-    getDelayColor = () => '#000',
-    getDelayText = () => null,
-    getDelayFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
-    getText = (text?: string) => text,
-    getTextFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
-    getTextColor = () => '#000',
-    getTextSize = () => 14,
-    getMaxRadiusForText = () => 10,
-    getMaxRadiusForStrokeAndDelay = () => 7,
   } = options;
 
-  const { zoom, pixelRatio = 1 } = viewState;
+  const { pixelRatio = 1, zoom } = viewState;
   let { type } = trajectory.properties;
   const {
-    train_id: id,
-    line,
     delay,
-    state,
+    line,
     operator_provides_realtime_journey: operatorProvidesRealtime,
+    state,
+    train_id: id,
   } = trajectory.properties;
-  let { name, text_color: textColor, color } = line || {};
+  let { color, name, text_color: textColor } = line || {};
 
   name = getText(name);
 
@@ -246,11 +248,11 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     textColor = '#000000';
   }
 
-  if (color && color[0] !== '#') {
+  if (color && !color.startsWith('#')) {
     color = `#${color}`;
   }
 
-  if (textColor[0] !== '#') {
+  if (!textColor.startsWith('#')) {
     textColor = `#${textColor}`;
   }
 

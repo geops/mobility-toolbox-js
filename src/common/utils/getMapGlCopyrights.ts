@@ -8,8 +8,8 @@ export interface Source {
 }
 
 export interface SourceCache {
-  used: boolean;
   getSource: () => Source;
+  used: boolean;
 }
 
 /**
@@ -21,7 +21,6 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
   if (!map) {
     return [];
   }
-  // @ts-ignore
   const { style } = map;
   if (!style) {
     return [];
@@ -30,11 +29,11 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
   let copyrights: string[] = [];
 
   Object.values(sourceCaches).forEach((value) => {
-    if (value.used as boolean) {
+    if (value.used) {
       const source = value.getSource();
 
-      const attribution = // @ts-ignore
-        source.attribution || (source.options && source.options.attribution);
+      // @ts-expect-error improve types
+      const attribution = source.attribution || source.options?.attribution;
 
       if (attribution) {
         copyrights = copyrights.concat(
