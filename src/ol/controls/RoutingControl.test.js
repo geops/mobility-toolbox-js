@@ -1,15 +1,15 @@
 import fetch from 'jest-fetch-mock';
-import View from 'ol/View';
 import Map from 'ol/Map';
-import RoutingControl from './RoutingControl';
+import View from 'ol/View';
 
+import RoutingControl from './RoutingControl';
+import RoutingControlRouteGen10 from './snapshots/RoutingControlRouteGen10.json';
+import RoutingControlRouteGen100 from './snapshots/RoutingControlRouteGen100.json';
+import RoutingControlRouteGen30 from './snapshots/RoutingControlRouteGen30.json';
+import RoutingControlRouteGen5 from './snapshots/RoutingControlRouteGen5.json';
+import RoutingControlRouteOSM from './snapshots/RoutingControlRouteOSM.json';
 import RoutingControlStation1 from './snapshots/RoutingControlStation1.json';
 import RoutingControlStation2 from './snapshots/RoutingControlStation2.json';
-import RoutingControlRouteGen5 from './snapshots/RoutingControlRouteGen5.json';
-import RoutingControlRouteGen10 from './snapshots/RoutingControlRouteGen10.json';
-import RoutingControlRouteGen30 from './snapshots/RoutingControlRouteGen30.json';
-import RoutingControlRouteGen100 from './snapshots/RoutingControlRouteGen100.json';
-import RoutingControlRouteOSM from './snapshots/RoutingControlRouteOSM.json';
 
 describe('RoutingControl', () => {
   let map;
@@ -46,8 +46,8 @@ describe('RoutingControl', () => {
     fetch.mockResponseOnce(JSON.stringify(global.fetchRouteResponse));
 
     const control = new RoutingControl({
-      url: 'https://foo.ch',
       apiKey: 'foo',
+      url: 'https://foo.ch',
     });
     map.addControl(control);
     expect(
@@ -60,7 +60,7 @@ describe('RoutingControl', () => {
     control.drawRoute(control.viaPoints).then(() => {
       // Should use correct URL
       expect(fetch.mock.calls[0][0]).toEqual(
-        'https://foo.ch/?key=foo&graph=osm&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+        'https://foo.ch/?key=foo&coord-punish=1000&coord-radius=100&elevation=false&graph=osm&mot=bus&resolve-hops=false&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839',
       );
       // routingLayer should contain three features (2 x viapoints, 1 x route)
       expect(control.routingLayer.getSource().getFeatures().length).toEqual(3);
@@ -80,8 +80,6 @@ describe('RoutingControl', () => {
     );
 
     const control = new RoutingControl({
-      url: 'https://foo.ch/',
-      stopsApiUrl: 'https://foo.ch/',
       apiKey: 'foo',
       graphs: [
         ['gen5', 6, 7],
@@ -90,6 +88,8 @@ describe('RoutingControl', () => {
         ['gen100', 11, 13],
         ['osm', 14, 99],
       ],
+      stopsApiUrl: 'https://foo.ch/',
+      url: 'https://foo.ch/',
     });
     map.addControl(control);
     control.viaPoints = ['a4dca961d199ff76', 'e3666f03cba06b2b'];
@@ -102,19 +102,19 @@ describe('RoutingControl', () => {
         'https://foo.ch/lookup/e3666f03cba06b2b?key=foo',
       );
       expect(fetch.mock.calls[2][0]).toEqual(
-        'https://foo.ch/?key=foo&graph=gen5&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+        'https://foo.ch/?key=foo&coord-punish=1000&coord-radius=100&elevation=false&graph=gen5&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
       );
       expect(fetch.mock.calls[3][0]).toEqual(
-        'https://foo.ch/?key=foo&graph=gen10&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+        'https://foo.ch/?key=foo&coord-punish=1000&coord-radius=100&elevation=false&graph=gen10&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
       );
       expect(fetch.mock.calls[4][0]).toEqual(
-        'https://foo.ch/?key=foo&graph=gen30&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+        'https://foo.ch/?key=foo&coord-punish=1000&coord-radius=100&elevation=false&graph=gen30&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
       );
       expect(fetch.mock.calls[5][0]).toEqual(
-        'https://foo.ch/?key=foo&graph=gen100&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+        'https://foo.ch/?key=foo&coord-punish=1000&coord-radius=100&elevation=false&graph=gen100&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
       );
       expect(fetch.mock.calls[6][0]).toEqual(
-        'https://foo.ch/?key=foo&graph=osm&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b&mot=bus&resolve-hops=false&elevation=false&coord-radius=100&coord-punish=1000',
+        'https://foo.ch/?key=foo&coord-punish=1000&coord-radius=100&elevation=false&graph=osm&mot=bus&resolve-hops=false&via=%21a4dca961d199ff76%7C%21e3666f03cba06b2b',
       );
       // routingLayer should contain seven features (2 x viapoints, 5 x route for each graph)
       expect(control.routingLayer.getSource().getFeatures().length).toEqual(7);
@@ -124,8 +124,8 @@ describe('RoutingControl', () => {
 
   test('ignores Abort Error and returns undefined', (done) => {
     const control = new RoutingControl({
-      url: 'https://foo.ch',
       apiKey: 'foo',
+      url: 'https://foo.ch',
     });
     map.addControl(control);
     control.viaPoints = [
