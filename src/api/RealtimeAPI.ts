@@ -211,6 +211,8 @@ class RealtimeAPI {
 
     this._buffer = opt.buffer || [100, 100];
 
+    this._bbox = opt.bbox;
+
     this.version = opt.version || '2';
 
     /**
