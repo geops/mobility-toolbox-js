@@ -314,6 +314,7 @@ class RealtimeAPI {
    *
    * @param {string | WebSocketAPIParameters} channelOrParams Name of the websocket channel to send GET or an object representing parameters to send
    * @return {Promise<WebSocketAPIMessageEventData<?>>} A websocket response.
+   * @public
    */
   get(
     channelOrParams: string | WebSocketAPIParameters,
@@ -336,7 +337,7 @@ class RealtimeAPI {
    * @param {function} onSuccess Callback when the subscription succeeds.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
-   * @private
+   * @public
    */
   subscribe(
     channel: string,
@@ -356,7 +357,7 @@ class RealtimeAPI {
    * @param {string} channel Name of the websocket channel to unsubscribe.
    * @param {string} suffix Suffix to add to the channel name.
    * @param {function} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
-   * @private
+   * @public
    */
   unsubscribe(
     channel: string,
@@ -388,9 +389,44 @@ class RealtimeAPI {
    * @param {function(departures: RealtimeDeparture[])} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
-   * @public
+   * @deprecated Use subscribeTimetable instead.
    */
   subscribeDepartures(
+    stationId: number,
+    onMessage: WebSocketAPIMessageCallback<RealtimeDeparture>,
+    onError: EventListener = () => {},
+    quiet: boolean = false,
+  ) {
+    this.subscribeTimetable(stationId, onMessage, onError, quiet);
+  }
+
+  /**
+   * Unsubscribe from current departures channel.
+   * @param {number} stationId UIC of the station.
+   * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @deprecated Use unsubscribeTimetabe instead.
+   */
+  unsubscribeDepartures(
+    stationId: RealtimeStationId,
+    onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
+  ) {
+    // eslint-disable-next-line no-console
+    console.log(
+      'RealtimeAPI.unsubscribeDepartures is deprecated. Use RealtimeAPI.unsubscribeTimetabe instead.',
+    );
+    this.unsubscribeTimetabe(stationId, onMessage);
+  }
+
+  /**
+   * Subscribe to timetable channel of a given station.
+   *
+   * @param {number} stationId UIC of the station.
+   * @param {function(departures: RealtimeDeparture[])} onMessage Function called on each message of the channel.
+   * @param {function} onError Callback when the subscription fails.
+   * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
+   */
+  subscribeTimetable(
     stationId: number,
     onMessage: WebSocketAPIMessageCallback<RealtimeDeparture>,
     onError: EventListener = () => {},
@@ -405,7 +441,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
-  unsubscribeDepartures(
+  unsubscribeTimetabe(
     stationId: RealtimeStationId,
     onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
   ) {
@@ -419,9 +455,40 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeNews[] })} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
-   * @public
+   * @deprecated Use subscribeNewsticker instead.
    */
   subscribeDisruptions(
+    tenant: RealtimeTenant,
+    onMessage: WebSocketAPIMessageCallback<RealtimeNews>,
+    onError: EventListener = () => {},
+    quiet: boolean = false,
+  ) {
+    this.subscribeNewsticker(tenant, onMessage, onError, quiet);
+  }
+
+  /**
+   * Unsubscribe disruptions.
+   * @param {RealtimeTenant} tenant Tenant's id
+   * @param {Function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @deprecated Use unsubscribeNewsticker instead.
+   */
+  unsubscribeDisruptions(
+    tenant: RealtimeTenant,
+    onMessage?: WebSocketAPIMessageCallback<RealtimeNews>,
+  ) {
+    this.unsubscribeNewsticker(tenant, onMessage);
+  }
+
+  /**
+   * Subscribe to the newsticker channel for tenant.
+   *
+   * @param {RealtimeTenant} tenant Tenant's id
+   * @param {function(data: { content: RealtimeNews[] })} onMessage Function called on each message of the channel.
+   * @param {function} onError Callback when the subscription fails.
+   * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
+   */
+  subscribeNewsticker(
     tenant: RealtimeTenant,
     onMessage: WebSocketAPIMessageCallback<RealtimeNews>,
     onError: EventListener = () => {},
@@ -436,7 +503,7 @@ class RealtimeAPI {
    * @param {Function(data: { content: RealtimeNews[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
-  unsubscribeDisruptions(
+  unsubscribeNewsticker(
     tenant: RealtimeTenant,
     onMessage?: WebSocketAPIMessageCallback<RealtimeNews>,
   ) {
@@ -598,6 +665,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeTrainId })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
+   * @public
    */
   subscribeDeletedVehicles(
     mode: RealtimeMode,
@@ -618,6 +686,7 @@ class RealtimeAPI {
   /**
    * Unsubscribe to deleted_vhicles channels.
    * @param {function(data: { content: RealtimeTrainId })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
+   * @public
    */
   unsubscribeDeletedVehicles(
     onMessage: WebSocketAPIMessageCallback<RealtimeTrainId>,
