@@ -1,13 +1,13 @@
 import { Layer } from 'ol/layer';
+
 import PropertiesLayerMixin, {
   PropertiesLayerMixinOptions,
 } from './PropertiesLayerMixin';
 
-export type MobilityLayerOptions = PropertiesLayerMixinOptions & {
-  [x: string]: any;
-};
+export type MobilityLayerOptions = PropertiesLayerMixinOptions &
+  Record<string, any>;
 
-type GConstructor<T = {}> = new (...args: any[]) => T;
+type GConstructor<T = object> = new (...args: any[]) => T;
 export type Layerable = GConstructor<Omit<Layer, keyof string>>;
 
 function MobilityLayerMixin<TBase extends Layerable>(Base: TBase) {

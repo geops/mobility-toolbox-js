@@ -25,10 +25,16 @@ export type PropertiesLayerMixinOptions = {
 } & Options &
   Record<string, any>;
 
-const deprecated = debounce((message: string) => {
-  // eslint-disable-next-line no-console
-  console.warn(message);
-}, 1000);
+let deprecated: (message: string) => void = () => {};
+if (
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('deprecated')
+) {
+  deprecated = debounce((message: string) => {
+    // eslint-disable-next-line no-console
+    console.warn(message);
+  }, 1000);
+}
 
 /**
  * This mixin adds some properties to access ol custom properties easily.
@@ -69,7 +75,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
      * @param {ol/Map~Map} map A map.
      */
     attachToMap(map: Map) {
-      // @ts-expect-error
+      // @ts-expect-error attachToMap not necessarily exists
       (super.attachToMap || (() => {}))(map);
 
       (this.get('children') || []).forEach((child: Layer) => {
@@ -84,7 +90,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       (this.get('children') || []).forEach((child: Layer) => {
         this.map.removeLayer(child);
       });
-      // @ts-expect-error
+      // @ts-expect-error detachToMap not necessarily exists
       (super.detachFromMap || (() => {}))();
     }
 

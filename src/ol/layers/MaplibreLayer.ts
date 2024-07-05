@@ -1,24 +1,26 @@
-import OlMap from 'ol/Map';
-import debounce from 'lodash.debounce';
-import { ObjectEvent } from 'ol/Object';
 import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer';
-import type {
-  MapLibreLayerOptions,
-  MapLibreOptions,
-} from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
+import debounce from 'lodash.debounce';
+import OlMap from 'ol/Map';
+import { ObjectEvent } from 'ol/Object';
+
 import { getUrlWithParams } from '../../common/utils';
 import MobilityLayerMixin, {
   MobilityLayerOptions,
 } from '../mixins/MobilityLayerMixin';
 
-export type MaplibreLayerOptions = MobilityLayerOptions &
-  MapLibreLayerOptions & {
-    apiKey?: string;
-    apiKeyName?: string;
-    style?: null | string | maplibregl.StyleSpecification;
-    url?: string;
-    mapLibreOptions?: MapLibreOptions;
-  };
+import type {
+  MapLibreLayerOptions,
+  MapLibreOptions,
+} from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
+
+export type MaplibreLayerOptions = {
+  apiKey?: string;
+  apiKeyName?: string;
+  mapLibreOptions?: MapLibreOptions;
+  style?: maplibregl.StyleSpecification | null | string;
+  url?: string;
+} & MapLibreLayerOptions &
+  MobilityLayerOptions;
 
 const buildStyleUrl = (
   url: string,
@@ -30,6 +32,17 @@ const buildStyleUrl = (
     [apiKeyName]: apiKey,
   }).toString();
 };
+
+let deprecated: (message: string) => void = () => {};
+if (
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('deprecated')
+) {
+  deprecated = debounce((message: string) => {
+    // eslint-disable-next-line no-console
+    console.warn(message);
+  }, 1000);
+}
 
 /**
  * An OpenLayers layer able to display data from the [geOps Maps API](https://developer.geops.io/apis/maps).
@@ -58,46 +71,6 @@ const buildStyleUrl = (
  * @public
  */
 class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
-  get mbMap(): maplibregl.Map | undefined {
-    // eslint-disable-next-line no-console
-    console.warn('MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.');
-    return this.maplibreMap as maplibregl.Map;
-  }
-
-  get maplibreMap(): maplibregl.Map | undefined {
-    // eslint-disable-next-line no-console
-    console.warn(
-      'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
-    );
-    return this.mapLibreMap as maplibregl.Map;
-  }
-
-  // get queryRenderedFeaturesOptions(): maplibregl.QueryRenderedFeaturesOptions {
-  //   return this.get('queryRenderedFeaturesOptions');
-  // }
-
-  // set queryRenderedFeaturesOptions(
-  //   newValue: maplibregl.QueryRenderedFeaturesOptions,
-  // ) {
-  //   this.set('queryRenderedFeaturesOptions', newValue);
-  // }
-
-  get style(): string {
-    return this.get('style');
-  }
-
-  set style(newValue: string) {
-    this.set('style', newValue);
-  }
-
-  get url(): string {
-    return this.get('url');
-  }
-
-  set url(newValue: string) {
-    this.set('url', newValue);
-  }
-
   /**
    * Constructor.
    *
@@ -126,7 +99,7 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     ) {
       newOptions.mapLibreOptions.style = buildStyleUrl(
         newOptions.url,
-        newOptions.style as string,
+        newOptions.style,
         newOptions.apiKey,
         newOptions.apiKeyName,
       );
@@ -152,6 +125,28 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
         }
       }),
     );
+  }
+
+  // get queryRenderedFeaturesOptions(): maplibregl.QueryRenderedFeaturesOptions {
+  //   return this.get('queryRenderedFeaturesOptions');
+  // }
+
+  // set queryRenderedFeaturesOptions(
+  //   newValue: maplibregl.QueryRenderedFeaturesOptions,
+  // ) {
+  //   this.set('queryRenderedFeaturesOptions', newValue);
+  // }
+
+  /**
+   * Create a copy of the MaplibreLayer.
+   * @param {MaplibreLayerOptions} newOptions Options to override
+   * @return {MaplibreLayer} A MaplibreLayer layer
+   */
+  clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
+    return new MaplibreLayer({
+      ...(this.options || {}),
+      ...(newOptions || {}),
+    });
   }
 
   getStyle() {
@@ -187,16 +182,32 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     }
   }
 
-  /**
-   * Create a copy of the MaplibreLayer.
-   * @param {MaplibreLayerOptions} newOptions Options to override
-   * @return {MaplibreLayer} A MaplibreLayer layer
-   */
-  clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
-    return new MaplibreLayer({
-      ...(this.options || {}),
-      ...(newOptions || {}),
-    });
+  get maplibreMap(): maplibregl.Map | undefined {
+    deprecated(
+      'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
+    );
+    return this.mapLibreMap!;
+  }
+
+  get mbMap(): maplibregl.Map | undefined {
+    deprecated('MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.');
+    return this.maplibreMap!;
+  }
+
+  get style(): string {
+    return this.get('style');
+  }
+
+  set style(newValue: string) {
+    this.set('style', newValue);
+  }
+
+  get url(): string {
+    return this.get('url');
+  }
+
+  set url(newValue: string) {
+    this.set('url', newValue);
   }
 }
 

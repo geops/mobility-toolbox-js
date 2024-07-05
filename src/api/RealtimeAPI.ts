@@ -638,7 +638,7 @@ class RealtimeAPI {
    * Unsubscribe from current departures channel.
    * @param {number} stationId UIC of the station.
    * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
-   * @deprecated Use unsubscribeTimetabe instead.
+   * @deprecated Use RealtimeAPI.unsubscribeTimetabe instead.
    */
   unsubscribeDepartures(
     stationId: RealtimeStationId,

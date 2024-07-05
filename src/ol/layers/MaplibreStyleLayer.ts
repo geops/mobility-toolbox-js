@@ -1,3 +1,4 @@
+import debounce from 'lodash.debounce';
 import { FeatureState, LayerSpecification } from 'maplibre-gl';
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
@@ -20,6 +21,17 @@ export type MaplibreStyleLayerOptions = {
   maplibreLayer?: MaplibreLayer;
   queryRenderedLayersFilter?: FilterFunction;
 } & MaplibreLayerOptions;
+
+let deprecated: (...messages: (object | string)[]) => void = () => {};
+if (
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('deprecated')
+) {
+  deprecated = debounce((...messages: (object | string)[]) => {
+    // eslint-disable-next-line no-console
+    console.warn(...messages);
+  }, 1000);
+}
 
 /**
  * Layer for visualizing a specific set of layer from a MapboxLayer.
@@ -61,8 +73,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   ) {
     /** Manage renamed property for backward compatibility with v2  */
     if (options.mapboxLayer) {
-      // eslint-disable-next-line no-console
-      console.warn(
+      deprecated(
         'options.mapboxLayer is deprecated. Use options.maplibreLayer instead.',
       );
       // eslint-disable-next-line no-param-reassign
@@ -252,8 +263,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
   ): Promise<LayerGetFeatureInfoResponse> {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       `Deprecated. getFeatureInfoAtCoordinate([layer], coordinate) from ol package instead.`,
     );
     if (!this.maplibreLayer?.mapLibreMap) {
@@ -312,8 +322,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   highlight(features: Feature[] = []) {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       `Deprecated. Use layer.setFeatureState(features, {highlighted: true}) instead.`,
     );
     // Filter out selected features
@@ -392,8 +401,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   select(features: Feature[] = []) {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       `Deprecated. Use layer.setFeatureState(features, {selected: true}) instead.`,
     );
     this.setHoverState(this.selectedFeatures || [], false);
@@ -418,10 +426,8 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
         feature.get(VECTOR_TILE_FEATURE_PROPERTY) || {};
       if ((!source && !sourceLayer) || !feature.getId()) {
         if (!feature.getId()) {
-          // eslint-disable-next-line no-console
-          console.warn(
+          deprecated(
             "No feature's id found. To use the feature state functionnality, tiles must be generated with --generate-ids. See https://github.com/Maplibre/tippecanoe#adding-calculated-attributes.",
-            feature.getId(),
             feature.getProperties(),
           );
         }
@@ -446,8 +452,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @private
    */
   setHoverState(features: Feature[], state: boolean) {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       `Deprecated. Use layer.setFeatureState(features, {hover: ${state}}) instead.`,
     );
     this.setFeatureState(features, { hover: state });
@@ -480,8 +485,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   }
 
   get mapboxLayer(): MaplibreLayer | undefined {
-    // eslint-disable-next-line no-console
-    console.warn('Deprecated. Use maplibreLayer instead.');
+    deprecated('Deprecated. Use maplibreLayer instead.');
     return this.get('maplibreLayer');
   }
 
@@ -535,8 +539,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @deprecated
    */
   get styleLayer(): maplibregl.AddLayerObject {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       'MaplibreStyleLayer.styleLayer is deprecated. Use MaplibreStyleLayer.layer instead.',
     );
     return this.layers[0];
@@ -546,8 +549,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @deprecated
    */
   set styleLayer(newValue: maplibregl.AddLayerObject) {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       'MaplibreStyleLayer.styleLayer is deprecated. Use MaplibreStyleLayer.layer instead.',
     );
     this.layers = [newValue];
@@ -560,8 +562,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @deprecated
    */
   get styleLayers(): maplibregl.AddLayerObject[] {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
     );
     return this.layers;
@@ -571,8 +572,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @deprecated
    */
   set styleLayers(newValue: maplibregl.AddLayerObject[]) {
-    // eslint-disable-next-line no-console
-    console.warn(
+    deprecated(
       'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
     );
     this.layers = newValue;
