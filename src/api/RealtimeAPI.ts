@@ -644,10 +644,6 @@ class RealtimeAPI {
     stationId: RealtimeStationId,
     onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
   ) {
-    // eslint-disable-next-line no-console
-    console.log(
-      'RealtimeAPI.unsubscribeDepartures is deprecated. Use RealtimeAPI.unsubscribeTimetabe instead.',
-    );
     this.unsubscribeTimetabe(stationId, onMessage);
   }
 
