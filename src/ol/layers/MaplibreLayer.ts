@@ -118,6 +118,7 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
       this.updateMaplibreMap.bind(this),
       150,
     );
+    updateMaplibreMapDebounced();
     this.olEventsKeys.push(
       this.on('propertychange', (evt: ObjectEvent) => {
         if (/(url|style)/.test(evt.key)) {
