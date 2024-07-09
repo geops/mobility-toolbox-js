@@ -87,7 +87,7 @@ class StopFinderControlCommon {
     this.inputElt.onkeyup = (evt) => {
       this.abortController?.abort();
       this.abortController = new AbortController();
-      // @ts-expect-error
+      // @ts-expect-error - Improve ts
       this.search(evt.target.value, this.abortController);
     };
     Object.assign(this.inputElt.style, {

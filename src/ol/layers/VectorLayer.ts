@@ -27,10 +27,11 @@ class VectorLayer extends Layer {
 
     if (this.map) {
       const pixel = this.map.getPixelFromCoordinate(coordinate);
-      features = this.map.getFeaturesAtPixel(pixel, {
-        hitTolerance: this.hitTolerance || 5,
-        layerFilter: (l) => l === this.olLayer,
-      }) as Feature[];
+      features =
+        (this.map.getFeaturesAtPixel(pixel, {
+          hitTolerance: this.hitTolerance || 5,
+          layerFilter: (l) => l === this.olLayer,
+        }) as Feature[]) || [];
     }
 
     return Promise.resolve({

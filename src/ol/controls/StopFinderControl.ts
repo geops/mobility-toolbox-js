@@ -1,13 +1,14 @@
 import { Feature, Point } from 'geojson';
-import { fromLonLat } from 'ol/proj';
 import Control, { Options } from 'ol/control/Control';
+import { fromLonLat } from 'ol/proj';
+
 import StopFinderControlCommon from '../../common/controls/StopFinderControlCommon';
 import createDefaultStopFinderElement from '../../common/utils/createDefaultStopFinderElt';
 
-export type StopFinderControlOptions = Options &
-  StopFinderControlCommon & {
-    className?: string;
-  };
+export type StopFinderControlOptions = {
+  className?: string;
+} & Options &
+  StopFinderControlCommon;
 
 /**
  * This OpenLayers control allows to search stations from the [geOps Stops API](https://developer.geops.io/apis/stops/).

@@ -34,7 +34,7 @@ class StopsAPI extends HttpAPI {
    * @public
    */
   constructor(options: StopsAPIOptions = {}) {
-    super({ url: 'https://api.geops.io/stops/v1/', ...options });
+    super({ ...options, url: options.url || 'https://api.geops.io/stops/v1/' });
   }
 
   /**

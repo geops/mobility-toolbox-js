@@ -227,6 +227,11 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
     }
 
     /** @deprecated */
+    get olListenersKeys(): EventsKey[] {
+      return this.olEventsKeys;
+    }
+
+    /** @deprecated */
     get parent(): Layer {
       deprecated(
         "Layer.parent is deprecated. Use the Layer.get('parent') method instead.",
