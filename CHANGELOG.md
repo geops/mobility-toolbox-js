@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/geops/mobility-toolbox-js/compare/v3.0.0-beta.21...v3.0.0) (2024-07-09)
+
+
+### Bug Fixes
+
+* divers ([e30392c](https://github.com/geops/mobility-toolbox-js/commit/e30392cdbe983cac489aae065ec8f25bfb836478))
+* divers ([2528d43](https://github.com/geops/mobility-toolbox-js/commit/2528d43e30f9dc1e7aac40d48fde9b9708624402))
+* divers ([06c9515](https://github.com/geops/mobility-toolbox-js/commit/06c9515b60528e486275ae39bb0d09710f714ffb))
+
 ### [2.4.2](https://github.com/geops/mobility-toolbox-js/compare/v2.4.1...v2.4.2) (2024-05-28)
 
 
