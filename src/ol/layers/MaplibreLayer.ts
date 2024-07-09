@@ -166,12 +166,7 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     }
 
     /// Otherwise build the complete style url.
-    return buildStyleUrl(
-      this.url,
-      this.style,
-      this.get('apiKey'),
-      this.get('apiKeyName'),
-    );
+    return buildStyleUrl(this.url, this.style, this.apiKey, this.apiKeyName);
   }
 
   updateMaplibreMap() {

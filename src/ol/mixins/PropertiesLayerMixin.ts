@@ -118,11 +118,12 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
 
     // @ts-expect-error  - this is a mixin
     override setMapInternal(map: Map) {
-      super.setMapInternal(map);
       if (map) {
+        super.setMapInternal(map);
         this.attachToMap(map);
       } else {
         this.detachFromMap();
+        super.setMapInternal(map);
       }
     }
 
