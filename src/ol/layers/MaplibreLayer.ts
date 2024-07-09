@@ -183,6 +183,22 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     }
   }
 
+  set apiKey(newValue: string) {
+    this.set('apiKey', newValue);
+  }
+
+  get apiKey(): string {
+    return this.get('apiKey');
+  }
+
+  set apiKeyName(newValue: string) {
+    this.set('apiKeyName', newValue);
+  }
+
+  get apiKeyName(): string {
+    return this.get('apiKeyName');
+  }
+
   get maplibreMap(): maplibregl.Map | undefined {
     deprecated(
       'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
