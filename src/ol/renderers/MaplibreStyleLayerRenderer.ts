@@ -83,7 +83,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
         ];
 
         if (hitTolerance) {
-          const [x, y] = pixels as [number, number];
+          const [x, y] = pixels;
           pixels = [
             [x - hitTolerance, y - hitTolerance],
             [x + hitTolerance, y + hitTolerance],
@@ -106,7 +106,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
 
         // At this point we get GeoJSON Maplibre feature, we transform it to an OpenLayers
         // feature to be consistent with other layers.
-        features = (mapLibreMap as maplibregl.Map)
+        features = mapLibreMap
           .queryRenderedFeatures(pixels, {
             layers: layers.map((l) => l.id),
             validate: false,

@@ -227,9 +227,9 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
     }
 
     /** @deprecated */
-    get olListenersKeys(): EventsKey[] {
-      return this.olEventsKeys;
-    }
+    // get olListenersKeys(): EventsKey[] {
+    //   return this.olEventsKeys;
+    // }
 
     /** @deprecated */
     get parent(): Layer {
