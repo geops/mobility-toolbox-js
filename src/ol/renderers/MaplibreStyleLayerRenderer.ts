@@ -36,7 +36,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
   ): Feature | undefined {
     const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);
     features.forEach((feature) => {
-      // @ts-expect-error
+      // @ts-expect-error improve ts types
       callback(feature, this.layer_, feature.getGeometry());
     });
     return features?.[0] as Feature;

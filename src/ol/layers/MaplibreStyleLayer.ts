@@ -82,6 +82,26 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
       delete options.mapboxLayer;
     }
 
+    if (options.styleLayers) {
+      deprecated(
+        'options.styleLayers is deprecated. Use options.layers instead.',
+      );
+      // eslint-disable-next-line no-param-reassign
+      options.layers = options.styleLayers;
+      // eslint-disable-next-line no-param-reassign
+      delete options.styleLayers;
+    }
+
+    if (options.styleLayersFilter) {
+      deprecated(
+        'options.styleLayersFilter is deprecated. Use options.layersFilter instead.',
+      );
+      // eslint-disable-next-line no-param-reassign
+      options.layersFilter = options.styleLayersFilter;
+      // eslint-disable-next-line no-param-reassign
+      delete options.styleLayersFilter;
+    }
+
     super({ source: new Source({}), ...options });
 
     /**

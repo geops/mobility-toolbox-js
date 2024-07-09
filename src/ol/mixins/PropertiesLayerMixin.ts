@@ -196,6 +196,14 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       return this.get('hitTolerance') || 5;
     }
 
+    /** @deprecated */
+    set hitTolerance(newValue: number) {
+      deprecated(
+        'Layer.hitTolerance is deprecated.Pass the hitTolerance when you request the features.',
+      );
+      this.set('hitTolerance', newValue);
+    }
+
     get key(): string {
       return this.get('key') || this.get('name') || getUid(this);
     }
