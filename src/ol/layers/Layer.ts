@@ -1,6 +1,5 @@
 import debounce from 'lodash.debounce';
 import OLLayer from 'ol/layer/Layer';
-import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import LayerRenderer from 'ol/renderer/Layer';
 
 import MobilityLayerMixin, {
@@ -16,6 +15,16 @@ if (
     // eslint-disable-next-line no-console
     console.warn(message);
   }, 1000);
+}
+
+class EmptyLayerRenderer extends LayerRenderer<OLLayer> {
+  prepareFrame() {
+    return true;
+  }
+
+  renderFrame() {
+    return null;
+  }
 }
 
 /**
@@ -37,7 +46,7 @@ class Layer extends MobilityLayerMixin(OLLayer) {
 
   // ol does not like when it returns null.
   createRenderer(): LayerRenderer<OLLayer> {
-    return new CanvasLayerRenderer(this);
+    return new EmptyLayerRenderer(this);
   }
 }
 
