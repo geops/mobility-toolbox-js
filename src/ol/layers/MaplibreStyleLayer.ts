@@ -246,6 +246,17 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
           this.attachToMap(map);
         }
       }),
+
+      // When the style changes we wait that it is loaded to relaunch the onLoad
+      this.maplibreLayer.on('propertychange', (evt) => {
+        if (evt.key === 'style') {
+          evt.target.maplibreMap.once('styledata', () => {
+            evt.target.maplibreMap.once('idle', () => {
+              this.onLoad();
+            });
+          });
+        }
+      }),
     );
   }
 

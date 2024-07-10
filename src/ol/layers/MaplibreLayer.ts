@@ -91,7 +91,13 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
         ...(options.mapLibreOptions || {}),
       },
     };
+
     if (
+      !newOptions.mapLibreOptions.style &&
+      newOptions.url?.includes('style.json')
+    ) {
+      newOptions.mapLibreOptions.style = newOptions.url;
+    } else if (
       !newOptions.mapLibreOptions.style &&
       newOptions.apiKey &&
       newOptions.style &&
@@ -160,6 +166,7 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     ) {
       return this.style;
     }
+
     // If the url set is already a complete style url, use it directly.
     if (this.url.includes('style.json')) {
       return this.url;
