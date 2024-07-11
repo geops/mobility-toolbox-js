@@ -4,6 +4,7 @@ import { getUid, Map } from 'ol';
 import { EventsKey } from 'ol/events';
 import { Layer } from 'ol/layer';
 import { ObjectEvent } from 'ol/Object';
+import { unByKey } from 'ol/Observable';
 
 import getLayersAsFlatArray from '../../common/utils/getLayersAsFlatArray';
 
@@ -56,14 +57,12 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
         this.setProperties(options.properties);
       }
 
-      this.olEventsKeys?.push(
-        // Update parent property
-        this.on('propertychange', (evt: ObjectEvent) => {
-          if (evt.key === 'children') {
-            this.onChildrenChange(evt.oldValue);
-          }
-        }),
-      );
+      // Update parent property
+      this.on('propertychange', (evt: ObjectEvent) => {
+        if (evt.key === 'children') {
+          this.onChildrenChange(evt.oldValue);
+        }
+      });
 
       this.options = options;
       this.set('children', options.children || []); // Trigger the on children change event
@@ -77,7 +76,6 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
     attachToMap(map: Map) {
       // @ts-expect-error attachToMap not necessarily exists
       (super.attachToMap || (() => {}))(map);
-
       (this.get('children') || []).forEach((child: Layer) => {
         map.addLayer(child);
       });
@@ -87,6 +85,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
      * Terminate what was initialized in init function. Remove layer, events...
      */
     detachFromMap() {
+      unByKey(this.olEventsKeys);
       (this.get('children') || []).forEach((child: Layer) => {
         this.map.removeLayer(child);
       });
