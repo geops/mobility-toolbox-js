@@ -17,7 +17,7 @@ const format = new GeoJSON();
  * @private
  */
 const getFeaturesFromWMS = (
-  source: ImageWMS | TileWMS,
+  source: TileWMS | ImageWMS,
   options: any,
   abortController: AbortController,
 ): Promise<LayerGetFeatureInfoResponse> => {

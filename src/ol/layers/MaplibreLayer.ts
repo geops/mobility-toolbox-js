@@ -13,14 +13,14 @@ import type {
   MapLibreOptions,
 } from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
 
-export type MaplibreLayerOptions = {
-  apiKey?: string;
-  apiKeyName?: string;
-  mapLibreOptions?: MapLibreOptions;
-  style?: maplibregl.StyleSpecification | null | string;
-  url?: string;
-} & MapLibreLayerOptions &
-  MobilityLayerOptions;
+export type MaplibreLayerOptions = MapLibreLayerOptions &
+  MobilityLayerOptions & {
+    apiKey?: string;
+    apiKeyName?: string;
+    mapLibreOptions?: MapLibreOptions;
+    style?: maplibregl.StyleSpecification | null | string;
+    url?: string;
+  };
 
 const buildStyleUrl = (
   url: string,

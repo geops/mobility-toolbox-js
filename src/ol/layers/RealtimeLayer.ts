@@ -25,14 +25,14 @@ import { fullTrajectoryStyle } from '../styles';
 /** @private */
 const format = new GeoJSON();
 
-export type RealtimeLayerOptions = {
+export type RealtimeLayerOptions = RealtimeLayerMixinOptions & {
   allowRenderWhenAnimating?: boolean;
   fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
     options: any,
   ) => void;
-} & RealtimeLayerMixinOptions;
+};
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).

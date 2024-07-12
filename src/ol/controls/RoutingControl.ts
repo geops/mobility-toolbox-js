@@ -27,7 +27,7 @@ import type {
   RoutingViaPoint,
 } from '../../types';
 
-export type RoutingControlOptions = {
+export type RoutingControlOptions = Options & {
   active?: boolean;
 
   apiKey?: string;
@@ -53,7 +53,7 @@ export type RoutingControlOptions = {
   style?: StyleLike;
 
   useRawViaPoints?: boolean;
-} & Options;
+};
 
 export type AbotControllersByGraph = Record<string, AbortController>;
 

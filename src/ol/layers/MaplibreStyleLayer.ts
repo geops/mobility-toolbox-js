@@ -12,15 +12,15 @@ import { LayerGetFeatureInfoResponse } from '../../types';
 import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
 
-import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
+import MaplibreLayer from './MaplibreLayer';
 
-export type MaplibreStyleLayerOptions = {
+export interface MaplibreStyleLayerOptions {
   beforeId?: string;
   layers?: maplibregl.AddLayerObject[];
   layersFilter?: FilterFunction;
   maplibreLayer?: MaplibreLayer;
   queryRenderedLayersFilter?: FilterFunction;
-} & MaplibreLayerOptions;
+}
 
 let deprecated: (...messages: (object | string)[]) => void = () => {};
 if (
