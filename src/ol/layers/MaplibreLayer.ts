@@ -8,19 +8,19 @@ import MobilityLayerMixin, {
   MobilityLayerOptions,
 } from '../mixins/MobilityLayerMixin';
 
-import type {
-  MapLibreLayerOptions,
-  MapLibreOptions,
-} from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
+import type { MapLibreOptions } from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
+import type { QueryRenderedFeaturesOptions } from 'maplibre-gl';
+import type { Options as LayerOptions } from 'ol/layer/Layer';
 
-export type MaplibreLayerOptions = MapLibreLayerOptions &
-  MobilityLayerOptions & {
-    apiKey?: string;
-    apiKeyName?: string;
-    mapLibreOptions?: MapLibreOptions;
-    style?: maplibregl.StyleSpecification | null | string;
-    url?: string;
-  };
+export type MaplibreLayerOptions = {
+  apiKey?: string;
+  apiKeyName?: string;
+  mapLibreOptions?: MapLibreOptions;
+  queryRenderedFeaturesOptions?: QueryRenderedFeaturesOptions | undefined;
+  style?: maplibregl.StyleSpecification | null | string;
+  url?: string;
+} & LayerOptions &
+  MobilityLayerOptions;
 
 const buildStyleUrl = (
   url: string,

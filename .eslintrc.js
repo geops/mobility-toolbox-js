@@ -33,6 +33,5 @@ module.exports = {
     '@typescript-eslint/no-floating-promises': 'Off',
     '@typescript-eslint/unbound-method': 'Off',
     '@typescript-eslint/prefer-for-of': 'Off',
-    'perfectionist/sort-intersection-types': 'Off',
   },
 };
