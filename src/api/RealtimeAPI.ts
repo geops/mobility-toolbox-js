@@ -91,12 +91,6 @@ export const RealtimeModes = {
  * @public
  */
 class RealtimeAPI {
-  _bbox?: RealtimeBbox;
-
-  _buffer?: number[];
-
-  _url!: string;
-
   private pingInterval!: number;
 
   private pingIntervalMs!: number;
@@ -104,6 +98,12 @@ class RealtimeAPI {
   private reconnectTimeout?: number;
 
   private reconnectTimeoutMs?: number;
+
+  _bbox?: RealtimeBbox;
+
+  _buffer?: number[];
+
+  _url!: string;
 
   version: RealtimeVersion = '2';
 

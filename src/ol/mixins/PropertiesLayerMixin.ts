@@ -12,19 +12,19 @@ import type { Options } from 'ol/layer/Layer';
 
 import type { Layerable } from './MobilityLayerMixin';
 
-export type PropertiesLayerMixinOptions = Options &
-  Record<string, any> & {
-    children?: any[];
-    copyrights?: string[];
-    disabled?: boolean;
-    group?: string;
-    hitTolerance?: number;
-    key?: string;
-    map?: Map;
-    name?: string;
-    properties?: Record<string, any>;
-    visible?: boolean;
-  };
+export type PropertiesLayerMixinOptions = {
+  children?: any[];
+  copyrights?: string[];
+  disabled?: boolean;
+  group?: string;
+  hitTolerance?: number;
+  key?: string;
+  map?: Map;
+  name?: string;
+  properties?: Record<string, any>;
+  visible?: boolean;
+} & Options &
+  Record<string, any>;
 
 let deprecated: (message: string) => void = () => {};
 if (

@@ -24,11 +24,11 @@ export default () => {
   map.on('load', () => {
     map.addLayer(realtime);
   });
-  
+
   document.getElementById('button').onclick = () => {
     const prop = map.getLayoutProperty('realtime', 'visibility');
     map.setLayoutProperty(
-      'id-raster',
+      'realtime',
       'visibility',
       prop === 'none' ? 'visible' : 'none',
     );

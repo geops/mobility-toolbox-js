@@ -1,5 +1,7 @@
+import { DebouncedFunc } from 'lodash';
 import debounce from 'lodash.debounce';
 import { Map, MapEvent } from 'ol';
+import { Coordinate } from 'ol/coordinate';
 import Feature, { FeatureLike } from 'ol/Feature';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -7,15 +9,20 @@ import Layer from 'ol/layer/Layer';
 import { ObjectEvent } from 'ol/Object';
 import { Vector as VectorSource } from 'ol/source';
 import Source from 'ol/source/Source';
+import { State } from 'ol/View';
 
 import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
-import RealtimeLayerMixin, {
-  RealtimeLayerMixinOptions,
-} from '../../common/mixins/RealtimeLayerMixin';
+import RealtimeEngine, {
+  RealtimeEngineOptions,
+} from '../../common/utils/RealtimeEngine';
+import { RealtimeAPI } from '../../maplibre';
 import {
+  LayerGetFeatureInfoOptions,
+  LayerGetFeatureInfoResponse,
   RealtimeFullTrajectory,
+  RealtimeMode,
+  RealtimeRenderState,
   RealtimeTrainId,
-  RealtimeTrajectory,
   ViewState,
 } from '../../types';
 import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
@@ -25,14 +32,15 @@ import { fullTrajectoryStyle } from '../styles';
 /** @private */
 const format = new GeoJSON();
 
-export type RealtimeLayerOptions = RealtimeLayerMixinOptions & {
+export type RealtimeLayerOptions = {
   allowRenderWhenAnimating?: boolean;
   fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
     options: any,
   ) => void;
-};
+  maxNbFeaturesRequested?: number;
+} & RealtimeEngineOptions;
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
@@ -54,12 +62,15 @@ export type RealtimeLayerOptions = RealtimeLayerMixinOptions & {
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  * @public
  */
-// @ts-expect-error
-class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
-  /** @private */
+class RealtimeLayer extends MobilityLayerMixin(Layer) {
   allowRenderWhenAnimating?: boolean = false;
-
-  vectorLayer: VectorLayer<Feature>;
+  currentZoom?: number;
+  engine: RealtimeEngine;
+  maxNbFeaturesRequested = 100;
+  onMoveEndDebounced: DebouncedFunc<(evt: MapEvent | ObjectEvent) => void>;
+  onZoomEndDebounced: DebouncedFunc<(evt: MapEvent | ObjectEvent) => void>;
+  renderedViewState: State | undefined;
+  vectorLayer: VectorLayer<VectorSource>;
 
   /**
    * Constructor.
@@ -78,32 +89,29 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
       ...options,
     });
 
+    this.engine = new RealtimeEngine({
+      getViewState: this.getViewState.bind(this),
+      onRender: this.onRealtimeEngineRender.bind(this),
+      ...options,
+    });
+
     /** @private */
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
     // We store the layer used to highlight the full Trajectory
     /** @private */
-    this.vectorLayer = new VectorLayer<Feature>({
+    this.vectorLayer = new VectorLayer<VectorSource>({
       source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
         return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
           feature,
           resolution,
-          this.styleOptions,
+          this.engine.styleOptions,
         );
       },
       updateWhileAnimating: this.allowRenderWhenAnimating,
       updateWhileInteracting: true,
     });
-
-    // Options the last render run did happen. If something changes
-    // we have to render again
-    /** @private */
-    this.renderState = {
-      center: [0, 0],
-      rotation: 0,
-      zoom: undefined,
-    };
 
     /** @private */
     this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
@@ -111,16 +119,16 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
     /** @private */
     this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
   }
-
   /** @private */
   override attachToMap(map: Map) {
     super.attachToMap(map);
+    this.engine.attachToMap();
+
     if (this.map) {
       // If the layer is visible we start  the rendering clock
       if (this.getVisible()) {
-        this.start();
+        this.engine.start();
       }
-      // @ts-expect-error  - bad ts check RealtimeLayer is a BaseLayer
       const index = this.map.getLayers().getArray().indexOf(this);
       this.map.getLayers().insertAt(index, this.vectorLayer);
       this.olEventsKeys.push(
@@ -140,7 +148,6 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
             if (this.currentZoom !== zoom) {
               this.onZoomEndDebounced(evt);
             }
-            /** @private */
             this.currentZoom = zoom;
 
             this.onMoveEndDebounced(evt);
@@ -148,9 +155,9 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
         ),
         this.on('change:visible', (evt: ObjectEvent) => {
           if (evt.target.getVisible()) {
-            this.start();
+            this.engine.start();
           } else {
-            this.stop();
+            this.engine.stop();
           }
         }),
         this.on('propertychange', (evt: ObjectEvent) => {
@@ -195,19 +202,56 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    */
   override detachFromMap() {
     this.map?.removeLayer(this.vectorLayer);
+    this.engine.detachFromMap();
     super.detachFromMap();
   }
 
-  /**
-   * Return the delay in ms before the next rendering.
-   * @private
-   */
-  getRefreshTimeInMs() {
-    return super.getRefreshTimeInMs(this.map.getView()?.getZoom() || 0);
+  getTrajectoryInfos(id: RealtimeTrainId) {
+    // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+    // Then we combine them in one response and send them to inherited layers.
+    const promises = [
+      this.engine.api.getStopSequence(id),
+      this.engine.api.getFullTrajectory(
+        id,
+        this.engine.mode,
+        this.engine.getGeneralizationLevelByZoom(
+          Math.floor(this.map?.getView()?.getZoom() || 0),
+        ),
+      ),
+    ];
+
+    return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
+      const response = {
+        fullTrajectory,
+        stopSequence,
+      };
+      return response;
+    });
+  }
+
+  getViewState() {
+    if (!this.map?.getView()) {
+      return {};
+    }
+    const view = this.map.getView();
+    return {
+      center: view.getCenter(),
+      extent: view.calculateExtent(),
+      pixelRatio: this.engine.pixelRatio,
+      resolution: view.getResolution(),
+      rotation: view.getRotation(),
+      size: this.map.getSize(),
+      visible: this.getVisible(),
+      zoom: view.getZoom(),
+    };
   }
 
   highlight(feature: Feature) {
-    this.highlightVehicle(feature?.get('train_id'));
+    const id = feature?.get('train_id');
+    if (this.hoverVehicleId !== id) {
+      this.hoverVehicleId = id;
+      this.engine.renderTrajectories(true);
+    }
   }
 
   /**
@@ -225,11 +269,11 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
       this.vectorLayer?.getSource()?.clear(true);
       return Promise.resolve([]);
     }
-    return this.api
+    return this.engine.api
       .getFullTrajectory(
         id,
-        this.mode,
-        this.getGeneralizationLevelByZoom(
+        this.engine.mode,
+        this.engine.getGeneralizationLevelByZoom(
           Math.floor(this.map?.getView()?.getZoom() || 0),
         ),
       )
@@ -239,7 +283,7 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
         if (!fullTrajectory?.features?.length) {
           return [];
         }
-        const features = format.readFeatures(fullTrajectory) as Feature[];
+        const features = format.readFeatures(fullTrajectory);
         this.vectorLayer?.getSource()?.clear(true);
         if (features.length) {
           this.vectorLayer?.getSource()?.addFeatures(features);
@@ -261,18 +305,33 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onMoveEnd(evt: MapEvent | ObjectEvent) {
-    if (!this.isUpdateBboxOnMoveEnd || !this.getVisible()) {
+    if (!this.engine.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
 
-    this.setBbox();
+    this.engine.setBbox();
+  }
+
+  /**
+   * Callback when the RealtimeEngine has rendered successfully.
+   */
+  onRealtimeEngineRender(
+    renderState: RealtimeRenderState,
+    viewState: ViewState,
+  ) {
+    this.renderedViewState = { ...viewState } as State;
+    // @ts-expect-error  - we are in the same class
+    const { container } = this.getRenderer() as RealtimeLayerRenderer;
+    if (container) {
+      container.style.transform = '';
+    }
   }
 
   // eslint-disable-next-line no-unused-vars
   onZoomEnd() {
-    super.onZoomEnd();
+    this.engine.onZoomEnd();
 
-    if (!this.isUpdateBboxOnMoveEnd || !this.getVisible()) {
+    if (!this.engine.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
 
@@ -281,146 +340,74 @@ class RealtimeLayer extends RealtimeLayerMixin(MobilityLayerMixin(Layer)) {
     }
   }
 
-  /**
-   * Remove the trajectory form the list if necessary.
-   *
-   * @private
-   */
-  purgeTrajectory(
-    trajectory: RealtimeTrajectory,
-    extent: [number, number, number, number],
-    zoom: number,
-  ) {
-    const center = this.map.getView()?.getCenter();
-    if (!extent && !center) {
-      // In that case the view is not zoomed yet so we can't calculate the extent of the map,
-      // it will trigger a js error on calculateExtent function.
-      return false;
+  select(feature: Feature) {
+    const id = feature?.get('train_id');
+    if (this.selectedVehicleId !== id) {
+      this.selectedVehicleId = id;
+      this.engine.renderTrajectories(true);
     }
-    return super.purgeTrajectory(
-      trajectory,
-      extent || this.map.getView().calculateExtent(),
-      zoom || this.map.getView().getZoom() || 0,
-    );
+    this.highlightTrajectory(id);
   }
 
-  // /**
-  //  * Update the cursor style when hovering a vehicle.
-  //  *
-  //  * @private
-  //  * @override
-  //  */
-  // onFeatureHover(
-  //   features: Feature[],
-  //   layer: RealtimeLayer,
-  //   coordinate: Coordinate,
-  // ) {
-  //   super.onFeatureHover(features, layer, coordinate);
-  //   this.map.getTargetElement().style.cursor = features.length
-  //     ? 'pointer'
-  //     : 'auto';
-  // }
-
-  // /**
-  //  * Display the complete trajectory of the vehicle.
-  //  *
-  //  * @private
-  //  * @override
-  //  */
-  // onFeatureClick(
-  //   features: Feature[],
-  //   layer: RealtimeLayer,
-  //   coordinate: Coordinate,
-  // ) {
-  //   super.onFeatureClick(features, layer, coordinate);
-  //   this.highlightTrajectory(this.selectedVehicleId);
-  // }
-
-  // @ts-expect-error
-  renderTrajectories(noInterpolate: boolean) {
-    if (!this.map) {
-      return;
-    }
-
-    const view = this.map.getView();
-
-    // it could happen that the view is set but without center yet,
-    // so the calcualteExtent will trigger an error.
-    if (!view?.getCenter()) {
-      return;
-    }
-
-    super.renderTrajectories(
-      {
-        center: view.getCenter(),
-        extent: view.calculateExtent(),
-        pixelRatio: this.pixelRatio,
-        resolution: view.getResolution(),
-        rotation: view.getRotation(),
-        size: this.map.getSize(),
-        zoom: view.getZoom(),
-      },
-      noInterpolate,
-    );
-  }
-
-  /**
-   * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
-   * @private
-   * @override
-   */
-  renderTrajectoriesInternal(viewState: ViewState, noInterpolate: boolean) {
-    if (!this.map?.getView()) {
-      return false;
-    }
-    let isRendered = false;
-
-    const blockRendering = this.allowRenderWhenAnimating
+  shouldRender() {
+    return this.allowRenderWhenAnimating
       ? false
       : this.map.getView().getAnimating() ||
-        this.map.getView().getInteracting();
-
-    // Don't render the map when the map is animating or interacting.
-    isRendered = blockRendering
-      ? false
-      : super.renderTrajectoriesInternal(viewState, noInterpolate);
-
-    // We update the current render state.
-    if (isRendered) {
-      /** @private */
-      this.renderedViewState = { ...viewState };
-      // @ts-expect-error  - we are in the same class
-      const { container } = this.getRenderer() as RealtimeLayerRenderer;
-      if (container) {
-        container.style.transform = '';
-      }
-    }
-    return isRendered;
+          this.map.getView().getInteracting();
   }
 
-  select(feature: Feature) {
-    this.selectVehicle(feature?.get('train_id'));
-    this.highlightTrajectory(feature?.get('train_id'));
+  start() {
+    this.engine.start();
   }
 
-  /**
-   * Send the current bbox to the websocket
-   *
-   * @private
-   */
-  setBbox(extent?: [number, number, number, number], zoom?: number) {
-    const extentt =
-      extent ||
-      (this.map?.getView()?.calculateExtent() as [
-        number,
-        number,
-        number,
-        number,
-      ]);
-    if (!extentt) {
-      return;
-    }
-    super.setBbox(extentt, zoom || this.map?.getView()?.getZoom() || 0);
+  stop() {
+    this.engine.stop();
+  }
+
+  get api() {
+    return this.engine.api;
+  }
+
+  set api(api: RealtimeAPI) {
+    this.engine.api = api;
+  }
+
+  get canvas() {
+    return this.engine.canvas;
+  }
+
+  get hoverVehicleId(): RealtimeTrainId | undefined {
+    return this.engine.hoverVehicleId;
+  }
+
+  set hoverVehicleId(id: RealtimeTrainId) {
+    this.engine.hoverVehicleId = id;
+  }
+
+  get mode() {
+    return this.engine.mode;
+  }
+
+  set mode(mode: RealtimeMode) {
+    this.engine.mode = mode;
+  }
+  get pixelRatio() {
+    return this.engine.pixelRatio;
+  }
+  get selectedVehicleId(): RealtimeTrainId | undefined {
+    return this.engine.selectedVehicleId;
+  }
+
+  set selectedVehicleId(id: RealtimeTrainId) {
+    this.engine.selectedVehicleId = id;
+  }
+
+  get sort() {
+    return this.engine.sort;
+  }
+
+  get trajectories() {
+    return this.engine.trajectories;
   }
 }
 

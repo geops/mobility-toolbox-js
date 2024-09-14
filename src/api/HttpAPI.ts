@@ -31,7 +31,7 @@ class HttpAPI {
       throw new Error(`No url defined for request to ${this.url}/${path}`);
     }
 
-    if (!this.url && !this.apiKey && !/key=/.test(this.url)) {
+    if (!this.url && !this.apiKey && !this.url.includes('key=')) {
       // eslint-disable-next-line no-console
       throw new Error(`No apiKey defined for request to ${this.url}`);
     }

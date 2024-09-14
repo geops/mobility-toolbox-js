@@ -27,7 +27,7 @@ import type {
   RoutingViaPoint,
 } from '../../types';
 
-export type RoutingControlOptions = Options & {
+export type RoutingControlOptions = {
   active?: boolean;
 
   apiKey?: string;
@@ -42,7 +42,7 @@ export type RoutingControlOptions = Options & {
 
   routingApiParams?: RoutingParameters;
 
-  routingLayer?: VectorLayer<Feature>;
+  routingLayer?: VectorLayer<VectorSource>;
 
   snapToClosestStation?: boolean;
 
@@ -53,7 +53,7 @@ export type RoutingControlOptions = Options & {
   style?: StyleLike;
 
   useRawViaPoints?: boolean;
-};
+} & Options;
 
 export type AbotControllersByGraph = Record<string, AbortController>;
 
@@ -162,7 +162,7 @@ class RoutingControl extends Control {
 
   routingApiParams?: RoutingParameters;
 
-  routingLayer?: VectorLayer<Feature>;
+  routingLayer?: VectorLayer<VectorSource>;
 
   segments: Feature<LineString>[] = [];
 
@@ -397,12 +397,10 @@ class RoutingControl extends Control {
     this.modifyInteraction = new Modify({
       // hitDetection: this.routingLayer, // Create a bug, the first point is always selected even if the mous eis far away
       deleteCondition: (e) => {
-        const feats = e.target?.getFeaturesAtPixel(
-          e.pixel,
-          {
+        const feats =
+          (e.target?.getFeaturesAtPixel(e.pixel, {
             hitTolerance: 5,
-          } || [],
-        ) as Feature<Geometry>[];
+          }) as Feature<Geometry>[]) || [];
         const viaPoint = feats.find(
           (feat) =>
             feat.getGeometry()?.getType() === 'Point' && feat.get('index'),

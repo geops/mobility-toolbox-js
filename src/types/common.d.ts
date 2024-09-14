@@ -36,6 +36,7 @@ export interface ViewState {
   size?: number[];
   time?: number;
   zoom?: number;
+  visible?:boolean;
 }
 
 export interface RealtimeStyleOptions {
@@ -121,7 +122,7 @@ export interface LayerGetFeatureInfoResponse {
 
 export interface LayerGetFeatureInfoOptions {
   nb?: number;
-  resolution: number;
+  hitTolerance: number = 5;
 }
 
 export type UserInteractionCallback = (

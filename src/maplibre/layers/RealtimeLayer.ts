@@ -1,18 +1,19 @@
-// @ts-nocheck
-import { fromLonLat } from 'ol/proj';
-import { getWidth, getHeight } from 'ol/extent';
-import transformRotate from '@turf/transform-rotate';
 import { point } from '@turf/helpers';
-import RealtimeLayerMixin, {
-  RealtimeLayerMixinOptions,
-} from '../../common/mixins/RealtimeLayerMixin';
-import Layer, { LayerOptions } from './Layer';
-import { getSourceCoordinates } from '../utils';
-import type { AnyMapGlMap, ViewState } from '../../types';
-import type { RealtimeTrajectory } from '../../api/typedefs';
-import toMercatorExtent from '../../common/utils/toMercatorExtent';
+import transformRotate from '@turf/transform-rotate';
+import { CanvasSourceSpecification, LayerSpecification } from 'maplibre-gl';
+import { getHeight, getWidth } from 'ol/extent';
+import { fromLonLat } from 'ol/proj';
 
-export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
+import RealtimeEngine, {
+  RealtimeEngineOptions,
+} from '../../common/utils/RealtimeEngine';
+import { getSourceCoordinates } from '../utils';
+
+import Layer, { LayerOptions } from './Layer';
+
+import type { AnyCanvas, AnyMapGlMap } from '../../types';
+
+export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
 
 /**
  * A Maplibre layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
@@ -50,7 +51,11 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeLayerMixinOptions;
  s
  * @public
  */
-class RealtimeLayer extends RealtimeLayerMixin(Layer) {
+class RealtimeLayer extends Layer {
+  engine: RealtimeEngine;
+  layer: LayerSpecification;
+  source: CanvasSourceSpecification;
+
   /**
    * Constructor.
    *
@@ -66,18 +71,24 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
    * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
    */
   constructor(options = {}) {
-    const canvas = document.createElement('canvas');
     super({
-      canvas,
       id: 'realtime',
+      ...options,
+    });
+
+    this.engine = new RealtimeEngine({
+      getViewState: this.getViewState.bind(this),
+      onRender: this.onRealtimeEngineRender.bind(this),
       ...options,
     });
 
     /** @private */
     this.source = {
-      id: this.id,
-      type: 'canvas',
-      canvas: this.canvas,
+      // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
+      animate: true,
+      // @ts-expect-error bad type definition
+      attribution: options.attribution?.join(', '),
+      canvas: this.canvas as HTMLCanvasElement,
       // Set a default coordinates, it will be overrides on next data update
       coordinates: [
         [0, 0],
@@ -85,25 +96,24 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
         [2, 2],
         [0, 0],
       ],
-      // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
-      animate: true,
-      attribution: options.attribution?.join(', '),
+      id: this.id,
       loaded: true,
+      type: 'canvas',
     };
 
     /** @private */
     this.layer = {
       id: `${this.id}-raster`,
-      type: 'raster',
-      source: this.id,
       layout: {
         visibility: 'visible',
       },
       paint: {
-        'raster-opacity': 1,
         'raster-fade-duration': 0,
+        'raster-opacity': 1,
         'raster-resampling': 'nearest', // important otherwise it looks blurry
       },
+      source: this.id,
+      type: 'raster',
     };
 
     /** @private */
@@ -118,96 +128,30 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     /** @private */
     this.onZoomEnd = this.onZoomEnd.bind(this);
   }
-
   /**
-   * Add sources, layers and listeners to the map.
-   */
-  override onAdd(
-    map: AnyMapGlMap,
-    gl: WebGLRenderingContext | WebGL2RenderingContext,
-  ) {
-    super.onAdd(map, gl);
-
-    if (map.isStyleLoaded()) {
-      this.onLoad();
-    }
-
-    map.on('load', this.onLoad);
-  }
-
-  /**
-   * Remove source, layers and listeners from the map.
-   */
-  override onRemove(
-    map: AnyMapGlMap,
-    gl: WebGLRenderingContext | WebGL2RenderingContext,
-  ) {
-    map.off('load', this.onLoad);
-
-    if (map.getLayer(this.layer.id)) {
-      map.removeLayer(this.layer.id);
-    }
-    if (map.getSource(this.id)) {
-      map.removeSource(this.id);
-    }
-    super.onRemove(map, gl);
-  }
-
-  onLoad() {
-    if (!this.map.getSource(this.id)) {
-      this.map.addSource(this.id, this.source);
-    }
-    if (!this.map.getLayer(this.layer.id)) {
-      this.map.addLayer(this.layer, this.id);
-    }
-    this.start();
-  }
-
-  /**
-   * Start updating vehicles position.
-   *
-   * @public
-   */
-  override start() {
-    super.start();
-    this.map.on('move', this.onMove);
-    this.map.on('moveend', this.onMoveEnd);
-    this.map.on('zoomend', this.onZoomEnd);
-  }
-
-  /**
-   * Stop updating vehicles position.
-   *
-   * @public
-   */
-  override stop() {
-    super.stop();
-    this.map?.off('move', this.onMove);
-    this.map?.off('moveend', this.onMoveEnd);
-    this.map?.off('zoomend', this.onZoomEnd);
-  }
-
-  /**
-   * Render the trajectories using current map's size, resolution and rotation.
-   * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
+   * Return the current view state. Used by the RealtimeEngine.
    * @private
    */
-  override renderTrajectories(noInterpolate?: boolean = false) {
+  getViewState() {
+    console.log(this);
     if (!this.map) {
-      return;
+      return {};
     }
     if (!this.pixelRatio) {
       this.pixelRatio = 1;
     }
 
-    const { width, height } = this.map.getCanvas();
+    const { height, width } = this.map.getCanvas();
     const center = this.map.getCenter();
 
     // We use turf here to have good transform.
+    // @ts-expect-error bad type definition
     const leftBottom = this.map.unproject({
       x: 0,
       y: height / this.pixelRatio,
     }); // southWest
+
+    // @ts-expect-error bad type definition
     const rightTop = this.map.unproject({
       x: width / this.pixelRatio,
       y: 0,
@@ -234,82 +178,136 @@ class RealtimeLayer extends RealtimeLayerMixin(Layer) {
     const res = Math.max(xResolution, yResolution);
 
     // Coordinate of trajectories are in mercator so we have to pass the proper resolution and center in mercator.
-    const viewState = {
-      size: [width / this.pixelRatio, height / this.pixelRatio],
+    return {
       center: fromLonLat([center.lng, center.lat]),
       extent: bounds,
-      resolution: res,
-      zoom: this.map.getZoom() - 1,
-      rotation: -(this.map.getBearing() * Math.PI) / 180,
       pixelRatio: this.pixelRatio,
+      resolution: res,
+      rotation: -(this.map.getBearing() * Math.PI) / 180,
+      size: [width / this.pixelRatio, height / this.pixelRatio],
+      visible: true,
+      zoom: this.map.getZoom() - 1,
     };
-
-    super.renderTrajectories(viewState, noInterpolate);
   }
 
   /**
-   * Return the delay in ms before the next rendering.
+   * Add sources, layers and listeners to the map.
    */
-  override getRefreshTimeInMs() {
-    return super.getRefreshTimeInMs(this.map.getZoom());
-  }
-
-  /**
-   * Remove the trajectory form the list if necessary.
-   */
-  override purgeTrajectory(
-    trajectory: RealtimeTrajectory,
-    extent: [number, number, number, number],
-    zoom: number,
+  override onAdd(
+    map: AnyMapGlMap,
+    gl: WebGL2RenderingContext | WebGLRenderingContext,
   ) {
-    return super.purgeTrajectory(
-      trajectory,
-      extent || toMercatorExtent(this.map.getBounds()),
-      zoom || Math.floor(this.map.getZoom() - 1),
-    );
-  }
+    super.onAdd(map, gl);
+    this.engine.attachToMap();
 
-  /**
-   * Send the current bbox to the websocket
-   */
-  override setBbox(extent?: [number, number, number, number], zoom?: number) {
-    super.setBbox(
-      extent || toMercatorExtent(this.map.getBounds()),
-      zoom || this.map.getZoom() - 1,
-    );
-  }
-
-  override renderTrajectoriesInternal(
-    viewState: ViewState,
-    noInterpolate: boolean = false,
-  ) {
-    const render = super.renderTrajectoriesInternal(viewState, noInterpolate);
-    if (render && this.map.style) {
-      const extent = getSourceCoordinates(this.map, this.pixelRatio);
-      const source = this.map.getSource(this.id);
-      if (source) {
-        source.setCoordinates(extent);
-      }
+    if (map.isStyleLoaded()) {
+      this.onLoad();
     }
-    return render;
+
+    map.on('load', this.onLoad);
+  }
+
+  onLoad() {
+    if (!this.map?.getSource(this.id)) {
+      this.map?.addSource(this.id, this.source);
+    }
+    if (!this.map?.getLayer(this.layer.id)) {
+      this.map?.addLayer(this.layer, this.id);
+    }
+    this.start();
   }
 
   /**
    * Callback on 'move' event.
    */
   onMove() {
-    this.renderTrajectories();
+    this.engine.renderTrajectories();
   }
 
   /**
    * Callback on 'moveend' event.
    */
   onMoveEnd() {
-    this.renderTrajectories();
+    this.engine.renderTrajectories();
 
-    if (this.isUpdateBboxOnMoveEnd) {
-      this.setBbox();
+    if (this.engine.isUpdateBboxOnMoveEnd) {
+      this.engine.setBbox();
     }
+  }
+
+  /**
+   * Callback when the RealtimeEngine has rendered successfully.
+   */
+  onRealtimeEngineRender() {
+    if (this.map?.style) {
+      const extent = getSourceCoordinates(this.map, this.pixelRatio);
+      const source = this.map.getSource(this.id)!;
+      if (source) {
+        // @ts-expect-error bad type definition
+        source.setCoordinates(extent);
+      }
+    }
+  }
+
+  /**
+   * Remove source, layers and listeners from the map.
+   */
+  override onRemove(
+    map: AnyMapGlMap,
+    gl: WebGL2RenderingContext | WebGLRenderingContext,
+  ) {
+    this.engine.detachFromMap();
+    this.stop();
+
+    map.off('load', this.onLoad);
+
+    if (map.getLayer(this.layer.id)) {
+      map.removeLayer(this.layer.id);
+    }
+    if (map.getSource(this.id)) {
+      map.removeSource(this.id);
+    }
+    super.onRemove(map, gl);
+  }
+
+  onZoomEnd() {
+    this.engine.onZoomEnd();
+  }
+
+  /**
+   * Start updating vehicles position.
+   *
+   * @public
+   */
+  start() {
+    this.engine.start();
+    this.map?.on('move', this.onMove);
+    this.map?.on('moveend', this.onMoveEnd);
+    this.map?.on('zoomend', this.onZoomEnd);
+  }
+
+  /**
+   * Stop updating vehicles position.
+   *
+   * @public
+   */
+  stop() {
+    this.engine.stop();
+    this.map?.off('move', this.onMove);
+    this.map?.off('moveend', this.onMoveEnd);
+    this.map?.off('zoomend', this.onZoomEnd);
+  }
+
+  get canvas(): AnyCanvas | undefined {
+    return this.engine.canvas;
+  }
+
+  get pixelRatio(): number | undefined {
+    return this.engine.pixelRatio || 1;
+  }
+
+  set pixelRatio(pixelRatio: number | undefined) {
+    this.engine.pixelRatio = pixelRatio || 1;
   }
 }
 

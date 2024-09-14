@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
-import { buffer, containsCoordinate } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Geometry } from 'ol/geom';
 import { FrameState } from 'ol/Map';
@@ -20,7 +19,6 @@ const format = new GeoJSON();
  * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
  * @private
  */
-// @ts-expect-error
 export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeLayer> {
   // private container: HTMLElement | undefined;
 
@@ -34,7 +32,7 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
   ): Feature | undefined {
     const features = this.getFeaturesAtCoordinate(coordinate, hitTolerance);
     features.forEach((feature) => {
-      // @ts-expect-error
+      // @ts-expect-error defintion to fix
       callback(feature, this.layer_, feature.getGeometry());
     });
     return features?.[0] as Feature;
@@ -76,43 +74,12 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
     if (!coordinate) {
       return [];
     }
-
     const layer = this.getLayer();
-    const map = layer.getMapInternal();
-    const resolution = map?.getView()?.getResolution() || 1;
-    const nb = 10;
-    const ext = buffer(
-      [...coordinate, ...coordinate],
-      hitTolerance * resolution,
-    );
-    let features: Feature[] = [];
-
-    let trajectories = Object.values(layer.trajectories || {});
-    if (layer.sort) {
-      // @ts-expect-error
-      trajectories = trajectories.sort(this.sort);
-    }
-
-    const vehicles = [];
-    for (let i = 0; i < trajectories.length; i += 1) {
-      const trajectory = trajectories[i];
-      if (
-        // @ts-expect-error  coordinate is added by the RealtimeLayer
-        trajectory.properties.coordinate &&
-        // @ts-expect-error  coordinate is added by the RealtimeLayer
-        containsCoordinate(ext, trajectory.properties.coordinate)
-      ) {
-        vehicles.push(trajectories[i]);
-      }
-      if (vehicles.length === nb) {
-        break;
-      }
-    }
-
-    features = vehicles.map(
-      (vehicle) => format.readFeature(vehicle) as Feature,
-    );
-    return features;
+    const featureCollection = layer.engine.getVehiclesAtCoordinate(coordinate, {
+      hitTolerance,
+      nb: layer.maxNbFeaturesRequested,
+    });
+    return format.readFeatures(featureCollection);
   }
 
   // eslint-disable-next-line class-methods-use-this
