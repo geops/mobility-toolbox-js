@@ -5,10 +5,10 @@ import { fromLonLat } from 'ol/proj';
 import StopFinderControlCommon from '../../common/controls/StopFinderControlCommon';
 import createDefaultStopFinderElement from '../../common/utils/createDefaultStopFinderElt';
 
-export type StopFinderControlOptions = Options &
-  StopFinderControlCommon & {
-    className?: string;
-  };
+export type StopFinderControlOptions = {
+  className?: string;
+} & Options &
+  StopFinderControlCommon;
 
 /**
  * This OpenLayers control allows to search stations from the [geOps Stops API](https://developer.geops.io/apis/stops/).
@@ -45,9 +45,6 @@ class StopFinderControl extends Control {
     });
   }
 
-  /**
-   * @private
-   */
   onSuggestionClick(suggestion: Feature) {
     const coord = fromLonLat((suggestion.geometry as Point).coordinates);
     this.getMap()?.getView().setCenter(coord);

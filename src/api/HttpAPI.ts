@@ -14,10 +14,8 @@ class HttpAPI {
   url: string;
 
   constructor(options: HttpAPIOptions) {
-    /** @private */
     this.url = options.url;
 
-    /** @private */
     this.apiKey = options.apiKey;
   }
 

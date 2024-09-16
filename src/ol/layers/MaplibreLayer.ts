@@ -66,20 +66,20 @@ if (
  * });
  *
  * @classproperty {maplibregl.Map} mapLibreMap - The Maplibre map object. Readonly.
- * @classproperty {string} style - geOps Maps api style.
- * @extends {ol/layer/Layer~Layer}
+ * @classproperty {string} style - The [geOps Maps API](https://developer.geops.io/apis/maps) style.
+ * @extends {MapLibreLayer}
  * @public
  */
 class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
   /**
    * Constructor.
    *
-   * @param {MaplibreLayerOptions} options
-   * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.apiKeyName="key"] The geOps Maps API key name.
-   * @param {maplibregl.MapOptions} [options.mapLibreOptions={ interactive: false, trackResize: false, attributionControl: false }] Maplibre map options.
-   * @param {string} [options.style="travic_v2"] The geOps Maps API style.
-   * @param {string} [options.url="https://maps.geops.io"] The geOps Maps API url.
+   * @param {Object} options
+   * @param {string} options.apiKey Accesss key for [geOps APIs](https://developer.geops.io/).
+   * @param {string} [options.apiKeyName="key"] The [geOps Maps API](https://developer.geops.io/apis/maps) key name.
+   * @param {maplibregl.MapOptions} [options.mapLibreOptions={ interactive: false, trackResize: false, attributionControl: false }] MapLibre map options.
+   * @param {string} [options.style="travic_v2"] The [geOps Maps API](https://developer.geops.io/apis/maps) style.
+   * @param {string} [options.url="https://maps.geops.io"] The [geOps Maps API](https://developer.geops.io/apis/maps) url.
    */
   constructor(options: MaplibreLayerOptions) {
     const newOptions = {
@@ -115,7 +115,7 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
 
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map
+   * @param {ol/Map~Map} map An OpenLayers map.
    */
   attachToMap(map: OlMap) {
     super.attachToMap(map);
@@ -146,8 +146,10 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
 
   /**
    * Create a copy of the MaplibreLayer.
-   * @param {MaplibreLayerOptions} newOptions Options to override
+   *
+   * @param {Object} newOptions Options to override. See constructor.
    * @return {MaplibreLayer} A MaplibreLayer layer
+   * @public
    */
   clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
     return new MaplibreLayer({
@@ -201,6 +203,9 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     return this.get('apiKeyName');
   }
 
+  /**
+   * @deprecated Use layer.mapLibreMap.
+   */
   get maplibreMap(): maplibregl.Map | undefined {
     deprecated(
       'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
@@ -208,6 +213,9 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     return this.mapLibreMap!;
   }
 
+  /**
+   * @deprecated Use layer.mapLibreMap.
+   */
   get mbMap(): maplibregl.Map | undefined {
     deprecated('MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.');
     return this.maplibreMap!;

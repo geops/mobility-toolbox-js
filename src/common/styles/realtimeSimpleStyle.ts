@@ -12,7 +12,6 @@ import type {
  */
 let canvas: AnyCanvas | null;
 
-/** @private */
 const realtimeSimpleStyle: RealtimeStyleFunction = () => {
   if (!canvas) {
     canvas = createCanvas(15, 15);

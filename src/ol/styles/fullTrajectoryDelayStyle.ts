@@ -1,33 +1,31 @@
-import { Style, Fill, Stroke, Circle } from 'ol/style';
+import { Circle, Fill, Stroke, Style } from 'ol/style';
 
-/** @private */
 const stroke = new Style({
-  zIndex: 2,
   image: new Circle({
-    radius: 5,
     fill: new Fill({
       color: '#000000',
     }),
+    radius: 5,
   }),
   stroke: new Stroke({
     color: '#000000',
     width: 6,
   }),
+  zIndex: 2,
 });
 
-/** @private */
 const fill = new Style({
-  zIndex: 3,
   image: new Circle({
-    radius: 4,
     fill: new Fill({
       color: '#a0a0a0',
     }),
+    radius: 4,
   }),
   stroke: new Stroke({
     color: '#a0a0a0',
     width: 4,
   }),
+  zIndex: 3,
 });
 
 /**

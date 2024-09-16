@@ -1,9 +1,9 @@
 // TODO: I use any to avoid circular dependency  with common/layers/layer
-/** @private */
+
 const getLayersAsFlatArray = (layersOrLayer: any | any[]): any[] => {
   let layers = layersOrLayer;
   if (!Array.isArray(layers)) {
-    layers = [layersOrLayer as any];
+    layers = [layersOrLayer];
   }
   let flatLayers: any[] = [];
   layers.forEach((layer: any) => {

@@ -1,5 +1,5 @@
 import debounce from 'lodash.debounce';
-import { FeatureState, LayerSpecification } from 'maplibre-gl';
+import { FeatureState } from 'maplibre-gl';
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { Layer } from 'ol/layer';
@@ -14,13 +14,13 @@ import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer'
 
 import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
 
-export type MaplibreStyleLayerOptions = MaplibreLayerOptions & {
+export type MaplibreStyleLayerOptions = {
   beforeId?: string;
   layers?: maplibregl.AddLayerObject[];
   layersFilter?: FilterFunction;
   maplibreLayer?: MaplibreLayer;
   queryRenderedLayersFilter?: FilterFunction;
-};
+} & MaplibreLayerOptions;
 
 let deprecated: (...messages: (object | string)[]) => void = () => {};
 if (
@@ -34,22 +34,25 @@ if (
 }
 
 /**
- * Layer for visualizing a specific set of layer from a MapboxLayer.
+ * Layer that helps show/hide a specific subset of style layers of a [MaplibreLayer](./MaplibreLayer.js~MaplibreLayer.html).
  *
  * @example
- * import { MapboxLayer, MapboxStyleLayer } from 'mobility-toolbox-js/ol';
+ * import { MaplibreLayer, MaplibreStyleLayer } from 'mobility-toolbox-js/ol';
  *
- * const maplibreLayer = new MapboxLayer({
- *   url: 'https://maps.geops.io/styles/travic_v2/style.json?key=[yourApiKey]',
+ * const maplibreLayer = new MaplibreLayer({
+ *   apiKey: 'yourApiKey',
  * });
  *
- * const layer = new MapboxStyleLayer({
+ * const layer = new MaplibreStyleLayer({
  *   maplibreLayer: maplibreLayer,
- *   styleLayersFilter: () => {},
+ *   layersFilter: (layer) => {
+ *     // show/hide only style layers related to stations
+ *     return /station/.test(layer.id);
+ *   },
  * });
  *
- * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
  * @extends {ol/layer/Layer~Layer}
+ * @public
  */
 class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   highlightedFeatures: Feature[] = [];
@@ -60,11 +63,13 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * Constructor.
    *
    * @param {Object} options
-   * @param {MapboxLayer} [options.maplibreLayer] The MaplibreLayer to use.
-   * @param {maplibregl.SourceSpecification[]} [options.sources] The source to add to the style on load.
+   * @param {string} [options.beforeId] The style layer id to use when the options.layers property is defined, unsused otherwise.
    * @param {maplibregl.AddLayerObject[]} [options.layers] The layers to add to the style on load.
    * @param {FilterFunction} [options.layersFilter] Filter function to decide which style layer to apply visiblity on. If not provided, the 'layers' property is used.
+   * @param {MaplibreLayer} [options.maplibreLayer] The MaplibreLayer to use.
    * @param {FilterFunction} [options.queryRenderedLayersFilter] Filter function to decide which style layer are available for query.
+   * @param {maplibregl.SourceSpecification[]} [options.sources] The sources to add to the style on load.
+   * @public
    */
   constructor(
     options: MaplibreStyleLayerOptions = {
@@ -104,9 +109,8 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
     super({ source: new Source({}), ...options });
 
-    /**
-     * @private
-     */
+    this.beforeId = options.beforeId;
+
     this.onLoad = this.onLoad.bind(this);
 
     if (!this.layersFilter && this.layers) {
@@ -116,7 +120,6 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     }
   }
 
-  /** @private */
   addLayers() {
     if (!this.maplibreLayer?.mapLibreMap || !Array.isArray(this.layers)) {
       return;
@@ -139,7 +142,6 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     }
   }
 
-  /** @private */
   addSources() {
     if (!this.maplibreLayer?.mapLibreMap || !this.sources) {
       return;
@@ -261,9 +263,11 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   }
 
   /**
-   * Create a copy of the MapboxStyleLayer.
-   * @param {Object} newOptions Options to override.
-   * @return {MapboxStyleLayer} A MapboxStyleLayer.
+   * Create a copy of the MaplibreStyleLayer.
+   *
+   * @param {Object} newOptions Options to override. See constructor.
+   * @return {MapboxStyleLayer} A MaplibreStyleLayer.
+   * @public
    */
   clone(newOptions: MaplibreStyleLayerOptions): MaplibreStyleLayer {
     return new MaplibreStyleLayer({ ...this.options, ...newOptions });
@@ -290,6 +294,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * Request feature information for a given coordinate.
    * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
    * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+   * @deprecated Use getFeatureInfoAtCoordinate([layer], coordinate) from mobility-toolbox-ol package instead.
    */
   getFeatureInfoAtCoordinate(
     coordinate: Coordinate,
@@ -350,11 +355,11 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   /**
    * Highlight a list of features.
    * @param {Array<ol/Feature~Feature>} [features=[]] Features to highlight.
-   * @private
+   * @deprecated Use layer.setFeatureState(features, {hover: true|false}) instead.
    */
   highlight(features: Feature[] = []) {
     deprecated(
-      `Deprecated. Use layer.setFeatureState(features, {highlighted: true}) instead.`,
+      `Deprecated. Use layer.setFeatureState(features, {hover: true}) instead.`,
     );
     // Filter out selected features
     const filtered: Feature[] =
@@ -375,7 +380,6 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /**
    * On Maplibre map load callback function. Add style layers and dynaimc filters.
-   * @private
    */
   onLoad() {
     if (!this.maplibreLayer?.mapLibreMap) {
@@ -393,7 +397,6 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     this.applyLayoutVisibility();
   }
 
-  /** @private */
   removeLayers() {
     if (!this.maplibreLayer?.mapLibreMap || !Array.isArray(this.layers)) {
       return;
@@ -410,7 +413,6 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     }
   }
 
-  /** @private */
   removeSources() {
     if (!this.maplibreLayer?.mapLibreMap || !this.sources) {
       return;
@@ -429,7 +431,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   /**
    * Select a list of features.
    * @param {Array<ol/Feature~Feature>} [features=[]] Features to select.
-   * @private
+   * @deprecated Use layer.setFeatureState(features, {selected: true|false}) instead.
    */
   select(features: Feature[] = []) {
     deprecated(
@@ -442,8 +444,9 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
   /**
    * Set the feature state of the features.
-   * @param {Array<ol/Feature~Feature>} features
-   * @param {{[key:string]:boolean}} state The feature state
+   *
+   * @param {ol/Feature~Feature[]} features
+   * @param {maplibregl.FeatureState} state The feature state
    * @public
    */
   setFeatureState(features: Feature[], state: FeatureState) {
@@ -480,7 +483,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * Set if features are hovered or not.
    * @param {Array<ol/Feature~Feature>} features
    * @param {boolean} state Is the feature hovered
-   * @private
+   * @deprecated Use layer.setFeatureState(features, {hover: true|false}) instead.
    */
   setHoverState(features: Feature[], state: boolean) {
     deprecated(
@@ -493,7 +496,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     return this.get('beforeId');
   }
 
-  set beforeId(newValue: string[]) {
+  set beforeId(newValue: string | undefined) {
     this.set('beforeId', newValue);
   }
 
@@ -515,6 +518,9 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     this.set('layersFilter', newValue);
   }
 
+  /**
+   * @deprecated Use MaplibreStyleLayer.maplibreLayer instead.
+   */
   get mapboxLayer(): MaplibreLayer | undefined {
     deprecated('Deprecated. Use maplibreLayer instead.');
     return this.get('maplibreLayer');
@@ -567,12 +573,10 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   }
 
   /**
-   * @deprecated
+   * @deprecated Use MaplibreStyleLayer.layer instead.
    */
   get styleLayer(): maplibregl.AddLayerObject {
-    deprecated(
-      'MaplibreStyleLayer.styleLayer is deprecated. Use MaplibreStyleLayer.layer instead.',
-    );
+    deprecated('Deprecated. Use MaplibreStyleLayer.layer instead.');
     return this.layers[0];
   }
 

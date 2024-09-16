@@ -11,7 +11,6 @@ import { composeCssTransform } from 'ol/transform';
 
 import type RealtimeLayer from '../layers/RealtimeLayer';
 
-/** @private */
 const format = new GeoJSON();
 
 /**

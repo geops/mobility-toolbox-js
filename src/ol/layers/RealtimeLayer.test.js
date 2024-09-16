@@ -1,7 +1,8 @@
 import fetch from 'jest-fetch-mock';
+import WS from 'jest-websocket-mock';
 import Map from 'ol/Map';
 import View from 'ol/View';
-import WS from 'jest-websocket-mock';
+
 import RealtimeLayer from './RealtimeLayer';
 
 // create a WS instance, listening on port 1234 on localhost
@@ -18,9 +19,9 @@ describe('RealtimeLayer', () => {
 
     onClick = jest.fn();
     layer = new RealtimeLayer({
-      url: 'ws://localhost:1234',
       apiKey: 'apiKey',
       onClick,
+      url: 'ws://localhost:1234',
     });
 
     olMap = new Map({
@@ -54,9 +55,9 @@ describe('RealtimeLayer', () => {
   test('should use the sort function.', () => {
     const fn = () => true;
     const laye = new RealtimeLayer({
-      url: 'ws://localhost:1234',
       apiKey: 'apiKey',
       sort: fn,
+      url: 'ws://localhost:1234',
     });
     expect(laye).toBeInstanceOf(RealtimeLayer);
     expect(laye.sort).toBe(fn);
@@ -65,9 +66,9 @@ describe('RealtimeLayer', () => {
   test('should use filter function.', () => {
     const fn = () => true;
     const laye = new RealtimeLayer({
-      url: 'ws://localhost:1234',
       apiKey: 'apiKey',
       filter: fn, // reverse the array
+      url: 'ws://localhost:1234',
     });
     expect(laye).toBeInstanceOf(RealtimeLayer);
     expect(laye.filter).toBe(fn);

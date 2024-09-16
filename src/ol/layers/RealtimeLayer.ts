@@ -1,7 +1,6 @@
 import { DebouncedFunc } from 'lodash';
 import debounce from 'lodash.debounce';
 import { Map, MapEvent } from 'ol';
-import { Coordinate } from 'ol/coordinate';
 import Feature, { FeatureLike } from 'ol/Feature';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -17,8 +16,6 @@ import RealtimeEngine, {
 } from '../../common/utils/RealtimeEngine';
 import { RealtimeAPI } from '../../maplibre';
 import {
-  LayerGetFeatureInfoOptions,
-  LayerGetFeatureInfoResponse,
   RealtimeFullTrajectory,
   RealtimeMode,
   RealtimeRenderState,
@@ -29,7 +26,6 @@ import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 
-/** @private */
 const format = new GeoJSON();
 
 export type RealtimeLayerOptions = {
@@ -77,8 +73,8 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
    *
    * @param {RealtimeLayerOptions} options
    * @param {boolean} [options.allowRenderWhenAnimating=false] Allow rendering of the layer when the map is animating.
-   * @param {string} options.apiKey Access key for [geOps apis](https://developer.geops.io/).
-   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
+   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The [geOps Realtime API](https://developer.geops.io/apis/realtime/) url.
    *
    */
   constructor(options: RealtimeLayerOptions) {
@@ -95,11 +91,10 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
       ...options,
     });
 
-    /** @private */
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
     // We store the layer used to highlight the full Trajectory
-    /** @private */
+
     this.vectorLayer = new VectorLayer<VectorSource>({
       source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
@@ -113,13 +108,11 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
       updateWhileInteracting: true,
     });
 
-    /** @private */
     this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
 
-    /** @private */
     this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
   }
-  /** @private */
+
   override attachToMap(map: Map) {
     super.attachToMap(map);
     this.engine.attachToMap();
@@ -176,29 +169,21 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
 
   /**
    * Create a copy of the RealtimeLayer.
-   * @param {Object} newOptions Options to override
+   *
+   * @param {Object} newOptions Options to override. See constructor.
    * @return {RealtimeLayer} A RealtimeLayer
+   * @public
    */
   clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
     return new RealtimeLayer({ ...this.options, ...newOptions });
   }
 
-  /**
-   * @private
-   */
   createRenderer() {
     return new RealtimeLayerRenderer(this);
   }
 
   /**
-   * Render the trajectories using current map's size, resolution and rotation.
-   * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
-   * @overrides
-   * @private
-   */
-  /**
    * Destroy the container of the tracker.
-   * @private
    */
   override detachFromMap() {
     this.map?.removeLayer(this.vectorLayer);
@@ -206,6 +191,12 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
     super.detachFromMap();
   }
 
+  /**
+   * Get some informations about a trajectory.
+   *
+   * @param {RealtimeTrainId} id A vehicle's id.
+   * @returns
+   */
   getTrajectoryInfos(id: RealtimeTrainId) {
     // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
     // Then we combine them in one response and send them to inherited layers.
@@ -255,14 +246,7 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
   }
 
   /**
-   * On move end we update the websocket with the new bbox.
-   *
-   * @private
-   * @override
-   */
-  /**
    * Highlight the trajectory of journey.
-   * @private
    */
   highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
     if (!id) {
@@ -296,15 +280,7 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
       });
   }
 
-  /**
-   * Function called on moveend event only when the zoom has changed.
-   *
-   * @param {ol/MapEvent~MapEvent} evt Moveend event.
-   * @private
-   * @override
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onMoveEnd(evt: MapEvent | ObjectEvent) {
+  onMoveEnd() {
     if (!this.engine.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
@@ -327,7 +303,6 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
     }
   }
 
-  // eslint-disable-next-line no-unused-vars
   onZoomEnd() {
     this.engine.onZoomEnd();
 
@@ -356,10 +331,20 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
           this.map.getView().getInteracting();
   }
 
+  /**
+   * Start the rendering.
+   *
+   * @public
+   */
   start() {
     this.engine.start();
   }
 
+  /**
+   * Stop the rendering.
+   *
+   * @public
+   */
   stop() {
     this.engine.stop();
   }
@@ -374,6 +359,10 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
 
   get canvas() {
     return this.engine.canvas;
+  }
+
+  get filter() {
+    return this.engine.filter;
   }
 
   get hoverVehicleId(): RealtimeTrainId | undefined {
@@ -391,9 +380,11 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
   set mode(mode: RealtimeMode) {
     this.engine.mode = mode;
   }
+
   get pixelRatio() {
     return this.engine.pixelRatio;
   }
+
   get selectedVehicleId(): RealtimeTrainId | undefined {
     return this.engine.selectedVehicleId;
   }

@@ -82,7 +82,6 @@ class RealtimeLayer extends Layer {
       ...options,
     });
 
-    /** @private */
     this.source = {
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
@@ -101,7 +100,6 @@ class RealtimeLayer extends Layer {
       type: 'canvas',
     };
 
-    /** @private */
     this.layer = {
       id: `${this.id}-raster`,
       layout: {
@@ -116,16 +114,12 @@ class RealtimeLayer extends Layer {
       type: 'raster',
     };
 
-    /** @private */
     this.onLoad = this.onLoad.bind(this);
 
-    /** @private */
     this.onMove = this.onMove.bind(this);
 
-    /** @private */
     this.onMoveEnd = this.onMoveEnd.bind(this);
 
-    /** @private */
     this.onZoomEnd = this.onZoomEnd.bind(this);
   }
   /**

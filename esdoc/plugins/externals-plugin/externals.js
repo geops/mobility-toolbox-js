@@ -50,6 +50,15 @@
  * @external {maplibregl.QueryRenderedFeaturesOptions} https://maplibre.org/maplibre-gl-js/docs/API/types/maplibregl.QueryRenderedFeaturesOptions/
  */
 /**
+ * @external {maplibregl.SourceSpecification} https://
+ */
+/**
+ * @external {maplibregl.AddLayerObject} https://
+ */
+/**
+ * @external {maplibregl.FeatureState} https://
+ */
+/**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
  */
 /**
@@ -121,4 +130,6 @@
 /**
  * @external {RoutingResponse} https://developer.geops.io/apis/routing
  */
-
+/**
+ * @external {MapLibreLayer} https://
+ */

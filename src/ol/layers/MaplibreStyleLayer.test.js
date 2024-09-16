@@ -1,6 +1,7 @@
+import gllib from 'maplibre-gl';
 import OlMap from 'ol/Map';
 import View from 'ol/View';
-import gllib from 'maplibre-gl';
+
 import MaplibreLayer from './MaplibreLayer';
 import MaplibreStyleLayer from './MaplibreStyleLayer';
 
@@ -17,15 +18,15 @@ const layers = [
 describe('MaplibreStyleLayer', () => {
   beforeEach(() => {
     source = new MaplibreLayer({
-      name: 'Layer',
       apiKey: 'foo',
+      name: 'Layer',
       url: 'https://foo.com/styles',
     });
     layer = new MaplibreStyleLayer({
+      layers,
+      maplibreLayer: source,
       name: 'Maplibre layer',
       visible: true,
-      maplibreLayer: source,
-      layers,
     });
     map = new OlMap({
       target: document.createElement('div'),
@@ -65,12 +66,12 @@ describe('MaplibreStyleLayer', () => {
   test('should add layer on load', () => {
     const style = { layers: [] };
     layer.maplibreLayer.mapLibreMap = {
-      getStyle: () => style,
-      setStyle: () => {},
-      getSource: () => ({}),
-      getLayer: () => null,
-      setLayoutProperty: () => null,
       addLayer: (styleLayerr) => style.layers.push(styleLayerr),
+      getLayer: () => null,
+      getSource: () => ({}),
+      getStyle: () => style,
+      setLayoutProperty: () => null,
+      setStyle: () => {},
     };
     layer.onLoad();
     expect(style.layers[0]).toBe(layers[0]);
@@ -80,12 +81,12 @@ describe('MaplibreStyleLayer', () => {
     test('when layer uses styleLayer property', () => {
       const styles = { layers: [] };
       layer.maplibreLayer.mapLibreMap = {
-        getStyle: () => styles,
-        setStyle: () => {},
-        getSource: () => ({}),
-        getLayer: () => null,
-        setLayoutProperty: () => null,
         addLayer: (styleLayerr) => styles.layers.push(styleLayerr),
+        getLayer: () => null,
+        getSource: () => ({}),
+        getStyle: () => styles,
+        setLayoutProperty: () => null,
+        setStyle: () => {},
       };
       expect(layer).toBeInstanceOf(MaplibreStyleLayer);
       layer.onLoad();
@@ -97,17 +98,17 @@ describe('MaplibreStyleLayer', () => {
     test('when layer uses styleLayersFilter property', () => {
       const styles = { layers };
       const layer2 = new MaplibreStyleLayer({
-        name: 'Maplibre layer',
-        maplibreLayer: source,
         layersFilter: () => false,
+        maplibreLayer: source,
+        name: 'Maplibre layer',
       });
       layer2.maplibreLayer.mapLibreMap = {
-        getStyle: () => styles,
-        setStyle: () => {},
-        getSource: () => ({}),
-        getLayer: () => null,
-        setLayoutProperty: () => null,
         addLayer: () => ({}),
+        getLayer: () => null,
+        getSource: () => ({}),
+        getStyle: () => styles,
+        setLayoutProperty: () => null,
+        setStyle: () => {},
       };
       layer2.onLoad();
       expect(layer2.disabled).toBe(true);
@@ -146,10 +147,10 @@ describe('MaplibreStyleLayer', () => {
         layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }, { id: 'foo2' }],
       }));
       const layer2 = new MaplibreStyleLayer({
+        layersFilter: ({ id }) => /foo/.test(id),
+        maplibreLayer: source,
         name: 'Maplibre layer',
         visible: true,
-        maplibreLayer: source,
-        layersFilter: ({ id }) => /foo/.test(id),
       });
       layer2.attachToMap(map);
       layer2.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
@@ -177,11 +178,11 @@ describe('MaplibreStyleLayer', () => {
         ],
       }));
       const layer2 = new MaplibreStyleLayer({
-        name: 'Maplibre layer',
-        visible: true,
         maplibreLayer: source,
-        styleLayersFilter: ({ id }) => /foo/.test(id),
+        name: 'Maplibre layer',
         queryRenderedLayersFilter: ({ id }) => /bar/.test(id),
+        styleLayersFilter: ({ id }) => /foo/.test(id),
+        visible: true,
       });
       layer2.attachToMap(map);
       layer2.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() =>

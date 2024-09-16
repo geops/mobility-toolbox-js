@@ -12,7 +12,6 @@ import type {
   ViewState,
 } from '../../types';
 
-/** @private */
 const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
   const ctx = canvas.getContext('2d') as AnyCanvasContext;
   ctx?.translate(canvas.width / 2, canvas.height / 2);
@@ -20,10 +19,8 @@ const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
   ctx?.translate(-canvas.width / 2, -canvas.height / 2);
 };
 
-/** @private */
 const arrowCache: Record<string, AnyCanvas | null> = {};
 
-/** @private */
 const getArrowCanvas = (fillColor: string): AnyCanvas | null => {
   const key = `${fillColor}`;
   if (!arrowCache[key]) {
@@ -50,10 +47,8 @@ const getArrowCanvas = (fillColor: string): AnyCanvas | null => {
   return arrowCache[key];
 };
 
-/** @private */
 const bufferArrowCache: Record<string, AnyCanvas | null> = {};
 
-/** @private */
 const getBufferArrowCanvas = (
   canvas: AnyCanvas,
   fillColor: string,

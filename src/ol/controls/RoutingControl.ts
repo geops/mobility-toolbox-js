@@ -64,27 +64,25 @@ export type AbotControllersByGraph = Record<string, AbortController>;
 // @47.37811,8.53935 a station at position 47.37811, 8.53935
 // @47.37811,8.53935$4 track 4 in a station at position 47.37811, 8.53935
 // zürich hb@47.37811,8.53935$8 track 8 in station "Zürich HB" at position 47.37811, 8.53935
-/** @private */
+
 const REGEX_VIA_POINT =
   /^([^@$!\n]*)(@?([\d.]+),([\d.]+))?(\$?([a-zA-Z0-9]{0,2}))$/;
 
 // Examples for a single hop:
 //
 // 47.37811,8.53935 a position 47.37811, 8.53935
-/** @private */
+
 const REGEX_VIA_POINT_COORD = /^([\d.]+),([\d.]+)$/;
 
 // Examples for a single hop:
 //
 // !8596126 a station with id 8596126
 // !8596126$4 a station with id 8596126
-/** @private */
+
 const REGEX_VIA_POINT_STATION_ID = /^!([^$]*)(\$?([a-zA-Z0-9]{0,2}))$/;
 
-/** @private */
 const STOP_FETCH_ABORT_CONTROLLER_KEY = 'stop-fetch';
 
-/** @private */
 const getFlatCoordinatesFromSegments = (
   segmentArray: Feature[],
 ): Coordinate[] => {
@@ -186,42 +184,30 @@ class RoutingControl extends Control {
     /** True if the control is requesting the backend. */
     this.loading = false;
 
-    /** @private */
     this.active = options.active || true;
 
-    /** @private */
     this.graphs = options.graphs || [['osm', 0, 99]];
 
-    /** @private */
     this.mot = options.mot || 'bus';
 
-    /** @private */
     this.modify = options.modify !== false;
 
-    /** @private */
     this.routingApiParams = options.routingApiParams;
 
-    /** @private */
     this.useRawViaPoints = options.useRawViaPoints || false;
 
-    /** @private */
     this.snapToClosestStation = options.snapToClosestStation || false;
 
-    /** @private */
     this.apiKey = options.apiKey;
 
-    /** @private */
     this.stopsApiKey = options.stopsApiKey || this.apiKey;
 
-    /** @private */
     this.stopsApiUrl = options.stopsApiUrl || 'https://api.geops.io/stops/v1/';
 
-    /** @private */
     this.api = new RoutingAPI({
       ...options,
     });
 
-    /** @private */
     this.routingLayer =
       options.routingLayer ||
       new VectorLayer({
@@ -229,7 +215,6 @@ class RoutingControl extends Control {
         style: options.style,
       });
 
-    /** @private */
     this.onRouteError =
       options.onRouteError ||
       ((error) => {
@@ -239,16 +224,12 @@ class RoutingControl extends Control {
         console.error(error);
       });
 
-    /** @private */
     this.onMapClick = this.onMapClick.bind(this);
 
-    /** @private */
     this.onModifyEnd = this.onModifyEnd.bind(this);
 
-    /** @private */
     this.onModifyStart = this.onModifyStart.bind(this);
 
-    /** @private */
     this.createModifyInteraction();
 
     this.on('propertychange', (evt: ObjectEvent) => {
@@ -304,12 +285,10 @@ class RoutingControl extends Control {
   activate() {
     const map = this.getMap();
     if (map) {
-      /** @private */
       this.format = new GeoJSON({
         featureProjection: map.getView().getProjection(),
       });
 
-      /** @private */
       this.graphsResolutions = RoutingControl.getGraphsResolutions(
         this.graphs,
         map,
@@ -339,7 +318,7 @@ class RoutingControl extends Control {
       return;
     }
     this.removeListeners();
-    /** @private */
+
     this.onMapClickKey = this.getMap()?.on('singleclick', this.onMapClick);
   }
 
@@ -371,7 +350,6 @@ class RoutingControl extends Control {
    * @private
    */
   createDefaultElement() {
-    /** @private */
     this.element = document.createElement('button');
     this.element.id = 'ol-toggle-routing';
     this.element.innerHTML = 'Toggle Route Control';
@@ -809,7 +787,7 @@ class RoutingControl extends Control {
       [])[0] as Feature<Point>;
 
     // Write object with modify info
-    /** @private */
+
     this.initialRouteDrag = {
       oldRoute: route && route.clone(),
       segmentIndex,

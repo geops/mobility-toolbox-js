@@ -104,7 +104,6 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       return getLayersAsFlatArray(this);
     }
 
-    /** @private */
     onChildrenChange(oldValue: Layer[]) {
       // Set the parent property
       (oldValue || []).forEach((child) => {
@@ -178,7 +177,6 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
       this.set('disabled', newValue);
     }
 
-    /** @deprecated */
     /** @deprecated */
     get group(): string {
       deprecated(

@@ -9,7 +9,6 @@ import type {
   ViewState,
 } from '../../types';
 
-/** @private */
 const cacheDelayBg: StyleCache = {};
 
 /**
@@ -41,7 +40,6 @@ export const getDelayBgCanvas = (
   return cacheDelayBg[key];
 };
 
-/** @private */
 const cacheDelayText: StyleCache = {};
 
 /**
@@ -83,7 +81,6 @@ export const getDelayTextCanvas = (
   return cacheDelayText[key];
 };
 
-/** @private */
 const cacheCircle: StyleCache = {};
 
 /**
@@ -132,7 +129,6 @@ export const getCircleCanvas = (
   return cacheCircle[key];
 };
 
-/** @private */
 const cacheText: StyleCache = {};
 
 /**
@@ -185,7 +181,6 @@ export const getTextCanvas = (
   return cacheText[key];
 };
 
-/** @private */
 const cache: StyleCache = {};
 
 /**
