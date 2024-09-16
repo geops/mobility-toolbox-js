@@ -443,10 +443,10 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
   }
 
   /**
-   * Set the feature state of the features.
+   * Set the [feature state](https://maplibre.org/maplibre-style-spec/expressions/#feature-state) of the features.
    *
    * @param {ol/Feature~Feature[]} features
-   * @param {maplibregl.FeatureState} state The feature state
+   * @param {{[key: string]: any}} state The feature state
    * @public
    */
   setFeatureState(features: Feature[], state: FeatureState) {
