@@ -34,6 +34,17 @@ export type StopFinderControlOptions = {
 class StopFinderControl extends Control {
   controller: StopFinderControlCommon;
 
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {HTMLElement} options.element HTML element where to attach input and suggestions.
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
+   * @param {StopsSearchParams} [options.apiParams={ limit: 20 }] Request parameters. See [geOps Stops API documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
+   * @param {string} [options.placeholder='Search for a stop...'] Input field placeholder.
+   * @param {string} [options.url='https://api.geops.io/stops/v1/'] [geOps Stops API](https://developer.geops.io/apis/stops/) url.
+   * @public
+   */
   constructor(options: StopFinderControlOptions) {
     const element = createDefaultStopFinderElement();
     element.className = options?.className || 'mbt-stop-finder';
@@ -50,6 +61,14 @@ class StopFinderControl extends Control {
     this.getMap()?.getView().setCenter(coord);
   }
 
+  /**
+   * Search for stations using a query.
+   *
+   * @param {string} q Query used to search stops.
+   * @param {AbortController} abortController  Abort controller used to abort requests.
+   * @returns {Promise<Array<GeoJSONFeature>>}
+   * @public
+   */
   search(q: string, abortController: AbortController) {
     return this.controller.search(q, abortController);
   }

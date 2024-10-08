@@ -1,16 +1,17 @@
 import { MapEvent } from 'ol';
-import { inView } from 'ol/layer/Layer';
 import Control, { Options } from 'ol/control/Control';
-import removeDuplicate from '../../common/utils/removeDuplicate';
-import createDefaultCopyrightElement from '../../common/utils/createDefaultCopyrightElt';
+import { inView } from 'ol/layer/Layer';
 
-export type CopyrightControlOptions = Options & {
+import createDefaultCopyrightElement from '../../common/utils/createDefaultCopyrightElt';
+import removeDuplicate from '../../common/utils/removeDuplicate';
+
+export type CopyrightControlOptions = {
   className?: 'string';
   format?: (copyrights: string[]) => string;
-};
+} & Options;
 
 /**
- * Display layer's copyrights.
+ * Display layer's copyrights. Adding the possiility to format them as you wish.
  *
  * @example
  * import { Map } from 'ol';
@@ -26,11 +27,19 @@ export type CopyrightControlOptions = Options & {
  *
  * @see <a href="/example/ol-copyright">Openlayers copyright example</a>
  *
- * @extends {ol/control/Control}
+ * @extends {ol/control/Control~Control}
+ * @public
  */
 class CopyrightControl extends Control {
   format: (copyrights: string[]) => string;
 
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {Function} format Function used to format the list of copyrights available to a single string. By default join all the copyrights with a |.
+   * @public
+   */
   constructor(options: CopyrightControlOptions = {}) {
     const element = createDefaultCopyrightElement();
     element.className = options.className || 'mbt-copyright';

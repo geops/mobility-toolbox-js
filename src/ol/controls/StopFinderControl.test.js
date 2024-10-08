@@ -1,6 +1,7 @@
 import fetch from 'jest-fetch-mock';
-import View from 'ol/View';
 import Map from 'ol/Map';
+import View from 'ol/View';
+
 import StopFinderControl from './StopFinderControl';
 
 describe('StopFinderControl', () => {
@@ -31,12 +32,12 @@ describe('StopFinderControl', () => {
     fetch.mockResponseOnce(JSON.stringify(global.stopsSearchResponse));
 
     const control = new StopFinderControl({
-      url: 'https://foo.ch',
       apiKey: 'foo',
       apiParams: {
-        limit: 10,
         foo: 'bar',
+        limit: 10,
       },
+      url: 'https://foo.ch',
     });
     map.addControl(control);
     expect(control.element).toBeDefined();

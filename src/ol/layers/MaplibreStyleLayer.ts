@@ -68,7 +68,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @param {FilterFunction} [options.layersFilter] Filter function to decide which style layer to apply visiblity on. If not provided, the 'layers' property is used.
    * @param {MaplibreLayer} [options.maplibreLayer] The MaplibreLayer to use.
    * @param {FilterFunction} [options.queryRenderedLayersFilter] Filter function to decide which style layer are available for query.
-   * @param {maplibregl.SourceSpecification[]} [options.sources] The sources to add to the style on load.
+   * @param {{[id: string]:maplibregl.SourceSpecification}} [options.sources] The sources to add to the style on load.
    * @public
    */
   constructor(

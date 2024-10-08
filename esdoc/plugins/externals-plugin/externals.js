@@ -35,6 +35,9 @@
  * @external {ol/Object~BaseObject} https://openlayers.org/en/latest/apidoc/module-ol_Object-BaseObject.html
  */
 /**
+ * @external {ol/control/Control~Control} https://openlayers.org/en/latest
+ */
+/**
  * @external {maplibregl.CustomLayerInterface} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
  */
 /**

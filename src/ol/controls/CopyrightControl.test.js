@@ -1,9 +1,10 @@
-import View from 'ol/View';
-import Tile from 'ol/Tile';
+import { Map } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import TileSource from 'ol/source/Tile';
+import Tile from 'ol/Tile';
 import { createXYZ } from 'ol/tilegrid';
-import { Map } from 'ol';
+import View from 'ol/View';
+
 import CopyrightControl from './CopyrightControl';
 
 const tileLoadFunction = () => {
@@ -31,8 +32,8 @@ const getOLTileLayer = (options = {}) => {
 
 const getLayer = (copyrights, visible = true) =>
   getOLTileLayer({
-    visible,
     copyrights,
+    visible,
   });
 
 describe('CopyrightControl', () => {

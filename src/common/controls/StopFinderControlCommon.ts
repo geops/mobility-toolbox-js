@@ -45,7 +45,7 @@ class StopFinderControlCommon {
    * @param {Object} options Options
    * @param {HTMLElement} options.element HTML element where to attach input and suggestions.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/). See StopsAPI.
-   * @param {string} [options.url='https://api.geops.io/tracker/v1'] Stops service url. See StopsAPI.
+   * @param {string} [options.url='https://api.geops.io/stops/v1/'] Stops service url. See StopsAPI.
    * @param {string} [options.placeholder='Search for a stop...'] Input field placeholder.
    * @param {StopsSearchParams} [options.apiParams={ limit: 20 }] Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
    */

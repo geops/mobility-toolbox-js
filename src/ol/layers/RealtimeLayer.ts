@@ -75,7 +75,7 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
    * @param {boolean} [options.allowRenderWhenAnimating=false] Allow rendering of the layer when the map is animating.
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The [geOps Realtime API](https://developer.geops.io/apis/realtime/) url.
-   *
+   * @public
    */
   constructor(options: RealtimeLayerOptions) {
     // We use a group to be able to add custom vector layer in extended class.

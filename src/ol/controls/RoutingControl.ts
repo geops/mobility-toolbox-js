@@ -32,6 +32,8 @@ export type RoutingControlOptions = {
 
   apiKey?: string;
 
+  apiParams?: RoutingParameters;
+
   graphs?: RoutingGraph[];
 
   modify?: boolean;
@@ -39,8 +41,6 @@ export type RoutingControlOptions = {
   mot?: string;
 
   onRouteError?: () => void;
-
-  routingApiParams?: RoutingParameters;
 
   routingLayer?: VectorLayer<VectorSource>;
 
@@ -88,7 +88,7 @@ const getFlatCoordinatesFromSegments = (
 ): Coordinate[] => {
   const coords: Coordinate[] = [];
   segmentArray.forEach((seg) => {
-    // @ts-expect-error
+    // @ts-expect-error missing type
     const coordArr = seg.getGeometry()?.getCoordinates();
     if (coordArr?.length) {
       coords.push(...coordArr);
@@ -98,7 +98,8 @@ const getFlatCoordinatesFromSegments = (
 };
 
 /**
- * This OpenLayers control allows the user to add and modifiy via points to a map and request a route from the [geOps Routing API](https://developer.geops.io/apis/routing/).
+ * This OpenLayers control allows the user to add and modifiy via points to
+ * a map and request a route from the [geOps Routing API](https://developer.geops.io/apis/routing/).
  *
  * @example
  * import { Map } from 'ol';
@@ -110,23 +111,15 @@ const getFlatCoordinatesFromSegments = (
  *
  * const control = new RoutingControl();
  *
- * control.attachToMap(map)
+ * map.addControl(control);
  *
- * @classproperty {string} apiKey - Key used for RoutingApi requests.
- * @classproperty {string} stopsApiKey - Key used for Stop lookup requests (defaults to apiKey).
- * @classproperty {string} stopsApiUrl - Url used for Stop lookup requests (defaults to https://api.geops.io/stops/v1/lookup/).
- * @classproperty {Array.<Array<graph="osm", minZoom=0, maxZoom=99>>} graphs - Array of routing graphs and min/max zoom levels. If you use the control in combination with the [geOps Maps API](https://developer.geops.io/apis/maps/), you may want to use the optimal level of generalizations: "[['gen4', 0, 8], ['gen3', 8, 9], ['gen2', 9, 11], ['gen1', 11, 13], ['osm', 13, 99]]"
  * @classproperty {string} mot - Mean of transport to be used for routing.
- * @classproperty {object} routingApiParams - object of additional parameters to pass to the routing api request.
- * @classproperty {object} snapToClosestStation - If true, the routing will snap the coordinate to the closest station. Default to false.
- * @classproperty {boolean} useRawViaPoints - Experimental property. Wen true, it allows the user to add via points using different kind of string. See "via" parameter defined by the [geOps Routing API](https://developer.geops.io/apis/routing/). Default to false, only array of coordinates and station's id are supported as via points.
  * @classproperty {VectorLayer} routingLayer - Layer for adding route features.
- * @classproperty {function} onRouteError - Callback on error.
  * @classproperty {boolean} loading - True if the control is requesting the backend.
+ *
  * @see <a href="/example/ol-routing">Openlayers routing example</a>
  *
- * @extends {Control}
- * @implements {RoutingInterface}
+ * @extends {ol/control/Control~Control}
  * @public
  */
 class RoutingControl extends Control {
@@ -135,6 +128,8 @@ class RoutingControl extends Control {
   api?: RoutingAPI;
 
   apiKey?: string;
+
+  apiParams?: RoutingParameters;
 
   cacheStationData: Record<string, Coordinate> = {};
 
@@ -158,8 +153,6 @@ class RoutingControl extends Control {
 
   onRouteError: (error?: Error, control?: RoutingControl) => void;
 
-  routingApiParams?: RoutingParameters;
-
   routingLayer?: VectorLayer<VectorSource>;
 
   segments: Feature<LineString>[] = [];
@@ -174,6 +167,22 @@ class RoutingControl extends Control {
 
   viaPoints: RoutingViaPoint[] = [];
 
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
+   * @param {Object} options.apiParams Request parameters. See [geOps Routing API documentation](https://developer.geops.io/apis/routing/).
+   * @param {Array.<Array<graph="osm", minZoom=0, maxZoom=99>>} [options.graphs=[['osm', 0, 99]]] - Array of routing graphs and min/max zoom levels. If you use the control in combination with the [geOps Maps API](https://developer.geops.io/apis/maps/), you may want to use the optimal level of generalizations: "[['gen4', 0, 8], ['gen3', 8, 9], ['gen2', 9, 11], ['gen1', 11, 13], ['osm', 13, 99]]".
+   * @param {string} [options.mot="bus"] Mean of transport to be used for routing.
+   * @param {function} options.onRouteError Callback on request errors.
+   * @param {VectorLayer} [options.routingLayer=new VectorLayer()] Vector layer for adding route features.
+   * @param {boolean} [options.snapToClosestStation=false] If true, the routing will snap the coordinate to the closest station. Default to false.
+   * @param {StyleLike} options.style Style of the default vector layer.
+   * @param {boolean} [options.useRawViaPoints=fale] Experimental property. If true, it allows the user to add via points using different kind of string. See "via" parameter defined by the [geOps Routing API](https://developer.geops.io/apis/routing/). Default to false, only array of coordinates and station's id are supported as via points.
+   * @param {string} [options.url='https://api.geops.io/routing/v1/'] [geOps Realtime API](https://developer.geops.io/apis/realtime/) url.
+   * @public
+   */
   constructor(options: RoutingControlOptions = {}) {
     super(options);
 
@@ -192,7 +201,7 @@ class RoutingControl extends Control {
 
     this.modify = options.modify !== false;
 
-    this.routingApiParams = options.routingApiParams;
+    this.apiParams = options.apiParams;
 
     this.useRawViaPoints = options.useRawViaPoints || false;
 
@@ -478,7 +487,7 @@ class RoutingControl extends Control {
               mot: this.mot,
               'resolve-hops': false,
               via: `${formattedViaPoints.join('|')}`,
-              ...(this.routingApiParams || {}),
+              ...(this.apiParams || {}),
             },
             { signal },
           )
@@ -769,7 +778,7 @@ class RoutingControl extends Control {
       // We use a buff extent to fix floating issues , see https://github.com/openlayers/openlayers/issues/7130#issuecomment-535856422
       const closestExtent = buffer(
         new Point(
-          // @ts-expect-error
+          // @ts-expect-error bad def
           route.getGeometry()?.getClosestPoint(evt.mapBrowserEvent.coordinate),
         ).getExtent(),
         0.001,
@@ -789,7 +798,7 @@ class RoutingControl extends Control {
     // Write object with modify info
 
     this.initialRouteDrag = {
-      oldRoute: route && route.clone(),
+      oldRoute: route?.clone(),
       segmentIndex,
       viaPoint,
     };
