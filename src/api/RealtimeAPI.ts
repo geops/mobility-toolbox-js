@@ -86,7 +86,7 @@ export const RealtimeModes = {
  * });
  *
  * // Close the websocket connection
- * // api.close();
+ * api.close();
  *
  * @public
  */
@@ -644,7 +644,7 @@ class RealtimeAPI {
     stationId: RealtimeStationId,
     onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
   ) {
-    this.unsubscribeTimetabe(stationId, onMessage);
+    this.unsubscribeTimetable(stationId, onMessage);
   }
 
   /**
@@ -736,7 +736,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeDeparture[] })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
-  unsubscribeTimetabe(
+  unsubscribeTimetable(
     stationId: RealtimeStationId,
     onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
   ) {

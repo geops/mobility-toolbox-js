@@ -4,15 +4,15 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@geops/geops-ui": "0.3.3",
-    "@mui/icons-material": "^6.1.0",
-    "@mui/material": "^6.1.0",
-    "@mui/styles": "^6.1.0",
+    "@geops/geops-ui": "0.3.4",
+    "@mui/icons-material": "^6.1.7",
+    "@mui/material": "^6.1.7",
+    "@mui/styles": "^6.1.7",
     "codesandbox": "2.2.3",
-    "maplibre-gl": "4.7.0",
+    "maplibre-gl": "4.7.1",
     "mobility-toolbox-js": "./../build",
-    "next": "14.2.11",
-    "ol": "10.1.0",
+    "next": "15.0.3",
+    "ol": "10.2.1",
     "path": "^0.12.7",
     "prop-types": "15.8.1",
     "react": "18.3.1",
@@ -21,14 +21,14 @@
     "react-icons": "5.3.0",
     "react-markdown": "9.0.1",
     "react-scrollchor": "7.0.2",
-    "react-syntax-highlighter": "15.5.0",
+    "react-syntax-highlighter": "15.6.1",
     "typeface-lato": "1.1.13"
   },
   "devDependencies": {
-    "eslint": "8.57.0",
-    "eslint-config-next": "14.2.11",
+    "eslint": "9.14.0",
+    "eslint-config-next": "15.0.3",
     "raw-loader": "4.0.2",
-    "sass": "1.78.0"
+    "sass": "1.81.0"
   },
   "scripts": {
     "build": "next build",

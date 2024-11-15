@@ -29,6 +29,9 @@ export type StopFinderControlOptions = {
  *
  *
  * @see <a href="/example/ol-search">Openlayers search example</a>
+ *
+ * @extends {ol/control/Control~Control}
+ *
  * @public
  */
 class StopFinderControl extends Control {

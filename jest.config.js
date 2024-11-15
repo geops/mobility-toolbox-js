@@ -22,7 +22,7 @@ const config = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
     '@geoblocks/ol-maplibre-layer':
-      '<rootDir>/node_modules/@geoblocks/ol-maplibre-layer/src/index.ts',
+      '<rootDir>/node_modules/@geoblocks/ol-maplibre-layer/lib/index.js',
   },
 };
 

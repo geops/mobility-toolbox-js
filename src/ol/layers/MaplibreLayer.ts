@@ -67,7 +67,12 @@ if (
  *
  * @classproperty {maplibregl.Map} mapLibreMap - The Maplibre map object. Readonly.
  * @classproperty {string} style - The [geOps Maps API](https://developer.geops.io/apis/maps) style.
- * @extends {@geoblocks/ol-maplibre-layer/MapLibreLayer}
+ *
+ *
+ * @see <a href="/example/ol-maplibre-layer">OpenLayers Maplibre layer example</a>
+ *
+ * @extends {ol/layer/Layer~Layer}
+ * @extends {geoblocks/ol-maplibre-layer/MapLibreLayer}
  * @public
  */
 class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {

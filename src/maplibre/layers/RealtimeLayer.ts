@@ -38,7 +38,7 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
  *
  *
  * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
- * @see <a href="/example/mb-realtime>Live example</a>
+ * @see <a href="/example/mb-realtime>MapLibre Realtime layer example</a>
  *
  * @implements {maplibregl.CustomLayerInterface}
  * @extends {maplibregl.Evented}

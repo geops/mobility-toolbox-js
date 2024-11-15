@@ -131,5 +131,5 @@
  * @external {RoutingResponse} https://developer.geops.io/apis/routing
  */
 /**
- * @external {@geoblocks/ol-maplibre-layer/MapLibreLayer} https://geoblocks.github.io/ol-maplibre-layer/api/modules/MapLibreLayer.html
+ * @external {geoblocks/ol-maplibre-layer/MapLibreLayer} https://geoblocks.github.io/ol-maplibre-layer/api/modules/MapLibreLayer.html
  */

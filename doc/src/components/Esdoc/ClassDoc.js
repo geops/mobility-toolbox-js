@@ -75,7 +75,7 @@ function ClassDoc({ doc }) {
           </pre>
         </div> */}
         <MixinClassesHTML doc={doc} />
-        {/* <ExtendsChainHTML doc={doc} /> */}
+        <ExtendsChainHTML doc={doc} />
         <DirectSubclassHTML doc={doc} />
         <IndirectSubclassHTML doc={doc} />
         {doc.implements && doc.implements.length && (

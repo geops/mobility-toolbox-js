@@ -316,7 +316,6 @@ class RealtimeEngine {
    * Get the duration before the next update depending on zoom level.
    *
    * @private
-   * @param {number} zoom
    */
   getRefreshTimeInMs(): number {
     const viewState = this.getViewState();
@@ -488,7 +487,6 @@ class RealtimeEngine {
   /**
    * On zoomend we adjust the time interval of the update of vehicles positions.
    *
-   * @param evt Event that triggered the function.
    * @private
    */
   onZoomEnd() {
@@ -517,8 +515,6 @@ class RealtimeEngine {
    *  - that aren't in the MOT list.
    *
    * @param {RealtimeTrajectory} trajectory
-   * @param {Array<number>} extent
-   * @param {number} zoom
    * @return {boolean} if the trajectory must be displayed or not.
    * @private
    */
@@ -553,12 +549,6 @@ class RealtimeEngine {
    * Render the trajectories requesting an animation frame and cancelling the previous one.
    * This function must be overrided by children to provide the correct parameters.
    *
-   * @param {object} viewState The view state of the map.
-   * @param {number[2]} viewState.center Center coordinate of the map in mercator coordinate.
-   * @param {number[4]} viewState.extent Extent of the map in mercator coordinates.
-   * @param {number[2]} viewState.size Size ([width, height]) of the canvas to render.
-   * @param {number} [viewState.rotation = 0] Rotation of the map to render.
-   * @param {number} viewState.resolution Resolution of the map to render.
    * @param {boolean} noInterpolate If true trajectories are not interpolated but
    *   drawn at the last known coordinate. Use this for performance optimization
    *   during map navigation.

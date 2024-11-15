@@ -11,7 +11,7 @@ export type CopyrightControlOptions = {
 } & Options;
 
 /**
- * Display layer's copyrights. Adding the possiility to format them as you wish.
+ * Display layer's copyrights. Adding the possibility to format them as you wish.
  *
  * @example
  * import { Map } from 'ol';
@@ -25,10 +25,11 @@ export type CopyrightControlOptions = {
  * map.addControl(control);
  *
  *
- * @see <a href="/example/ol-copyright">Openlayers copyright example</a>
+ * @see <a href="/example/ol-copyright">OpenLayers copyright example</a>
  *
  * @extends {ol/control/Control~Control}
- * @public
+ *
+ * @private
  */
 class CopyrightControl extends Control {
   format: (copyrights: string[]) => string;

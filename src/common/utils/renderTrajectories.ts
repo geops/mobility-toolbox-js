@@ -20,6 +20,7 @@ import getVehiclePosition from './getVehiclePosition';
  * @param {ViewState} trajectories An array of trajectories.
  * @param {Function} style A function that returns a canvas representing a vehicle of a specific trajectory.
  * @param {ViewState} viewState The view state of the map.
+ * @param {Object} options The options.
  * @param {boolean} options.hoverVehicleId The id of the vehicle to highlight.
  * @param {boolean} options.selectedVehicleId The id of the vehicle to select.
  * @param {boolean} options.noInterpolate If true trajectories are not interpolated but

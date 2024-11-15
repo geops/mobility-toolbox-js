@@ -52,8 +52,11 @@ export type RealtimeLayerOptions = {
  *
  *
  * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
+ * @see <a href="/example/ol-realtime">OpenLayers Realtime layer example</a>
+ *
  *
  * @extends {ol/layer/Layer~Layer}
+ *
  *
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  * @public

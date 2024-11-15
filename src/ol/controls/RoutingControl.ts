@@ -120,6 +120,7 @@ const getFlatCoordinatesFromSegments = (
  * @see <a href="/example/ol-routing">Openlayers routing example</a>
  *
  * @extends {ol/control/Control~Control}
+ *
  * @public
  */
 class RoutingControl extends Control {
@@ -337,7 +338,7 @@ class RoutingControl extends Control {
    *   If an index is passed a viaPoint is added at the specified index.
    *   If an index is passed and overwrite x is > 0, x viaPoints at the specified
    *     index are replaced with a single new viaPoint.
-   * @param {number[]|string} coordinates Array of coordinates
+   * @param {string | Coordinate} coordinatesOrString Array of coordinates or a string representing a station
    * @param {number} [index=-1] Integer representing the index of the added viaPoint. If not specified, the viaPoint is added at the end of the array.
    * @param {number} [overwrite=0] Marks the number of viaPoints that are removed at the specified index on add.
    * @public
@@ -462,13 +463,13 @@ class RoutingControl extends Control {
     this.loading = true;
 
     // Create point features for the viaPoints
-    this.viaPoints.forEach((viaPoint, idx) =>
+    this.viaPoints.forEach((viaPoint, idx) => {
       this.drawViaPoint(
         viaPoint,
         idx,
         this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY],
-      ),
-    );
+      );
+    });
 
     return Promise.all(
       this.graphs.map(([graph], index) => {

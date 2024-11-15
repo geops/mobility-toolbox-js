@@ -51,6 +51,7 @@ if (
  *   },
  * });
  *
+ * @see <a href="/example/ol-maplibre-style-layer">OpenLayers MaplibreStyle layer example</a>
  * @extends {ol/layer/Layer~Layer}
  * @public
  */
