@@ -29,7 +29,6 @@ export type CopyrightControlOptions = {
  *
  * @extends {ol/control/Control~Control}
  *
- * @public
  */
 class CopyrightControl extends Control {
   format: (copyrights: string[]) => string;
