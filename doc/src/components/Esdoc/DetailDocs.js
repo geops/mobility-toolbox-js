@@ -42,7 +42,7 @@ function DetailDocs({ docs, title }) {
           doc.type.types[0] === 'function'
         )
           isFunction = true;
-        console.log(doc.export, doc.importPath, doc.importStyle);
+
         return (
           <div
             className="detail"

@@ -1,4 +1,5 @@
 import { ControlPosition, IControl } from 'maplibre-gl';
+
 import { getMapGlCopyrights } from '../../common/utils';
 
 /**
@@ -7,11 +8,11 @@ import { getMapGlCopyrights } from '../../common/utils';
 const DEFAULT_SEPARATOR = ' | ';
 
 /**
- * Display layer's copyrights.
+ * Display layer's attributions trying to remove duplicated ones.
  *
  * @example
- * import { Map } from 'Maplibre-gl';
- * import { CopyrightControl } from 'mobility-toolbox-js/Maplibre';
+ * import { Map } from 'maplibre-gl';
+ * import { CopyrightControl } from 'mobility-toolbox-js/maplibre';
  *
  * const map = new Map({
  *   container: 'map',
@@ -22,15 +23,18 @@ const DEFAULT_SEPARATOR = ' | ';
  * map.addControl(control);
  *
  *
- * @see <a href="/example/mb-copyright">Maplibre copyright example</a>
+ * @see <a href="/example/mb-realtime>MapLibre Realtime layer example</a>
  *
+ * @implements {maplibregl.IControl}
+ *
+ * @public
  */
 class CopyrightControl implements IControl {
-  map?: maplibregl.Map;
-
   container?: HTMLElement;
 
   content?: string;
+
+  map?: maplibregl.Map;
 
   options?: {
     customAttribution?: string | string[];
@@ -39,6 +43,11 @@ class CopyrightControl implements IControl {
 
   constructor(options = {}) {
     this.options = options;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getDefaultPosition(): ControlPosition {
+    return 'bottom-right';
   }
 
   onAdd(map: maplibregl.Map) {
@@ -67,11 +76,6 @@ class CopyrightControl implements IControl {
     this.map = undefined;
 
     return this.container;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  getDefaultPosition(): ControlPosition {
-    return 'bottom-right';
   }
 
   render() {

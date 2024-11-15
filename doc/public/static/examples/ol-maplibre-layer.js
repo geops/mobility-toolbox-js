@@ -1,14 +1,14 @@
 import { Map, View } from 'ol';
-import { MaplibreLayer, CopyrightControl } from 'mobility-toolbox-js/ol';
+import { MaplibreLayer } from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {
-  // Define the Maplibre style to display
+  // Creates the background layer
   const layer = new MaplibreLayer({
     apiKey: window.apiKey,
   });
 
-  // Define the map
+  // Creates the map
   const map = new Map({
     target: 'map',
     layers: [layer],
@@ -24,11 +24,11 @@ export default () => {
     map.getTargetElement().style.cursor = has ? 'pointer' : '';
   });
 
-  // Display maplibre feature informations on click.
+  // Display feature informations on click.
   map.on('singleclick', (evt) => {
     const [feature] = map.getFeaturesAtPixel(evt.pixel);
 
-    // Display the maplibre feature informations
+    // Display the feature informations
     document.getElementById('content').innerHTML = feature
       ? JSON.stringify(feature.get('vectorTileFeature'), null, 2)
       : 'No feature found';

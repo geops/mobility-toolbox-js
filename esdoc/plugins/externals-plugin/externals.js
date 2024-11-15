@@ -59,6 +59,9 @@
  * @external {maplibregl.AddLayerObject} https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/AddLayerObject
  */
 /**
+ * @external {maplibregl.IControl} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/IControl/
+ */
+/**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
  */
 /**

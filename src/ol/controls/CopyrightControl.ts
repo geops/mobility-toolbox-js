@@ -25,11 +25,11 @@ export type CopyrightControlOptions = {
  * map.addControl(control);
  *
  *
- * @see <a href="/example/ol-copyright">OpenLayers copyright example</a>
+ * @see <a href="/example/ol-realtime>OpenLayers Realtime layer example</a>
  *
  * @extends {ol/control/Control~Control}
  *
- * @private
+ * @public
  */
 class CopyrightControl extends Control {
   format: (copyrights: string[]) => string;

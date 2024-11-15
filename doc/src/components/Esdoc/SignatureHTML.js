@@ -14,7 +14,6 @@ import TypeDocLinkHTML from './TypeDocLinkHTML';
 const SignatureHTML = ({ doc }) => {
   // call signature
   const callSignatures = [];
-  console.log(doc.kind, doc.params);
   if (doc.params) {
     for (const param of doc.params) {
       const paramName = param.name;

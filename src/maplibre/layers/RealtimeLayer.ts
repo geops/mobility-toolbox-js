@@ -52,9 +52,11 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
  * @public
  */
 class RealtimeLayer extends Layer {
+  #internalId: string;
   engine: RealtimeEngine;
   layer: LayerSpecification;
   source: CanvasSourceSpecification;
+  sourceId: string;
 
   /**
    * Constructor.
@@ -70,11 +72,14 @@ class RealtimeLayer extends Layer {
    * @param {RealtimeTenant} options.tenant Filter trains by its tenant. It filters trains on backend side.
    * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
    */
-  constructor(options = {}) {
+  constructor(options: RealtimeLayerOptions = {}) {
+    const id = options?.id || 'realtime';
     super({
-      id: 'realtime',
       ...options,
+      id: 'realtime-custom-' + id,
     });
+
+    this.#internalId = id;
 
     this.engine = new RealtimeEngine({
       getViewState: this.getViewState.bind(this),
@@ -82,6 +87,7 @@ class RealtimeLayer extends Layer {
       ...options,
     });
 
+    this.sourceId = this.#internalId;
     this.source = {
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
@@ -95,13 +101,12 @@ class RealtimeLayer extends Layer {
         [2, 2],
         [0, 0],
       ],
-      id: this.id,
       loaded: true,
       type: 'canvas',
     };
 
     this.layer = {
-      id: `${this.id}-raster`,
+      id: this.#internalId,
       layout: {
         visibility: 'visible',
       },
@@ -110,7 +115,7 @@ class RealtimeLayer extends Layer {
         'raster-opacity': 1,
         'raster-resampling': 'nearest', // important otherwise it looks blurry
       },
-      source: this.id,
+      source: this.sourceId,
       type: 'raster',
     };
 
@@ -127,7 +132,6 @@ class RealtimeLayer extends Layer {
    * @private
    */
   getViewState() {
-    console.log(this);
     if (!this.map) {
       return {};
     }
@@ -202,8 +206,8 @@ class RealtimeLayer extends Layer {
   }
 
   onLoad() {
-    if (!this.map?.getSource(this.id)) {
-      this.map?.addSource(this.id, this.source);
+    if (!this.map?.getSource(this.sourceId)) {
+      this.map?.addSource(this.sourceId, this.source);
     }
     if (!this.map?.getLayer(this.layer.id)) {
       this.map?.addLayer(this.layer, this.id);
@@ -235,7 +239,7 @@ class RealtimeLayer extends Layer {
   onRealtimeEngineRender() {
     if (this.map?.style) {
       const extent = getSourceCoordinates(this.map, this.pixelRatio);
-      const source = this.map.getSource(this.id)!;
+      const source = this.map.getSource(this.sourceId)!;
       if (source) {
         // @ts-expect-error bad type definition
         source.setCoordinates(extent);
@@ -258,8 +262,8 @@ class RealtimeLayer extends Layer {
     if (map.getLayer(this.layer.id)) {
       map.removeLayer(this.layer.id);
     }
-    if (map.getSource(this.id)) {
-      map.removeSource(this.id);
+    if (map.getSource(this.sourceId)) {
+      map.removeSource(this.sourceId);
     }
     super.onRemove(map, gl);
   }

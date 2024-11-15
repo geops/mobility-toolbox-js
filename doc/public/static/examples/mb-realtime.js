@@ -3,7 +3,7 @@ import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
-  // Define the map
+  // Creates the MapLibre GL map
   const map = new Map({
     container: 'map',
     style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
@@ -14,23 +14,28 @@ export default () => {
     attributionControl: false,
   });
 
+  // Display a better copyright
   map.addControl(new CopyrightControl());
 
-  // Define the layer
+  // Creates the realtime layer
   const realtime = new RealtimeLayer({
+    id: 'realtime',
     apiKey: window.apiKey,
   });
 
+  // Add the layer when the map is ready
   map.on('load', () => {
     map.addLayer(realtime);
   });
 
+  // Toggle visiblity on button click
   document.getElementById('button').onclick = () => {
-    const prop = map.getLayoutProperty('realtime', 'visibility');
     map.setLayoutProperty(
       'realtime',
       'visibility',
-      prop === 'none' ? 'visible' : 'none',
+      map.getLayoutProperty('realtime', 'visibility') === 'none'
+        ? 'visible'
+        : 'none',
     );
   };
 };

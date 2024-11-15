@@ -318,6 +318,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
 
     if (this.layersFilter) {
       layers = mapLibreMap.getStyle().layers.filter(this.layersFilter);
+      console.log(layers);
     }
 
     if (this.queryRenderedLayersFilter) {

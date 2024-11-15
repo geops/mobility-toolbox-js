@@ -1,10 +1,13 @@
-import { v4 as uuid } from 'uuid';
 import { CustomLayerInterface, Evented } from 'maplibre-gl';
+import { v4 as uuid } from 'uuid';
+
 import type { AnyMapGlMap } from '../../types';
 
-export type LayerOptions = {
+export interface LayerOptions {
   id?: string;
-};
+}
+
+export type CUSTOM = 'custom';
 
 /**
  * A class representing a layer to display on an Maplibre map.
@@ -25,17 +28,16 @@ class Layer extends Evented implements CustomLayerInterface {
 
   options: LayerOptions = {};
 
-  type: 'custom' = 'custom';
+  type: CUSTOM = 'custom';
 
   constructor(options: LayerOptions = {}) {
     super();
     this.options = options;
     this.id = options.id || uuid();
-    this.type = 'custom';
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onAdd(map: AnyMapGlMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
+  onAdd(map: AnyMapGlMap, gl: WebGL2RenderingContext | WebGLRenderingContext) {
     this.map = map;
   }
 
@@ -43,13 +45,13 @@ class Layer extends Evented implements CustomLayerInterface {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: AnyMapGlMap,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    gl: WebGLRenderingContext | WebGL2RenderingContext,
+    gl: WebGL2RenderingContext | WebGLRenderingContext,
   ) {
     this.map = undefined;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  render(gl: WebGLRenderingContext | WebGL2RenderingContext) {}
+  render(gl: WebGL2RenderingContext | WebGLRenderingContext) {}
 }
 
 export default Layer;
