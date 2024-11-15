@@ -552,7 +552,7 @@ class RoutingControl extends Control {
             this.loading = false;
           })
           .catch((error) => {
-            if (/AbortError/.test(error.message)) {
+            if (/AbortError/.test(error.name)) {
               // Ignore abort error
               return;
             }
@@ -560,7 +560,6 @@ class RoutingControl extends Control {
             // Dispatch error event and execute error function
             this.dispatchEvent(new BaseEvent('error'));
             this.onRouteError(error, this);
-            this.routingLayer?.getSource()?.clear();
             this.loading = false;
           });
       }),
@@ -607,7 +606,13 @@ class RoutingControl extends Control {
       )
         .then((res) => res.json())
         .then((stationData) => {
-          const { coordinates } = stationData.features[0].geometry;
+          const { coordinates } = stationData?.features?.[0]?.geometry || {};
+          if (!coordinates) {
+            console.log(
+              'No coordinates found for station ' + stationId,
+              stationData,
+            );
+          }
           this.cacheStationData[viaPoint] = fromLonLat(coordinates);
           pointFeature.set('viaPointTrack', track);
           pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
@@ -622,6 +627,7 @@ class RoutingControl extends Control {
           // Dispatch error event and execute error function
           this.dispatchEvent(new BaseEvent('error'));
           this.onRouteError(error, this);
+          this.routingLayer?.getSource()?.clear();
           this.loading = false;
         });
     }
