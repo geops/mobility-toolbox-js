@@ -4,12 +4,12 @@ import RealtimeLayer from './RealtimeLayer';
 describe('RealtimeLayer', () => {
   test('should create a source', () => {
     const layer = new RealtimeLayer({
-      id: 'realtime',
       attribution: ['foo', 'bar'],
+      id: 'realtime',
     });
     expect(layer).toBeInstanceOf(Layer);
     expect(layer).toBeInstanceOf(RealtimeLayer);
-    expect(layer.source.id).toBe('realtime');
+    expect(layer.sourceId).toBe('realtime');
     expect(layer.source.canvas).toBeInstanceOf(HTMLCanvasElement);
     expect(layer.source.type).toBe('canvas');
     expect(layer.source.coordinates).toBeDefined();
@@ -21,17 +21,18 @@ describe('RealtimeLayer', () => {
 
   test('should create a raster layer', () => {
     const layer = new RealtimeLayer({
-      id: 'realtime',
       attribution: ['foo', 'bar'],
+      id: 'realtime',
     });
     expect(layer).toBeInstanceOf(RealtimeLayer);
-    expect(layer.layer.id).toBe('realtime-raster');
+    expect(layer.id).toBe('realtime-custom-realtime');
+    expect(layer.layer.id).toBe('realtime');
     expect(layer.layer.type).toBe('raster');
-    expect(layer.layer.source).toBe('realtime');
+    expect(layer.sourceId).toBe('realtime');
     expect(layer.layer.layout.visibility).toBe('visible');
     expect(layer.layer.paint).toEqual({
-      'raster-opacity': 1,
       'raster-fade-duration': 0,
+      'raster-opacity': 1,
       'raster-resampling': 'nearest', // important otherwise it looks blurry
     });
   });
