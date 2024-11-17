@@ -2,7 +2,7 @@
 
 This version contains a lot of breaking changes.
 
-The native OpenLayers and Maplibre APIs are nw used to add/remove layers and controls. This makes the library more flexible and easier to use.
+The native OpenLayers and Maplibre APIs are now used to add/remove layers and controls. This makes the library more flexible and easier to use.
 
 We also removed `mapbox-gl` dependency and use only `maplibre-gl` instead.
 
