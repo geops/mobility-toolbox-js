@@ -2,6 +2,7 @@ import { DebouncedFunc } from 'lodash';
 import debounce from 'lodash.debounce';
 import { Map, MapEvent } from 'ol';
 import Feature, { FeatureLike } from 'ol/Feature';
+import Filter from 'ol/format/filter/Filter';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer } from 'ol/layer';
 import Layer from 'ol/layer/Layer';
@@ -11,6 +12,7 @@ import Source from 'ol/source/Source';
 import { State } from 'ol/View';
 
 import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
+import { FilterFunction, SortFunction } from '../../common/typedefs';
 import RealtimeEngine, {
   RealtimeEngineOptions,
 } from '../../common/utils/RealtimeEngine';
@@ -223,6 +225,10 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
     });
   }
 
+  getVehicles(filterFunc: FilterFunction) {
+    return this.engine.getVehicles(filterFunc);
+  }
+
   getViewState() {
     if (!this.map?.getView()) {
       return {};
@@ -364,8 +370,12 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
     return this.engine.canvas;
   }
 
-  get filter() {
+  get filter(): FilterFunction | undefined {
     return this.engine.filter;
+  }
+
+  set filter(filter: FilterFunction) {
+    this.engine.filter = filter;
   }
 
   get hoverVehicleId(): RealtimeTrainId | undefined {
@@ -396,8 +406,12 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
     this.engine.selectedVehicleId = id;
   }
 
-  get sort() {
+  get sort(): SortFunction | undefined {
     return this.engine.sort;
+  }
+
+  set sort(sort: SortFunction) {
+    this.engine.sort = sort;
   }
 
   get trajectories() {

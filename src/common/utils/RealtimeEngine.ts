@@ -350,7 +350,7 @@ class RealtimeEngine {
    * @param {function} filterFc A function use to filter results.
    * @return {Array<Object>} Array of vehicle.
    */
-  getVehicle(filterFc: FilterFunction) {
+  getVehicles(filterFc: FilterFunction) {
     return (
       (this.trajectories &&
         // @ts-expect-error good type must be defined
