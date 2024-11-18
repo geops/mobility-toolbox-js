@@ -8,9 +8,11 @@ import MobilityLayerMixin, {
   MobilityLayerOptions,
 } from '../mixins/MobilityLayerMixin';
 
-import type { MapLibreOptions } from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
+import type {
+  MapLibreLayerOptions,
+  MapLibreOptions,
+} from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
 import type { QueryRenderedFeaturesOptions } from 'maplibre-gl';
-import type { Options as LayerOptions } from 'ol/layer/Layer';
 
 export type MaplibreLayerOptions = {
   apiKey?: string;
@@ -19,7 +21,7 @@ export type MaplibreLayerOptions = {
   queryRenderedFeaturesOptions?: QueryRenderedFeaturesOptions | undefined;
   style?: maplibregl.StyleSpecification | null | string;
   url?: string;
-} & LayerOptions &
+} & MapLibreLayerOptions &
   MobilityLayerOptions;
 
 const buildStyleUrl = (
@@ -177,6 +179,11 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     // If the url set is already a complete style url, use it directly.
     if (this.url.includes('style.json')) {
       return this.url;
+    }
+
+    // If the style is defined by the maplibreOptions, we use it directly
+    if (this.get('mapLibreOptions')?.style) {
+      return this.get('mapLibreOptions').style;
     }
 
     /// Otherwise build the complete style url.

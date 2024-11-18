@@ -202,7 +202,7 @@ function PropertiesLayerMixin<TBase extends Layerable>(Base: TBase) {
     }
 
     get key(): string {
-      return this.get('key') || this.get('name') || getUid(this);
+      return this.get('key') || this.get('name');
     }
 
     get map(): Map {
