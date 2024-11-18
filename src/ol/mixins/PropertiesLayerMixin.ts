@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import debounce from 'lodash.debounce';
-import { getUid, Map } from 'ol';
+import { Map } from 'ol';
 import { EventsKey } from 'ol/events';
 import { Layer } from 'ol/layer';
 import { ObjectEvent } from 'ol/Object';
