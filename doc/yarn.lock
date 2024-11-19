@@ -4518,7 +4518,7 @@ mkdirp@^0.5.1:
     minimist "^1.2.6"
 
 mobility-toolbox-js@./../build:
-  version "3.0.0-beta.35"
+  version "3.0.0-beta.36"
   dependencies:
     "@geoblocks/ol-maplibre-layer" "^1.0.1"
     "@turf/helpers" "7.1.0"

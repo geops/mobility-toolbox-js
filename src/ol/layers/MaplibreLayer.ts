@@ -118,6 +118,10 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
       );
     }
     super(newOptions);
+
+    // We save the options to be able to clone the layer.
+    // and to see if the style is defined by the maplibreOptions given by the user.
+    this.set('options', options);
   }
 
   /**
@@ -181,9 +185,9 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
       return this.url;
     }
 
-    // If the style is defined by the maplibreOptions, we use it directly
-    if (this.get('mapLibreOptions')?.style) {
-      return this.get('mapLibreOptions').style;
+    // If the user has defined the style by the maplibreOptions, we use it directly.
+    if (this.get('options')?.mapLibreOptions?.style) {
+      return this.get('options').mapLibreOptions.style;
     }
 
     /// Otherwise build the complete style url.
