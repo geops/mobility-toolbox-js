@@ -1,12 +1,12 @@
 # Migration v3
 
-The version contains a lot of breaking changes.
+This version contains a lot of breaking changes.
 
-Now we use the native api of OpenLayers and Maplibre to add/remove layers and controls it makes the library more flexible and easier to use.
+The native OpenLayers and Maplibre APIs are now used to add/remove layers and controls. This makes the library more flexible and easier to use.
 
-We also remove the dependency to  `mapbox-gl` and use only `maplibre-gl` instead.
+We also removed `mapbox-gl` dependency and use only `maplibre-gl` instead.
 
-Here is an exhaustive list of what you have to change in your application code.
+Here is an exhaustive list of what you need to change in your application code.
 
 ## exports
 
@@ -26,7 +26,7 @@ Here is an exhaustive list of what you have to change in your application code.
 ### for all Layer classes
 
 Layers classes inherits now from `ol/layer/Base` directly.
-So now native ol function like `setVisible()` are available directly on the layer.
+Native ol functions like `setVisible()` are now available directly on the layer.
 
 The `olLayer` property has been removed. Use the layer itself directly instead.
 
@@ -48,7 +48,7 @@ layer.attachToMap(map);
 map.addLayer(layer);
 ```
 
-All custorm properties must be send at the root level of the options, not into a `properties` property
+All custom properties must be sent at the root level of the options, not into a `properties` property
   
 ```js
 // Before:
@@ -67,7 +67,7 @@ const layer = new Layer({
 ### for all Control classes
 
 Controls classes inherits now from `ol/control/Control` directly.
-So now native ol functionnalities are available directly on the layer.
+Native ol functionalities are now available directly on the layer.
 
 To add a control use the `addControl()` method of the map instead of the `attachToMap()` method of the control.
 
@@ -83,7 +83,7 @@ map.addControl(control);
 
 ### for all Layer classes
 
-Layer classes inherits now from [`Evented`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Evented/) and implements the [`CustomLayerInterface`](https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/).
+Layer classes now inherit from [`Evented`](https://maplibre.org/maplibre-gl-js/docs/API/classes/Evented/) and implement the [`CustomLayerInterface`](https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/).
 
 To add a layer use the `addLayer()` method of the map instead of the `attachToMap()` method of the layer.
 
@@ -95,7 +95,7 @@ layer.attachToMap(map);
 map.addLayer(layer);
 ```
 
-We also have removed the onClick, onHover properties. Because we never used it.
+We also have removed the onClick, onHover properties, since we never used them.
 
 ```js
 // Before:
