@@ -55,7 +55,7 @@ export type RoutingControlOptions = {
   useRawViaPoints?: boolean;
 } & Options;
 
-export type AbotControllersByGraph = Record<string, AbortController>;
+export type AbortControllersByGraph = Record<string, AbortController>;
 
 // Examples for a single hop:
 // basel sbb a station named "basel sbb"
@@ -432,7 +432,7 @@ class RoutingControl extends Control {
   drawRoute() {
     /* Calls RoutingAPI to draw a route using the viaPoints array */
     this.abortRequests();
-    this.routingLayer?.getSource()?.clear(true);
+    this.routingLayer?.getSource()?.clear();
 
     if (!this.viaPoints.length) {
       return null;
