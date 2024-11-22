@@ -400,6 +400,7 @@ class RoutingControl extends Control {
         }
         return false;
       },
+      hitDetection: this.routingLayer,
       pixelTolerance: 6,
       source: this.routingLayer?.getSource() || undefined,
     });

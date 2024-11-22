@@ -48,13 +48,23 @@ const routingStyle: StyleFunction = (
   if (minResolution && maxResolution && !inRange) {
     return [];
   }
+
+  const zIndex = feature?.getGeometry()?.getType() === 'Point' ? 100 : 0;
+
+  let styles = [blackBorder, redLine];
   const mot = feature.get('mot');
 
-  if (mot !== 'foot') {
-    return [blackBorder, redLine];
+  if (mot === 'foot') {
+    styles = [dashedRedLine];
   }
 
-  return [dashedRedLine];
+  styles = styles.map((style) => {
+    const tmp = style.clone();
+    tmp.setZIndex(zIndex);
+    return tmp;
+  });
+
+  return styles;
 };
 
 export default routingStyle;
