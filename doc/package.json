@@ -2,12 +2,12 @@
   "name": "doc",
   "version": "0.1.0",
   "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
     "@geops/geops-ui": "^0.3.4",
-    "@mui/icons-material": "^6.1.7",
-    "@mui/material": "^6.1.7",
-    "@mui/styles": "^6.1.7",
+    "@mui/icons-material": "^6.1.8",
+    "@mui/material": "^6.1.8",
+    "@mui/styles": "^6.1.8",
     "codesandbox": "2.2.3",
     "maplibre-gl": "4.7.1",
     "mobility-toolbox-js": "./../build",
@@ -25,7 +25,7 @@
     "typeface-lato": "1.1.13"
   },
   "devDependencies": {
-    "eslint": "9.14.0",
+    "eslint": "9.15.0",
     "eslint-config-next": "15.0.3",
     "raw-loader": "4.0.2",
     "sass": "1.81.0"
