@@ -383,7 +383,7 @@ class RoutingControl extends Control {
      */
     // Define and add modify interaction
     this.modifyInteraction = new Modify({
-      // hitDetection: this.routingLayer, // Create a bug, the first point is always selected even if the mous eis far away
+      // hitDetection: this.routingLayer, // TODO: wait for ol, fixed in https://github.com/openlayers/openlayers/pull/16393
       deleteCondition: (e) => {
         const feats =
           (e.target?.getFeaturesAtPixel(e.pixel, {
@@ -400,7 +400,6 @@ class RoutingControl extends Control {
         }
         return false;
       },
-      hitDetection: this.routingLayer,
       pixelTolerance: 6,
       source: this.routingLayer?.getSource() || undefined,
     });

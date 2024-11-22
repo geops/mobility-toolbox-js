@@ -1,6 +1,6 @@
 # Migration v3
 
-This version contains a lot of breaking changes.
+This version contains some breaking changes.
 
 The native OpenLayers and Maplibre APIs are now used to add/remove layers and controls. This makes the library more flexible and easier to use.
 
@@ -22,6 +22,8 @@ Here is an exhaustive list of what you need to change in your application code.
 - `Layer` has been removed , simply use the `ol/layer/Layer` class directly instead
 - `WMSLayer` has been removed , simply use the `ol/layer/WMSLayer` class directly instead
 - `VectorLayer` has been removed , simply use the `ol/layer/VectorLayer` class directly instead
+- `RoutingLayer` has been removed , simply use the `ol/layer/VectorLayer` class directly instead
+- `layer.getFeatureAtCoordinate()` has been removed, use `map.getFeaturesAtPixel()` instead or the util function `getFeaturesAtCoordinate()`
   
 ### for all Layer classes
 
@@ -63,6 +65,20 @@ const layer = new Layer({
   myProperty: 'myProperty'
 });
 ```
+We have removed the onClick, onHover properties, since we never used them.
+
+```js
+// Before:
+layer.onClick(([feature])=> {
+  setFeature(feature);
+});
+
+// after
+map.on('singleclick', (evt) => {
+  const [feature] = map.getFeaturesAtPixel(evt.pixel, {layerFilter: l => l=== layer}) || [];
+  setFeature(feature);
+});
+```
 
 ### for all Control classes
 
@@ -93,21 +109,6 @@ layer.attachToMap(map);
 
 // After
 map.addLayer(layer);
-```
-
-We also have removed the onClick, onHover properties, since we never used them.
-
-```js
-// Before:
-layer.onClick(([feature])=> {
-  setFeature(feature);
-});
-
-// after
-map.on('singleclick', (evt) => {
-  const [feature] = map.getFeaturesAtPixel(evt.pixel, {layerFilter: l => l=== layer}) || [];
-  setFeature(feature);
-});
 ```
 
 ### for all Control classes
