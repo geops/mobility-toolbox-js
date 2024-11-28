@@ -98,7 +98,7 @@
     "cy:test:firefox": "yarn build && start-server-and-test start http://localhost:3000 'cypress run --browser firefox'",
     "dev": "vite",
     "doc": "yarn build && yarn apidoc && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn build",
-    "doc:dev": "yarn clean && yarn build && yarn apidoc && yarn dev:examples",
+    "doc:dev": "yarn clean && yarn build && yarn apidoc && yarn doc:dev:examples",
     "doc:dev:examples": "yarn clean && yarn build && cd doc && rm -rf node_modules/mobility-toolbox-js && yarn install --force && yarn dev",
     "esbuild": "yarn esbuild:all && yarn esbuild:iife",
     "esbuild:all": "esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx",

@@ -9,8 +9,6 @@ import { RealtimeAPI, RealtimeModes } from '../../api';
 import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import {
   AnyCanvas,
-  AnyLayer,
-  AnyRealtimeLayer,
   LayerGetFeatureInfoOptions,
   RealtimeBbox,
   RealtimeGeneralizationLevel,
@@ -62,8 +60,8 @@ export interface RealtimeEngineOptions {
   mode?: RealtimeMode;
   motsByZoom?: RealtimeMot[][];
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
-  onStart?: (realtimeLayer: AnyRealtimeLayer) => void;
-  onStop?: (realtimeLayer: AnyRealtimeLayer) => void;
+  onStart?: (realtimeEngine: RealtimeEngine) => void;
+  onStop?: (realtimeEngine: RealtimeEngine) => void;
   pingIntervalMs?: number;
   pixelRatio?: number;
   prefix?: string;
@@ -119,8 +117,8 @@ class RealtimeEngine {
   mots?: RealtimeMot[];
   motsByZoom: RealtimeMot[][];
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
-  onStart?: (realtimeLayer: AnyLayer) => void;
-  onStop?: (realtimeLayer: AnyLayer) => void;
+  onStart?: (realtimeLayer: RealtimeEngine) => void;
+  onStop?: (realtimeLayer: RealtimeEngine) => void;
   pixelRatio?: number;
   renderState?: RealtimeRenderState;
   renderTimeIntervalByZoom: number[];
@@ -387,7 +385,6 @@ class RealtimeEngine {
 
     const vehicles = [];
     for (let i = 0; i < trajectories.length; i += 1) {
-      // @ts-expect-error  coordinate is added by the RealtimeLayer
       const { coordinate: trajcoord } = trajectories[i].properties;
       if (trajcoord && containsCoordinate(ext, trajcoord)) {
         vehicles.push(trajectories[i]);

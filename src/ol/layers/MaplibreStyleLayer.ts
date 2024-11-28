@@ -2,15 +2,17 @@ import debounce from 'lodash.debounce';
 import { FeatureState } from 'maplibre-gl';
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
+import { EventsKey } from 'ol/events';
 import { Layer } from 'ol/layer';
 import { ObjectEvent } from 'ol/Object';
+import { unByKey } from 'ol/Observable';
 import { Source } from 'ol/source';
 
 import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 import { FilterFunction } from '../../common/typedefs';
 import { LayerGetFeatureInfoResponse } from '../../types';
-import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
 import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
 
@@ -55,8 +57,10 @@ if (
  * @extends {ol/layer/Layer~Layer}
  * @public
  */
-class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
+class MaplibreStyleLayer extends Layer {
   highlightedFeatures: Feature[] = [];
+
+  public olEventsKeys: EventsKey[] = [];
 
   selectedFeatures: Feature[] = [];
 
@@ -109,6 +113,12 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
     }
 
     super({ source: new Source({}), ...options });
+
+    // For backward compatibility with v2
+    defineDeprecatedProperties(this, options);
+
+    // For cloning
+    this.set('options', options);
 
     this.beforeId = options.beforeId;
 
@@ -196,20 +206,20 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @override
    */
   attachToMap(map: Map) {
-    if (this.maplibreLayer && !this.maplibreLayer.map) {
+    if (this.maplibreLayer && !this.maplibreLayer.getMapInternal()) {
       map.addLayer(this.maplibreLayer as unknown as Layer);
     }
-    super.attachToMap(map);
 
-    if (!this.map || !this.maplibreLayer) {
+    const mapInternal = this.getMapInternal();
+    if (!mapInternal || !this.maplibreLayer) {
       return;
     }
 
-    if (!this.map.getTargetElement()) {
+    if (!mapInternal.getTargetElement()) {
       // If ther e is no target element the mapLibreMap is not yet created, we
       // relaunch the initialisation when it's the case.
       this.olEventsKeys.push(
-        this.map.on('change:target', () => {
+        mapInternal.on('change:target', () => {
           this.attachToMap(map);
         }),
       );
@@ -271,7 +281,7 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @public
    */
   clone(newOptions: MaplibreStyleLayerOptions): MaplibreStyleLayer {
-    return new MaplibreStyleLayer({ ...this.options, ...newOptions });
+    return new MaplibreStyleLayer({ ...this.get('options'), ...newOptions });
   }
 
   createRenderer() {
@@ -283,12 +293,12 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
    * @override
    */
   detachFromMap() {
+    unByKey(this.olEventsKeys);
     if (this.maplibreLayer?.mapLibreMap) {
       this.maplibreLayer.mapLibreMap.off('load', this.onLoad);
       this.removeLayers();
       this.removeSources();
     }
-    super.detachFromMap();
   }
 
   /**
@@ -492,6 +502,16 @@ class MaplibreStyleLayer extends MobilityLayerMixin(Layer) {
       `Deprecated. Use layer.setFeatureState(features, {hover: ${state}}) instead.`,
     );
     this.setFeatureState(features, { hover: state });
+  }
+
+  override setMapInternal(map: Map) {
+    if (map) {
+      super.setMapInternal(map);
+      this.attachToMap(map);
+    } else {
+      this.detachFromMap();
+      super.setMapInternal(map);
+    }
   }
 
   get beforeId(): string {

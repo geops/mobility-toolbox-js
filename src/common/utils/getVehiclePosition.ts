@@ -23,14 +23,14 @@ const getVehiclePosition = (
   noInterpolate: boolean,
 ): VehiclePosition => {
   const {
-    // @ts-expect-error  coordinate is added by the RealtimeLayer
     coordinate,
     // @ts-expect-error  olGeometry is added by the RealtimeLayer
     olGeometry,
     time_intervals: timeIntervals,
   } = trajectory.properties;
-  // @ts-expect-error
-  let { coordinates, type } = trajectory.geometry;
+  let { coordinates, type } = trajectory.geometry as
+    | GeoJSON.LineString
+    | GeoJSON.Point;
   let geometry = olGeometry;
   let coord;
   let rotation;

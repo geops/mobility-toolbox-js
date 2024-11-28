@@ -1,10 +1,25 @@
 import debounce from 'lodash.debounce';
+import { Map } from 'ol';
 import OLLayer from 'ol/layer/Layer';
 import LayerRenderer from 'ol/renderer/Layer';
 
-import MobilityLayerMixin, {
-  MobilityLayerOptions,
-} from '../mixins/MobilityLayerMixin';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+
+import type { Options } from 'ol/layer/Layer';
+
+export type MobilityLayerOptions = {
+  children?: any[];
+  copyrights?: string[];
+  disabled?: boolean;
+  group?: string;
+  hitTolerance?: number;
+  key?: string;
+  map?: Map;
+  name?: string;
+  properties?: Record<string, any>;
+  visible?: boolean;
+} & Options &
+  Record<string, any>;
 
 let deprecated: (message: string) => void = () => {};
 if (
@@ -31,15 +46,16 @@ class EmptyLayerRenderer extends LayerRenderer<OLLayer> {
  * An OpenLayers layer here only for backward compatibility v2.
  * @deprecated Use an OpenLayers Layer instead.
  */
-class Layer extends MobilityLayerMixin(OLLayer) {
+class Layer extends OLLayer {
   constructor(options: MobilityLayerOptions) {
     super(options);
+    defineDeprecatedProperties(this, options);
     deprecated('Layer is deprecated. Use an OpenLayers Layer instead.');
   }
 
   clone(newOptions: MobilityLayerOptions): Layer {
     return new Layer({
-      ...(this.options || {}),
+      ...(this.get('options') || {}),
       ...(newOptions || {}),
     });
   }

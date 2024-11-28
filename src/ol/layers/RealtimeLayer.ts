@@ -1,12 +1,13 @@
 import { DebouncedFunc } from 'lodash';
 import debounce from 'lodash.debounce';
 import { Map, MapEvent } from 'ol';
+import { EventsKey } from 'ol/events';
 import Feature, { FeatureLike } from 'ol/Feature';
-import Filter from 'ol/format/filter/Filter';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Vector as VectorLayer } from 'ol/layer';
 import Layer from 'ol/layer/Layer';
 import { ObjectEvent } from 'ol/Object';
+import { unByKey } from 'ol/Observable';
 import { Vector as VectorSource } from 'ol/source';
 import Source from 'ol/source/Source';
 import { State } from 'ol/View';
@@ -24,9 +25,9 @@ import {
   RealtimeTrainId,
   ViewState,
 } from '../../types';
-import MobilityLayerMixin from '../mixins/MobilityLayerMixin';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
 const format = new GeoJSON();
 
@@ -63,11 +64,12 @@ export type RealtimeLayerOptions = {
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  * @public
  */
-class RealtimeLayer extends MobilityLayerMixin(Layer) {
+class RealtimeLayer extends Layer {
   allowRenderWhenAnimating?: boolean = false;
   currentZoom?: number;
   engine: RealtimeEngine;
   maxNbFeaturesRequested = 100;
+  public olEventsKeys: EventsKey[] = [];
   onMoveEndDebounced: DebouncedFunc<(evt: MapEvent | ObjectEvent) => void>;
   onZoomEndDebounced: DebouncedFunc<(evt: MapEvent | ObjectEvent) => void>;
   renderedViewState: State | undefined;
@@ -89,6 +91,9 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
       source: new Source({}), // TODO set some attributions
       ...options,
     });
+
+    // For backward compatibility with v2
+    defineDeprecatedProperties(this, options);
 
     this.engine = new RealtimeEngine({
       getViewState: this.getViewState.bind(this),
@@ -118,19 +123,18 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
     this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
   }
 
-  override attachToMap(map: Map) {
-    super.attachToMap(map);
+  attachToMap() {
     this.engine.attachToMap();
-
-    if (this.map) {
+    const mapInternal = this.getMapInternal();
+    if (mapInternal) {
       // If the layer is visible we start  the rendering clock
       if (this.getVisible()) {
         this.engine.start();
       }
-      const index = this.map.getLayers().getArray().indexOf(this);
-      this.map.getLayers().insertAt(index, this.vectorLayer);
+      const index = mapInternal.getLayers().getArray().indexOf(this);
+      mapInternal.getLayers().insertAt(index, this.vectorLayer);
       this.olEventsKeys.push(
-        ...this.map.on(
+        ...mapInternal.on(
           ['moveend', 'change:target'],
           // @ts-expect-error  - bad ol definitions
           (evt: MapEvent | ObjectEvent) => {
@@ -171,7 +175,6 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
       );
     }
   }
-
   /**
    * Create a copy of the RealtimeLayer.
    *
@@ -180,7 +183,7 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
    * @public
    */
   clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
-    return new RealtimeLayer({ ...this.options, ...newOptions });
+    return new RealtimeLayer({ ...this.get('options'), ...newOptions });
   }
 
   createRenderer() {
@@ -190,10 +193,10 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
   /**
    * Destroy the container of the tracker.
    */
-  override detachFromMap() {
-    this.map?.removeLayer(this.vectorLayer);
+  detachFromMap() {
+    unByKey(this.olEventsKeys);
+    this.getMapInternal()?.removeLayer(this.vectorLayer);
     this.engine.detachFromMap();
-    super.detachFromMap();
   }
 
   /**
@@ -211,7 +214,7 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
         id,
         this.engine.mode,
         this.engine.getGeneralizationLevelByZoom(
-          Math.floor(this.map?.getView()?.getZoom() || 0),
+          Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
         ),
       ),
     ];
@@ -230,17 +233,18 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
   }
 
   getViewState() {
-    if (!this.map?.getView()) {
+    const mapInternal = this.getMapInternal();
+    if (!mapInternal?.getView()) {
       return {};
     }
-    const view = this.map.getView();
+    const view = mapInternal.getView();
     return {
       center: view.getCenter(),
       extent: view.calculateExtent(),
       pixelRatio: this.engine.pixelRatio,
       resolution: view.getResolution(),
       rotation: view.getRotation(),
-      size: this.map.getSize(),
+      size: mapInternal.getSize(),
       visible: this.getVisible(),
       zoom: view.getZoom(),
     };
@@ -267,7 +271,7 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
         id,
         this.engine.mode,
         this.engine.getGeneralizationLevelByZoom(
-          Math.floor(this.map?.getView()?.getZoom() || 0),
+          Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
         ),
       )
       .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
@@ -333,11 +337,21 @@ class RealtimeLayer extends MobilityLayerMixin(Layer) {
     this.highlightTrajectory(id);
   }
 
+  override setMapInternal(map: Map) {
+    if (map) {
+      super.setMapInternal(map);
+      this.attachToMap();
+    } else {
+      this.detachFromMap();
+      super.setMapInternal(map);
+    }
+  }
+
   shouldRender() {
     return this.allowRenderWhenAnimating
       ? false
-      : this.map.getView().getAnimating() ||
-          this.map.getView().getInteracting();
+      : this.getMapInternal()?.getView().getAnimating() ||
+          this.getMapInternal()?.getView().getInteracting();
   }
 
   /**

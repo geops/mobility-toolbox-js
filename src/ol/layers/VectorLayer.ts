@@ -2,9 +2,8 @@ import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 
 import { LayerGetFeatureInfoResponse } from '../../types';
-import { MobilityLayerOptions } from '../mixins/MobilityLayerMixin';
 
-import Layer from './Layer';
+import Layer, { MobilityLayerOptions } from './Layer';
 
 /**
  * @deprecated
@@ -14,7 +13,7 @@ class VectorLayer extends Layer {
    * @deprecated
    */
   clone(newOptions: MobilityLayerOptions) {
-    return new VectorLayer({ ...this.options, ...newOptions });
+    return new VectorLayer({ ...this.get('options'), ...newOptions });
   }
 
   /**
@@ -25,12 +24,13 @@ class VectorLayer extends Layer {
   ): Promise<LayerGetFeatureInfoResponse> {
     let features: Feature[] = [];
 
-    if (this.map) {
-      const pixel = this.map.getPixelFromCoordinate(coordinate);
+    const mapInternal = this.getMapInternal();
+    if (mapInternal) {
+      const pixel = mapInternal.getPixelFromCoordinate(coordinate);
       features =
-        (this.map.getFeaturesAtPixel(pixel, {
-          hitTolerance: this.hitTolerance || 5,
-          layerFilter: (l) => l === this.olLayer,
+        (mapInternal.getFeaturesAtPixel(pixel, {
+          hitTolerance: this.get('hitTolerance') || 5,
+          layerFilter: (l) => l === this,
         }) as Feature[]) || [];
     }
 

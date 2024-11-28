@@ -1,12 +1,14 @@
 import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer';
 import debounce from 'lodash.debounce';
-import OlMap from 'ol/Map';
+import { EventsKey } from 'ol/events';
+import Map from 'ol/Map';
 import { ObjectEvent } from 'ol/Object';
+import { unByKey } from 'ol/Observable';
 
 import { getUrlWithParams } from '../../common/utils';
-import MobilityLayerMixin, {
-  MobilityLayerOptions,
-} from '../mixins/MobilityLayerMixin';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+
+import { MobilityLayerOptions } from './Layer';
 
 import type {
   MapLibreLayerOptions,
@@ -73,11 +75,12 @@ if (
  *
  * @see <a href="/example/ol-maplibre-layer">OpenLayers Maplibre layer example</a>
  *
- * @extends {ol/layer/Layer~Layer}
  * @extends {geoblocks/ol-maplibre-layer/MapLibreLayer}
  * @public
  */
-class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
+class MaplibreLayer extends MapLibreLayer {
+  public olEventsKeys: EventsKey[] = [];
+
   /**
    * Constructor.
    *
@@ -119,18 +122,17 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     }
     super(newOptions);
 
+    // For backward compatibility with v2
+    defineDeprecatedProperties(this, options);
+
     // We save the options to be able to clone the layer.
     // and to see if the style is defined by the maplibreOptions given by the user.
     this.set('options', options);
   }
-
   /**
    * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map An OpenLayers map.
    */
-  attachToMap(map: OlMap) {
-    super.attachToMap(map);
-
+  attachToMap() {
     const updateMaplibreMapDebounced = debounce(
       this.updateMaplibreMap.bind(this),
       150,
@@ -145,16 +147,6 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
     );
   }
 
-  // get queryRenderedFeaturesOptions(): maplibregl.QueryRenderedFeaturesOptions {
-  //   return this.get('queryRenderedFeaturesOptions');
-  // }
-
-  // set queryRenderedFeaturesOptions(
-  //   newValue: maplibregl.QueryRenderedFeaturesOptions,
-  // ) {
-  //   this.set('queryRenderedFeaturesOptions', newValue);
-  // }
-
   /**
    * Create a copy of the MaplibreLayer.
    *
@@ -164,9 +156,13 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
    */
   clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
     return new MaplibreLayer({
-      ...(this.options || {}),
+      ...(this.get('options') || {}),
       ...(newOptions || {}),
     });
+  }
+
+  detachFromMap() {
+    unByKey(this.olEventsKeys);
   }
 
   getStyle() {
@@ -192,6 +188,26 @@ class MaplibreLayer extends MobilityLayerMixin(MapLibreLayer) {
 
     /// Otherwise build the complete style url.
     return buildStyleUrl(this.url, this.style, this.apiKey, this.apiKeyName);
+  }
+
+  // get queryRenderedFeaturesOptions(): maplibregl.QueryRenderedFeaturesOptions {
+  //   return this.get('queryRenderedFeaturesOptions');
+  // }
+
+  // set queryRenderedFeaturesOptions(
+  //   newValue: maplibregl.QueryRenderedFeaturesOptions,
+  // ) {
+  //   this.set('queryRenderedFeaturesOptions', newValue);
+  // }
+
+  override setMapInternal(map: Map) {
+    if (map) {
+      super.setMapInternal(map);
+      this.attachToMap();
+    } else {
+      this.detachFromMap();
+      super.setMapInternal(map);
+    }
   }
 
   updateMaplibreMap() {

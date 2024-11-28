@@ -74,7 +74,12 @@ export type RealtimeChannelName =
 export interface RealtimeTrajectoryProperties {
   // Tralis and trafimage
   bounds: [number, number, number, number];
+
+  // Only after first rendering on a map
+  coordinate?: [number, number];
+
   delay: null | number;
+
   // Tralis
   event?: string;
   event_delay?: number;
@@ -139,7 +144,7 @@ export interface RealtimeStop {
   aimedDepartureTime: number;
   arrivalDelay?: number;
   arrivalTime: number;
-  cancelled: booblean;
+  cancelled: boolean;
   coordinate: number[];
   departureDelay: number;
   departureTime: number;

@@ -4,9 +4,6 @@ import { ObjectEvent } from 'ol/Object';
 import { Pixel } from 'ol/pixel';
 
 import { RealtimeTrajectory } from '../api/typedefs';
-import CommonLayer, {
-  LayerCommonOptions,
-} from '../ol/mixins/PropertiesLayerMixin';
 
 import type {
   CopyrightControl as MbCopyrightControl,
@@ -86,12 +83,6 @@ export interface RealtimeRenderState {
   zoom?: number;
 }
 
-export type AnyMap = MapboxMap | MaplibreMap | OlMap;
-export type AnyLayer = MbLayer | OlLayer;
-export type AnyOlLayer = OlLayer;
-export type AnyMapboxLayer = MapboxLayer | MaplibreLayer;
-export type AnyRealtimeLayer = MbRealtimeLayer | OlRealtimeLayer;
-export type AnyCopyrightControl = MbCopyrightControl | OlCopyrightControl;
 export type AnyMapGlMap = maplibregl.Map;
 export type AnyMapGlMapOptions = maplibregl.MapOptions;
 export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
@@ -100,19 +91,10 @@ export type AnyCanvasContext =
   | null
   | OffscreenCanvasRenderingContext2D
   | undefined;
-export type GConstructor<T extends CommonLayer> = new (options?: any) => T;
-export type CommonLayerClass = GConstructor<CommonLayer>;
-export type GConstructor2<T extends OlLayer> = new (options?: any) => T;
-export type OlLayerClass = GConstructor<AnyOlLayer>;
-export type AnyLayerClass = GConstructor<AnyLayer>;
 
-type GConstructor3<T = object> = new (...args: any[]) => T;
-export type AnyLayerable = GConstructor3<Omit<AnyLayer, keyof string>>;
+export type AnyRealtimeLayer = MbRealtimeLayer | OlRealtimeLayer;
+export type AnyCopyrightControl = MbCopyrightControl | OlCopyrightControl;
 
-export type AnyMapboxLayerClass = GConstructor<AnyMapboxLayer>;
-export type AnyRealtimeLayerClass = GConstructor<AnyRealtimeLayer>;
-export type AnyMapGlMapClass = GConstructor<AnyMapGlMap>;
-export type AnyCopyrightControlClass = GConstructor<AnyCopyrightControl>;
 
 export interface LayerGetFeatureInfoResponse {
   coordinate: Coordinate;
@@ -125,12 +107,6 @@ export interface LayerGetFeatureInfoOptions {
   hitTolerance: number = 5;
 }
 
-export type UserInteractionCallback = (
-  features: Feature[],
-  layer: LayerCommonOptions,
-  coordinate: Coordinate,
-  event: ObjectEvent,
-) => void;
 
 export type RoutingGraph = [RoutingParameters.graph, number, number];
 export type RoutingMot = RoutingParameters.mot;
