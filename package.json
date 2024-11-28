@@ -20,8 +20,8 @@
     "uuid": "11.0.3"
   },
   "peerDependencies": {
-    "maplibre-gl": ">=1",
-    "ol": ">=7"
+    "maplibre-gl": ">=4",
+    "ol": ">=9"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.26.0",
