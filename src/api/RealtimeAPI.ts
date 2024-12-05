@@ -91,14 +91,6 @@ export const RealtimeModes = {
  * @public
  */
 class RealtimeAPI {
-  private pingInterval!: number;
-
-  private pingIntervalMs!: number;
-
-  private reconnectTimeout?: number;
-
-  private reconnectTimeoutMs?: number;
-
   _bbox?: RealtimeBbox;
 
   _buffer?: number[];
@@ -108,6 +100,92 @@ class RealtimeAPI {
   version: RealtimeVersion = '2';
 
   wsApi!: WebSocketAPI;
+
+  /**
+   * This callback type is called `requestCallback` and is displayed as a global symbol.
+   *
+   * @callback onFullTrajectoryMessageCallback
+   * @param {number} responseCode
+   * @param {string} responseMessage
+   */
+  /**
+   * The bounding box to receive data from.\
+   * Example: [minX, minY, maxX, maxY, zoom, mots , gen_level, tenant, ...]\
+   * &nbsp;\
+   * Where:
+   * - **minX**: a string representation of an integer (not a float) representing the minimal X coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **minY**: a string representation of an integer (not a float) representing the minimal Y coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **maxX**: a string representation of an integer (not a float) representing the maximal X coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **maxY**: a string representation of an integer (not a float) representing the maximal Y coordinate (in EPSG:3857) of a bounding box\
+   * &nbsp;
+   * - **zoom**: a string representation of an integer representing the zoom level (from 4 to 22). When zoom < 8 only the trains are displayed for performance reasons.\
+   * &nbsp;
+   * - **mots**: A comma separated list of modes of transport. **Optional**.\
+   *         Example: "mots=rail,subway".\
+   * &nbsp;
+   * - **gen_level**: An integer representing the generalization level. **Optional**.\
+   *              Example: "gen_level=5"\
+   * &nbsp;
+   * - **tenant**: A string representing the tenant. **Optional**.\
+   *           Example: "tenant=sbb"\
+   * &nbsp;
+   * - ...: Any other values added to the bbox will be send to the server
+   *
+   * @type {string[]}
+   *
+   * @public
+   */
+  get bbox() {
+    return this._bbox;
+  }
+
+  set bbox(newBbox) {
+    if (JSON.stringify(newBbox) !== JSON.stringify(this._bbox)) {
+      this._bbox = newBbox;
+      if (this.wsApi && this._bbox) {
+        this.wsApi.send(`BBOX ${this._bbox.join(' ')}`);
+      }
+    }
+  }
+
+  get buffer() {
+    return this._buffer;
+  }
+
+  set buffer(newBuffer) {
+    if (JSON.stringify(newBuffer) !== JSON.stringify(this._buffer)) {
+      this._buffer = newBuffer;
+      if (this.wsApi && this._buffer) {
+        this.wsApi.send(`BUFFER ${this._buffer.join(' ')}`);
+      }
+    }
+  }
+
+  get url() {
+    return this._url;
+  }
+
+  set url(newUrl) {
+    if (this._url !== newUrl) {
+      this._url = newUrl;
+
+      // Update the websocket only if the url has changed and the websocket is already open or is opening.
+      if (this.wsApi.open || this.wsApi.connecting) {
+        this.open();
+      }
+    }
+  }
+
+  private pingInterval!: number;
+
+  private pingIntervalMs!: number;
+
+  private reconnectTimeout?: number;
+
+  private reconnectTimeoutMs?: number;
 
   /**
    * Constructor
@@ -752,84 +830,6 @@ class RealtimeAPI {
     onMessage: WebSocketAPIMessageCallback<RealtimeTrajectory>,
   ) {
     this.unsubscribe(`trajectory`, '', onMessage);
-  }
-
-  /**
-   * This callback type is called `requestCallback` and is displayed as a global symbol.
-   *
-   * @callback onFullTrajectoryMessageCallback
-   * @param {number} responseCode
-   * @param {string} responseMessage
-   */
-  /**
-   * The bounding box to receive data from.\
-   * Example: [minX, minY, maxX, maxY, zoom, mots , gen_level, tenant, ...]\
-   * &nbsp;\
-   * Where:
-   * - **minX**: a string representation of an integer (not a float) representing the minimal X coordinate (in EPSG:3857) of a bounding box\
-   * &nbsp;
-   * - **minY**: a string representation of an integer (not a float) representing the minimal Y coordinate (in EPSG:3857) of a bounding box\
-   * &nbsp;
-   * - **maxX**: a string representation of an integer (not a float) representing the maximal X coordinate (in EPSG:3857) of a bounding box\
-   * &nbsp;
-   * - **maxY**: a string representation of an integer (not a float) representing the maximal Y coordinate (in EPSG:3857) of a bounding box\
-   * &nbsp;
-   * - **zoom**: a string representation of an integer representing the zoom level (from 4 to 22). When zoom < 8 only the trains are displayed for performance reasons.\
-   * &nbsp;
-   * - **mots**: A comma separated list of modes of transport. **Optional**.\
-   *         Example: "mots=rail,subway".\
-   * &nbsp;
-   * - **gen_level**: An integer representing the generalization level. **Optional**.\
-   *              Example: "gen_level=5"\
-   * &nbsp;
-   * - **tenant**: A string representing the tenant. **Optional**.\
-   *           Example: "tenant=sbb"\
-   * &nbsp;
-   * - ...: Any other values added to the bbox will be send to the server
-   *
-   * @type {string[]}
-   *
-   * @public
-   */
-  get bbox() {
-    return this._bbox;
-  }
-
-  set bbox(newBbox) {
-    if (JSON.stringify(newBbox) !== JSON.stringify(this._bbox)) {
-      this._bbox = newBbox;
-      if (this.wsApi && this._bbox) {
-        this.wsApi.send(`BBOX ${this._bbox.join(' ')}`);
-      }
-    }
-  }
-
-  get buffer() {
-    return this._buffer;
-  }
-
-  set buffer(newBuffer) {
-    if (JSON.stringify(newBuffer) !== JSON.stringify(this._buffer)) {
-      this._buffer = newBuffer;
-      if (this.wsApi && this._buffer) {
-        this.wsApi.send(`BUFFER ${this._buffer.join(' ')}`);
-      }
-    }
-  }
-
-  get url() {
-    return this._url;
-  }
-
-  set url(newUrl) {
-    if (this._url !== newUrl) {
-      this._url = newUrl;
-
-      // Update the websocket only if the url has changed and the websocket is already open or is opening.
-      if (this.wsApi.open || this.wsApi.connecting) {
-        this.open();
-      }
-    }
   }
 }
 export default RealtimeAPI;
