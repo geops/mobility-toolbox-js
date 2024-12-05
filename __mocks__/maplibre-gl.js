@@ -1,3 +1,5 @@
+import { Evented } from 'maplibre-gl';
+
 const callbacks = {};
 
 /* eslint-disable class-methods-use-this */
@@ -75,7 +77,10 @@ class Map {
   unproject() {
     return { lng: 0, lat: 0 };
   }
+
+  setStyle() {}
 }
 module.exports = {
   Map,
+  Evented,
 };

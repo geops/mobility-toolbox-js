@@ -10,7 +10,7 @@ The tools in this library have been inspired by many projects realized for publi
 
 ## Documentation and examples
 
-Visit https://mobility-toolbox-js.vercel.app/
+Visit https://mobility-toolbox-js.geops.io/
 
 ## Demos
 
@@ -24,7 +24,7 @@ Visit https://mobility-toolbox-js.vercel.app/
 Install the library and the peer dependencies:
 
 ```bash
-yarn add mobility-toolbox-js ol maplibre-gl
+yarn add ol maplibre-gl mobility-toolbox-js
 ```
 
 ## Development
@@ -34,9 +34,17 @@ yarn install
 yarn dev
 ```
 
+`yarn dev` starts a vite server using the `index.html` file at the root of the project.
+This html file loads the `dev.js` file. Use this file to develop the library.
+Each time you modifiy the library code you have to run `yarn build:tsc` to see the changes.
+
+## Development documentation
+
+The documentations website is located in the `doc/`  folder.
+It's a nextJS website that use the mobility-toolbox-js library built from the `build/` folder.
+
 ## Deploy
 
 This library website is deployed automatically using [Vercel](https://vercel.com/geops).
 For Vercel we have to add the nextjs and raw-loader modules in the dev dependencies of the main package.json.
 But those 2 librairies are not needed to build the library.
-

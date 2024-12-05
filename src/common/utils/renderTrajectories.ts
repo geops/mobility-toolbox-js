@@ -1,22 +1,26 @@
 /* eslint-disable no-param-reassign */
 import { Pixel } from 'ol/pixel';
-import { compose, apply, create } from 'ol/transform';
+import { apply, compose, create } from 'ol/transform';
+
 import {
   AnyCanvas,
+  AnyCanvasContext,
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
   RealtimeTrajectories,
   ViewState,
 } from '../../types';
+
 import getVehiclePosition from './getVehiclePosition';
 
 /**
  * Draw all the trajectories available in a canvas.
- * @param {HTMLCanvas|HTMLOffscreenCanvas} The canvas where to draw the trajectories.
+ * @param {HTMLCanvas|HTMLOffscreenCanvas} canvas The canvas where to draw the trajectories.
  * @param {ViewState} trajectories An array of trajectories.
  * @param {Function} style A function that returns a canvas representing a vehicle of a specific trajectory.
  * @param {ViewState} viewState The view state of the map.
+ * @param {Object} options The options.
  * @param {boolean} options.hoverVehicleId The id of the vehicle to highlight.
  * @param {boolean} options.selectedVehicleId The id of the vehicle to select.
  * @param {boolean} options.noInterpolate If true trajectories are not interpolated but
@@ -36,12 +40,12 @@ const renderTrajectories = (
   }
 
   const {
-    time = Date.now(),
-    size = [],
     center,
+    pixelRatio = 1,
     resolution,
     rotation = 0,
-    pixelRatio = 1,
+    size = [],
+    time = Date.now(),
   } = viewState;
 
   if (!resolution || !center) {
@@ -49,16 +53,16 @@ const renderTrajectories = (
   }
 
   const {
-    noInterpolate = false,
-    hoverVehicleId,
-    selectedVehicleId,
     filter,
     getScreenPixel = (pixel: Pixel, viewStat: ViewState): Pixel =>
       (viewStat.zoom || 0) < 12
         ? pixel.map((coord) => Math.floor(coord))
         : pixel,
+    hoverVehicleId,
+    noInterpolate = false,
+    selectedVehicleId,
   } = options;
-  const context = canvas.getContext('2d');
+  const context: AnyCanvasContext = canvas.getContext('2d') as AnyCanvasContext;
   context?.clearRect(0, 0, canvas.width, canvas.height);
 
   const [width, height] = size;
@@ -103,7 +107,7 @@ const renderTrajectories = (
     }
 
     // We simplify the trajectory object
-    const { train_id: id, timeOffset } = trajectory.properties;
+    const { timeOffset, train_id: id } = trajectory.properties;
     // We set the rotation and the timeFraction of the trajectory (used by tralis).
     // if rotation === null that seems there is no rotation available.
     const { coord, rotation: rotationIcon } = getVehiclePosition(

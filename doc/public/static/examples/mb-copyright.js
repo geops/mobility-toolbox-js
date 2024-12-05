@@ -1,5 +1,5 @@
 import { Map } from 'maplibre-gl';
-import { CopyrightControl } from 'mobility-toolbox-js/mapbox';
+import { CopyrightControl } from 'mobility-toolbox-js/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default () => {
@@ -14,24 +14,35 @@ export default () => {
 
   // Define a custom copyright
   const control = new CopyrightControl({
-    target: document.getElementById('copyright'),
-    element: document.createElement('div'),
-    render() {
-      this.element.innerHTML = this.active
-        ? this.getCopyrights().join(' | ')
-        : '';
-    },
+    customAttribution: ['My Custom Attribution'],
   });
 
-  // Attach the control to the map
-  control.attachToMap(map);
+  // Add the control inside the map
+  map.addControl(control);
 
-  // Add example button to toggle the copyright control.
-  document.getElementById('button').addEventListener('click', () => {
+  // Aplly default maplibre-gl css
+  control.container.className = 'maplibregl-ctrl maplibregl-ctrl-attrib';
+
+  const toggle = () => {
     if (control.map) {
-      control.detachFromMap();
+      map.removeControl(control);
     } else {
-      control.attachToMap(map);
+      map.addControl(control);
     }
-  });
+  };
+
+  // Add the control outside the map
+  // const container = document.getElementById('copyright');
+  // container.appendChild(control.onAdd(map));
+
+  // const toggle = () => {
+  //   if (control.map) {
+  //     control.onRemove();
+  //   } else {
+  //     container.appendChild(control.onAdd(map));
+  //   }
+  // };
+
+  // // Add example button to toggle the copyright control.
+  document.getElementById('button').addEventListener('click', toggle);
 };

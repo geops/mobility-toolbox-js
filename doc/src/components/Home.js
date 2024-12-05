@@ -18,8 +18,7 @@ const codeHtmlPage = `
 
 const codeMapObject = `
 import { Map } from 'maplibre-gl;
-import { RealtimeLayer } from 'mobility-toolbox-js/mapbox';
-
+import { RealtimeLayer } from 'mobility-toolbox-js/maplibre';
 
 const map = new Map({
   container: 'map',
@@ -30,12 +29,13 @@ const map = new Map({
 `;
 
 const codeTracker = `
-const tracker = new RealtimeLayer({
-  url: 'wss://api.geops.io/tracker-ws/v1/',
+const layer = new RealtimeLayer({
   apiKey: window.apiKey,
 });
 
-tracker.attachToMap(map);
+map.on('load', () => {
+  map.addLayer(layer);
+})
 `;
 
 function MarkdownHeading({ ...props }) {

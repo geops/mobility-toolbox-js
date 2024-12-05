@@ -1,6 +1,8 @@
 import { RealtimeAPIDeparturesById } from '../../api/RealtimeAPI';
-import type { RealtimeDepartureExtended } from '../../types';
+
 import compareDepartures from './compareDepartures';
+
+import type { RealtimeDepartureExtended } from '../../types';
 
 /**
  * This function sort Departures by arrival time and filter out unwanted departures:
@@ -10,13 +12,14 @@ import compareDepartures from './compareDepartures';
  *
  * @param {Object} depObject The object containing departures by id.
  * @param {boolean} [sortByMinArrivalTime=false] If true sort departures by arrival time.
- * @return {Array<Departure>} Return departures array.
+ * @param {number} [maxDepartureAge=30] The maximum departure age in minutes.
+ * @return {RealtimeDeparture[]} Return departures array.
  * @private
  */
 const sortAndfilterDepartures = (
   depObject: RealtimeAPIDeparturesById,
-  sortByMinArrivalTime: boolean = false,
-  maxDepartureAge: number = 30,
+  sortByMinArrivalTime = false,
+  maxDepartureAge = 30,
 ): RealtimeDepartureExtended[] => {
   const departures = Object.keys(depObject).map((k) => depObject[k]);
   departures.sort((a, b) => compareDepartures(a, b, sortByMinArrivalTime));

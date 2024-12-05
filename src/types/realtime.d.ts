@@ -1,8 +1,8 @@
 import { Feature, FeatureCollection, Point } from 'geojson';
 
-export declare type RealtimeMode = 'topographic' | 'schematic' | 'raw';
+export declare type RealtimeMode = 'raw' | 'schematic' | 'topographic';
 
-export declare type RealtimeChannelModeSuffix = '' | '_schematic';
+export declare type RealtimeChannelModeSuffix = '_schematic' | '';
 
 export type RealtimeTrainId = string;
 
@@ -10,90 +10,111 @@ export type RealtimeStationId = number;
 
 export type RealtimeService =
   | 'redis_websocket_api'
-  | 'tralis_stations'
   | 'tralis_fzo'
-  | 'tralis_worker'
-  | 'tralis_vdv'
-  | 'tralis_newsticker'
   | 'tralis_geofox'
+  | 'tralis_newsticker'
+  | 'tralis_stations'
+  | 'tralis_vdv'
+  | 'tralis_worker'
   | string;
 
-export type RealtimeTenant = 'sbb' | 'sbh' | 'sbm' | '' | string;
+export type RealtimeTenant = '' | 'sbb' | 'sbh' | 'sbm' | string;
 
 export type RealtimeElevatorState = 'ALL_OPERABLE' | string;
 
-export type RealtimeStopState = 'LEAVING' | 'BOARDING' | string;
+export type RealtimeStopState = 'BOARDING' | 'LEAVING' | string;
 
 export type RealtimeTrajectoryState =
-  | 'HIDDEN'
   | 'BOARDING'
-  | 'STOP_CANCELLED'
-  | 'JOURNEY_CANCELLED';
+  | 'HIDDEN'
+  | 'JOURNEY_CANCELLED'
+  | 'STOP_CANCELLED';
 
-export type RealtimeGeneralizationLevel = 5 | 10 | 30 | 100;
+export type RealtimeGeneralizationLevel = 10 | 100 | 30 | 5;
 
 export type RealtimeMot =
-  | 'tram'
-  | 'subway'
-  | 'rail'
   | 'bus'
-  | 'ferry'
   | 'cablecar'
-  | 'gondola'
+  | 'coach'
+  | 'ferry'
   | 'funicular'
-  | 'coach';
+  | 'gondola'
+  | 'rail'
+  | 'subway'
+  | 'tram';
+
+/**
+ * @type RealtimeBbox
+ */
+export type RealtimeBbox = (number | string)[];
+// minX: number,
+// minY: number,
+// maxX: number,
+// maxY: number,
+// zoom: number,
+// string?,
+// `gen_level=${RealtimeGeneralizationLevel}`| undefined,
+// `tenant=${UnionConcat<RealtimeTenant, ','>}`!,
+// `mots=${UnionConcat<RealtimeMot, ','>}`!,
+
+export type RealtimeBuffer = [number, number];
 
 export type RealtimeChannelName =
-  | 'websocket'
   | 'buffer'
-  | 'line'
   | 'extra_geoms'
   | 'healthcheck'
-  | `timetable_${RealtimeStationId}`
-  | `trajectory${RealtimeChannelModeSuffix}`
+  | 'line'
+  | 'websocket'
   | `deleted_vehicles${RealtimeChannelModeSuffix}`
+  | `full_trajectory${RealtimeChannelModeSuffix}_${RealtimeTenant}_${RealtimeTrainId}`
   | `stopsequence_${RealtimeTenant}_${RealtimeTrainId}`
-  | `full_trajectory${RealtimeChannelModeSuffix}_${RealtimeTenant}_${RealtimeTrainId}`;
+  | `timetable_${RealtimeStationId}`
+  | `trajectory${RealtimeChannelModeSuffix}`;
 
 export interface RealtimeTrajectoryProperties {
   // Tralis and trafimage
   bounds: [number, number, number, number];
-  delay: number | null;
+
+  // Only after first rendering on a map
+  coordinate?: [number, number];
+
+  delay: null | number;
+
+  // Tralis
+  event?: string;
+  event_delay?: number;
   event_timestamp: number;
+  event_timestamp?: number;
   gen_level?: RealtimeGeneralizationLevel;
   gen_range: [number, number];
   has_journey: boolean;
   has_realtime: boolean;
   has_realtime_journey: boolean;
   line?: RealtimeLine;
-  operator_provides_realtime_journey: 'unknown' | 'yes' | 'no';
-  rake?: string;
-  raw_time?: string;
-  route_identifier: string;
-  state: RealtimeTrajectoryState;
-  tenant: string;
-  time_intervals?: Array<Array<number>>;
-  time_since_update?: string;
-  timestamp: number;
-  train_id?: RealtimeTrainId;
-  train_number?: number;
-  type: RealtimeMots;
-
-  operator?: string; // deprecated, operator is an old property, use tenant instead.
   name?: string; // deprecated, name is an old property, use line.name instead.
-
-  // Tralis
-  event?: string;
-  event_delay?: number;
-  event_timestamp?: number;
+  operator?: string; // deprecated, operator is an old property, use tenant instead.
+  operator_provides_realtime_journey: 'no' | 'unknown' | 'yes';
   original_line?: RealtimeLine;
   original_rake?: string;
   original_train_number?: number;
   position_correction?: number;
+  rake?: string;
   raw_coordinates?: [number, number];
+
+  raw_time?: string;
   ride_state?: string;
+
+  route_identifier: string;
   routeIdentifier?: string;
+  state: RealtimeTrajectoryState;
+  tenant: string;
+  time_intervals?: number[][];
+  time_since_update?: string;
+  timestamp: number;
+  train_id?: RealtimeTrainId;
+  train_number?: number;
   transmitting_vehicle?: string;
+  type: RealtimeMots;
 }
 
 export interface RealtimeTrajectory extends Feature {
@@ -123,7 +144,7 @@ export interface RealtimeStop {
   aimedDepartureTime: number;
   arrivalDelay?: number;
   arrivalTime: number;
-  cancelled: booblean;
+  cancelled: boolean;
   coordinate: number[];
   departureDelay: number;
   departureTime: number;
@@ -158,7 +179,7 @@ export interface RealtimeStopSequence {
 }
 
 export interface RealtimeExtraGeomProperties {
-  ref: string | number;
+  ref: number | string;
 }
 
 export interface RealtimeExtraGeom extends Feature {
@@ -166,40 +187,38 @@ export interface RealtimeExtraGeom extends Feature {
 }
 
 export interface RealtimeExtraGeomDeleted {
-  type: 'Deleted';
   properties: RealtimeExtraGeomProperties;
+  type: 'Deleted';
 }
 
-export type RealtimeExtraGeoms = {
-  [index: string]: Feature[];
-};
+export type RealtimeExtraGeoms = Record<string, Feature[]>;
 
 export interface RealtimeLine {
-  id: number;
   color: string;
-  stroke: string;
+  id: number;
   name: string;
+  stroke: string;
   text_color: string;
 }
 
 export interface RealtimeTransfer {
-  mot: RealtimeMot;
   lines: string[];
+  mot: RealtimeMot;
 }
 
 export interface RealtimeStationproperties extends Feature {
-  transfers: RealtimeTransfer[];
   elevatorOutOfOrder: boolean;
-  elevatorState: RealtimeElevatorState;
   elevators: object;
-  uic: RealtimeStationId;
-  name: string;
-  networkLines: RealtimeLine[];
-  hasElevator: boolean;
-  hasZOB: boolean;
+  elevatorState: RealtimeElevatorState;
   hasAccessibility: boolean;
   hasAirport: boolean;
+  hasElevator: boolean;
+  hasZOB: boolean;
+  name: string;
+  networkLines: RealtimeLine[];
   tenant: RealtimeTenant;
+  transfers: RealtimeTransfer[];
+  uic: RealtimeStationId;
 }
 
 export interface RealtimeStation extends Feature {
@@ -208,30 +227,30 @@ export interface RealtimeStation extends Feature {
 }
 
 export interface RealtimeDeparture {
-  to: string[];
-  time: number;
-  no_stop_between: boolean;
-  new_to: boolean;
-  has_fzo: boolean;
-  next_stoppoints: string[];
-  platform: string;
-  created_at: string;
   at_station_ds100: string;
-  train_number: number;
-  ris_aimed_time: number;
-  updated_at: number;
-  min_arrival_time: number;
-  ris_estimated_time: number;
-  train_id: RealtimeTrainId;
-  fzo_estimated_time: number;
-  train_type: number;
   call_id: number;
-  line: RealtimeLine;
-  state: string; /// (BOARDING|STOP_CANCELLED|JOURNEY_CANCELLED|HIDDEN)/
+  created_at: string;
   formation: any;
+  fzo_estimated_time: number;
+  has_fzo: boolean;
+  line: RealtimeLine;
+  min_arrival_time: number;
+  new_to: boolean;
+  next_stoppoints: string[];
+  no_stop_between: boolean;
   no_stop_till: any;
-  timestamp: number; // This property seems to never exists
+  platform: string;
+  ris_aimed_time: number;
+  ris_estimated_time: number;
+  state: string; /// (BOARDING|STOP_CANCELLED|JOURNEY_CANCELLED|HIDDEN)/
+  time: number;
   timediff: number; // This property seems to alawy been 0
+  timestamp: number; // This property seems to never exists
+  to: string[];
+  train_id: RealtimeTrainId;
+  train_number: number;
+  train_type: number;
+  updated_at: number;
 }
 
 export interface RealtimeDepartureExtended extends RealtimeDeparture {
@@ -253,68 +272,68 @@ export interface RealtimeNews {
 export interface RealtimeHealth {
   heathly: boolean;
   service: RealtimeService;
-  tenant: string | null;
+  tenant: null | string;
 }
 
 export interface RealtimeExtraGeomsResponse {
-  source: `extra_geoms`;
-  timestamp: number;
   client_reference: null;
   content: RealtimeExtraGeom | RealtimeExtraGeomDeleted;
+  source: `extra_geoms`;
+  timestamp: number;
 }
 
 export interface RealtimeStationResponse {
-  source: `station_${RealtimeStationId}`;
-  timestamp: number;
   client_reference: null;
   content: RealtimeNews;
+  source: `station_${RealtimeStationId}`;
+  timestamp: number;
 }
 
 export interface RealtimeNewsTickerResponse {
-  source: `${RealtimeTenant}_newsticker`;
-  timestamp: number;
   client_reference: null;
   content: RealtimeNews;
+  source: `${RealtimeTenant}_newsticker`;
+  timestamp: number;
 }
 
 export interface RealtimeTimetableResponse {
-  source: `timetable_${RealtimeStationId}`;
-  timestamp: number;
   client_reference: null;
   content: RealtimeDeparture;
+  source: `timetable_${RealtimeStationId}`;
+  timestamp: number;
 }
 
 export interface RealtimeTrajectoryResponse {
-  source: `trajectory${RealtimeChannelModeSuffix}`;
-  timestamp: number;
   client_reference: '';
   content: RealtimeTrajectory;
+  source: `trajectory${RealtimeChannelModeSuffix}`;
+  timestamp: number;
 }
 
 export interface RealtimeStopSequenceResponse {
+  client_reference: '';
+  content: RealtimeStopSequence[];
   source: `stopsequence_${RealtimeTenant}_${RealtimeTrainId}`;
   timestamp: number;
-  client_reference: '';
-  content: Array<RealtimeStopSequence>;
 }
 
 export interface RealtimeBufferResponse {
-  source: 'buffer';
-  timestamp: number;
   client_reference: '';
   content: RealtimeTrajectoryResponse[];
+  source: 'buffer';
+  timestamp: number;
 }
 
 export interface RealtimeDeletedVehiclesResponse {
-  source: `deleted_vehicles${RealtimeChannelModeSuffix}`;
-  timestamp: number;
   client_reference: null;
   content: string;
+  source: `deleted_vehicles${RealtimeChannelModeSuffix}`;
+  timestamp: number;
 }
 
 export interface RealtimeHealthCheckResponse {
-  source: 'healthcheck';
-  timestamp: number;
   client_reference: null;
   content: RealtimeHealth;
+  source: 'healthcheck';
+  timestamp: number;
 }

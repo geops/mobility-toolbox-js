@@ -35,31 +35,31 @@
  * @external {ol/Object~BaseObject} https://openlayers.org/en/latest/apidoc/module-ol_Object-BaseObject.html
  */
 /**
- * @external {mapboxgl.Map} https://docs.mapbox.com/mapbox-gl-js/api/map/
+ * @external {ol/control/Control~Control} https://openlayers.org/en/latest
  */
 /**
- * @external {mapboxgl.Layer} https://docs.mapbox.com/mapbox-gl-js/style-spec/layers/
+ * @external {maplibregl.CustomLayerInterface} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
  */
 /**
- * @external {mapboxgl.map.event:mousemove} https://docs.mapbox.com/mapbox-gl-js/api/map/#map.event:mousemove
+ * @external {maplibregl.Evented} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Evented/
  */
 /**
- * @external {mapboxgl.map.event:zoomend} https://docs.mapbox.com/mapbox-gl-js/api/map/#map.event:zoomend
+ * @external {maplibregl.Map} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Map/
  */
 /**
- * @external {mapboxgl.MapMouseEvent} https://docs.mapbox.com/mapbox-gl-js/api/events/#mapmouseevent
+ * @external {maplibregl.MapOptions} https://maplibre.org/maplibre-gl-js/docs/API/types/maplibregl.MapOptions/
  */
 /**
- * @external {mapboxgl.styleLayer} https://docs.mapbox.com/help/glossary/layer/
+ * @external {maplibregl.QueryRenderedFeaturesOptions} https://maplibre.org/maplibre-gl-js/docs/API/types/maplibregl.QueryRenderedFeaturesOptions/
  */
 /**
- * @external {mapboxgl.filter} https://docs.mapbox.com/help/glossary/filter/
+ * @external {maplibregl.SourceSpecification} https://maplibre.org/maplibre-style-spec/sources/
  */
 /**
- * @external {mapboxgl.IControl} https://docs.mapbox.com/mapbox-gl-js/api/markers/#icontrol
+ * @external {maplibregl.AddLayerObject} https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/AddLayerObject
  */
 /**
- * @external {mapboxgl.position} https://docs.mapbox.com/mapbox-gl-js/api/map/#map#addcontrol
+ * @external {maplibregl.IControl} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/IControl/
  */
 /**
  * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
@@ -69,6 +69,9 @@
  */
 /**
  * @external {GeoJSONFeature} https://tools.ietf.org/html/rfc7946#section-3.2
+ */
+/**
+ * @external {GeoJSONFeatureCollection} https://tools.ietf.org/html/rfc7946#section-3.3
  */
 /**
  * @external {Canvas} https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
@@ -90,4 +93,46 @@
  */
 /**
  * @external {HTMLElement} https://developer.mozilla.org/fr/docs/Web/API/HTMLElement
+ */
+/**
+ * @external {FetchOptions} https://developer.mozilla.org/en-US/docs/Web/API/fetch#options
+ */
+/**
+ * @external {StopsParameters} https://developer.geops.io/apis/stops
+ */
+/**
+ * @external {StopsResponse} https://developer.geops.io/apis/stops
+ */
+/**
+ * @external {RealtimeFullTrajectory} https://developer.geops.io/apis/realtime#model-FullTrajectory
+ */
+/**
+ * @external {RealtimeStation} https://developer.geops.io/apis/realtime
+ */
+/**
+ * @external {RealtimeNews} https://developer.geops.io/apis/realtime
+ */
+/**
+ * @external {RealtimeStopSequence} https://developer.geops.io/apis/realtime#model-StopSequence
+ */
+/**
+ * @external {RealtimeTrajectory} https://developer.geops.io/apis/realtime#model-TrackerTrajectory
+ */
+/**
+ * @external {RealtimeDeparture} https://developer.geops.io/apis/realtime#model-Departure
+ */
+/**
+ * @external {RealtimeStationId} https://developer.geops.io/apis/realtime
+ */
+/**
+ * @external {RealtimeTenant} https://developer.geops.io/apis/realtime
+ */
+/**
+ * @external {RoutingParameters} https://developer.geops.io/apis/routing
+ */
+/**
+ * @external {RoutingResponse} https://developer.geops.io/apis/routing
+ */
+/**
+ * @external {geoblocks/ol-maplibre-layer/MapLibreLayer} https://geoblocks.github.io/ol-maplibre-layer/api/modules/MapLibreLayer.html
  */

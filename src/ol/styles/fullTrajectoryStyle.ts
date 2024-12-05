@@ -1,19 +1,19 @@
-import type { FeatureLike } from 'ol/Feature';
-import { Style, Fill, Stroke, Circle } from 'ol/style';
+import { Circle, Fill, Stroke, Style } from 'ol/style';
 
-/** @private */
+import type { FeatureLike } from 'ol/Feature';
+
 const borderStyle = new Style({
-  zIndex: 2,
   image: new Circle({
-    radius: 5,
     fill: new Fill({
       color: '#000000',
     }),
+    radius: 5,
   }),
   stroke: new Stroke({
     color: '#000000',
     width: 6,
   }),
+  zIndex: 2,
 });
 
 const fullTrajectorystyle = (
@@ -38,17 +38,17 @@ const fullTrajectorystyle = (
   const style = [
     borderStyle,
     new Style({
-      zIndex: 3,
       image: new Circle({
-        radius: 4,
         fill: new Fill({
           color: lineColor,
         }),
+        radius: 4,
       }),
       stroke: new Stroke({
         color: lineColor,
         width: 4,
       }),
+      zIndex: 3,
     }),
   ];
   return style;

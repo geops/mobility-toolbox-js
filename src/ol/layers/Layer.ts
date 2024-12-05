@@ -1,252 +1,69 @@
+import debounce from 'lodash.debounce';
 import { Map } from 'ol';
-import { EventsKey } from 'ol/events';
-import LayerGroup from 'ol/layer/Group';
-import OlLayer from 'ol/layer/Layer';
-import { unByKey } from 'ol/Observable';
-import LayerCommon from '../../common/layers/LayerCommon';
-import type { LayerCommonOptions } from '../../common/layers/LayerCommon';
-import userInteractionsMixin from '../../common/mixins/UserInteractionsLayerMixin';
-import type { UserInteractionCallback } from '../../types';
+import OLLayer from 'ol/layer/Layer';
+import LayerRenderer from 'ol/renderer/Layer';
 
-export type OlLayerOptions = LayerCommonOptions & {
-  olLayer?: OlLayer;
-};
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
-/**
- * A class representing a layer to display on an OpenLayers map.
- *
- * @example
- * import { Layer } from 'mobility-toolbox-js/ol';
- *
- * const layer = new Layer({
- *   olLayer: ...,
- * });
- *
- * @see <a href="/example/ol-map">Map example</a>
- *
- * @classproperty {ol/Map~Map} map - The map where the layer is displayed.
- * @extends {LayerCommon}
- */
-class Layer extends userInteractionsMixin(LayerCommon) {
-  olLayer?: OlLayer | LayerGroup;
+import type { Options } from 'ol/layer/Layer';
 
-  olListenersKeys!: EventsKey[];
-
-  /* LayerCommon */
-
-  options!: OlLayerOptions;
-
-  visible!: boolean;
-
-  copyrights!: string[];
-
+export type MobilityLayerOptions = {
+  children?: any[];
+  copyrights?: string[];
+  disabled?: boolean;
+  group?: string;
+  hitTolerance?: number;
+  key?: string;
   map?: Map;
+  name?: string;
+  properties?: Record<string, any>;
+  visible?: boolean;
+} & Options &
+  Record<string, any>;
 
-  singleClickListenerKey!: EventsKey;
+let deprecated: (message: string) => void = () => {};
+if (
+  typeof window !== 'undefined' &&
+  new URLSearchParams(window.location.search).get('deprecated')
+) {
+  deprecated = debounce((message: string) => {
+    // eslint-disable-next-line no-console
+    console.warn(message);
+  }, 1000);
+}
 
-  pointerMoveListenerKey!: EventsKey;
-
-  /* userInteractionsMixin */
-
-  userInteractions?: boolean;
-
-  userClickInteractions?: boolean;
-
-  userHoverInteractions?: boolean;
-
-  userClickCallbacks?: UserInteractionCallback[];
-
-  userHoverCallbacks?: UserInteractionCallback[];
-
-  onUserClickCallback!: () => void;
-
-  onUserMoveCallback!: () => void;
-
-  /**
-   * Constructor.
-   *
-   * @param {LayerCommonOptions} options
-   * @param {ol/layer/Layer~Layer} options.olLayer The layer (required).
-   * @param {string} [options.name=uuid()] Layer name. Default use a generated uuid.
-   * @param {string} [options.key=uuid().toLowerCase()] Layer key, will use options.name.toLowerCase() if not specified.
-   * @param {string} [options.copyright=undefined] Copyright-Statement.
-   * @param {Array<Layer>} [options.children=[]] Sublayers.
-   * @param {Object} [options.properties={}] Application-specific layer properties.
-   * @param {boolean} [options.visible=true] If true this layer is the currently visible layer on the map.
-   */
-  constructor(options: OlLayerOptions) {
-    super(options);
-
-    this.olLayer?.setVisible(this.visible);
+class EmptyLayerRenderer extends LayerRenderer<OLLayer> {
+  prepareFrame() {
+    return true;
   }
 
-  /**
-   * Define layer's properties.
-   *
-   * @private
-   */
-  defineProperties(options: OlLayerOptions) {
-    super.defineProperties(options);
-    Object.defineProperties(this, {
-      olLayer: { value: options.olLayer, writable: true },
-      olListenersKeys: {
-        value: [],
-      },
+  renderFrame() {
+    return null;
+  }
+}
+
+/**
+ * An OpenLayers layer here only for backward compatibility v2.
+ * @deprecated Use an OpenLayers Layer instead.
+ */
+class Layer extends OLLayer {
+  constructor(options: MobilityLayerOptions) {
+    super(options);
+    defineDeprecatedProperties(this, options);
+    deprecated('Layer is deprecated. Use an OpenLayers Layer instead.');
+  }
+
+  clone(newOptions: MobilityLayerOptions): Layer {
+    return new Layer({
+      ...(this.get('options') || {}),
+      ...(newOptions || {}),
     });
   }
 
-  /**
-   * Initialize the layer and listen to feature clicks.
-   * @param {ol/Map~Map} map
-   */
-  attachToMap(map: Map) {
-    super.attachToMap(map);
-
-    if (!this.map) {
-      return;
-    }
-
-    // Make sure the visiblity is correct
-    this.olLayer?.setVisible(this.visible);
-
-    if (
-      this.olLayer &&
-      !this.map?.getLayers()?.getArray()?.includes(this.olLayer)
-    ) {
-      this.map.addLayer(this.olLayer);
-    }
-
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:visible', () => {
-        if (this.olLayer) {
-          this.olLayer.setVisible(this.visible);
-        }
-      }),
-    );
-
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:minZoom', () => {
-        if (this.olLayer && this.get('minZoom')) {
-          this.olLayer.setMinZoom(this.get('minZoom'));
-        }
-      }),
-    );
-
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:maxZoom', () => {
-        if (this.olLayer && this.get('maxZoom')) {
-          this.olLayer.setMaxZoom(this.get('maxZoom'));
-        }
-      }),
-    );
-
-    this.olListenersKeys.push(
-      this.map.getLayers().on('remove', (evt) => {
-        if (evt.element === this.olLayer) {
-          this.detachFromMap();
-        }
-      }),
-    );
-
-    this.toggleVisibleListeners();
-    this.olListenersKeys.push(
-      // @ts-ignore
-      this.on('change:visible', this.toggleVisibleListeners),
-    );
-
-    // We set the copyright to the source used by the layer.
-    if (this.copyrights && this.olLayer) {
-      const attributions = this.copyrights || [];
-      if ((this.olLayer as unknown as LayerGroup).getLayers) {
-        (this.olLayer as unknown as LayerGroup)
-          .getLayers()
-          .getArray()
-          .forEach((layer) => {
-            // @ts-ignore
-            if (layer.getSource) {
-              // @ts-ignore
-              layer.getSource()?.setAttributions(attributions);
-            }
-          });
-
-        // @ts-ignore
-      } else if (this.olLayer.getSource) {
-        // @ts-ignore
-        this.olLayer.getSource()?.setAttributions(attributions);
-      }
-    }
-  }
-
-  /**
-   * Terminate what was initialized in init function. Remove layer, events...
-   */
-  detachFromMap() {
-    this.deactivateUserInteractions();
-    unByKey(this.olListenersKeys);
-
-    if (
-      this.olLayer &&
-      this.map?.getLayers()?.getArray()?.includes(this.olLayer)
-    ) {
-      this.map.removeLayer(this.olLayer);
-    }
-
-    super.detachFromMap();
-  }
-
-  activateUserInteractions() {
-    this.deactivateUserInteractions();
-    if (
-      this.map &&
-      this.userInteractions &&
-      this.userClickInteractions &&
-      this.userClickCallbacks?.length
-    ) {
-      this.singleClickListenerKey = this.map.on(
-        'singleclick',
-        this.onUserClickCallback,
-      );
-      this.olListenersKeys.push(this.singleClickListenerKey);
-    }
-    if (
-      this.map &&
-      this.userInteractions &&
-      this.userHoverInteractions &&
-      this.userHoverCallbacks?.length
-    ) {
-      this.pointerMoveListenerKey = this.map.on(
-        'pointermove',
-        this.onUserMoveCallback,
-      );
-    }
-  }
-
-  deactivateUserInteractions() {
-    unByKey([this.pointerMoveListenerKey, this.singleClickListenerKey]);
-  }
-
-  /**
-   * Toggle listeners needed when a layer is avisible or not.
-   * @private
-   */
-  toggleVisibleListeners() {
-    if (this.visible) {
-      this.activateUserInteractions();
-    } else {
-      this.deactivateUserInteractions();
-    }
-  }
-
-  /**
-   * Create a copy of the Layer.
-   * @param {Object} newOptions Options to override
-   * @return {Layer} A Layer
-   */
-  clone(newOptions: OlLayerOptions) {
-    return new Layer({ ...this.options, ...newOptions });
+  // ol does not like when it returns null.
+  createRenderer(): LayerRenderer<OLLayer> {
+    return new EmptyLayerRenderer(this);
   }
 }
+
 export default Layer;

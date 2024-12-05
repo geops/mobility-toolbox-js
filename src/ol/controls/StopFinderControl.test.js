@@ -1,6 +1,7 @@
 import fetch from 'jest-fetch-mock';
-import View from 'ol/View';
 import Map from 'ol/Map';
+import View from 'ol/View';
+
 import StopFinderControl from './StopFinderControl';
 
 describe('StopFinderControl', () => {
@@ -27,23 +28,18 @@ describe('StopFinderControl', () => {
     fetch.resetMocks();
   });
 
-  test('should be activate by default', () => {
-    const control = new StopFinderControl();
-    expect(control.active).toBe(true);
-  });
-
   test('launch a search and display results', (done) => {
     fetch.mockResponseOnce(JSON.stringify(global.stopsSearchResponse));
 
     const control = new StopFinderControl({
-      url: 'https://foo.ch',
       apiKey: 'foo',
       apiParams: {
-        limit: 10,
         foo: 'bar',
+        limit: 10,
       },
+      url: 'https://foo.ch',
     });
-    control.attachToMap(map);
+    map.addControl(control);
     expect(control.element).toBeDefined();
     control.search('foo').then(() => {
       // Correct url

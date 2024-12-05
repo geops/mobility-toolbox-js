@@ -1,34 +1,32 @@
-import type {
-  RealtimeTrajectory,
-  ViewState,
-  RealtimeStyleOptions,
-  RealtimeStyleFunction,
-  AnyCanvas,
-} from '../../types';
 import createCanvas from '../utils/createCanvas';
 import { getBgColor } from '../utils/realtimeConfig';
+
 import realtimeDefaultStyle from './realtimeDefaultStyle';
 
-/** @private */
+import type {
+  AnyCanvas,
+  AnyCanvasContext,
+  RealtimeStyleFunction,
+  RealtimeStyleOptions,
+  RealtimeTrajectory,
+  ViewState,
+} from '../../types';
+
 const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d') as AnyCanvasContext;
   ctx?.translate(canvas.width / 2, canvas.height / 2);
   ctx?.rotate(rotation);
   ctx?.translate(-canvas.width / 2, -canvas.height / 2);
 };
 
-/** @private */
-const arrowCache: {
-  [key: string]: AnyCanvas | null;
-} = {};
+const arrowCache: Record<string, AnyCanvas | null> = {};
 
-/** @private */
 const getArrowCanvas = (fillColor: string): AnyCanvas | null => {
   const key = `${fillColor}`;
   if (!arrowCache[key]) {
     // Create the arrow canvas
     const arrowCanvas = createCanvas(20, 20);
-    const ctx = arrowCanvas?.getContext('2d');
+    const ctx = arrowCanvas?.getContext('2d') as AnyCanvasContext;
     if (ctx) {
       ctx.fillStyle = fillColor;
       ctx.beginPath();
@@ -49,12 +47,8 @@ const getArrowCanvas = (fillColor: string): AnyCanvas | null => {
   return arrowCache[key];
 };
 
-/** @private */
-const bufferArrowCache: {
-  [key: string]: AnyCanvas | null;
-} = {};
+const bufferArrowCache: Record<string, AnyCanvas | null> = {};
 
-/** @private */
 const getBufferArrowCanvas = (
   canvas: AnyCanvas,
   fillColor: string,
@@ -70,7 +64,7 @@ const getBufferArrowCanvas = (
     );
     const arrowCanvas = getArrowCanvas(fillColor);
     if (arrowCanvas && buffer) {
-      const bufferCtx = buffer.getContext('2d');
+      const bufferCtx = buffer.getContext('2d') as AnyCanvasContext;
       bufferCtx?.drawImage(
         arrowCanvas,
         buffer.width - margin,
@@ -97,14 +91,15 @@ const getBufferArrowCanvas = (
  * @param {ViewState} viewState The view state of the map.
  * @param {RealtimeStyleOptions} options Some options to change the rendering
  * @return a canvas
+ * @private
  */
 const realtimeHeadingStyle: RealtimeStyleFunction = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => {
-  // @ts-ignore
-  const { rotation, type, line } = trajectory.properties;
+  // @ts-expect-error improve types
+  const { line, rotation, type } = trajectory.properties;
   const { color } = line || {};
 
   const canvas = realtimeDefaultStyle(trajectory, viewState, options);
@@ -118,18 +113,23 @@ const realtimeHeadingStyle: RealtimeStyleFunction = (
         bufferArrow.width,
         bufferArrow.height,
       );
-      vehicleWithArrow
-        ?.getContext('2d')
-        ?.drawImage(bufferArrow, 0, 0, bufferArrow.width, bufferArrow.height);
-      vehicleWithArrow
-        ?.getContext('2d')
-        ?.drawImage(
-          canvas,
-          bufferSize,
-          bufferSize,
-          canvas.width,
-          canvas.height,
-        );
+      const context: AnyCanvasContext = vehicleWithArrow?.getContext(
+        '2d',
+      ) as AnyCanvasContext;
+      context?.drawImage(
+        bufferArrow,
+        0,
+        0,
+        bufferArrow.width,
+        bufferArrow.height,
+      );
+      context?.drawImage(
+        canvas,
+        bufferSize,
+        bufferSize,
+        canvas.width,
+        canvas.height,
+      );
       return vehicleWithArrow;
     }
   }

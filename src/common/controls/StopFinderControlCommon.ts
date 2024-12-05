@@ -2,51 +2,55 @@
 /* eslint-disable no-useless-constructor */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable max-classes-per-file */
-import { FeatureCollection } from '@turf/helpers';
-import { Feature } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
+
 import { StopsAPI } from '../../api';
 import { StopsAPIOptions } from '../../api/StopsAPI';
 import { StopsParameters } from '../../types';
-import ControlCommon, { ControlCommonOptions } from './ControlCommon';
 
-export type StopFinderControlCommonOptions = ControlCommonOptions &
-  StopsAPIOptions & {
-    placeholder?: string;
-    apiParams: StopsParameters;
-  };
+export type StopFinderControlCommonOptions = {
+  apiParams: StopsParameters;
+  element: HTMLElement;
+  onSuggestionClick?: (suggestion: Feature, evt: MouseEvent) => void;
+  placeholder?: string;
+} & StopsAPIOptions;
 
 /**
  * A class representing a stop finder control to display on map.
  * This class only draw the html elements.
  * The geographic logic must be implemented by subclasses.
+ *
+ * @private
  */
-class StopFinderControlCommon extends ControlCommon {
-  apiParams: StopsParameters;
-
-  placeholder: string;
+class StopFinderControlCommon {
+  abortController?: AbortController;
 
   api: StopsAPI;
 
-  abortController?: AbortController;
+  apiParams: StopsParameters;
 
-  suggestionsElt?: HTMLElement;
+  clearElt?: HTMLDivElement;
 
   inputElt?: HTMLInputElement;
 
-  clearElt?: HTMLDivElement;
+  options?: StopFinderControlCommonOptions;
+
+  placeholder: string;
+
+  suggestionsElt?: HTMLElement;
 
   /**
    * Constructor.
    *
-   * @param {Object} options Map options
+   * @param {Object} options Options
+   * @param {HTMLElement} options.element HTML element where to attach input and suggestions.
    * @param {string} options.apiKey Access key for [geOps services](https://developer.geops.io/). See StopsAPI.
-   * @param {string} [options.url='https://api.geops.io/tracker/v1'] Stops service url. See StopsAPI.
+   * @param {string} [options.url='https://api.geops.io/stops/v1/'] Stops service url. See StopsAPI.
    * @param {string} [options.placeholder='Search for a stop...'] Input field placeholder.
    * @param {StopsSearchParams} [options.apiParams={ limit: 20 }] Request parameters. See [Stops service documentation](https://developer.geops.io/apis/5dcbd702a256d90001cf1361/).
    */
   constructor(options: StopFinderControlCommonOptions) {
-    super(options);
-    const { apiParams, apiKey, url, placeholder } = options || {};
+    const { apiKey, apiParams, placeholder, url } = options || {};
 
     this.apiParams = { limit: 20, ...(apiParams || {}) };
     this.placeholder = placeholder || 'Search for a stop...';
@@ -57,50 +61,24 @@ class StopFinderControlCommon extends ControlCommon {
     }
     this.api = new StopsAPI(apiOptions);
     this.abortController = new AbortController();
+    this.createElement(options);
+    this.options = options;
   }
 
-  deactivate() {}
-
-  render(featureCollection?: FeatureCollection) {
-    const suggestions = featureCollection?.features || [];
-    if (!this.suggestionsElt) {
+  /**
+   * Clear the search field and close the control.
+   */
+  clear() {
+    if (!this.suggestionsElt || !this.inputElt || !this.clearElt) {
       return;
     }
 
-    this.suggestionsElt.style.display = suggestions.length ? 'block' : 'none';
-
+    this.inputElt.value = '';
     this.suggestionsElt.innerHTML = '';
-
-    suggestions.forEach((suggestion) => {
-      const suggElt = document.createElement('div');
-      suggElt.innerHTML = suggestion?.properties?.name;
-      suggElt.onclick = () => {
-        // @ts-ignore
-        this.onSuggestionClick(suggestion);
-      };
-      Object.assign(suggElt.style, {
-        padding: '5px 12px',
-      });
-      this.suggestionsElt?.appendChild(suggElt);
-    });
+    this.clearElt.style.display = 'none';
   }
 
-  createDefaultElement() {
-    /**
-     * Define a default element.
-     */
-    this.element = document.createElement('div');
-    this.element.id = 'mbt-search';
-    Object.assign(this.element.style, {
-      position: 'absolute',
-      top: 0,
-      left: '50px',
-      margin: '10px',
-      display: 'flex',
-      flexDirection: 'column',
-      width: '320px',
-    });
-
+  createElement({ element }: StopFinderControlCommonOptions) {
     // Create input element
     this.inputElt = document.createElement('input');
     this.inputElt.type = 'text';
@@ -109,41 +87,63 @@ class StopFinderControlCommon extends ControlCommon {
     this.inputElt.onkeyup = (evt) => {
       this.abortController?.abort();
       this.abortController = new AbortController();
-      // @ts-ignore
+      // @ts-expect-error - Improve ts
       this.search(evt.target.value, this.abortController);
     };
     Object.assign(this.inputElt.style, {
       padding: '10px 30px 10px 10px',
     });
-    this.element.appendChild(this.inputElt);
+    element.appendChild(this.inputElt);
 
     // Create suggestions list element
     this.suggestionsElt = document.createElement('div');
     Object.assign(this.suggestionsElt.style, {
       backgroundColor: 'white',
-      overflowY: 'auto',
       cursor: 'pointer',
+      overflowY: 'auto',
     });
-    this.element.appendChild(this.suggestionsElt);
+    element.appendChild(this.suggestionsElt);
 
     this.clearElt = document.createElement('div');
     Object.assign(this.clearElt.style, {
+      cursor: 'pointer',
       display: 'none',
+      fontSize: '200%',
+      padding: '0 10px',
       position: 'absolute',
       right: '0',
-      padding: '0 10px',
-      fontSize: '200%',
-      cursor: 'pointer',
     });
     this.clearElt.innerHTML = '×';
     this.clearElt.onclick = () => this.clear();
-    this.element.appendChild(this.clearElt);
+    element.appendChild(this.clearElt);
+  }
+
+  render(featureCollection?: FeatureCollection) {
+    const suggestions = featureCollection?.features || [];
+    if (!this.suggestionsElt) {
+      return;
+    }
+
+    this.suggestionsElt.style.display = suggestions.length ? 'block' : 'none';
+    this.suggestionsElt.innerHTML = '';
+
+    suggestions.forEach((suggestion) => {
+      const suggElt = document.createElement('div');
+      suggElt.innerHTML = suggestion?.properties?.name;
+      suggElt.onclick = (evt) => {
+        this.options?.onSuggestionClick?.(suggestion, evt);
+      };
+      Object.assign(suggElt.style, {
+        padding: '5px 12px',
+      });
+      this.suggestionsElt?.appendChild(suggElt);
+    });
   }
 
   /**
    * Launch a search.
    *
-   * @param {String} query The query to search for.
+   * @param {String} q The query to search for.
    * @param {AbortController} abortController Abort controller used to cancel the request.
    * @return {Promise<Array<GeoJSONFeature>>} An array of GeoJSON features with coordinates in [EPSG:4326](http://epsg.io/4326).
    */
@@ -167,25 +167,6 @@ class StopFinderControlCommon extends ControlCommon {
       .catch(() => {
         this.render();
       });
-  }
-
-  /**
-   * To be defined in inherited class
-   */
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  onSuggestionClick(suggestion: Feature) {}
-
-  /**
-   * Clear the search field and close the control.
-   */
-  clear() {
-    if (!this.suggestionsElt || !this.inputElt || !this.clearElt) {
-      return;
-    }
-
-    this.inputElt.value = '';
-    this.suggestionsElt.innerHTML = '';
-    this.clearElt.style.display = 'none';
   }
 }
 

@@ -1,6 +1,5 @@
-import type { RealtimeTrajectory } from '../../api/typedefs';
+import { RealtimeTrajectory } from '../../types';
 
-/** @private */
 const sortByDelay = (
   traj1: RealtimeTrajectory,
   traj2: RealtimeTrajectory,
@@ -17,12 +16,17 @@ const sortByDelay = (
 
   // We put cancelled train inbetween green and yellow trains
   // >=180000ms corresponds to yellow train
+  // @ts-expect-error
   if (props1.cancelled && !props2.cancelled) {
+    // @ts-expect-error
     return props2.delay < 180000 ? -1 : 1;
   }
+  // @ts-expect-error
   if (props2.cancelled && !props1.cancelled) {
+    // @ts-expect-error
     return props1.delay < 180000 ? 1 : -1;
   }
+  // @ts-expect-error
   return props2.delay - props1.delay;
 };
 

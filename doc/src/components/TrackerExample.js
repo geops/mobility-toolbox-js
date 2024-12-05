@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import { Map } from 'maplibre-gl';
-import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/mapbox';
+import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/maplibre';
 
 const useStyles = makeStyles({
   root: {
@@ -24,16 +24,28 @@ function TrackerExample() {
       attributionControl: false,
     });
     const control = new CopyrightControl();
-    control.attachToMap(map);
+    map.addControl(control);
 
-    const tracker = new RealtimeLayer({
+    const layer = new RealtimeLayer({
       apiKey: window.apiKey,
     });
 
-    tracker.attachToMap(map);
+    const onLoad = () => {
+      map.addLayer(layer);
+    };
+
+    map.once('load', onLoad);
+
+    return () => {
+      map.off('load', onLoad);
+      if (map.getLayer(layer.id)) {
+        map.removeLayer(layer);
+      }
+      map.removeControl(control);
+    };
   }, []);
 
   return <div id="map" className={classes.root} />;
 }
 
-export default TrackerExample;
+export default React.memo(TrackerExample);

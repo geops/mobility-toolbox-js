@@ -1,11 +1,17 @@
 import { MapEvent } from 'ol';
+import Control, { Options } from 'ol/control/Control';
 import { inView } from 'ol/layer/Layer';
-import type { FrameState } from 'ol/Map';
-import CopyrightControlCommon from '../../common/controls/CopyrightControlCommon';
+
+import createDefaultCopyrightElement from '../../common/utils/createDefaultCopyrightElt';
 import removeDuplicate from '../../common/utils/removeDuplicate';
 
+export type CopyrightControlOptions = {
+  className?: 'string';
+  format?: (copyrights: string[]) => string;
+} & Options;
+
 /**
- * Display layer's copyrights.
+ * Display layer's copyrights. Adding the possibility to format them as you wish.
  *
  * @example
  * import { Map } from 'ol';
@@ -14,68 +20,69 @@ import removeDuplicate from '../../common/utils/removeDuplicate';
  * const map = new Map({
  *   target: 'map',
  * });
+ *
  * const control = new CopyrightControl();
- * control.attachToMap(map)
+ * map.addControl(control);
  *
  *
- * @see <a href="/example/ol-copyright">Openlayers copyright example</a>
+ * @see <a href="/example/ol-realtime>OpenLayers Realtime layer example</a>
  *
- * @extends {CopyrightControlCommon}
+ * @extends {ol/control/Control~Control}
+ *
  */
-class CopyrightControl extends CopyrightControlCommon {
-  frameState?: FrameState;
+class CopyrightControl extends Control {
+  format: (copyrights: string[]) => string;
 
-  constructor(options: any) {
-    super(options);
-    this.onPostRender = this.onPostRender.bind(this);
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {Function} format Function used to format the list of copyrights available to a single string. By default join all the copyrights with a |.
+   * @public
+   */
+  constructor(options: CopyrightControlOptions = {}) {
+    const element = createDefaultCopyrightElement();
+    element.className = options.className || 'mbt-copyright';
+    super({
+      element,
+      ...options,
+    });
+    this.format =
+      options.format ||
+      ((copyrights) => {
+        return copyrights?.join(' | ');
+      });
   }
 
-  getCopyrights() {
-    if (!this.frameState) {
-      return [];
+  render({ frameState }: MapEvent) {
+    if (!frameState) {
+      this.element.innerHTML = '';
+      return;
     }
     let copyrights: string[] = [];
 
     // This code loop comes mainly from ol.
-    this.frameState?.layerStatesArray.forEach((layerState: any) => {
+    frameState?.layerStatesArray.forEach((layerState: any) => {
       const { layer } = layerState;
-      if (
-        this.frameState &&
-        inView(layerState, this.frameState.viewState) &&
-        layer &&
-        layer.getSource &&
-        layer.getSource() &&
-        layer.getSource().getAttributions()
-      ) {
-        copyrights = copyrights.concat(
-          layer.getSource().getAttributions()(this.frameState),
-        );
+
+      if (frameState && inView(layerState, frameState.viewState)) {
+        if (layer?.getSource()?.getAttributions()) {
+          copyrights = copyrights.concat(
+            layer.getSource().getAttributions()(frameState),
+          );
+        }
+
+        if (layer?.get('copyrights')) {
+          let copyProp = layer.get('copyrights');
+          copyProp = !Array.isArray(copyProp) ? [copyProp] : copyProp;
+          if (copyProp?.length) {
+            copyrights.push(...copyProp);
+          }
+        }
       }
     });
-    return removeDuplicate(copyrights);
-  }
-
-  activate() {
-    super.activate();
-    if (this.map) {
-      this.map.on('postrender', this.onPostRender);
-    }
-  }
-
-  deactivate() {
-    if (this.map) {
-      this.map.un('postrender', this.onPostRender);
-    }
-  }
-
-  onPostRender(evt: MapEvent) {
-    if (this.map && this.element) {
-      /**
-       * @private
-       */
-      this.frameState = evt.frameState || undefined;
-      this.render();
-    }
+    const unique = removeDuplicate(copyrights) || [];
+    this.element.innerHTML = this.format(unique);
   }
 }
 

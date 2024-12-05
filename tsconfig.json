@@ -11,7 +11,7 @@
     // "emitDeclarationOnly": true,
     // go to js file when using IDE functions like
     // "Go to Definition" in VSCode
-    "declarationMap": true,
+    // "declarationMap": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
@@ -19,5 +19,5 @@
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],
-  "exclude": ["./node_modules/**/*", "./node_modules/*"]
+  "exclude": ["dev.js","/node_modules/**/**/*","./node_modules/**/*", "./node_modules/*", "./__mocks__/maplibre-gl.js","ol"]
 }

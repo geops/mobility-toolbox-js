@@ -1,6 +1,5 @@
 import { AnyCanvasContext, RealtimeMot } from '../../types';
 
-/** @private */
 const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -14,19 +13,34 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
+/**
+ * @private
+ */
 export const MOTS_ONLY_RAIL: RealtimeMot[] = ['rail'];
+
+/**
+ * @private
+ */
 export const MOTS_WITH_CABLE: RealtimeMot[] = [
   'cablecar',
   'gondola',
   'funicular',
   'coach',
 ];
+
+/**
+ * @private
+ */
 export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
   'tram',
   'subway',
   'rail',
   'bus',
 ];
+
+/**
+ * @private
+ */
 export const MOTS_ALL: RealtimeMot[] = [
   'tram',
   'subway',
@@ -173,7 +187,7 @@ export const getTextSize = (
  * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
  */
 export const getDelayColor = (
-  delayInMs: number | null,
+  delayInMs: null | number,
   cancelled?: boolean,
   isDelayText?: boolean,
 ): string => {

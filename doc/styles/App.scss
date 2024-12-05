@@ -1,4 +1,5 @@
 @import url("maplibre-gl/dist/maplibre-gl.css");
+@import url("@geops/geops-ui/geops-ui.css");
 
 html {
   height: 100%;
@@ -12,6 +13,24 @@ body {
   min-height: 100%;
   overflow-y: scroll;
   font-size: 18px;
+}
+
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+*::-webkit-thumb:hover {
+  background: #555;
 }
 
 a {

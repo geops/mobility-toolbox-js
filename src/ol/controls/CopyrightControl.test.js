@@ -1,10 +1,10 @@
-import View from 'ol/View';
-import Tile from 'ol/Tile';
+import { Map } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import TileSource from 'ol/source/Tile';
+import Tile from 'ol/Tile';
 import { createXYZ } from 'ol/tilegrid';
-import { Map } from 'ol';
-import Layer from '../layers/Layer';
+import View from 'ol/View';
+
 import CopyrightControl from './CopyrightControl';
 
 const tileLoadFunction = () => {
@@ -18,8 +18,9 @@ const tileLoadFunction = () => {
   return tile;
 };
 
-const getOLTileLayer = () => {
+const getOLTileLayer = (options = {}) => {
   const layer = new TileLayer({
+    ...options,
     source: new TileSource({
       projection: 'EPSG:3857',
       tileGrid: createXYZ(),
@@ -30,10 +31,9 @@ const getOLTileLayer = () => {
 };
 
 const getLayer = (copyrights, visible = true) =>
-  new Layer({
-    visible,
+  getOLTileLayer({
     copyrights,
-    olLayer: getOLTileLayer(),
+    visible,
   });
 
 describe('CopyrightControl', () => {
@@ -49,7 +49,7 @@ describe('CopyrightControl', () => {
         zoom: 0,
       }),
     });
-    getLayer(true, 'bar').attachToMap(map);
+    map.addLayer(getLayer(true, 'bar'));
     map.setSize([200, 200]);
     map.renderSync();
   });
@@ -61,113 +61,73 @@ describe('CopyrightControl', () => {
     }
   });
 
-  test('should be activate by default', () => {
-    const control = new CopyrightControl();
-    expect(control.active).toBe(true);
-  });
-
   test('renders a string copyright', () => {
     const control = new CopyrightControl();
-    control.attachToMap(map);
+    map.addControl(control);
     expect(control.element.innerHTML).toBe('');
-    getLayer('copyright').attachToMap(map);
+    map.addLayer(getLayer('copyright'));
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright');
   });
 
   test('renders an array of copyrights', () => {
     const control = new CopyrightControl();
-    control.attachToMap(map);
+    map.addControl(control);
     expect(control.element.innerHTML).toBe('');
-    getLayer(['copyright 1', 'copyright 2']).attachToMap(map);
+    map.addLayer(getLayer(['copyright 1', 'copyright 2']));
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright 1 | copyright 2');
   });
 
   test('renders unique copyrights', () => {
     const control = new CopyrightControl();
-    control.attachToMap(map);
+    map.addControl(control);
     expect(control.element.innerHTML).toBe('');
-    getLayer(['copyright 1', 'copyright 2']).attachToMap(map);
-    getLayer('copyright 1').attachToMap(map);
-    getLayer(['copyright 2']).attachToMap(map);
+    map.addLayer(getLayer(['copyright 1', 'copyright 2']));
+    map.addLayer(getLayer('copyright 1'));
+    map.addLayer(getLayer(['copyright 2']));
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright 1 | copyright 2');
   });
 
   test("doesn't render copyright of an hidden layer", () => {
     const control = new CopyrightControl();
-    control.attachToMap(map);
+    map.addControl(control);
     expect(control.element.innerHTML).toBe('');
     const layer1 = getLayer('copyright hidden', false);
-    layer1.attachToMap(map);
+    map.addLayer(layer1);
     const layer2 = getLayer('copyright', true);
-    layer2.attachToMap(map);
+    map.addLayer(layer2);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright');
 
     // the we update visibility of both layers
-    layer1.visible = true;
+    layer1.setVisible(true);
     map.renderSync();
-    layer2.visible = false;
+    layer2.setVisible(false);
     map.renderSync();
     expect(control.element.innerHTML).toBe('copyright hidden');
   });
 
-  test('should activate the control on construction then deactivate it', () => {
-    getLayer('copyright 1').attachToMap(map);
-    const control = new CopyrightControl({ active: true });
-    control.attachToMap(map);
-    map.renderSync();
-
-    expect(control.element.parentNode).toBe(map.getTargetElement());
-
-    // Should be activated by default.
-    expect(control.active).toBe(true);
-    expect(control.element.innerHTML).toBe('copyright 1');
-
-    // on deactivation
-    control.active = false;
-    map.renderSync();
-    expect(control.element.innerHTML).toBe('');
-  });
-
-  test('should deactivate the control on constrcution then activate it', () => {
-    getLayer('copyright 1').attachToMap(map);
-    const control = new CopyrightControl({ active: false });
-    control.attachToMap(map);
-    map.renderSync();
-
-    expect(control.element.parentNode).toBe(map.getTargetElement());
-
-    // Should be activated by default.
-    expect(control.active).toBe(false);
-    map.renderSync();
-    expect(control.element.innerHTML).toBe('');
-
-    // on deactivation
-    control.active = true;
-    map.renderSync();
-    expect(control.element.innerHTML).toBe('copyright 1');
-  });
-
   test('should add copyrights in the map container element then remove it.', () => {
-    getLayer('copyright value').attachToMap(map);
+    map.addLayer(getLayer('copyright value'));
     map.renderSync();
 
     const control = new CopyrightControl();
 
     // Add control
-    control.attachToMap(map);
-    expect(control.element.parentNode).toBe(map.getTargetElement());
+    map.addControl(control);
+    expect(control.element.parentNode.className).toBe(
+      'ol-overlaycontainer-stopevent',
+    );
 
     // Remove control
-    control.detachFromMap();
+    map.removeControl(control);
     expect(control.element.parentNode).toBe(null);
   });
 
   test('should add copyrights in the target element then remove it.', () => {
-    getLayer(['copyright value']).attachToMap(map);
+    map.addLayer(getLayer(['copyright value']));
     map.renderSync();
 
     const target = document.createElement('div');
@@ -179,33 +139,28 @@ describe('CopyrightControl', () => {
     });
 
     // Add control
-    control.attachToMap(map);
+    map.addControl(control);
     expect(control.element.parentNode).toBe(target);
 
     // Remove control
-    control.detachFromMap();
+    map.removeControl(control);
     expect(control.element.parentNode).toBe(null);
   });
 
-  test('renders custom copyrights with the render method ', () => {
+  test('renders custom copyrights with the format method ', () => {
     const control = new CopyrightControl({
       active: true,
-      render() {
-        if (!this.element) {
-          return;
-        }
-        this.element.innerHTML = this.active
-          ? this.getCopyrights().join(', ')
-          : '';
+      format: (copyrights) => {
+        return copyrights?.join(',,, ');
       },
     });
-    control.attachToMap(map);
-    getLayer(['copyright 1', 'copyright 2', 'copyright 3']).attachToMap(map);
+    map.addControl(control);
+    map.addLayer(getLayer(['copyright 1', 'copyright 2', 'copyright 3']));
     map.renderSync();
 
     // Add control
     expect(control.element.innerHTML).toBe(
-      'copyright 1, copyright 2, copyright 3',
+      'copyright 1,,, copyright 2,,, copyright 3',
     );
   });
 });

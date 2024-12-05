@@ -1,183 +1,147 @@
-import GeoJSON from 'ol/format/GeoJSON';
-import { Layer as OLLayer, Group, Vector as VectorLayer } from 'ol/layer';
-import Source from 'ol/source/Source';
-import { composeCssTransform } from 'ol/transform';
-import { Vector as VectorSource } from 'ol/source';
-import Feature, { FeatureLike } from 'ol/Feature';
-import { MapEvent } from 'ol';
-import { Coordinate } from 'ol/coordinate';
-import { ObjectEvent } from 'ol/Object';
+import { DebouncedFunc } from 'lodash';
 import debounce from 'lodash.debounce';
-import Layer from './Layer';
-import mixin, {
-  RealtimeLayerMixinOptions,
-} from '../../common/mixins/RealtimeLayerMixin';
-import { fullTrajectoryStyle } from '../styles';
+import { Map, MapEvent } from 'ol';
+import { EventsKey } from 'ol/events';
+import Feature, { FeatureLike } from 'ol/Feature';
+import GeoJSON from 'ol/format/GeoJSON';
+import { Vector as VectorLayer } from 'ol/layer';
+import Layer from 'ol/layer/Layer';
+import { ObjectEvent } from 'ol/Object';
+import { unByKey } from 'ol/Observable';
+import { Vector as VectorSource } from 'ol/source';
+import Source from 'ol/source/Source';
+import { State } from 'ol/View';
+
+import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
+import { FilterFunction, SortFunction } from '../../common/typedefs';
+import RealtimeEngine, {
+  RealtimeEngineOptions,
+} from '../../common/utils/RealtimeEngine';
+import { RealtimeAPI } from '../../maplibre';
 import {
-  AnyMap,
-  LayerGetFeatureInfoResponse,
   RealtimeFullTrajectory,
+  RealtimeMode,
+  RealtimeRenderState,
   RealtimeTrainId,
   ViewState,
 } from '../../types';
-import { RealtimeTrajectory } from '../../api/typedefs';
-import { WebSocketAPIMessageEventData } from '../../common/api/WebSocketAPI';
+import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
+import { fullTrajectoryStyle } from '../styles';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
-/** @private */
 const format = new GeoJSON();
 
-export type OlRealtimeLayerOptions = RealtimeLayerMixinOptions & {
+export type RealtimeLayerOptions = {
+  allowRenderWhenAnimating?: boolean;
   fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
     options: any,
   ) => void;
-  allowRenderWhenAnimating?: boolean;
-};
+  maxNbFeaturesRequested?: number;
+} & RealtimeEngineOptions;
 
 /**
- * Responsible for loading and display data from a Realtime service.
+ * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
  *
  * @example
  * import { RealtimeLayer } from 'mobility-toolbox-js/ol';
  *
  * const layer = new RealtimeLayer({
- *   url: [yourUrl],
- *   apiKey: [yourApiKey],
+ *   apiKey: "yourApiKey"
+ *   // allowRenderWhenAnimating: false,
+ *   // url: "wss://api.geops.io/tracker-ws/v1/",
  * });
  *
  *
  * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
+ * @see <a href="/example/ol-realtime">OpenLayers Realtime layer example</a>
  *
- * @extends {Layer}
- * @implements {UserInteractionsLayerInterface}
- * @implements {RealtimeLayerInterface}
+ *
+ * @extends {ol/layer/Layer~Layer}
+ *
+ *
+ * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
+ * @public
  */
-// @ts-ignore
-class RealtimeLayer extends mixin(Layer) {
+class RealtimeLayer extends Layer {
   allowRenderWhenAnimating?: boolean = false;
+  currentZoom?: number;
+  engine: RealtimeEngine;
+  maxNbFeaturesRequested = 100;
+  public olEventsKeys: EventsKey[] = [];
+  onMoveEndDebounced: DebouncedFunc<(evt: MapEvent | ObjectEvent) => void>;
+  onZoomEndDebounced: DebouncedFunc<(evt: MapEvent | ObjectEvent) => void>;
+  renderedViewState: State | undefined;
+  vectorLayer: VectorLayer<VectorSource>;
 
   /**
    * Constructor.
    *
-   * @param {Object} options
-   * @private
+   * @param {RealtimeLayerOptions} options
+   * @param {boolean} [options.allowRenderWhenAnimating=false] Allow rendering of the layer when the map is animating.
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
+   * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The [geOps Realtime API](https://developer.geops.io/apis/realtime/) url.
+   * @public
    */
-  constructor(options: OlRealtimeLayerOptions) {
+  constructor(options: RealtimeLayerOptions) {
     // We use a group to be able to add custom vector layer in extended class.
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
+      source: new Source({}), // TODO set some attributions
+      ...options,
+    });
+
+    // For backward compatibility with v2
+    defineDeprecatedProperties(this, options);
+
+    this.engine = new RealtimeEngine({
+      getViewState: this.getViewState.bind(this),
+      onRender: this.onRealtimeEngineRender.bind(this),
       ...options,
     });
 
     this.allowRenderWhenAnimating = !!options.allowRenderWhenAnimating;
 
-    /** @private */
-    this.olLayer =
-      options.olLayer ||
-      new Group({
-        layers: [
-          new VectorLayer({
-            updateWhileAnimating: true,
-            updateWhileInteracting: true,
-            source: new VectorSource({ features: [] }),
-            style: (feature, resolution) => {
-              return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
-                feature,
-                resolution,
-                this.styleOptions,
-              );
-            },
-          }),
-          new OLLayer({
-            source: new Source({}),
-            render: (frameState) => {
-              if (!this.container) {
-                this.container = document.createElement('div');
-                this.container.style.position = 'absolute';
-                this.container.style.width = '100%';
-                this.container.style.height = '100%';
-                this.transformContainer = document.createElement('div');
-                this.transformContainer.style.position = 'absolute';
-                this.transformContainer.style.width = '100%';
-                this.transformContainer.style.height = '100%';
-                this.container.appendChild(this.transformContainer);
-                if (this.canvas) {
-                  (this.canvas as HTMLCanvasElement).style.position =
-                    'absolute';
-                  (this.canvas as HTMLCanvasElement).style.top = '0';
-                  (this.canvas as HTMLCanvasElement).style.left = '0';
-                  (this.canvas as HTMLCanvasElement).style.transformOrigin =
-                    'top left';
-                  this.transformContainer.appendChild(this.canvas);
-                }
-              }
-
-              if (this.renderedViewState) {
-                const { center, resolution, rotation } = frameState.viewState;
-                const {
-                  center: renderedCenter,
-                  resolution: renderedResolution,
-                  rotation: renderedRotation,
-                } = this.renderedViewState;
-
-                if (renderedResolution / resolution >= 3) {
-                  // Avoid having really big points when zooming fast.
-                  const context = this.canvas?.getContext('2d');
-                  context?.clearRect(
-                    0,
-                    0,
-                    this.canvas?.width as number,
-                    this.canvas?.height as number,
-                  );
-                } else {
-                  const pixelCenterRendered =
-                    this.map.getPixelFromCoordinate(renderedCenter);
-                  const pixelCenter = this.map.getPixelFromCoordinate(center);
-                  this.transformContainer.style.transform = composeCssTransform(
-                    pixelCenterRendered[0] - pixelCenter[0],
-                    pixelCenterRendered[1] - pixelCenter[1],
-                    renderedResolution / resolution,
-                    renderedResolution / resolution,
-                    rotation - renderedRotation,
-                    0,
-                    0,
-                  );
-                }
-              }
-              return this.container;
-            },
-          }),
-        ],
-      });
-
     // We store the layer used to highlight the full Trajectory
-    this.vectorLayer = this.olLayer.getLayers().item(0);
 
-    // Options the last render run did happen. If something changes
-    // we have to render again
-    /** @private */
-    this.renderState = {
-      center: [0, 0],
-      zoom: undefined,
-      rotation: 0,
-    };
+    this.vectorLayer = new VectorLayer<VectorSource>({
+      source: new VectorSource<Feature>({ features: [] }),
+      style: (feature, resolution) => {
+        return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
+          feature,
+          resolution,
+          this.engine.styleOptions,
+        );
+      },
+      updateWhileAnimating: this.allowRenderWhenAnimating,
+      updateWhileInteracting: true,
+    });
 
     this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
+
     this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
   }
 
-  attachToMap(map: AnyMap) {
-    super.attachToMap(map);
-    if (this.map) {
-      this.olListenersKeys.push(
-        ...this.map.on(
+  attachToMap() {
+    this.engine.attachToMap();
+    const mapInternal = this.getMapInternal();
+    if (mapInternal) {
+      // If the layer is visible we start  the rendering clock
+      if (this.getVisible()) {
+        this.engine.start();
+      }
+      const index = mapInternal.getLayers().getArray().indexOf(this);
+      mapInternal.getLayers().insertAt(index, this.vectorLayer);
+      this.olEventsKeys.push(
+        ...mapInternal.on(
           ['moveend', 'change:target'],
+          // @ts-expect-error  - bad ol definitions
           (evt: MapEvent | ObjectEvent) => {
             const view = (
               (evt as MapEvent).map || (evt as ObjectEvent).target
             ).getView();
-            if (view.getAnimating() || view.getInteracting()) {
+            if (!view || view?.getAnimating() || view?.getInteracting()) {
               return;
             }
             const zoom = view.getZoom();
@@ -191,274 +155,281 @@ class RealtimeLayer extends mixin(Layer) {
             this.onMoveEndDebounced(evt);
           },
         ),
+        this.on('change:visible', (evt: ObjectEvent) => {
+          if (evt.target.getVisible()) {
+            this.engine.start();
+          } else {
+            this.engine.stop();
+          }
+        }),
+        this.on('propertychange', (evt: ObjectEvent) => {
+          // We apply every property change event related to visiblity to the vectorlayer
+          if (
+            /(opacity|visible|zIndex|minResolution|maxResolution|minZoom|maxZoom)/.test(
+              evt.key,
+            )
+          ) {
+            this.vectorLayer.set(evt.key, evt.target.get(evt.key));
+          }
+        }),
       );
     }
+  }
+  /**
+   * Create a copy of the RealtimeLayer.
+   *
+   * @param {Object} newOptions Options to override. See constructor.
+   * @return {RealtimeLayer} A RealtimeLayer
+   * @public
+   */
+  clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
+    return new RealtimeLayer({ ...this.get('options'), ...newOptions });
+  }
+
+  createRenderer() {
+    return new RealtimeLayerRenderer(this);
   }
 
   /**
    * Destroy the container of the tracker.
    */
   detachFromMap() {
-    super.detachFromMap();
-    this.container = null;
+    unByKey(this.olEventsKeys);
+    this.getMapInternal()?.removeLayer(this.vectorLayer);
+    this.engine.detachFromMap();
   }
 
   /**
-   * Detect in the canvas if there is data to query at a specific coordinate.
-   * @param {ol/coordinate~Coordinate}  coordinate The coordinate to test
+   * Get some informations about a trajectory.
+   *
+   * @param {RealtimeTrainId} id A vehicle's id.
    * @returns
    */
-  hasFeatureInfoAtCoordinate(coordinate: Coordinate) {
-    if (this.map && this.canvas) {
-      const context = this.canvas.getContext('2d', {
-        willReadFrequently: true,
-      });
-      const pixel = this.map.getPixelFromCoordinate(coordinate);
-      return !!context?.getImageData(
-        pixel[0] * (this.pixelRatio || 1),
-        pixel[1] * (this.pixelRatio || 1),
-        1,
-        1,
-      ).data[3];
-    }
-    return false;
-  }
+  getTrajectoryInfos(id: RealtimeTrainId) {
+    // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
+    // Then we combine them in one response and send them to inherited layers.
+    const promises = [
+      this.engine.api.getStopSequence(id),
+      this.engine.api.getFullTrajectory(
+        id,
+        this.engine.mode,
+        this.engine.getGeneralizationLevelByZoom(
+          Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
+        ),
+      ),
+    ];
 
-  /**
-   * Render the trajectories using current map's size, resolution and rotation.
-   * @param {boolean} noInterpolate if true, renders the vehicles without interpolating theirs positions.
-   * @overrides
-   */
-  // @ts-ignore
-  renderTrajectories(noInterpolate: boolean) {
-    if (!this.map) {
-      return;
-    }
-
-    const view = this.map.getView();
-
-    // it could happen that the view is set but without center yet,
-    // so the calcualteExtent will trigger an error.
-    if (!view.getCenter()) {
-      return;
-    }
-
-    super.renderTrajectories(
-      {
-        size: this.map.getSize(),
-        center: view.getCenter(),
-        extent: view.calculateExtent(),
-        resolution: view.getResolution(),
-        rotation: view.getRotation(),
-        zoom: view.getZoom(),
-        pixelRatio: this.pixelRatio,
-      },
-      noInterpolate,
-    );
-  }
-
-  /**
-   * Launch renderTrajectories. it avoids duplicating code in renderTrajectories methhod.
-   * @private
-   * @override
-   */
-  renderTrajectoriesInternal(viewState: ViewState, noInterpolate: boolean) {
-    if (!this.map) {
-      return false;
-    }
-    let isRendered = false;
-
-    const blockRendering = this.allowRenderWhenAnimating
-      ? false
-      : this.map.getView().getAnimating() ||
-        this.map.getView().getInteracting();
-
-    // Don't render the map when the map is animating or interacting.
-    isRendered = blockRendering
-      ? false
-      : super.renderTrajectoriesInternal(viewState, noInterpolate);
-
-    // We update the current render state.
-    if (isRendered) {
-      this.renderedViewState = { ...viewState };
-
-      if (this.transformContainer) {
-        this.transformContainer.style.transform = '';
-      }
-    }
-    return isRendered;
-  }
-
-  /**
-   * Return the delay in ms before the next rendering.
-   */
-  getRefreshTimeInMs() {
-    return super.getRefreshTimeInMs(this.map.getView().getZoom());
-  }
-
-  getFeatureInfoAtCoordinate(
-    coordinate: Coordinate,
-    options = {},
-  ): Promise<LayerGetFeatureInfoResponse> {
-    if (!this.map || !this.map.getView()) {
-      return Promise.resolve({
-        layer: this,
-        features: [],
-        coordinate,
-      });
-    }
-
-    const resolution = this.map.getView().getResolution();
-    return super.getFeatureInfoAtCoordinate(coordinate, {
-      resolution,
-      ...options,
+    return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
+      const response = {
+        fullTrajectory,
+        stopSequence,
+      };
+      return response;
     });
   }
 
-  /**
-   * On move end we update the websocket with the new bbox.
-   *
-   * @private
-   * @override
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onMoveEnd(evt: MapEvent | ObjectEvent) {
-    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
-      return;
-    }
+  getVehicles(filterFunc: FilterFunction) {
+    return this.engine.getVehicles(filterFunc);
+  }
 
-    this.setBbox();
+  getViewState() {
+    const mapInternal = this.getMapInternal();
+    if (!mapInternal?.getView()) {
+      return {};
+    }
+    const view = mapInternal.getView();
+    return {
+      center: view.getCenter(),
+      extent: view.calculateExtent(),
+      pixelRatio: this.engine.pixelRatio,
+      resolution: view.getResolution(),
+      rotation: view.getRotation(),
+      size: mapInternal.getSize(),
+      visible: this.getVisible(),
+      zoom: view.getZoom(),
+    };
+  }
+
+  highlight(feature: Feature) {
+    const id = feature?.get('train_id');
+    if (this.hoverVehicleId !== id) {
+      this.hoverVehicleId = id;
+      this.engine.renderTrajectories(true);
+    }
   }
 
   /**
-   * Function called on moveend event only when the zoom has changed.
-   *
-   * @param {ol/MapEvent~MapEvent} evt Moveend event.
-   * @private
-   * @override
+   * Highlight the trajectory of journey.
    */
-  // eslint-disable-next-line no-unused-vars
+  highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
+    if (!id) {
+      this.vectorLayer?.getSource()?.clear(true);
+      return Promise.resolve([]);
+    }
+    return this.engine.api
+      .getFullTrajectory(
+        id,
+        this.engine.mode,
+        this.engine.getGeneralizationLevelByZoom(
+          Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
+        ),
+      )
+      .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
+        const fullTrajectory = data.content;
+
+        if (!fullTrajectory?.features?.length) {
+          return [];
+        }
+        const features = format.readFeatures(fullTrajectory);
+        this.vectorLayer?.getSource()?.clear(true);
+        if (features.length) {
+          this.vectorLayer?.getSource()?.addFeatures(features);
+        }
+        return features;
+      })
+      .catch(() => {
+        this.vectorLayer?.getSource()?.clear(true);
+        return [];
+      });
+  }
+
+  onMoveEnd() {
+    if (!this.engine.isUpdateBboxOnMoveEnd || !this.getVisible()) {
+      return;
+    }
+
+    this.engine.setBbox();
+  }
+
+  /**
+   * Callback when the RealtimeEngine has rendered successfully.
+   */
+  onRealtimeEngineRender(
+    renderState: RealtimeRenderState,
+    viewState: ViewState,
+  ) {
+    this.renderedViewState = { ...viewState } as State;
+    // @ts-expect-error  - we are in the same class
+    const { container } = this.getRenderer() as RealtimeLayerRenderer;
+    if (container) {
+      container.style.transform = '';
+    }
+  }
+
   onZoomEnd() {
-    super.onZoomEnd();
+    this.engine.onZoomEnd();
 
-    if (!this.isUpdateBboxOnMoveEnd || !this.visible) {
+    if (!this.engine.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
 
-    if (this.userClickInteractions && this.selectedVehicleId) {
-      this.highlightTrajectory(this.selectedVehicleId);
-    }
-  }
-
-  /**
-   * Update the cursor style when hovering a vehicle.
-   *
-   * @private
-   * @override
-   */
-  onFeatureHover(
-    features: Feature[],
-    layer: RealtimeLayer,
-    coordinate: Coordinate,
-  ) {
-    super.onFeatureHover(features, layer, coordinate);
-    this.map.getTargetElement().style.cursor = features.length
-      ? 'pointer'
-      : 'auto';
-  }
-
-  /**
-   * Display the complete trajectory of the vehicle.
-   *
-   * @private
-   * @override
-   */
-  onFeatureClick(
-    features: Feature[],
-    layer: RealtimeLayer,
-    coordinate: Coordinate,
-  ) {
-    super.onFeatureClick(features, layer, coordinate);
-    if (!features.length && this.vectorLayer) {
-      this.vectorLayer.getSource().clear();
-    }
     if (this.selectedVehicleId) {
       this.highlightTrajectory(this.selectedVehicleId);
     }
   }
 
-  /**
-   * Remove the trajectory form the list if necessary.
-   *
-   * @private
-   */
-  purgeTrajectory(
-    trajectory: RealtimeTrajectory,
-    extent: [number, number, number, number],
-    zoom: number,
-  ) {
-    const center = this.map.getView().getCenter();
-    if (!extent && !center) {
-      // In that case the view is not zoomed yet so we can't calculate the extent of the map,
-      // it will trigger a js error on calculateExtent function.
-      return false;
+  select(feature: Feature) {
+    const id = feature?.get('train_id');
+    if (this.selectedVehicleId !== id) {
+      this.selectedVehicleId = id;
+      this.engine.renderTrajectories(true);
     }
-    return super.purgeTrajectory(
-      trajectory,
-      extent || this.map.getView().calculateExtent(),
-      zoom || this.map.getView().getZoom(),
-    );
+    this.highlightTrajectory(id);
+  }
+
+  override setMapInternal(map: Map) {
+    if (map) {
+      super.setMapInternal(map);
+      this.attachToMap();
+    } else {
+      this.detachFromMap();
+      super.setMapInternal(map);
+    }
+  }
+
+  shouldRender() {
+    return this.allowRenderWhenAnimating
+      ? false
+      : this.getMapInternal()?.getView().getAnimating() ||
+          this.getMapInternal()?.getView().getInteracting();
   }
 
   /**
-   * Send the current bbox to the websocket
+   * Start the rendering.
    *
-   * @private
+   * @public
    */
-  setBbox(extent?: [number, number, number, number], zoom?: number) {
-    super.setBbox(
-      extent || this.map.getView().calculateExtent(),
-      zoom || this.map.getView().getZoom(),
-    );
+  start() {
+    this.engine.start();
   }
 
   /**
-   * Highlight the trajectory of journey.
-   * @private
+   * Stop the rendering.
+   *
+   * @public
    */
-  highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
-    return this.api
-      .getFullTrajectory(
-        id,
-        this.mode,
-        this.getGeneralizationLevelByZoom(
-          Math.floor(this.map?.getView()?.getZoom() || 0),
-        ),
-      )
-      .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
-        const fullTrajectory = data.content;
-        this.vectorLayer.getSource().clear();
-
-        if (
-          !fullTrajectory ||
-          !fullTrajectory.features ||
-          !fullTrajectory.features.length
-        ) {
-          return undefined;
-        }
-        const features = format.readFeatures(fullTrajectory);
-        this.vectorLayer.getSource().addFeatures(features);
-        return features as Feature[];
-      });
+  stop() {
+    this.engine.stop();
   }
 
-  /**
-   * Create a copy of the RealtimeLayer.
-   * @param {Object} newOptions Options to override
-   * @return {RealtimeLayer} A RealtimeLayer
-   */
-  clone(newOptions: OlRealtimeLayerOptions) {
-    return new RealtimeLayer({ ...this.options, ...newOptions });
+  get api() {
+    return this.engine.api;
+  }
+
+  set api(api: RealtimeAPI) {
+    this.engine.api = api;
+  }
+
+  get canvas() {
+    return this.engine.canvas;
+  }
+
+  get filter(): FilterFunction | undefined {
+    return this.engine.filter;
+  }
+
+  set filter(filter: FilterFunction) {
+    this.engine.filter = filter;
+  }
+
+  get hoverVehicleId(): RealtimeTrainId | undefined {
+    return this.engine.hoverVehicleId;
+  }
+
+  set hoverVehicleId(id: RealtimeTrainId) {
+    this.engine.hoverVehicleId = id;
+  }
+
+  get mode() {
+    return this.engine.mode;
+  }
+
+  set mode(mode: RealtimeMode) {
+    this.engine.mode = mode;
+  }
+
+  get pixelRatio() {
+    return this.engine.pixelRatio;
+  }
+
+  get selectedVehicleId(): RealtimeTrainId | undefined {
+    return this.engine.selectedVehicleId;
+  }
+
+  set selectedVehicleId(id: RealtimeTrainId) {
+    this.engine.selectedVehicleId = id;
+  }
+
+  get sort(): SortFunction | undefined {
+    return this.engine.sort;
+  }
+
+  set sort(sort: SortFunction) {
+    this.engine.sort = sort;
+  }
+
+  get trajectories() {
+    return this.engine.trajectories;
   }
 }
 

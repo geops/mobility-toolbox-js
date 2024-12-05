@@ -2,8 +2,8 @@ import { RealtimeDeparture } from '../../types';
 
 /**
  * Compare two given departures for sort alogithm,
- * @param {Departure} a First departure.
- * @param {Departure} b Second departure.
+ * @param {RealtimeDeparture} a First departure.
+ * @param {RealtimeDeparture} b Second departure.
  * @param {boolean} [sortByMinArrivalTime=false] Sort departures by arrival time.
  * @private
  */

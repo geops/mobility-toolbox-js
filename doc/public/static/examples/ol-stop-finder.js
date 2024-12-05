@@ -1,11 +1,6 @@
 import View from 'ol/View';
 import Map from 'ol/Map';
-import {
-  MapboxLayer,
-  CopyrightControl,
-  StopFinderControl,
-} from 'mobility-toolbox-js/ol';
-import 'ol/ol.css';
+import { MaplibreLayer, StopFinderControl } from 'mobility-toolbox-js/ol';
 
 export default () => {
   const map = new Map({
@@ -17,19 +12,15 @@ export default () => {
     controls: [],
   });
 
-  const copyright = new CopyrightControl();
-  copyright.attachToMap(map);
-
-  const stopFinder = new StopFinderControl({
+  const control = new StopFinderControl({
     apiKey: window.apiKey,
   });
-  stopFinder.attachToMap(map);
+  map.addControl(control);
 
-  const mapboxLayer = new MapboxLayer({
-    url: 'https://maps.geops.io/styles/travic_v2/style.json',
+  const layer = new MaplibreLayer({
     apiKey: window.apiKey,
   });
-  mapboxLayer.attachToMap(map);
+  map.addLayer(layer);
 
-  map.on('singleclick', () => stopFinder.clear());
+  map.on('singleclick', () => control.clear());
 };
