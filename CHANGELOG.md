@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/geops/mobility-toolbox-js/compare/v2.4.2...v3.0.0) (2024-12-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* see migartion guide on the root of the project.
+
+### Features
+
+* v3 ([#207](https://github.com/geops/mobility-toolbox-js/issues/207)) ([f2836aa](https://github.com/geops/mobility-toolbox-js/commit/f2836aa28dc7d9c94daeae11df4e12da21bcd84f))
+
 ## [3.0.0](https://github.com/geops/mobility-toolbox-js/compare/v3.0.0-beta.21...v3.0.0) (2024-07-09)
 
 
