@@ -38,10 +38,9 @@ function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
             build: 'parcel build index.html',
           },
           dependencies: {
-            'mapbox-gl': '1',
-            'maplibre-gl': '2',
-            'mobility-toolbox-js': 'latest@beta',
-            ol: '6.3.1',
+            'maplibre-gl': 'latest',
+            'mobility-toolbox-js': 'latest',
+            ol: 'latest',
           },
           devDependencies: {
             '@babel/core': '7.2.0',
@@ -92,6 +91,5 @@ CodeSandboxButton.propTypes = {
   js: PropTypes.string,
   extraFiles: PropTypes.shape(),
 };
-
 
 export default React.memo(CodeSandboxButton);
