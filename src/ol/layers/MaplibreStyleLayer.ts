@@ -64,6 +64,109 @@ class MaplibreStyleLayer extends Layer {
 
   selectedFeatures: Feature[] = [];
 
+  get beforeId(): string {
+    return this.get('beforeId');
+  }
+
+  set beforeId(newValue: string | undefined) {
+    this.set('beforeId', newValue);
+  }
+
+  get layers(): maplibregl.AddLayerObject[] {
+    return this.get('layers');
+  }
+
+  set layers(newValue: maplibregl.AddLayerObject[]) {
+    this.set('layers', newValue);
+  }
+
+  get layersFilter(): (layer: maplibregl.LayerSpecification) => boolean {
+    return this.get('layersFilter');
+  }
+
+  set layersFilter(
+    newValue: (layer: maplibregl.LayerSpecification) => boolean,
+  ) {
+    this.set('layersFilter', newValue);
+  }
+
+  /**
+   * @deprecated Use MaplibreStyleLayer.maplibreLayer instead.
+   */
+  get mapboxLayer(): MaplibreLayer | undefined {
+    deprecated('Deprecated. Use maplibreLayer instead.');
+    return this.get('maplibreLayer');
+  }
+
+  get maplibreLayer(): MaplibreLayer {
+    return this.get('maplibreLayer');
+  }
+
+  set maplibreLayer(newValue: MaplibreLayer) {
+    this.set('maplibreLayer', newValue);
+  }
+
+  get queryRenderedLayersFilter(): (
+    layer: maplibregl.LayerSpecification,
+  ) => boolean {
+    return this.get('queryRenderedLayersFilter');
+  }
+
+  set queryRenderedLayersFilter(
+    newValue: (layer: maplibregl.LayerSpecification) => boolean,
+  ) {
+    this.set('queryRenderedLayersFilter', newValue);
+  }
+
+  get sources(): Record<string, maplibregl.SourceSpecification> {
+    return this.get('sources');
+  }
+
+  set sources(newValue: Record<string, maplibregl.SourceSpecification>) {
+    this.set('sources', newValue);
+  }
+
+  /**
+   * @deprecated Use MaplibreStyleLayer.layer instead.
+   */
+  get styleLayer(): maplibregl.AddLayerObject {
+    deprecated('Deprecated. Use MaplibreStyleLayer.layer instead.');
+    return this.layers[0];
+  }
+
+  /**
+   * @deprecated
+   */
+  set styleLayer(newValue: maplibregl.AddLayerObject) {
+    deprecated(
+      'MaplibreStyleLayer.styleLayer is deprecated. Use MaplibreStyleLayer.layer instead.',
+    );
+    this.layers = [newValue];
+  }
+
+  /**
+   * Apply visibility to style layers that fits the styleLayersFilter function.
+   */
+  /**
+   * @deprecated
+   */
+  get styleLayers(): maplibregl.AddLayerObject[] {
+    deprecated(
+      'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
+    );
+    return this.layers;
+  }
+
+  /**
+   * @deprecated
+   */
+  set styleLayers(newValue: maplibregl.AddLayerObject[]) {
+    deprecated(
+      'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
+    );
+    this.layers = newValue;
+  }
+
   /**
    * Constructor.
    *
@@ -425,6 +528,24 @@ class MaplibreStyleLayer extends Layer {
     }
   }
 
+  // /**
+  //  * Set filter that determines which features should be rendered in a style layer.
+  //  * @param {maplibregl.filter} filter Determines which features should be rendered in a style layer.
+  //  */
+  // setFilter(filter: { [key: string]: any }) {
+  //   if (!this.maplibreLayer?.mapLibreMap) {
+  //     return;
+  //   }
+  //   const { mapLibreMap } = this.maplibreLayer;
+
+  //   this.styleLayers.forEach(({ id }) => {
+  //     if (id && filter && mapLibreMap.getLayer(id)) {
+  //       // @ts-expect-error
+  //       mapLibreMap.setFilter(id, filter);
+  //     }
+  //   });
+  // }
+
   removeSources() {
     if (!this.maplibreLayer?.mapLibreMap || !this.sources) {
       return;
@@ -465,7 +586,7 @@ class MaplibreStyleLayer extends Layer {
     if (!this.maplibreLayer?.mapLibreMap || !features.length) {
       return;
     }
-    const { mapLibreMap } = this.maplibreLayer;
+    const mapLibreMap = this.maplibreLayer.mapLibreMap;
 
     features.forEach((feature: Feature) => {
       const { source, sourceLayer } =
@@ -512,127 +633,6 @@ class MaplibreStyleLayer extends Layer {
       this.detachFromMap();
       super.setMapInternal(map);
     }
-  }
-
-  get beforeId(): string {
-    return this.get('beforeId');
-  }
-
-  set beforeId(newValue: string | undefined) {
-    this.set('beforeId', newValue);
-  }
-
-  get layers(): maplibregl.AddLayerObject[] {
-    return this.get('layers');
-  }
-
-  set layers(newValue: maplibregl.AddLayerObject[]) {
-    this.set('layers', newValue);
-  }
-
-  get layersFilter(): (layer: maplibregl.LayerSpecification) => boolean {
-    return this.get('layersFilter');
-  }
-
-  set layersFilter(
-    newValue: (layer: maplibregl.LayerSpecification) => boolean,
-  ) {
-    this.set('layersFilter', newValue);
-  }
-
-  /**
-   * @deprecated Use MaplibreStyleLayer.maplibreLayer instead.
-   */
-  get mapboxLayer(): MaplibreLayer | undefined {
-    deprecated('Deprecated. Use maplibreLayer instead.');
-    return this.get('maplibreLayer');
-  }
-
-  get maplibreLayer(): MaplibreLayer {
-    return this.get('maplibreLayer');
-  }
-
-  set maplibreLayer(newValue: MaplibreLayer) {
-    this.set('maplibreLayer', newValue);
-  }
-
-  get queryRenderedLayersFilter(): (
-    layer: maplibregl.LayerSpecification,
-  ) => boolean {
-    return this.get('queryRenderedLayersFilter');
-  }
-
-  set queryRenderedLayersFilter(
-    newValue: (layer: maplibregl.LayerSpecification) => boolean,
-  ) {
-    this.set('queryRenderedLayersFilter', newValue);
-  }
-
-  get sources(): Record<string, maplibregl.SourceSpecification> {
-    return this.get('sources');
-  }
-
-  // /**
-  //  * Set filter that determines which features should be rendered in a style layer.
-  //  * @param {maplibregl.filter} filter Determines which features should be rendered in a style layer.
-  //  */
-  // setFilter(filter: { [key: string]: any }) {
-  //   if (!this.maplibreLayer?.mapLibreMap) {
-  //     return;
-  //   }
-  //   const { mapLibreMap } = this.maplibreLayer;
-
-  //   this.styleLayers.forEach(({ id }) => {
-  //     if (id && filter && mapLibreMap.getLayer(id)) {
-  //       // @ts-expect-error
-  //       mapLibreMap.setFilter(id, filter);
-  //     }
-  //   });
-  // }
-
-  set sources(newValue: Record<string, maplibregl.SourceSpecification>) {
-    this.set('sources', newValue);
-  }
-
-  /**
-   * @deprecated Use MaplibreStyleLayer.layer instead.
-   */
-  get styleLayer(): maplibregl.AddLayerObject {
-    deprecated('Deprecated. Use MaplibreStyleLayer.layer instead.');
-    return this.layers[0];
-  }
-
-  /**
-   * @deprecated
-   */
-  set styleLayer(newValue: maplibregl.AddLayerObject) {
-    deprecated(
-      'MaplibreStyleLayer.styleLayer is deprecated. Use MaplibreStyleLayer.layer instead.',
-    );
-    this.layers = [newValue];
-  }
-
-  /**
-   * Apply visibility to style layers that fits the styleLayersFilter function.
-   */
-  /**
-   * @deprecated
-   */
-  get styleLayers(): maplibregl.AddLayerObject[] {
-    deprecated(
-      'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
-    );
-    return this.layers;
-  }
-
-  /**
-   * @deprecated
-   */
-  set styleLayers(newValue: maplibregl.AddLayerObject[]) {
-    deprecated(
-      'MaplibreStyleLayer.styleLayers is deprecated. Use MaplibreStyleLayer.layers instead.',
-    );
-    this.layers = newValue;
   }
 }
 

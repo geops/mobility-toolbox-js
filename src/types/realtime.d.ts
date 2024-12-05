@@ -172,7 +172,7 @@ export interface RealtimeStopSequence {
   routeIdentifier: string;
   shortName: string;
   stations: RealtimeStop[];
-  stroke?: strinealtimeTenant;
+  stroke?: RealtimeTenant;
   text_color: string;
   type: RealtimeMot;
   vehicleType: number;

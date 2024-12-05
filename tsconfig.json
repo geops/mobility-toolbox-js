@@ -19,5 +19,5 @@
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],
-  "exclude": ["dev.js","/node_modules/**/**/*","./node_modules/**/*", "./node_modules/*", "./__mocks__/maplibre-gl.js","ol"]
+  "exclude": ["dev.js","./node_modules/**/**/**/*","./node_modules/**/**/*","./node_modules/**/*", "./node_modules/*", "./__mocks__/maplibre-gl.js","ol"]
 }

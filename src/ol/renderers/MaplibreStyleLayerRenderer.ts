@@ -59,7 +59,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
 
     const layer = this.getLayer();
     const map = layer.getMapInternal();
-    const { mapLibreMap } = layer.maplibreLayer;
+    const mapLibreMap = layer.maplibreLayer.mapLibreMap;
 
     const projection =
       map?.getView()?.getProjection()?.getCode() || 'EPSG:3857';

@@ -1,4 +1,4 @@
-import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer';
+import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer/lib';
 import debounce from 'lodash.debounce';
 import { EventsKey } from 'ol/events';
 import Map from 'ol/Map';
@@ -13,7 +13,7 @@ import { MobilityLayerOptions } from './Layer';
 import type {
   MapLibreLayerOptions,
   MapLibreOptions,
-} from '@geoblocks/ol-maplibre-layer/lib/types/MapLibreLayer';
+} from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
 import type { QueryRenderedFeaturesOptions } from 'maplibre-gl';
 
 export type MaplibreLayerOptions = {
@@ -81,6 +81,65 @@ if (
 class MaplibreLayer extends MapLibreLayer {
   public olEventsKeys: EventsKey[] = [];
 
+  set apiKey(newValue: string) {
+    this.set('apiKey', newValue);
+  }
+  get apiKey(): string {
+    return this.get('apiKey');
+  }
+
+  set apiKeyName(newValue: string) {
+    this.set('apiKeyName', newValue);
+  }
+
+  get apiKeyName(): string {
+    return this.get('apiKeyName');
+  }
+
+  /**
+   * @deprecated Use layer.mapLibreMap.
+   */
+  get maplibreMap(): maplibregl.Map | undefined {
+    deprecated(
+      'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
+    );
+    return this.mapLibreMap!;
+  }
+
+  // get queryRenderedFeaturesOptions(): maplibregl.QueryRenderedFeaturesOptions {
+  //   return this.get('queryRenderedFeaturesOptions');
+  // }
+
+  // set queryRenderedFeaturesOptions(
+  //   newValue: maplibregl.QueryRenderedFeaturesOptions,
+  // ) {
+  //   this.set('queryRenderedFeaturesOptions', newValue);
+  // }
+
+  /**
+   * @deprecated Use layer.mapLibreMap.
+   */
+  get mbMap(): maplibregl.Map | undefined {
+    deprecated('MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.');
+    return this.maplibreMap!;
+  }
+
+  get style(): string {
+    return this.get('style');
+  }
+
+  set style(newValue: string) {
+    this.set('style', newValue);
+  }
+
+  get url(): string {
+    return this.get('url');
+  }
+
+  set url(newValue: string) {
+    this.set('url', newValue);
+  }
+
   /**
    * Constructor.
    *
@@ -129,6 +188,7 @@ class MaplibreLayer extends MapLibreLayer {
     // and to see if the style is defined by the maplibreOptions given by the user.
     this.set('options', options);
   }
+
   /**
    * Initialize the layer and listen to feature clicks.
    */
@@ -190,16 +250,6 @@ class MaplibreLayer extends MapLibreLayer {
     return buildStyleUrl(this.url, this.style, this.apiKey, this.apiKeyName);
   }
 
-  // get queryRenderedFeaturesOptions(): maplibregl.QueryRenderedFeaturesOptions {
-  //   return this.get('queryRenderedFeaturesOptions');
-  // }
-
-  // set queryRenderedFeaturesOptions(
-  //   newValue: maplibregl.QueryRenderedFeaturesOptions,
-  // ) {
-  //   this.set('queryRenderedFeaturesOptions', newValue);
-  // }
-
   override setMapInternal(map: Map) {
     if (map) {
       super.setMapInternal(map);
@@ -217,56 +267,6 @@ class MaplibreLayer extends MapLibreLayer {
       // eslint-disable-next-line no-console
       console.error('Error while updating MaplibreMap', e);
     }
-  }
-
-  set apiKey(newValue: string) {
-    this.set('apiKey', newValue);
-  }
-
-  get apiKey(): string {
-    return this.get('apiKey');
-  }
-
-  set apiKeyName(newValue: string) {
-    this.set('apiKeyName', newValue);
-  }
-
-  get apiKeyName(): string {
-    return this.get('apiKeyName');
-  }
-
-  /**
-   * @deprecated Use layer.mapLibreMap.
-   */
-  get maplibreMap(): maplibregl.Map | undefined {
-    deprecated(
-      'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
-    );
-    return this.mapLibreMap!;
-  }
-
-  /**
-   * @deprecated Use layer.mapLibreMap.
-   */
-  get mbMap(): maplibregl.Map | undefined {
-    deprecated('MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.');
-    return this.maplibreMap!;
-  }
-
-  get style(): string {
-    return this.get('style');
-  }
-
-  set style(newValue: string) {
-    this.set('style', newValue);
-  }
-
-  get url(): string {
-    return this.get('url');
-  }
-
-  set url(newValue: string) {
-    this.set('url', newValue);
   }
 }
 

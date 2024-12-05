@@ -29,3 +29,21 @@ class ResizeObserver {
 }
 
 window.ResizeObserver = ResizeObserver;
+
+window.noop = () => {};
+class Worker {
+  url;
+  onmessage;
+  constructor(stringUrl) {
+    this.url = stringUrl;
+    this.onmessage = noop;
+  }
+  postMessage(msg) {
+    this.onmessage(msg);
+  }
+}
+
+Object.defineProperty(window, 'Worker', {
+  writable: true,
+  value: Worker,
+});

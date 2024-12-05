@@ -4,8 +4,8 @@ import { Map, MapEvent } from 'ol';
 import { EventsKey } from 'ol/events';
 import Feature, { FeatureLike } from 'ol/Feature';
 import GeoJSON from 'ol/format/GeoJSON';
-import { Vector as VectorLayer } from 'ol/layer';
 import Layer from 'ol/layer/Layer';
+import VectorLayer from 'ol/layer/Vector';
 import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 import { Vector as VectorSource } from 'ol/source';
@@ -74,6 +74,65 @@ class RealtimeLayer extends Layer {
   onZoomEndDebounced: DebouncedFunc<(evt: MapEvent | ObjectEvent) => void>;
   renderedViewState: State | undefined;
   vectorLayer: VectorLayer<VectorSource>;
+
+  get api() {
+    return this.engine.api;
+  }
+
+  set api(api: RealtimeAPI) {
+    this.engine.api = api;
+  }
+  get canvas() {
+    return this.engine.canvas;
+  }
+
+  get filter(): FilterFunction | undefined {
+    return this.engine.filter;
+  }
+
+  set filter(filter: FilterFunction) {
+    this.engine.filter = filter;
+  }
+
+  get hoverVehicleId(): RealtimeTrainId | undefined {
+    return this.engine.hoverVehicleId;
+  }
+
+  set hoverVehicleId(id: RealtimeTrainId) {
+    this.engine.hoverVehicleId = id;
+  }
+
+  get mode() {
+    return this.engine.mode;
+  }
+
+  set mode(mode: RealtimeMode) {
+    this.engine.mode = mode;
+  }
+
+  get pixelRatio() {
+    return this.engine.pixelRatio;
+  }
+
+  get selectedVehicleId(): RealtimeTrainId | undefined {
+    return this.engine.selectedVehicleId;
+  }
+
+  set selectedVehicleId(id: RealtimeTrainId) {
+    this.engine.selectedVehicleId = id;
+  }
+
+  get sort(): SortFunction | undefined {
+    return this.engine.sort;
+  }
+
+  set sort(sort: SortFunction) {
+    this.engine.sort = sort;
+  }
+
+  get trajectories() {
+    return this.engine.trajectories;
+  }
 
   /**
    * Constructor.
@@ -175,6 +234,7 @@ class RealtimeLayer extends Layer {
       );
     }
   }
+
   /**
    * Create a copy of the RealtimeLayer.
    *
@@ -370,66 +430,6 @@ class RealtimeLayer extends Layer {
    */
   stop() {
     this.engine.stop();
-  }
-
-  get api() {
-    return this.engine.api;
-  }
-
-  set api(api: RealtimeAPI) {
-    this.engine.api = api;
-  }
-
-  get canvas() {
-    return this.engine.canvas;
-  }
-
-  get filter(): FilterFunction | undefined {
-    return this.engine.filter;
-  }
-
-  set filter(filter: FilterFunction) {
-    this.engine.filter = filter;
-  }
-
-  get hoverVehicleId(): RealtimeTrainId | undefined {
-    return this.engine.hoverVehicleId;
-  }
-
-  set hoverVehicleId(id: RealtimeTrainId) {
-    this.engine.hoverVehicleId = id;
-  }
-
-  get mode() {
-    return this.engine.mode;
-  }
-
-  set mode(mode: RealtimeMode) {
-    this.engine.mode = mode;
-  }
-
-  get pixelRatio() {
-    return this.engine.pixelRatio;
-  }
-
-  get selectedVehicleId(): RealtimeTrainId | undefined {
-    return this.engine.selectedVehicleId;
-  }
-
-  set selectedVehicleId(id: RealtimeTrainId) {
-    this.engine.selectedVehicleId = id;
-  }
-
-  get sort(): SortFunction | undefined {
-    return this.engine.sort;
-  }
-
-  set sort(sort: SortFunction) {
-    this.engine.sort = sort;
-  }
-
-  get trajectories() {
-    return this.engine.trajectories;
   }
 }
 
