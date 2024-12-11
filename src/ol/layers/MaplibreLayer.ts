@@ -6,6 +6,7 @@ import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 
 import { getUrlWithParams } from '../../common/utils';
+import MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
 import { MobilityLayerOptions } from './Layer';
@@ -222,7 +223,7 @@ class MaplibreLayer extends MapLibreLayer {
   }
 
   override createRenderer() {
-    return new MapLibreLayerRenderer(this);
+    return new MaplibreLayerRenderer(this);
   }
 
   detachFromMap() {
