@@ -88,6 +88,7 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
 
   renderFrame(frameState: FrameState) {
     const { canvas, renderedViewState } = this.getLayer();
+    this.getLayer().engine.pixelRatio = frameState.pixelRatio;
     if (!this.container) {
       this.container = document.createElement('div');
       this.container.className = this.getLayer().getClassName();

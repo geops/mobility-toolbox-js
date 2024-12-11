@@ -5,10 +5,15 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import LineString from 'ol/geom/LineString';
 import Modify from 'ol/interaction/Modify';
-import { MaplibreLayer, RoutingControl, routingStyle } from './build/ol';
+import {
+  MaplibreLayer,
+  RealtimeLayer,
+  RoutingControl,
+  routingStyle,
+} from './build/ol';
 import 'ol/ol.css';
 
-window.apiKey = '5cc87b12d7c5370001c1d655f23526a2a5b14ff5bf1c6c4eb6c4c9b4';
+window.apiKey = '5cc87b12d7c5370001c1d65534da34dc9d4648aab190503c2e5ee81d';
 
 const map = new Map({
   target: 'map',
@@ -22,6 +27,11 @@ const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
 });
 map.addLayer(baseLayer);
+
+const realtimeLayer = new RealtimeLayer({
+  apiKey: window.apiKey,
+});
+map.addLayer(realtimeLayer);
 
 const routingLayer = new VectorLayer({
   source: new VectorSource(),
@@ -68,8 +78,8 @@ const modify = new Modify({
 });
 map.addInteraction(modify);
 
-control.addViaPoint([950476.4055933182, 6003322.253698345]);
-control.addViaPoint([950389.0813034325, 6003656.659274571]);
+// control.addViaPoint([950476.4055933182, 6003322.253698345]);
+// control.addViaPoint([950389.0813034325, 6003656.659274571]);
 // control.addViaPoint('29563461696e881d');
 
 // Add example button to toggle the RoutingControl.
