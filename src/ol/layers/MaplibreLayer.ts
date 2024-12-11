@@ -23,8 +23,8 @@ export type MaplibreLayerOptions = {
   queryRenderedFeaturesOptions?: QueryRenderedFeaturesOptions | undefined;
   style?: maplibregl.StyleSpecification | null | string;
   url?: string;
-} & MapLibreLayerOptions &
-  MobilityLayerOptions;
+} & MobilityLayerOptions &
+  Omit<MapLibreLayerOptions, 'mapLibreOptions'>;
 
 const buildStyleUrl = (
   url: string,
@@ -221,6 +221,10 @@ class MaplibreLayer extends MapLibreLayer {
     });
   }
 
+  override createRenderer() {
+    return new MapLibreLayerRenderer(this);
+  }
+
   detachFromMap() {
     unByKey(this.olEventsKeys);
   }
@@ -259,7 +263,6 @@ class MaplibreLayer extends MapLibreLayer {
       super.setMapInternal(map);
     }
   }
-
   updateMaplibreMap() {
     try {
       this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
