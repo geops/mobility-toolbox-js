@@ -264,6 +264,7 @@ class MaplibreLayer extends MapLibreLayer {
       super.setMapInternal(map);
     }
   }
+
   updateMaplibreMap() {
     try {
       this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
