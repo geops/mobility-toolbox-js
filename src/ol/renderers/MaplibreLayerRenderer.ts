@@ -20,17 +20,19 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   }
 
   renderFrame(frameState: FrameState): HTMLElement {
+    const layer = this.getLayer();
+    const { mapLibreMap } = layer;
+    const map = layer.getMapInternal();
     this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
 
-    const mapLibreMap = this.getLayer()?.mapLibreMap;
-    mapLibreMap?.off('idle', this.setIsReady);
+    if (!layer || !map || !mapLibreMap) {
+      // @ts-expect-error - can return null
+      return null;
+    }
 
     if (this.ignoreNextRender) {
       this.ignoreNextRender = false;
-      const container = mapLibreMap?.getContainer();
-      if (container) {
-        return container;
-      }
+      return mapLibreMap?.getContainer();
     }
     this.ready = false;
     const container = super.renderFrame(frameState);
