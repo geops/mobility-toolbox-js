@@ -191,6 +191,9 @@ class RealtimeLayer extends Layer {
         this.engine.start();
       }
       const index = mapInternal.getLayers().getArray().indexOf(this);
+      if (this.vectorLayer.getMapInternal() === mapInternal) {
+        this.getMapInternal()?.removeLayer(this.vectorLayer);
+      }
       mapInternal.getLayers().insertAt(index, this.vectorLayer);
       this.olEventsKeys.push(
         ...mapInternal.on(
