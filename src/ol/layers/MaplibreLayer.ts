@@ -230,6 +230,14 @@ class MaplibreLayer extends MapLibreLayer {
     unByKey(this.olEventsKeys);
   }
 
+  override disposeInternal() {
+    const source = this.getSource();
+    super.disposeInternal();
+
+    // We don't want the source removed
+    this.setSource(source);
+  }
+
   getStyle() {
     // If the style is a complete style object, use it directly.
     if (

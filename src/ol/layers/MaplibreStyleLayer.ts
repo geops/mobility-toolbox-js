@@ -309,24 +309,8 @@ class MaplibreStyleLayer extends Layer {
    * @override
    */
   attachToMap(map: Map) {
-    if (this.maplibreLayer && !this.maplibreLayer.getMapInternal()) {
-      map.addLayer(this.maplibreLayer as unknown as Layer);
-    }
-
     const mapInternal = this.getMapInternal();
     if (!mapInternal || !this.maplibreLayer) {
-      return;
-    }
-
-    if (!mapInternal.getTargetElement()) {
-      // If ther e is no target element the mapLibreMap is not yet created, we
-      // relaunch the initialisation when it's the case.
-      this.olEventsKeys.push(
-        mapInternal.on('change:target', () => {
-          this.attachToMap(map);
-        }),
-      );
-
       return;
     }
 
@@ -343,6 +327,7 @@ class MaplibreStyleLayer extends Layer {
         mapLibreMap.once('load', this.onLoad);
       }
     }
+
     // Apply the visibiltity when layer's visibility change.
     this.olEventsKeys.push(
       // @ts-expect-error  'load' is a custom event
