@@ -1,5 +1,4 @@
 import { MapLibreLayerRenderer } from '@geoblocks/ol-maplibre-layer/lib';
-import { Layer } from 'ol/layer';
 import { FrameState } from 'ol/Map';
 
 import { MaplibreLayer } from '../layers';

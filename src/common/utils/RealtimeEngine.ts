@@ -109,7 +109,6 @@ class RealtimeEngine {
   getGeneralizationLevelByZoom: (zoom: number) => RealtimeGeneralizationLevel;
   getMotsByZoom: (zoom: number) => RealtimeMot[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
-  getViewState: () => ViewState = () => ({});
   hoverVehicleId?: RealtimeTrainId;
   isUpdateBboxOnMoveEnd: boolean;
   live?: boolean;
@@ -125,7 +124,6 @@ class RealtimeEngine {
   requestId?: number;
   selectedVehicle!: RealtimeTrajectory;
   selectedVehicleId?: RealtimeTrainId;
-  shouldRender: () => boolean = () => true;
   sort?: SortFunction;
   styleOptions?: RealtimeStyleOptions;
   tenant: RealtimeTenant;
@@ -139,6 +137,48 @@ class RealtimeEngine {
   useDebounce?: boolean;
   useRequestAnimationFrame?: boolean;
   useThrottle?: boolean;
+  get mode() {
+    return this._mode;
+  }
+  set mode(newMode: RealtimeMode) {
+    if (newMode === this._mode) {
+      return;
+    }
+    this._mode = newMode;
+    if (this.api?.wsApi?.open) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  get speed() {
+    return this._speed;
+  }
+
+  set speed(newSpeed: number) {
+    this._speed = newSpeed;
+    this.start();
+  }
+
+  get style() {
+    return this._style;
+  }
+
+  set style(newStyle: RealtimeStyleFunction) {
+    this._style = newStyle;
+    this.renderTrajectories();
+  }
+
+  get time(): Date {
+    return this._time;
+  }
+
+  set time(newTime: Date | number) {
+    this._time = (newTime as Date)?.getTime
+      ? (newTime as Date)
+      : new Date(newTime);
+    this.renderTrajectories();
+  }
 
   constructor(options: RealtimeEngineOptions) {
     this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
@@ -395,6 +435,8 @@ class RealtimeEngine {
     }
     return { features: vehicles, type: 'FeatureCollection' };
   }
+
+  getViewState: () => ViewState = () => ({});
 
   /**
    * Callback on websocket's deleted_vehicles channel events.
@@ -706,6 +748,8 @@ class RealtimeEngine {
     this.api.bbox = bbox;
   }
 
+  shouldRender: () => boolean = () => true;
+
   start() {
     this.stop();
 
@@ -779,50 +823,6 @@ class RealtimeEngine {
       clearInterval(this.updateTimeInterval);
       this.updateTimeInterval = undefined;
     }
-  }
-
-  get mode() {
-    return this._mode;
-  }
-
-  set mode(newMode: RealtimeMode) {
-    if (newMode === this._mode) {
-      return;
-    }
-    this._mode = newMode;
-    if (this.api?.wsApi?.open) {
-      this.stop();
-      this.start();
-    }
-  }
-
-  get speed() {
-    return this._speed;
-  }
-
-  set speed(newSpeed: number) {
-    this._speed = newSpeed;
-    this.start();
-  }
-
-  get style() {
-    return this._style;
-  }
-
-  set style(newStyle: RealtimeStyleFunction) {
-    this._style = newStyle;
-    this.renderTrajectories();
-  }
-
-  get time(): Date {
-    return this._time;
-  }
-
-  set time(newTime: Date | number) {
-    this._time = (newTime as Date)?.getTime
-      ? (newTime as Date)
-      : new Date(newTime);
-    this.renderTrajectories();
   }
 }
 
