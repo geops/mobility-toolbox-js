@@ -232,6 +232,11 @@ class RealtimeLayer extends Layer {
     }
   }
 
+  cleanVectorLayer() {
+    this.vectorLayer?.getSource()?.clear(true);
+    this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
+  }
+
   /**
    * Create a copy of the RealtimeLayer.
    *
@@ -345,16 +350,15 @@ class RealtimeLayer extends Layer {
   async highlightTrajectory(
     id: RealtimeTrainId,
   ): Promise<Feature[] | undefined> {
-    this.vectorLayer?.getSource()?.clear(true);
-    this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
-
     if (!id) {
+      this.cleanVectorLayer();
       return;
     }
 
     const features = await this.getFullTrajectory(id);
 
     if (!features?.length) {
+      this.cleanVectorLayer();
       return;
     }
 
@@ -362,12 +366,21 @@ class RealtimeLayer extends Layer {
       this.vectorLayer?.getSource()?.addFeatures(features);
     }
 
+    if (
+      this.vectorLayer.getMapInternal() &&
+      this.vectorLayer.getMapInternal() !== this.getMapInternal()
+    ) {
+      this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
+    }
+
     // Add the vector layer to the map
     const zIndex = this.getZIndex();
     if (zIndex !== undefined) {
       this.vectorLayer.setZIndex(zIndex - 1);
-      this.getMapInternal()?.addLayer(this.vectorLayer);
-    } else {
+      if (!this.vectorLayer.getMapInternal()) {
+        this.getMapInternal()?.addLayer(this.vectorLayer);
+      }
+    } else if (!this.vectorLayer.getMapInternal()) {
       const index =
         this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
       if (index) {
