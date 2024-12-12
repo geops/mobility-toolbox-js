@@ -155,6 +155,7 @@ class RealtimeLayer extends Layer {
 
     this.engine = new RealtimeEngine({
       getViewState: this.getViewState.bind(this),
+      onIdle: this.onRealtimeEngineIdle.bind(this),
       onRender: this.onRealtimeEngineRender.bind(this),
       ...options,
     });
@@ -190,6 +191,11 @@ class RealtimeLayer extends Layer {
         this.engine.start();
       }
       this.olEventsKeys.push(
+        mapInternal.on('movestart', () => {
+          if (this.engine.isUpdateBboxOnMoveEnd) {
+            this.engine.updateIdleState();
+          }
+        }),
         ...mapInternal.on(
           ['moveend', 'change:target'],
           // @ts-expect-error  - bad ol definitions
@@ -396,6 +402,10 @@ class RealtimeLayer extends Layer {
     }
 
     this.engine.setBbox();
+  }
+
+  onRealtimeEngineIdle() {
+    this.changed();
   }
 
   /**

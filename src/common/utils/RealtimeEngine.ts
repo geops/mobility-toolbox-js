@@ -59,6 +59,7 @@ export interface RealtimeEngineOptions {
   minZoomInterpolation?: number;
   mode?: RealtimeMode;
   motsByZoom?: RealtimeMot[][];
+  onIdle?: (realtimeEngine: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeEngine: RealtimeEngine) => void;
   onStop?: (realtimeEngine: RealtimeEngine) => void;
@@ -87,6 +88,7 @@ export interface RealtimeEngineOptions {
  * This class is totally agnostic from Maplibre or OpenLayers and must stay taht way.
  */
 class RealtimeEngine {
+  _idleTimeout?: number;
   _mode: RealtimeMode;
   _speed: number;
   _style: RealtimeStyleFunction;
@@ -96,6 +98,7 @@ class RealtimeEngine {
     string,
     boolean | boolean[] | number | number[] | string | string[]
   >;
+
   canvas?: AnyCanvas;
   debounceRenderTrajectories: (
     viewState: ViewState,
@@ -110,11 +113,13 @@ class RealtimeEngine {
   getMotsByZoom: (zoom: number) => RealtimeMot[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
   hoverVehicleId?: RealtimeTrainId;
+  isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
   live?: boolean;
   minZoomInterpolation: number;
   mots?: RealtimeMot[];
   motsByZoom: RealtimeMot[][];
+  onIdle?: (realtimeLayer: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeLayer: RealtimeEngine) => void;
   onStop?: (realtimeLayer: RealtimeEngine) => void;
@@ -137,6 +142,7 @@ class RealtimeEngine {
   useDebounce?: boolean;
   useRequestAnimationFrame?: boolean;
   useThrottle?: boolean;
+
   get mode() {
     return this._mode;
   }
@@ -220,6 +226,7 @@ class RealtimeEngine {
     this.getViewState = options.getViewState || (() => ({}));
     this.shouldRender = options.shouldRender || (() => true);
     this.onRender = options.onRender;
+    this.onIdle = options.onIdle;
     this.onStart = options.onStart;
     this.onStop = options.onStop;
 
@@ -478,6 +485,7 @@ class RealtimeEngine {
    * @private
    */
   onTrajectoryMessage(data: WebSocketAPIMessageEventData<RealtimeTrajectory>) {
+    this.updateIdleState();
     if (!data.content) {
       return;
     }
@@ -595,7 +603,6 @@ class RealtimeEngine {
    */
   renderTrajectories(noInterpolate?: boolean) {
     const viewState = this.getViewState();
-
     if (this.requestId) {
       cancelAnimationFrame(this.requestId);
       this.requestId = undefined;
@@ -680,6 +687,8 @@ class RealtimeEngine {
   }
 
   setBbox() {
+    this.updateIdleState();
+
     const viewState = this.getViewState();
     const extent = viewState.extent;
     const zoom = viewState.zoom || 0;
@@ -823,6 +832,16 @@ class RealtimeEngine {
       clearInterval(this.updateTimeInterval);
       this.updateTimeInterval = undefined;
     }
+  }
+
+  updateIdleState() {
+    this.isIdle = false;
+    clearTimeout(this._idleTimeout);
+
+    this._idleTimeout = window.setTimeout(() => {
+      this.isIdle = true;
+      this.onIdle?.(this);
+    }, 1000);
   }
 }
 

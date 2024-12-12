@@ -191,6 +191,7 @@ const renderTrajectories = (
     );
   }
   return {
+    // isReady: true,
     renderedTrajectories,
   };
 };
