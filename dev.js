@@ -105,3 +105,14 @@ map.addInteraction(modify);
 // document.getElementById('reset-button').addEventListener('click', () => {
 //   control.reset();
 // });
+
+map.on('pointermove', (e) => {
+  const feature = map.getFeaturesAtPixel(e.pixel)[0];
+  realtimeLayer.highlight(feature);
+});
+
+map.on('singleclick', (e) => {
+  const feature = map.getFeaturesAtPixel(e.pixel)[0];
+  realtimeLayer.select(feature);
+  console.log(feature);
+});
