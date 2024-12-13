@@ -22,18 +22,20 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     const layer = this.getLayer();
     const { mapLibreMap } = layer;
     const map = layer.getMapInternal();
-    this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
 
     if (!layer || !map || !mapLibreMap) {
       // @ts-expect-error - can return null
       return null;
     }
 
-    if (this.ignoreNextRender) {
+    if (this.ready && this.ignoreNextRender) {
       this.ignoreNextRender = false;
       return mapLibreMap?.getContainer();
     }
     this.ready = false;
+    this.ignoreNextRender = false;
+    this.updateReadyState();
+
     const container = super.renderFrame(frameState);
 
     // Mark the renderer as ready when the map is idle
@@ -48,5 +50,10 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       this.ignoreNextRender = true;
       this.getLayer().changed();
     }
+  }
+
+  updateReadyState() {
+    this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
+    this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady);
   }
 }
