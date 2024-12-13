@@ -116,3 +116,30 @@ map.on('singleclick', (e) => {
   realtimeLayer.select(feature);
   console.log(feature);
 });
+
+let map2 = new Map({
+  pixelRatio: 3,
+  target: 'map2',
+  view: new View({
+    center: map.getView().getCenter(),
+    zoom: map.getView().getZoom(),
+  }),
+});
+
+document.getElementById('map2ToMap').onclick = () => {
+  const layers = [...map2.getLayers().getArray()];
+  map2.getLayers().clear();
+  map.setLayers(layers);
+  map.addEventListener('rendercomplete', (e) => {
+    console.log('map rendercomplete');
+  });
+};
+
+document.getElementById('mapToMap2').onclick = () => {
+  const layers = [...map.getLayers().getArray()];
+  map.getLayers().clear();
+  map2.setLayers(layers);
+  map2.addEventListener('rendercomplete', (e) => {
+    console.log('map2 rendercomplete');
+  });
+};
