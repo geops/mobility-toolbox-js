@@ -16,10 +16,8 @@ export type MobilityLayerOptions = {
   key?: string;
   map?: Map;
   name?: string;
-  properties?: Record<string, any>;
-  visible?: boolean;
 } & Options &
-  Record<string, any>;
+  Record<string, unknown>;
 
 let deprecated: (message: string) => void = () => {};
 if (

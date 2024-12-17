@@ -59,6 +59,7 @@ export interface RealtimeEngineOptions {
   minZoomInterpolation?: number;
   mode?: RealtimeMode;
   motsByZoom?: RealtimeMot[][];
+  onIdle?: (realtimeEngine: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeEngine: RealtimeEngine) => void;
   onStop?: (realtimeEngine: RealtimeEngine) => void;
@@ -87,6 +88,7 @@ export interface RealtimeEngineOptions {
  * This class is totally agnostic from Maplibre or OpenLayers and must stay taht way.
  */
 class RealtimeEngine {
+  _idleTimeout?: number;
   _mode: RealtimeMode;
   _speed: number;
   _style: RealtimeStyleFunction;
@@ -96,6 +98,7 @@ class RealtimeEngine {
     string,
     boolean | boolean[] | number | number[] | string | string[]
   >;
+
   canvas?: AnyCanvas;
   debounceRenderTrajectories: (
     viewState: ViewState,
@@ -109,13 +112,14 @@ class RealtimeEngine {
   getGeneralizationLevelByZoom: (zoom: number) => RealtimeGeneralizationLevel;
   getMotsByZoom: (zoom: number) => RealtimeMot[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
-  getViewState: () => ViewState = () => ({});
   hoverVehicleId?: RealtimeTrainId;
+  isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
   live?: boolean;
   minZoomInterpolation: number;
   mots?: RealtimeMot[];
   motsByZoom: RealtimeMot[][];
+  onIdle?: (realtimeLayer: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeLayer: RealtimeEngine) => void;
   onStop?: (realtimeLayer: RealtimeEngine) => void;
@@ -125,7 +129,6 @@ class RealtimeEngine {
   requestId?: number;
   selectedVehicle!: RealtimeTrajectory;
   selectedVehicleId?: RealtimeTrainId;
-  shouldRender: () => boolean = () => true;
   sort?: SortFunction;
   styleOptions?: RealtimeStyleOptions;
   tenant: RealtimeTenant;
@@ -139,6 +142,49 @@ class RealtimeEngine {
   useDebounce?: boolean;
   useRequestAnimationFrame?: boolean;
   useThrottle?: boolean;
+
+  get mode() {
+    return this._mode;
+  }
+  set mode(newMode: RealtimeMode) {
+    if (newMode === this._mode) {
+      return;
+    }
+    this._mode = newMode;
+    if (this.api?.wsApi?.open) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  get speed() {
+    return this._speed;
+  }
+
+  set speed(newSpeed: number) {
+    this._speed = newSpeed;
+    this.start();
+  }
+
+  get style() {
+    return this._style;
+  }
+
+  set style(newStyle: RealtimeStyleFunction) {
+    this._style = newStyle;
+    this.renderTrajectories();
+  }
+
+  get time(): Date {
+    return this._time;
+  }
+
+  set time(newTime: Date | number) {
+    this._time = (newTime as Date)?.getTime
+      ? (newTime as Date)
+      : new Date(newTime);
+    this.renderTrajectories();
+  }
 
   constructor(options: RealtimeEngineOptions) {
     this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
@@ -180,6 +226,7 @@ class RealtimeEngine {
     this.getViewState = options.getViewState || (() => ({}));
     this.shouldRender = options.shouldRender || (() => true);
     this.onRender = options.onRender;
+    this.onIdle = options.onIdle;
     this.onStart = options.onStart;
     this.onStop = options.onStop;
 
@@ -396,6 +443,8 @@ class RealtimeEngine {
     return { features: vehicles, type: 'FeatureCollection' };
   }
 
+  getViewState: () => ViewState = () => ({});
+
   /**
    * Callback on websocket's deleted_vehicles channel events.
    * It removes the trajectory from the list.
@@ -436,6 +485,7 @@ class RealtimeEngine {
    * @private
    */
   onTrajectoryMessage(data: WebSocketAPIMessageEventData<RealtimeTrajectory>) {
+    this.updateIdleState();
     if (!data.content) {
       return;
     }
@@ -553,7 +603,6 @@ class RealtimeEngine {
    */
   renderTrajectories(noInterpolate?: boolean) {
     const viewState = this.getViewState();
-
     if (this.requestId) {
       cancelAnimationFrame(this.requestId);
       this.requestId = undefined;
@@ -638,6 +687,8 @@ class RealtimeEngine {
   }
 
   setBbox() {
+    this.updateIdleState();
+
     const viewState = this.getViewState();
     const extent = viewState.extent;
     const zoom = viewState.zoom || 0;
@@ -705,6 +756,8 @@ class RealtimeEngine {
     // Extent and zoom level are mandatory.
     this.api.bbox = bbox;
   }
+
+  shouldRender: () => boolean = () => true;
 
   start() {
     this.stop();
@@ -781,48 +834,14 @@ class RealtimeEngine {
     }
   }
 
-  get mode() {
-    return this._mode;
-  }
+  updateIdleState() {
+    this.isIdle = false;
+    clearTimeout(this._idleTimeout);
 
-  set mode(newMode: RealtimeMode) {
-    if (newMode === this._mode) {
-      return;
-    }
-    this._mode = newMode;
-    if (this.api?.wsApi?.open) {
-      this.stop();
-      this.start();
-    }
-  }
-
-  get speed() {
-    return this._speed;
-  }
-
-  set speed(newSpeed: number) {
-    this._speed = newSpeed;
-    this.start();
-  }
-
-  get style() {
-    return this._style;
-  }
-
-  set style(newStyle: RealtimeStyleFunction) {
-    this._style = newStyle;
-    this.renderTrajectories();
-  }
-
-  get time(): Date {
-    return this._time;
-  }
-
-  set time(newTime: Date | number) {
-    this._time = (newTime as Date)?.getTime
-      ? (newTime as Date)
-      : new Date(newTime);
-    this.renderTrajectories();
+    this._idleTimeout = window.setTimeout(() => {
+      this.isIdle = true;
+      this.onIdle?.(this);
+    }, 1000);
   }
 }
 

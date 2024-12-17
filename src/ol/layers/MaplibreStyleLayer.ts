@@ -1,5 +1,5 @@
 import debounce from 'lodash.debounce';
-import { FeatureState } from 'maplibre-gl';
+import { AddLayerObject, FeatureState } from 'maplibre-gl';
 import { Feature, Map } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import { EventsKey } from 'ol/events';
@@ -14,6 +14,7 @@ import { LayerGetFeatureInfoResponse } from '../../types';
 import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
+import { MobilityLayerOptions } from './Layer';
 import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
 
 export type MaplibreStyleLayerOptions = {
@@ -22,7 +23,8 @@ export type MaplibreStyleLayerOptions = {
   layersFilter?: FilterFunction;
   maplibreLayer?: MaplibreLayer;
   queryRenderedLayersFilter?: FilterFunction;
-} & MaplibreLayerOptions;
+} & MaplibreLayerOptions &
+  MobilityLayerOptions;
 
 let deprecated: (...messages: (object | string)[]) => void = () => {};
 if (
@@ -189,7 +191,7 @@ class MaplibreStyleLayer extends Layer {
       deprecated(
         'options.mapboxLayer is deprecated. Use options.maplibreLayer instead.',
       );
-      // eslint-disable-next-line no-param-reassign
+      // @ts-expect-error - mapboxLayer is deprecated
       options.maplibreLayer = options.mapboxLayer;
       // eslint-disable-next-line no-param-reassign
       delete options.mapboxLayer;
@@ -200,7 +202,7 @@ class MaplibreStyleLayer extends Layer {
         'options.styleLayers is deprecated. Use options.layers instead.',
       );
       // eslint-disable-next-line no-param-reassign
-      options.layers = options.styleLayers;
+      options.layers = options.styleLayers as AddLayerObject[];
       // eslint-disable-next-line no-param-reassign
       delete options.styleLayers;
     }
@@ -210,7 +212,7 @@ class MaplibreStyleLayer extends Layer {
         'options.styleLayersFilter is deprecated. Use options.layersFilter instead.',
       );
       // eslint-disable-next-line no-param-reassign
-      options.layersFilter = options.styleLayersFilter;
+      options.layersFilter = options.styleLayersFilter as FilterFunction;
       // eslint-disable-next-line no-param-reassign
       delete options.styleLayersFilter;
     }
@@ -309,24 +311,8 @@ class MaplibreStyleLayer extends Layer {
    * @override
    */
   attachToMap(map: Map) {
-    if (this.maplibreLayer && !this.maplibreLayer.getMapInternal()) {
-      map.addLayer(this.maplibreLayer as unknown as Layer);
-    }
-
     const mapInternal = this.getMapInternal();
     if (!mapInternal || !this.maplibreLayer) {
-      return;
-    }
-
-    if (!mapInternal.getTargetElement()) {
-      // If ther e is no target element the mapLibreMap is not yet created, we
-      // relaunch the initialisation when it's the case.
-      this.olEventsKeys.push(
-        mapInternal.on('change:target', () => {
-          this.attachToMap(map);
-        }),
-      );
-
       return;
     }
 
@@ -343,6 +329,7 @@ class MaplibreStyleLayer extends Layer {
         mapLibreMap.once('load', this.onLoad);
       }
     }
+
     // Apply the visibiltity when layer's visibility change.
     this.olEventsKeys.push(
       // @ts-expect-error  'load' is a custom event

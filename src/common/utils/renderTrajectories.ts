@@ -66,7 +66,12 @@ const renderTrajectories = (
   context?.clearRect(0, 0, canvas.width, canvas.height);
 
   const [width, height] = size;
-  if (width && height && (canvas.width !== width || canvas.height !== height)) {
+  if (
+    width &&
+    height &&
+    (canvas.width !== width * pixelRatio ||
+      canvas.height !== height * pixelRatio)
+  ) {
     [canvas.width, canvas.height] = [width * pixelRatio, height * pixelRatio];
   }
 
@@ -191,6 +196,7 @@ const renderTrajectories = (
     );
   }
   return {
+    // isReady: true,
     renderedTrajectories,
   };
 };

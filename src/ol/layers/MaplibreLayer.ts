@@ -6,6 +6,7 @@ import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 
 import { getUrlWithParams } from '../../common/utils';
+import MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
 import { MobilityLayerOptions } from './Layer';
@@ -23,8 +24,8 @@ export type MaplibreLayerOptions = {
   queryRenderedFeaturesOptions?: QueryRenderedFeaturesOptions | undefined;
   style?: maplibregl.StyleSpecification | null | string;
   url?: string;
-} & MapLibreLayerOptions &
-  MobilityLayerOptions;
+} & MobilityLayerOptions &
+  Omit<MapLibreLayerOptions, 'mapLibreOptions'>;
 
 const buildStyleUrl = (
   url: string,
@@ -221,8 +222,20 @@ class MaplibreLayer extends MapLibreLayer {
     });
   }
 
+  override createRenderer() {
+    return new MaplibreLayerRenderer(this);
+  }
+
   detachFromMap() {
     unByKey(this.olEventsKeys);
+  }
+
+  override disposeInternal() {
+    const source = this.getSource();
+    super.disposeInternal();
+
+    // We don't want the source removed
+    this.setSource(source);
   }
 
   getStyle() {

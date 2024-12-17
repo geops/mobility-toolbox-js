@@ -52,11 +52,22 @@ export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
  * @public
  */
 class RealtimeLayer extends Layer {
-  #internalId: string;
   engine: RealtimeEngine;
   layer: LayerSpecification;
   source: CanvasSourceSpecification;
   sourceId: string;
+  get canvas(): AnyCanvas | undefined {
+    return this.engine.canvas;
+  }
+
+  get pixelRatio(): number | undefined {
+    return this.engine.pixelRatio || 1;
+  }
+  set pixelRatio(pixelRatio: number | undefined) {
+    this.engine.pixelRatio = pixelRatio || 1;
+  }
+
+  #internalId: string;
 
   /**
    * Constructor.
@@ -127,6 +138,7 @@ class RealtimeLayer extends Layer {
 
     this.onZoomEnd = this.onZoomEnd.bind(this);
   }
+
   /**
    * Return the current view state. Used by the RealtimeEngine.
    * @private
@@ -294,18 +306,6 @@ class RealtimeLayer extends Layer {
     this.map?.off('move', this.onMove);
     this.map?.off('moveend', this.onMoveEnd);
     this.map?.off('zoomend', this.onZoomEnd);
-  }
-
-  get canvas(): AnyCanvas | undefined {
-    return this.engine.canvas;
-  }
-
-  get pixelRatio(): number | undefined {
-    return this.engine.pixelRatio || 1;
-  }
-
-  set pixelRatio(pixelRatio: number | undefined) {
-    this.engine.pixelRatio = pixelRatio || 1;
   }
 }
 

@@ -276,10 +276,10 @@
   dependencies:
     levn "^0.4.1"
 
-"@geoblocks/ol-maplibre-layer@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@geoblocks/ol-maplibre-layer/-/ol-maplibre-layer-1.0.1.tgz#5f7e7bd5c7d0ae5ff2edb5de557ce73f457ef1bb"
-  integrity sha512-FMwil9AISKOYLKklVdl+PRGeDpPFkZzyFETb4wCQXHCjhpahwzH5gho3AQ06VGZIDC1Sg8IXxEfsR9R8IUpccg==
+"@geoblocks/ol-maplibre-layer@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@geoblocks/ol-maplibre-layer/-/ol-maplibre-layer-1.0.2.tgz#12ea1f99a6da8efc128a82f367cd1b406b786937"
+  integrity sha512-A08lboUJYuUKCLBTlzy18kq8ZGnIFCPN9gblEZi0nlHNVxJsg9Irw5G3KW5ZvxhdLWreEP/l1Q0YorCpnsfilA==
 
 "@geops/geops-ui@^0.3.4":
   version "0.3.4"
@@ -4533,9 +4533,9 @@ mkdirp@^0.5.1:
     minimist "^1.2.6"
 
 mobility-toolbox-js@./../build:
-  version "3.0.0-beta.37"
+  version "3.0.1-beta.7"
   dependencies:
-    "@geoblocks/ol-maplibre-layer" "^1.0.1"
+    "@geoblocks/ol-maplibre-layer" "^1.0.2"
     "@turf/helpers" "7.1.0"
     "@turf/transform-rotate" "7.1.0"
     lodash.debounce "4.0.8"

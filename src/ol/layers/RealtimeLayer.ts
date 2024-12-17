@@ -12,22 +12,23 @@ import { Vector as VectorSource } from 'ol/source';
 import Source from 'ol/source/Source';
 import { State } from 'ol/View';
 
-import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import { FilterFunction, SortFunction } from '../../common/typedefs';
 import RealtimeEngine, {
   RealtimeEngineOptions,
 } from '../../common/utils/RealtimeEngine';
 import { RealtimeAPI } from '../../maplibre';
 import {
-  RealtimeFullTrajectory,
   RealtimeMode,
   RealtimeRenderState,
+  RealtimeStopSequence,
   RealtimeTrainId,
   ViewState,
 } from '../../types';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+
+import { MobilityLayerOptions } from './Layer';
 
 const format = new GeoJSON();
 
@@ -39,7 +40,8 @@ export type RealtimeLayerOptions = {
     options: any,
   ) => void;
   maxNbFeaturesRequested?: number;
-} & RealtimeEngineOptions;
+} & MobilityLayerOptions &
+  RealtimeEngineOptions;
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
@@ -156,6 +158,7 @@ class RealtimeLayer extends Layer {
 
     this.engine = new RealtimeEngine({
       getViewState: this.getViewState.bind(this),
+      onIdle: this.onRealtimeEngineIdle.bind(this),
       onRender: this.onRealtimeEngineRender.bind(this),
       ...options,
     });
@@ -190,9 +193,12 @@ class RealtimeLayer extends Layer {
       if (this.getVisible()) {
         this.engine.start();
       }
-      const index = mapInternal.getLayers().getArray().indexOf(this);
-      mapInternal.getLayers().insertAt(index, this.vectorLayer);
       this.olEventsKeys.push(
+        mapInternal.on('movestart', () => {
+          if (this.engine.isUpdateBboxOnMoveEnd) {
+            this.engine.updateIdleState();
+          }
+        }),
         ...mapInternal.on(
           ['moveend', 'change:target'],
           // @ts-expect-error  - bad ol definitions
@@ -235,6 +241,11 @@ class RealtimeLayer extends Layer {
     }
   }
 
+  cleanVectorLayer() {
+    this.vectorLayer?.getSource()?.clear(true);
+    this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
+  }
+
   /**
    * Create a copy of the RealtimeLayer.
    *
@@ -260,32 +271,56 @@ class RealtimeLayer extends Layer {
   }
 
   /**
-   * Get some informations about a trajectory.
+   * Get the full trajectory of a vehicle as features.
+   *
+   * @param {string} id A vehicle's id.
+   * @returns {Promise<Feature[]>} A list of features representing a full trajectory.
+   * @public
+   */
+  async getFullTrajectory(id: RealtimeTrainId): Promise<Feature[]> {
+    const data = await this.engine.api.getFullTrajectory(
+      id,
+      this.engine.mode,
+      this.engine.getGeneralizationLevelByZoom(
+        Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
+      ),
+    );
+    if (data?.content?.features?.length) {
+      return format.readFeatures(data?.content);
+    }
+    return [];
+  }
+
+  /**
+   * Get the stop sequences of a vehicle.
+   *
+   * @param {string} id A vehicle's id.
+   * @returns {Promise<RealtimeStopSequence[]>} An array of stop sequences.
+   * @public
+   */
+  async getStopSequences(id: RealtimeTrainId): Promise<RealtimeStopSequence[]> {
+    const data = await this.engine.api.getStopSequence(id);
+    return data?.content;
+  }
+
+  /**
+   * Get full trajectory and stop sequences  of a vehicle.
    *
    * @param {RealtimeTrainId} id A vehicle's id.
-   * @returns
+   * @returns {Promise<{fullTrajectory: Feature[], stopSequences: RealtimeStopSequence[]}>} An object containing the full trajectory and the stop sequences.
    */
-  getTrajectoryInfos(id: RealtimeTrainId) {
+  async getTrajectoryInfos(id: RealtimeTrainId): Promise<{
+    fullTrajectory: Feature[];
+    stopSequences: RealtimeStopSequence[];
+  }> {
     // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
-    // Then we combine them in one response and send them to inherited layers.
-    const promises = [
-      this.engine.api.getStopSequence(id),
-      this.engine.api.getFullTrajectory(
-        id,
-        this.engine.mode,
-        this.engine.getGeneralizationLevelByZoom(
-          Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
-        ),
-      ),
-    ];
-
-    return Promise.all(promises).then(([stopSequence, fullTrajectory]) => {
-      const response = {
-        fullTrajectory,
-        stopSequence,
-      };
-      return response;
-    });
+    // Then we combine them in one response.
+    const promises = [this.getStopSequences(id), this.getFullTrajectory(id)];
+    const [stopSequences, fullTrajectory] = await Promise.all(promises);
+    return {
+      fullTrajectory: fullTrajectory as Feature[],
+      stopSequences: stopSequences as RealtimeStopSequence[],
+    };
   }
 
   getVehicles(filterFunc: FilterFunction) {
@@ -321,36 +356,47 @@ class RealtimeLayer extends Layer {
   /**
    * Highlight the trajectory of journey.
    */
-  highlightTrajectory(id: RealtimeTrainId): Promise<Feature[] | undefined> {
+  async highlightTrajectory(
+    id: RealtimeTrainId,
+  ): Promise<Feature[] | undefined> {
     if (!id) {
-      this.vectorLayer?.getSource()?.clear(true);
-      return Promise.resolve([]);
+      this.cleanVectorLayer();
+      return;
     }
-    return this.engine.api
-      .getFullTrajectory(
-        id,
-        this.engine.mode,
-        this.engine.getGeneralizationLevelByZoom(
-          Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
-        ),
-      )
-      .then((data: WebSocketAPIMessageEventData<RealtimeFullTrajectory>) => {
-        const fullTrajectory = data.content;
 
-        if (!fullTrajectory?.features?.length) {
-          return [];
-        }
-        const features = format.readFeatures(fullTrajectory);
-        this.vectorLayer?.getSource()?.clear(true);
-        if (features.length) {
-          this.vectorLayer?.getSource()?.addFeatures(features);
-        }
-        return features;
-      })
-      .catch(() => {
-        this.vectorLayer?.getSource()?.clear(true);
-        return [];
-      });
+    const features = await this.getFullTrajectory(id);
+
+    if (!features?.length) {
+      this.cleanVectorLayer();
+      return;
+    }
+
+    if (features.length) {
+      this.vectorLayer?.getSource()?.addFeatures(features);
+    }
+
+    if (
+      this.vectorLayer.getMapInternal() &&
+      this.vectorLayer.getMapInternal() !== this.getMapInternal()
+    ) {
+      this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
+    }
+
+    // Add the vector layer to the map
+    const zIndex = this.getZIndex();
+    if (zIndex !== undefined) {
+      this.vectorLayer.setZIndex(zIndex - 1);
+      if (!this.vectorLayer.getMapInternal()) {
+        this.getMapInternal()?.addLayer(this.vectorLayer);
+      }
+    } else if (!this.vectorLayer.getMapInternal()) {
+      const index =
+        this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
+      if (index) {
+        this.getMapInternal()?.getLayers().insertAt(index, this.vectorLayer);
+      }
+    }
+    return features;
   }
 
   onMoveEnd() {
@@ -359,6 +405,10 @@ class RealtimeLayer extends Layer {
     }
 
     this.engine.setBbox();
+  }
+
+  onRealtimeEngineIdle() {
+    this.changed();
   }
 
   /**
