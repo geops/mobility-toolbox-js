@@ -28,6 +28,8 @@ import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
+import { MobilityLayerOptions } from './Layer';
+
 const format = new GeoJSON();
 
 export type RealtimeLayerOptions = {
@@ -38,7 +40,8 @@ export type RealtimeLayerOptions = {
     options: any,
   ) => void;
   maxNbFeaturesRequested?: number;
-} & RealtimeEngineOptions;
+} & MobilityLayerOptions &
+  RealtimeEngineOptions;
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
