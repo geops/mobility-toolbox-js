@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/geops/mobility-toolbox-js/compare/v3.0.0...v3.1.0) (2024-12-17)
+
+
+### Features
+
+* allow to rely on ol rendercomplete event ([#211](https://github.com/geops/mobility-toolbox-js/issues/211)) ([9aa17e8](https://github.com/geops/mobility-toolbox-js/commit/9aa17e8c02fa1f9e21e8d5c7f344aae5cbd88b5e))
+
 ## [3.0.0](https://github.com/geops/mobility-toolbox-js/compare/v2.4.2...v3.0.0) (2024-12-05)
 
 
