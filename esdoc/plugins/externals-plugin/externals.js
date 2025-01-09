@@ -41,16 +41,16 @@
  * @external {maplibregl.CustomLayerInterface} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
  */
 /**
- * @external {maplibregl.Evented} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Evented/
+ * @external {maplibregl.Evented} https://maplibre.org/maplibre-gl-js/docs/API/classes/Evented/
  */
 /**
- * @external {maplibregl.Map} https://maplibre.org/maplibre-gl-js/docs/API/classes/maplibregl.Map/
+ * @external {maplibregl.Map} https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/
  */
 /**
- * @external {maplibregl.MapOptions} https://maplibre.org/maplibre-gl-js/docs/API/types/maplibregl.MapOptions/
+ * @external {maplibregl.MapOptions} https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/
  */
 /**
- * @external {maplibregl.QueryRenderedFeaturesOptions} https://maplibre.org/maplibre-gl-js/docs/API/types/maplibregl.QueryRenderedFeaturesOptions/
+ * @external {maplibregl.QueryRenderedFeaturesOptions} https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/QueryRenderedFeaturesOptions/
  */
 /**
  * @external {maplibregl.SourceSpecification} https://maplibre.org/maplibre-style-spec/sources/
@@ -62,7 +62,7 @@
  * @external {maplibregl.IControl} https://maplibre.org/maplibre-gl-js/docs/API/interfaces/IControl/
  */
 /**
- * @external {AbortController} https://developer.mozilla.org/fr/docs/Web/API/AbortController
+ * @external {AbortController} https://developer.mozilla.org/en-US/docs/Web/API/AbortController
  */
 /**
  * @external {GeoJSONPoint} https://tools.ietf.org/html/rfc7946#section-3.1.2
@@ -92,7 +92,7 @@
  * @external {GetTrajectoryStationsParams} https://developer.geops.io/apis/5dcbd5c9a256d90001cf1360/#/default/get_trajstations
  */
 /**
- * @external {HTMLElement} https://developer.mozilla.org/fr/docs/Web/API/HTMLElement
+ * @external {HTMLElement} https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement
  */
 /**
  * @external {FetchOptions} https://developer.mozilla.org/en-US/docs/Web/API/fetch#options
