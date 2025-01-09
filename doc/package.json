@@ -11,7 +11,7 @@
     "codesandbox": "2.2.3",
     "maplibre-gl": "4.7.1",
     "mobility-toolbox-js": "./../build",
-    "next": "15.0.3",
+    "next": "15.1.2",
     "ol": "10.2.1",
     "path": "^0.12.7",
     "prop-types": "15.8.1",
