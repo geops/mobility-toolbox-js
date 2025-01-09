@@ -1,3 +1,4 @@
+import { max } from 'lodash';
 import debounce from 'lodash.debounce';
 import { AddLayerObject, FeatureState } from 'maplibre-gl';
 import { Feature, Map } from 'ol';
@@ -288,16 +289,35 @@ class MaplibreStyleLayer extends Layer {
       const layer = layers[i];
 
       if (this.layersFilter(layer)) {
-        const { id } = layer;
+        const { id, maxzoom, minzoom } = layer;
 
         if (mapLibreMap.getLayer(id)) {
           mapLibreMap.setLayoutProperty(id, 'visibility', visibilityValue);
 
-          if (this.getMinZoom() || this.getMaxZoom()) {
+          // If minZoom and maxZoom are not set, their values are -Infinity and Infinity
+          if (
+            this.getMinZoom() !== -Infinity ||
+            this.getMaxZoom() !== Infinity
+          ) {
+            let minZoom = this.getMinZoom() || 0;
+
+            if (minZoom === -Infinity) {
+              minZoom = (minzoom || 0) + 1;
+            }
+            if (minZoom === 0) {
+              minZoom = 1;
+            }
+            let maxZoom = this.getMaxZoom() || 0;
+            if (maxZoom === Infinity) {
+              maxZoom = (maxzoom || 24) + 1;
+            }
+            if (maxZoom === 0) {
+              maxZoom = 1;
+            }
             mapLibreMap.setLayerZoomRange(
               id,
-              this.getMinZoom() ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1
-              this.getMaxZoom() ? this.getMaxZoom() - 1 : 24,
+              minZoom - 1, // Maplibre zoom = ol zoom - 1
+              maxZoom - 1,
             );
           }
         }
