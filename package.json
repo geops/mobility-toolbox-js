@@ -5,11 +5,11 @@
   "version": "3.1.1-beta.5",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "exports": {
-    ".": "./src/index.js",
-    "./api": "./src/api/index.js",
-    "./maplibre": "./src/maplibre/index.js",
-    "./ol": "./src/ol/index.js",
-    "./types": "./src/types/index.d.ts"
+    ".": "./index.js",
+    "./api": "./api/index.js",
+    "./maplibre": "./maplibre/index.js",
+    "./ol": "./ol/index.js",
+    "./types": "./types/index.d.ts"
   },
   "dependencies": {
     "@geoblocks/ol-maplibre-layer": "^1.0.3",

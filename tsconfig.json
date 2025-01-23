@@ -18,6 +18,6 @@
     "lib": ["es6", "dom"]
   },
   "allowSyntheticDefaultImports": true,
-  "include": ["./src/**/*", ".eslintrc.js"],
+  "include": ["./src/**/*"],
   "exclude": ["dev.js","./node_modules/**/**/**/*","./node_modules/**/**/*","./node_modules/**/*", "./node_modules/*", "./__mocks__/maplibre-gl.js","ol"]
 }
