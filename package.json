@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "3.1.1-beta.4",
+  "version": "3.1.1-beta.3",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "exports": {
     ".": "./src/index.js",
@@ -88,7 +88,7 @@
   "scripts": {
     "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
     "build": "yarn build:tsc && yarn esbuild:iife",
-    "build:tsc": "rm -rf build && yarn tsc && cp package.json build/ && cp README.md build/ && cp LICENSE build/  && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
+    "build:tsc": "rm -rf build && yarn tsc && cp package.json build/ && cp README.md build/ && cp LICENSE build/  && cp -R src/types build/src/ && find build -type f -name '*.test.*' -delete",
     "clean": "rm -rf .next && rm -rf doc/.next",
     "coverage": "yarn test  --watchAll=false  --coverage --coverageDirectory=coverage",
     "cy:open": "cypress open",
