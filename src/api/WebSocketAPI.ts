@@ -79,11 +79,11 @@ class WebSocketAPI {
 
   open?: boolean;
 
-  requests!: WebSocketAPIRequest[];
+  requests!: WebSocketAPIRequest<unknown>[];
 
   subscribed!: WebSocketAPISubscribed;
 
-  subscriptions!: WebSocketAPISubscription[];
+  subscriptions!: WebSocketAPISubscription<unknown>[];
 
   websocket?: WebSocket;
 
@@ -291,8 +291,10 @@ class WebSocketAPI {
       requestString,
     };
     if (index > -1) {
+      // @ts-expect-error - We know that the requests is an array of WebSocketAPIRequest
       this.requests[index] = newReq;
     } else {
+      // @ts-expect-error - We know that the requests is an array of WebSocketAPIRequest
       this.requests.push(newReq);
     }
   }
@@ -336,6 +338,7 @@ class WebSocketAPI {
       let contents: WebSocketAPIMessageEventData<T>[];
 
       if (data.source === 'buffer') {
+        // @ts-expect-error - We know that the data is a WebSocketAPIBufferMessageEventData
         contents = (data as unknown as WebSocketAPIBufferMessageEventData)
           .content;
       } else {
@@ -424,8 +427,10 @@ class WebSocketAPI {
     );
     const newSubscr = { cb, errorCb, onErrorCb, onMessageCb, params, quiet };
     if (index > -1) {
+      // @ts-expect-error - We know that the subscriptions is an array of WebSocketAPISubscription
       this.subscriptions[index] = newSubscr;
     } else {
+      // @ts-expect-error - We know that the subscriptions is an array of WebSocketAPISubscription
       this.subscriptions.push(newSubscr);
     }
 
