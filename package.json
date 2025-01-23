@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "3.1.1-beta.4",
+  "version": "3.1.1-beta.5",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "exports": {
     ".": "./src/index.js",
