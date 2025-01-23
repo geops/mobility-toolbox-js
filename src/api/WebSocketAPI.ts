@@ -43,8 +43,8 @@ export type WebSocketAPIMessageCallback<T> = (
   data: WebSocketAPIMessageEventData<T>,
 ) => void;
 
-export declare interface WebSocketAPISubscription {
-  cb: WebSocketAPIMessageCallback<any>;
+export declare interface WebSocketAPISubscription<T> {
+  cb: WebSocketAPIMessageCallback<T>;
   errorCb?: EventListener;
   onErrorCb?: EventListener;
   onMessageCb: WebSocketAPIMessageEventListener;
@@ -54,8 +54,8 @@ export declare interface WebSocketAPISubscription {
 
 export type WebSocketAPISubscribed = Record<string, boolean>;
 
-export declare interface WebSocketAPIRequest {
-  cb: WebSocketAPIMessageCallback<any>;
+export declare interface WebSocketAPIRequest<T> {
+  cb: WebSocketAPIMessageCallback<T>;
   errorCb?: EventListener;
   onErrorCb?: EventListener;
   onMessageCb: WebSocketAPIMessageEventListener;
@@ -245,9 +245,9 @@ class WebSocketAPI {
    * @param {function} errorCb Callback on error and close event
    * @private
    */
-  get(
+  get<T>(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIMessageCallback<any>,
+    cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
   ) {
     const requestString = WebSocketAPI.getRequestString('GET', params);
@@ -255,7 +255,7 @@ class WebSocketAPI {
 
     // We wrap the callbacks to make sure they are called only once.
     const once =
-      (callback: EventListener | WebSocketAPIMessageCallback<any>) =>
+      (callback: EventListener | WebSocketAPIMessageCallback<T>) =>
       // @ts-expect-error : Spread error
       (...args) => {
         // @ts-expect-error : Spread error
@@ -306,9 +306,9 @@ class WebSocketAPI {
    * @return {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
    * @private
    */
-  listen(
+  listen<T>(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIMessageCallback<any>,
+    cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
   ): {
     onErrorCb?: EventListener;
@@ -321,7 +321,7 @@ class WebSocketAPI {
     const onMessage: WebSocketAPIMessageEventListener = (
       evt: WebSocketAPIMessageEvent,
     ) => {
-      let data: WebSocketAPIMessageEventData<any>;
+      let data: WebSocketAPIMessageEventData<T>;
       try {
         data = JSON.parse(evt.data);
       } catch (err) {
@@ -333,7 +333,7 @@ class WebSocketAPI {
       source += params.args ? ` ${params.args}` : '';
 
       // Buffer channel message return a list of other channels to propagate to proper callbacks.
-      let contents: WebSocketAPIMessageEventData<any>[];
+      let contents: WebSocketAPIMessageEventData<T>[];
 
       if (data.source === 'buffer') {
         contents = (data as unknown as WebSocketAPIBufferMessageEventData)
@@ -341,7 +341,7 @@ class WebSocketAPI {
       } else {
         contents = [data];
       }
-      contents.forEach((content: WebSocketAPIMessageEventData<any>) => {
+      contents.forEach((content: WebSocketAPIMessageEventData<T>) => {
         // Because of backend optimization, the last content is null.
         if (
           content?.source === source &&
@@ -410,9 +410,9 @@ class WebSocketAPI {
    * @param {boolean} quiet if false, no GET or SUB requests are send, only the callback is registered.
    * @private
    */
-  subscribe(
+  subscribe<T>(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIMessageCallback<any>,
+    cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
     quiet = false,
   ) {
@@ -462,9 +462,9 @@ class WebSocketAPI {
    * @param {function} cb Callback used when listen.
    * @private
    */
-  unlisten(
+  unlisten<T>(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIMessageCallback<any>,
+    cb: WebSocketAPIMessageCallback<T>,
   ) {
     [...(this.subscriptions || []), ...(this.requests || [])]
       .filter(
@@ -481,7 +481,7 @@ class WebSocketAPI {
    * @param {function} cb Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @private
    */
-  unsubscribe(source: string, cb?: WebSocketAPIMessageCallback<any>) {
+  unsubscribe<T>(source: string, cb?: WebSocketAPIMessageCallback<T>) {
     const toRemove = this.subscriptions.filter(
       (s) => s.params.channel === source && (!cb || s.cb === cb),
     );

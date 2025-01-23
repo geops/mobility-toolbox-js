@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import WS from 'jest-websocket-mock';
 
 import WebSocketAPI from './WebSocketAPI';
