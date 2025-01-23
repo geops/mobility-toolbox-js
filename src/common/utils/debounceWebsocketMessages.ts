@@ -16,17 +16,13 @@ const debounceWebsocketMessages = (
   getObjectId?: (object: any) => string,
   timeout = 100,
 ): WebSocketAPIMessageCallback<any> => {
-  const updateTimeout: {
-    [key: string]: number;
-  } = {};
+  const updateTimeout: Record<string, number> = {};
 
-  const objectsById: {
-    [key: string]: any;
-  } = {};
+  const objectsById: Record<string, any> = {};
   const objects: any[] = [];
 
   return (data: WebSocketAPIMessageEventData<any>) => {
-    const { source, content } = data;
+    const { content, source } = data;
     if (updateTimeout[source]) {
       window.clearTimeout(updateTimeout[source]);
     }

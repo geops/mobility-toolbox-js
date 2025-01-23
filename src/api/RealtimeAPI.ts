@@ -255,9 +255,9 @@ class RealtimeAPI {
    * @return {Promise<WebSocketAPIMessageEventData<?>>} A websocket response.
    * @public
    */
-  get(
+  get<T>(
     channelOrParams: string | WebSocketAPIParameters,
-  ): Promise<WebSocketAPIMessageEventData<any>> {
+  ): Promise<WebSocketAPIMessageEventData<T>> {
     let params = channelOrParams as WebSocketAPIParameters;
 
     if (typeof channelOrParams === 'string') {
@@ -297,7 +297,7 @@ class RealtimeAPI {
       channel.push(`gen${generalizationLevel}`);
     }
 
-    return this.get(channel.join('_'));
+    return this.get<RealtimeFullTrajectory>(channel.join('_'));
   }
 
   /**
@@ -317,7 +317,7 @@ class RealtimeAPI {
       channel: `station${getModeSuffix(mode, RealtimeModes)}`,
     };
 
-    return this.get(params);
+    return this.get<RealtimeStation>(params);
   }
 
   /**
@@ -329,9 +329,9 @@ class RealtimeAPI {
    */
   getStations(mode: RealtimeMode, timeout = 100): Promise<RealtimeStation[]> {
     return new Promise((resolve) => {
-      this.get(`station${getModeSuffix(mode, RealtimeModes)}`).then(
-        debounceWebsocketMessages(resolve, undefined, timeout),
-      );
+      this.get<RealtimeStation[]>(
+        `station${getModeSuffix(mode, RealtimeModes)}`,
+      ).then(debounceWebsocketMessages(resolve, undefined, timeout));
     });
   }
 
@@ -345,7 +345,7 @@ class RealtimeAPI {
   getStopSequence(
     id: RealtimeTrainId,
   ): Promise<WebSocketAPIMessageEventData<RealtimeStopSequence[]>> {
-    return this.get(`stopsequence_${id}`);
+    return this.get<RealtimeStopSequence[]>(`stopsequence_${id}`);
   }
 
   /**
@@ -360,7 +360,7 @@ class RealtimeAPI {
     id: RealtimeTrainId,
     mode: RealtimeMode,
   ): Promise<WebSocketAPIMessageEventData<RealtimeTrajectory>> {
-    return this.get(
+    return this.get<RealtimeTrajectory>(
       `partial_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
     );
   }
@@ -440,9 +440,9 @@ class RealtimeAPI {
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
    */
-  subscribe(
+  subscribe<T>(
     channel: string,
-    onSuccess: WebSocketAPIMessageCallback<any>,
+    onSuccess: WebSocketAPIMessageCallback<T>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -678,10 +678,10 @@ class RealtimeAPI {
    * @param {function} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    * @public
    */
-  unsubscribe(
+  unsubscribe<T>(
     channel: string,
     suffix = '',
-    onMessage?: WebSocketAPIMessageCallback<any>,
+    onMessage?: WebSocketAPIMessageCallback<T>,
   ) {
     const suffixSchenatic = getModeSuffix(
       RealtimeModes.SCHEMATIC,
