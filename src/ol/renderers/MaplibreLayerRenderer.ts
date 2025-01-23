@@ -1,4 +1,5 @@
 import { MapLibreLayerRenderer } from '@geoblocks/ol-maplibre-layer/lib';
+import { MapLibreLayerTranslateZoomFunction } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
 import { FrameState } from 'ol/Map';
 
 import { MaplibreLayer } from '../layers';
@@ -12,8 +13,11 @@ import { MaplibreLayer } from '../layers';
 export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   ignoreNextRender = false;
 
-  constructor(layer: MaplibreLayer) {
-    super(layer);
+  constructor(
+    layer: MaplibreLayer,
+    translateZoom?: MapLibreLayerTranslateZoomFunction,
+  ) {
+    super(layer, translateZoom);
     this.setIsReady = this.setIsReady.bind(this);
     this.ignoreNextRender = false;
   }
