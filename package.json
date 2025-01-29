@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "exports": {
     ".": "./index.js",
@@ -46,7 +46,7 @@
     "esdoc-publish-html-plugin": "1.1.2",
     "esdoc-standard-plugin": "1.0.0",
     "esdoc-typescript-plugin": "1.0.1",
-    "eslint": "8.57.0",
+    "eslint": "9.19.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-airbnb-typescript": "18.0.0",
     "eslint-config-prettier": "10.0.1",
