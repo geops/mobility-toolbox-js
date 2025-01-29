@@ -24,7 +24,11 @@ class HttpAPI {
    *
    * @private
    */
-  async fetch(path: string, params: object, config: RequestInit): Promise<any> {
+  async fetch<T>(
+    path: string,
+    params: object,
+    config: RequestInit,
+  ): Promise<T> {
     if (!this.url) {
       throw new Error(`No url defined for request to ${this.url}/${path}`);
     }
@@ -44,10 +48,10 @@ class HttpAPI {
     const data = await response.json();
 
     if (data.error) {
-      throw new Error(data.error);
+      throw new Error(data.error as string);
     }
 
-    return data;
+    return data as T;
   }
 }
 
