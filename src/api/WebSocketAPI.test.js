@@ -183,6 +183,7 @@ describe('WebSocketAPI', () => {
       expect(client.send).toHaveBeenCalledTimes(0);
     });
   });
+
   describe('#get', () => {
     test('listen to message event', async () => {
       // eslint-disable-next-line no-unused-vars
@@ -250,6 +251,7 @@ describe('WebSocketAPI', () => {
       expect(cb2).toHaveBeenCalledTimes(2);
     });
   });
+
   describe('#subscribe', () => {
     test('adds subscription to subscriptions array', async () => {
       // eslint-disable-next-line no-unused-vars

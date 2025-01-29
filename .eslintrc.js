@@ -20,6 +20,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-member-access': 'Off',
     '@typescript-eslint/prefer-nullish-coalescing': 'Off',
     'arrow-body-style': 0,
+    'mocha/no-setup-in-describe': 'Off',
     'prettier/prettier': 'error',
     'react/jsx-filename-extension': [
       1,
