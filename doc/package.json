@@ -9,7 +9,7 @@
     "@mui/material": "^6.4.1",
     "@mui/styles": "^6.4.1",
     "codesandbox": "2.2.3",
-    "maplibre-gl": "5.0.1",
+    "maplibre-gl": "5.1.0",
     "mobility-toolbox-js": "./../build",
     "next": "15.1.6",
     "ol": "10.3.1",
@@ -25,7 +25,7 @@
     "typeface-lato": "1.1.13"
   },
   "devDependencies": {
-    "eslint": "9.18.0",
+    "eslint": "9.19.0",
     "eslint-config-next": "15.1.6",
     "raw-loader": "4.0.2",
     "sass": "1.83.4"
