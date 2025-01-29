@@ -3,6 +3,7 @@ import { Paths as Stops } from './stops';
 
 export * from './common';
 export * from './realtime';
+export * from './ol';
 
 export type RoutingParameters = Routing['/']['get']['parameters']['query'];
 export type RoutingResponse = Routing['/']['get']['responses']['200']['schema'];
