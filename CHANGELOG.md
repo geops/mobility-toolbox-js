@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [3.1.1](https://github.com/geops/mobility-toolbox-js/compare/v3.1.0...v3.1.1) (2025-01-29)
 
+
+### Bug Fixes
+
+* update dependencies ([#219](https://github.com/geops/mobility-toolbox-js/issues/219)) ([1fa7939](https://github.com/geops/mobility-toolbox-js/commit/1fa793942c5f501542ef3088cdefe6bafc623785))
+
 ## [3.1.0](https://github.com/geops/mobility-toolbox-js/compare/v3.0.0...v3.1.0) (2024-12-17)
 
 
