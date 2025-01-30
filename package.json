@@ -63,7 +63,7 @@
     "next": "15.1.6",
     "next-transpile-modules": "10.0.1",
     "ol": "10.4.0",
-    "openapi-typescript": "6.7.5",
+    "openapi-typescript": "5",
     "prettier": "3.4.2",
     "raw-loader": "4.0.2",
     "sort-json": "2.0.1",

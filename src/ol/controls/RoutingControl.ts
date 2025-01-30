@@ -1,3 +1,7 @@
+import type { Map, MapBrowserEvent } from 'ol';
+import type { Coordinate } from 'ol/coordinate';
+import type { StyleLike } from 'ol/style/Style';
+
 import { Feature } from 'ol';
 import Control, { Options } from 'ol/control/Control';
 import { EventsKey } from 'ol/events';
@@ -14,18 +18,16 @@ import { unByKey } from 'ol/Observable';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
 
-import { RoutingAPI } from '../../api';
-
-import type { Map, MapBrowserEvent } from 'ol';
-import type { Coordinate } from 'ol/coordinate';
-import type { StyleLike } from 'ol/style/Style';
-
 import type {
   RoutingGraph,
   RoutingMot,
   RoutingParameters,
   RoutingViaPoint,
 } from '../../types';
+
+import { RoutingAPI } from '../../api';
+
+export type AbortControllersByGraph = Record<string, AbortController>;
 
 export type RoutingControlOptions = {
   active?: boolean;
@@ -54,8 +56,6 @@ export type RoutingControlOptions = {
 
   useRawViaPoints?: boolean;
 } & Options;
-
-export type AbortControllersByGraph = Record<string, AbortController>;
 
 // Examples for a single hop:
 // basel sbb a station named "basel sbb"
@@ -168,6 +168,38 @@ class RoutingControl extends Control {
 
   viaPoints: RoutingViaPoint[] = [];
 
+  get active(): boolean {
+    return this.get('active');
+  }
+
+  set active(newValue: boolean) {
+    this.set('active', newValue);
+  }
+
+  get loading(): boolean {
+    return this.get('loading');
+  }
+
+  set loading(newValue: boolean) {
+    this.set('loading', newValue);
+  }
+
+  get modify() {
+    return this.get('modify');
+  }
+
+  set modify(newValue) {
+    this.set('modify', newValue);
+  }
+
+  get mot(): RoutingMot {
+    return this.get('mot');
+  }
+
+  set mot(newValue: RoutingMot) {
+    this.set('mot', newValue);
+  }
+
   /**
    * Constructor.
    *
@@ -230,7 +262,7 @@ class RoutingControl extends Control {
       ((error) => {
         this.dispatchEvent(new BaseEvent('change:route'));
         this.reset();
-        // eslint-disable-next-line no-console
+
         console.error(error);
       });
 
@@ -264,10 +296,12 @@ class RoutingControl extends Control {
     map: Map,
   ): [number, number][] {
     const view = map.getView();
-    return graphs.map(([, minZoom, maxZoom]) => [
-      view.getResolutionForZoom(minZoom),
-      view.getResolutionForZoom(maxZoom || minZoom + 1),
-    ]);
+    return graphs.map(([, minZoom, maxZoom]) => {
+      return [
+        view.getResolutionForZoom(minZoom),
+        view.getResolutionForZoom(maxZoom || minZoom + 1),
+      ];
+    });
   }
 
   /**
@@ -363,8 +397,9 @@ class RoutingControl extends Control {
     this.element = document.createElement('button');
     this.element.id = 'ol-toggle-routing';
     this.element.innerHTML = 'Toggle Route Control';
-    this.element.onclick = () =>
-      this.active ? this.deactivate() : this.activate();
+    this.element.onclick = () => {
+      return this.active ? this.deactivate() : this.activate();
+    };
     Object.assign(this.element.style, {
       position: 'absolute',
       right: '10px',
@@ -389,10 +424,9 @@ class RoutingControl extends Control {
           (e.target?.getFeaturesAtPixel(e.pixel, {
             hitTolerance: 5,
           }) as Feature<Geometry>[]) || [];
-        const viaPoint = feats.find(
-          (feat) =>
-            feat.getGeometry()?.getType() === 'Point' && feat.get('index'),
-        );
+        const viaPoint = feats.find((feat) => {
+          return feat.getGeometry()?.getType() === 'Point' && feat.get('index');
+        });
         if (click(e) && viaPoint) {
           // Remove node & viaPoint if an existing viaPoint was clicked
           this.removeViaPoint(viaPoint.get('index'));
@@ -482,7 +516,6 @@ class RoutingControl extends Control {
             {
               'coord-punish': 1000.0,
               'coord-radius': 100.0,
-              // @ts-expect-error  missing property in swagger
               elevation: false,
               graph,
               mot: this.mot,
@@ -502,9 +535,9 @@ class RoutingControl extends Control {
               const uniqueVias = this.segments.reduce(
                 (resultVias: Coordinate[], currentFeat: Feature) => {
                   const segTrg = currentFeat.get('trg');
-                  return resultVias.find(
-                    (via) => via[0] === segTrg[0] && via[1] === segTrg[1],
-                  )
+                  return resultVias.find((via) => {
+                    return via[0] === segTrg[0] && via[1] === segTrg[1];
+                  })
                     ? resultVias
                     : [...resultVias, segTrg];
                 },
@@ -604,7 +637,9 @@ class RoutingControl extends Control {
         `${this.stopsApiUrl}lookup/${stationId}?key=${this.stopsApiKey}`,
         { signal: abortController.signal },
       )
-        .then((res) => res.json())
+        .then((res) => {
+          return res.json();
+        })
         .then((stationData) => {
           const { coordinates } = stationData?.features?.[0]?.geometry || {};
           if (!coordinates) {
@@ -678,7 +713,9 @@ class RoutingControl extends Control {
         `${this.stopsApiUrl}?key=${this.stopsApiKey}&q=${stationName}&limit=1`,
         { signal: abortController.signal },
       )
-        .then((res) => res.json())
+        .then((res) => {
+          return res.json();
+        })
         .then((stationData) => {
           const { coordinates } = stationData.features[0].geometry;
           this.cacheStationData[viaPoint] = fromLonLat(coordinates);
@@ -720,13 +757,16 @@ class RoutingControl extends Control {
   onMapClick(evt: MapBrowserEvent<MouseEvent>) {
     const feats = (evt.target as Map).getFeaturesAtPixel(evt.pixel, {
       hitTolerance: 5,
-      layerFilter: (layer) => layer === this.routingLayer,
+      layerFilter: (layer) => {
+        return layer === this.routingLayer;
+      },
     }) as Feature<Geometry>[];
-    const viaPoint = feats.find(
-      (feat: Feature<Geometry>) =>
+    const viaPoint = feats.find((feat: Feature<Geometry>) => {
+      return (
         feat.getGeometry()?.getType() === 'Point' &&
-        feat.get('viaPointIdx') !== undefined,
-    );
+        feat.get('viaPointIdx') !== undefined
+      );
+    });
 
     if (viaPoint) {
       // Remove existing viaPoint on click and abort viaPoint add
@@ -774,11 +814,9 @@ class RoutingControl extends Control {
   onModifyStart(evt: ModifyEvent) {
     // When modify start, we search the index of the segment that is modifying.
     let segmentIndex = -1;
-    const route: Feature<LineString> = evt.features
-      .getArray()
-      .find(
-        (feat) => feat.getGeometry()?.getType() === 'LineString',
-      ) as unknown as Feature<LineString>;
+    const route: Feature<LineString> = evt.features.getArray().find((feat) => {
+      return feat.getGeometry()?.getType() === 'LineString';
+    }) as unknown as Feature<LineString>;
 
     // Find the segment index that is being modified
     if (route?.getGeometry() && evt.mapBrowserEvent.coordinate) {
@@ -791,16 +829,15 @@ class RoutingControl extends Control {
         0.001,
       );
 
-      segmentIndex = this.segments.findIndex((segment) =>
-        segment.getGeometry()?.intersectsExtent(closestExtent),
-      );
+      segmentIndex = this.segments.findIndex((segment) => {
+        return segment.getGeometry()?.intersectsExtent(closestExtent);
+      });
     }
 
     // Find the viaPoint that is being modified
-    const viaPoint: Feature<Point> = (evt.features
-      .getArray()
-      .filter((feat) => feat.getGeometry()?.getType() === 'Point') ||
-      [])[0] as Feature<Point>;
+    const viaPoint: Feature<Point> = (evt.features.getArray().filter((feat) => {
+      return feat.getGeometry()?.getType() === 'Point';
+    }) || [])[0] as Feature<Point>;
 
     // Write object with modify info
 
@@ -868,38 +905,6 @@ class RoutingControl extends Control {
     this.viaPoints = [...coordinateArray];
     this.drawRoute();
     this.dispatchEvent(new BaseEvent('change:route'));
-  }
-
-  get active(): boolean {
-    return this.get('active');
-  }
-
-  set active(newValue: boolean) {
-    this.set('active', newValue);
-  }
-
-  get loading(): boolean {
-    return this.get('loading');
-  }
-
-  set loading(newValue: boolean) {
-    this.set('loading', newValue);
-  }
-
-  get modify() {
-    return this.get('modify');
-  }
-
-  set modify(newValue) {
-    this.set('modify', newValue);
-  }
-
-  get mot(): RoutingMot {
-    return this.get('mot');
-  }
-
-  set mot(newValue: RoutingMot) {
-    this.set('mot', newValue);
   }
 }
 

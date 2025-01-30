@@ -3,41 +3,41 @@
  * Do not make direct changes to the file.
  */
 
-export interface Paths {
+export interface paths {
   '/': {
     /** Returns a stop (or multiple) as GeoJSON FeatureCollection */
     get: {
       parameters: {
         query: {
-          /**
-           * left,bottom,right,up coordinates in WGS84 wherein the
-           * station should lie
-           */
-          bbox?: string;
-          /** which field to look up, default: all of them */
-          field?: 'coords' | 'id' | 'name';
           /** Control how many matches will be returned */
           limit?: number;
+          /** Anything you'd like to search for */
+          q: string;
+          /**
+           * comma seperated list, order chooses which agency will be preferred
+           * as ident_source (for id and code fields)
+           */
+          prefagencies?: 'sbb' | 'db';
           /**
            * comma seperated list of mot's which should be available
            * at the stop
            */
           mots?:
             | 'bus'
-            | 'cable_car'
             | 'ferry'
-            | 'funicular'
             | 'gondola'
+            | 'tram'
             | 'rail'
-            | 'subway'
-            | 'tram';
+            | 'funicular'
+            | 'cable_car'
+            | 'subway';
           /**
-           * comma seperated list, order chooses which agency will be preferred
-           * as ident_source (for id and code fields)
+           * left,bottom,right,up coordinates in WGS84 wherein the
+           * station should lie
            */
-          prefagencies?: 'db' | 'sbb';
-          /** Anything you'd like to search for */
-          q: string;
+          bbox?: string;
+          /** which field to look up, default: all of them */
+          field?: 'id' | 'name' | 'coords';
           /**
            * Coordinates in WGS84 (in lat,lon order) used to rank stops close to
            * this position higher
@@ -49,59 +49,24 @@ export interface Paths {
         /** stop(s) */
         200: {
           schema: {
+            /** @enum {string} */
+            type?: 'FeatureCollection';
             features?: {
-              /** @description the coordinates of the stop */
-              geometry?: {
-                /**
-                 * @example [
-                 *   7.439119,
-                 *   46.94882
-                 * ]
-                 */
-                coordinates?: number[];
-                /** @enum {string} */
-                type?: 'Point';
-              };
+              /** @enum {string} */
+              type?: 'Feature';
               properties?: {
-                /**
-                 * @description Abbreviation code from the transport agency (e.g. DS100 for Deutsche Bahn)
-                 *
-                 * @example BN
-                 */
-                code?: string;
-                /**
-                 * @description 2 letter country code where the station is located
-                 * @example CH
-                 */
-                country_code?: string;
-                /**
-                 * @description uic number
-                 * @example 8507000
-                 */
-                id?: string;
-                /**
-                 * @description source agency for id and code (see below)
-                 * @example sbb
-                 */
-                ident_source?: string;
-                /** @description ifopt identifier, if available */
-                ifopt?: string;
-                /** @description Means of transport that are available at this station */
-                mot?: {
-                  bus?: boolean;
-                  cable_car?: boolean;
-                  ferry?: boolean;
-                  funicular?: boolean;
-                  gondola?: boolean;
-                  rail?: boolean;
-                  subway?: boolean;
-                  tram?: boolean;
-                };
+                /** @description internal ID */
+                uid?: string;
                 /**
                  * @description name of the stop
                  * @example Bern
                  */
                 name?: string;
+                /**
+                 * @description 2 letter country code where the station is located
+                 * @example CH
+                 */
+                country_code?: string;
                 /**
                  * @description how well the result matches your query, 0
                  * means best
@@ -112,18 +77,53 @@ export interface Paths {
                  * @default []
                  */
                 translated_names?: {
+                  value?: string;
                   /** @enum {string} */
                   language?: 'de' | 'en' | 'fr' | 'it';
-                  value?: string;
                 }[];
-                /** @description internal ID */
-                uid?: string;
+                /** @description Means of transport that are available at this station */
+                mot?: {
+                  bus?: boolean;
+                  ferry?: boolean;
+                  gondola?: boolean;
+                  tram?: boolean;
+                  rail?: boolean;
+                  funicular?: boolean;
+                  cable_car?: boolean;
+                  subway?: boolean;
+                };
+                /**
+                 * @description source agency for id and code (see below)
+                 * @example sbb
+                 */
+                ident_source?: string;
+                /**
+                 * @description uic number
+                 * @example 8507000
+                 */
+                id?: string;
+                /**
+                 * @description Abbreviation code from the transport agency (e.g. DS100 for Deutsche Bahn)
+                 *
+                 * @example BN
+                 */
+                code?: string;
+                /** @description ifopt identifier, if available */
+                ifopt?: string;
               };
-              /** @enum {string} */
-              type?: 'Feature';
+              /** @description the coordinates of the stop */
+              geometry?: {
+                /** @enum {string} */
+                type?: 'Point';
+                /**
+                 * @example [
+                 *   7.439119,
+                 *   46.94882
+                 * ]
+                 */
+                coordinates?: number[];
+              };
             }[];
-            /** @enum {string} */
-            type?: 'FeatureCollection';
           };
         };
         /** limit parameter too high */
@@ -138,6 +138,6 @@ export interface Paths {
   };
 }
 
-export interface Operations {}
+export interface operations {}
 
-export interface External {}
+export interface external {}
