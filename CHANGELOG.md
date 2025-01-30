@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.1](https://github.com/geops/mobility-toolbox-js/compare/v3.2.0...v3.2.1) (2025-01-30)
+
+
+### Bug Fixes
+
+* clean highlighted trajectory when selection changes ([c4dabc1](https://github.com/geops/mobility-toolbox-js/commit/c4dabc1e8ac29b4b7fb031cc44ac69489cbfc66a))
+* update backend types ([96a3d67](https://github.com/geops/mobility-toolbox-js/commit/96a3d67e7b34f212cf63b56d34a1d76c917db1c1))
+
 ## [3.2.0](https://github.com/geops/mobility-toolbox-js/compare/v3.1.0...v3.2.0) (2025-01-30)
 
 
