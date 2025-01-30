@@ -27,7 +27,6 @@ import {
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
-
 import { MobilityLayerOptions } from './Layer';
 
 const format = new GeoJSON();
@@ -359,17 +358,9 @@ class RealtimeLayer extends Layer {
   async highlightTrajectory(
     id: RealtimeTrainId,
   ): Promise<Feature[] | undefined> {
-    if (!id) {
-      this.cleanVectorLayer();
-      return;
-    }
-
     const features = await this.getFullTrajectory(id);
 
-    if (!features?.length) {
-      this.cleanVectorLayer();
-      return;
-    }
+    this.cleanVectorLayer();
 
     if (features.length) {
       this.vectorLayer?.getSource()?.addFeatures(features);
@@ -441,6 +432,7 @@ class RealtimeLayer extends Layer {
   select(feature: Feature) {
     const id = feature?.get('train_id');
     if (this.selectedVehicleId !== id) {
+      this.cleanVectorLayer();
       this.selectedVehicleId = id;
       this.engine.renderTrajectories(true);
     }
