@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
+import Markdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+
 import TrackerExample from './TrackerExample';
 
 const codeHtmlPage = `
@@ -38,12 +39,6 @@ map.on('load', () => {
 })
 `;
 
-function MarkdownHeading({ ...props }) {
-  // eslint-disable-next-line react/prop-types
-  const { node, children } = props;
-  return <Typography variant={node.tagName}>{children}</Typography>;
-}
-
 function Home() {
   const [source, setSource] = useState(null);
   const [apiKey, setApiKey] = useState('');
@@ -51,7 +46,9 @@ function Home() {
   useEffect(() => {
     // Get the public api key
     fetch('https://backend.developer.geops.io/publickey')
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((data) => {
         if (data && data.success) {
           window.apiKey = data.key;
@@ -62,7 +59,9 @@ function Home() {
 
   useEffect(() => {
     fetch('/README.md')
-      .then((response) => response.text())
+      .then((response) => {
+        return response.text();
+      })
       .then((text) => {
         // only show the 'Documentation and examples' section on GitHub
         const noDocText = text.split('## Documentation')[0];
@@ -96,26 +95,32 @@ function Home() {
         map. Check out the{' '}
         <Link href="/examples/ol-tracker">Live Tracker with OpenLayers</Link>{' '}
         example to see how to use{' '}
-        <a href="https://openlayers.org/" target="_blank" rel="noreferrer">
+        <a href="https://openlayers.org/" rel="noreferrer" target="_blank">
           OpenLayers
         </a>{' '}
         instead.
       </p>
       <p>First, create a HTML page with an empty map container.</p>
-      <SyntaxHighlighter language="html" code={codeHtmlPage.trim()} />
+      <SyntaxHighlighter code={codeHtmlPage.trim()} language="html" />
       <p>Create a Maplibre map.</p>
-      <SyntaxHighlighter language="js" code={codeMapObject.trim()} />
+      <SyntaxHighlighter code={codeMapObject.trim()} language="js" />
       <p>
         Finally, add the <i>RealtimeLayer</i> for rendering real time vehicle
         positions from our Realtime API. For more information about the backend
         and for obtaining the required API-Key, visit our Developer Portal at{' '}
-        <a target="_blank" rel="noreferrer" href="https://geops.io">
+        <a href="https://geops.io" rel="noreferrer" target="_blank">
           https://geops.io
         </a>
         .
       </p>
-      <SyntaxHighlighter language="js" code={codeTracker.trim()} />
+      <SyntaxHighlighter code={codeTracker.trim()} language="js" />
     </>
   );
+}
+
+function MarkdownHeading({ ...props }) {
+  // eslint-disable-next-line react/prop-types
+  const { children, node } = props;
+  return <Typography variant={node.tagName}>{children}</Typography>;
 }
 export default Home;

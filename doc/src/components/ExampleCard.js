@@ -1,73 +1,75 @@
-import React, { useState } from 'react';
 import Card from '@mui/material/Card';
-import CardMedia from '@mui/material/CardMedia';
-import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
 import CardActionArea from '@mui/material/CardActionArea';
+import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
 import Icon from '@mui/material/Icon';
 import Typography from '@mui/material/Typography';
 import makeStyles from '@mui/styles/makeStyles';
-import { CgArrowRight } from 'react-icons/cg';
-import Markdown from 'react-markdown';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import React, { useState } from 'react';
+import { CgArrowRight } from 'react-icons/cg';
+import Markdown from 'react-markdown';
 
-const useStyles = makeStyles((theme) => ({
-  exampleLink: {
-    height: '100%',
-    width: '100%',
-    color: '#353535',
-  },
-  cardWrapper: {
-    position: 'relative',
-    height: '100%',
-    width: '100%',
-    '& .MuiIcon-root': {
-      width: 30,
-      height: 30,
-      '& svg': {
-        height: '100%',
-        width: '100%',
-      },
-      margin: 35,
-      transition: 'margin-left 500ms ease, color 800ms ease',
+const useStyles = makeStyles((theme) => {
+  return {
+    card: {
+      boxShadow: 'none',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      width: '100%',
+      zIndex: 0,
     },
-    '&:hover': {
-      '& .MuiIcon-root': {
-        marginLeft: 60,
-        color: theme.colors.primaryGreen,
+    cardOverlay: {
+      '&:hover': {
+        border: '5px solid white',
       },
+      alignItems: 'center',
+      border: '15px solid white',
+      boxShadow:
+        'inset 0px 1px 3px 0px rgba(0, 0, 0, 0.12), inset 0px -1px 1px 0px rgba(0, 0, 0, 0.14)',
+      boxSizing: 'border-box',
+      cursor: 'pointer',
+      display: 'flex',
+      height: '100%',
+      position: 'absolute',
+      transition: 'border 500ms ease',
+      width: '100%',
+      zIndex: 1,
     },
-  },
-  cardOverlay: {
-    position: 'absolute',
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
-    width: '100%',
-    boxSizing: 'border-box',
-    boxShadow:
-      'inset 0px 1px 3px 0px rgba(0, 0, 0, 0.12), inset 0px -1px 1px 0px rgba(0, 0, 0, 0.14)',
-    border: '15px solid white',
-    transition: 'border 500ms ease',
-    '&:hover': {
+    cardOverlayHover: {
       border: '5px solid white',
     },
-    cursor: 'pointer',
-    zIndex: 1,
-  },
-  cardOverlayHover: {
-    border: '5px solid white',
-  },
-  card: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    width: '100%',
-    boxShadow: 'none',
-    zIndex: 0,
-  },
-}));
+    cardWrapper: {
+      '&:hover': {
+        '& .MuiIcon-root': {
+          color: theme.colors.primaryGreen,
+          marginLeft: 60,
+        },
+      },
+      '& .MuiIcon-root': {
+        '& svg': {
+          height: '100%',
+          width: '100%',
+        },
+        height: 30,
+        margin: 35,
+        transition: 'margin-left 500ms ease, color 800ms ease',
+        width: 30,
+      },
+      height: '100%',
+      position: 'relative',
+      width: '100%',
+    },
+    exampleLink: {
+      color: '#353535',
+      height: '100%',
+      width: '100%',
+    },
+  };
+});
 
 function ExampleCard({ example }) {
   const classes = useStyles();
@@ -82,19 +84,33 @@ function ExampleCard({ example }) {
           classes.cardOverlay +
           (example === raisedExample ? ` ${classes.cardOverlayHover}` : '')
         }
-        onClick={() => router.push(`/example/${example.key}`)}
+        onClick={() => {
+          return router.push(`/example/${example.key}`);
+        }}
       />
       <Card
         classes={{
           root: classes.card,
         }}
+        onBlur={() => {
+          return setRaisedExample();
+        }}
+        onFocus={() => {
+          return setRaisedExample(example);
+        }}
+        onMouseOut={() => {
+          return setRaisedExample();
+        }}
+        onMouseOver={() => {
+          return setRaisedExample(example);
+        }}
         raised={example === raisedExample}
-        onMouseOver={() => setRaisedExample(example)}
-        onMouseOut={() => setRaisedExample()}
-        onFocus={() => setRaisedExample(example)}
-        onBlur={() => setRaisedExample()}
       >
-        <CardActionArea onClick={() => router.push(`/example/${example.key}`)}>
+        <CardActionArea
+          onClick={() => {
+            return router.push(`/example/${example.key}`);
+          }}
+        >
           <CardMedia
             image={example.img}
             style={{
@@ -103,8 +119,8 @@ function ExampleCard({ example }) {
           />
           <CardContent className={classes.cardContent}>
             <Link
-              href={`/example/${example.key}`}
               className={classes.exampleLink}
+              href={`/example/${example.key}`}
             >
               <Typography variant="h3">{example.name}</Typography>
             </Link>

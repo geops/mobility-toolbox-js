@@ -1,14 +1,14 @@
 /* eslint-disable import/no-relative-packages */
-import React, { useEffect } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import { Map } from 'maplibre-gl';
-import { RealtimeLayer, CopyrightControl } from 'mobility-toolbox-js/maplibre';
+import { CopyrightControl, RealtimeLayer } from 'mobility-toolbox-js/maplibre';
+import React, { useEffect } from 'react';
 
 const useStyles = makeStyles({
   root: {
-    width: '100%',
     height: 300,
     pointerEvents: 'none',
+    width: '100%',
   },
 });
 
@@ -17,11 +17,11 @@ function TrackerExample() {
 
   useEffect(() => {
     const map = new Map({
+      attributionControl: false,
+      center: [7.4707, 46.95],
       container: 'map',
       style: `https://maps.geops.io/styles/travic_v2/style.json?key=${window.apiKey}`,
-      center: [7.4707, 46.95],
       zoom: 12,
-      attributionControl: false,
     });
     const control = new CopyrightControl();
     map.addControl(control);
@@ -45,7 +45,7 @@ function TrackerExample() {
     };
   }, []);
 
-  return <div id="map" className={classes.root} />;
+  return <div className={classes.root} id="map" />;
 }
 
 export default React.memo(TrackerExample);

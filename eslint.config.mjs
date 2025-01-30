@@ -34,7 +34,20 @@
 import flat from '@geops/eslint-config-react/flat';
 export default [
   {
-    ignores: ['__mocks__/*', 'src/types/*.d.ts', 'dev.js'],
+    ignores: [
+      'build/*',
+      '__mocks__/*',
+      'src/types/*.d.ts',
+      'dev.js',
+      'doc/**/*',
+    ],
   },
   ...flat,
+  {
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+      },
+    },
+  },
 ];

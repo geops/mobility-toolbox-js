@@ -1,46 +1,49 @@
-import React, { useState, useEffect, useMemo } from 'react';
 import { Grid, Paper, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import React, { useEffect, useMemo, useState } from 'react';
 import Markdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+
 import CodeSandboxButton from './CodeSandboxButton';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    padding: 12,
-  },
-  htmlContainer: {
-    height: 500,
-  },
-  noPointer: {
-    // Remove pointer events for mobile devices on load
-    [theme.breakpoints.down('sm')]: {
-      pointerEvents: 'none',
+const useStyles = makeStyles((theme) => {
+  return {
+    editButton: {
+      paddingRight: 10,
+      paddingTop: 5,
+      position: 'absolute',
+      right: 0,
+      top: 0,
     },
-  },
-  paper: {
-    position: 'relative',
-    margin: '20px 0',
-    resize: 'horizontal',
-    display: 'block',
-    overflow: 'hidden',
-  },
-  fileName: {
-    padding: '10px 0 5px 15px',
-  },
-  editButton: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    paddingTop: 5,
-    paddingRight: 10,
-  },
-  readme: {
-    '& p': {
-      fontSize: 18,
+    fileName: {
+      padding: '10px 0 5px 15px',
     },
-  },
-}));
+    htmlContainer: {
+      height: 500,
+    },
+    noPointer: {
+      // Remove pointer events for mobile devices on load
+      [theme.breakpoints.down('sm')]: {
+        pointerEvents: 'none',
+      },
+    },
+    paper: {
+      display: 'block',
+      margin: '20px 0',
+      overflow: 'hidden',
+      position: 'relative',
+      resize: 'horizontal',
+    },
+    readme: {
+      '& p': {
+        fontSize: 18,
+      },
+    },
+    root: {
+      padding: 12,
+    },
+  };
+});
 
 function Example({ example }) {
   const classes = useStyles();
@@ -50,19 +53,21 @@ function Example({ example }) {
   const [apiKey, setApiKey] = useState('');
 
   const htmlFileName = useMemo(() => {
-    const { key, files } = example || {};
+    const { files, key } = example || {};
     return files?.html || (key && `${key}.html`) || '';
   }, [example]);
 
   const jsFileName = useMemo(() => {
-    const { key, files } = example || {};
+    const { files, key } = example || {};
     return files?.js || (key && `${key}.js`) || '';
   }, [example]);
 
   useEffect(() => {
     // Get the public api key
     fetch('https://backend.developer.geops.io/publickey')
-      .then((response) => response.json())
+      .then((response) => {
+        return response.json();
+      })
       .then((data) => {
         if (data && data.success) {
           window.apiKey = data.key;
@@ -83,11 +88,15 @@ function Example({ example }) {
     fetch(`/static/examples/${htmlFileName}`, {
       signal: abortController.signal,
     })
-      .then((res) => res.text())
+      .then((res) => {
+        return res.text();
+      })
       .then((htmlAsText) => {
         setHtml(htmlAsText);
       })
-      .catch(() => setHtml());
+      .catch(() => {
+        return setHtml();
+      });
 
     return () => {
       abortController.abort();
@@ -114,7 +123,9 @@ function Example({ example }) {
     fetch(`/static/examples/${jsFileName}`, {
       signal: abortController.signal,
     })
-      .then((res) => res.text())
+      .then((res) => {
+        return res.text();
+      })
       .then((jsCode) => {
         // Replace relative import by library import
         setJs(
@@ -128,7 +139,9 @@ function Example({ example }) {
             .replace(/^ {2}/gm, ''),
         );
       })
-      .catch(() => setJs());
+      .catch(() => {
+        return setJs();
+      });
     return () => {
       abortController.abort();
     };
@@ -141,8 +154,8 @@ function Example({ example }) {
   return (
     <div style={{ marginTop: 30 }}>
       <Grid container direction="column" spacing={3}>
-        <Grid item xs={12} style={{ maxWidth: '100%' }}>
-          <Typography variant="h1" className="headline">
+        <Grid item style={{ maxWidth: '100%' }} xs={12}>
+          <Typography className="headline" variant="h1">
             {example.name}
           </Typography>
           <Markdown className={classes.readme}>
@@ -150,20 +163,24 @@ function Example({ example }) {
           </Markdown>
           <Markdown className={classes.readme}>{example.readme || ''}</Markdown>
         </Grid>
-        <Grid item xs={12} style={{ maxWidth: '100%' }}>
-          <Paper className={classes.paper} onClick={() => setIsNavigable(true)}>
+        <Grid item style={{ maxWidth: '100%' }} xs={12}>
+          <Paper
+            className={classes.paper}
+            onClick={() => {
+              return setIsNavigable(true);
+            }}
+          >
             <div
               className={`${classes.htmlContainer} ${
                 isNavigable ? '' : classes.noPointer
               }`}
-              // eslint-disable-next-line react/no-danger
               dangerouslySetInnerHTML={{ __html: html }}
             />
           </Paper>
         </Grid>
         {js && html && (
           <>
-            <Grid item xs={12} style={{ maxWidth: '100%' }}>
+            <Grid item style={{ maxWidth: '100%' }} xs={12}>
               <Paper className={classes.paper}>
                 <Typography className={classes.fileName}>
                   {jsFileName}
@@ -179,7 +196,7 @@ function Example({ example }) {
                 />
               </Paper>
             </Grid>
-            <Grid item xs={12} style={{ maxWidth: '100%' }}>
+            <Grid item style={{ maxWidth: '100%' }} xs={12}>
               <Paper className={classes.paper}>
                 <Typography className={classes.fileName}>
                   {htmlFileName}
@@ -187,9 +204,9 @@ function Example({ example }) {
                 <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
                 <CodeSandboxButton
                   className={classes.editButton}
+                  extraFiles={{}}
                   html={html}
                   js={js}
-                  extraFiles={{}}
                 />
               </Paper>
             </Grid>
