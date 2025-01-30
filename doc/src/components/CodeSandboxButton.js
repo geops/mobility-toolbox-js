@@ -1,8 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { getParameters } from 'codesandbox/lib/api/define';
 import { Button, SvgIcon } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
+import { getParameters } from 'codesandbox/lib/api/define';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 const useStyles = makeStyles({
   button: {
@@ -10,7 +10,7 @@ const useStyles = makeStyles({
   },
 });
 
-function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
+function CodeSandboxButton({ extraFiles = {}, html, js, ...props }) {
   const classes = useStyles();
 
   if (!html || !js) {
@@ -23,25 +23,18 @@ function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
         content: `${html}<script src="index.js"></script>`,
       },
       'index.js': {
-        content: js // eslint-disable-next-line no-template-curly-in-string
+        content: js
           .replaceAll('${window.apiKey}', window.apiKey)
           .replaceAll('window.apiKey', `'${window.apiKey}'`),
       },
       'package.json': {
         content: {
-          name: 'vanilla',
-          version: '1.0.0',
-          description: 'Mobility example starter project',
-          main: 'index.html',
-          scripts: {
-            start: 'parcel index.html --open',
-            build: 'parcel build index.html',
-          },
           dependencies: {
             'maplibre-gl': 'latest',
             'mobility-toolbox-js': 'latest',
             ol: 'latest',
           },
+          description: 'Mobility example starter project',
           devDependencies: {
             '@babel/core': '7.2.0',
             'parcel-bundler': '^1.6.1',
@@ -53,6 +46,13 @@ function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
             'mobility',
             'toolbox',
           ],
+          main: 'index.html',
+          name: 'vanilla',
+          scripts: {
+            build: 'parcel build index.html',
+            start: 'parcel index.html --open',
+          },
+          version: '1.0.0',
         },
       },
       ...extraFiles,
@@ -64,12 +64,10 @@ function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
       action="https://codesandbox.io/api/v1/sandboxes/define"
       method="POST"
       target="_blank"
-      // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
     >
-      <input type="hidden" name="parameters" value={dataSBStr} />
+      <input name="parameters" type="hidden" value={dataSBStr} />
       <Button
-        type="submit"
         className={classes.button}
         startIcon={
           <SvgIcon fontSize="large">
@@ -79,6 +77,7 @@ function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
             />
           </SvgIcon>
         }
+        type="submit"
       >
         Edit in Sandbox
       </Button>
@@ -87,9 +86,9 @@ function CodeSandboxButton({ html, js, extraFiles = {}, ...props }) {
 }
 
 CodeSandboxButton.propTypes = {
+  extraFiles: PropTypes.shape(),
   html: PropTypes.string,
   js: PropTypes.string,
-  extraFiles: PropTypes.shape(),
 };
 
 export default React.memo(CodeSandboxButton);
