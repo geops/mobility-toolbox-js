@@ -1,5 +1,4 @@
 import { RoutingParameters, RoutingResponse } from '../types';
-
 import HttpAPI from './HttpAPI';
 
 export interface RoutingAPIOptions {

@@ -1,5 +1,0 @@
-build/*
-__mocks__/*
-node_modules/*
-src/types/*.d.ts
-dev.js

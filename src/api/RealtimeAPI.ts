@@ -1,14 +1,3 @@
-/* eslint-disable no-underscore-dangle */
-import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
-import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
-
-/* eslint-disable class-methods-use-this */
-import WebSocketAPI, {
-  WebSocketAPIMessageCallback,
-  WebSocketAPIMessageEventData,
-  WebSocketAPIParameters,
-} from './WebSocketAPI';
-
 import type {
   RealtimeBbox,
   RealtimeDeparture,
@@ -26,6 +15,18 @@ import type {
   RealtimeVersion,
 } from '../types';
 
+import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
+import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
+import WebSocketAPI, {
+  WebSocketAPIMessageCallback,
+  WebSocketAPIMessageEventData,
+  WebSocketAPIParameters,
+} from './WebSocketAPI';
+
+export type RealtimeAPIDeparturesById = Record<string, RealtimeDeparture>;
+
+export type RealtimeAPIExtraGeomsById = Record<string, RealtimeExtraGeom>;
+
 /**
  * @typedef RealtimeAPIOptions
  */
@@ -38,10 +39,6 @@ export interface RealtimeAPIOptions {
   url?: string;
   version?: RealtimeVersion;
 }
-
-export type RealtimeAPIExtraGeomsById = Record<string, RealtimeExtraGeom>;
-
-export type RealtimeAPIDeparturesById = Record<string, RealtimeDeparture>;
 
 export interface RealtimeModesType {
   RAW: RealtimeMode;
@@ -375,10 +372,9 @@ class RealtimeAPI {
     window.clearTimeout(this.reconnectTimeout);
 
     if (this.reconnectTimeoutMs) {
-      this.reconnectTimeout = window.setTimeout(
-        () => this.open(),
-        this.reconnectTimeoutMs,
-      );
+      this.reconnectTimeout = window.setTimeout(() => {
+        return this.open();
+      }, this.reconnectTimeoutMs);
     }
   }
 

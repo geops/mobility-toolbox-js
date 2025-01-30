@@ -1,5 +1,4 @@
 import { StopsParameters, StopsResponse } from '../types';
-
 import HttpAPI from './HttpAPI';
 
 export interface StopsAPIOptions {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import WS from 'jest-websocket-mock';
 
 import WebSocketAPI from './WebSocketAPI';
@@ -31,7 +30,6 @@ describe('WebSocketAPI', () => {
 
   describe('#close', () => {
     test('should close the websocket and clear some property', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       const subsc2 = {
         cb: () => {},
@@ -186,7 +184,6 @@ describe('WebSocketAPI', () => {
 
   describe('#get', () => {
     test('listen to message event', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -203,7 +200,6 @@ describe('WebSocketAPI', () => {
     });
 
     test('unlisten after receiving one response', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -224,7 +220,6 @@ describe('WebSocketAPI', () => {
     });
 
     test('call (then remove) good callbacks on multiple requests', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -254,7 +249,6 @@ describe('WebSocketAPI', () => {
 
   describe('#subscribe', () => {
     test('adds subscription to subscriptions array', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -276,7 +270,6 @@ describe('WebSocketAPI', () => {
     });
 
     test("doesn't duplicate subscriptions", async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -295,7 +288,6 @@ describe('WebSocketAPI', () => {
     });
 
     test('send GET and SUB requests.', () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       client.send = jest.fn();
@@ -310,7 +302,6 @@ describe('WebSocketAPI', () => {
     });
 
     test('should register callback without sending GET and SUB requests (quiet=true).', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -331,7 +322,6 @@ describe('WebSocketAPI', () => {
 
   describe('#unsubscribe', () => {
     test('should only unsubscribe the subscription using the good cb', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -359,7 +349,6 @@ describe('WebSocketAPI', () => {
     });
 
     test('should unsubscribe all subscriptions related to a channel', () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       client.websocket.removeEventListener = jest.fn();
@@ -376,9 +365,9 @@ describe('WebSocketAPI', () => {
       expect(client.subscriptions.length).toBe(3);
       expect(client.websocket.removeEventListener).toBeCalledTimes(2);
       expect(
-        client.websocket.addEventListener.mock.calls.filter(
-          (c) => c[0] === 'message',
-        ).length,
+        client.websocket.addEventListener.mock.calls.filter((c) => {
+          return c[0] === 'message';
+        }).length,
       ).toBe(5);
 
       client.unsubscribe('foo');
@@ -388,7 +377,6 @@ describe('WebSocketAPI', () => {
     });
 
     test('send DEL when there is no more unquiet subscriptions on the channel', async () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       await server.connected;
@@ -406,7 +394,6 @@ describe('WebSocketAPI', () => {
     });
 
     test("doesn't send DEL when we unsubscribe a quiet channel", () => {
-      // eslint-disable-next-line no-unused-vars
       const client = new WebSocketAPI();
       client.connect(`ws://foo:1234`);
       client.send = jest.fn();

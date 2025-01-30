@@ -86,7 +86,7 @@ class MaplibreLayer extends MapLibreLayer {
     this.set('apiKey', newValue);
   }
   get apiKey(): string {
-    return this.get('apiKey');
+    return this.get('apiKey') as string;
   }
 
   set apiKeyName(newValue: string) {
@@ -94,7 +94,7 @@ class MaplibreLayer extends MapLibreLayer {
   }
 
   get apiKeyName(): string {
-    return this.get('apiKeyName');
+    return this.get('apiKeyName') as string;
   }
 
   /**
@@ -126,7 +126,7 @@ class MaplibreLayer extends MapLibreLayer {
   }
 
   get style(): string {
-    return this.get('style');
+    return this.get('style') as string;
   }
 
   set style(newValue: string) {
@@ -134,7 +134,7 @@ class MaplibreLayer extends MapLibreLayer {
   }
 
   get url(): string {
-    return this.get('url');
+    return this.get('url') as string;
   }
 
   set url(newValue: string) {
@@ -255,8 +255,9 @@ class MaplibreLayer extends MapLibreLayer {
     }
 
     // If the user has defined the style by the maplibreOptions, we use it directly.
-    if (this.get('options')?.mapLibreOptions?.style) {
-      return this.get('options').mapLibreOptions.style;
+    const opts = this.get('options') as MaplibreLayerOptions;
+    if (opts?.mapLibreOptions?.style) {
+      return opts.mapLibreOptions.style;
     }
 
     /// Otherwise build the complete style url.

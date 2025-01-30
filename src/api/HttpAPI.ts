@@ -34,7 +34,6 @@ class HttpAPI {
     }
 
     if (!this.url && !this.apiKey && !this.url.includes('key=')) {
-      // eslint-disable-next-line no-console
       throw new Error(`No apiKey defined for request to ${this.url}`);
     }
 

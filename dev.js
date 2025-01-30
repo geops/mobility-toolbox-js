@@ -13,7 +13,7 @@ import {
 } from './build/ol';
 import 'ol/ol.css';
 
-window.apiKey = '5cc87b12d7c5370001c1d65534da34dc9d4648aab190503c2e5ee81d';
+window.apiKey = '5cc87b12d7c5370001c1d65577c8c1b147434ddbbd82079182e249e4';
 
 const map = new Map({
   target: 'map',
@@ -28,55 +28,55 @@ const baseLayer = new MaplibreLayer({
 });
 map.addLayer(baseLayer);
 
-const realtimeLayer = new RealtimeLayer({
-  apiKey: window.apiKey,
-});
-map.addLayer(realtimeLayer);
-
-const routingLayer = new VectorLayer({
-  source: new VectorSource(),
-  style: routingStyle,
-});
-// map.addLayer(routingLayer);
-
-// const control = new RoutingControl({
-//   element: document.createElement('div'),
+// const realtimeLayer = new RealtimeLayer({
 //   apiKey: window.apiKey,
-//   routingLayer: routingLayer,
 // });
-// map.addControl(control);
+// map.addLayer(realtimeLayer);
 
-const vectorLayer = new VectorLayer({
-  source: new VectorSource(),
-});
-vectorLayer.getSource().addFeature(
-  new Feature({
-    geometry: new LineString([
-      // [950476.4055933182, 6003322.253698345],
-      // [950389.0813034325, 6003656.659274571],
-      // [
-      [950478.7985399539, 6003320.7265438335],
-      [950483.7500754321, 6003337.644331005],
-      [950518.7823191849, 6003431.357665203],
-      [950420.9547506756, 6003448.256090432],
-      [950349.999707244, 6003582.770702608],
-      [950351.0015826611, 6003608.825650063],
-      [950361.1427882726, 6003611.801014977],
-      [950368.5900622065, 6003616.61749184],
-      [950379.0986221373, 6003626.80936295],
-      [950388.2936120768, 6003641.22594949],
-      [950393.3361623707, 6003652.514778154],
-      // ]
-    ]),
-  }),
-);
-map.addLayer(vectorLayer);
+// const routingLayer = new VectorLayer({
+//   source: new VectorSource(),
+//   style: routingStyle,
+// });
+// // map.addLayer(routingLayer);
 
-const modify = new Modify({
-  source: vectorLayer.getSource(),
-  hitDetection: vectorLayer,
-});
-map.addInteraction(modify);
+// // const control = new RoutingControl({
+// //   element: document.createElement('div'),
+// //   apiKey: window.apiKey,
+// //   routingLayer: routingLayer,
+// // });
+// // map.addControl(control);
+
+// const vectorLayer = new VectorLayer({
+//   source: new VectorSource(),
+// });
+// vectorLayer.getSource().addFeature(
+//   new Feature({
+//     geometry: new LineString([
+//       // [950476.4055933182, 6003322.253698345],
+//       // [950389.0813034325, 6003656.659274571],
+//       // [
+//       [950478.7985399539, 6003320.7265438335],
+//       [950483.7500754321, 6003337.644331005],
+//       [950518.7823191849, 6003431.357665203],
+//       [950420.9547506756, 6003448.256090432],
+//       [950349.999707244, 6003582.770702608],
+//       [950351.0015826611, 6003608.825650063],
+//       [950361.1427882726, 6003611.801014977],
+//       [950368.5900622065, 6003616.61749184],
+//       [950379.0986221373, 6003626.80936295],
+//       [950388.2936120768, 6003641.22594949],
+//       [950393.3361623707, 6003652.514778154],
+//       // ]
+//     ]),
+//   }),
+// );
+// map.addLayer(vectorLayer);
+
+// const modify = new Modify({
+//   source: vectorLayer.getSource(),
+//   hitDetection: vectorLayer,
+// });
+// map.addInteraction(modify);
 
 // control.addViaPoint([950476.4055933182, 6003322.253698345]);
 // control.addViaPoint([950389.0813034325, 6003656.659274571]);
@@ -126,11 +126,15 @@ let map2 = new Map({
   }),
 });
 
+map.once('rendercomplete', (e) => {
+  console.log('map first rendercomplete');
+});
+
 document.getElementById('map2ToMap').onclick = () => {
   const layers = [...map2.getLayers().getArray()];
   map2.getLayers().clear();
   map.setLayers(layers);
-  map.addEventListener('rendercomplete', (e) => {
+  map.once('rendercomplete', (e) => {
     console.log('map rendercomplete');
   });
 };
@@ -139,7 +143,7 @@ document.getElementById('mapToMap2').onclick = () => {
   const layers = [...map.getLayers().getArray()];
   map.getLayers().clear();
   map2.setLayers(layers);
-  map2.addEventListener('rendercomplete', (e) => {
+  map2.once('rendercomplete', (e) => {
     console.log('map2 rendercomplete');
   });
 };
