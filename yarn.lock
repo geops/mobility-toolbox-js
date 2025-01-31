@@ -1350,10 +1350,10 @@
   resolved "https://registry.yarnpkg.com/@geoblocks/ol-maplibre-layer/-/ol-maplibre-layer-1.0.3.tgz#996345296b0b2d1b8ad06b78424caa5b69296b6f"
   integrity sha512-NKr7iqIezw5XWKy6Dw32mYdo3tcNXIOb+wI/nguhiqKxntFvvpiQAsv38lM9xpTkqlDRd1JKLfAHaqtc7jy4Ug==
 
-"@geops/eslint-config-react@1.5.0-beta.0":
-  version "1.5.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@geops/eslint-config-react/-/eslint-config-react-1.5.0-beta.0.tgz#674dc9fa96f175afd3d9ef3858e04ff5d4f35e8b"
-  integrity sha512-Rz1HVlvQSKutMf8R4D2oTWC/CtJ1xpvkQ7OrVku9vZZn+7RLJENKQe92ZgeL/uBJ7lHJ5WzEm4N+PWG3DXldvA==
+"@geops/eslint-config-react@1.5.0-beta.1":
+  version "1.5.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@geops/eslint-config-react/-/eslint-config-react-1.5.0-beta.1.tgz#064a0fc34d71fcc46c83b06323961117125856bd"
+  integrity sha512-gnCRY1uespgxj8KMMuAnihXtI7gTGV7DctN3H0XCrfHzqEBswalxwAvqGSLBbPgJla2fWw/h4haJ3Kl3d/x3Yg==
   dependencies:
     eslint-config-prettier "^10.0.1"
     eslint-plugin-cypress "^4.1.0"
@@ -1365,7 +1365,6 @@
     eslint-plugin-react "^7.37.4"
     eslint-plugin-react-compiler "^19.0.0-beta-27714ef-20250124"
     eslint-plugin-react-hooks "^5.1.0"
-    eslint-plugin-tailwindcss "^3.18.0"
     globals "^15.14.0"
     typescript-eslint "^8.22.0"
 
@@ -4751,14 +4750,6 @@ eslint-plugin-react@^7.37.4:
     string.prototype.matchall "^4.0.12"
     string.prototype.repeat "^1.0.0"
 
-eslint-plugin-tailwindcss@^3.18.0:
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-tailwindcss/-/eslint-plugin-tailwindcss-3.18.0.tgz#00b020f6360e616d592c477a9abdc7d18970715d"
-  integrity sha512-PQDU4ZMzFH0eb2DrfHPpbgo87Zgg2EXSMOj1NSfzdZm+aJzpuwGerfowMIaVehSREEa0idbf/eoNYAOHSJoDAQ==
-  dependencies:
-    fast-glob "^3.2.5"
-    postcss "^8.4.4"
-
 eslint-scope@^8.2.0:
   version "8.2.0"
   resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-8.2.0.tgz#377aa6f1cb5dc7592cfd0b7f892fd0cf352ce442"
@@ -5014,7 +5005,7 @@ fast-diff@^1.1.2:
   resolved "https://registry.yarnpkg.com/fast-diff/-/fast-diff-1.3.0.tgz#ece407fa550a64d638536cd727e129c61616e0f0"
   integrity sha512-VxPP4NqbUjj6MaAOafWeUn2cXWLcCtljklUtZf0Ind4XQ+QPtmA0b18zZy0jIQx+ExRVCR/ZQpBmik5lXshNsw==
 
-fast-glob@^3.2.5, fast-glob@^3.2.9, fast-glob@^3.3.2, fast-glob@^3.3.3:
+fast-glob@^3.2.9, fast-glob@^3.3.2, fast-glob@^3.3.3:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/fast-glob/-/fast-glob-3.3.3.tgz#d06d585ce8dba90a16b0505c543c3ccfb3aeb818"
   integrity sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==
@@ -8118,7 +8109,7 @@ postcss@8.4.31:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-postcss@^8.4.4, postcss@^8.4.49, postcss@^8.5.1:
+postcss@^8.4.49, postcss@^8.5.1:
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.5.1.tgz#e2272a1f8a807fafa413218245630b5db10a3214"
   integrity sha512-6oz2beyjc5VMn/KV1pPw8fliQkhBXrVn1Z3TVyqZxU8kZpzEKhBdmCFqI6ZbmGtamQvQGuU1sgPTk8ZrXDD7jQ==
@@ -9436,11 +9427,6 @@ taffydb@2.7.3:
   version "2.7.3"
   resolved "https://registry.yarnpkg.com/taffydb/-/taffydb-2.7.3.tgz#2ad37169629498fca5bc84243096d3cde0ec3a34"
   integrity sha512-GQ3gtYFSOAxSMN/apGtDKKkbJf+8izz5YfbGqIsUc7AMiQOapARZ76dhilRY2h39cynYxBFdafQo5HUL5vgkrg==
-
-tailwindcss@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-4.0.1.tgz#ae722697352001233a8f491aeb755e83139c453b"
-  integrity sha512-UK5Biiit/e+r3i0O223bisoS5+y7ZT1PM8Ojn0MxRHzXN1VPZ2KY6Lo6fhu1dOfCfyUAlK7Lt6wSxowRabATBw==
 
 tapable@^2.2.0:
   version "2.2.1"
