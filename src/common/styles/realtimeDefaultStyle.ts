@@ -1,5 +1,3 @@
-import createCanvas from '../utils/createCanvas';
-
 import type {
   AnyCanvasContext,
   RealtimeStyleFunction,
@@ -8,6 +6,8 @@ import type {
   StyleCache,
   ViewState,
 } from '../../types';
+
+import createCanvas from '../utils/createCanvas';
 
 const cacheDelayBg: StyleCache = {};
 
@@ -200,17 +200,39 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   const {
     delayDisplay = 300000,
     delayOutlineColor = '#000',
-    getBgColor = () => '#000',
-    getDelayColor = () => '#000',
-    getDelayFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
-    getDelayText = () => null,
-    getMaxRadiusForStrokeAndDelay = () => 7,
-    getMaxRadiusForText = () => 10,
-    getRadius = () => 0,
-    getText = (text?: string) => text,
-    getTextColor = () => '#000',
-    getTextFont = (fontSize: number) => `bold ${fontSize}px arial, sans-serif`,
-    getTextSize = () => 14,
+    getBgColor = () => {
+      return '#000';
+    },
+    getDelayColor = () => {
+      return '#000';
+    },
+    getDelayFont = (fontSize: number) => {
+      return `bold ${fontSize}px arial, sans-serif`;
+    },
+    getDelayText = () => {
+      return null;
+    },
+    getMaxRadiusForStrokeAndDelay = () => {
+      return 7;
+    },
+    getMaxRadiusForText = () => {
+      return 10;
+    },
+    getRadius = () => {
+      return 0;
+    },
+    getText = (text?: string) => {
+      return text;
+    },
+    getTextColor = () => {
+      return '#000';
+    },
+    getTextFont = (fontSize: number) => {
+      return `bold ${fontSize}px arial, sans-serif`;
+    },
+    getTextSize = () => {
+      return 14;
+    },
     hoverVehicleId,
     selectedVehicleId,
     useDelayStyle,
@@ -271,11 +293,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   let key = `${radius}${hover || selected}`;
 
   if (useDelayStyle) {
-    key += `${operatorProvidesRealtime}${delay}`;
-
-    if (isDisplayStrokeAndDelay) {
-      key += `${cancelled}`;
-    }
+    key += `${operatorProvidesRealtime}${delay}${cancelled}`;
   } else {
     key += `${color || type}`;
 

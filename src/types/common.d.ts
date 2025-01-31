@@ -33,7 +33,7 @@ export interface ViewState {
   size?: number[];
   time?: number;
   zoom?: number;
-  visible?:boolean;
+  visible?: boolean;
 }
 
 export interface RealtimeStyleOptions {
@@ -95,7 +95,6 @@ export type AnyCanvasContext =
 export type AnyRealtimeLayer = MbRealtimeLayer | OlRealtimeLayer;
 export type AnyCopyrightControl = MbCopyrightControl | OlCopyrightControl;
 
-
 export interface LayerGetFeatureInfoResponse {
   coordinate: Coordinate;
   features: Feature[];
@@ -104,9 +103,8 @@ export interface LayerGetFeatureInfoResponse {
 
 export interface LayerGetFeatureInfoOptions {
   nb?: number;
-  hitTolerance: number = 5;
+  hitTolerance: number;
 }
-
 
 export type RoutingGraph = [RoutingParameters.graph, number, number];
 export type RoutingMot = RoutingParameters.mot;

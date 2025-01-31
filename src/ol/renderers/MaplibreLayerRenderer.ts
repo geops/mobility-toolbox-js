@@ -49,7 +49,6 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   }
 
   setIsReady() {
-    console.log('ici');
     if (!this.ready) {
       this.ready = true;
       this.ignoreNextRender = true;

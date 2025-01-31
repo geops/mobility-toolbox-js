@@ -19,7 +19,7 @@ const map = new Map({
   target: 'map',
   view: new View({
     center: [950690.34, 6003962.67],
-    zoom: 15,
+    zoom: 6,
   }),
 });
 
@@ -28,10 +28,20 @@ const baseLayer = new MaplibreLayer({
 });
 map.addLayer(baseLayer);
 
-// const realtimeLayer = new RealtimeLayer({
-//   apiKey: window.apiKey,
-// });
-// map.addLayer(realtimeLayer);
+const realtimeLayer = new RealtimeLayer({
+  apiKey: window.apiKey,
+  styleOptions: { useDelayStyle: true },
+  // filter: (traj) => {
+  //   return traj.properties.state === 'JOURNEY_CANCELLED';
+  // },
+});
+map.addLayer(realtimeLayer);
+
+map.on('moveend', () => {
+  console.log('center: ', map.getView().getCenter());
+  console.log('zoom: ', map.getView().getZoom());
+  console.log('resolution: ', map.getView().getResolution());
+});
 
 // const routingLayer = new VectorLayer({
 //   source: new VectorSource(),
@@ -128,6 +138,16 @@ let map2 = new Map({
 
 map.once('rendercomplete', (e) => {
   console.log('map first rendercomplete');
+  map.on('rendercomplete', (e) => {
+    console.log('map first rendercomplete');
+  });
+});
+
+map2.once('rendercomplete', (e) => {
+  console.log('map2 first rendercomplete');
+  map2.on('rendercomplete', (e) => {
+    console.log('map2 rendercomplete');
+  });
 });
 
 document.getElementById('map2ToMap').onclick = () => {
@@ -135,7 +155,7 @@ document.getElementById('map2ToMap').onclick = () => {
   map2.getLayers().clear();
   map.setLayers(layers);
   map.once('rendercomplete', (e) => {
-    console.log('map rendercomplete');
+    console.log('map1 rendercomplete');
   });
 };
 
