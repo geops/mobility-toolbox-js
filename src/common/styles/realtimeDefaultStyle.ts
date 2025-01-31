@@ -273,11 +273,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   let key = `${radius}${hover || selected}`;
 
   if (useDelayStyle) {
-    key += `${operatorProvidesRealtime}${delay}`;
-
-    if (isDisplayStrokeAndDelay) {
-      key += `${cancelled}`;
-    }
+    key += `${operatorProvidesRealtime}${delay}${cancelled}`;
   } else {
     key += `${color || type}`;
 
