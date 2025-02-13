@@ -110,7 +110,7 @@
     "prepare": "is-ci || husky",
     "publish:beta": "HUSKY=0 yarn release -- --prerelease beta --skip.changelog  && yarn run build && cd build && HUSKY=0 yarn publish --tag beta && git push origin HEAD && git push --tags ",
     "publish:beta:dryrun": "yarn release -- --prerelease beta --dry-run --skip.changelog",
-    "publish:public": "yarn release  && yarn run build && cd build && HUSKY=0 yarn publish && git push origin HEAD && git push --tags ",
+    "publish:public": "yarn release  && yarn run build && cd build && HUSKY=0 yarn publish --tag latest-v2 && git push origin HEAD && git push --tags ",
     "publish:public:dryrun": "yarn release --dry-run",
     "release": "standard-version",
     "start": "yarn doc && cd doc && yarn start",
