@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [2.4.4](https://github.com/geops/mobility-toolbox-js/compare/v2.4.3...v2.4.4) (2025-02-13)
 
+Fix npm publishing on latest-v2 channel
+
 ### [2.4.3](https://github.com/geops/mobility-toolbox-js/compare/v2.4.2...v2.4.3) (2025-01-31)
 
 
