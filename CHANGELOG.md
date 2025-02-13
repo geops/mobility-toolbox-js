@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.2](https://github.com/geops/mobility-toolbox-js/compare/v3.2.1...v3.2.2) (2025-02-13)
+
+
+### Bug Fixes
+
+* display cancelled train properly on low zoom level ([9ff5342](https://github.com/geops/mobility-toolbox-js/commit/9ff5342c718c48c84e4fea2190f430735b361c03))
+
 ### [3.2.1](https://github.com/geops/mobility-toolbox-js/compare/v3.2.0...v3.2.1) (2025-01-30)
 
 
