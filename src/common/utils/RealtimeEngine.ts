@@ -1,3 +1,5 @@
+import type { Coordinate } from 'ol/coordinate';
+
 import { FeatureCollection } from 'geojson';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
@@ -24,11 +26,8 @@ import {
 } from '../../types';
 import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
 import { FilterFunction, SortFunction } from '../typedefs';
-
 import * as realtimeConfig from './realtimeConfig';
 import renderTrajectories from './renderTrajectories';
-
-import type { Coordinate } from 'ol/coordinate';
 
 export interface RealtimeEngineOptions {
   api?: RealtimeAPI;
@@ -223,8 +222,16 @@ class RealtimeEngine {
     this.useRequestAnimationFrame = options.useRequestAnimationFrame || false;
     this.useThrottle = options.useThrottle !== false; // the default behavior
 
-    this.getViewState = options.getViewState || (() => ({}));
-    this.shouldRender = options.shouldRender || (() => true);
+    this.getViewState =
+      options.getViewState ||
+      (() => {
+        return {};
+      });
+    this.shouldRender =
+      options.shouldRender ||
+      (() => {
+        return true;
+      });
     this.onRender = options.onRender;
     this.onIdle = options.onIdle;
     this.onStart = options.onStart;
@@ -443,7 +450,9 @@ class RealtimeEngine {
     return { features: vehicles, type: 'FeatureCollection' };
   }
 
-  getViewState: () => ViewState = () => ({});
+  getViewState: () => ViewState = () => {
+    return {};
+  };
 
   /**
    * Callback on websocket's deleted_vehicles channel events.
@@ -734,7 +743,6 @@ class RealtimeEngine {
     /* @private */
     this.mots = this.getMotsByZoom(zoomFloor);
     if (this.mots) {
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       bbox.push(`mots=${this.mots}`);
     }
 
@@ -748,7 +756,6 @@ class RealtimeEngine {
 
     if (this.bboxParameters) {
       Object.entries(this.bboxParameters).forEach(([key, value]) => {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         bbox.push(`${key}=${value}`);
       });
     }
@@ -757,7 +764,9 @@ class RealtimeEngine {
     this.api.bbox = bbox;
   }
 
-  shouldRender: () => boolean = () => true;
+  shouldRender: () => boolean = () => {
+    return true;
+  };
 
   start() {
     this.stop();

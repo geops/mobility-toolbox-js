@@ -110,7 +110,9 @@ export const textColors: string[] = [
  */
 export const getTypeIndex = (type: RealtimeMot): number => {
   if (typeof type === 'string') {
-    return types.findIndex((t) => t.test(type));
+    return types.findIndex((t) => {
+      return t.test(type);
+    });
   }
   return type;
 };
@@ -171,7 +173,6 @@ export const getTextSize = (
   let i = 0;
 
   while (newText.width > markerSize - 6 && i < maxiter) {
-    // eslint-disable-next-line no-param-reassign
     fontSize -= 0.5;
     ctx.font = getTextFont(fontSize, text);
     newText = ctx.measureText(text);
