@@ -1,0 +1,55 @@
+<html>
+
+<head>
+  <title>Parcel Sandbox</title>
+  <meta charset="UTF-8" />
+
+  <script src="./build/mbt.min.js"></script>
+</head>
+
+<body>
+  <div id="map" style="width: 600px; height: 600px">
+  </div>
+
+  <script>
+    console.log(ol, mbt, maplibregl);
+    const map = new ol.Map({
+      target: 'map', 
+      view: new ol.View({
+        center: [831634, 5933959],
+        zoom: 13,
+      }),
+      controls: [],
+    });
+
+    
+    
+    
+    const layer = new mbt.ol.MaplibreLayer({
+      apiKey: '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb',
+    });
+    map.addLayer(layer);
+
+
+    const osm = new ol.layer.Tile({
+      source: new ol.source.OSM(),
+      opacity: 0.5,
+    });
+    map.addLayer(osm);
+    
+    
+   /* const tracker = new mbt.ol.RealtimeLayer({
+      url: 'wss://api.geops.io/tracker-ws/v1/',
+      apiKey: '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb',
+    });
+    tracker.attachToMap(map);
+    tracker.onClick(([feature]) => {
+      if (feature) {
+        // eslint-disable-next-line no-console
+        console.log(feature.getProperties());
+      }
+    });*/
+  </script>
+</body>
+
+</html>
