@@ -53,7 +53,7 @@ export interface RealtimeStyleOptions {
   getRadius?: (type: RealtimeMot, z: number) => number;
   getScreenPixel?: (pixel: Pixel, viewState: ViewState) => Pixel;
   getText?: (text?: string) => string;
-  getTextColor?: (type: RealtimeMot) => string;
+  getTextColor?: (type: RealtimeMot, line?: RealtimeLine) => string;
   getTextFont?: (fontSize: number, text?: string) => string;
   getTextSize?: (
     ctx: AnyCanvasContext,

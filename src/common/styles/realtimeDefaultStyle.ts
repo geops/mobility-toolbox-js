@@ -261,15 +261,11 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     name = 'I';
   }
 
-  if (!textColor) {
-    textColor = '#000000';
-  }
-
   if (color && !color.startsWith('#')) {
     color = `#${color}`;
   }
 
-  if (!textColor.startsWith('#')) {
+  if (textColor && !textColor.startsWith('#')) {
     textColor = `#${textColor}`;
   }
 
@@ -295,7 +291,8 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}${delay}${cancelled}`;
   } else {
-    key += `${color || type}`;
+    color = color || getBgColor(type, line);
+    key += `${color}`;
 
     if (isDisplayStrokeAndDelay) {
       key += `${cancelled}${delay}`;
@@ -303,6 +300,13 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   }
 
   if (isDisplayText) {
+    // Get the text color of the vehicle
+    if (useDelayStyle) {
+      textColor = '#000000';
+    } else {
+      textColor = textColor || getTextColor(type, line);
+    }
+
     key += `${name}${textColor}`;
   }
 
@@ -354,14 +358,6 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       }
     }
 
-    // Draw colored circle with black border
-    let circleFillColor;
-    if (useDelayStyle) {
-      circleFillColor = getDelayColor(delay, cancelled);
-    } else {
-      circleFillColor = color || getBgColor(type, line);
-    }
-
     const hasStroke = isDisplayStrokeAndDelay || hover || selected;
 
     const hasDash =
@@ -369,6 +365,12 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       !!useDelayStyle &&
       delay === null &&
       operatorProvidesRealtime === 'yes';
+
+    // Get the color of the vehicle
+    let circleFillColor = color || '#fff';
+    if (useDelayStyle) {
+      circleFillColor = getDelayColor(delay, cancelled);
+    }
 
     const circle = getCircleCanvas(
       origin,
@@ -411,9 +413,6 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
           fontSize2,
           getTextFont,
         );
-        const textColor2 = !useDelayStyle
-          ? textColor || getTextColor(type)
-          : '#000000';
         const hasStroke2 =
           !!useDelayStyle &&
           delay === null &&
@@ -423,7 +422,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
           name,
           origin,
           textSize,
-          textColor2,
+          textColor || '#000',
           circleFillColor,
           hasStroke2,
           pixelRatio,
