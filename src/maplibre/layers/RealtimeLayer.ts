@@ -4,14 +4,13 @@ import { CanvasSourceSpecification, LayerSpecification } from 'maplibre-gl';
 import { getHeight, getWidth } from 'ol/extent';
 import { fromLonLat } from 'ol/proj';
 
+import type { AnyCanvas, AnyMapGlMap } from '../../types';
+
 import RealtimeEngine, {
   RealtimeEngineOptions,
 } from '../../common/utils/RealtimeEngine';
 import { getSourceCoordinates } from '../utils';
-
 import Layer, { LayerOptions } from './Layer';
-
-import type { AnyCanvas, AnyMapGlMap } from '../../types';
 
 export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
 
