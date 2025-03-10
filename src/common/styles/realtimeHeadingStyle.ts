@@ -1,8 +1,3 @@
-import createCanvas from '../utils/createCanvas';
-import { getBgColor } from '../utils/realtimeConfig';
-
-import realtimeDefaultStyle from './realtimeDefaultStyle';
-
 import type {
   AnyCanvas,
   AnyCanvasContext,
@@ -11,6 +6,10 @@ import type {
   RealtimeTrajectory,
   ViewState,
 } from '../../types';
+
+import createCanvas from '../utils/createCanvas';
+import { getBgColor } from '../utils/realtimeConfig';
+import realtimeDefaultStyle from './realtimeDefaultStyle';
 
 const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
   const ctx = canvas.getContext('2d') as AnyCanvasContext;
@@ -105,7 +104,7 @@ const realtimeHeadingStyle: RealtimeStyleFunction = (
   const canvas = realtimeDefaultStyle(trajectory, viewState, options);
 
   if (canvas && rotation !== null) {
-    const circleFillColor = color || getBgColor(type);
+    const circleFillColor = color || getBgColor(type, line);
     const bufferArrow = getBufferArrowCanvas(canvas, circleFillColor, rotation);
     if (bufferArrow) {
       const bufferSize = (bufferArrow.width - canvas.width) / 2;

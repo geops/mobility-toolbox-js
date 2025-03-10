@@ -12,6 +12,7 @@ import {
   routingStyle,
 } from './build/ol';
 import 'ol/ol.css';
+import { buffer } from 'ol/extent';
 
 window.apiKey = '5cc87b12d7c5370001c1d655326a8fe3dfc442c4b494079981d18214';
 
@@ -28,10 +29,15 @@ const baseLayer = new MaplibreLayer({
 });
 map.addLayer(baseLayer);
 
+const francfortExtent = buffer(
+  [967387.0927876673, 6464738.161156644, 967387.0927876673, 6464738.161156644],
+  100000,
+);
+
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
-  styleOptions: { useDelayStyle: true },
-  extent: [950000, 6003000, 951000, 6004000],
+  // styleOptions: { useDelayStyle: true },
+  extent: francfortExtent,
   // filter: (traj) => {
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },

@@ -359,7 +359,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     if (useDelayStyle) {
       circleFillColor = getDelayColor(delay, cancelled);
     } else {
-      circleFillColor = color || getBgColor(type);
+      circleFillColor = color || getBgColor(type, line);
     }
 
     const hasStroke = isDisplayStrokeAndDelay || hover || selected;

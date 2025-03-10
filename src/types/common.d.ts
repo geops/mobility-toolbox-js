@@ -18,7 +18,7 @@ import type {
   RealtimeLayer as OlRealtimeLayer,
 } from '../ol';
 
-import type { RealtimeMot, RealtimeTrainId } from './realtime';
+import type { RealtimeLine, RealtimeMot, RealtimeTrainId } from './realtime';
 
 import type { RoutingParameters } from '.';
 
@@ -40,7 +40,7 @@ export interface RealtimeStyleOptions {
   delayDisplay?: number;
   delayOutlineColor?: string;
   filter?: FilterFunction;
-  getBgColor?: (type: RealtimeMot) => string;
+  getBgColor?: (type: RealtimeMot, line?: RealtimeLine) => string;
   getDelayColor?: (
     delay: null | number,
     cancelled?: boolean,
