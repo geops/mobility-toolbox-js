@@ -1,6 +1,6 @@
-import { Circle, Fill, Stroke, Style } from 'ol/style';
-
 import type { FeatureLike } from 'ol/Feature';
+
+import { Circle, Fill, Stroke, Style } from 'ol/style';
 
 const borderStyle = new Style({
   image: new Circle({
@@ -26,11 +26,14 @@ const fullTrajectorystyle = (
   const type = feature.get('type');
   let stroke = feature.get('stroke');
 
+  console.log(feature.getProperties());
+
   if (stroke && stroke[0] !== '#') {
     stroke = `#${stroke}`;
   }
 
-  lineColor = stroke || options?.getBgColor(type);
+  lineColor =
+    stroke || options?.getBgColor(type, { name: feature.get('line_name') });
 
   // Don't allow white lines, use red instead.
   lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;

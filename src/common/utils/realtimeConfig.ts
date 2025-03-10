@@ -1,4 +1,4 @@
-import { AnyCanvasContext, RealtimeMot } from '../../types';
+import { AnyCanvasContext, RealtimeLine, RealtimeMot } from '../../types';
 
 const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -132,11 +132,13 @@ export const getRadius = (type: RealtimeMot, zoom: number): number => {
 /**
  * @private
  */
-export const getBgColor = (type: RealtimeMot): string => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const getBgColor = (type: RealtimeMot, line?: RealtimeLine): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return bgColors[typeIdx];
-  } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
     return '#ffffff';
   }
 };

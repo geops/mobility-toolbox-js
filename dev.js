@@ -12,8 +12,9 @@ import {
   routingStyle,
 } from './build/ol';
 import 'ol/ol.css';
+import { buffer } from 'ol/extent';
 
-window.apiKey = '5cc87b12d7c5370001c1d65577c8c1b147434ddbbd82079182e249e4';
+window.apiKey = '5cc87b12d7c5370001c1d655326a8fe3dfc442c4b494079981d18214';
 
 const map = new Map({
   target: 'map',
@@ -28,9 +29,60 @@ const baseLayer = new MaplibreLayer({
 });
 map.addLayer(baseLayer);
 
+const francfortExtent = buffer(
+  [967387.0927876673, 6464738.161156644, 967387.0927876673, 6464738.161156644],
+  100000,
+);
+
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
-  styleOptions: { useDelayStyle: true },
+  // styleOptions: { useDelayStyle: true },
+  extent: francfortExtent,
+  styleOptions: {
+    delayDisplay: 0,
+    // Define the circle color
+    // @param {string} mot - The mode of transport
+    // @param {object} line - The line object
+    // @return {string} The color in rgba format
+    getBgColor: (mot, line) => {
+      if (mot === 'bus') {
+        return 'rgba(0, 255, 0, 1)';
+      }
+      if (mot === 'subway') {
+        return 'rgba(0, 0, 255, 1)';
+      }
+      // S-Bahn
+      if (/^S/.test(line?.name)) {
+        return 'rgba(0, 255, 255, 1)';
+      }
+      // Rail
+      return 'rgba(255, 0, 0, 1)';
+    },
+
+    // Define the maximum radius of the circle when to display the stroke representing the delay
+    // @param {string} mot - The mode of transport
+    // @param {number} delay - The delay in seconds
+    // @return {number} a radius in pixel
+    getMaxRadiusForStrokeAndDelay: (mot, delay) => {
+      return 7;
+    },
+
+    // Define the maximum radius of the circle when to display the text
+    // @param {string} mot - The mode of transport
+    // @param {number} zoom - The current zoom level
+    // @return {number} a radius in pixel
+    getMaxRadiusForText: (mot, zoom) => {
+      return 6;
+    },
+
+    // Define the radius of the circle
+    // @param {string} mot - The mode of transport
+    // @param {number} zoom - The current zoom level
+    // @return {number} a radius in pixel
+    getRadius: (mot, zoom) => {
+      return 7;
+    },
+  },
   // filter: (traj) => {
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },

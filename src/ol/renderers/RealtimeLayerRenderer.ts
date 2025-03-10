@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -53,7 +52,6 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
         ).data || null; // [3];
       return data;
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('error getting data', err);
     }
     return null;
@@ -81,7 +79,6 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
     return format.readFeatures(featureCollection);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   prepareFrame() {
     return true;
   }
