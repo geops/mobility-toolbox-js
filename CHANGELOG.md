@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.3](https://github.com/geops/mobility-toolbox-js/compare/v3.2.2...v3.2.3) (2025-03-10)
+
+
+### Bug Fixes
+
+* fix iife file ([#221](https://github.com/geops/mobility-toolbox-js/issues/221)) ([395bf4d](https://github.com/geops/mobility-toolbox-js/commit/395bf4dd6987198c217ffc4aedfe9113275b20d1))
+* use the layer extent and allow to define a color by a line ([#223](https://github.com/geops/mobility-toolbox-js/issues/223)) ([7b7e793](https://github.com/geops/mobility-toolbox-js/commit/7b7e793c5a0c6e5e25c9f3c0b7ee44ce7f6b8c86))
+
 ### [3.2.2](https://github.com/geops/mobility-toolbox-js/compare/v3.2.1...v3.2.2) (2025-02-13)
 
 
