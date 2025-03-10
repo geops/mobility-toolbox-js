@@ -13,7 +13,7 @@ import {
 } from './build/ol';
 import 'ol/ol.css';
 
-window.apiKey = '5cc87b12d7c5370001c1d65577c8c1b147434ddbbd82079182e249e4';
+window.apiKey = '5cc87b12d7c5370001c1d655326a8fe3dfc442c4b494079981d18214';
 
 const map = new Map({
   target: 'map',
@@ -31,6 +31,7 @@ map.addLayer(baseLayer);
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
   styleOptions: { useDelayStyle: true },
+  extent: [950000, 6003000, 951000, 6004000],
   // filter: (traj) => {
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },

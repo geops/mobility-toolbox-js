@@ -2,6 +2,7 @@ import { DebouncedFunc } from 'lodash';
 import debounce from 'lodash.debounce';
 import { Map, MapEvent } from 'ol';
 import { EventsKey } from 'ol/events';
+import { getIntersection, isEmpty } from 'ol/extent';
 import Feature, { FeatureLike } from 'ol/Feature';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from 'ol/layer/Layer';
@@ -332,9 +333,20 @@ class RealtimeLayer extends Layer {
       return {};
     }
     const view = mapInternal.getView();
+    let extent = view.calculateExtent();
+
+    const layerExtent = this.getExtent();
+    if (layerExtent) {
+      extent = getIntersection(extent, layerExtent);
+      // If there is no intersection we use the layer extent
+      if (isEmpty(extent)) {
+        extent = layerExtent;
+      }
+    }
+
     return {
       center: view.getCenter(),
-      extent: view.calculateExtent(),
+      extent: extent,
       pixelRatio: this.engine.pixelRatio,
       resolution: view.getResolution(),
       rotation: view.getRotation(),
