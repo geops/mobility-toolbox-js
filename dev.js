@@ -10,12 +10,35 @@ import {
   RealtimeLayer,
   RoutingControl,
   routingStyle,
+  MocoAPI,
 } from './build/ol';
 import 'ol/ol.css';
 import { buffer } from 'ol/extent';
 
-window.apiKey = '5cc87b12d7c5370001c1d655326a8fe3dfc442c4b494079981d18214';
+window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
+const mocoApi = new MocoAPI();
+console.log('MocoAPI: ', mocoApi);
+mocoApi
+  .getNotifications({ addStatusProperties: true, date: new Date() })
+  .then((response) => {
+    console.log('MocoAPI response: ', response);
+  })
+  .catch((error) => {
+    console.error('Error fetching notifications: ', error);
+  });
+
+mocoApi
+  .getNotificationsAsFeatureCollection({
+    addStatusProperties: true,
+    date: new Date(),
+  })
+  .then((response) => {
+    console.log('MocoAPI response 2: ', response);
+  })
+  .catch((error) => {
+    console.error('Error fetching notifications: ', error);
+  });
 const map = new Map({
   target: 'map',
   view: new View({

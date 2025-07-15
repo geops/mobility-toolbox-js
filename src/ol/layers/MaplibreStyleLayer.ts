@@ -13,7 +13,6 @@ import { FilterFunction } from '../../common/typedefs';
 import { LayerGetFeatureInfoResponse } from '../../types';
 import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
-
 import { MobilityLayerOptions } from './Layer';
 import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
 
@@ -32,7 +31,6 @@ if (
   new URLSearchParams(window.location.search).get('deprecated')
 ) {
   deprecated = debounce((...messages: (object | string)[]) => {
-    // eslint-disable-next-line no-console
     console.warn(...messages);
   }, 1000);
 }
@@ -41,13 +39,13 @@ if (
  * Layer that helps show/hide a specific subset of style layers of a [MaplibreLayer](./MaplibreLayer.js~MaplibreLayer.html).
  *
  * @example
- * import { MaplibreLayer, MaplibreStyleLayer } from 'mobility-toolbox-js/ol';
+ * import { MaplibreLayer, MocoLayer } from 'mobility-toolbox-js/ol';
  *
  * const maplibreLayer = new MaplibreLayer({
  *   apiKey: 'yourApiKey',
  * });
  *
- * const layer = new MaplibreStyleLayer({
+ * const layer = new MocoLayer({
  *   maplibreLayer: maplibreLayer,
  *   layersFilter: (layer) => {
  *     // show/hide only style layers related to stations
@@ -55,8 +53,7 @@ if (
  *   },
  * });
  *
- * @see <a href="/example/ol-maplibre-style-layer">OpenLayers MaplibreStyle layer example</a>
- * @extends {ol/layer/Layer~Layer}
+ * @extends {MaplibreStyleLayer}
  * @public
  */
 class MaplibreStyleLayer extends Layer {
@@ -193,7 +190,7 @@ class MaplibreStyleLayer extends Layer {
       );
       // @ts-expect-error - mapboxLayer is deprecated
       options.maplibreLayer = options.mapboxLayer;
-      // eslint-disable-next-line no-param-reassign
+
       delete options.mapboxLayer;
     }
 
@@ -201,9 +198,9 @@ class MaplibreStyleLayer extends Layer {
       deprecated(
         'options.styleLayers is deprecated. Use options.layers instead.',
       );
-      // eslint-disable-next-line no-param-reassign
+
       options.layers = options.styleLayers as AddLayerObject[];
-      // eslint-disable-next-line no-param-reassign
+
       delete options.styleLayers;
     }
 
@@ -211,9 +208,9 @@ class MaplibreStyleLayer extends Layer {
       deprecated(
         'options.styleLayersFilter is deprecated. Use options.layersFilter instead.',
       );
-      // eslint-disable-next-line no-param-reassign
+
       options.layersFilter = options.styleLayersFilter as FilterFunction;
-      // eslint-disable-next-line no-param-reassign
+
       delete options.styleLayersFilter;
     }
 
@@ -231,7 +228,9 @@ class MaplibreStyleLayer extends Layer {
 
     if (!this.layersFilter && this.layers) {
       this.layersFilter = (layer: maplibregl.LayerSpecification) => {
-        return !!this.layers.find((l) => layer.id === l.id);
+        return !!this.layers.find((l) => {
+          return layer.id === l.id;
+        });
       };
     }
   }
@@ -422,7 +421,6 @@ class MaplibreStyleLayer extends Layer {
     }
 
     if (this.queryRenderedLayersFilter) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       layers = mapLibreMap
         .getStyle()
         .layers.filter(this.queryRenderedLayersFilter);
@@ -465,12 +463,13 @@ class MaplibreStyleLayer extends Layer {
     );
     // Filter out selected features
     const filtered: Feature[] =
-      this.highlightedFeatures?.filter(
-        (feature) =>
-          !(this.selectedFeatures || [])
-            .map((feat: Feature) => feat.getId())
-            .includes(feature.getId()),
-      ) || [];
+      this.highlightedFeatures?.filter((feature) => {
+        return !(this.selectedFeatures || [])
+          .map((feat: Feature) => {
+            return feat.getId();
+          })
+          .includes(feature.getId());
+      }) || [];
 
     // Remove previous highlight
     this.setHoverState(filtered, false);

@@ -2,6 +2,7 @@ import { Paths as Routing } from './routing';
 import { Paths as Stops } from './stops';
 
 export * from './common';
+export * from './moco';
 export * from './ol';
 export * from './realtime';
 
