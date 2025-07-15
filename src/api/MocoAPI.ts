@@ -53,9 +53,9 @@ class MocoAPI extends HttpAPI {
    */
   constructor(options: MocoAPIOptions = {}) {
     super({
-      apiKey: 'public',
-      url: 'https://moco.dev.geops.io/api/v1',
+      apiKey: 'public', // hack apiKey is not needed for moco
       ...options,
+      url: options.url || 'https://moco.dev.geops.io/api/v1/',
     });
   }
 
@@ -72,7 +72,7 @@ class MocoAPI extends HttpAPI {
     config: RequestInit,
   ): Promise<MocoNotification[]> {
     let notifications = (await this.fetch(
-      '/export/publication/',
+      'export/publication/',
       {
         graph: this.graph,
         sso_config: this.ssoConfig,

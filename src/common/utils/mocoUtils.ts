@@ -6,7 +6,6 @@ import { toLonLat } from 'ol/proj';
 import {
   MocoAffectedTimeInterval,
   MocoNotification,
-  MocoNotificationFeatureProperties,
   MocoNotificationIconRefFeatureProperties,
 } from '../../types';
 
