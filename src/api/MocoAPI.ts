@@ -1,14 +1,7 @@
-import {
-  getStartsString,
-  isNotificationActive,
-  isNotificationNotOutOfDate,
-  isNotificationPublished,
-} from '../common/utils/mocoUtils';
+import { isNotificationNotOutOfDate } from '../common/utils/mocoUtils';
 import {
   MocoNotification,
   MocoNotificationAsFeatureCollection,
-  MocoNotificationFeatureProperties,
-  MocoNotificationStatusProperties,
 } from '../types';
 import HttpAPI from './HttpAPI';
 
