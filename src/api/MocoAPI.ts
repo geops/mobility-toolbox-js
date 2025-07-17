@@ -74,9 +74,8 @@ class MocoAPI extends HttpAPI {
     let notifications = (await this.fetch(
       'export/publication/',
       {
-        graph: this.graph,
-        sso_config: this.ssoConfig,
-        ...params,
+        graph: params.graph || this.graph || 'osm',
+        sso_config: params.sso_config || this.ssoConfig || 'geopstest',
       },
       config,
     )) as MocoNotification[];
