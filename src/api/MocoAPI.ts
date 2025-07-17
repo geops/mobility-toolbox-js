@@ -1,4 +1,4 @@
-import { isNotificationNotOutOfDate } from '../common/utils/mocoUtils';
+import { isMocoNotificationNotOutOfDate } from '../common/utils/mocoUtils';
 import {
   MocoNotification,
   MocoNotificationAsFeatureCollection,
@@ -86,7 +86,7 @@ class MocoAPI extends HttpAPI {
     const date = params?.date;
     if (date) {
       notifications = notifications.filter((notification) => {
-        return isNotificationNotOutOfDate(notification, date);
+        return isMocoNotificationNotOutOfDate(notification, date);
       });
     }
 
@@ -114,37 +114,37 @@ class MocoAPI extends HttpAPI {
     return notifications;
   }
 
-  /**
-   * Get notifications as a unique GeoJSON feature collection.
-   * The list of notification are read from the `getNotifications` method
-   * then all features are merged into a single GeoJSON feature collection
-   * and the notification properties are given to each feature of its notification.
-   */
-  async getNotificationsAsFeatureCollection(
-    params: MocoParameters,
-    config: RequestInit,
-  ): Promise<MocoNotificationAsFeatureCollection> {
-    const notifications = await this.getNotifications(params, config);
+  // /**
+  //  * Get notifications as a unique GeoJSON feature collection.
+  //  * The list of notification are read from the `getNotifications` method
+  //  * then all features are merged into a single GeoJSON feature collection
+  //  * and the notification properties are given to each feature of its notification.
+  //  */
+  // async getNotificationsAsFeatureCollection(
+  //   params: MocoParameters,
+  //   config: RequestInit,
+  // ): Promise<MocoNotificationAsFeatureCollection> {
+  //   const notifications = await this.getNotifications(params, config);
 
-    // Merge all features into a single GeoJSON feature collection
-    // and add the notification properties to each feature.
-    const features = notifications.flatMap((notification) => {
-      return notification.features.map((feature) => {
-        return {
-          ...feature,
-          properties: {
-            ...notification.properties,
-            ...feature.properties,
-          },
-        };
-      });
-    });
+  //   // Merge all features into a single GeoJSON feature collection
+  //   // and add the notification properties to each feature.
+  //   const features = notifications.flatMap((notification) => {
+  //     return notification.features.map((feature) => {
+  //       return {
+  //         ...feature,
+  //         properties: {
+  //           ...notification.properties,
+  //           ...feature.properties,
+  //         },
+  //       };
+  //     });
+  //   });
 
-    return {
-      features,
-      type: 'FeatureCollection',
-    };
-  }
+  //   return {
+  //     features,
+  //     type: 'FeatureCollection',
+  //   };
+  // }
 }
 
 export default MocoAPI;

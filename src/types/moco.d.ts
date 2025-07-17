@@ -37,7 +37,7 @@ export interface MocoNotificationFeatureProperties {
 export interface MocoNotificationIconRefFeatureProperties
   extends MocoNotificationFeatureProperties {
   disruption_type_banner?: string; // 'DISRUPTION';
-  isIconRefPoint: boolean; // true;
+  isIconRefPoint?: boolean; // true;
 }
 
 export interface MocoNotificationProperties {

@@ -11,46 +11,70 @@ import {
   RoutingControl,
   routingStyle,
   MocoAPI,
+  MocoLayer,
 } from './build/ol';
 import 'ol/ol.css';
-import { buffer } from 'ol/extent';
+import { buffer, getCenter } from 'ol/extent';
+import { transformExtent } from 'ol/proj';
 
 window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
-const mocoApi = new MocoAPI();
-console.log('MocoAPI: ', mocoApi);
-mocoApi
-  .getNotifications({ addStatusProperties: true, date: new Date() })
-  .then((response) => {
-    console.log('MocoAPI response: ', response);
-  })
-  .catch((error) => {
-    console.error('Error fetching notifications: ', error);
-  });
+const RVF_EXTENT_4326 = [7.5, 47.7, 8.45, 48.4];
 
-mocoApi
-  .getNotificationsAsFeatureCollection({
-    addStatusProperties: true,
-    date: new Date(),
-  })
-  .then((response) => {
-    console.log('MocoAPI response 2: ', response);
-  })
-  .catch((error) => {
-    console.error('Error fetching notifications: ', error);
-  });
+const RVF_EXTENT_3857 = transformExtent(
+  RVF_EXTENT_4326,
+  'EPSG:4326',
+  'EPSG:3857',
+);
+
+// const bbox = RVF_EXTENT_3857.join(',');
+const rvfCenter = getCenter(RVF_EXTENT_3857);
+// const mocoApi = new MocoAPI();
+// console.log('MocoAPI: ', mocoApi);
+// mocoApi
+//   .getNotifications({ addStatusProperties: true, date: new Date() })
+//   .then((response) => {
+//     console.log('MocoAPI response: ', response);
+//   })
+//   .catch((error) => {
+//     console.error('Error fetching notifications: ', error);
+//   });
+
+// mocoApi
+//   .getNotificationsAsFeatureCollection({
+//     addStatusProperties: true,
+//     date: new Date(),
+//   })
+//   .then((response) => {
+//     console.log('MocoAPI response 2: ', response);
+//   })
+//   .catch((error) => {
+//     console.error('Error fetching notifications: ', error);
+//   });
 const map = new Map({
   target: 'map',
   view: new View({
-    center: [950690.34, 6003962.67],
-    zoom: 6,
+    // Zurich
+    // center: [950690.34, 6003962.67],
+    // rvf params:
+    center: rvfCenter,
+    zoom: 10,
   }),
 });
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
+  style: 'de.rvf_moco',
 });
 map.addLayer(baseLayer);
+
+const mocoLayer = new MocoLayer({
+  maplibreLayer: baseLayer,
+  tenant: 'rvf',
+  // date: new Date('2025-09-10T00:00:00Z'),
+});
+
+map.addLayer(mocoLayer);
 
 const francfortExtent = buffer(
   [967387.0927876673, 6464738.161156644, 967387.0927876673, 6464738.161156644],
@@ -110,7 +134,7 @@ const realtimeLayer = new RealtimeLayer({
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },
 });
-map.addLayer(realtimeLayer);
+// map.addLayer(realtimeLayer);
 
 map.on('moveend', () => {
   console.log('center: ', map.getView().getCenter());
