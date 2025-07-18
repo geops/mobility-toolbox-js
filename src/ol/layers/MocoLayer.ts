@@ -1,4 +1,5 @@
 import { GeoJSONSource } from 'maplibre-gl';
+import { getUid } from 'ol';
 
 import {
   getMocoIconRefFeatures,
@@ -71,6 +72,8 @@ class MocoLayer extends MaplibreStyleLayer {
   #graphMapping: Record<number, string> = DEFAULT_GRAPH_MAPPING;
 
   constructor(options: MaplibreStyleLayerOptions) {
+    const id = Math.random();
+
     super({
       ...options,
       layers: [
@@ -188,6 +191,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   onLoad() {
     super.onLoad();
+    console.log('MocoLayer: onLoad called');
 
     if (this.maplibreLayer?.mapLibreMap?.getLayer('moco_point')) {
       this.maplibreLayer?.mapLibreMap?.removeLayer('moco_point');

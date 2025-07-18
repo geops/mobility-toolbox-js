@@ -266,3 +266,30 @@ document.getElementById('mapToMap2').onclick = () => {
     console.log('map2 rendercomplete');
   });
 };
+
+document.getElementById('toggleMocoLayer').onclick = () => {
+  if (map.getLayers().getArray().includes(mocoLayer)) {
+    console.log('Removing MocoLayer');
+    map.removeLayer(mocoLayer);
+  } else {
+    console.log('Add MocoLayer');
+    map.addLayer(mocoLayer);
+    mocoLayer.maplibreLayer?.mapLibreMap?.on('load', () => {
+      console.log('MocoLayer mapLibreMap load event');
+    });
+    mocoLayer.maplibreLayer?.mapLibreMap?.on('idle', () => {
+      console.log('MocoLayer mapLibreMap load event');
+    });
+    mocoLayer.maplibreLayer?.mapLibreMap.redraw();
+    window.mbMap = mocoLayer.maplibreLayer?.mapLibreMap;
+    console.log(
+      'Source data',
+      mocoLayer.maplibreLayer?.mapLibreMap?.getSource('rvf_moco'),
+    );
+    console.log(
+      'layer data',
+      mocoLayer.maplibreLayer?.mapLibreMap,
+      mocoLayer.maplibreLayer?.mapLibreMap.getLayer('moco-notification-line'),
+    );
+  }
+};

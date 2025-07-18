@@ -325,7 +325,11 @@ class MaplibreStyleLayer extends Layer {
       if (mapLibreMap.loaded()) {
         this.onLoad();
       } else {
-        mapLibreMap.once('load', this.onLoad);
+        if (mapLibreMap.isStyleLoaded()) {
+          this.onLoad();
+        } else {
+          mapLibreMap.once('load', this.onLoad);
+        }
       }
     }
 
