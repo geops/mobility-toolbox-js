@@ -273,6 +273,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
     const data = getMocoNotificationsAsFeatureCollection(notifsToDisplay);
 
+    console.log('Notifications data to display:', data);
     // Apply new data to the source
     (source as GeoJSONSource).setData(data);
   }

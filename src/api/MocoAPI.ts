@@ -40,6 +40,8 @@ export interface MocoParameters {
 class MocoAPI extends HttpAPI {
   graph?: string = 'osm';
 
+  simplify?: number = 0; // The backend has 100 as default value, but we use 0 to get the full geometries.
+
   ssoConfig?: string = 'rvf';
 
   /**
@@ -60,7 +62,41 @@ class MocoAPI extends HttpAPI {
   }
 
   /**
+   * Get a notification from the MOCO API.
+   *
+   * @param {string} id Id of a notification
+   * @param {MocoParameters} params Request parameters.
+   * @param {FetchOptions} config Options for the fetch request.
+   * @return {Promise<MocoNotification>} An array of GeoJSON feature collections with coordinates in [EPSG:4326](http://epsg.io/4326).
+   * @public
+   */
+  async getNotificationById(
+    id: string,
+    params: MocoParameters = {},
+    config: RequestInit = {},
+  ): Promise<MocoNotification | null> {
+    if (!id) {
+      throw new Error('MocoAPI: id parameter is required');
+    }
+    const apiParams = { ...params };
+    delete apiParams.date; // Not used in this method
+    const notification = (await this.fetch(
+      'export/publication/' + id + '/',
+      {
+        graph: this.graph || 'osm',
+        simplify: this.simplify || 0,
+        sso_config: this.ssoConfig || 'geopstest',
+        ...apiParams,
+      },
+      config,
+    )) as MocoNotification;
+
+    return notification;
+  }
+
+  /**
    * Get notifications from the MOCO API.
+   * Notifications are returned as an array of GeoJSON feature collections.
    *
    * @param {MocoParameters} params Request parameters.
    * @param {FetchOptions} config Options for the fetch request.
@@ -68,14 +104,18 @@ class MocoAPI extends HttpAPI {
    * @public
    */
   async getNotifications(
-    params: MocoParameters,
-    config: RequestInit,
+    params: MocoParameters = {},
+    config: RequestInit = {},
   ): Promise<MocoNotification[]> {
+    const apiParams = { ...params };
+    delete apiParams.date; // Not used in this method
     let notifications = (await this.fetch(
       'export/publication/',
       {
-        graph: params.graph || this.graph || 'osm',
-        sso_config: params.sso_config || this.ssoConfig || 'geopstest',
+        graph: this.graph || 'osm',
+        simplify: this.simplify || 0,
+        sso_config: this.ssoConfig || 'geopstest',
+        ...apiParams,
       },
       config,
     )) as MocoNotification[];
@@ -88,62 +128,8 @@ class MocoAPI extends HttpAPI {
         return isMocoNotificationNotOutOfDate(notification, date);
       });
     }
-
-    // TODO: Should those status properties go in the NotificationsLayer? or in the backend?
-    // Adds some status properties to the notification to facilitate the rendering on a map
-    // if (params?.addStatusProperties) {
-    //   notifications = notifications.map((notification) => {
-    //     const now = date || new Date();
-    //     const isPublished = isNotificationPublished(notification, now);
-    //     const isActive = isNotificationActive(notification, now);
-    //     const starts = getStartsString(notification, now);
-
-    //     return {
-    //       ...notification,
-    //       properties: {
-    //         ...notification.properties,
-    //         isActive,
-    //         isPublished,
-    //         starts,
-    //       },
-    //     };
-    //   });
-    // }
-
     return notifications;
   }
-
-  // /**
-  //  * Get notifications as a unique GeoJSON feature collection.
-  //  * The list of notification are read from the `getNotifications` method
-  //  * then all features are merged into a single GeoJSON feature collection
-  //  * and the notification properties are given to each feature of its notification.
-  //  */
-  // async getNotificationsAsFeatureCollection(
-  //   params: MocoParameters,
-  //   config: RequestInit,
-  // ): Promise<MocoNotificationAsFeatureCollection> {
-  //   const notifications = await this.getNotifications(params, config);
-
-  //   // Merge all features into a single GeoJSON feature collection
-  //   // and add the notification properties to each feature.
-  //   const features = notifications.flatMap((notification) => {
-  //     return notification.features.map((feature) => {
-  //       return {
-  //         ...feature,
-  //         properties: {
-  //           ...notification.properties,
-  //           ...feature.properties,
-  //         },
-  //       };
-  //     });
-  //   });
-
-  //   return {
-  //     features,
-  //     type: 'FeatureCollection',
-  //   };
-  // }
 }
 
 export default MocoAPI;
