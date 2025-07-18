@@ -202,7 +202,11 @@ export const getMocoNotificationsAsFeatureCollection = (
 ): MocoNotificationAsFeatureCollection => {
   // Merge all features into a single GeoJSON feature collection
   // and add the notification properties to each feature.
+
   const features = notifications.flatMap((notification) => {
+    // TODO: severity must be added on affectedStops stops as well, not only affectedines
+    let severityLast: null | string = null;
+    let serviceConditionGroupLast: null | string = null;
     return notification.features.map((feature) => {
       const feat = {
         ...feature,
@@ -214,10 +218,13 @@ export const getMocoNotificationsAsFeatureCollection = (
       const reasonName = notification.properties.reasons?.[0]?.name;
       const reasonCategoryName =
         notification.properties.reasons?.[0]?.category_name;
-      const severity = feature.properties.severity;
+      const severity = feature.properties.severity || severityLast;
       // const serviceCondition = feature.properties.condition;
-      const serviceConditionGroup = feature.properties.condition_group;
-
+      const serviceConditionGroup =
+        feature.properties.condition_group || serviceConditionGroupLast;
+      severityLast = severity || severityLast;
+      serviceConditionGroupLast =
+        serviceConditionGroup || serviceConditionGroupLast;
       // Determine the severity group
       let severityGroup = '';
       if (
