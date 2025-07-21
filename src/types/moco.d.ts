@@ -26,6 +26,7 @@ export interface MocoNotificationFeatureProperties {
   is_icon_ref: boolean; //false;
   // periods: object[];
   severity: string; //'unknown';
+  severity_group: string; //'information';
   stops: {
     external_code: null | string; //null;
     external_id: null | string; //null;
