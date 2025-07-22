@@ -45,7 +45,7 @@ class MocoAPI extends HttpAPI {
    *
    * @param {Object} options Options.
    * @param {string} [options.url='https://moco.dev.geops.io/api/v1'] Service url.
-   * @param {string} [options.ssoConfig='geops'] SSO config to get notifications from.
+   * @param {string} [options.ssoConfig='geopsTest'] SSO config to get notifications from.
    * @param {string} [options.graph='osm'] Graph to use for geometries.
    * @public
    */

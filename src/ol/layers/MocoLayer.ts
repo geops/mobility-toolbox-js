@@ -20,6 +20,7 @@ export type MocoLayerOptions = {
   date?: Date;
   notifications: MocoNotification[];
   tenant?: string;
+  url?: string;
 } & MaplibreStyleLayerOptions;
 
 export type MocoNotificationToRender = {
@@ -69,10 +70,18 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   get tenant() {
-    return this.get('tenant') || 'geopstest';
+    return this.get('tenant');
   }
   set tenant(value: string) {
     this.set('tenant', value);
+    this.updateData();
+  }
+
+  get url() {
+    return this.get('url');
+  }
+  set url(value: string) {
+    this.set('url', value);
     this.updateData();
   }
 
@@ -131,6 +140,7 @@ class MocoLayer extends MaplibreStyleLayer {
     const api = new MocoAPI({
       graph: graphsString,
       ssoConfig: this.tenant,
+      url: this.url,
     });
 
     const date = this.date; // Example date, can be replaced with a dynamic date
