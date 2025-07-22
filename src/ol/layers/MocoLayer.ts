@@ -1,5 +1,4 @@
-import { GeoJSONSource } from 'maplibre-gl';
-import { getUid } from 'ol';
+import { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
 
 import {
   getMocoIconRefFeatures,
@@ -8,13 +7,13 @@ import {
   isMocoNotificationPublished,
   MocoAPI,
 } from '..';
-import { MocoNotification } from '../../types';
+import { MocoDefinitions, MocoNotification } from '../../types';
 import MaplibreStyleLayer, {
   MaplibreStyleLayerOptions,
 } from './MaplibreStyleLayer';
 
-export const MOCO_SOURCE_ID = 'rvf_moco';
-export const MOCO_MD_LAYER_FILTER = 'notifications';
+export const MOCO_SOURCE_ID = 'moco';
+export const MOCO_MD_LAYER_FILTER = 'moco';
 export const DEFAULT_GRAPH_MAPPING = { 1: 'osm' };
 
 export type MocoLayerOptions = {
@@ -22,6 +21,16 @@ export type MocoLayerOptions = {
   notifications: MocoNotification[];
   tenant?: string;
 } & MaplibreStyleLayerOptions;
+
+export type MocoNotificationToRender = {
+  features?: ({
+    // geometry?: GeoJSON.Geometry;
+  } & MocoDefinitions['AffectedLinesFeature'])[];
+  properties: {
+    iPublished?: boolean;
+    isActive?: boolean;
+  } & MocoDefinitions['FeatureCollectionProperties'];
+} & Omit<MocoNotification, 'features' | 'properties'>;
 
 /**
  * An OpenLayers layer able to display data from the [geOps MOCO API](https://developer.geops.io/apis/realtime/).
@@ -38,7 +47,7 @@ export type MocoLayerOptions = {
  * });
  *
  * @see <a href="/example/ol-maplibre-style-layer">OpenLayers MaplibreStyle layer example</a>
- * @extends {ol/layer/Layer~Layer}
+ * @extends {MaplibreStyleLayer}
  */
 class MocoLayer extends MaplibreStyleLayer {
   get date() {
@@ -72,110 +81,16 @@ class MocoLayer extends MaplibreStyleLayer {
   #graphMapping: Record<number, string> = DEFAULT_GRAPH_MAPPING;
 
   constructor(options: MaplibreStyleLayerOptions) {
-    const id = Math.random();
-
     super({
       ...options,
-      layers: [
-        // Display line
-        {
-          filter: [
-            'all',
-            ['==', '$type', 'LineString'],
-            ['==', 'isActive', true],
-          ],
-          id: 'moco-notification-line',
-          layout: {
-            'line-cap': 'round',
-            'line-join': 'round',
-          },
-          paint: {
-            'line-color': ['get', 'line-color'],
-            'line-width': ['get', 'line-width'],
-          },
-          source: MOCO_SOURCE_ID,
-          type: 'line',
-        },
-        // Display an icon
-        {
-          filter: [
-            'all',
-            ['==', '$type', 'Point'],
-            ['==', 'isIconRefPoint', true],
-            ['==', 'isPublished', true],
-          ],
-          id: 'moco-notification-icon',
-          layout: {
-            // 'icon-allow-overlap': true,
-            'icon-image': ['get', 'icon-image'],
-            'text-anchor': 'left',
-            // 'text-field': ['get', 'text-field'],
-            'text-font': ['SourceSansPro-Bold'],
-            'text-justify': 'auto',
-            'text-radial-offset': 1,
-            'text-size': 14,
-
-            // "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0, 11, 0.6],
-            visibility: 'visible',
-          },
-          minzoom: 11,
-          paint: {
-            'icon-halo-blur': 0,
-            'icon-halo-color': 'rgba(255, 255, 255, 0)',
-            'icon-halo-width': 0,
-            'icon-opacity': 1,
-            'text-color': '#000000',
-            'text-halo-blur': 1,
-            'text-halo-color': 'rgba(255, 255, 255, 1)',
-            'text-halo-width': 3,
-          },
-
-          source: MOCO_SOURCE_ID,
-          type: 'symbol',
-        },
-
-        // Display a banner with the start date
-        // {
-        //   filter: [
-        //     'all',
-        //     ['==', ['get', 'isIconRefPoint'], true],
-        //     ['==', ['get', 'isActive'], false],
-        //     ['==', ['get', 'isPublished'], true],
-        //   ],
-        //   id: 'notificationsIconRefPointNonActive',
-        //   layout: {
-        //     'icon-allow-overlap': true,
-        //     // "icon-image": "warningBanner",
-        //     'icon-image': [
-        //       'coalesce',
-        //       // ["image", "warning"],
-        //       ['image', ['get', 'disruption_type_banner']],
-        //       // If no image with the name above exists, show the
-        //       // "rocket" image instead.
-        //       ['image', 'warningBanner'],
-        //     ],
-        //     'icon-size': 0.15,
-        //     // "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0, 11, 0.15],
-        //     'text-field': ['get', 'starts'],
-        //     'text-offset': [1.5, 0],
-        //     'text-size': 8,
-        //     visibility: 'visible',
-        //   },
-        //   metadata: {
-        //     'general.filter': 'notifications',
-        //   },
-        //   minzoom: 11,
-        //   paint: {},
-        //   source: MOCO_SOURCE_ID,
-        //   type: 'symbol',
-        // },
-      ],
-      // layersFilter: ({ metadata }: LayerSpecification) => {
-      //   return (
-      //     (metadata as { 'general.filter': string })?.['general.filter'] ===
-      //     MOCO_MD_LAYER_FILTER
-      //   );
-      // },
+      layersFilter: ({ metadata }: LayerSpecification) => {
+        return (
+          (metadata as { 'rvf.filter': string })?.['rvf.filter'] ===
+            MOCO_MD_LAYER_FILTER ||
+          (metadata as { 'general.filter': string })?.['general.filter'] ===
+            MOCO_MD_LAYER_FILTER
+        );
+      },
       maplibreLayer: options.maplibreLayer,
       sources: {
         [MOCO_SOURCE_ID]: {
@@ -235,47 +150,32 @@ class MocoLayer extends MaplibreStyleLayer {
       return;
     }
 
-    notifications.forEach((notification) => {
-      // Add status properties to the features, these properties are only there for rendering purposes
-      (
-        notification.properties as {
-          isPublished?: boolean;
-        } & typeof notification.properties
-      ).isPublished = isMocoNotificationPublished(
-        notification.properties,
-        date,
-      );
+    const notifsToRender: MocoNotificationToRender[] = notifications
+      .map((notification) => {
+        // Add status properties to the features, these properties are only there for rendering purposes
+        return {
+          ...notification,
+          properties: {
+            ...notification.properties,
+            isActive: isMocoNotificationActive(notification.properties, date),
+            isPublished: isMocoNotificationPublished(
+              notification.properties,
+              date,
+            ),
+          },
+        };
+      })
+      .filter((n) => {
+        return n.properties.isPublished || n.properties.isActive;
+      });
 
-      (
-        notification.properties as {
-          isActive?: boolean;
-        } & typeof notification.properties
-      ).isActive = isMocoNotificationActive(notification.properties, date);
-
-      // if (
-      //   notification.properties.isPublished &&
-      //   !notification.properties.isActive
-      // ) {
-      //   (
-      //     notification.properties as {
-      //       'text-field'?: string;
-      //     } & typeof notification.properties
-      //   )['text-field'] = getMocoStartsString(notification.properties, date);
-      // }
-    });
-
-    // Transform to a usable format for MapLibre
-    const notifsToDisplay = notifications.filter((n) => {
-      return n.properties.isPublished || n.properties.isActive;
-    });
-
-    notifsToDisplay.forEach((notification) => {
+    notifsToRender.forEach((notification) => {
       // Add icon ref features, these features are only there for rendering purposes
       const iconRefFeatures = getMocoIconRefFeatures(notification);
-      notification.features.push(...iconRefFeatures);
+      notification.features?.push(...iconRefFeatures);
     });
 
-    const data = getMocoNotificationsAsFeatureCollection(notifsToDisplay);
+    const data = getMocoNotificationsAsFeatureCollection(notifsToRender);
 
     console.log('Notifications data to display:', data);
     // Apply new data to the source

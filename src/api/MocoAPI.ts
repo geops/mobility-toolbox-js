@@ -1,8 +1,5 @@
 import { isMocoNotificationNotOutOfDate } from '../common/utils/mocoUtils';
-import {
-  MocoNotification,
-  MocoNotificationAsFeatureCollection,
-} from '../types';
+import { MocoNotification, MocoParameters } from '../types';
 import HttpAPI from './HttpAPI';
 
 export interface MocoAPIOptions {
@@ -11,13 +8,11 @@ export interface MocoAPIOptions {
   url?: string;
 }
 
-export interface MocoParameters {
+export type MocoParametersExtended = {
   addIconRefFeatures?: boolean;
   addStatusProperties?: boolean;
   date?: Date;
-  graph?: string;
-  sso_config?: string;
-}
+} & MocoParameters;
 
 /**
  * This class provides convenience methods to use to the [geOps MOCO API](https://geops.com/de/solution/disruption-information).
@@ -62,39 +57,6 @@ class MocoAPI extends HttpAPI {
   }
 
   /**
-   * Get a notification from the MOCO API.
-   *
-   * @param {string} id Id of a notification
-   * @param {MocoParameters} params Request parameters.
-   * @param {FetchOptions} config Options for the fetch request.
-   * @return {Promise<MocoNotification>} An array of GeoJSON feature collections with coordinates in [EPSG:4326](http://epsg.io/4326).
-   * @public
-   */
-  async getNotificationById(
-    id: string,
-    params: MocoParameters = {},
-    config: RequestInit = {},
-  ): Promise<MocoNotification | null> {
-    if (!id) {
-      throw new Error('MocoAPI: id parameter is required');
-    }
-    const apiParams = { ...params };
-    delete apiParams.date; // Not used in this method
-    const notification = (await this.fetch(
-      'export/publication/' + id + '/',
-      {
-        graph: this.graph || 'osm',
-        simplify: this.simplify || 0,
-        sso_config: this.ssoConfig || 'geopstest',
-        ...apiParams,
-      },
-      config,
-    )) as MocoNotification;
-
-    return notification;
-  }
-
-  /**
    * Get notifications from the MOCO API.
    * Notifications are returned as an array of GeoJSON feature collections.
    *
@@ -104,7 +66,7 @@ class MocoAPI extends HttpAPI {
    * @public
    */
   async getNotifications(
-    params: MocoParameters = {},
+    params: MocoParametersExtended = {},
     config: RequestInit = {},
   ): Promise<MocoNotification[]> {
     const apiParams = { ...params };
