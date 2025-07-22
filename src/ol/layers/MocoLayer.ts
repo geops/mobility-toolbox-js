@@ -85,10 +85,8 @@ class MocoLayer extends MaplibreStyleLayer {
       ...options,
       layersFilter: ({ metadata }: LayerSpecification) => {
         return (
-          (metadata as { 'rvf.filter': string })?.['rvf.filter'] ===
-            MOCO_MD_LAYER_FILTER ||
           (metadata as { 'general.filter': string })?.['general.filter'] ===
-            MOCO_MD_LAYER_FILTER
+          MOCO_MD_LAYER_FILTER
         );
       },
       maplibreLayer: options.maplibreLayer,

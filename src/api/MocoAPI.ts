@@ -23,7 +23,7 @@ export type MocoParametersExtended = {
  * const api = new MocoAPI({
  *   // graph: 'osm',
  *   // url: 'https://moco.geops.io/api/v1',
- *   // ssoConfig: "rvf",
+ *   // ssoConfig: "geopstest",
  * });
  *
  * const notifications = await api.getNotifications();
@@ -37,7 +37,7 @@ class MocoAPI extends HttpAPI {
 
   simplify?: number = 0; // The backend has 100 as default value, but we use 0 to get the full geometries.
 
-  ssoConfig?: string = 'rvf';
+  ssoConfig?: string = 'geopsTest';
 
   /**
    * Constructor
