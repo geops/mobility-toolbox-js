@@ -21,6 +21,30 @@ export type MocoNotificationAsFeatureCollection = GeoJSON.FeatureCollection<
   MocoNotificationFeatureProperties & MocoNotificationProperties
 >;
 
+const REASONS_CATEGORY = {
+  DAS_PERSONAL_BETREFEND: 'Das Personal betreffend',
+  SICHERHEITSRELEVANT: 'Sicherheitsrelevant',
+  SPEZIELLE_ANLAESSE: 'Spezielle Anl\u00E4sse',
+  TECHNISCHE_PROBLEME: 'Technische Probleme',
+  UMWELTEINFLUESSE: 'Umwelteinflüsse',
+  UNDEFINIERT: 'Undefiniert',
+  UNFALL: 'Unfall',
+  VERKEHRLICHE_GRUENDE: 'Verkehrliche Gr\u00FCnde',
+  VERSCHIEDENES: 'Verschiedenes',
+};
+
+const IMAGE_BY_CATEGORY = {
+  [REASONS_CATEGORY.DAS_PERSONAL_BETREFEND]: 'das_personal_betrefend',
+  [REASONS_CATEGORY.SICHERHEITSRELEVANT]: 'sicherheitsrelevant',
+  [REASONS_CATEGORY.SPEZIELLE_ANLAESSE]: 'spezielle_anlaesse',
+  [REASONS_CATEGORY.TECHNISCHE_PROBLEME]: 'technische_probleme',
+  [REASONS_CATEGORY.UMWELTEINFLUESSE]: 'umwelteinfluesse',
+  [REASONS_CATEGORY.UNDEFINIERT]: 'undefiniert',
+  [REASONS_CATEGORY.UNFALL]: 'unfall',
+  [REASONS_CATEGORY.VERKEHRLICHE_GRUENDE]: 'verkehrliche_gruende',
+  [REASONS_CATEGORY.VERSCHIEDENES]: 'verschiedenes',
+};
+
 export const getTime = (str: string) => {
   return parseInt(str?.substr(0, 8).replace(/:/g, ''), 10);
 };
@@ -213,119 +237,15 @@ export const getMocoNotificationsAsFeatureCollection = (
           ...feature.properties,
         },
       };
-      // const reasonName = notification.properties.reasons?.[0]?.name;
-      // const reasonCategoryName =
-      //   notification.properties.reasons?.[0]?.category_name;
-      // const severity = feature.properties.severity;
-      // const serviceConditionGroup = feature.properties.condition_group;
-      // let severityGroup = feature.properties.severity_group;
-      // if (!severity) {
-      //   severityGroup = 'undefined';
-      // }
+      const reasonCategoryName =
+        notification.properties.reasons?.[0]?.category_name;
 
-      // // console.log(
-      // //   'Reason name: ',
-      // //   reasonName,
-      // //   ' - Reason Category Name : ',
-      // //   reasonCategoryName,
-      // //   ' - Service Condition Group: ',
-      // //   serviceConditionGroup,
-      // //   ' - Severity: ',
-      // //   severity,
-      // //   ' - Severity Group: ',
-      // //   severityGroup,
-      // // );
+      // reasons_category is used to choose the proper icon in the style
+      // @ts-expect-error the value is a string in the style
+      feat.properties['reasons_category'] =
+        IMAGE_BY_CATEGORY[reasonCategoryName || REASONS_CATEGORY.UNDEFINIERT] ||
+        IMAGE_BY_CATEGORY[REASONS_CATEGORY.UNDEFINIERT];
 
-      // // Default image :)
-      // let iconImage = 'undefined';
-      // let lineWidth = 5;
-      // let lineColor = 'rgba(0, 0, 0)';
-
-      // if (reasonName === 'Bauarbeiten') {
-      //   iconImage = 'constructionWork';
-      // } else {
-      //   switch (reasonCategoryName) {
-      //     case REASONS_CATEGORY.DAS_PERSONAL_BETREFEND:
-      //       iconImage = 'staffConcerned';
-      //       break;
-      //     case REASONS_CATEGORY.SICHERHEITSRELEVANT:
-      //       iconImage = 'securityAlert';
-      //       break;
-      //     case REASONS_CATEGORY.SPEZIELLE_ANLAESSE:
-      //       iconImage = 'specialEvent';
-      //       break;
-      //     case REASONS_CATEGORY.TECHNISCHE_PROBLEME:
-      //       iconImage = 'technicalProblem';
-      //       break;
-      //     case REASONS_CATEGORY.UMWELTEINFLUESSE:
-      //       iconImage = 'enviromentalImpact';
-      //       break;
-      //     case REASONS_CATEGORY.UNDEFINIERT:
-      //       iconImage = 'undefined';
-      //       break;
-      //     case REASONS_CATEGORY.UNFALL:
-      //       iconImage = 'accident';
-      //       break;
-      //     case REASONS_CATEGORY.VERKEHRLICHE_GRUENDE:
-      //       iconImage = 'trafficReason';
-      //       break;
-      //     case REASONS_CATEGORY.VERSCHIEDENES:
-      //       iconImage = 'miscellanous';
-      //       break;
-      //     default:
-      //       iconImage = 'undefined';
-      //   }
-      // }
-
-      // if (!feat.properties.isActive && feat.properties.isPublished) {
-      //   iconImage += '_future';
-      // } else if (feat.properties.isActive) {
-      //   if (severityGroup === 'high') {
-      //     iconImage += '_high';
-      //   } else if (severityGroup === 'low' || severityGroup === 'undefined') {
-      //     iconImage += '_low';
-      //   } else if (severityGroup === 'normal') {
-      //     if (serviceConditionGroup === 'disruption') {
-      //       iconImage += '_high';
-      //     } else if (serviceConditionGroup === 'information') {
-      //       iconImage += '_low';
-      //     } else {
-      //       iconImage += '_medium';
-      //     }
-      //   } else {
-      //     iconImage += '_medium';
-      //   }
-      // }
-
-      // if (/high/.test(iconImage)) {
-      //   lineColor = 'rgba(255, 0, 0)';
-      // }
-
-      // if (/low/.test(iconImage)) {
-      //   lineWidth = 0; // hidden
-      // }
-
-      // // @ts-expect-error the value is a string in the style
-      // feat.properties['icon-image'] = iconImage;
-      // // @ts-expect-error the value is a string in the style
-      // feat.properties['line-color'] = lineColor;
-      // // @ts-expect-error the value is a string in the style
-      // feat.properties['line-width'] = lineWidth;
-      // // @ts-expect-error the value is a string in the style
-      // feat.properties['severityGroup'] = severityGroup;
-
-      // We move the condition, severity, ... properties one level upper otherwise
-      // it s too complicated for the style. This will be fixed
-      // when /export/publication will returns the same object as in graphql
-      // a station feature can have mutiple affected stops
-      // @ts-expect-error feat.properties.affected_stops is not defined in the type
-      if (feat.properties?.affected_stops?.length) {
-        feat.properties = {
-          ...feat.properties,
-          // @ts-expect-error feat.properties.affected_stops is not defined in the type
-          ...feat.properties.affected_stops[0],
-        };
-      }
       return feat;
     });
   });
