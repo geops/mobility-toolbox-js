@@ -21,7 +21,7 @@ export type MocoNotificationAsFeatureCollection = GeoJSON.FeatureCollection<
   MocoNotificationFeatureProperties & MocoNotificationProperties
 >;
 
-const REASONS_CATEGORY = {
+export const MOCO_REASONS_CATEGORY = {
   DAS_PERSONAL_BETREFEND: 'Das Personal betreffend',
   SICHERHEITSRELEVANT: 'Sicherheitsrelevant',
   SPEZIELLE_ANLAESSE: 'Spezielle Anl\u00E4sse',
@@ -33,16 +33,16 @@ const REASONS_CATEGORY = {
   VERSCHIEDENES: 'Verschiedenes',
 };
 
-const IMAGE_BY_CATEGORY = {
-  [REASONS_CATEGORY.DAS_PERSONAL_BETREFEND]: 'das_personal_betrefend',
-  [REASONS_CATEGORY.SICHERHEITSRELEVANT]: 'sicherheitsrelevant',
-  [REASONS_CATEGORY.SPEZIELLE_ANLAESSE]: 'spezielle_anlaesse',
-  [REASONS_CATEGORY.TECHNISCHE_PROBLEME]: 'technische_probleme',
-  [REASONS_CATEGORY.UMWELTEINFLUESSE]: 'umwelteinfluesse',
-  [REASONS_CATEGORY.UNDEFINIERT]: 'undefiniert',
-  [REASONS_CATEGORY.UNFALL]: 'unfall',
-  [REASONS_CATEGORY.VERKEHRLICHE_GRUENDE]: 'verkehrliche_gruende',
-  [REASONS_CATEGORY.VERSCHIEDENES]: 'verschiedenes',
+export const MOCO_IMAGE_BY_CATEGORY = {
+  [MOCO_REASONS_CATEGORY.DAS_PERSONAL_BETREFEND]: 'das_personal_betrefend',
+  [MOCO_REASONS_CATEGORY.SICHERHEITSRELEVANT]: 'sicherheitsrelevant',
+  [MOCO_REASONS_CATEGORY.SPEZIELLE_ANLAESSE]: 'spezielle_anlaesse',
+  [MOCO_REASONS_CATEGORY.TECHNISCHE_PROBLEME]: 'technische_probleme',
+  [MOCO_REASONS_CATEGORY.UMWELTEINFLUESSE]: 'umwelteinfluesse',
+  [MOCO_REASONS_CATEGORY.UNDEFINIERT]: 'undefiniert',
+  [MOCO_REASONS_CATEGORY.UNFALL]: 'unfall',
+  [MOCO_REASONS_CATEGORY.VERKEHRLICHE_GRUENDE]: 'verkehrliche_gruende',
+  [MOCO_REASONS_CATEGORY.VERSCHIEDENES]: 'verschiedenes',
 };
 
 export const getTime = (str: string) => {
@@ -243,8 +243,9 @@ export const getMocoNotificationsAsFeatureCollection = (
       // reasons_category is used to choose the proper icon in the style
       // @ts-expect-error the value is a string in the style
       feat.properties['reasons_category'] =
-        IMAGE_BY_CATEGORY[reasonCategoryName || REASONS_CATEGORY.UNDEFINIERT] ||
-        IMAGE_BY_CATEGORY[REASONS_CATEGORY.UNDEFINIERT];
+        MOCO_IMAGE_BY_CATEGORY[
+          reasonCategoryName || MOCO_REASONS_CATEGORY.UNDEFINIERT
+        ] || MOCO_IMAGE_BY_CATEGORY[MOCO_REASONS_CATEGORY.UNDEFINIERT];
 
       return feat;
     });
