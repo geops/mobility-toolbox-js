@@ -4,6 +4,7 @@ import HttpAPI from './HttpAPI';
 
 export interface MocoAPIOptions {
   graph?: string;
+  simplify?: number;
   ssoConfig?: string;
   url?: string;
 }
@@ -54,6 +55,10 @@ class MocoAPI extends HttpAPI {
       ...options,
       url: options.url || 'https://moco.dev.geops.io/api/v1/',
     });
+
+    this.ssoConfig = options.ssoConfig || 'geopsTest';
+    this.graph = options.graph || 'osm';
+    this.simplify = options.simplify || 0;
   }
 
   /**
