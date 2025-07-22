@@ -314,6 +314,18 @@ export const getMocoNotificationsAsFeatureCollection = (
       // // @ts-expect-error the value is a string in the style
       // feat.properties['severityGroup'] = severityGroup;
 
+      // We move the condition, severity, ... properties one level upper otherwise
+      // it s too complicated for the style. This will be fixed
+      // when /export/publication will returns the same object as in graphql
+      // a station feature can have mutiple affected stops
+      // @ts-expect-error feat.properties.affected_stops is not defined in the type
+      if (feat.properties?.affected_stops?.length) {
+        feat.properties = {
+          ...feat.properties,
+          // @ts-expect-error feat.properties.affected_stops is not defined in the type
+          ...feat.properties.affected_stops[0],
+        };
+      }
       return feat;
     });
   });
