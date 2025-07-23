@@ -1,8 +1,3 @@
-import { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
-
-import type { MocoAPIOptions } from '../../api/MocoAPI';
-import type { MocoDefinitions, MocoNotification } from '../../types';
-
 import {
   getMocoIconRefFeatures,
   getMocoNotificationsAsFeatureCollection,
@@ -10,9 +5,15 @@ import {
   isMocoNotificationPublished,
   MocoAPI,
 } from '..';
-import MaplibreStyleLayer, {
-  MaplibreStyleLayerOptions,
-} from './MaplibreStyleLayer';
+
+import MaplibreStyleLayer from './MaplibreStyleLayer';
+
+import type { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
+
+import type { MocoAPIOptions } from '../../api/MocoAPI';
+import type { MocoDefinitions, MocoNotification } from '../../types';
+
+import type { MaplibreStyleLayerOptions } from './MaplibreStyleLayer';
 
 export const MOCO_SOURCE_ID = 'moco';
 export const MOCO_MD_LAYER_FILTER = 'moco';
@@ -62,55 +63,56 @@ export type MocoNotificationToRender = {
  * @private
  */
 class MocoLayer extends MaplibreStyleLayer {
-  get apiKey() {
-    return this.get('apiKey');
+  get apiKey(): string {
+    return this.get('apiKey') as string;
   }
 
   set apiKey(value: string) {
     this.set('apiKey', value);
-    this.updateData();
+    void this.updateData();
   }
 
-  get date() {
-    return this.get('date') || new Date();
+  get date(): Date {
+    return (this.get('date') as Date) || new Date();
   }
 
   set date(value: Date) {
     this.set('date', value);
-    this.updateData();
+    void this.updateData();
   }
 
-  get loadAll() {
-    return this.get('loadAll') ?? true;
+  get loadAll(): boolean {
+    return (this.get('loadAll') as boolean) ?? true;
   }
 
   set loadAll(value: boolean) {
     this.set('loadAll', value);
-    this.updateData();
+    void this.updateData();
   }
 
-  get notifications() {
-    return this.get('notifications') || undefined;
+  get notifications(): MocoNotification[] | undefined {
+    return this.get('notifications') as MocoNotification[] | undefined;
   }
+
   set notifications(value: MocoNotification[]) {
     this.set('notifications', value);
-    this.updateData();
+    void this.updateData();
   }
 
-  get tenant() {
-    return this.get('tenant');
+  get tenant(): string | undefined {
+    return this.get('tenant') as string | undefined;
   }
   set tenant(value: string) {
     this.set('tenant', value);
-    this.updateData();
+    void this.updateData();
   }
 
-  get url() {
-    return this.get('url');
+  get url(): string | undefined {
+    return this.get('url') as string | undefined;
   }
   set url(value: string) {
     this.set('url', value);
-    this.updateData();
+    void this.updateData();
   }
 
   #abortController: AbortController | null = null;
@@ -170,7 +172,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   onLoad() {
     super.onLoad();
-    this.updateData();
+    void this.updateData();
   }
 
   async updateData() {
@@ -212,7 +214,7 @@ class MocoLayer extends MaplibreStyleLayer {
       return;
     }
 
-    const notifsToRender: MocoNotificationToRender[] = notifications
+    const notifsToRender: MocoNotificationToRender[] = (notifications ?? [])
       .map((notification) => {
         // Add status properties to the features, these properties are only there for rendering purposes
         return {
@@ -241,6 +243,8 @@ class MocoLayer extends MaplibreStyleLayer {
 
     // Apply new data to the source
     (source as GeoJSONSource).setData(data);
+
+    return true;
   }
 }
 

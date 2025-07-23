@@ -1,9 +1,11 @@
-import { Feature } from 'ol';
 import { getCenter } from 'ol/extent';
-import GeoJSON, { GeoJSONGeometry } from 'ol/format/GeoJSON';
+import GeoJSON from 'ol/format/GeoJSON';
 import { toLonLat } from 'ol/proj';
 
-import {
+import type { Feature } from 'ol';
+import type { GeoJSONGeometry } from 'ol/format/GeoJSON';
+
+import type {
   MocoDefinitions,
   MocoNotification,
   MocoNotificationFeature,
@@ -161,14 +163,9 @@ export const getMocoIconRefFeatures = (
     return f.geometry?.type !== 'Point';
   });
 
-  let lineFeaturesUsedForIcons = lineFeatures.filter((f) => {
+  const lineFeaturesUsedForIcons = lineFeatures.filter((f) => {
     return f.properties.is_icon_ref;
   });
-
-  // If no icon ref defined we use the first one
-  if (lineFeaturesUsedForIcons.length === 0 && lineFeatures.length > 0) {
-    lineFeaturesUsedForIcons = [features[0]];
-  }
 
   const iconsForLines = lineFeaturesUsedForIcons
     .map((affectedLine) => {
@@ -207,7 +204,7 @@ export const getMocoIconRefFeatures = (
             coordinates: toLonLat(iconRefPoint),
             type: 'Point',
           },
-          id: Math.random() + '',
+          id: `${Math.random()}`,
           properties: iconRefFeatureProperties,
           type: 'Feature',
         };
@@ -242,7 +239,7 @@ export const getMocoNotificationsAsFeatureCollection = (
 
       // reasons_category is used to choose the proper icon in the style
       // @ts-expect-error the value is a string in the style
-      feat.properties['reasons_category'] =
+      feat.properties.reasons_category =
         MOCO_IMAGE_BY_CATEGORY[
           reasonCategoryName || MOCO_REASONS_CATEGORY.UNDEFINIERT
         ] || MOCO_IMAGE_BY_CATEGORY[MOCO_REASONS_CATEGORY.UNDEFINIERT];
