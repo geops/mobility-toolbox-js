@@ -139,16 +139,33 @@ class MocoLayer extends MaplibreStyleLayer {
         );
       },
       maplibreLayer: options.maplibreLayer,
-      sources: {
-        [MOCO_SOURCE_ID]: {
-          data: {
-            features: [],
-            type: 'FeatureCollection',
-          },
-          type: 'geojson',
-        },
-      },
+      // sources: {
+      //   [MOCO_SOURCE_ID]: {
+      //     data: {
+      //       features: [],
+      //       type: 'FeatureCollection',
+      //     },
+      //     type: 'geojson',
+      //   },
+      // },
     });
+  }
+
+  override detachFromMap() {
+    super.detachFromMap();
+    const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
+    if (source) {
+      // Clean data source new data to the source
+      (source as GeoJSONSource).setData({
+        features: [],
+        type: 'FeatureCollection',
+      });
+    }
+
+    if (this.#abortController) {
+      this.#abortController.abort();
+      this.#abortController = null;
+    }
   }
 
   onLoad() {
