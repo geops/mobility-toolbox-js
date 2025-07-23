@@ -8,6 +8,7 @@ import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 import { Source } from 'ol/source';
 
+import { ol } from '../..';
 import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 import { FilterFunction } from '../../common/typedefs';
 import { LayerGetFeatureInfoResponse } from '../../types';
@@ -53,7 +54,7 @@ if (
  *   },
  * });
  *
- * @extends {MaplibreStyleLayer}
+ * @extends {ol/layer/Layer~Layer}
  * @public
  */
 class MaplibreStyleLayer extends Layer {

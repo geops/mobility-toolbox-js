@@ -58,6 +58,7 @@ export type MocoNotificationToRender = {
  * });
  *
  * @see <a href="/example/ol-maplibre-style-layer">OpenLayers MaplibreStyle layer example</a>
+ * @extends {MaplibreStyleLayer}
  * @private
  */
 class MocoLayer extends MaplibreStyleLayer {

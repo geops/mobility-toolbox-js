@@ -2,7 +2,6 @@ import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 
 import { LayerGetFeatureInfoResponse } from '../../types';
-
 import Layer, { MobilityLayerOptions } from './Layer';
 
 /**
@@ -30,7 +29,9 @@ class VectorLayer extends Layer {
       features =
         (mapInternal.getFeaturesAtPixel(pixel, {
           hitTolerance: this.get('hitTolerance') || 5,
-          layerFilter: (l) => l === this,
+          layerFilter: (l) => {
+            return l === this;
+          },
         }) as Feature[]) || [];
     }
 
