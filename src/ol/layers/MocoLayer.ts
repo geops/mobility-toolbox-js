@@ -21,7 +21,7 @@ export const DEFAULT_GRAPH_MAPPING = { 1: 'osm' };
 export type MocoLayerOptions = {
   date?: Date;
   loadAll?: boolean;
-  notifications: MocoNotification[];
+  notifications?: MocoNotification[];
   tenant?: string;
   url?: string;
 } & MaplibreStyleLayerOptions &
