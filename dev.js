@@ -12,6 +12,7 @@ import {
   routingStyle,
   MocoAPI,
   MocoLayer,
+  CopyrightControl,
 } from './build/ol';
 import 'ol/ol.css';
 import { buffer, getCenter } from 'ol/extent';
@@ -69,6 +70,8 @@ const baseLayer = new MaplibreLayer({
 map.addLayer(baseLayer);
 
 const mocoLayer = new MocoLayer({
+  apiKey: window.apiKey,
+  url: 'https://moco.dev.geops.io/api/v1/',
   maplibreLayer: baseLayer,
   tenant: 'rvf',
   // date: new Date('2025-09-10T00:00:00Z'),
@@ -398,6 +401,7 @@ const realtimeLayer = new RealtimeLayer({
 });
 // map.addLayer(realtimeLayer);
 
+map.addControl(new CopyrightControl());
 map.on('moveend', () => {
   console.log('center: ', map.getView().getCenter());
   console.log('zoom: ', map.getView().getZoom());

@@ -26,8 +26,6 @@ const fullTrajectorystyle = (
   const type = feature.get('type');
   let stroke = feature.get('stroke');
 
-  console.log(feature.getProperties());
-
   if (stroke && stroke[0] !== '#') {
     stroke = `#${stroke}`;
   }

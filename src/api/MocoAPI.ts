@@ -3,6 +3,7 @@ import { MocoNotification, MocoParameters } from '../types';
 import HttpAPI from './HttpAPI';
 
 export interface MocoAPIOptions {
+  apiKey: string;
   graph?: string;
   simplify?: number;
   ssoConfig?: string;
@@ -31,32 +32,33 @@ export type MocoParametersExtended = {
  *
  * console.log('Log route:', JSON.stringify(notifications));
  *
- * @public
+ * @private
  */
 class MocoAPI extends HttpAPI {
   graph?: string = 'osm';
 
   simplify?: number = 0; // The backend has 100 as default value, but we use 0 to get the full geometries.
 
-  ssoConfig?: string = 'geopsTest';
+  ssoConfig?: string = 'geopstest';
 
   /**
    * Constructor
    *
    * @param {Object} options Options.
-   * @param {string} [options.url='https://moco.dev.geops.io/api/v1'] Service url.
-   * @param {string} [options.ssoConfig='geopsTest'] SSO config to get notifications from.
+   *
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
+   * @param {string} [options.url='https://moco.geops.io/api/v1'] Service url.
+   * @param {string} [options.ssoConfig='geopstest'] SSO config to get notifications from.
    * @param {string} [options.graph='osm'] Graph to use for geometries.
-   * @public
    */
-  constructor(options: MocoAPIOptions = {}) {
+  constructor(options: MocoAPIOptions) {
     super({
-      apiKey: 'public', // hack apiKey is not needed for moco
       ...options,
-      url: options.url || 'https://moco.dev.geops.io/api/v1/',
+      apiKey: options.apiKey,
+      url: options.url || 'https://moco.geops.io/api/v1/',
     });
 
-    this.ssoConfig = options.ssoConfig || 'geopsTest';
+    this.ssoConfig = options.ssoConfig || 'geopstest';
     this.graph = options.graph || 'osm';
     this.simplify = options.simplify || 0;
   }

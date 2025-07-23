@@ -1,5 +1,8 @@
 import { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
 
+import type { MocoAPIOptions } from '../../api/MocoAPI';
+import type { MocoDefinitions, MocoNotification } from '../../types';
+
 import {
   getMocoIconRefFeatures,
   getMocoNotificationsAsFeatureCollection,
@@ -7,7 +10,6 @@ import {
   isMocoNotificationPublished,
   MocoAPI,
 } from '..';
-import { MocoDefinitions, MocoNotification } from '../../types';
 import MaplibreStyleLayer, {
   MaplibreStyleLayerOptions,
 } from './MaplibreStyleLayer';
@@ -18,10 +20,12 @@ export const DEFAULT_GRAPH_MAPPING = { 1: 'osm' };
 
 export type MocoLayerOptions = {
   date?: Date;
+  loadAll?: boolean;
   notifications: MocoNotification[];
   tenant?: string;
   url?: string;
-} & MaplibreStyleLayerOptions;
+} & MaplibreStyleLayerOptions &
+  Pick<MocoAPIOptions, 'apiKey' | 'url'>;
 
 export type MocoNotificationToRender = {
   features?: ({
@@ -34,7 +38,7 @@ export type MocoNotificationToRender = {
 } & Omit<MocoNotification, 'features' | 'properties'>;
 
 /**
- * An OpenLayers layer able to display data from the [geOps MOCO API](https://developer.geops.io/apis/realtime/).
+ * An OpenLayers layer able to display data from the [geOps MOCO API](https://geops.com/de/solution/disruption-information).
  *
  * @example
  * import { MaplibreLayer, MaplibreStyleLayer } from 'mobility-toolbox-js/ol';
@@ -44,13 +48,28 @@ export type MocoNotificationToRender = {
  * });
  *
  * const layer = new MocoLayer({
+ *   apiKey: 'yourApiKey',
  *   maplibreLayer: maplibreLayer,
+ *   // date: new Date(),
+ *   // loadAll: true,
+ *   // notifications: undefined,
+ *   // tenant: "geopstest",
+ *   // url: 'https://moco.geops.io'
  * });
  *
  * @see <a href="/example/ol-maplibre-style-layer">OpenLayers MaplibreStyle layer example</a>
- * @extends {MaplibreStyleLayer}
+ * @private
  */
 class MocoLayer extends MaplibreStyleLayer {
+  get apiKey() {
+    return this.get('apiKey');
+  }
+
+  set apiKey(value: string) {
+    this.set('apiKey', value);
+    this.updateData();
+  }
+
   get date() {
     return this.get('date') || new Date();
   }
@@ -60,10 +79,18 @@ class MocoLayer extends MaplibreStyleLayer {
     this.updateData();
   }
 
+  get loadAll() {
+    return this.get('loadAll') ?? true;
+  }
+
+  set loadAll(value: boolean) {
+    this.set('loadAll', value);
+    this.updateData();
+  }
+
   get notifications() {
     return this.get('notifications') || undefined;
   }
-
   set notifications(value: MocoNotification[]) {
     this.set('notifications', value);
     this.updateData();
@@ -89,7 +116,19 @@ class MocoLayer extends MaplibreStyleLayer {
 
   #graphMapping: Record<number, string> = DEFAULT_GRAPH_MAPPING;
 
-  constructor(options: MaplibreStyleLayerOptions) {
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).   *
+   * @param {string} [options.date] The date to filter notifications. If not set, the current date is used.
+   * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded, otherwise only the notifications set in 'notifications' will be displayed.
+   * @param {MocoNotification[]} [options.notifications] The notifications to display. If not set and loadAll is true, all active and published notifications will be loaded.
+   * @param {string} [options.tenant] The SSO config to use to get notifications from.
+   * @param {string} [options.url] The URL of the [geOps MOCO API](https://geops.com/de/solution/disruption-information).
+   * @public
+   */
+  constructor(options: MocoLayerOptions) {
     super({
       ...options,
       layersFilter: ({ metadata }: LayerSpecification) => {
@@ -113,11 +152,6 @@ class MocoLayer extends MaplibreStyleLayer {
 
   onLoad() {
     super.onLoad();
-    console.log('MocoLayer: onLoad called');
-
-    if (this.maplibreLayer?.mapLibreMap?.getLayer('moco_point')) {
-      this.maplibreLayer?.mapLibreMap?.removeLayer('moco_point');
-    }
     this.updateData();
   }
 
@@ -134,23 +168,25 @@ class MocoLayer extends MaplibreStyleLayer {
     const graphsString = [...new Set(Object.values(this.#graphMapping))].join(
       ',',
     );
-    //console.log(`MocoLayer: Using graphs: ${graphsString}`);
 
     // We get the data from the MocoAPI
     const api = new MocoAPI({
+      apiKey: this.apiKey,
       graph: graphsString,
       ssoConfig: this.tenant,
       url: this.url,
     });
 
-    const date = this.date; // Example date, can be replaced with a dynamic date
+    const date = this.date;
 
-    const notifications =
-      this.notifications ||
-      (await api.getNotifications(
+    let notifications = this.notifications;
+
+    if (!notifications && this.loadAll) {
+      notifications = await api.getNotifications(
         { date: date },
         { signal: this.#abortController.signal },
-      ));
+      );
+    }
 
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (!source) {
@@ -185,7 +221,6 @@ class MocoLayer extends MaplibreStyleLayer {
 
     const data = getMocoNotificationsAsFeatureCollection(notifsToRender);
 
-    console.log('Notifications data to display:', data);
     // Apply new data to the source
     (source as GeoJSONSource).setData(data);
   }

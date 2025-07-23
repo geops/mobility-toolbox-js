@@ -1,3 +1,9 @@
+import type {
+  MapLibreLayerOptions,
+  MapLibreOptions,
+} from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
+import type { QueryRenderedFeaturesOptions } from 'maplibre-gl';
+
 import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer/lib';
 import debounce from 'lodash.debounce';
 import { EventsKey } from 'ol/events';
@@ -8,14 +14,7 @@ import { unByKey } from 'ol/Observable';
 import { getUrlWithParams } from '../../common/utils';
 import MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
-
 import { MobilityLayerOptions } from './Layer';
-
-import type {
-  MapLibreLayerOptions,
-  MapLibreOptions,
-} from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
-import type { QueryRenderedFeaturesOptions } from 'maplibre-gl';
 
 export type MaplibreLayerOptions = {
   apiKey?: string;
@@ -44,7 +43,6 @@ if (
   new URLSearchParams(window.location.search).get('deprecated')
 ) {
   deprecated = debounce((message: string) => {
-    // eslint-disable-next-line no-console
     console.warn(message);
   }, 1000);
 }
@@ -278,7 +276,6 @@ class MaplibreLayer extends MapLibreLayer {
     try {
       this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Error while updating MaplibreMap', e);
     }
   }

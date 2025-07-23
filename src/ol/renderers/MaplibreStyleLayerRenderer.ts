@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { Feature } from 'ol';
 import { Coordinate } from 'ol/coordinate';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -9,9 +8,9 @@ import { toLonLat } from 'ol/proj';
 import LayerRenderer from 'ol/renderer/Layer';
 import { FeatureCallback } from 'ol/renderer/vector';
 
-import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
-
 import type { MaplibreStyleLayer } from '../layers';
+
+import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 
 /**
  * @private
@@ -98,7 +97,6 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
         }
 
         if (layer.queryRenderedLayersFilter) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           layers = mapLibreMap
             .getStyle()
             .layers.filter(layer.queryRenderedLayersFilter);
@@ -108,7 +106,9 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
         // feature to be consistent with other layers.
         features = mapLibreMap
           .queryRenderedFeatures(pixels, {
-            layers: layers.map((l) => l.id),
+            layers: layers.map((l) => {
+              return l.id;
+            }),
             validate: false,
             // ...layer.queryRenderedFeaturesOptions,
           })
@@ -129,13 +129,15 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
     return features;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   override prepareFrame() {
     return true;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  renderFrame() {
-    return null;
+  override renderFrame(
+    frameState: FrameState,
+    target: HTMLElement | null,
+  ): HTMLElement {
+    // Return an empty div as a placeholder since nothing is rendered
+    return target ?? document.createElement('div');
   }
 }

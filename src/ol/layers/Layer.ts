@@ -35,7 +35,8 @@ class EmptyLayerRenderer extends LayerRenderer<OLLayer> {
   }
 
   renderFrame() {
-    return null;
+    // Return an empty div as a placeholder HTMLElement
+    return document.createElement('div');
   }
 }
 
