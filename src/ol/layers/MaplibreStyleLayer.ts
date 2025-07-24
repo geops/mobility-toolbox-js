@@ -1,21 +1,25 @@
 import debounce from 'lodash.debounce';
-import { AddLayerObject, FeatureState } from 'maplibre-gl';
-import { Feature, Map } from 'ol';
-import { Coordinate } from 'ol/coordinate';
-import { EventsKey } from 'ol/events';
 import { Layer } from 'ol/layer';
-import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 import { Source } from 'ol/source';
 
 import { ol } from '../..';
 import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
-import { FilterFunction } from '../../common/typedefs';
-import { LayerGetFeatureInfoResponse } from '../../types';
 import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
-import { MobilityLayerOptions } from './Layer';
-import MaplibreLayer, { MaplibreLayerOptions } from './MaplibreLayer';
+
+import type { AddLayerObject, FeatureState } from 'maplibre-gl';
+import type { Feature, Map } from 'ol';
+import type { Coordinate } from 'ol/coordinate';
+import type { EventsKey } from 'ol/events';
+import type { ObjectEvent } from 'ol/Object';
+
+import type { FilterFunction } from '../../common/typedefs';
+import type { LayerGetFeatureInfoResponse } from '../../types';
+
+import type { MobilityLayerOptions } from './Layer';
+import type { MaplibreLayerOptions } from './MaplibreLayer';
+import type MaplibreLayer from './MaplibreLayer';
 
 export type MaplibreStyleLayerOptions = {
   beforeId?: string;

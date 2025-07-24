@@ -9,7 +9,9 @@ import {
 import MaplibreStyleLayer from './MaplibreStyleLayer';
 
 import type { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
+import type { Map } from 'ol';
 
+import type { MocoNotificationAsFeatureCollection } from '..';
 import type { MocoAPIOptions } from '../../api/MocoAPI';
 import type { MocoDefinitions, MocoNotification } from '../../types';
 
@@ -66,7 +68,6 @@ class MocoLayer extends MaplibreStyleLayer {
   get apiKey(): string {
     return this.get('apiKey') as string;
   }
-
   set apiKey(value: string) {
     this.set('apiKey', value);
     void this.updateData();
@@ -102,19 +103,19 @@ class MocoLayer extends MaplibreStyleLayer {
   get tenant(): string | undefined {
     return this.get('tenant') as string | undefined;
   }
+
   set tenant(value: string) {
     this.set('tenant', value);
     void this.updateData();
   }
-
   get url(): string | undefined {
     return this.get('url') as string | undefined;
   }
+
   set url(value: string) {
     this.set('url', value);
     void this.updateData();
   }
-
   #abortController: AbortController | null = null;
 
   #graphMapping: Record<number, string> = DEFAULT_GRAPH_MAPPING;
@@ -153,11 +154,21 @@ class MocoLayer extends MaplibreStyleLayer {
     });
   }
 
+  override attachToMap(map: Map) {
+    super.attachToMap(map);
+
+    // If the source is already there (no load event triggered) update data
+    const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
+    if (source) {
+      void this.updateData();
+    }
+  }
+
   override detachFromMap() {
     super.detachFromMap();
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (source) {
-      // Clean data source new data to the source
+      // Remove the data from the map
       (source as GeoJSONSource).setData({
         features: [],
         type: 'FeatureCollection',
