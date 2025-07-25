@@ -35,6 +35,7 @@ const getFeaturesFromWMS = (
     });
   }
 
+  // @ts-expect-error url can be undefined
   return fetch(url, { signal: abortController.signal })
     .then((resp) => {
       return resp.json();
