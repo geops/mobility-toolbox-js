@@ -54,12 +54,21 @@ const getFeaturesFromWMS = (
 let abortControllers: Record<string, AbortController | undefined> = {};
 
 /**
+ * Fetches feature information at a given coordinate from the provided layers.
+ * It supports WMS sources and MapLibre layers and custom layer via the method `layer.getFeatureInfoAtCoordinate`.
+ *
+ * @param {Coordinate} coordinate - The coordinate to query for feature information.
+ * @param {ol/layer/BaseLayer~BaseLayer[]} layers - The layers to query for feature information.
+ * @param {number} hitTolerance - The pixel tolerance for feature selection.
+ * @param {boolean} ignoreLayerMethod - If true, it ignores the `getFeatureInfoAtCoordinate` method on layers.
+ * @returns {LayerGetFeatureInfoResponse[]} A promise that resolves to an array of feature information responses.
  * @private
  */
 const getFeatureInfoAtCoordinate = async (
   coordinate: Coordinate,
-  layers: Layer[],
+  layers: BaseLayer[],
   hitTolerance = 5,
+  ignoreLayerMethod = false,
 ): Promise<LayerGetFeatureInfoResponse[]> => {
   // Kill all previous requests
   Object.values(abortControllers).forEach((abortController) => {
@@ -85,7 +94,7 @@ const getFeatureInfoAtCoordinate = async (
 
     // For backward compatibility
     // @ts-expect-error getFeatureInfoAtCoordinate is deprecated
-    if (layer.getFeatureInfoAtCoordinate) {
+    if (!ignoreLayerMethod && layer.getFeatureInfoAtCoordinate) {
       // @ts-expect-error getFeatureInfoAtCoordinate is deprecated
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       return layer.getFeatureInfoAtCoordinate(
