@@ -1,6 +1,7 @@
 import debounce from 'lodash.debounce';
 
 import type { Map } from 'ol';
+import type { EventsKey } from 'ol/events';
 import type { Layer } from 'ol/layer';
 import type { ObjectEvent } from 'ol/Object';
 
@@ -21,7 +22,7 @@ const onChildrenChange = (layer: Layer, oldValue: Layer[]) => {
   (oldValue || []).forEach((child) => {
     child.set('parent', undefined);
   });
-  (layer.get('children') || []).forEach((child: Layer) => {
+  ((layer.get('children') || []) as Layer[]).forEach((child: Layer) => {
     child.set('parent', this);
   });
 };
@@ -46,7 +47,7 @@ const defineDeprecatedProperties = (
   // Update parent property
   obj.on('propertychange', (evt: ObjectEvent) => {
     if (evt.key === 'children') {
-      onChildrenChange(evt.target, evt.oldValue);
+      onChildrenChange(evt.target as Layer, evt.oldValue as Layer[]);
     }
 
     if (evt.key === 'map') {
@@ -195,12 +196,12 @@ const defineDeprecatedProperties = (
     },
     olListenersKeys: {
       /** @deprecated */
-      get() {
+      get(): EventsKey[] {
         deprecated(
           'Layer.olListenersKeys is deprecated. Use the Layer.olEventsKeys instead.',
         );
         //@ts-expect-error Property just there for backward compatibility
-        return obj.olEventsKeys || [];
+        return (obj.olEventsKeys as EventsKey[]) || [];
       },
       set(newValue: string[]) {
         deprecated(
@@ -209,6 +210,7 @@ const defineDeprecatedProperties = (
 
         //@ts-expect-error Property just there for backward compatibility
         obj.olEventsKeys = newValue;
+      },
     },
     options: {
       /** @deprecated */
@@ -216,7 +218,7 @@ const defineDeprecatedProperties = (
         deprecated(
           'Layer.options is deprecated. Use the Layer.get("options") method instead.',
         );
-        return obj.get('options');
+        return obj.get('options') as MobilityLayerOptions;
       },
       set(newValue: MobilityLayerOptions) {
         deprecated(
@@ -231,7 +233,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.parent is deprecated. Use the Layer.get('parent') method instead.",
         );
-        return obj.get('parent');
+        return obj.get('parent') as Layer;
       },
 
       /** @deprecated */
@@ -258,7 +260,6 @@ const defineDeprecatedProperties = (
         obj.setProperties(newValue);
       },
     },
-
     visible: {
       /** @deprecated */
       get(): boolean {
