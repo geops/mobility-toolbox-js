@@ -1,18 +1,43 @@
-import { Feature } from 'ol';
-import { Coordinate } from 'ol/coordinate';
+import { Vector } from 'ol/layer';
 
-import { LayerGetFeatureInfoResponse } from '../../types';
-import Layer, { MobilityLayerOptions } from './Layer';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+
+import { deprecated } from './MaplibreLayer';
+
+import type { Feature } from 'ol';
+import type { Coordinate } from 'ol/coordinate';
+import type { Options } from 'ol/layer/Vector';
+
+import type { LayerGetFeatureInfoResponse } from '../../types';
+
+import type { MobilityLayerOptions } from './Layer';
 
 /**
  * @deprecated
  */
-class VectorLayer extends Layer {
+class VectorLayer extends Vector {
+  constructor(options: MobilityLayerOptions & Options) {
+    if (!options.source && (options.olLayer as Vector)?.getSource()) {
+      options.source = (options.olLayer as Vector)?.getSource?.() ?? undefined;
+    }
+    super(options);
+
+    defineDeprecatedProperties(this, options as MobilityLayerOptions);
+    deprecated('Layer is deprecated. Use an OpenLayers Layer instead.');
+
+    // Backward compatibility
+    // @ts-expect-error Property just there for backward compatibility
+    this.olEventsKeys = [];
+  }
+
   /**
    * @deprecated
    */
-  clone(newOptions: MobilityLayerOptions) {
-    return new VectorLayer({ ...this.get('options'), ...newOptions });
+  clone(newOptions: MobilityLayerOptions & Options) {
+    return new VectorLayer({
+      ...(this.get('options') as MobilityLayerOptions & Options),
+      ...newOptions,
+    });
   }
 
   /**
@@ -28,7 +53,7 @@ class VectorLayer extends Layer {
       const pixel = mapInternal.getPixelFromCoordinate(coordinate);
       features =
         (mapInternal.getFeaturesAtPixel(pixel, {
-          hitTolerance: this.get('hitTolerance') || 5,
+          hitTolerance: (this.get('hitTolerance') as number) || 5,
           layerFilter: (l) => {
             return l === this;
           },
