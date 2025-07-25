@@ -1,11 +1,11 @@
-import type { Options } from 'ol/layer/Layer';
-
 import debounce from 'lodash.debounce';
-import { Map } from 'ol';
 import OLLayer from 'ol/layer/Layer';
 import LayerRenderer from 'ol/renderer/Layer';
 
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+
+import type { Map } from 'ol';
+import type { Options } from 'ol/layer/Layer';
 
 export type MobilityLayerOptions = {
   children?: any[];
@@ -25,6 +25,7 @@ if (
   new URLSearchParams(window.location.search).get('deprecated')
 ) {
   deprecated = debounce((message: string) => {
+    // eslint-disable-next-line no-console
     console.warn(message);
   }, 1000);
 }
@@ -45,7 +46,7 @@ class EmptyLayerRenderer extends LayerRenderer<OLLayer> {
  * @deprecated Use an OpenLayers Layer instead.
  */
 class Layer extends OLLayer {
-  constructor(options: MobilityLayerOptions) {
+  constructor(options: MobilityLayerOptions = {}) {
     super(options);
     defineDeprecatedProperties(this, options);
     deprecated('Layer is deprecated. Use an OpenLayers Layer instead.');

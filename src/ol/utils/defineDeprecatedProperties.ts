@@ -1,9 +1,10 @@
 import debounce from 'lodash.debounce';
-import { Map } from 'ol';
-import { Layer } from 'ol/layer';
-import { ObjectEvent } from 'ol/Object';
 
-import { MobilityLayerOptions } from '../layers/Layer';
+import type { Map } from 'ol';
+import type { Layer } from 'ol/layer';
+import type { ObjectEvent } from 'ol/Object';
+
+import type { MobilityLayerOptions } from '../layers/Layer';
 
 let deprecated: (message: string) => void = () => {};
 if (
@@ -222,6 +223,22 @@ const defineDeprecatedProperties = (
           "Layer.parent is deprecated. Use the Layer.set('parent', parent) method instead.",
         );
         obj.set('parent', newValue);
+      },
+    },
+    properties: {
+      /** @deprecated */
+      get(): Record<string, unknown> {
+        deprecated(
+          'Layer.properties is deprecated. Use the Layer.getProperties() method instead.',
+        );
+        return obj.getProperties();
+      },
+      /** @deprecated */
+      set(newValue: Record<string, unknown>) {
+        deprecated(
+          'Layer.properties is deprecated. Use the Layer.setProperties(newValue) method instead.',
+        );
+        obj.setProperties(newValue);
       },
     },
     visible: {
