@@ -1,34 +1,37 @@
-import { DebouncedFunc } from 'lodash';
 import debounce from 'lodash.debounce';
-import { Map, MapEvent } from 'ol';
-import { EventsKey } from 'ol/events';
 import { getIntersection, isEmpty } from 'ol/extent';
-import Feature, { FeatureLike } from 'ol/Feature';
 import GeoJSON from 'ol/format/GeoJSON';
 import Layer from 'ol/layer/Layer';
 import VectorLayer from 'ol/layer/Vector';
-import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 import { Vector as VectorSource } from 'ol/source';
 import Source from 'ol/source/Source';
-import { State } from 'ol/View';
 
-import { FilterFunction, SortFunction } from '../../common/typedefs';
-import RealtimeEngine, {
-  RealtimeEngineOptions,
-} from '../../common/utils/RealtimeEngine';
-import { RealtimeAPI } from '../../maplibre';
-import {
+import RealtimeEngine from '../../common/utils/RealtimeEngine';
+import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
+import { fullTrajectoryStyle } from '../styles';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+
+import type { DebouncedFunc } from 'lodash';
+import type { Map, MapEvent } from 'ol';
+import type { EventsKey } from 'ol/events';
+import type { FeatureLike } from 'ol/Feature';
+import type Feature from 'ol/Feature';
+import type { ObjectEvent } from 'ol/Object';
+import type { State } from 'ol/View';
+
+import type { FilterFunction, SortFunction } from '../../common/typedefs';
+import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
+import type { RealtimeAPI } from '../../maplibre';
+import type {
   RealtimeMode,
   RealtimeRenderState,
   RealtimeStopSequence,
   RealtimeTrainId,
   ViewState,
 } from '../../types';
-import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
-import { fullTrajectoryStyle } from '../styles';
-import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
-import { MobilityLayerOptions } from './Layer';
+
+import type { MobilityLayerOptions } from './Layer';
 
 const format = new GeoJSON();
 
@@ -356,8 +359,9 @@ class RealtimeLayer extends Layer {
     };
   }
 
-  highlight(feature: Feature) {
-    const id = feature?.get('train_id');
+  highlight(features: Feature | Feature[]) {
+    const feat = Array.isArray(features) ? features[0] : features;
+    const id: null | string | undefined = feat?.get('train_id') as string;
     if (this.hoverVehicleId !== id) {
       this.hoverVehicleId = id;
       this.engine.renderTrajectories(true);
@@ -437,18 +441,19 @@ class RealtimeLayer extends Layer {
     }
 
     if (this.selectedVehicleId) {
-      this.highlightTrajectory(this.selectedVehicleId);
+      void this.highlightTrajectory(this.selectedVehicleId);
     }
   }
 
-  select(feature: Feature) {
-    const id = feature?.get('train_id');
+  select(features: Feature | Feature[]) {
+    const feat = Array.isArray(features) ? features[0] : features;
+    const id: null | string | undefined = feat?.get('train_id') as string;
     if (this.selectedVehicleId !== id) {
       this.cleanVectorLayer();
       this.selectedVehicleId = id;
       this.engine.renderTrajectories(true);
     }
-    this.highlightTrajectory(id);
+    void this.highlightTrajectory(id);
   }
 
   override setMapInternal(map: Map) {

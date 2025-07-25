@@ -1,10 +1,12 @@
 import debounce from 'lodash.debounce';
 import OLLayer from 'ol/layer/Layer';
+import { unByKey } from 'ol/Observable';
 import LayerRenderer from 'ol/renderer/Layer';
 
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
 import type { Map } from 'ol';
+import type { EventsKey } from 'ol/events';
 import type { Options } from 'ol/layer/Layer';
 
 export type MobilityLayerOptions = {
@@ -46,10 +48,15 @@ class EmptyLayerRenderer extends LayerRenderer<OLLayer> {
  * @deprecated Use an OpenLayers Layer instead.
  */
 class Layer extends OLLayer {
+  olEventsKeys: EventsKey[] = [];
+
   constructor(options: MobilityLayerOptions = {}) {
     super(options);
     defineDeprecatedProperties(this, options);
     deprecated('Layer is deprecated. Use an OpenLayers Layer instead.');
+
+    // Backward compatibility
+    this.olEventsKeys = [];
   }
 
   clone(newOptions: MobilityLayerOptions): Layer {
@@ -62,6 +69,11 @@ class Layer extends OLLayer {
   // ol does not like when it returns null.
   createRenderer(): LayerRenderer<OLLayer> {
     return new EmptyLayerRenderer(this);
+  }
+
+  detachFromMap() {
+    // Backward compatibility
+    unByKey(this.olEventsKeys);
   }
 }
 

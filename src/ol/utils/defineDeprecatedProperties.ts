@@ -193,6 +193,23 @@ const defineDeprecatedProperties = (
         );
       },
     },
+    olListenersKeys: {
+      /** @deprecated */
+      get() {
+        deprecated(
+          'Layer.olListenersKeys is deprecated. Use the Layer.olEventsKeys instead.',
+        );
+        //@ts-expect-error Property just there for backward compatibility
+        return obj.olEventsKeys || [];
+      },
+      set(newValue: string[]) {
+        deprecated(
+          'Layer.olListenersKeys is deprecated. Use the Layer.olEventsKeys instead.',
+        );
+
+        //@ts-expect-error Property just there for backward compatibility
+        obj.olEventsKeys = newValue;
+    },
     options: {
       /** @deprecated */
       get(): MobilityLayerOptions {
@@ -241,6 +258,7 @@ const defineDeprecatedProperties = (
         obj.setProperties(newValue);
       },
     },
+
     visible: {
       /** @deprecated */
       get(): boolean {
