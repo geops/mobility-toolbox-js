@@ -1,18 +1,22 @@
-// TODO: I use any to avoid circular dependency  with common/layers/layer
+import type BaseLayer from 'ol/layer/Base';
+import type LayerGroup from 'ol/layer/Group';
 
-const getLayersAsFlatArray = (layersOrLayer: any | any[]): any[] => {
+const getLayersAsFlatArray = (
+  layersOrLayer: BaseLayer | BaseLayer[],
+): BaseLayer[] => {
   let layers = layersOrLayer;
   if (!Array.isArray(layers)) {
-    layers = [layersOrLayer];
+    layers = [layersOrLayer as BaseLayer];
   }
-  let flatLayers: any[] = [];
-  layers.forEach((layer: any) => {
+  let flatLayers: BaseLayer[] = [];
+  layers.forEach((layer: BaseLayer) => {
     flatLayers.push(layer);
     // Handle children property and ol.layer.Group
     const children =
-      layer.children ||
-      layer.get('children') ||
-      layer.getLayers?.()?.getArray();
+      // @ts-expect-error children is deprecated
+      (layer.children as BaseLayer[]) ||
+      (layer.get('children') as BaseLayer[]) ||
+      (layer as LayerGroup).getLayers?.()?.getArray();
     flatLayers = flatLayers.concat(getLayersAsFlatArray(children || []));
   });
   return flatLayers;

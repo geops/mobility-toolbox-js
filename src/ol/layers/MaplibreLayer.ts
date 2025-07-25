@@ -38,7 +38,7 @@ const buildStyleUrl = (
   }).toString();
 };
 
-let deprecated: (message: string) => void = () => {};
+export let deprecated: (message: string) => void = () => {};
 if (
   typeof window !== 'undefined' &&
   new URLSearchParams(window.location.search).get('deprecated')

@@ -12,6 +12,8 @@ import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
+import { deprecated } from './MaplibreLayer';
+
 import type { DebouncedFunc } from 'lodash';
 import type { Map, MapEvent } from 'ol';
 import type { EventsKey } from 'ol/events';
@@ -443,6 +445,17 @@ class RealtimeLayer extends Layer {
     if (this.selectedVehicleId) {
       void this.highlightTrajectory(this.selectedVehicleId);
     }
+  }
+
+  /**
+   * Render the trajectories of the vehicles.
+   * @deprecated Use this.engine.renderTrajectories instead.
+   */
+  renderTrajectories(noInterpolate?: boolean) {
+    deprecated(
+      'RealtimeLayer.renderTrajectories is deprecated. Use RealtimeLayer.engine.renderTrajectories instead.',
+    );
+    this.engine.renderTrajectories(noInterpolate);
   }
 
   select(features: Feature | Feature[]) {

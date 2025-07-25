@@ -1,12 +1,14 @@
-import { Feature, getUid } from 'ol';
+import { getUid } from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
-import { ImageWMS, TileWMS } from 'ol/source';
 
 import { getLayersAsFlatArray } from '../../common';
-import { LayerGetFeatureInfoResponse } from '../../types';
 
+import type { Feature } from 'ol';
 import type { Coordinate } from 'ol/coordinate';
 import type { Layer } from 'ol/layer';
+import type { ImageWMS, TileWMS } from 'ol/source';
+
+import type { LayerGetFeatureInfoResponse } from '../../types';
 
 /**
  * @private
@@ -17,7 +19,7 @@ const format = new GeoJSON();
  * @private
  */
 const getFeaturesFromWMS = (
-  source: TileWMS | ImageWMS,
+  source: ImageWMS | TileWMS,
   options: any,
   abortController: AbortController,
 ): Promise<LayerGetFeatureInfoResponse> => {
@@ -33,9 +35,15 @@ const getFeaturesFromWMS = (
 
   // @ts-expect-error
   return fetch(url, { signal: abortController.signal })
-    .then((resp) => resp.json())
-    .then((featureCollection) => format.readFeatures(featureCollection))
-    .catch(() => []);
+    .then((resp) => {
+      return resp.json();
+    })
+    .then((featureCollection) => {
+      return format.readFeatures(featureCollection);
+    })
+    .catch(() => {
+      return [];
+    });
 };
 
 /**
@@ -57,7 +65,7 @@ const getFeatureInfoAtCoordinate = async (
   });
   abortControllers = {};
 
-  const flatLayers = getLayersAsFlatArray(layers);
+  const flatLayers: Layer[] = getLayersAsFlatArray(layers) as Layer[];
 
   const promises = flatLayers.map((layer) => {
     const map = layer.getMapInternal();
@@ -122,7 +130,9 @@ const getFeatureInfoAtCoordinate = async (
 
     const features = map?.getFeaturesAtPixel(pixel, {
       hitTolerance: layer.get('hitTolerance') || hitTolerance || 5,
-      layerFilter: (l: Layer) => l === layer,
+      layerFilter: (l: Layer) => {
+        return l === layer;
+      },
     }) as Feature[];
 
     return Promise.resolve({

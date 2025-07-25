@@ -399,66 +399,66 @@ class MaplibreStyleLayer extends Layer {
     }
   }
 
-  /**
-   * Request feature information for a given coordinate.
-   * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
-   * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
-   * @deprecated Use getFeatureInfoAtCoordinate([layer], coordinate) from mobility-toolbox-ol package instead.
-   */
-  getFeatureInfoAtCoordinate(
-    coordinate: Coordinate,
-  ): Promise<LayerGetFeatureInfoResponse> {
-    deprecated(
-      `Deprecated. getFeatureInfoAtCoordinate([layer], coordinate) from ol package instead.`,
-    );
-    if (!this.maplibreLayer?.mapLibreMap) {
-      return Promise.resolve({ coordinate, features: [], layer: this });
-    }
-    const { mapLibreMap } = this.maplibreLayer;
+  // /**
+  //  * Request feature information for a given coordinate.
+  //  * @param {ol/coordinate~Coordinate} coordinate Coordinate to request the information at.
+  //  * @return {Promise<FeatureInfo>} Promise with features, layer and coordinate.
+  //  * @deprecated Use getFeatureInfoAtCoordinate([layer], coordinate) from mobility-toolbox-ol package instead.
+  //  */
+  // getFeatureInfoAtCoordinate(
+  //   coordinate: Coordinate,
+  // ): Promise<LayerGetFeatureInfoResponse> {
+  //   deprecated(
+  //     `Deprecated. getFeatureInfoAtCoordinate([layer], coordinate) from ol package instead.`,
+  //   );
+  //   if (!this.maplibreLayer?.mapLibreMap) {
+  //     return Promise.resolve({ coordinate, features: [], layer: this });
+  //   }
+  //   const { mapLibreMap } = this.maplibreLayer;
 
-    // Ignore the getFeatureInfo until the Maplibre map is loaded
-    if (!mapLibreMap.isStyleLoaded()) {
-      return Promise.resolve({ coordinate, features: [], layer: this });
-    }
+  //   // Ignore the getFeatureInfo until the Maplibre map is loaded
+  //   if (!mapLibreMap.isStyleLoaded()) {
+  //     return Promise.resolve({ coordinate, features: [], layer: this });
+  //   }
 
-    // We query features only on style layers used by this layer.
-    let layers = this.layers || [];
+  //   // We query features only on style layers used by this layer.
+  //   let layers = this.layers || [];
 
-    if (this.layersFilter) {
-      layers = mapLibreMap.getStyle().layers.filter(this.layersFilter);
-    }
+  //   if (this.layersFilter) {
+  //     layers = mapLibreMap.getStyle().layers.filter(this.layersFilter);
+  //   }
 
-    if (this.queryRenderedLayersFilter) {
-      layers = mapLibreMap
-        .getStyle()
-        .layers.filter(this.queryRenderedLayersFilter);
-    }
+  //   if (this.queryRenderedLayersFilter) {
+  //     layers = mapLibreMap
+  //       .getStyle()
+  //       .layers.filter(this.queryRenderedLayersFilter);
+  //   }
 
-    return Promise.resolve({
-      coordinate,
-      features: [],
-      layer: this,
-    });
+  //   return Promise.resolve({
+  //     coordinate,
+  //     features: [],
+  //     layer: this,
+  //   });
 
-    // this.maplibreLayer
-    //   .getFeatureInfoAtCoordinate(coordinate, {
-    //     layers: layers.map((layer) => layer && layer.id),
-    //     validate: false,
-    //   })
-    //   .then((featureInfo: LayerGetFeatureInfoResponse) => {
-    //     const features: Feature[] = featureInfo.features.filter(
-    //       (feature: Feature) => {
-    //         // @ts-expect-error
-    //         return this.featureInfoFilter(
-    //           feature,
-    //           this.map?.getView().getResolution(),
-    //         ) as Feature[];
-    //       },
-    //     );
-    //     this.highlight(features);
-    //     return { ...featureInfo, features, layer: this };
-    //   });
-  }
+  //   // this.maplibreLayer
+  //   //   .getFeatureInfoAtCoordinate(coordinate, {
+  //   //     layers: layers.map((layer) => layer && layer.id),
+  //   //     validate: false,
+  //   //   })
+  //   //   .then((featureInfo: LayerGetFeatureInfoResponse) => {
+  //   //     const features: Feature[] = featureInfo.features.filter(
+  //   //       (feature: Feature) => {
+  //   //         // @ts-expect-error
+  //   //         return this.featureInfoFilter(
+  //   //           feature,
+  //   //           this.map?.getView().getResolution(),
+  //   //         ) as Feature[];
+  //   //       },
+  //   //     );
+  //   //     this.highlight(features);
+  //   //     return { ...featureInfo, features, layer: this };
+  //   //   });
+  // }
 
   /**
    * Highlight a list of features.
