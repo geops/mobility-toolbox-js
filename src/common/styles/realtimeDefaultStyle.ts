@@ -1,3 +1,5 @@
+import createCanvas from '../utils/createCanvas';
+
 import type {
   AnyCanvasContext,
   RealtimeStyleFunction,
@@ -6,8 +8,6 @@ import type {
   StyleCache,
   ViewState,
 } from '../../types';
-
-import createCanvas from '../utils/createCanvas';
 
 const cacheDelayBg: StyleCache = {};
 
@@ -254,7 +254,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   const cancelled = state === 'JOURNEY_CANCELLED';
 
   if (!type) {
-    type = 'Rail';
+    type = 'rail';
   }
 
   if (!name) {
