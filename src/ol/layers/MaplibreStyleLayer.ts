@@ -516,7 +516,7 @@ class MaplibreStyleLayer extends Layer {
     if (mapLibreMap) {
       this.layers.forEach((styleLayer) => {
         const { id } = styleLayer;
-        if (id && mapLibreMap.getLayer(id)) {
+        if (id && mapLibreMap?.getLayer(id)) {
           mapLibreMap.removeLayer(id);
         }
       });
