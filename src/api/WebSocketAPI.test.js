@@ -315,7 +315,7 @@ describe('WebSocketAPI', () => {
       expect(client.subscriptions[0].cb).toBe(cb);
       expect(client.subscriptions[0].errorCb).toBe(errorCb);
       expect(client.subscriptions[0].quiet).toBe(true);
-      expect(client.send).toBeCalledTimes(0);
+      expect(client.send).toHaveBeenCalledTimes(0);
       client.send.mockRestore();
     });
   });
@@ -363,7 +363,7 @@ describe('WebSocketAPI', () => {
       client.subscribe(params, cb2);
       client.subscribe(params2, cb2);
       expect(client.subscriptions.length).toBe(3);
-      expect(client.websocket.removeEventListener).toBeCalledTimes(2);
+      expect(client.websocket.removeEventListener).toHaveBeenCalledTimes(2);
       expect(
         client.websocket.addEventListener.mock.calls.filter((c) => {
           return c[0] === 'message';
