@@ -223,7 +223,7 @@ class MaplibreLayer extends MapLibreLayer {
    */
   clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
     return new MaplibreLayer({
-      ...(this.get('options') || {}),
+      ...((this.get('options') as MaplibreLayerOptions) || {}),
       ...(newOptions || {}),
     });
   }

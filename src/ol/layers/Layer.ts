@@ -61,7 +61,7 @@ class Layer extends OLLayer {
 
   clone(newOptions: MobilityLayerOptions): Layer {
     return new Layer({
-      ...(this.get('options') || {}),
+      ...((this.get('options') as MobilityLayerOptions) || {}),
       ...(newOptions || {}),
     });
   }

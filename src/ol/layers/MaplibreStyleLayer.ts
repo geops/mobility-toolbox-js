@@ -3,19 +3,16 @@ import { Layer } from 'ol/layer';
 import { unByKey } from 'ol/Observable';
 import { Source } from 'ol/source';
 
-import { ol } from '../..';
 import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
 import MaplibreStyleLayerRenderer from '../renderers/MaplibreStyleLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
 import type { AddLayerObject, FeatureState } from 'maplibre-gl';
 import type { Feature, Map } from 'ol';
-import type { Coordinate } from 'ol/coordinate';
 import type { EventsKey } from 'ol/events';
 import type { ObjectEvent } from 'ol/Object';
 
 import type { FilterFunction } from '../../common/typedefs';
-import type { LayerGetFeatureInfoResponse } from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 import type { MaplibreLayerOptions } from './MaplibreLayer';
@@ -36,6 +33,7 @@ if (
   new URLSearchParams(window.location.search).get('deprecated')
 ) {
   deprecated = debounce((...messages: (object | string)[]) => {
+    // eslint-disable-next-line no-console
     console.warn(...messages);
   }, 1000);
 }
@@ -68,8 +66,8 @@ class MaplibreStyleLayer extends Layer {
 
   selectedFeatures: Feature[] = [];
 
-  get beforeId(): string {
-    return this.get('beforeId');
+  get beforeId(): string | undefined {
+    return this.get('beforeId') as string | undefined;
   }
 
   set beforeId(newValue: string | undefined) {
@@ -77,7 +75,7 @@ class MaplibreStyleLayer extends Layer {
   }
 
   get layers(): maplibregl.AddLayerObject[] {
-    return this.get('layers');
+    return (this.get('layers') as maplibregl.AddLayerObject[]) || [];
   }
 
   set layers(newValue: maplibregl.AddLayerObject[]) {
@@ -85,7 +83,9 @@ class MaplibreStyleLayer extends Layer {
   }
 
   get layersFilter(): (layer: maplibregl.LayerSpecification) => boolean {
-    return this.get('layersFilter');
+    return this.get('layersFilter') as (
+      layer: maplibregl.LayerSpecification,
+    ) => boolean;
   }
 
   set layersFilter(
@@ -99,21 +99,23 @@ class MaplibreStyleLayer extends Layer {
    */
   get mapboxLayer(): MaplibreLayer | undefined {
     deprecated('Deprecated. Use maplibreLayer instead.');
-    return this.get('maplibreLayer');
+    return this.get('maplibreLayer') as MaplibreLayer | undefined;
   }
 
-  get maplibreLayer(): MaplibreLayer {
-    return this.get('maplibreLayer');
+  get maplibreLayer(): MaplibreLayer | undefined {
+    return this.get('maplibreLayer') as MaplibreLayer | undefined;
   }
 
-  set maplibreLayer(newValue: MaplibreLayer) {
+  set maplibreLayer(newValue: MaplibreLayer | undefined) {
     this.set('maplibreLayer', newValue);
   }
 
   get queryRenderedLayersFilter(): (
     layer: maplibregl.LayerSpecification,
   ) => boolean {
-    return this.get('queryRenderedLayersFilter');
+    return this.get('queryRenderedLayersFilter') as (
+      layer: maplibregl.LayerSpecification,
+    ) => boolean;
   }
 
   set queryRenderedLayersFilter(
@@ -123,7 +125,10 @@ class MaplibreStyleLayer extends Layer {
   }
 
   get sources(): Record<string, maplibregl.SourceSpecification> {
-    return this.get('sources');
+    return this.get('sources') as Record<
+      string,
+      maplibregl.SourceSpecification
+    >;
   }
 
   set sources(newValue: Record<string, maplibregl.SourceSpecification>) {
@@ -195,17 +200,22 @@ class MaplibreStyleLayer extends Layer {
       );
       // @ts-expect-error - mapboxLayer is deprecated
       options.maplibreLayer = options.mapboxLayer;
-
       delete options.mapboxLayer;
+    }
+
+    if (options.styleLayer) {
+      deprecated(
+        'options.styleLayer is deprecated. Use options.layers instead.',
+      );
+      options.layers = [options.styleLayer] as AddLayerObject[];
+      delete options.styleLayer;
     }
 
     if (options.styleLayers) {
       deprecated(
         'options.styleLayers is deprecated. Use options.layers instead.',
       );
-
       options.layers = options.styleLayers as AddLayerObject[];
-
       delete options.styleLayers;
     }
 
@@ -213,9 +223,7 @@ class MaplibreStyleLayer extends Layer {
       deprecated(
         'options.styleLayersFilter is deprecated. Use options.layersFilter instead.',
       );
-
       options.layersFilter = options.styleLayersFilter as FilterFunction;
-
       delete options.styleLayersFilter;
     }
 
@@ -249,7 +257,7 @@ class MaplibreStyleLayer extends Layer {
     if (mapLibreMap) {
       this.layers.forEach((layer) => {
         // @ts-expect-error  source is optional but exists in TS definition
-        const { id, source } = layer;
+        const { id, source }: { id: string; source?: string } = layer;
         if (
           (!source || (source && mapLibreMap.getSource(source))) &&
           id &&
@@ -334,7 +342,8 @@ class MaplibreStyleLayer extends Layer {
         if (mapLibreMap.isStyleLoaded()) {
           this.onLoad();
         } else {
-          mapLibreMap.once('load', this.onLoad);
+          // eslint-disable-next-line @typescript-eslint/unbound-method
+          void mapLibreMap.once('load', this.onLoad);
         }
       }
     }
@@ -360,10 +369,11 @@ class MaplibreStyleLayer extends Layer {
       }),
 
       // When the style changes we wait that it is loaded to relaunch the onLoad
-      this.maplibreLayer.on('propertychange', (evt) => {
+      this.maplibreLayer.on('propertychange', (evt: ObjectEvent) => {
         if (evt.key === 'style') {
-          evt.target.maplibreMap.once('styledata', () => {
-            evt.target.maplibreMap.once('idle', () => {
+          const mbMap = (evt.target as MaplibreLayer).mapLibreMap;
+          void mbMap?.once('styledata', () => {
+            void mbMap?.once('idle', () => {
               this.onLoad();
             });
           });
@@ -380,7 +390,10 @@ class MaplibreStyleLayer extends Layer {
    * @public
    */
   clone(newOptions: MaplibreStyleLayerOptions): MaplibreStyleLayer {
-    return new MaplibreStyleLayer({ ...this.get('options'), ...newOptions });
+    return new MaplibreStyleLayer({
+      ...((this.get('options') as MaplibreStyleLayerOptions) || {}),
+      ...(newOptions || {}),
+    });
   }
 
   createRenderer() {
@@ -394,6 +407,7 @@ class MaplibreStyleLayer extends Layer {
   detachFromMap() {
     unByKey(this.olEventsKeys);
     if (this.maplibreLayer?.mapLibreMap) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.maplibreLayer.mapLibreMap.off('load', this.onLoad);
       this.removeLayers();
       this.removeSources();
@@ -584,8 +598,12 @@ class MaplibreStyleLayer extends Layer {
     const mapLibreMap = this.maplibreLayer.mapLibreMap;
 
     features.forEach((feature: Feature) => {
-      const { source, sourceLayer } =
-        feature.get(VECTOR_TILE_FEATURE_PROPERTY) || {};
+      const { source, sourceLayer } = (feature.get(
+        VECTOR_TILE_FEATURE_PROPERTY,
+      ) || {}) as {
+        source?: string;
+        sourceLayer?: string;
+      };
       if ((!source && !sourceLayer) || !feature.getId()) {
         if (!feature.getId()) {
           deprecated(
@@ -596,14 +614,21 @@ class MaplibreStyleLayer extends Layer {
         return;
       }
 
-      mapLibreMap.setFeatureState(
-        {
-          id: feature.getId(),
-          source,
-          sourceLayer,
-        },
-        state,
-      );
+      if (source) {
+        mapLibreMap.setFeatureState(
+          {
+            id: feature.getId(),
+            source,
+            sourceLayer,
+          },
+          state,
+        );
+      } else {
+        deprecated(
+          'No source found for the feature. To use the feature state functionnality, a source must be defined.',
+          feature.getProperties(),
+        );
+      }
     });
   }
 
