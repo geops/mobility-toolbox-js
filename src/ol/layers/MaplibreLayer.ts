@@ -1,21 +1,21 @@
 import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer/lib';
 import debounce from 'lodash.debounce';
-import { EventsKey } from 'ol/events';
-import Map from 'ol/Map';
-import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 
 import { getUrlWithParams } from '../../common/utils';
 import MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
-import { MobilityLayerOptions } from './Layer';
-
 import type {
   MapLibreLayerOptions,
   MapLibreOptions,
 } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
 import type { QueryRenderedFeaturesOptions } from 'maplibre-gl';
+import type { EventsKey } from 'ol/events';
+import type Map from 'ol/Map';
+import type { ObjectEvent } from 'ol/Object';
+
+import type { MobilityLayerOptions } from './Layer';
 
 export type MaplibreLayerOptions = {
   apiKey?: string;
@@ -38,13 +38,12 @@ const buildStyleUrl = (
   }).toString();
 };
 
-let deprecated: (message: string) => void = () => {};
+export let deprecated: (message: string) => void = () => {};
 if (
   typeof window !== 'undefined' &&
   new URLSearchParams(window.location.search).get('deprecated')
 ) {
   deprecated = debounce((message: string) => {
-    // eslint-disable-next-line no-console
     console.warn(message);
   }, 1000);
 }
@@ -152,6 +151,13 @@ class MaplibreLayer extends MapLibreLayer {
    * @param {string} [options.url="https://maps.geops.io"] The [geOps Maps API](https://developer.geops.io/apis/maps) url.
    */
   constructor(options: MaplibreLayerOptions) {
+    // Backward compatibility
+    if (options.mapOptions && !options.mapLibreOptions) {
+      deprecated(
+        'MaplibreLayer.mapOptions is deprecated. Use mapLibreOptions instead.',
+      );
+      options.mapLibreOptions = options.mapOptions;
+    }
     const newOptions = {
       apiKeyName: 'key',
       style: 'travic_v2',
@@ -217,7 +223,7 @@ class MaplibreLayer extends MapLibreLayer {
    */
   clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
     return new MaplibreLayer({
-      ...(this.get('options') || {}),
+      ...((this.get('options') as MaplibreLayerOptions) || {}),
       ...(newOptions || {}),
     });
   }
@@ -278,7 +284,6 @@ class MaplibreLayer extends MapLibreLayer {
     try {
       this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
     } catch (e) {
-      // eslint-disable-next-line no-console
       console.error('Error while updating MaplibreMap', e);
     }
   }

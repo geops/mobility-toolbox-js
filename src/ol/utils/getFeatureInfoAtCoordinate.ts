@@ -1,12 +1,16 @@
-import { Feature, getUid } from 'ol';
+import { getUid } from 'ol';
 import GeoJSON from 'ol/format/GeoJSON';
-import { ImageWMS, TileWMS } from 'ol/source';
 
 import { getLayersAsFlatArray } from '../../common';
-import { LayerGetFeatureInfoResponse } from '../../types';
+import { FeatureInfo } from '../../common/typedefs';
 
+import type { Feature } from 'ol';
 import type { Coordinate } from 'ol/coordinate';
 import type { Layer } from 'ol/layer';
+import type BaseLayer from 'ol/layer/Base';
+import type { ImageWMS, TileWMS } from 'ol/source';
+
+import type { LayerGetFeatureInfoResponse } from '../../types';
 
 /**
  * @private
@@ -17,7 +21,7 @@ const format = new GeoJSON();
  * @private
  */
 const getFeaturesFromWMS = (
-  source: TileWMS | ImageWMS,
+  source: ImageWMS | TileWMS,
   options: any,
   abortController: AbortController,
 ): Promise<LayerGetFeatureInfoResponse> => {
@@ -31,11 +35,17 @@ const getFeaturesFromWMS = (
     });
   }
 
-  // @ts-expect-error
+  // @ts-expect-error url can be undefined
   return fetch(url, { signal: abortController.signal })
-    .then((resp) => resp.json())
-    .then((featureCollection) => format.readFeatures(featureCollection))
-    .catch(() => []);
+    .then((resp) => {
+      return resp.json();
+    })
+    .then((featureCollection) => {
+      return format.readFeatures(featureCollection);
+    })
+    .catch(() => {
+      return [];
+    });
 };
 
 /**
@@ -44,12 +54,21 @@ const getFeaturesFromWMS = (
 let abortControllers: Record<string, AbortController | undefined> = {};
 
 /**
+ * Fetches feature information at a given coordinate from the provided layers.
+ * It supports WMS sources and MapLibre layers and custom layer via the method `layer.getFeatureInfoAtCoordinate`.
+ *
+ * @param {Coordinate} coordinate - The coordinate to query for feature information.
+ * @param {ol/layer/BaseLayer~BaseLayer[]} layers - The layers to query for feature information.
+ * @param {number} hitTolerance - The pixel tolerance for feature selection.
+ * @param {boolean} ignoreLayerMethod - If true, it ignores the `getFeatureInfoAtCoordinate` method on layers.
+ * @returns {LayerGetFeatureInfoResponse[]} A promise that resolves to an array of feature information responses.
  * @private
  */
 const getFeatureInfoAtCoordinate = async (
   coordinate: Coordinate,
-  layers: Layer[],
+  layers: BaseLayer[],
   hitTolerance = 5,
+  ignoreLayerMethod = false,
 ): Promise<LayerGetFeatureInfoResponse[]> => {
   // Kill all previous requests
   Object.values(abortControllers).forEach((abortController) => {
@@ -57,20 +76,30 @@ const getFeatureInfoAtCoordinate = async (
   });
   abortControllers = {};
 
-  const flatLayers = getLayersAsFlatArray(layers);
+  const flatLayers: BaseLayer[] = getLayersAsFlatArray(layers);
 
-  const promises = flatLayers.map((layer) => {
-    const map = layer.getMapInternal();
+  const promises = flatLayers.map(async (baseLayer: BaseLayer) => {
+    const map = (baseLayer as Layer).getMapInternal();
     const projection = map?.getView()?.getProjection()?.getCode();
-    const emptyResponse = { coordinate, features: [], layer };
+    const emptyResponse = {
+      coordinate,
+      features: [],
+      layer: baseLayer,
+    } as LayerGetFeatureInfoResponse;
 
     if (!projection) {
       return Promise.resolve(emptyResponse);
     }
+    const layer = baseLayer as Layer;
 
     // For backward compatibility
-    if (layer.getFeatureInfoAtCoordinate) {
-      return layer.getFeatureInfoAtCoordinate(coordinate);
+    // @ts-expect-error getFeatureInfoAtCoordinate is deprecated
+    if (!ignoreLayerMethod && layer.getFeatureInfoAtCoordinate) {
+      // @ts-expect-error getFeatureInfoAtCoordinate is deprecated
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      return layer.getFeatureInfoAtCoordinate(
+        coordinate,
+      ) as Promise<LayerGetFeatureInfoResponse>;
     }
 
     // WMS sources
@@ -84,33 +113,27 @@ const getFeatureInfoAtCoordinate = async (
       abortControllers[id] = new AbortController();
 
       const resolution = map?.getView()?.getResolution();
-      return getFeaturesFromWMS(
+      const features = await getFeaturesFromWMS(
         source,
         {
           coordinate,
           params: {
             info_format: 'application/json',
-            query_layers: source.getParams().layers,
+            query_layers: (source.getParams() as { layers: string }).layers,
           },
           projection,
           resolution,
         },
         abortControllers[id],
-      )
-        .then((features) => {
-          return {
-            coordinate,
-            features,
-            layer,
-          };
-        })
-        .catch(() => {
-          return {
-            coordinate,
-            features: [],
-            layer,
-          };
-        });
+      ).catch(() => {
+        return [];
+      });
+      const featureInfoResponse = {
+        coordinate,
+        features,
+        layer,
+      } as LayerGetFeatureInfoResponse;
+      return Promise.resolve(featureInfoResponse);
     }
 
     // Other layers
@@ -121,16 +144,19 @@ const getFeatureInfoAtCoordinate = async (
     }
 
     const features = map?.getFeaturesAtPixel(pixel, {
-      hitTolerance: layer.get('hitTolerance') || hitTolerance || 5,
-      layerFilter: (l: Layer) => l === layer,
+      hitTolerance: (layer.get('hitTolerance') as number) || hitTolerance || 5,
+      layerFilter: (l: Layer) => {
+        return l === layer;
+      },
     }) as Feature[];
 
     return Promise.resolve({
       coordinate,
       features,
       layer,
-    });
+    } as LayerGetFeatureInfoResponse);
   });
+
   return Promise.all(promises);
 };
 

@@ -363,6 +363,7 @@ class RoutingControl extends Control {
     }
     this.removeListeners();
 
+    // @ts-expect-error improve ts types
     this.onMapClickKey = this.getMap()?.on('singleclick', this.onMapClick);
   }
 
@@ -754,7 +755,7 @@ class RoutingControl extends Control {
    *   If an existing viaPoint is clicked removes the clicked viaPoint.
    * @private
    */
-  onMapClick(evt: MapBrowserEvent<MouseEvent>) {
+  onMapClick(evt: MapBrowserEvent<PointerEvent>) {
     const feats = (evt.target as Map).getFeaturesAtPixel(evt.pixel, {
       hitTolerance: 5,
       layerFilter: (layer) => {

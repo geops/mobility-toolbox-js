@@ -1,8 +1,9 @@
 import { MapLibreLayerRenderer } from '@geoblocks/ol-maplibre-layer/lib';
-import { MapLibreLayerTranslateZoomFunction } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
-import { FrameState } from 'ol/Map';
 
-import { MaplibreLayer } from '../layers';
+import type { MapLibreLayerTranslateZoomFunction } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
+import type { FrameState } from 'ol/Map';
+
+import type { MaplibreLayer } from '../layers';
 
 // /**
 //  * This class is usea renderer for Maplibre Layer to be able to use the native ol

@@ -34,7 +34,7 @@ export interface paths {
            *    the next station is performed. Instead the route will forcefully
            *    traverse the specified point.
            *
-           * Note on mot's "foot" and "car":
+           * Note on mot "foot":
            *    Some features might not be available, such as "line-from",
            *    "line-to", because they dont apply to those means of transport.
            *
@@ -62,8 +62,7 @@ export interface paths {
             | 'subway'
             | 'gondola'
             | 'funicular'
-            | 'ferry'
-            | 'car';
+            | 'ferry';
           /** Only for mot=rail. Default is a detailed network based on OpenStreetMap. gen1 to gen4 provide rail networks with increasing levels of generalization */
           graph?: 'gen1' | 'gen2' | 'gen3' | 'gen4';
           /** A line name that should be preferred */

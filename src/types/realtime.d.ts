@@ -317,7 +317,7 @@ export interface RealtimeTrajectoryProperties {
   train_id?: RealtimeTrainId;
   train_number?: number;
   transmitting_vehicle?: string;
-  type: RealtimeMots;
+  type: RealtimeMot;
 }
 
 export interface RealtimeTrajectoryResponse {

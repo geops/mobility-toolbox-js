@@ -1,4 +1,4 @@
-import { RealtimeTrajectoryResponse } from '../types';
+import type { RealtimeTrajectoryResponse } from '../types';
 
 export declare interface WebSocketAPIMessageEventData<T> {
   // | RealtimeFullTrajectory;
@@ -262,6 +262,7 @@ class WebSocketAPI {
       // @ts-expect-error : Spread error
       return (...args) => {
         // @ts-expect-error : Spread error
+
         callback(...args);
         const index = this.requests.findIndex((request) => {
           return requestString === request.requestString && cb === request.cb;
@@ -330,6 +331,7 @@ class WebSocketAPI {
       try {
         data = JSON.parse(evt.data);
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error('WebSocket: unable to parse JSON data', err, evt.data);
         return;
       }

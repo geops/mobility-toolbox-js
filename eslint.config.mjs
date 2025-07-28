@@ -8,6 +8,8 @@ export default [
       'dev.js',
       'doc/**/*',
       './eslint.config.mjs',
+      '*.test.js',
+      '*.d.ts',
     ],
   },
   ...flat,
@@ -16,6 +18,20 @@ export default [
       parserOptions: {
         project: './tsconfig.json',
       },
+    },
+  },
+  {
+    rules: {
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      'mocha/no-setup-in-describe': 'off',
+      'mocha/consistent-spacing-between-blocks': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      'mocha/no-pending-tests': 'off',
     },
   },
 ];

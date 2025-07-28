@@ -1,6 +1,6 @@
-import type { FeatureLike } from 'ol/Feature';
-
 import { Circle, Fill, Stroke, Style } from 'ol/style';
+
+import type { FeatureLike } from 'ol/Feature';
 
 const borderStyle = new Style({
   image: new Circle({
@@ -25,8 +25,6 @@ const fullTrajectorystyle = (
 
   const type = feature.get('type');
   let stroke = feature.get('stroke');
-
-  console.log(feature.getProperties());
 
   if (stroke && stroke[0] !== '#') {
     stroke = `#${stroke}`;

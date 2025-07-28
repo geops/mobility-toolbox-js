@@ -17,19 +17,21 @@ export const getUTCDateString = (now = new Date()): string => {
  * ex: 09:05:01.123
  * @private
  */
-export const getUTCTimeString = (date: Date): string =>
-  [
+export const getUTCTimeString = (date: Date): string => {
+  return [
     date.getUTCHours(),
     date.getUTCMinutes(),
     `${date.getUTCSeconds()}.${date.getUTCMilliseconds()}`,
   ].join(':');
+};
 
 /**
  * Returns a string representation of a number, with a zero if the number is lower than 10.
  * @private
  */
-export const pad = (integer: number): string =>
-  integer < 10 ? `0${integer}` : `${integer}`;
+export const pad = (integer: number): string => {
+  return integer < 10 ? `0${integer}` : `${integer}`;
+};
 
 /**
  * Returns a 'hh:mm' string from a time in ms.

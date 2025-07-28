@@ -38,6 +38,7 @@
  * @property {number[2]} coord Coordinate of the vehicle position in Mercator .
  * @property {number!} rotation  An angle in radians representing the direction (from the true north) towards which the vehicle is facing.
  */
+
 // These lines is to block TypeScript to add "use strict;" in the outputed file.
 const dummy = () => {};
 export default dummy;

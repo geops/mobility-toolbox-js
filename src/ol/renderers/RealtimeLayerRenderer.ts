@@ -1,12 +1,13 @@
-import { Feature } from 'ol';
-import { Coordinate } from 'ol/coordinate';
 import GeoJSON from 'ol/format/GeoJSON';
-import { Geometry } from 'ol/geom';
-import { FrameState } from 'ol/Map';
-import { Pixel } from 'ol/pixel';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
-import { FeatureCallback } from 'ol/renderer/vector';
 import { composeCssTransform } from 'ol/transform';
+
+import type { Feature } from 'ol';
+import type { Coordinate } from 'ol/coordinate';
+import type { Geometry } from 'ol/geom';
+import type { FrameState } from 'ol/Map';
+import type { Pixel } from 'ol/pixel';
+import type { FeatureCallback } from 'ol/renderer/vector';
 
 import type RealtimeLayer from '../layers/RealtimeLayer';
 

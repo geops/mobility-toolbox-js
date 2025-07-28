@@ -1,8 +1,10 @@
-/* eslint-disable no-param-reassign */
-import { Pixel } from 'ol/pixel';
 import { apply, compose, create } from 'ol/transform';
 
-import {
+import getVehiclePosition from './getVehiclePosition';
+
+import type { Pixel } from 'ol/pixel';
+
+import type {
   AnyCanvas,
   AnyCanvasContext,
   RealtimeRenderState,
@@ -11,8 +13,6 @@ import {
   RealtimeTrajectories,
   ViewState,
 } from '../../types';
-
-import getVehiclePosition from './getVehiclePosition';
 
 /**
  * Draw all the trajectories available in a canvas.
@@ -54,10 +54,13 @@ const renderTrajectories = (
 
   const {
     filter,
-    getScreenPixel = (pixel: Pixel, viewStat: ViewState): Pixel =>
-      (viewStat.zoom || 0) < 12
-        ? pixel.map((coord) => Math.floor(coord))
-        : pixel,
+    getScreenPixel = (pixel: Pixel, viewStat: ViewState): Pixel => {
+      return (viewStat.zoom || 0) < 12
+        ? pixel.map((coord) => {
+            return Math.floor(coord);
+          })
+        : pixel;
+    },
     hoverVehicleId,
     noInterpolate = false,
     selectedVehicleId,
@@ -107,7 +110,6 @@ const renderTrajectories = (
 
     // Filter out trajectories
     if (filter && !filter(trajectory)) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -126,17 +128,17 @@ const renderTrajectories = (
     trajectories[i].properties.rotation = rotationIcon;
 
     if (!coord) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
     let px = apply(coordinateToPixelTransform, [...coord]);
     if (!px) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
-    px = px.map((p) => p * pixelRatio);
+    px = px.map((p) => {
+      return p * pixelRatio;
+    });
 
     if (
       px[0] < 0 ||
@@ -144,13 +146,11 @@ const renderTrajectories = (
       px[1] < 0 ||
       px[1] > canvas.height
     ) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 
     const vehicleImg = style(trajectory, viewState, options);
     if (!vehicleImg) {
-      // eslint-disable-next-line no-continue
       continue;
     }
 

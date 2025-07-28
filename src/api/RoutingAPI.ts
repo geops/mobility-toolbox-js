@@ -1,5 +1,6 @@
-import { RoutingParameters, RoutingResponse } from '../types';
 import HttpAPI from './HttpAPI';
+
+import type { RoutingParameters, RoutingResponse } from '../types';
 
 export interface RoutingAPIOptions {
   apiKey?: string;
@@ -51,7 +52,7 @@ class RoutingAPI extends HttpAPI {
     params: RoutingParameters,
     config: RequestInit,
   ): Promise<RoutingResponse> {
-    return this.fetch('', params, config);
+    return this.fetch('', params as object, config);
   }
 }
 

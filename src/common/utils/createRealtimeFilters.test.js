@@ -2,29 +2,29 @@ import createRealtimeFilters from './createRealtimeFilters';
 
 const u1 = {
   properties: {
-    route_identifier: '001.000827.004:7',
-    operator: 'FoO',
     line: {
       name: 'U1',
     },
+    operator: 'FoO',
+    route_identifier: '001.000827.004:7',
   },
 };
 const ireta = {
   properties: {
-    routeIdentifier: '0022.000827.004:7',
-    tenant: 'BAR',
     line: {
       name: 'IRETA',
     },
+    routeIdentifier: '0022.000827.004:7',
+    tenant: 'BAR',
   },
 };
 const arb = {
   properties: {
-    route_identifier: '00333.000827.004:7',
-    operator: 'qux',
     line: {
       name: 'ARB',
     },
+    operator: 'qux',
+    route_identifier: '00333.000827.004:7',
   },
 };
 

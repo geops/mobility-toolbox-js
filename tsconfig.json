@@ -27,6 +27,7 @@
     "./node_modules/**/*",
     "./node_modules/*",
     "./__mocks__/maplibre-gl.js",
-    "ol"
+    "ol",
+    "*.test.js",
   ]
 }

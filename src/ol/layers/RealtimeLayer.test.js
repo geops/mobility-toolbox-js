@@ -8,6 +8,7 @@ import RealtimeLayer from './RealtimeLayer';
 // create a WS instance, listening on port 1234 on localhost
 let layer;
 let onClick;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let olMap;
 let server;
 
@@ -53,7 +54,9 @@ describe('RealtimeLayer', () => {
   });
 
   test('should use the sort function.', () => {
-    const fn = () => true;
+    const fn = () => {
+      return true;
+    };
     const laye = new RealtimeLayer({
       apiKey: 'apiKey',
       sort: fn,
@@ -64,7 +67,9 @@ describe('RealtimeLayer', () => {
   });
 
   test('should use filter function.', () => {
-    const fn = () => true;
+    const fn = () => {
+      return true;
+    };
     const laye = new RealtimeLayer({
       apiKey: 'apiKey',
       filter: fn, // reverse the array

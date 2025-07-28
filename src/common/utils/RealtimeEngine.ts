@@ -1,6 +1,3 @@
-import type { Coordinate } from 'ol/coordinate';
-
-import { FeatureCollection } from 'geojson';
 import debounce from 'lodash.debounce';
 import throttle from 'lodash.throttle';
 import { buffer, containsCoordinate, intersects } from 'ol/extent';
@@ -8,8 +5,16 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { fromLonLat } from 'ol/proj';
 
 import { RealtimeAPI, RealtimeModes } from '../../api';
-import { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
-import {
+import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
+
+import * as realtimeConfig from './realtimeConfig';
+import renderTrajectories from './renderTrajectories';
+
+import type { FeatureCollection } from 'geojson';
+import type { Coordinate } from 'ol/coordinate';
+
+import type { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
+import type {
   AnyCanvas,
   LayerGetFeatureInfoOptions,
   RealtimeBbox,
@@ -24,10 +29,7 @@ import {
   RealtimeTrajectory,
   ViewState,
 } from '../../types';
-import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
-import { FilterFunction, SortFunction } from '../typedefs';
-import * as realtimeConfig from './realtimeConfig';
-import renderTrajectories from './renderTrajectories';
+import type { FilterFunction, SortFunction } from '../typedefs';
 
 export interface RealtimeEngineOptions {
   api?: RealtimeAPI;
@@ -193,7 +195,11 @@ class RealtimeEngine {
 
     this.api = options.api || new RealtimeAPI(options);
     this.bboxParameters = options.bboxParameters;
-    this.canvas = options.canvas || document.createElement('canvas');
+    this.canvas =
+      options.canvas ||
+      (typeof document !== 'undefined'
+        ? document.createElement('canvas')
+        : undefined);
     this.debug = options.debug || false;
     this.filter = options.filter;
     this.hoverVehicleId = options.hoverVehicleId;

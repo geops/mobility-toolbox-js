@@ -26,28 +26,31 @@ class HttpAPI {
    */
   async fetch<T>(
     path: string,
-    params: object,
-    config: RequestInit,
+    params?: object,
+    config?: RequestInit,
   ): Promise<T> {
     if (!this.url) {
       throw new Error(`No url defined for request to ${this.url}/${path}`);
     }
 
-    if (!this.url && !this.apiKey && !this.url.includes('key=')) {
+    if (
+      !this.url &&
+      (!this.apiKey || this.apiKey === 'public') &&
+      !this.url.includes('key=')
+    ) {
       throw new Error(`No apiKey defined for request to ${this.url}`);
     }
 
-    // Clean requets parameters, removing undefined and null values.
-    const searchParams = params || {};
     const url = getUrlWithParams(`${this.url}${path || ''}`, {
-      key: this.apiKey,
-      ...searchParams,
+      key: !this.apiKey || this.apiKey === 'public' ? undefined : this.apiKey,
+      ...(params || {}),
     });
-    const response = await fetch(url.toString(), config);
-    const data = await response.json();
 
-    if (data.error) {
-      throw new Error(data.error as string);
+    const response = await fetch(url.toString(), config);
+    const data = (await response.json()) as { error?: string } | T;
+
+    if ((data as { error?: string }).error) {
+      throw new Error((data as { error?: string }).error);
     }
 
     return data as T;
