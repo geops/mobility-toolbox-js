@@ -18,13 +18,13 @@ if (
     console.warn(message);
   }, 1000);
 }
-const onChildrenChange = (layer: Layer, oldValue: Layer[]) => {
+const onChildrenChange = (obj: OLObject, oldValue: OLObject[]) => {
   // Set the parent property
   (oldValue || []).forEach((child) => {
     child.set('parent', undefined);
   });
-  ((layer.get('children') || []) as Layer[]).forEach((child: Layer) => {
-    child.set('parent', this);
+  ((obj.get('children') || []) as OLObject[]).forEach((child: OLObject) => {
+    child.set('parent', obj);
   });
 };
 
