@@ -11,7 +11,7 @@ const getUrlWithParams = (url: string, params: object): URL => {
   const searchParams = params || {};
   Object.entries(searchParams).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
-      newUrl.searchParams.set(key, value);
+      newUrl.searchParams.set(key, value as string);
     }
   });
 

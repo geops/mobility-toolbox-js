@@ -1,4 +1,4 @@
-import { AnyCanvas } from '../../types';
+import type { AnyCanvas } from '../../types';
 
 /**
  * This function try to create a canvas element and return it.

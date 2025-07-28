@@ -4,20 +4,20 @@
  */
 
 export interface paths {
-  "/export/notification/": {
+  '/export/notification/': {
     /**
      * This is a read-only alternative to the main notifications endpoint with
      * the same filters, plus `split_layers` and `filename` query parameters.
      */
-    get: operations["export_notification_list"];
+    get: operations['export_notification_list'];
     parameters: {};
   };
-  "/export/notification/{id}/": {
+  '/export/notification/{id}/': {
     /**
      * This is a read-only alternative to the main notifications endpoint with
      * the same filters, plus `split_layers` and `filename` query parameters.
      */
-    get: operations["export_notification_read"];
+    get: operations['export_notification_read'];
     parameters: {
       path: {
         /** A unique integer value identifying this notification. */
@@ -25,12 +25,12 @@ export interface paths {
       };
     };
   };
-  "/export/notification/{id}/preview/": {
+  '/export/notification/{id}/preview/': {
     /**
      * The `pk` may be the ID of an existing notification or `null` if it is a
      * new object.
      */
-    post: operations["export_notification_preview"];
+    post: operations['export_notification_preview'];
     parameters: {
       path: {
         /** A unique integer value identifying this notification. */
@@ -38,14 +38,14 @@ export interface paths {
       };
     };
   };
-  "/export/publication/": {
+  '/export/publication/': {
     /** Export publications as GeoJSON */
-    get: operations["export_publication_list"];
+    get: operations['export_publication_list'];
     parameters: {};
   };
-  "/export/publication/{id}/": {
+  '/export/publication/{id}/': {
     /** Export publications as GeoJSON */
-    get: operations["export_publication_read"];
+    get: operations['export_publication_read'];
     parameters: {
       path: {
         /** A unique integer value identifying this textual content. */
@@ -53,35 +53,35 @@ export interface paths {
       };
     };
   };
-  "/notification-category/": {
+  '/notification-category/': {
     /**
      * Usually you don't need to add new items here unless they appear in an
      * external source for the first time.
      */
-    get: operations["notification-category_list"];
+    get: operations['notification-category_list'];
     /**
      * Usually you don't need to add new items here unless they appear in an
      * external source for the first time.
      */
-    post: operations["notification-category_create"];
+    post: operations['notification-category_create'];
     parameters: {};
   };
-  "/notification/": {
+  '/notification/': {
     /** Notifications are the main data type for all relevant information */
-    get: operations["notification_list"];
+    get: operations['notification_list'];
     /** This is a special case because we need to clear all IDs from input. */
-    post: operations["notification_create"];
+    post: operations['notification_create'];
     parameters: {};
   };
-  "/notification/{id}/": {
+  '/notification/{id}/': {
     /** Notifications are the main data type for all relevant information */
-    get: operations["notification_read"];
+    get: operations['notification_read'];
     /** Notifications are the main data type for all relevant information */
-    put: operations["notification_update"];
+    put: operations['notification_update'];
     /** Notifications are the main data type for all relevant information */
-    delete: operations["notification_delete"];
+    delete: operations['notification_delete'];
     /** Notifications are the main data type for all relevant information */
-    patch: operations["notification_partial_update"];
+    patch: operations['notification_partial_update'];
     parameters: {
       path: {
         /** A unique integer value identifying this notification. */
@@ -89,9 +89,9 @@ export interface paths {
       };
     };
   };
-  "/notification/{id}/screenshot/": {
+  '/notification/{id}/screenshot/': {
     /** Notifications are the main data type for all relevant information */
-    get: operations["notification_screenshot"];
+    get: operations['notification_screenshot'];
     parameters: {
       path: {
         /** A unique integer value identifying this notification. */
@@ -99,9 +99,9 @@ export interface paths {
       };
     };
   };
-  "/notification/{id}/upload_image/": {
+  '/notification/{id}/upload_image/': {
     /** Notifications are the main data type for all relevant information */
-    post: operations["notification_upload_image"];
+    post: operations['notification_upload_image'];
     parameters: {
       path: {
         /** A unique integer value identifying this notification. */
@@ -109,12 +109,12 @@ export interface paths {
       };
     };
   };
-  "/publication-channel/": {
+  '/publication-channel/': {
     /**
      * Each channel has a list of graphs that it needs geometries for. The
      * topographic default graph is always expected implicitly.
      */
-    get: operations["publication-channel_list"];
+    get: operations['publication-channel_list'];
     parameters: {};
   };
 }
@@ -238,17 +238,17 @@ export interface definitions {
     id?: number;
     /** Category */
     category: string;
-    affected_time_intervals: definitions["RelatedAffectedTimeIntervals"][];
-    markers: definitions["MarkerExport"][];
-    publications?: definitions["RelatedPublication"][];
-    start_stop?: definitions["DeprecatedStopSerializer"];
-    end_stop?: definitions["DeprecatedStopSerializer"];
-    links?: definitions["RelatedLink"][];
+    affected_time_intervals: definitions['RelatedAffectedTimeIntervals'][];
+    markers: definitions['MarkerExport'][];
+    publications?: definitions['RelatedPublication'][];
+    start_stop?: definitions['DeprecatedStopSerializer'];
+    end_stop?: definitions['DeprecatedStopSerializer'];
+    links?: definitions['RelatedLink'][];
     /** Created by */
     created_by?: string;
     /** Updated by */
     updated_by?: string;
-    images?: definitions["ImageUpload"][];
+    images?: definitions['ImageUpload'][];
     /**
      * Created at
      * Format: date-time
@@ -316,10 +316,10 @@ export interface definitions {
   RelatedAffectedRouteExportProperties: {
     /** ID */
     id?: number;
-    affected_products?: definitions["RelatedAffectedProduct"][];
+    affected_products?: definitions['RelatedAffectedProduct'][];
     /** Disruption type */
     disruption_type: string;
-    stops?: definitions["RelatedAffectedRouteStop"][];
+    stops?: definitions['RelatedAffectedRouteStop'][];
     /** Graph */
     graph: string;
     /** Index */
@@ -331,27 +331,27 @@ export interface definitions {
      * @enum {string}
      */
     mot:
-      | "bus"
-      | "ferry"
-      | "gondola"
-      | "tram"
-      | "rail"
-      | "funicular"
-      | "cable_car"
-      | "subway";
+      | 'bus'
+      | 'ferry'
+      | 'gondola'
+      | 'tram'
+      | 'rail'
+      | 'funicular'
+      | 'cable_car'
+      | 'subway';
   };
   AffectedRoutesExportFeature: {
     /** Type */
     type?: string;
     /** Geometry */
     geometry?: string;
-    properties: definitions["RelatedAffectedRouteExportProperties"];
+    properties: definitions['RelatedAffectedRouteExportProperties'];
   };
   NotificationGeoJSON: {
     /** Type */
     type?: string;
-    properties: definitions["NotificationProperties"];
-    features?: definitions["AffectedRoutesExportFeature"][];
+    properties: definitions['NotificationProperties'];
+    features?: definitions['AffectedRoutesExportFeature'][];
   };
   RelatedAffectedRouteGeom: {
     /** Id */
@@ -364,11 +364,11 @@ export interface definitions {
   RelatedAffectedRoute: {
     /** ID */
     id?: number;
-    affected_products?: definitions["RelatedAffectedProduct"][];
+    affected_products?: definitions['RelatedAffectedProduct'][];
     /** Disruption type */
     disruption_type: string;
-    geoms?: definitions["RelatedAffectedRouteGeom"][];
-    stops?: definitions["RelatedAffectedRouteStop"][];
+    geoms?: definitions['RelatedAffectedRouteGeom'][];
+    stops?: definitions['RelatedAffectedRouteStop'][];
     /** Index */
     index?: number;
     /** Is icon ref */
@@ -378,14 +378,14 @@ export interface definitions {
      * @enum {string}
      */
     mot:
-      | "bus"
-      | "ferry"
-      | "gondola"
-      | "tram"
-      | "rail"
-      | "funicular"
-      | "cable_car"
-      | "subway";
+      | 'bus'
+      | 'ferry'
+      | 'gondola'
+      | 'tram'
+      | 'rail'
+      | 'funicular'
+      | 'cable_car'
+      | 'subway';
   };
   RelatedMarker: {
     /** Id */
@@ -402,18 +402,18 @@ export interface definitions {
     id?: number;
     /** Category */
     category: string;
-    affected_routes?: definitions["RelatedAffectedRoute"][];
-    affected_time_intervals: definitions["RelatedAffectedTimeIntervals"][];
-    markers?: definitions["RelatedMarker"][];
-    publications?: definitions["RelatedPublication"][];
-    start_stop?: definitions["DeprecatedStopSerializer"];
-    end_stop?: definitions["DeprecatedStopSerializer"];
-    links?: definitions["RelatedLink"][];
+    affected_routes?: definitions['RelatedAffectedRoute'][];
+    affected_time_intervals: definitions['RelatedAffectedTimeIntervals'][];
+    markers?: definitions['RelatedMarker'][];
+    publications?: definitions['RelatedPublication'][];
+    start_stop?: definitions['DeprecatedStopSerializer'];
+    end_stop?: definitions['DeprecatedStopSerializer'];
+    links?: definitions['RelatedLink'][];
     /** Created by */
     created_by?: string;
     /** Updated by */
     updated_by?: string;
-    images?: definitions["ImageUpload"][];
+    images?: definitions['ImageUpload'][];
     /**
      * Created at
      * Format: date-time
@@ -545,10 +545,10 @@ export interface definitions {
   FeatureCollectionProperties: {
     /** Id */
     id: number;
-    affected_time_intervals: definitions["AffectedTimeIntervals"][];
-    publications?: definitions["PublicationWindow"][];
-    links?: definitions["Link"][];
-    images?: definitions["Image"][];
+    affected_time_intervals: definitions['AffectedTimeIntervals'][];
+    publications?: definitions['PublicationWindow'][];
+    links?: definitions['Link'][];
+    images?: definitions['Image'][];
     /**
      * Sso config
      * Format: slug
@@ -587,12 +587,12 @@ export interface definitions {
      * @default
      * @enum {string}
      */
-    size?: "S" | "M" | "L";
+    size?: 'S' | 'M' | 'L';
     /**
      * Default language
      * @enum {string}
      */
-    default_language: "de" | "fr" | "it" | "en";
+    default_language: 'de' | 'fr' | 'it' | 'en';
     /**
      * Title de
      * @default
@@ -733,7 +733,7 @@ export interface definitions {
      * @default
      */
     recommendation_en?: string;
-    reasons?: definitions["Reason"][];
+    reasons?: definitions['Reason'][];
   };
   StopSerializer: {
     /** Uid */
@@ -774,81 +774,81 @@ export interface definitions {
      * @default false
      */
     is_icon_ref?: boolean;
-    stops?: definitions["StopSerializer"][];
-    affected_products?: definitions["AffectedProduct"][];
+    stops?: definitions['StopSerializer'][];
+    affected_products?: definitions['AffectedProduct'][];
     /** Disruption type */
     disruption_type: string;
-    periods: definitions["ConsequencePeriod"][];
+    periods: definitions['ConsequencePeriod'][];
     /**
      * Severity
      * @enum {string}
      */
     severity:
-      | "unknown"
-      | "verySlight"
-      | "slight"
-      | "normal"
-      | "severe"
-      | "verySevere"
-      | "noImpact"
-      | "undefined";
+      | 'unknown'
+      | 'verySlight'
+      | 'slight'
+      | 'normal'
+      | 'severe'
+      | 'verySevere'
+      | 'noImpact'
+      | 'undefined';
     /**
      * Severity group
      * @enum {string}
      */
-    severity_group: "undefined" | "low" | "normal" | "high";
+    severity_group: 'undefined' | 'low' | 'normal' | 'high';
     /**
      * Condition
      * @enum {string}
      */
     condition:
-      | "unknown"
-      | "delay"
-      | "minorDelays"
-      | "majorDelays"
-      | "operationTimeExtension"
-      | "onTime"
-      | "disturbanceRectified"
-      | "changeOfPlatform"
-      | "lineCancellation"
-      | "tripCancellation"
-      | "boarding"
-      | "goToGate"
-      | "stopCancelled"
-      | "stopMoved"
-      | "stopOnDemand"
-      | "additionalStop"
-      | "substitutedStop"
-      | "diverted"
-      | "disruption"
-      | "limitedOperation"
-      | "discontinuedOperation"
-      | "irregularTraffic"
-      | "wagonOrderChanged"
-      | "trainShortened"
-      | "additionalRide"
-      | "replacementRide"
-      | "temporarilyNonStopping"
-      | "temporaryStopplace"
-      | "undefinedStatus";
+      | 'unknown'
+      | 'delay'
+      | 'minorDelays'
+      | 'majorDelays'
+      | 'operationTimeExtension'
+      | 'onTime'
+      | 'disturbanceRectified'
+      | 'changeOfPlatform'
+      | 'lineCancellation'
+      | 'tripCancellation'
+      | 'boarding'
+      | 'goToGate'
+      | 'stopCancelled'
+      | 'stopMoved'
+      | 'stopOnDemand'
+      | 'additionalStop'
+      | 'substitutedStop'
+      | 'diverted'
+      | 'disruption'
+      | 'limitedOperation'
+      | 'discontinuedOperation'
+      | 'irregularTraffic'
+      | 'wagonOrderChanged'
+      | 'trainShortened'
+      | 'additionalRide'
+      | 'replacementRide'
+      | 'temporarilyNonStopping'
+      | 'temporaryStopplace'
+      | 'undefinedStatus';
     /**
      * Condition group
      * @enum {string}
      */
-    condition_group: "information" | "changes" | "disruption";
+    condition_group: 'information' | 'changes' | 'disruption';
   };
   AffectedLinesFeature: {
     /** Type */
     type?: string;
     /** Geometry */
     geometry?: { [key: string]: unknown };
-    properties: definitions["AffectedLineProperties"];
+    properties: definitions['AffectedLineProperties'];
   };
   GeoJSON: {
     /** Type */
     type?: string;
-    properties: definitions["FeatureCollectionProperties"];
-    features?: definitions["AffectedLinesFeature"][];
+    properties: definitions['FeatureCollectionProperties'];
+    features?: definitions['AffectedLinesFeature'][];
   };
   Category: {
     /** ID */
@@ -913,7 +913,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["NotificationGeoJSON"][];
+        schema: definitions['NotificationGeoJSON'][];
       };
     };
   };
@@ -938,7 +938,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["NotificationGeoJSON"];
+        schema: definitions['NotificationGeoJSON'];
       };
     };
   };
@@ -953,7 +953,7 @@ export interface operations {
         id: number;
       };
       body: {
-        data: definitions["Notification"];
+        data: definitions['Notification'];
       };
       query: {
         /** This is a workaround for clients that don't support GeometryCollections. This may return modified geoms using ST_Union. */
@@ -966,7 +966,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["NotificationGeoJSON"];
+        schema: definitions['NotificationGeoJSON'];
       };
     };
   };
@@ -975,7 +975,7 @@ export interface operations {
     parameters: {
       query: {
         /** Return entries which have the given size (usually you'll want to set this to `L`) */
-        size?: "S" | "M" | "L";
+        size?: 'S' | 'M' | 'L';
         /** Return entries which belong to the given tenant slug */
         sso_config: string;
         /** Retrun geometries which are part of the given graph, multiple graphs can be separated by comma. Objects without matching geoms have an empty features list. */
@@ -996,7 +996,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["GeoJSON"][];
+        schema: definitions['GeoJSON'][];
       };
     };
   };
@@ -1010,7 +1010,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["GeoJSON"];
+        schema: definitions['GeoJSON'];
       };
     };
   };
@@ -1018,7 +1018,7 @@ export interface operations {
    * Usually you don't need to add new items here unless they appear in an
    * external source for the first time.
    */
-  "notification-category_list": {
+  'notification-category_list': {
     parameters: {
       query: {
         /** A search term. */
@@ -1029,7 +1029,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["Category"][];
+        schema: definitions['Category'][];
       };
     };
   };
@@ -1037,15 +1037,15 @@ export interface operations {
    * Usually you don't need to add new items here unless they appear in an
    * external source for the first time.
    */
-  "notification-category_create": {
+  'notification-category_create': {
     parameters: {
       body: {
-        data: definitions["Category"];
+        data: definitions['Category'];
       };
     };
     responses: {
       201: {
-        schema: definitions["Category"];
+        schema: definitions['Category'];
       };
     };
   };
@@ -1089,7 +1089,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["Notification"][];
+        schema: definitions['Notification'][];
       };
     };
   };
@@ -1097,12 +1097,12 @@ export interface operations {
   notification_create: {
     parameters: {
       body: {
-        data: definitions["Notification"];
+        data: definitions['Notification'];
       };
     };
     responses: {
       201: {
-        schema: definitions["Notification"];
+        schema: definitions['Notification'];
       };
     };
   };
@@ -1116,7 +1116,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["Notification"];
+        schema: definitions['Notification'];
       };
     };
   };
@@ -1128,12 +1128,12 @@ export interface operations {
         id: number;
       };
       body: {
-        data: definitions["Notification"];
+        data: definitions['Notification'];
       };
     };
     responses: {
       200: {
-        schema: definitions["Notification"];
+        schema: definitions['Notification'];
       };
     };
   };
@@ -1157,12 +1157,12 @@ export interface operations {
         id: number;
       };
       body: {
-        data: definitions["Notification"];
+        data: definitions['Notification'];
       };
     };
     responses: {
       200: {
-        schema: definitions["Notification"];
+        schema: definitions['Notification'];
       };
     };
   };
@@ -1176,7 +1176,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["Notification"];
+        schema: definitions['Notification'];
       };
     };
   };
@@ -1188,12 +1188,12 @@ export interface operations {
         id: number;
       };
       body: {
-        data: definitions["ImageUpload"];
+        data: definitions['ImageUpload'];
       };
     };
     responses: {
       201: {
-        schema: definitions["ImageUpload"];
+        schema: definitions['ImageUpload'];
       };
     };
   };
@@ -1201,7 +1201,7 @@ export interface operations {
    * Each channel has a list of graphs that it needs geometries for. The
    * topographic default graph is always expected implicitly.
    */
-  "publication-channel_list": {
+  'publication-channel_list': {
     parameters: {
       query: {
         /** A search term. */
@@ -1212,7 +1212,7 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions["Channel"][];
+        schema: definitions['Channel'][];
       };
     };
   };

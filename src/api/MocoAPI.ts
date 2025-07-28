@@ -1,6 +1,8 @@
 import { isMocoNotificationNotOutOfDate } from '../common/utils/mocoUtils';
-import { MocoNotification, MocoParameters } from '../types';
+
 import HttpAPI from './HttpAPI';
+
+import type { MocoNotification, MocoParameters } from '../types';
 
 export interface MocoAPIOptions {
   apiKey: string;
@@ -11,8 +13,6 @@ export interface MocoAPIOptions {
 }
 
 export type MocoParametersExtended = {
-  addIconRefFeatures?: boolean;
-  addStatusProperties?: boolean;
   date?: Date;
 } & MocoParameters;
 
@@ -78,7 +78,7 @@ class MocoAPI extends HttpAPI {
   ): Promise<MocoNotification[]> {
     const apiParams = { ...params };
     delete apiParams.date; // Not used in this method
-    let notifications = (await this.fetch(
+    let notifications = await this.fetch(
       'export/publication/',
       {
         graph: this.graph || 'osm',
@@ -87,7 +87,7 @@ class MocoAPI extends HttpAPI {
         ...apiParams,
       },
       config,
-    )) as MocoNotification[];
+    );
 
     // TODO in the future we hope that the date parameter will be used by the API to filter out-of-date notifications.
     // For now we filter them out manually.

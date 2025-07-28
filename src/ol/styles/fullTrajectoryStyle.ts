@@ -1,6 +1,6 @@
-import type { FeatureLike } from 'ol/Feature';
-
 import { Circle, Fill, Stroke, Style } from 'ol/style';
+
+import type { FeatureLike } from 'ol/Feature';
 
 const borderStyle = new Style({
   image: new Circle({

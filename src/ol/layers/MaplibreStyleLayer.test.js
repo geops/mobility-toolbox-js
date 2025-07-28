@@ -66,11 +66,21 @@ describe.skip('MaplibreStyleLayer', () => {
   test('should add layer on load', () => {
     const style = { layers: [] };
     layer.maplibreLayer.mapLibreMap = {
-      addLayer: (styleLayerr) => style.layers.push(styleLayerr),
-      getLayer: () => null,
-      getSource: () => ({}),
-      getStyle: () => style,
-      setLayoutProperty: () => null,
+      addLayer: (styleLayerr) => {
+        return style.layers.push(styleLayerr);
+      },
+      getLayer: () => {
+        return null;
+      },
+      getSource: () => {
+        return {};
+      },
+      getStyle: () => {
+        return style;
+      },
+      setLayoutProperty: () => {
+        return null;
+      },
       setStyle: () => {},
     };
     layer.onLoad();
@@ -81,11 +91,21 @@ describe.skip('MaplibreStyleLayer', () => {
     test('when layer uses styleLayer property', () => {
       const styles = { layers: [] };
       layer.maplibreLayer.mapLibreMap = {
-        addLayer: (styleLayerr) => styles.layers.push(styleLayerr),
-        getLayer: () => null,
-        getSource: () => ({}),
-        getStyle: () => styles,
-        setLayoutProperty: () => null,
+        addLayer: (styleLayerr) => {
+          return styles.layers.push(styleLayerr);
+        },
+        getLayer: () => {
+          return null;
+        },
+        getSource: () => {
+          return {};
+        },
+        getStyle: () => {
+          return styles;
+        },
+        setLayoutProperty: () => {
+          return null;
+        },
         setStyle: () => {},
       };
       expect(layer).toBeInstanceOf(MaplibreStyleLayer);
@@ -98,16 +118,28 @@ describe.skip('MaplibreStyleLayer', () => {
     test('when layer uses styleLayersFilter property', () => {
       const styles = { layers };
       const layer2 = new MaplibreStyleLayer({
-        layersFilter: () => false,
+        layersFilter: () => {
+          return false;
+        },
         maplibreLayer: source,
         name: 'Maplibre layer',
       });
       layer2.maplibreLayer.mapLibreMap = {
-        addLayer: () => ({}),
-        getLayer: () => null,
-        getSource: () => ({}),
-        getStyle: () => styles,
-        setLayoutProperty: () => null,
+        addLayer: () => {
+          return {};
+        },
+        getLayer: () => {
+          return null;
+        },
+        getSource: () => {
+          return {};
+        },
+        getStyle: () => {
+          return styles;
+        },
+        setLayoutProperty: () => {
+          return null;
+        },
         setStyle: () => {},
       };
       layer2.onLoad();
@@ -118,22 +150,29 @@ describe.skip('MaplibreStyleLayer', () => {
   describe.skip('#getFeatureInfoAtCoordinate()', () => {
     beforeEach(() => {
       source.attachToMap(map);
-      source.mapLibreMap.isStyleLoaded = jest.fn(() => true);
-      source.mapLibreMap.getSource = jest.fn(() => true);
+      source.mapLibreMap.isStyleLoaded = jest.fn(() => {
+        return true;
+      });
+      source.mapLibreMap.getSource = jest.fn(() => {
+        return true;
+      });
     });
+
     afterEach(() => {
       source.mapLibreMap.getSource.mockRestore();
       source.mapLibreMap.isStyleLoaded.mockRestore();
     });
 
     test('should request features on layers ids from styleLayers property', () => {
-      source.mapLibreMap.getStyle = jest.fn(() => ({
-        layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }],
-      }));
+      source.mapLibreMap.getStyle = jest.fn(() => {
+        return {
+          layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }],
+        };
+      });
       layer.attachToMap(map);
-      layer.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
-        Promise.resolve({ features: [] }),
-      );
+      layer.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
+        return Promise.resolve({ features: [] });
+      });
       layer.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
       expect(
         layer.maplibreLayer.getFeatureInfoAtCoordinate,
@@ -143,19 +182,28 @@ describe.skip('MaplibreStyleLayer', () => {
     });
 
     test('should request features on layers ids from styleLayersFilter property', () => {
-      source.mapLibreMap.getStyle = jest.fn(() => ({
-        layers: [{ id: 'foo' }, { id: 'layer' }, { id: 'bar' }, { id: 'foo2' }],
-      }));
+      source.mapLibreMap.getStyle = jest.fn(() => {
+        return {
+          layers: [
+            { id: 'foo' },
+            { id: 'layer' },
+            { id: 'bar' },
+            { id: 'foo2' },
+          ],
+        };
+      });
       const layer2 = new MaplibreStyleLayer({
-        layersFilter: ({ id }) => /foo/.test(id),
+        layersFilter: ({ id }) => {
+          return /foo/.test(id);
+        },
         maplibreLayer: source,
         name: 'Maplibre layer',
         visible: true,
       });
       layer2.attachToMap(map);
-      layer2.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
-        Promise.resolve({ features: [] }),
-      );
+      layer2.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
+        return Promise.resolve({ features: [] });
+      });
       layer2.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
       expect(
         layer2.maplibreLayer.getFeatureInfoAtCoordinate,
@@ -168,26 +216,32 @@ describe.skip('MaplibreStyleLayer', () => {
     });
 
     test('should request features on layers ids from queryRenderedLayersFilter property', () => {
-      source.mapLibreMap.getStyle = jest.fn(() => ({
-        layers: [
-          { id: 'foo' },
-          { id: 'bar2' },
-          { id: 'layer' },
-          { id: 'bar' },
-          { id: 'foo2' },
-        ],
-      }));
+      source.mapLibreMap.getStyle = jest.fn(() => {
+        return {
+          layers: [
+            { id: 'foo' },
+            { id: 'bar2' },
+            { id: 'layer' },
+            { id: 'bar' },
+            { id: 'foo2' },
+          ],
+        };
+      });
       const layer2 = new MaplibreStyleLayer({
         maplibreLayer: source,
         name: 'Maplibre layer',
-        queryRenderedLayersFilter: ({ id }) => /bar/.test(id),
-        styleLayersFilter: ({ id }) => /foo/.test(id),
+        queryRenderedLayersFilter: ({ id }) => {
+          return /bar/.test(id);
+        },
+        styleLayersFilter: ({ id }) => {
+          return /foo/.test(id);
+        },
         visible: true,
       });
       layer2.attachToMap(map);
-      layer2.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() =>
-        Promise.resolve({ features: [] }),
-      );
+      layer2.maplibreLayer.getFeatureInfoAtCoordinate = jest.fn(() => {
+        return Promise.resolve({ features: [] });
+      });
       layer2.getFeatureInfoAtCoordinate([0, 0]).then(() => {});
       expect(
         layer2.maplibreLayer.getFeatureInfoAtCoordinate,

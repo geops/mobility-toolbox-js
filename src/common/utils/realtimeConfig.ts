@@ -1,4 +1,4 @@
-import { AnyCanvasContext, RealtimeLine, RealtimeMot } from '../../types';
+import type { AnyCanvasContext, RealtimeLine, RealtimeMot } from '../../types';
 
 const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],

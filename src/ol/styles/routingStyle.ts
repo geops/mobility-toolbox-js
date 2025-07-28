@@ -1,6 +1,8 @@
-import { FeatureLike } from 'ol/Feature';
 import { Circle, Fill, Stroke } from 'ol/style';
-import Style, { StyleFunction } from 'ol/style/Style';
+import Style from 'ol/style/Style';
+
+import type { FeatureLike } from 'ol/Feature';
+import type { StyleFunction } from 'ol/style/Style';
 
 const circleStyle = new Circle({
   fill: new Fill({

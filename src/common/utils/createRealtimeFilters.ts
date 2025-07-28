@@ -1,4 +1,4 @@
-import { RealtimeTrajectory } from '../../types';
+import type { RealtimeTrajectory } from '../../types';
 /**
  * Return a filter functions based on some parameters of a vehicle.
  *
@@ -24,28 +24,25 @@ const createRealtimeFilters = (
     const regexLineList: string[] =
       typeof regexLine === 'string' ? [regexLine] : regexLine;
     const lineFilter = (item: RealtimeTrajectory) => {
-      const name =
-        item.properties.name ||
-        (item.properties.line && item.properties.line.name) ||
-        '';
+      const name = item.properties.name || item.properties.line?.name || '';
       if (!name) {
         return false;
       }
-      return regexLineList.some((regexStr) =>
-        new RegExp(regexStr, 'i').test(name),
-      );
+      return regexLineList.some((regexStr) => {
+        return new RegExp(regexStr, 'i').test(name);
+      });
     };
     filterList.push(lineFilter);
   }
 
   if (line) {
     const lineFiltersList = typeof line === 'string' ? line.split(',') : line;
-    const lineList = lineFiltersList.map((l) =>
-      l.replace(/\s+/g, '').toUpperCase(),
-    );
+    const lineList = lineFiltersList.map((l) => {
+      return l.replace(/\s+/g, '').toUpperCase();
+    });
     const lineFilter = (item: RealtimeTrajectory) => {
       const { line: linee, name } = item.properties;
-      const lineName = (name || (linee && linee.name) || '').toUpperCase();
+      const lineName = (name || linee?.name || '').toUpperCase();
       if (!lineName) {
         return false;
       }
@@ -56,7 +53,9 @@ const createRealtimeFilters = (
 
   if (route) {
     const routes = typeof route === 'string' ? route.split(',') : route;
-    const routeList = routes.map((item) => parseInt(item, 10));
+    const routeList = routes.map((item) => {
+      return parseInt(item, 10);
+    });
     const routeFilter = (item: RealtimeTrajectory) => {
       const routeIdentifier =
         item.properties.route_identifier ||
@@ -70,12 +69,13 @@ const createRealtimeFilters = (
 
   if (operator) {
     const operatorList = typeof operator === 'string' ? [operator] : operator;
-    const operatorFilter = (item: RealtimeTrajectory) =>
-      operatorList.some((op) => {
+    const operatorFilter = (item: RealtimeTrajectory) => {
+      return operatorList.some((op) => {
         // operaotr is the old property tenant is the new one
         const tenant = item.properties.operator || item.properties.tenant || '';
         return new RegExp(op, 'i').test(tenant);
       });
+    };
     filterList.push(operatorFilter);
   }
 

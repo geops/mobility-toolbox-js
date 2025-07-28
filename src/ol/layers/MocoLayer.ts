@@ -11,7 +11,6 @@ import MaplibreStyleLayer from './MaplibreStyleLayer';
 import type { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
 import type { Map } from 'ol';
 
-import type { MocoNotificationAsFeatureCollection } from '..';
 import type { MocoAPIOptions } from '../../api/MocoAPI';
 import type { MocoDefinitions, MocoNotification } from '../../types';
 

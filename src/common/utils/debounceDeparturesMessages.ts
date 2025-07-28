@@ -1,10 +1,11 @@
-import { RealtimeAPIDeparturesById } from '../../api/RealtimeAPI';
-import type { RealtimeDeparture, RealtimeDepartureExtended } from '../../types';
+import sortAndFilterDepartures from './sortAndFilterDepartures';
+
+import type { RealtimeAPIDeparturesById } from '../../api/RealtimeAPI';
 import type {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
 } from '../../api/WebSocketAPI';
-import sortAndFilterDepartures from './sortAndFilterDepartures';
+import type { RealtimeDeparture, RealtimeDepartureExtended } from '../../types';
 
 /**
  * This function returns a WebSocket api callback, and call the onDeparturesUpdate function with the list of current departures to display.
@@ -20,14 +21,12 @@ const debounceDeparturesMessages = (
   maxDepartureAge = 30,
   timeout = 100,
 ): WebSocketAPIMessageCallback<RealtimeDeparture> => {
-  const departureUpdateTimeout: {
-    [key: string]: number;
-  } = {};
+  const departureUpdateTimeout: Record<string, number> = {};
 
   const departureObject: RealtimeAPIDeparturesById = {};
 
   return (data: WebSocketAPIMessageEventData<RealtimeDeparture>) => {
-    const { source, content: departure } = data;
+    const { content: departure, source } = data;
     if (departureUpdateTimeout[source]) {
       window.clearTimeout(departureUpdateTimeout[source]);
     }

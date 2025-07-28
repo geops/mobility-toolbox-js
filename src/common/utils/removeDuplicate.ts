@@ -6,16 +6,18 @@
  * @private
  */
 const removeDuplicate = (array: any[]) => {
-  const arrWithoutEmptyValues = array.filter(
-    (val) => val !== undefined && val !== null && val.trim && val.trim(),
-  );
-  const lowerCasesValues = arrWithoutEmptyValues.map((str) =>
-    str.toLowerCase(),
-  );
+  const arrWithoutEmptyValues = array.filter((val) => {
+    return val?.trim?.();
+  });
+  const lowerCasesValues = arrWithoutEmptyValues.map((str) => {
+    return str.toLowerCase();
+  });
   const uniqueLowerCaseValues = [...new Set(lowerCasesValues)];
-  const uniqueValues = uniqueLowerCaseValues.map((uniqueStr) =>
-    arrWithoutEmptyValues.find((str) => str.toLowerCase() === uniqueStr),
-  );
+  const uniqueValues = uniqueLowerCaseValues.map((uniqueStr) => {
+    return arrWithoutEmptyValues.find((str) => {
+      return str.toLowerCase() === uniqueStr;
+    });
+  });
   return uniqueValues;
 };
 

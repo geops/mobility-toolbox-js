@@ -1,5 +1,6 @@
-import { StopsParameters, StopsResponse } from '../types';
 import HttpAPI from './HttpAPI';
+
+import type { StopsParameters, StopsResponse } from '../types';
 
 export interface StopsAPIOptions {
   apiKey?: string;
@@ -45,7 +46,7 @@ class StopsAPI extends HttpAPI {
    * @public
    */
   search(params: StopsParameters, config: RequestInit): Promise<StopsResponse> {
-    return this.fetch('', params, config);
+    return this.fetch('', params as object, config);
   }
 }
 

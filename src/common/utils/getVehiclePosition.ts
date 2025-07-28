@@ -1,7 +1,8 @@
-import { Coordinate } from 'ol/coordinate';
 import { LineString } from 'ol/geom';
 
-import { RealtimeTrajectory } from '../../types';
+import type { Coordinate } from 'ol/coordinate';
+
+import type { RealtimeTrajectory } from '../../types';
 
 export interface VehiclePosition {
   coord: Coordinate;

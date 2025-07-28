@@ -1,12 +1,13 @@
-import OLView from 'ol/View';
-import ImageLayer from 'ol/layer/Image';
-import ImageWMS from 'ol/source/ImageWMS';
 import fetch from 'jest-fetch-mock';
-import Map from 'ol/Map';
-import VectorLayer from 'ol/layer/Vector';
-import { Vector } from 'ol/source';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
+import ImageLayer from 'ol/layer/Image';
+import VectorLayer from 'ol/layer/Vector';
+import Map from 'ol/Map';
+import { Vector } from 'ol/source';
+import ImageWMS from 'ol/source/ImageWMS';
+import OLView from 'ol/View';
+
 import getFeatureInfoAtCoordinate from './getFeatureInfoAtCoordinate';
 
 describe('getFeatureInfoAtCoordinate', () => {
@@ -14,8 +15,8 @@ describe('getFeatureInfoAtCoordinate', () => {
 
   beforeEach(() => {
     map = new Map({
-      view: new OLView({ resolution: 5 }),
       target: document.createElement('div'),
+      view: new OLView({ resolution: 5 }),
     });
     map.setSize([100, 100]);
     map.getView().setCenter([50, 50]);
@@ -34,15 +35,15 @@ describe('getFeatureInfoAtCoordinate', () => {
     beforeEach(() => {
       layer = new ImageLayer({
         source: new ImageWMS({
-          url: 'http://dummy',
           params: { LAYERS: 'layers' },
+          url: 'http://dummy',
         }),
       });
       map.addLayer(layer);
       fetch.mockResponseOnce(
         JSON.stringify({
-          type: 'FeatureCollection',
           features: [],
+          type: 'FeatureCollection',
         }),
       );
       global.fetch = fetch;
@@ -84,8 +85,12 @@ describe('getFeatureInfoAtCoordinate', () => {
     });
 
     test('should return features info', async () => {
-      map.getFeaturesAtPixel = jest.fn(() => [feature]);
-      map.getPixelFromCoordinate = jest.fn(() => [50, 50]);
+      map.getFeaturesAtPixel = jest.fn(() => {
+        return [feature];
+      });
+      map.getPixelFromCoordinate = jest.fn(() => {
+        return [50, 50];
+      });
 
       const data = await getFeatureInfoAtCoordinate([50, 50], [layer]);
 

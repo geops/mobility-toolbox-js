@@ -1,3 +1,8 @@
+import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
+import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
+
+import WebSocketAPI from './WebSocketAPI';
+
 import type {
   RealtimeBbox,
   RealtimeDeparture,
@@ -15,9 +20,7 @@ import type {
   RealtimeVersion,
 } from '../types';
 
-import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
-import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
-import WebSocketAPI, {
+import type {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
   WebSocketAPIParameters,
@@ -325,10 +328,12 @@ class RealtimeAPI {
    * @public
    */
   getStations(mode: RealtimeMode, timeout = 100): Promise<RealtimeStation[]> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.get<RealtimeStation[]>(
         `station${getModeSuffix(mode, RealtimeModes)}`,
-      ).then(debounceWebsocketMessages(resolve, undefined, timeout));
+      )
+        .then(debounceWebsocketMessages(resolve, undefined, timeout))
+        .catch(reject);
     });
   }
 
