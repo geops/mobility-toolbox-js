@@ -1,8 +1,9 @@
 import debounce from 'lodash.debounce';
 
-import type { Map } from 'ol';
+import type { Map, Object as OLObject } from 'ol';
 import type { EventsKey } from 'ol/events';
 import type { Layer } from 'ol/layer';
+import type BaseLayer from 'ol/layer/Base';
 import type { ObjectEvent } from 'ol/Object';
 
 import type { MobilityLayerOptions } from '../layers/Layer';
@@ -51,14 +52,18 @@ const defineDeprecatedProperties = (
     }
 
     if (evt.key === 'map') {
-      const map = evt.target.get(evt.key);
+      const map = (evt.target as OLObject).get(evt.key) as Map | null;
       if (map) {
-        (evt.target.get('children') || []).forEach((child: Layer) => {
+        (
+          ((evt.target as BaseLayer).get('children') as BaseLayer[]) || []
+        ).forEach((child: BaseLayer) => {
           map.addLayer(child);
         });
       } else if (evt.oldValue) {
-        (evt.target.get('children') || []).forEach((child: Layer) => {
-          evt.oldValue.removeLayer(child);
+        (
+          ((evt.target as BaseLayer).get('children') as BaseLayer[]) || []
+        ).forEach((child: BaseLayer) => {
+          (evt.oldValue as Map | null)?.removeLayer(child);
         });
       }
     }
@@ -67,7 +72,8 @@ const defineDeprecatedProperties = (
   // Save options for cloning
   obj.set('options', options);
 
-  obj.set('children', options.children || []); // Trigger the on children change event
+  // Force triggering the on children property change event
+  obj.set('children', [...((options.children as Layer[]) || [])]);
 
   Object.defineProperties(obj, {
     children: {
@@ -76,7 +82,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.children is deprecated. Use the Layer.get('children') method instead.",
         );
-        return obj.get('children') || [];
+        return (obj.get('children') as Layer[]) || [];
       },
 
       /** @deprecated */
@@ -93,7 +99,7 @@ const defineDeprecatedProperties = (
         deprecated(
           'Layer.copyrights is deprecated. Get the attributions from the source object',
         );
-        return obj.get('copyrights');
+        return obj.get('copyrights') as string;
       },
 
       /** @deprecated */
@@ -114,7 +120,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.disabled is deprecated. Use the Layer.get('disabled') method instead.",
         );
-        return obj.get('disabled');
+        return obj.get('disabled') as boolean;
       },
 
       /** @deprecated */
@@ -131,7 +137,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.group is deprecated. Use the Layer.get('group') method instead.",
         );
-        return obj.get('group');
+        return obj.get('group') as string;
       },
     },
     hitTolerance: {
@@ -140,7 +146,7 @@ const defineDeprecatedProperties = (
         deprecated(
           'Layer.hitTolerance is deprecated. Pass the hitTolerance when you request the features.',
         );
-        return obj.get('hitTolerance') || 5;
+        return (obj.get('hitTolerance') as number) || 5;
       },
 
       /** @deprecated */
@@ -157,7 +163,7 @@ const defineDeprecatedProperties = (
         deprecated(
           'Layer.key is deprecated. Use the Layer.get("key") method instead.',
         );
-        return obj.get('key') || obj.get('name');
+        return (obj.get('key') as string) || (obj.get('name') as string);
       },
     },
     map: {
@@ -175,7 +181,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.name is deprecated. Use the Layer.get('name') method instead.",
         );
-        return obj.get('name');
+        return obj.get('name') as string;
       },
     },
     olLayer: {
