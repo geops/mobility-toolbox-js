@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/geops/mobility-toolbox-js/compare/v3.2.3...v3.3.0) (2025-07-28)
+
+
+### Features
+
+* add classes to use moco api ([#224](https://github.com/geops/mobility-toolbox-js/issues/224)) ([029b8dd](https://github.com/geops/mobility-toolbox-js/commit/029b8dd895db0b396e18518d37b214bcd28ae621))
+
 ### [3.2.3](https://github.com/geops/mobility-toolbox-js/compare/v3.2.2...v3.2.3) (2025-03-10)
 
 
