@@ -78,7 +78,7 @@ class MocoAPI extends HttpAPI {
   ): Promise<MocoNotification[]> {
     const apiParams = { ...params };
     delete apiParams.date; // Not used in this method
-    let notifications = await this.fetch(
+    let notifications = await this.fetch<MocoNotification[]>(
       'export/publication/',
       {
         graph: this.graph || 'osm',
