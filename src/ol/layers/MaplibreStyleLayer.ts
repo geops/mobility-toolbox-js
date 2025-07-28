@@ -288,6 +288,7 @@ class MaplibreStyleLayer extends Layer {
     const visibilityValue = this.getVisible() ? 'visible' : 'none';
     const layers = style.layers || [];
 
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < layers.length; i += 1) {
       const layer = layers[i];
 
@@ -300,8 +301,8 @@ class MaplibreStyleLayer extends Layer {
           if (this.getMinZoom() || this.getMaxZoom()) {
             mapLibreMap.setLayerZoomRange(
               id,
-              this.getMinZoom() ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1
-              this.getMaxZoom() ? this.getMaxZoom() - 1 : 24,
+              Number.isFinite(this.getMinZoom()) ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1
+              Number.isFinite(this.getMaxZoom()) ? this.getMaxZoom() - 1 : 24,
             );
           }
         }
