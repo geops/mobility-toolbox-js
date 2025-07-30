@@ -306,7 +306,11 @@ class MaplibreStyleLayer extends Layer {
         if (mapLibreMap.getLayer(id)) {
           mapLibreMap.setLayoutProperty(id, 'visibility', visibilityValue);
 
-          if (this.getMinZoom() || this.getMaxZoom()) {
+          // OL sets -Infinity, Infinity for minZoom and maxZoom.
+          if (
+            Number.isFinite(this.getMinZoom()) ||
+            Number.isFinite(this.getMaxZoom())
+          ) {
             mapLibreMap.setLayerZoomRange(
               id,
               Number.isFinite(this.getMinZoom()) ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1
@@ -342,7 +346,6 @@ class MaplibreStyleLayer extends Layer {
         if (mapLibreMap.isStyleLoaded()) {
           this.onLoad();
         } else {
-          // eslint-disable-next-line @typescript-eslint/unbound-method
           void mapLibreMap.once('load', this.onLoad);
         }
       }
@@ -407,7 +410,6 @@ class MaplibreStyleLayer extends Layer {
   detachFromMap() {
     unByKey(this.olEventsKeys);
     if (this.maplibreLayer?.mapLibreMap) {
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.maplibreLayer.mapLibreMap.off('load', this.onLoad);
       this.removeLayers();
       this.removeSources();
