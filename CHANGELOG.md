@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.3.1](https://github.com/geops/mobility-toolbox-js/compare/v3.3.0...v3.3.1) (2025-07-30)
+
+
+### Bug Fixes
+
+* manage Infinity min7maxZoom values ([359d623](https://github.com/geops/mobility-toolbox-js/commit/359d623ce0e261a3b505b5c091de4fb745dff4a1))
+
 ## [3.3.0](https://github.com/geops/mobility-toolbox-js/compare/v3.2.3...v3.3.0) (2025-07-28)
 
 
