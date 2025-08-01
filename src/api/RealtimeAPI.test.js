@@ -1,3 +1,5 @@
+/* eslint-disable mocha/no-setup-in-describe */
+/* eslint-disable mocha/consistent-spacing-between-blocks */
 import { RealtimeAPI, RealtimeModes } from '.';
 
 describe('RealtimeAPI', () => {
@@ -60,6 +62,7 @@ describe('RealtimeAPI', () => {
             done();
           });
         });
+
         test("doesn't use generalizationLevel param", (done) => {
           api.getFullTrajectory('foo', RealtimeModes.SCHEMATIC, 10).then(() => {
             expect(get.mock.calls.length).toBe(1);
@@ -129,6 +132,7 @@ describe('RealtimeAPI', () => {
             done();
           });
         });
+
         test("doesn't use generalizationLevel param", (done) => {
           api.getFullTrajectory('foo', RealtimeModes.SCHEMATIC, 10).then(() => {
             expect(get.mock.calls.length).toBe(1);

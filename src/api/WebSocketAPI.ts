@@ -259,10 +259,8 @@ class WebSocketAPI {
 
     // We wrap the callbacks to make sure they are called only once.
     const once = (callback: EventListener | WebSocketAPIMessageCallback<T>) => {
-      // @ts-expect-error : Spread error
-      return (...args) => {
-        // @ts-expect-error : Spread error
-
+      return (...args: unknown[]) => {
+        // @ts-expect-error - We know that args is an array
         callback(...args);
         const index = this.requests.findIndex((request) => {
           return requestString === request.requestString && cb === request.cb;
@@ -329,6 +327,7 @@ class WebSocketAPI {
     ) => {
       let data: WebSocketAPIMessageEventData<T>;
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data = JSON.parse(evt.data);
       } catch (err) {
         // eslint-disable-next-line no-console

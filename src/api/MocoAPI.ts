@@ -13,8 +13,11 @@ export interface MocoAPIOptions {
 }
 
 export type MocoParametersExtended = {
+  apiKey?: string;
   date?: Date;
-} & MocoParameters;
+  graph?: string;
+  sso_config?: string;
+} & Omit<MocoParameters, 'apiKey' | 'graph' | 'sso_config'>;
 
 /**
  * This class provides convenience methods to use to the [geOps MOCO API](https://geops.com/de/solution/disruption-information).
@@ -76,7 +79,7 @@ class MocoAPI extends HttpAPI {
     params: MocoParametersExtended = {},
     config: RequestInit = {},
   ): Promise<MocoNotification[]> {
-    const apiParams = { ...params };
+    const apiParams: MocoParametersExtended = { ...params };
     delete apiParams.date; // Not used in this method
     let notifications = await this.fetch<MocoNotification[]>(
       'export/publication/',
