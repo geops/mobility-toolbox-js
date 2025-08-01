@@ -13,6 +13,7 @@ import {
   MocoAPI,
   MocoLayer,
   CopyrightControl,
+  getGraphByZoom,
 } from './build/ol';
 import 'ol/ol.css';
 import { buffer, getCenter } from 'ol/extent';
@@ -68,6 +69,10 @@ const baseLayer = new MaplibreLayer({
   url: 'https://style-review.geops.io',
   style: 'review-geops-tgma-u03rp4.de.rvf',
 });
+baseLayer.on('load', () => {
+  console.log('baseLayer loaded');
+});
+
 map.addLayer(baseLayer);
 
 const mocoLayer = new MocoLayer({
@@ -351,6 +356,7 @@ const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
   // styleOptions: { useDelayStyle: true },
   extent: francfortExtent,
+  // graphByZoom: ['osm', 'osm', 'osm', 'osm', 'osm', 'osm', 'rvf'],
   styleOptions: {
     delayDisplay: 0,
     // Define the circle color
@@ -400,7 +406,7 @@ const realtimeLayer = new RealtimeLayer({
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },
 });
-// map.addLayer(realtimeLayer);
+map.addLayer(realtimeLayer);
 
 map.addControl(new CopyrightControl());
 map.on('moveend', () => {
@@ -507,6 +513,15 @@ map.once('rendercomplete', (e) => {
   map.on('rendercomplete', (e) => {
     console.log('map first rendercomplete');
   });
+
+  const metadata = baseLayer.mapLibreMap?.getStyle()?.metadata;
+  console.log('baseLayer metadata: ', metadata);
+  const graphByZoom = [];
+  for (var i = 0; i < 26; i++) {
+    graphByZoom.push(getGraphByZoom(i, metadata?.graphs));
+  }
+  realtimeLayer.engine.graphByZoom = graphByZoom;
+  console.log('realtimeLayer.graphByZoom: ', realtimeLayer.engine.graphByZoom);
 });
 
 map2.once('rendercomplete', (e) => {
