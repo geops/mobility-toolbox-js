@@ -5,6 +5,7 @@ import {
   isMocoNotificationPublished,
   MocoAPI,
 } from '..';
+import getGraphByZoom from '../utils/getGraphByZoom';
 
 import MaplibreStyleLayer from './MaplibreStyleLayer';
 
@@ -12,7 +13,11 @@ import type { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
 import type { Map } from 'ol';
 
 import type { MocoAPIOptions } from '../../api/MocoAPI';
-import type { MocoDefinitions, MocoNotification } from '../../types';
+import type {
+  MocoDefinitions,
+  MocoNotification,
+  StyleMetadataGraphs,
+} from '../../types';
 
 import type { MaplibreStyleLayerOptions } from './MaplibreStyleLayer';
 
@@ -117,8 +122,6 @@ class MocoLayer extends MaplibreStyleLayer {
   }
   #abortController: AbortController | null = null;
 
-  #graphMapping: Record<number, string> = DEFAULT_GRAPH_MAPPING;
-
   /**
    * Constructor.
    *
@@ -155,6 +158,11 @@ class MocoLayer extends MaplibreStyleLayer {
 
   override attachToMap(map: Map) {
     super.attachToMap(map);
+    this.olEventsKeys.push(
+      map.on('moveend', () => {
+        void this.updateData(false);
+      }),
+    );
 
     // If the source is already there (no load event triggered) update data
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
@@ -185,43 +193,42 @@ class MocoLayer extends MaplibreStyleLayer {
     void this.updateData();
   }
 
-  async updateData() {
+  async updateData(reloadData = true): Promise<boolean> {
     if (this.#abortController) {
       this.#abortController.abort();
     }
     this.#abortController = new AbortController();
 
+    const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
+    if (!source) {
+      // eslint-disable-next-line no-console
+      console.warn('MocoLayer: No source found for id : ', MOCO_SOURCE_ID);
+      return true;
+    }
+
     // Get graphs mapping
     const styleMetadata = this.maplibreLayer?.mapLibreMap?.getStyle()
       ?.metadata as { graphs?: Record<number, string> };
-    this.#graphMapping = styleMetadata?.graphs || DEFAULT_GRAPH_MAPPING;
-    const graphsString = [...new Set(Object.values(this.#graphMapping))].join(
-      ',',
-    );
+    const graphMapping: StyleMetadataGraphs =
+      styleMetadata?.graphs ?? DEFAULT_GRAPH_MAPPING;
+    const graphsString = [...new Set(Object.values(graphMapping))].join(',');
 
-    // We get the data from the MocoAPI
-    const api = new MocoAPI({
-      apiKey: this.apiKey,
-      graph: graphsString,
-      ssoConfig: this.tenant,
-      url: this.url,
-    });
-
-    const date = this.date;
-
+    // Load data if needed
     let notifications = this.notifications;
 
-    if (!notifications && this.loadAll) {
+    if (!notifications && this.loadAll && reloadData) {
+      // We get the data from the MocoAPI
+      const api = new MocoAPI({
+        apiKey: this.apiKey,
+        graph: graphsString,
+        ssoConfig: this.tenant,
+        url: this.url,
+      });
+
       notifications = await api.getNotifications(
-        { date: date },
+        { date: this.date },
         { signal: this.#abortController.signal },
       );
-    }
-
-    const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
-    if (!source) {
-      console.warn('MocoLayer: No source found for id : ', MOCO_SOURCE_ID);
-      return;
     }
 
     const notifsToRender: MocoNotificationToRender[] = (notifications ?? [])
@@ -231,10 +238,13 @@ class MocoLayer extends MaplibreStyleLayer {
           ...notification,
           properties: {
             ...notification.properties,
-            isActive: isMocoNotificationActive(notification.properties, date),
+            isActive: isMocoNotificationActive(
+              notification.properties,
+              this.date,
+            ),
             isPublished: isMocoNotificationPublished(
               notification.properties,
-              date,
+              this.date,
             ),
           },
         };
@@ -243,16 +253,31 @@ class MocoLayer extends MaplibreStyleLayer {
         return n.properties.isPublished || n.properties.isActive;
       });
 
+    // Create icon features for affected lines
     notifsToRender.forEach((notification) => {
-      // Add icon ref features, these features are only there for rendering purposes
       const iconRefFeatures = getMocoIconRefFeatures(notification);
       notification.features?.push(...iconRefFeatures);
     });
 
+    // We get the notifications as a unique feature collection.
     const data = getMocoNotificationsAsFeatureCollection(notifsToRender);
 
+    const currentGraph = getGraphByZoom(
+      this.getMapInternal()?.getView()?.getZoom() ?? 0,
+      graphMapping,
+    );
+
+    // Filter out features that are not using the current graph
+    // Only affected lines have a graph property not affected stations
+    data.features = data.features.filter((feature) => {
+      return (
+        !!feature.properties?.graph &&
+        feature.properties?.graph === currentGraph
+      );
+    });
+
     // Apply new data to the source
-    (source as GeoJSONSource).setData(data);
+    (source as GeoJSONSource)?.setData(data);
 
     return true;
   }
