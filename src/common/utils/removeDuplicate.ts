@@ -5,7 +5,7 @@
  * @param {array} array Array of values.
  * @private
  */
-const removeDuplicate = (array: any[]) => {
+function removeDuplicate(array: string[]): string[] {
   const arrWithoutEmptyValues = array.filter((val) => {
     return val?.trim?.();
   });
@@ -18,7 +18,7 @@ const removeDuplicate = (array: any[]) => {
       return str.toLowerCase() === uniqueStr;
     });
   });
-  return uniqueValues;
-};
+  return uniqueValues as string[];
+}
 
 export default removeDuplicate;

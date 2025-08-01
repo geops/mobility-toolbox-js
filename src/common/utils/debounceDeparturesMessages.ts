@@ -16,7 +16,7 @@ import type { RealtimeDeparture, RealtimeDepartureExtended } from '../../types';
  * @private
  */
 const debounceDeparturesMessages = (
-  onDeparturesUpdate: (departures: RealtimeDepartureExtended[]) => {},
+  onDeparturesUpdate: (departures: RealtimeDepartureExtended[]) => unknown,
   sortByMinArrivalTime = false,
   maxDepartureAge = 30,
   timeout = 100,

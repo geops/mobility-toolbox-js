@@ -318,6 +318,9 @@ export interface RealtimeTrajectoryProperties {
   train_number?: number;
   transmitting_vehicle?: string;
   type: RealtimeMot;
+
+  // Added by realtime engine
+  rotation?: number;
 }
 
 export interface RealtimeTrajectoryResponse {

@@ -32,8 +32,10 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
     if (value.used) {
       const source = value.getSource();
 
-      // @ts-expect-error improve types
-      const attribution = source.attribution || source.options?.attribution;
+      const attribution =
+        source?.attribution ||
+        (source as unknown as { options: { attribution: string } }).options
+          ?.attribution;
 
       if (attribution) {
         copyrights = copyrights.concat(

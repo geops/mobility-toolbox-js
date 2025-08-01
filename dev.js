@@ -399,7 +399,7 @@ const realtimeLayer = new RealtimeLayer({
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },
 });
-// map.addLayer(realtimeLayer);
+map.addLayer(realtimeLayer);
 
 map.addControl(new CopyrightControl());
 map.on('moveend', () => {

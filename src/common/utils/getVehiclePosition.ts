@@ -1,11 +1,13 @@
 import { LineString } from 'ol/geom';
 
+import type { Position } from 'geojson';
 import type { Coordinate } from 'ol/coordinate';
+import type { SimpleGeometry } from 'ol/geom';
 
 import type { RealtimeTrajectory } from '../../types';
 
 export interface VehiclePosition {
-  coord: Coordinate;
+  coord?: Coordinate;
   rotation?: number;
 }
 
@@ -20,12 +22,13 @@ export interface VehiclePosition {
  */
 const getVehiclePosition = (
   now: number,
-  trajectory: RealtimeTrajectory,
+  trajectory: {
+    properties: { olGeometry?: SimpleGeometry };
+  } & RealtimeTrajectory,
   noInterpolate: boolean,
 ): VehiclePosition => {
   const {
     coordinate,
-    // @ts-expect-error  olGeometry is added by the RealtimeLayer
     olGeometry,
     time_intervals: timeIntervals,
   } = trajectory.properties;
@@ -37,15 +40,16 @@ const getVehiclePosition = (
   let rotation;
 
   // If an olGeometry exists we use it. It avoids to create one each time.
-  if (olGeometry) {
+  if (geometry) {
+    // @ts-expect-error improve types
     type = geometry.getType();
-    coordinates = geometry.getCoordinates();
+    coordinates = geometry.getCoordinates() ?? [];
   }
 
   if (noInterpolate && coordinate) {
     coord = coordinate;
   } else if (type === 'Point') {
-    coord = coordinates;
+    coord = coordinates as Position;
   } else if (type === 'LineString') {
     if (!geometry) {
       geometry = new LineString(coordinates);
@@ -79,7 +83,7 @@ const getVehiclePosition = (
           // interpolate position inside the time interval.
           const timeFrac = Math.min((now - start) / (end - start), 1);
           const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;
-          coord = geometry.getCoordinateAt(geomFrac);
+          coord = (geometry as LineString)?.getCoordinateAt(geomFrac);
           [, , rotation] = intervals[j];
           break;
         }

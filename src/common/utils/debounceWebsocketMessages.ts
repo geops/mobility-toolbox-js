@@ -12,16 +12,16 @@ import type {
  * @private
  */
 const debounceWebsocketMessages = (
-  onUpdate: (objects: any[]) => void,
-  getObjectId?: (object: any) => string,
+  onUpdate: (objects: unknown[]) => void,
+  getObjectId?: (object: unknown) => string,
   timeout = 100,
-): WebSocketAPIMessageCallback<any> => {
+): WebSocketAPIMessageCallback<unknown> => {
   const updateTimeout: Record<string, number> = {};
 
-  const objectsById: Record<string, any> = {};
-  const objects: any[] = [];
+  const objectsById: Record<string, unknown> = {};
+  const objects: unknown[] = [];
 
-  return (data: WebSocketAPIMessageEventData<any>) => {
+  return (data: WebSocketAPIMessageEventData<unknown>) => {
     const { content, source } = data;
     if (updateTimeout[source]) {
       window.clearTimeout(updateTimeout[source]);

@@ -106,6 +106,6 @@ export interface LayerGetFeatureInfoOptions {
   hitTolerance: number;
 }
 
-export type RoutingGraph = [RoutingParameters.graph, number, number];
-export type RoutingMot = RoutingParameters.mot;
+export type RoutingGraph = [RoutingParameters['graph'] | 'osm', number, number];
+export type RoutingMot = RoutingParameters['mot'];
 export type RoutingViaPoint = Coordinate | string;
