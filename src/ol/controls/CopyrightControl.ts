@@ -1,9 +1,12 @@
-import { MapEvent } from 'ol';
-import Control, { Options } from 'ol/control/Control';
+import Control from 'ol/control/Control';
 import { inView } from 'ol/layer/Layer';
 
 import createDefaultCopyrightElement from '../../common/utils/createDefaultCopyrightElt';
 import removeDuplicate from '../../common/utils/removeDuplicate';
+
+import type { MapEvent } from 'ol';
+import type { Options } from 'ol/control/Control';
+import type { ViewStateLayerStateExtent } from 'ol/View';
 
 export type CopyrightControlOptions = {
   className?: 'string';
@@ -62,18 +65,19 @@ class CopyrightControl extends Control {
     let copyrights: string[] = [];
 
     // This code loop comes mainly from ol.
-    frameState?.layerStatesArray.forEach((layerState: any) => {
+    frameState?.layerStatesArray.forEach((layerState) => {
       const { layer } = layerState;
 
       if (frameState && inView(layerState, frameState.viewState)) {
-        if (layer?.getSource()?.getAttributions()) {
+        const attribFunc = layer?.getSource()?.getAttributions();
+        if (attribFunc) {
           copyrights = copyrights.concat(
-            layer.getSource().getAttributions()(frameState),
+            attribFunc(frameState as ViewStateLayerStateExtent),
           );
         }
 
-        if (layer?.get('copyrights')) {
-          let copyProp = layer.get('copyrights');
+        if (layer?.get('copyrights') as string[]) {
+          let copyProp = layer.get('copyrights') as string[];
           copyProp = !Array.isArray(copyProp) ? [copyProp] : copyProp;
           if (copyProp?.length) {
             copyrights.push(...copyProp);

@@ -332,6 +332,7 @@ class RealtimeAPI {
       this.get<RealtimeStation[]>(
         `station${getModeSuffix(mode, RealtimeModes)}`,
       )
+        // @ts-expect-error check this
         .then(debounceWebsocketMessages(resolve, undefined, timeout))
         .catch(reject);
     });

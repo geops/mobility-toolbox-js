@@ -41,7 +41,7 @@ describe('StopFinderControl', () => {
     });
     map.addControl(control);
     expect(control.element).toBeDefined();
-    control.search('foo').then(() => {
+    void control.search('foo').then(() => {
       // Correct url
       expect(fetch.mock.calls[0][0]).toEqual(
         'https://foo.ch/?key=foo&limit=10&foo=bar&q=foo',

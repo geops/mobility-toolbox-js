@@ -84,6 +84,7 @@ const createRealtimeFilters = (
   }
 
   return (item: RealtimeTrajectory) => {
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < filterList.length; i += 1) {
       if (!filterList[i](item)) {
         return false;

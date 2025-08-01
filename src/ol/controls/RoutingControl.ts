@@ -1,31 +1,36 @@
-import type { Map, MapBrowserEvent } from 'ol';
-import type { Coordinate } from 'ol/coordinate';
-import type { StyleLike } from 'ol/style/Style';
-
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Feature } from 'ol';
-import Control, { Options } from 'ol/control/Control';
-import { EventsKey } from 'ol/events';
+import Control from 'ol/control/Control';
 import { click } from 'ol/events/condition';
 import BaseEvent from 'ol/events/Event';
 import { buffer } from 'ol/extent';
 import { GeoJSON } from 'ol/format';
-import { Geometry, LineString, Point } from 'ol/geom';
+import { LineString, Point } from 'ol/geom';
 import { Modify } from 'ol/interaction';
-import { ModifyEvent } from 'ol/interaction/Modify';
 import VectorLayer from 'ol/layer/Vector';
-import { ObjectEvent } from 'ol/Object';
 import { unByKey } from 'ol/Observable';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import VectorSource from 'ol/source/Vector';
+
+import { RoutingAPI } from '../../api';
+
+import type { FeatureCollection } from 'geojson';
+import type { Map, MapBrowserEvent } from 'ol';
+import type { Options } from 'ol/control/Control';
+import type { Coordinate } from 'ol/coordinate';
+import type { EventsKey } from 'ol/events';
+import type { Geometry, SimpleGeometry } from 'ol/geom';
+import type { ModifyEvent } from 'ol/interaction/Modify';
+import type { ObjectEvent } from 'ol/Object';
+import type { StyleLike } from 'ol/style/Style';
 
 import type {
   RoutingGraph,
   RoutingMot,
   RoutingParameters,
   RoutingViaPoint,
+  StopsResponse,
 } from '../../types';
-
-import { RoutingAPI } from '../../api';
 
 export type AbortControllersByGraph = Record<string, AbortController>;
 
@@ -40,7 +45,7 @@ export type RoutingControlOptions = {
 
   modify?: boolean;
 
-  mot?: string;
+  mot?: RoutingMot;
 
   onRouteError?: () => void;
 
@@ -88,8 +93,9 @@ const getFlatCoordinatesFromSegments = (
 ): Coordinate[] => {
   const coords: Coordinate[] = [];
   segmentArray.forEach((seg) => {
-    // @ts-expect-error missing type
-    const coordArr = seg.getGeometry()?.getCoordinates();
+    const coordArr = (
+      seg.getGeometry() as SimpleGeometry
+    )?.getCoordinates() as Coordinate[];
     if (coordArr?.length) {
       coords.push(...coordArr);
     }
@@ -169,7 +175,7 @@ class RoutingControl extends Control {
   viaPoints: RoutingViaPoint[] = [];
 
   get active(): boolean {
-    return this.get('active');
+    return this.get('active') as boolean;
   }
 
   set active(newValue: boolean) {
@@ -177,15 +183,15 @@ class RoutingControl extends Control {
   }
 
   get loading(): boolean {
-    return this.get('loading');
+    return this.get('loading') as boolean;
   }
 
   set loading(newValue: boolean) {
     this.set('loading', newValue);
   }
 
-  get modify() {
-    return this.get('modify');
+  get modify(): boolean {
+    return this.get('modify') as boolean;
   }
 
   set modify(newValue) {
@@ -193,7 +199,7 @@ class RoutingControl extends Control {
   }
 
   get mot(): RoutingMot {
-    return this.get('mot');
+    return this.get('mot') as RoutingMot;
   }
 
   set mot(newValue: RoutingMot) {
@@ -228,7 +234,7 @@ class RoutingControl extends Control {
 
     this.active = options.active || true;
 
-    this.graphs = options.graphs || [['osm', 0, 99]];
+    this.graphs = options.graphs ?? [['osm', 0, 99]];
 
     this.mot = options.mot || 'bus';
 
@@ -280,7 +286,7 @@ class RoutingControl extends Control {
       }
       if (evt.key === 'mot') {
         if (this.viaPoints) {
-          this.drawRoute();
+          void this.drawRoute();
         }
       }
     });
@@ -311,7 +317,7 @@ class RoutingControl extends Control {
   abortRequests() {
     // Abort Routing API requests
     this.graphs.forEach((graph) => {
-      const graphName = graph[0];
+      const graphName = graph[0] || '';
       if (this.abortControllers[graphName]) {
         this.abortControllers[graphName].abort();
       }
@@ -364,6 +370,7 @@ class RoutingControl extends Control {
     this.removeListeners();
 
     // @ts-expect-error improve ts types
+
     this.onMapClickKey = this.getMap()?.on('singleclick', this.onMapClick);
   }
 
@@ -385,7 +392,7 @@ class RoutingControl extends Control {
       overwrite,
       coordinatesOrString,
     );
-    this.drawRoute();
+    void this.drawRoute();
     this.dispatchEvent(new BaseEvent('change:route'));
   }
 
@@ -422,6 +429,7 @@ class RoutingControl extends Control {
       // hitDetection: this.routingLayer, // TODO: wait for ol, fixed in https://github.com/openlayers/openlayers/pull/16393
       deleteCondition: (e) => {
         const feats =
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           (e.target?.getFeaturesAtPixel(e.pixel, {
             hitTolerance: 5,
           }) as Feature<Geometry>[]) || [];
@@ -430,7 +438,7 @@ class RoutingControl extends Control {
         });
         if (click(e) && viaPoint) {
           // Remove node & viaPoint if an existing viaPoint was clicked
-          this.removeViaPoint(viaPoint.get('index'));
+          this.removeViaPoint(viaPoint.get('index') as number);
           return true;
         }
         return false;
@@ -499,7 +507,7 @@ class RoutingControl extends Control {
 
     // Create point features for the viaPoints
     this.viaPoints.forEach((viaPoint, idx) => {
-      this.drawViaPoint(
+      void this.drawViaPoint(
         viaPoint,
         idx,
         this.abortControllers[STOP_FETCH_ABORT_CONTROLLER_KEY],
@@ -508,7 +516,7 @@ class RoutingControl extends Control {
 
     return Promise.all(
       this.graphs.map(([graph], index) => {
-        const { signal } = this.abortControllers[graph];
+        const { signal } = this.abortControllers[graph || ''];
         if (!this.api) {
           return Promise.resolve([]);
         }
@@ -518,6 +526,7 @@ class RoutingControl extends Control {
               'coord-punish': 1000.0,
               'coord-radius': 100.0,
               elevation: false,
+              // @ts-expect-error improve type graph must include osm in the enum
               graph,
               mot: this.mot,
               'resolve-hops': false,
@@ -535,7 +544,7 @@ class RoutingControl extends Control {
               // Extract unique values from viaPoint target value
               const uniqueVias = this.segments.reduce(
                 (resultVias: Coordinate[], currentFeat: Feature) => {
-                  const segTrg = currentFeat.get('trg');
+                  const segTrg = currentFeat.get('trg') as Coordinate;
                   return resultVias.find((via) => {
                     return via[0] === segTrg[0] && via[1] === segTrg[1];
                   })
@@ -586,13 +595,15 @@ class RoutingControl extends Control {
             this.loading = false;
           })
           .catch((error) => {
-            if (/AbortError/.test(error.name)) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+            if (/AbortError/.test(error?.name)) {
               // Ignore abort error
               return;
             }
             this.segments = [];
             // Dispatch error event and execute error function
             this.dispatchEvent(new BaseEvent('error'));
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             this.onRouteError(error, this);
             this.loading = false;
           });
@@ -641,11 +652,11 @@ class RoutingControl extends Control {
         .then((res) => {
           return res.json();
         })
-        .then((stationData) => {
+        .then((stationData: FeatureCollection<GeoJSON.Point, unknown>) => {
           const { coordinates } = stationData?.features?.[0]?.geometry || {};
           if (!coordinates) {
             console.log(
-              'No coordinates found for station ' + stationId,
+              `No coordinates found for station ${stationId}`,
               stationData,
             );
           }
@@ -656,12 +667,14 @@ class RoutingControl extends Control {
           return pointFeature;
         })
         .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
           if (/AbortError/.test(error.message)) {
             // Ignore abort error
             return;
           }
           // Dispatch error event and execute error function
           this.dispatchEvent(new BaseEvent('error'));
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           this.onRouteError(error, this);
           this.routingLayer?.getSource()?.clear();
           this.loading = false;
@@ -717,8 +730,11 @@ class RoutingControl extends Control {
         .then((res) => {
           return res.json();
         })
-        .then((stationData) => {
-          const { coordinates } = stationData.features[0].geometry;
+        .then((stationData: StopsResponse) => {
+          const { coordinates } = stationData?.features?.[0].geometry || {};
+          if (!coordinates) {
+            throw new Error(`No coordinates found for station ${stationName}`);
+          }
           this.cacheStationData[viaPoint] = fromLonLat(coordinates);
           pointFeature.set('viaPointTrack', track);
           pointFeature.setGeometry(new Point(fromLonLat(coordinates)));
@@ -728,6 +744,7 @@ class RoutingControl extends Control {
         .catch((error) => {
           // Dispatch error event and execute error function
           this.dispatchEvent(new BaseEvent('error'));
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           this.onRouteError(error, this);
           this.loading = false;
           return null;
@@ -771,7 +788,7 @@ class RoutingControl extends Control {
 
     if (viaPoint) {
       // Remove existing viaPoint on click and abort viaPoint add
-      this.removeViaPoint(viaPoint.get('viaPointIdx'));
+      this.removeViaPoint(viaPoint.get('viaPointIdx') as number);
       return;
     }
 
@@ -790,7 +807,7 @@ class RoutingControl extends Control {
 
     // If viaPoint is being relocated overwrite the old viaPoint
     if (viaPoint) {
-      return this.addViaPoint(coord, viaPoint.get('viaPointIdx'), 1);
+      return this.addViaPoint(coord, viaPoint.get('viaPointIdx') as number, 1);
     }
 
     // In case there is no route overwrite first coordinate
@@ -870,7 +887,7 @@ class RoutingControl extends Control {
     if (this.viaPoints.length && this.viaPoints[index]) {
       this.viaPoints.splice(index, 1);
     }
-    this.drawRoute();
+    void this.drawRoute();
     this.dispatchEvent(new BaseEvent('change:route'));
   }
 
@@ -904,7 +921,7 @@ class RoutingControl extends Control {
    */
   setViaPoints(coordinateArray: Coordinate[]) {
     this.viaPoints = [...coordinateArray];
-    this.drawRoute();
+    void this.drawRoute();
     this.dispatchEvent(new BaseEvent('change:route'));
   }
 }

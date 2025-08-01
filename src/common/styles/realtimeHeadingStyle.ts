@@ -1,3 +1,8 @@
+import createCanvas from '../utils/createCanvas';
+import { getBgColor } from '../utils/realtimeConfig';
+
+import realtimeDefaultStyle from './realtimeDefaultStyle';
+
 import type {
   AnyCanvas,
   AnyCanvasContext,
@@ -6,10 +11,6 @@ import type {
   RealtimeTrajectory,
   ViewState,
 } from '../../types';
-
-import createCanvas from '../utils/createCanvas';
-import { getBgColor } from '../utils/realtimeConfig';
-import realtimeDefaultStyle from './realtimeDefaultStyle';
 
 const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
   const ctx = canvas.getContext('2d') as AnyCanvasContext;
@@ -51,7 +52,7 @@ const bufferArrowCache: Record<string, AnyCanvas | null> = {};
 const getBufferArrowCanvas = (
   canvas: AnyCanvas,
   fillColor: string,
-  rotation: number,
+  rotation = 0,
 ): AnyCanvas | null => {
   const margin = 20;
   const bufferKey = `${fillColor},${canvas.width},${canvas.height},${rotation}`;
@@ -97,7 +98,6 @@ const realtimeHeadingStyle: RealtimeStyleFunction = (
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => {
-  // @ts-expect-error improve types
   const { line, rotation, type } = trajectory.properties;
   const { color } = line || {};
 

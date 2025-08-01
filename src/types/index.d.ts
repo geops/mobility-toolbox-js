@@ -7,21 +7,21 @@ export * from './ol';
 export * from './realtime';
 export * from './maps';
 
-export type MocoDefinitions = MocoDefinitions;
-export type MocoParameters =
-  MocoPaths['/export/publication/']['get']['parameters']['query'];
-
 export type RealtimeVersion = '1' | '2';
 
 export type RoutingParameters = RoutingPaths['/']['get']['parameters']['query'];
 export type RoutingResponse =
   RoutingPaths['/']['get']['responses']['200']['schema'];
 
+/** Stops definitions */
 export type StopsParameters = StopsPaths['/']['get']['parameters']['query'];
 export type StopsResponse =
   StopsPaths['/']['get']['responses']['200']['schema'];
 
-/** Simplified MOCO definitions */
+/** MOCO definitions */
+export type MocoDefinitions = MocoDefinitions;
+export type MocoParameters =
+  MocoPaths['/export/publication/']['get']['parameters']['query'];
 export type MocoNotification = MocoDefinitions['GeoJSON'];
 export type MocoNotificationProperties =
   MocoDefinitions['FeatureCollectionProperties'];

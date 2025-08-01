@@ -1,17 +1,18 @@
-/* eslint-disable no-empty-function */
-/* eslint-disable no-useless-constructor */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable max-classes-per-file */
-import { Feature, FeatureCollection } from 'geojson';
-
 import { StopsAPI } from '../../api';
-import { StopsAPIOptions } from '../../api/StopsAPI';
-import { StopsParameters } from '../../types';
+
+import type { StopsAPIOptions } from '../../api/StopsAPI';
+import type { StopsParameters, StopsResponse } from '../../types';
+
+export type ArrayElement<ArrayType extends readonly unknown[]> =
+  ArrayType[number];
 
 export type StopFinderControlCommonOptions = {
   apiParams: StopsParameters;
   element: HTMLElement;
-  onSuggestionClick?: (suggestion: Feature, evt: MouseEvent) => void;
+  onSuggestionClick?: (
+    suggestion: ArrayElement<NonNullable<StopsResponse['features']>>,
+    evt: MouseEvent,
+  ) => void;
   placeholder?: string;
 } & StopsAPIOptions;
 
@@ -87,8 +88,10 @@ class StopFinderControlCommon {
     this.inputElt.onkeyup = (evt) => {
       this.abortController?.abort();
       this.abortController = new AbortController();
-      // @ts-expect-error - Improve ts
-      this.search(evt.target.value, this.abortController);
+      void this.search(
+        (evt.target as HTMLInputElement).value,
+        this.abortController,
+      );
     };
     Object.assign(this.inputElt.style, {
       padding: '10px 30px 10px 10px',
@@ -114,12 +117,14 @@ class StopFinderControlCommon {
       right: '0',
     });
     this.clearElt.innerHTML = '×';
-    this.clearElt.onclick = () => this.clear();
+    this.clearElt.onclick = () => {
+      return this.clear();
+    };
     element.appendChild(this.clearElt);
   }
 
-  render(featureCollection?: FeatureCollection) {
-    const suggestions = featureCollection?.features || [];
+  render(featureCollection?: StopsResponse) {
+    const suggestions = featureCollection?.features ?? [];
     if (!this.suggestionsElt) {
       return;
     }
@@ -129,7 +134,7 @@ class StopFinderControlCommon {
 
     suggestions.forEach((suggestion) => {
       const suggElt = document.createElement('div');
-      suggElt.innerHTML = suggestion?.properties?.name;
+      suggElt.innerHTML = suggestion?.properties?.name || '';
       suggElt.onclick = (evt) => {
         this.options?.onSuggestionClick?.(suggestion, evt);
       };
@@ -162,7 +167,7 @@ class StopFinderControlCommon {
         abortController && { signal: abortController.signal },
       )
       .then((data) => {
-        this.render(data as FeatureCollection);
+        this.render(data);
       })
       .catch(() => {
         this.render();
