@@ -12,7 +12,9 @@ global.fetchTrajectoryStationsResponse = fetchTrajectoryStationsResponse;
 global.stopsSearchResponse = stopsSearchResponse;
 global.fetchRouteResponse = fetchRouteResponse;
 
-global.URL.createObjectURL = jest.fn(() => 'fooblob');
+global.URL.createObjectURL = jest.fn(() => {
+  return 'fooblob';
+});
 
 window.OffscreenCanvas = () => {
   return document.createElement('canvas');

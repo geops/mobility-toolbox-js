@@ -61,5 +61,6 @@
  */
 
 // These lines is to block TypeScript to add "use strict;" in the outputed file.
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 const dummy = () => {};
 export default dummy;

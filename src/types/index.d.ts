@@ -1,6 +1,6 @@
-import { Paths as Routing } from './routing';
-import { Paths as Stops } from './stops';
-import { Paths as Moco, definitions as MocoDefinitions } from './moco';
+import { paths as RoutingPaths } from './routing';
+import { paths as StopsPaths } from './stops';
+import { paths as MocoPaths, definitions as MocoDefinitions } from './moco';
 
 export * from './common';
 export * from './ol';
@@ -9,15 +9,17 @@ export * from './maps';
 
 export type MocoDefinitions = MocoDefinitions;
 export type MocoParameters =
-  Moco['/export/publication/']['get']['parameters']['query'];
+  MocoPaths['/export/publication/']['get']['parameters']['query'];
 
 export type RealtimeVersion = '1' | '2';
 
-export type RoutingParameters = Routing['/']['get']['parameters']['query'];
-export type RoutingResponse = Routing['/']['get']['responses']['200']['schema'];
+export type RoutingParameters = RoutingPaths['/']['get']['parameters']['query'];
+export type RoutingResponse =
+  RoutingPaths['/']['get']['responses']['200']['schema'];
 
-export type StopsParameters = Stops['/']['get']['parameters']['query'];
-export type StopsResponse = Stops['/']['get']['responses']['200']['schema'];
+export type StopsParameters = StopsPaths['/']['get']['parameters']['query'];
+export type StopsResponse =
+  StopsPaths['/']['get']['responses']['200']['schema'];
 
 /** Simplified MOCO definitions */
 export type MocoNotification = MocoDefinitions['GeoJSON'];

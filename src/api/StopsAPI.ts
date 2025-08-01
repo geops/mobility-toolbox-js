@@ -34,6 +34,7 @@ class StopsAPI extends HttpAPI {
    * @public
    */
   constructor(options: StopsAPIOptions = {}) {
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     super({ ...options, url: options.url || 'https://api.geops.io/stops/v1/' });
   }
 
