@@ -240,6 +240,9 @@ class MaplibreLayer extends MapLibreLayer {
     const source = this.getSource();
     super.disposeInternal();
 
+    // At this point mapLibreMap.style is undefined, so to avoid errors on layers removed after this one,
+    // we set the mapLibreMap to null
+    this.mapLibreMap = undefined;
     // We don't want the source removed
     this.setSource(source);
   }
