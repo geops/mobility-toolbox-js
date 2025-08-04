@@ -354,54 +354,55 @@ const francfortExtent = buffer(
 
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
+  url: 'https://tralis-tracker-api.dev.geops.io/ws',
   // styleOptions: { useDelayStyle: true },
-  extent: francfortExtent,
+  // extent: francfortExtent,
   // graphByZoom: ['osm', 'osm', 'osm', 'osm', 'osm', 'osm', 'rvf'],
-  styleOptions: {
-    delayDisplay: 0,
-    // Define the circle color
-    // @param {string} mot - The mode of transport
-    // @param {object} line - The line object
-    // @return {string} The color in rgba format
-    getBgColor: (mot, line) => {
-      if (mot === 'bus') {
-        return 'rgba(0, 255, 0, 1)';
-      }
-      if (mot === 'subway') {
-        return 'rgba(0, 0, 255, 1)';
-      }
-      // S-Bahn
-      if (/^S/.test(line?.name)) {
-        return 'rgba(0, 255, 255, 1)';
-      }
-      // Rail
-      return 'rgba(255, 0, 0, 1)';
-    },
+  // styleOptions: {
+  //   delayDisplay: 0,
+  //   // Define the circle color
+  //   // @param {string} mot - The mode of transport
+  //   // @param {object} line - The line object
+  //   // @return {string} The color in rgba format
+  //   getBgColor: (mot, line) => {
+  //     if (mot === 'bus') {
+  //       return 'rgba(0, 255, 0, 1)';
+  //     }
+  //     if (mot === 'subway') {
+  //       return 'rgba(0, 0, 255, 1)';
+  //     }
+  //     // S-Bahn
+  //     if (/^S/.test(line?.name)) {
+  //       return 'rgba(0, 255, 255, 1)';
+  //     }
+  //     // Rail
+  //     return 'rgba(255, 0, 0, 1)';
+  //   },
 
-    // Define the maximum radius of the circle when to display the stroke representing the delay
-    // @param {string} mot - The mode of transport
-    // @param {number} delay - The delay in seconds
-    // @return {number} a radius in pixel
-    getMaxRadiusForStrokeAndDelay: (mot, delay) => {
-      return 7;
-    },
+  //   // Define the maximum radius of the circle when to display the stroke representing the delay
+  //   // @param {string} mot - The mode of transport
+  //   // @param {number} delay - The delay in seconds
+  //   // @return {number} a radius in pixel
+  //   getMaxRadiusForStrokeAndDelay: (mot, delay) => {
+  //     return 7;
+  //   },
 
-    // Define the maximum radius of the circle when to display the text
-    // @param {string} mot - The mode of transport
-    // @param {number} zoom - The current zoom level
-    // @return {number} a radius in pixel
-    getMaxRadiusForText: (mot, zoom) => {
-      return 6;
-    },
+  //   // Define the maximum radius of the circle when to display the text
+  //   // @param {string} mot - The mode of transport
+  //   // @param {number} zoom - The current zoom level
+  //   // @return {number} a radius in pixel
+  //   getMaxRadiusForText: (mot, zoom) => {
+  //     return 6;
+  //   },
 
-    // Define the radius of the circle
-    // @param {string} mot - The mode of transport
-    // @param {number} zoom - The current zoom level
-    // @return {number} a radius in pixel
-    getRadius: (mot, zoom) => {
-      return 7;
-    },
-  },
+  //   // Define the radius of the circle
+  //   // @param {string} mot - The mode of transport
+  //   // @param {number} zoom - The current zoom level
+  //   // @return {number} a radius in pixel
+  //   getRadius: (mot, zoom) => {
+  //     return 7;
+  //   },
+  // },
   // filter: (traj) => {
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },
