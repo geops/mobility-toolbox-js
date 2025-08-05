@@ -11,41 +11,23 @@ import type {
   MocoNotificationFeature,
   MocoNotificationFeatureProperties,
   MocoNotificationProperties,
+  MocoReasonCategory,
 } from '../../types';
+
+export type MocoNotificationAsFeatureProperties = {
+  reasons_category?: string;
+} & MocoNotificationFeatureProperties &
+  MocoNotificationProperties;
 
 export type MocoNotificationAsFeature = GeoJSON.Feature<
   GeoJSONGeometry,
-  MocoNotificationFeatureProperties & MocoNotificationProperties
+  MocoNotificationAsFeatureProperties
 >;
 
 export type MocoNotificationAsFeatureCollection = GeoJSON.FeatureCollection<
   GeoJSONGeometry,
-  MocoNotificationFeatureProperties & MocoNotificationProperties
+  MocoNotificationAsFeatureProperties
 >;
-
-export const MOCO_REASONS_CATEGORY = {
-  DAS_PERSONAL_BETREFEND: 'Das Personal betreffend',
-  SICHERHEITSRELEVANT: 'Sicherheitsrelevant',
-  SPEZIELLE_ANLAESSE: 'Spezielle Anl\u00E4sse',
-  TECHNISCHE_PROBLEME: 'Technische Probleme',
-  UMWELTEINFLUESSE: 'Umwelteinflüsse',
-  UNDEFINIERT: 'Undefiniert',
-  UNFALL: 'Unfall',
-  VERKEHRLICHE_GRUENDE: 'Verkehrliche Gr\u00FCnde',
-  VERSCHIEDENES: 'Verschiedenes',
-};
-
-export const MOCO_IMAGE_BY_CATEGORY = {
-  [MOCO_REASONS_CATEGORY.DAS_PERSONAL_BETREFEND]: 'das_personal_betrefend',
-  [MOCO_REASONS_CATEGORY.SICHERHEITSRELEVANT]: 'sicherheitsrelevant',
-  [MOCO_REASONS_CATEGORY.SPEZIELLE_ANLAESSE]: 'spezielle_anlaesse',
-  [MOCO_REASONS_CATEGORY.TECHNISCHE_PROBLEME]: 'technische_probleme',
-  [MOCO_REASONS_CATEGORY.UMWELTEINFLUESSE]: 'umwelteinfluesse',
-  [MOCO_REASONS_CATEGORY.UNDEFINIERT]: 'undefiniert',
-  [MOCO_REASONS_CATEGORY.UNFALL]: 'unfall',
-  [MOCO_REASONS_CATEGORY.VERKEHRLICHE_GRUENDE]: 'verkehrliche_gruende',
-  [MOCO_REASONS_CATEGORY.VERSCHIEDENES]: 'verschiedenes',
-};
 
 export const getTime = (str: string) => {
   return parseInt(str?.substr(0, 8).replace(/:/g, ''), 10);
@@ -74,22 +56,6 @@ export const isMocoNotificationNotOutOfDate = (
   return notOutOfDate;
 };
 
-export const isMocoNotificationPublished = (
-  notificationProperties: MocoNotificationProperties,
-  now: Date,
-) => {
-  if (!notificationProperties?.publications?.length) {
-    // If there is no piblications date, use the time intervals
-    return isMocoNotificationActive(notificationProperties, now);
-  }
-  return notificationProperties.publications.some((publication) => {
-    return (
-      now >= new Date(publication.visible_from) &&
-      now <= new Date(publication.visible_until)
-    );
-  });
-};
-
 export const isMocoNotificationActive = (
   notificationProperties: MocoNotificationProperties,
   now: Date,
@@ -111,6 +77,22 @@ export const isMocoNotificationActive = (
         : inRange;
     },
   );
+};
+
+export const isMocoNotificationPublished = (
+  notificationProperties: MocoNotificationProperties,
+  now: Date,
+) => {
+  if (!notificationProperties?.publications?.length) {
+    // If there is no piblications date, use the time intervals
+    return isMocoNotificationActive(notificationProperties, now);
+  }
+  return notificationProperties.publications.some((publication) => {
+    return (
+      now >= new Date(publication.visible_from) &&
+      now <= new Date(publication.visible_until)
+    );
+  });
 };
 
 export const getMocoStartsString = (
@@ -183,7 +165,7 @@ export const getMocoIconRefFeatures = (
       const center = getCenter(geometry.getExtent());
       const iconRefPoint = geometry.getClosestPoint(center);
 
-      const iconRefFeatureProperties: MocoNotificationFeatureProperties = {
+      const iconRefFeatureProperties: MocoNotificationAsFeatureProperties = {
         ...notification.properties,
         ...affectedLine.properties,
       };
@@ -219,6 +201,19 @@ export const getMocoIconRefFeatures = (
   return iconsForLines;
 };
 
+export const getMocoIconNameFromReasonCategory = (
+  category: MocoReasonCategory = 'Undefiniert',
+) => {
+  const reasonCategory = (category as string)?.toLowerCase() || 'undefiniert';
+  return reasonCategory
+    .toLowerCase()
+    .replace(/ /g, '_')
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss');
+};
+
 export const getMocoNotificationsAsFeatureCollection = (
   notifications: MocoNotification[],
 ): MocoNotificationAsFeatureCollection => {
@@ -234,17 +229,19 @@ export const getMocoNotificationsAsFeatureCollection = (
           ...feature.properties,
         },
       };
-      const reasonCategoryName =
-        notification.properties.reasons?.[0]?.category_name;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const reasonCategoryName = notification.properties.reasons?.[0]
+        ?.category_name as MocoReasonCategory;
 
-      // reasons_category is used to choose the proper icon in the style
-      // @ts-expect-error the value is a string in the style
-      feat.properties.reasons_category =
-        MOCO_IMAGE_BY_CATEGORY[
-          reasonCategoryName || MOCO_REASONS_CATEGORY.UNDEFINIERT
-        ] || MOCO_IMAGE_BY_CATEGORY[MOCO_REASONS_CATEGORY.UNDEFINIERT];
-
-      return feat;
+      return {
+        ...feat,
+        properties: {
+          ...feat.properties,
+          // reasons_category is used to choose the proper icon in the style
+          reasons_category:
+            getMocoIconNameFromReasonCategory(reasonCategoryName),
+        },
+      };
     });
   });
 
@@ -263,5 +260,6 @@ export const getCurrentGraph = (mapping: object, zoom: number) => {
     return bp <= Math.floor(zoom) - 1;
   }); // - 1 due to ol zoom !== mapbox zoom
   // @ts-expect-error the value is a number in der style
-  return mapping[closest || Math.min(...breakPoints)];
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return mapping[closest ?? Math.min(...breakPoints)];
 };

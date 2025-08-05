@@ -18,6 +18,17 @@ export type StopsResponse =
   StopsPaths['/']['get']['responses']['200']['schema'];
 
 /** MOCO definitions */
+export type MocoReasonCategory =
+  | 'Allegemein'
+  | 'Das Personal betreffend'
+  | 'Sicherheitsrelevant'
+  | 'Spezielle Anlässe'
+  | 'Technische Probleme'
+  | 'Umwelteinflüsse'
+  | 'Undefiniert'
+  | 'Unfall'
+  | 'Verkehrliche Gründe'
+  | 'Verschiedenes';
 export type MocoDefinitions = MocoDefinitions;
 export type MocoParameters =
   MocoPaths['/export/publication/']['get']['parameters']['query'];
@@ -28,4 +39,4 @@ export type MocoNotificationProperties =
 export type MocoNotificationFeature = MocoDefinitions['AffectedLinesFeature'];
 
 export type MocoNotificationFeatureProperties =
-  MocoDefinitions['AffectedLinesProperties'];
+  MocoDefinitions['AffectedLineProperties'];
