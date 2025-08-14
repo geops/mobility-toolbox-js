@@ -5,6 +5,7 @@ import { paths as MocoPaths, definitions as MocoDefinitions } from './moco';
 export * from './common';
 export * from './ol';
 export * from './realtime';
+export * from './maps';
 
 export type RealtimeVersion = '1' | '2';
 
@@ -28,4 +29,4 @@ export type MocoNotificationProperties =
 export type MocoNotificationFeature = MocoDefinitions['AffectedLinesFeature'];
 
 export type MocoNotificationFeatureProperties =
-  MocoDefinitions['AffectedLinesProperties'];
+  MocoDefinitions['AffectedLineProperties'];
