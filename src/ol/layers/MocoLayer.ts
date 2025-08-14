@@ -133,7 +133,7 @@ class MocoLayer extends MaplibreStyleLayer {
   };
 
   /** Current graph use */
-  #graph: string;
+  #graph?: string;
 
   /** Graph mapping from the style metadata */
   #graphMapping?: StyleMetadataGraphs;
