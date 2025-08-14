@@ -66,8 +66,9 @@ const map = new Map({
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
+  // style: 'de.rvf_moco',
+  style: 'review-geops-tgma-bzfqt7.de.rvf_moco',
   url: 'https://style-review.geops.io',
-  style: 'review-geops-tgma-u03rp4.de.rvf',
 });
 baseLayer.on('load', () => {
   console.log('baseLayer loaded');
@@ -407,7 +408,7 @@ const realtimeLayer = new RealtimeLayer({
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },
 });
-map.addLayer(realtimeLayer);
+// map.addLayer(realtimeLayer);
 
 map.addControl(new CopyrightControl());
 map.on('moveend', () => {

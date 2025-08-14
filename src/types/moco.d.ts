@@ -535,7 +535,7 @@ export interface definitions {
      * Name
      * @default
      */
-    name?: string;
+    name?: string; 
     /**
      * Category name
      * @default

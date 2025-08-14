@@ -1,8 +1,8 @@
 import type { StyleMetadataGraphs } from '../../types';
 
-const DEFAULT_GRAPH = 'osm';
+export const DEFAULT_GRAPH = 'osm';
 
-const DEFAULT_GRAPH_MAPPING: StyleMetadataGraphs = {
+export const DEFAULT_GRAPH_MAPPING: StyleMetadataGraphs = {
   1: DEFAULT_GRAPH,
 };
 
@@ -16,7 +16,7 @@ const DEFAULT_GRAPH_MAPPING: StyleMetadataGraphs = {
  * @returns {string} - The graph to use for the given zoom level.
  */
 export default function getGraphByZoom(
-  zoom: number,
+  zoom = 0,
   styleMetadata: StyleMetadataGraphs = DEFAULT_GRAPH_MAPPING,
 ): string {
   const breakPoints: number[] = Object.keys(styleMetadata).map((k) => {
@@ -27,6 +27,6 @@ export default function getGraphByZoom(
   });
   let key: number | undefined = closest;
   key ??= Math.min(...breakPoints);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+
   return styleMetadata[key] ?? DEFAULT_GRAPH;
 }
