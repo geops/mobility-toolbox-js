@@ -217,10 +217,6 @@ class MocoLayer extends MaplibreStyleLayer {
     ).metadata?.graphs;
 
     const graph = getGraphByZoom(zoom, graphs);
-    if (graph === this.#graph) {
-      return data; // No need to filter if the graph is the same
-    }
-    this.#graph = graph;
     const newData: MocoNotificationAsFeatureCollection = {
       features: (data?.features || []).filter((feature) => {
         return feature.properties?.graph === graph;
