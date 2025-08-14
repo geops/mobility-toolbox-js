@@ -284,7 +284,7 @@ class MocoLayer extends MaplibreStyleLayer {
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (!source) {
       console.warn('MocoLayer: No source found for id : ', MOCO_SOURCE_ID);
-      // return;
+      return;
     }
 
     const notifsToRender: MocoNotificationToRender[] = (notifications ?? [])
