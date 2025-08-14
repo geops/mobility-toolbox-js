@@ -132,9 +132,6 @@ class MocoLayer extends MaplibreStyleLayer {
     type: 'FeatureCollection',
   };
 
-  /** Current graph use */
-  #graph?: string;
-
   /** Graph mapping from the style metadata */
   #graphMapping?: StyleMetadataGraphs;
 
