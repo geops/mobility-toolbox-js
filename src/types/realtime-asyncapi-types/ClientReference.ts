@@ -1,4 +1,2 @@
-enum ClientReference {
-  EMPTY = '',
-}
+type ClientReference = '';
 export default ClientReference;

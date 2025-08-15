@@ -1,4 +1,2 @@
-enum Source {
-  WEBSOCKET = 'websocket',
-}
+type Source = 'websocket';
 export default Source;

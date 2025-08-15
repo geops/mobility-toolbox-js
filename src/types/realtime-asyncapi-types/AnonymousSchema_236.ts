@@ -1,9 +1,8 @@
-enum AnonymousSchema_236 {
-  BOARDING = 'BOARDING',
-  JOURNEY_CANCELLED = 'JOURNEY_CANCELLED',
-  LEAVING = 'LEAVING',
-  PENDING = 'PENDING',
-  STOP_CANCELLED = 'STOP_CANCELLED',
-  TIME_BASED = 'TIME_BASED',
-}
+type AnonymousSchema_236 =
+  | 'BOARDING'
+  | 'JOURNEY_CANCELLED'
+  | 'LEAVING'
+  | 'PENDING'
+  | 'STOP_CANCELLED'
+  | 'TIME_BASED';
 export default AnonymousSchema_236;

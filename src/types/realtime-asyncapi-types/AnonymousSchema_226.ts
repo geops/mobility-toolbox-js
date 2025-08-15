@@ -1,12 +1,11 @@
-enum AnonymousSchema_226 {
-  BUS = 'bus',
-  CABLECAR = 'cablecar',
-  COACH = 'coach',
-  FERRY = 'ferry',
-  FUNICULAR = 'funicular',
-  GONDOLA = 'gondola',
-  RAIL = 'rail',
-  SUBWAY = 'subway',
-  TRAM = 'tram',
-}
+type AnonymousSchema_226 =
+  | 'bus'
+  | 'cablecar'
+  | 'coach'
+  | 'ferry'
+  | 'funicular'
+  | 'gondola'
+  | 'rail'
+  | 'subway'
+  | 'tram';
 export default AnonymousSchema_226;

@@ -1,4 +1,2 @@
-enum ReservedType {
-  MULTI_LINE_STRING = 'MultiLineString',
-}
+type ReservedType = 'MultiLineString';
 export default ReservedType;
