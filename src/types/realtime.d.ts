@@ -1,4 +1,15 @@
 import { Feature, FeatureCollection, Point } from 'geojson';
+import StopSequence from './realtime-asyncapi-types/StopSequence';
+import StopSequenceCall from './realtime-asyncapi-types/StopSequenceCall';
+import StopSequenceMessage from './realtime-asyncapi-types/StopSequenceMessage';
+import TrackerTrajectory from './realtime-asyncapi-types/TrackerTrajectory';
+import PartialTrajectoryMessage from './realtime-asyncapi-types/PartialTrajectoryMessage';
+import BufferMessage from './realtime-asyncapi-types/BufferMessage';
+import FullTrajectory from './realtime-asyncapi-types/FullTrajectory';
+import FullTrajectoryProperties from './realtime-asyncapi-types/FullTrajectoryProperties';
+import DeletedVehicleMessage from './realtime-asyncapi-types/DeletedVehicleMessage';
+import AnonymousSchema_236 from './realtime-asyncapi-types/AnonymousSchema_236';
+import AnonymousSchema_65 from './realtime-asyncapi-types/AnonymousSchema_65';
 
 export declare type RealtimeChannelModeSuffix = '_schematic' | '';
 
@@ -11,12 +22,7 @@ export type RealtimeBbox = (number | string)[];
 
 export type RealtimeBuffer = [number, number];
 
-export interface RealtimeBufferResponse {
-  client_reference: '';
-  content: RealtimeTrajectoryResponse[];
-  source: 'buffer';
-  timestamp: number;
-}
+export interface RealtimeBufferResponse extends BufferMessage {}
 
 export type RealtimeChannelName =
   | 'buffer'
@@ -30,12 +36,8 @@ export type RealtimeChannelName =
   | `timetable_${RealtimeStationId}`
   | `trajectory${RealtimeChannelModeSuffix}`;
 
-export interface RealtimeDeletedVehiclesResponse {
-  client_reference: null;
-  content: string;
-  source: `deleted_vehicles${RealtimeChannelModeSuffix}`;
-  timestamp: number;
-}
+export interface RealtimeDeletedVehiclesResponse
+  extends DeletedVehicleMessage {}
 
 export interface RealtimeDeparture {
   at_station_ds100: string;
@@ -101,23 +103,10 @@ export interface RealtimeExtraGeomsResponse {
   timestamp: number;
 }
 
-export interface RealtimeFullTrajectory extends FeatureCollection {
-  properties: RealtimeFullTrajectoryProperties;
-}
+export interface RealtimeFullTrajectory extends FullTrajectory {}
 
-export interface RealtimeFullTrajectoryProperties {
-  gen_level?: RealtimeGeneralizationLevel;
-  gen_range: [number, number];
-  license?: string;
-  licenseNote?: string;
-  licenseUrl?: string;
-  operator?: string;
-  operatorUrl?: string;
-  publisher?: string;
-  publisherUrl?: string;
-  tenant: RealtimeTenant;
-  train_id: RealtimeTrainId;
-}
+export interface RealtimeFullTrajectoryProperties
+  extends FullTrajectoryProperties {}
 
 export type RealtimeGeneralizationLevel = 10 | 100 | 30 | 5;
 
@@ -142,16 +131,7 @@ export interface RealtimeLine {
   text_color: string;
 }
 
-export type RealtimeMot =
-  | 'bus'
-  | 'cablecar'
-  | 'coach'
-  | 'ferry'
-  | 'funicular'
-  | 'gondola'
-  | 'rail'
-  | 'subway'
-  | 'tram';
+export type RealtimeMot = AnonymousSchema_226;
 
 export interface RealtimeNews {
   incident_program: boolean;
@@ -211,53 +191,13 @@ export interface RealtimeStationResponse {
   timestamp: number;
 }
 
-export interface RealtimeStop {
-  aimedArrivalTime: number;
-  aimedDepartureTime: number;
-  arrivalDelay?: number;
-  arrivalTime: number;
-  cancelled: boolean;
-  coordinate: number[];
-  departureDelay: number;
-  departureTime: number;
-  noDropOff?: boolean;
-  noPickUp?: boolean;
-  state?: RealtimeStopState;
-  stationId: RealtimeStationId;
-  stationName: string;
-}
+export interface RealtimeStopCall extends StopSequenceCall {}
 
-export interface RealtimeStopSequence {
-  backgroundColor?: string;
-  color?: string;
-  destination: string;
-  id: RealtimeTrainId;
-  license?: string;
-  licenseNote?: string;
-  licenseUrl?: string;
-  longName?: string;
-  new_destination?: string;
-  operator?: string;
-  operatorUrl?: string;
-  publisher?: string;
-  publisherUrl?: string;
-  routeIdentifier: string;
-  shortName: string;
-  stations: RealtimeStop[];
-  stroke?: RealtimeTenant;
-  text_color: string;
-  type: RealtimeMot;
-  vehicleType: number;
-}
+export interface RealtimeStopSequence extends StopSequence {}
 
-export interface RealtimeStopSequenceResponse {
-  client_reference: '';
-  content: RealtimeStopSequence[];
-  source: `stopsequence_${RealtimeTenant}_${RealtimeTrainId}`;
-  timestamp: number;
-}
+export interface RealtimeStopSequenceResponse extends StopSequenceMessage {}
 
-export type RealtimeStopState = 'BOARDING' | 'LEAVING' | string;
+export type RealtimeStopState = AnonymousSchema_236;
 
 export type RealtimeTenant = '' | 'sbb' | 'sbh' | 'sbm' | string;
 
@@ -270,71 +210,11 @@ export interface RealtimeTimetableResponse {
 
 export type RealtimeTrainId = string;
 
-export interface RealtimeTrajectory extends Feature {
-  properties: RealtimeTrajectoryProperties;
-}
+export interface RealtimeTrajectory extends TrackerTrajectory {}
 
-export interface RealtimeTrajectoryProperties {
-  // Tralis and trafimage
-  bounds: [number, number, number, number];
+export interface RealtimeTrajectoryResponse extends PartialTrajectoryMessage {}
 
-  // Only after first rendering on a map
-  coordinate?: [number, number];
-
-  delay: null | number;
-
-  // Tralis
-  event?: string;
-  event_delay?: number;
-  event_timestamp: number;
-  event_timestamp?: number;
-  gen_level?: RealtimeGeneralizationLevel;
-  gen_range: [number, number];
-  has_journey: boolean;
-  has_realtime: boolean;
-  has_realtime_journey: boolean;
-  line?: RealtimeLine;
-  name?: string; // deprecated, name is an old property, use line.name instead.
-  operator?: string; // deprecated, operator is an old property, use tenant instead.
-  operator_provides_realtime_journey: 'no' | 'unknown' | 'yes';
-  original_line?: RealtimeLine;
-  original_rake?: string;
-  original_train_number?: number;
-  position_correction?: number;
-  rake?: string;
-  raw_coordinates?: [number, number];
-
-  raw_time?: string;
-  ride_state?: string;
-
-  route_identifier: string;
-  routeIdentifier?: string;
-  state: RealtimeTrajectoryState;
-  tenant: string;
-  time_intervals?: number[][];
-  time_since_update?: string;
-  timestamp: number;
-  train_id?: RealtimeTrainId;
-  train_number?: number;
-  transmitting_vehicle?: string;
-  type: RealtimeMot;
-
-  // Added by realtime engine
-  rotation?: number;
-}
-
-export interface RealtimeTrajectoryResponse {
-  client_reference: '';
-  content: RealtimeTrajectory;
-  source: `trajectory${RealtimeChannelModeSuffix}`;
-  timestamp: number;
-}
-
-export type RealtimeTrajectoryState =
-  | 'BOARDING'
-  | 'HIDDEN'
-  | 'JOURNEY_CANCELLED'
-  | 'STOP_CANCELLED';
+export type RealtimeTrajectoryState = AnonymousSchema_65;
 
 export interface RealtimeTransfer {
   lines: string[];

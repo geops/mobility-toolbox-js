@@ -8,7 +8,7 @@ import type { RealtimeTrajectory } from '../../types';
 
 export interface VehiclePosition {
   coord?: Coordinate;
-  rotation?: number;
+  rotation?: null | number;
 }
 
 /**
@@ -23,7 +23,10 @@ export interface VehiclePosition {
 const getVehiclePosition = (
   now: number,
   trajectory: {
-    properties: { olGeometry?: SimpleGeometry };
+    properties: {
+      coordinate?: Coordinate;
+      olGeometry?: SimpleGeometry;
+    };
   } & RealtimeTrajectory,
   noInterpolate: boolean,
 ): VehiclePosition => {
@@ -64,11 +67,11 @@ const getVehiclePosition = (
     // So we make the choice here to display the last (or the first) position
     // of an trajectory event instead of removing them, if the current date is
     // outside the time intervals we display the vehicle at the last (or first) position known.
-    if (now < firstInterval[0]) {
+    if (firstInterval?.[0] && now < firstInterval[0]) {
       // Display first position known.
       [, , rotation] = firstInterval;
       coord = geometry.getFirstCoordinate();
-    } else if (now > lastInterval[0]) {
+    } else if (lastInterval?.[0] && now > lastInterval[0]) {
       // Display last position known.
       [, , rotation] = lastInterval;
       coord = geometry.getLastCoordinate();
@@ -79,7 +82,14 @@ const getVehiclePosition = (
         const [start, startFrac] = intervals[j];
         const [end, endFrac] = intervals[j + 1];
 
-        if (start <= now && now <= end) {
+        if (
+          start &&
+          end &&
+          startFrac &&
+          endFrac &&
+          start <= now &&
+          now <= end
+        ) {
           // interpolate position inside the time interval.
           const timeFrac = Math.min((now - start) / (end - start), 1);
           const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;
