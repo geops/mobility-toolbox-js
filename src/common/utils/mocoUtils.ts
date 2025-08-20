@@ -1,9 +1,8 @@
 import { getCenter } from 'ol/extent';
-import GeoJSON from 'ol/format/GeoJSON';
+import GeoJSONFormat from 'ol/format/GeoJSON';
 import { toLonLat } from 'ol/proj';
 
 import type { Feature } from 'ol';
-import type { GeoJSONGeometry } from 'ol/format/GeoJSON';
 
 import type {
   MocoDefinitions,
@@ -13,14 +12,17 @@ import type {
   MocoNotificationProperties,
 } from '../../types';
 
+export type MocoNotificationAsFeatureProperties =
+  MocoNotificationFeatureProperties & MocoNotificationProperties;
+
 export type MocoNotificationAsFeature = GeoJSON.Feature<
-  GeoJSONGeometry,
-  MocoNotificationFeatureProperties & MocoNotificationProperties
+  GeoJSON.Geometry,
+  MocoNotificationAsFeatureProperties
 >;
 
 export type MocoNotificationAsFeatureCollection = GeoJSON.FeatureCollection<
-  GeoJSONGeometry,
-  MocoNotificationFeatureProperties & MocoNotificationProperties
+  GeoJSON.Geometry,
+  MocoNotificationAsFeatureProperties
 >;
 
 export const MOCO_REASONS_CATEGORY = {
@@ -74,22 +76,6 @@ export const isMocoNotificationNotOutOfDate = (
   return notOutOfDate;
 };
 
-export const isMocoNotificationPublished = (
-  notificationProperties: MocoNotificationProperties,
-  now: Date,
-) => {
-  if (!notificationProperties?.publications?.length) {
-    // If there is no piblications date, use the time intervals
-    return isMocoNotificationActive(notificationProperties, now);
-  }
-  return notificationProperties.publications.some((publication) => {
-    return (
-      now >= new Date(publication.visible_from) &&
-      now <= new Date(publication.visible_until)
-    );
-  });
-};
-
 export const isMocoNotificationActive = (
   notificationProperties: MocoNotificationProperties,
   now: Date,
@@ -111,6 +97,22 @@ export const isMocoNotificationActive = (
         : inRange;
     },
   );
+};
+
+export const isMocoNotificationPublished = (
+  notificationProperties: MocoNotificationProperties,
+  now: Date,
+) => {
+  if (!notificationProperties?.publications?.length) {
+    // If there is no piblications date, use the time intervals
+    return isMocoNotificationActive(notificationProperties, now);
+  }
+  return notificationProperties.publications.some((publication) => {
+    return (
+      now >= new Date(publication.visible_from) &&
+      now <= new Date(publication.visible_until)
+    );
+  });
 };
 
 export const getMocoStartsString = (
@@ -156,7 +158,7 @@ export const getMocoStartsString = (
 export const getMocoIconRefFeatures = (
   notification: MocoNotification,
 ): MocoNotificationFeature[] => {
-  const format = new GeoJSON();
+  const format = new GeoJSONFormat();
 
   const features = notification.features || [];
   const lineFeatures: MocoNotificationFeature[] = features.filter((f) => {
@@ -183,7 +185,7 @@ export const getMocoIconRefFeatures = (
       const center = getCenter(geometry.getExtent());
       const iconRefPoint = geometry.getClosestPoint(center);
 
-      const iconRefFeatureProperties: MocoNotificationFeatureProperties = {
+      const iconRefFeatureProperties: MocoNotificationAsFeatureProperties = {
         ...notification.properties,
         ...affectedLine.properties,
       };
@@ -253,15 +255,4 @@ export const getMocoNotificationsAsFeatureCollection = (
     features,
     type: 'FeatureCollection',
   };
-};
-
-export const getCurrentGraph = (mapping: object, zoom: number) => {
-  const breakPoints = Object.keys(mapping).map((k) => {
-    return parseFloat(k);
-  });
-  const closest = breakPoints.reverse().find((bp) => {
-    return bp <= Math.floor(zoom) - 1;
-  }); // - 1 due to ol zoom !== mapbox zoom
-  // @ts-expect-error the value is a number in der style
-  return mapping[closest || Math.min(...breakPoints)];
 };

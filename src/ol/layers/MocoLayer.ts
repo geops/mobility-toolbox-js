@@ -1,24 +1,31 @@
 import {
+  getGraphByZoom,
   getMocoIconRefFeatures,
   getMocoNotificationsAsFeatureCollection,
   isMocoNotificationActive,
   isMocoNotificationPublished,
   MocoAPI,
 } from '..';
+import { DEFAULT_GRAPH_MAPPING } from '../utils/getGraphByZoom';
 
 import MaplibreStyleLayer from './MaplibreStyleLayer';
 
 import type { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
 import type { Map } from 'ol';
 
+import type { MocoNotificationAsFeatureCollection } from '..';
 import type { MocoAPIOptions } from '../../api/MocoAPI';
-import type { MocoDefinitions, MocoNotification } from '../../types';
+import type {
+  MapsStyleSpecification,
+  MocoDefinitions,
+  MocoNotification,
+  StyleMetadataGraphs,
+} from '../../types';
 
 import type { MaplibreStyleLayerOptions } from './MaplibreStyleLayer';
 
 export const MOCO_SOURCE_ID = 'moco';
 export const MOCO_MD_LAYER_FILTER = 'moco';
-export const DEFAULT_GRAPH_MAPPING = { 1: 'osm' };
 
 export type MocoLayerOptions = {
   date?: Date;
@@ -117,7 +124,16 @@ class MocoLayer extends MaplibreStyleLayer {
   }
   #abortController: AbortController | null = null;
 
-  #graphMapping: Record<number, string> = DEFAULT_GRAPH_MAPPING;
+  /**
+   * This is used to store the notifications data that are rendered on the map and to filter them depending on the graph.
+   */
+  #dataInternal: MocoNotificationAsFeatureCollection = {
+    features: [],
+    type: 'FeatureCollection',
+  };
+
+  /** Graph mapping from the style metadata */
+  #graphMapping?: StyleMetadataGraphs;
 
   /**
    * Constructor.
@@ -161,6 +177,15 @@ class MocoLayer extends MaplibreStyleLayer {
     if (source) {
       void this.updateData();
     }
+
+    const mapInternal = this.getMapInternal();
+    if (mapInternal) {
+      this.olEventsKeys.push(
+        mapInternal.on('moveend', () => {
+          this.onZoomEnd();
+        }),
+      );
+    }
   }
 
   override detachFromMap() {
@@ -180,9 +205,41 @@ class MocoLayer extends MaplibreStyleLayer {
     }
   }
 
+  getDataByGraph(
+    data: MocoNotificationAsFeatureCollection,
+  ): MocoNotificationAsFeatureCollection {
+    const zoom = this.getMapInternal()?.getView()?.getZoom();
+    const graphs = (
+      this.maplibreLayer?.mapLibreMap?.getStyle() as MapsStyleSpecification
+    ).metadata?.graphs;
+
+    const graph = getGraphByZoom(zoom, graphs);
+    const newData: MocoNotificationAsFeatureCollection = {
+      features: (data?.features || []).filter((feature) => {
+        return feature.properties?.graph === graph;
+      }),
+      type: 'FeatureCollection',
+    };
+    return newData;
+  }
+
   onLoad() {
     super.onLoad();
     void this.updateData();
+  }
+
+  onZoomEnd() {
+    const source: GeoJSONSource | undefined =
+      this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
+    if (!source || !this.#graphMapping || !this.#dataInternal.features.length) {
+      return;
+    }
+
+    // We update the data if the graph has changed
+    const newData = this.getDataByGraph(this.#dataInternal);
+    if (newData !== this.#dataInternal) {
+      source.setData(newData);
+    }
   }
 
   async updateData() {
@@ -192,12 +249,11 @@ class MocoLayer extends MaplibreStyleLayer {
     this.#abortController = new AbortController();
 
     // Get graphs mapping
-    const styleMetadata = this.maplibreLayer?.mapLibreMap?.getStyle()
-      ?.metadata as { graphs?: Record<number, string> };
-    this.#graphMapping = styleMetadata?.graphs || DEFAULT_GRAPH_MAPPING;
-    const graphsString = [...new Set(Object.values(this.#graphMapping))].join(
-      ',',
-    );
+    const mdGraphs = (
+      this.maplibreLayer?.mapLibreMap?.getStyle() as MapsStyleSpecification
+    ).metadata?.graphs;
+    const graphMapping = mdGraphs ?? DEFAULT_GRAPH_MAPPING;
+    const graphsString = [...new Set(Object.values(graphMapping))].join(',');
 
     // We get the data from the MocoAPI
     const api = new MocoAPI({
@@ -251,8 +307,12 @@ class MocoLayer extends MaplibreStyleLayer {
 
     const data = getMocoNotificationsAsFeatureCollection(notifsToRender);
 
+    this.#dataInternal = data;
+
     // Apply new data to the source
-    (source as GeoJSONSource).setData(data);
+    (source as GeoJSONSource).setData(this.getDataByGraph(data));
+
+    this.#graphMapping = graphMapping; // Active update of data on zoom end
 
     return true;
   }

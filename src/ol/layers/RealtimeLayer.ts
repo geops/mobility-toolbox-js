@@ -29,7 +29,9 @@ import type {
   RealtimeMode,
   RealtimeRenderState,
   RealtimeStopSequence,
+  RealtimeStyleFunction,
   RealtimeTrainId,
+  RealtimeTrajectory,
   ViewState,
 } from '../../types';
 
@@ -137,6 +139,16 @@ class RealtimeLayer extends Layer {
     this.engine.sort = sort;
   }
 
+  get style() {
+    return this.engine?.style;
+  }
+
+  set style(style: RealtimeStyleFunction) {
+    if (this.engine) {
+      this.engine.style = style;
+    }
+  }
+
   get trajectories() {
     return this.engine.trajectories;
   }
@@ -188,6 +200,14 @@ class RealtimeLayer extends Layer {
     this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
 
     this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
+  }
+
+  /**
+   * Add a trajectory.
+   * @param trajectory
+   */
+  addTrajectory(trajectory: RealtimeTrajectory) {
+    this.engine?.addTrajectory(trajectory);
   }
 
   attachToMap() {
@@ -445,6 +465,15 @@ class RealtimeLayer extends Layer {
     if (this.selectedVehicleId) {
       void this.highlightTrajectory(this.selectedVehicleId);
     }
+  }
+
+  /**
+   * Remove a trajectory.
+   *
+   * @param trajectoryOrId
+   */
+  removeTrajectory(trajectoryOrId: RealtimeTrainId | RealtimeTrajectory) {
+    this.engine?.removeTrajectory(trajectoryOrId);
   }
 
   /**

@@ -48,12 +48,14 @@ export interface RealtimeEngineOptions {
     zoom: number,
     generalizationLevelByZoom: RealtimeGeneralizationLevel[],
   ) => RealtimeGeneralizationLevel;
+  getGraphByZoom?: (zoom: number, graphByZoom: string[]) => string | undefined;
   getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
   getRenderTimeIntervalByZoom?: (
     zoom: number,
     renderTimeIntervalByZoom: number[],
   ) => number;
   getViewState?: () => ViewState;
+  graphByZoom?: string[];
   hoverVehicleId?: RealtimeTrainId;
   isUpdateBboxOnMoveEnd?: boolean;
   live?: boolean;
@@ -111,8 +113,10 @@ class RealtimeEngine {
   generalizationLevel?: RealtimeGeneralizationLevel;
   generalizationLevelByZoom: RealtimeGeneralizationLevel[];
   getGeneralizationLevelByZoom: (zoom: number) => RealtimeGeneralizationLevel;
+  getGraphByZoom: (zoom: number) => string | undefined;
   getMotsByZoom: (zoom: number) => RealtimeMot[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
+  graphByZoom: string[];
   hoverVehicleId?: RealtimeTrainId;
   isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
@@ -245,8 +249,9 @@ class RealtimeEngine {
 
     this.format = new GeoJSON();
 
+    // Mots by zoom
     // Server will block non train before zoom 9
-    this.motsByZoom = options.motsByZoom || [
+    this.motsByZoom = options.motsByZoom ?? [
       realtimeConfig.MOTS_ONLY_RAIL,
       realtimeConfig.MOTS_ONLY_RAIL,
       realtimeConfig.MOTS_ONLY_RAIL,
@@ -259,11 +264,13 @@ class RealtimeEngine {
       realtimeConfig.MOTS_WITHOUT_CABLE,
       realtimeConfig.MOTS_WITHOUT_CABLE,
     ];
-
-    // Mots by zoom
     this.getMotsByZoom = (zoom) => {
       if (options.getMotsByZoom) {
         return options.getMotsByZoom(zoom, this.motsByZoom);
+      }
+
+      if (zoom > this.motsByZoom.length - 1) {
+        return this.motsByZoom[this.motsByZoom.length - 1];
       }
       return this.motsByZoom[zoom];
     };
@@ -277,7 +284,25 @@ class RealtimeEngine {
           this.generalizationLevelByZoom,
         );
       }
+      if (zoom > this.generalizationLevelByZoom.length - 1) {
+        return this.generalizationLevelByZoom[
+          this.generalizationLevelByZoom.length - 1
+        ];
+      }
       return this.generalizationLevelByZoom[zoom];
+    };
+
+    // Graph by zoom
+    this.graphByZoom = options.graphByZoom ?? [];
+    console.log('graphByZoom', this.graphByZoom);
+    this.getGraphByZoom = (zoom) => {
+      if (options.getGraphByZoom) {
+        return options.getGraphByZoom(zoom, this.graphByZoom);
+      }
+      if (zoom > this.graphByZoom.length - 1) {
+        return this.graphByZoom?.[this.graphByZoom.length - 1];
+      }
+      return this.graphByZoom?.[zoom];
     };
 
     // Render time interval by zoom
@@ -432,9 +457,9 @@ class RealtimeEngine {
   ): FeatureCollection {
     const { resolution } = this.getViewState();
     const { hitTolerance, nb } = options || {};
-    const ext = buffer(
+    const extent = buffer(
       [...coordinate, ...coordinate],
-      (hitTolerance || 5) * (resolution || 1),
+      (hitTolerance ?? 5) * (resolution ?? 1),
     );
     let trajectories = Object.values(this.trajectories || {});
 
@@ -444,10 +469,10 @@ class RealtimeEngine {
     }
 
     const vehicles = [];
-    for (let i = 0; i < trajectories.length; i += 1) {
-      const { coordinate: trajcoord } = trajectories[i].properties;
-      if (trajcoord && containsCoordinate(ext, trajcoord)) {
-        vehicles.push(trajectories[i]);
+    for (const trajectory of trajectories) {
+      const { coordinate: trajcoord } = trajectory.properties;
+      if (trajcoord && containsCoordinate(extent, trajcoord)) {
+        vehicles.push(trajectory);
       }
       if (vehicles.length === nb) {
         break;
@@ -706,7 +731,7 @@ class RealtimeEngine {
 
     const viewState = this.getViewState();
     const extent = viewState.extent;
-    const zoom = viewState.zoom || 0;
+    const zoom = viewState.zoom ?? 0;
 
     if (!extent || Number.isNaN(zoom)) {
       return;
@@ -749,7 +774,7 @@ class RealtimeEngine {
     /* @private */
     this.mots = this.getMotsByZoom(zoomFloor);
     if (this.mots) {
-      bbox.push(`mots=${this.mots}`);
+      bbox.push(`mots=${this.mots.toString()}`);
     }
 
     if (this.tenant) {
@@ -760,8 +785,14 @@ class RealtimeEngine {
       bbox.push(`channel_prefix=${this.mode}`);
     }
 
+    const graph = this.getGraphByZoom(zoomFloor);
+    if (graph) {
+      bbox.push(`graph=${graph}`);
+    }
+
     if (this.bboxParameters) {
       Object.entries(this.bboxParameters).forEach(([key, value]) => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         bbox.push(`${key}=${value}`);
       });
     }
