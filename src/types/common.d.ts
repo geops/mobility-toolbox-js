@@ -13,6 +13,7 @@ import type {
 import type {
   MapboxLayer,
   MaplibreLayer,
+  MapsetLayer,
   CopyrightControl as OlCopyrightControl,
   layer as OlLayer,
   RealtimeLayer as OlRealtimeLayer,

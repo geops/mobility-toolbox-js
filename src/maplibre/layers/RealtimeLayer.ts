@@ -1,16 +1,22 @@
 import { point } from '@turf/helpers';
 import transformRotate from '@turf/transform-rotate';
-import { CanvasSourceSpecification, LayerSpecification } from 'maplibre-gl';
 import { getHeight, getWidth } from 'ol/extent';
 import { fromLonLat } from 'ol/proj';
 
+import RealtimeEngine from '../../common/utils/RealtimeEngine';
+import { getSourceCoordinates } from '../utils';
+
+import Layer from './Layer';
+
+import type {
+  CanvasSourceSpecification,
+  LayerSpecification,
+} from 'maplibre-gl';
+
+import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { AnyCanvas, AnyMapGlMap } from '../../types';
 
-import RealtimeEngine, {
-  RealtimeEngineOptions,
-} from '../../common/utils/RealtimeEngine';
-import { getSourceCoordinates } from '../utils';
-import Layer, { LayerOptions } from './Layer';
+import type { LayerOptions } from './Layer';
 
 export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
 
@@ -86,7 +92,7 @@ class RealtimeLayer extends Layer {
     const id = options?.id || 'realtime';
     super({
       ...options,
-      id: 'realtime-custom-' + id,
+      id: `realtime-custom-${id}`,
     });
 
     this.#internalId = id;

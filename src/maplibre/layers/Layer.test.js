@@ -1,11 +1,12 @@
 import { Evented } from 'maplibre-gl';
+
 import Layer from './Layer';
 
 describe('Layer', () => {
   test('should be initialized with good properties and with functions implemented', () => {
     const options = {
-      id: 'Layer',
       foo: 'bar',
+      id: 'Layer',
     };
     const layer = new Layer(options);
     expect(layer).toBeInstanceOf(Evented);

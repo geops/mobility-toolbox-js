@@ -1,4 +1,4 @@
-import { AnyMapGlMap } from '../../types';
+import type { AnyMapGlMap } from '../../types';
 
 /**
  * Get the canvas source coordinates of the current map's extent.
