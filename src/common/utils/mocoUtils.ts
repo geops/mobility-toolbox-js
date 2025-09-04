@@ -1,5 +1,6 @@
 import { getCenter } from 'ol/extent';
 import GeoJSONFormat from 'ol/format/GeoJSON';
+import { v4 as uuid } from 'uuid';
 
 import type { LineString } from 'ol/geom';
 
@@ -120,7 +121,7 @@ export const getMocoIconRefFeature = (
       coordinates: geometry.getClosestPoint(center),
       type: 'Point',
     },
-    id: `${Math.random()}`,
+    id: uuid(),
     properties: {
       ...publicationLineFeature.properties,
       geometry: undefined, // to avoid ol problems
@@ -200,6 +201,7 @@ export const getFeatureCollectionToRenderFromSituation = (
           }) => {
             const feature: MocoNotificationFeatureToRender = {
               geometry: to4326(geom),
+              id: uuid(),
               properties: {
                 ...situation, // for the situation id
                 ...publication, // for serviceConditionGroup and severityGroup
@@ -232,6 +234,7 @@ export const getFeatureCollectionToRenderFromSituation = (
         }) => {
           const feature: MocoNotificationFeatureToRender = {
             geometry: to4326(geom),
+            id: uuid(),
             properties: {
               ...situation, // for the situation id
               ...publication, // for serviceConditionGroup and severityGroup
