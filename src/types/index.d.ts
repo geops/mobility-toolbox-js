@@ -6,7 +6,7 @@ import {
   operations as MocoOperations,
 } from './moco';
 import { SituationTypeExtendedOffsetPaginated } from './moco/gql/graphql';
-export * from './moco/gql';
+export * from './moco/gql/graphql';
 
 export * from './common';
 export * from './ol';
