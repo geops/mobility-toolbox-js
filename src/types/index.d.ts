@@ -1,6 +1,12 @@
 import { paths as RoutingPaths } from './routing';
 import { paths as StopsPaths } from './stops';
-import { paths as MocoPaths, definitions as MocoDefinitions } from './moco';
+import {
+  paths as MocoPaths,
+  definitions as MocoDefinitions,
+  operations as MocoOperations,
+} from './moco';
+import { SituationTypeExtendedOffsetPaginated } from './moco/gql/graphql';
+export * from './moco/gql';
 
 export * from './common';
 export * from './ol';
@@ -18,15 +24,5 @@ export type StopsParameters = StopsPaths['/']['get']['parameters']['query'];
 export type StopsResponse =
   StopsPaths['/']['get']['responses']['200']['schema'];
 
-/** MOCO definitions */
-export type MocoDefinitions = MocoDefinitions;
-export type MocoParameters =
-  MocoPaths['/export/publication/']['get']['parameters']['query'];
-export type MocoNotification = MocoDefinitions['GeoJSON'];
-export type MocoNotificationProperties =
-  MocoDefinitions['FeatureCollectionProperties'];
-
-export type MocoNotificationFeature = MocoDefinitions['AffectedLinesFeature'];
-
-export type MocoNotificationFeatureProperties =
-  MocoDefinitions['AffectedLineProperties'];
+export type MocoExportParameters =
+  MocoOperations.v2_export_retrieve.parameters & { apiKey?: string };

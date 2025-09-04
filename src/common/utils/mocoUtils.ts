@@ -1,258 +1,286 @@
 import { getCenter } from 'ol/extent';
 import GeoJSONFormat from 'ol/format/GeoJSON';
-import { toLonLat } from 'ol/proj';
 
-import type { Feature } from 'ol';
+import type { LineString } from 'ol/geom';
 
 import type {
-  MocoDefinitions,
-  MocoNotification,
-  MocoNotificationFeature,
-  MocoNotificationFeatureProperties,
-  MocoNotificationProperties,
-} from '../../types';
-
-export type MocoNotificationAsFeatureProperties =
-  MocoNotificationFeatureProperties & MocoNotificationProperties;
-
-export type MocoNotificationAsFeature = GeoJSON.Feature<
-  GeoJSON.Geometry,
-  MocoNotificationAsFeatureProperties
->;
-
-export type MocoNotificationAsFeatureCollection = GeoJSON.FeatureCollection<
-  GeoJSON.Geometry,
-  MocoNotificationAsFeatureProperties
->;
-
-export const MOCO_REASONS_CATEGORY = {
-  DAS_PERSONAL_BETREFEND: 'Das Personal betreffend',
-  SICHERHEITSRELEVANT: 'Sicherheitsrelevant',
-  SPEZIELLE_ANLAESSE: 'Spezielle Anl\u00E4sse',
-  TECHNISCHE_PROBLEME: 'Technische Probleme',
-  UMWELTEINFLUESSE: 'Umwelteinflüsse',
-  UNDEFINIERT: 'Undefiniert',
-  UNFALL: 'Unfall',
-  VERKEHRLICHE_GRUENDE: 'Verkehrliche Gr\u00FCnde',
-  VERSCHIEDENES: 'Verschiedenes',
-};
-
-export const MOCO_IMAGE_BY_CATEGORY = {
-  [MOCO_REASONS_CATEGORY.DAS_PERSONAL_BETREFEND]: 'das_personal_betrefend',
-  [MOCO_REASONS_CATEGORY.SICHERHEITSRELEVANT]: 'sicherheitsrelevant',
-  [MOCO_REASONS_CATEGORY.SPEZIELLE_ANLAESSE]: 'spezielle_anlaesse',
-  [MOCO_REASONS_CATEGORY.TECHNISCHE_PROBLEME]: 'technische_probleme',
-  [MOCO_REASONS_CATEGORY.UMWELTEINFLUESSE]: 'umwelteinfluesse',
-  [MOCO_REASONS_CATEGORY.UNDEFINIERT]: 'undefiniert',
-  [MOCO_REASONS_CATEGORY.UNFALL]: 'unfall',
-  [MOCO_REASONS_CATEGORY.VERKEHRLICHE_GRUENDE]: 'verkehrliche_gruende',
-  [MOCO_REASONS_CATEGORY.VERSCHIEDENES]: 'verschiedenes',
-};
+  MocoNotificationFeatureCollectionToRender,
+  MocoNotificationFeatureToRender,
+} from '../../ol/layers/MocoLayer';
+import type { SituationType } from '../../types/moco/gql/graphql';
 
 export const getTime = (str: string) => {
   return parseInt(str?.substr(0, 8).replace(/:/g, ''), 10);
 };
+const geojson = new GeoJSONFormat();
 
-export const isMocoNotificationNotOutOfDate = (
-  notification: MocoNotification,
+/**
+ * Determines if the current date is within an affected time intervals of a situation.
+ */
+export const isMocoSituationAffected = (
+  situation: Partial<SituationType>,
   now: Date = new Date(),
 ) => {
-  // TODO: The backend should be responsible to returns only good notifications.
-  let notOutOfDate = notification.properties.affected_time_intervals.some(
-    (ati) => {
-      return now < new Date(ati.end);
-    },
-  );
-  if (!notOutOfDate) {
-    notOutOfDate = (notification.properties.publications || []).some(
-      (publication) => {
-        return (
-          now >= new Date(publication.visible_from) &&
-          now <= new Date(publication.visible_until)
-        );
-      },
-    );
-  }
-  return notOutOfDate;
-};
-
-export const isMocoNotificationActive = (
-  notificationProperties: MocoNotificationProperties,
-  now: Date,
-) => {
-  return notificationProperties.affected_time_intervals.some(
-    (affectedTimeInterval) => {
-      const {
-        end,
-        start,
-        time_of_day_end: dayTimeEnd,
-        time_of_day_start: dayTimeStart,
-      } = affectedTimeInterval;
-      const nowTime = getTime(now.toTimeString());
-      const startTime = getTime(dayTimeStart || '');
-      const endTime = getTime(dayTimeEnd || '');
-      const inRange = new Date(start) <= now && now <= new Date(end);
-      return startTime && endTime
-        ? inRange && startTime <= nowTime && nowTime <= endTime
-        : inRange;
-    },
-  );
-};
-
-export const isMocoNotificationPublished = (
-  notificationProperties: MocoNotificationProperties,
-  now: Date,
-) => {
-  if (!notificationProperties?.publications?.length) {
-    // If there is no piblications date, use the time intervals
-    return isMocoNotificationActive(notificationProperties, now);
-  }
-  return notificationProperties.publications.some((publication) => {
-    return (
-      now >= new Date(publication.visible_from) &&
-      now <= new Date(publication.visible_until)
-    );
+  return !!situation.affectedTimeIntervals?.some((affectedTimeInterval) => {
+    const {
+      dailyEndTime = '',
+      dailyStartTime = '',
+      endTime,
+      startTime,
+    } = affectedTimeInterval as {
+      dailyEndTime?: string;
+      dailyStartTime?: string;
+      endTime: string;
+      startTime: string;
+    };
+    const nowTime = getTime(now.toTimeString());
+    const dailyStart = getTime(dailyStartTime);
+    const dailyEnd = getTime(dailyEndTime);
+    const inRange = new Date(startTime) <= now && now <= new Date(endTime);
+    return dailyStart && dailyEnd
+      ? inRange && dailyStart <= nowTime && nowTime <= dailyEnd
+      : inRange;
   });
 };
 
-export const getMocoStartsString = (
-  notificationProperties: MocoNotificationProperties,
-  now: Date,
+/**
+ * Determines if the current date is within a publication windows of a situation.
+ */
+export const isMocoSituationPublished = (
+  situation: Partial<SituationType>,
+  now: Date = new Date(),
 ) => {
-  const next = notificationProperties.affected_time_intervals.reduce(
-    (
-      a: MocoDefinitions['AffectedTimeIntervals'],
-      b: MocoDefinitions['AffectedTimeIntervals'],
-    ) => {
-      const aEnd = new Date(a.end);
-      const aStart = new Date(a.start);
-      const bStart = new Date(b.start);
-      return now < aEnd && aStart < bStart ? a : b;
-    },
-    {} as MocoDefinitions['AffectedTimeIntervals'],
-  );
-  const nextStartDate = new Date(next.start);
-  let starts;
-  if (
-    now.toDateString() === nextStartDate.toDateString() ||
-    now.getTime() - nextStartDate.getTime() > 0
-  ) {
-    if (next.time_of_day_start) {
-      starts = `ab ${next.time_of_day_start.substr(0, 5)}`;
-    } else {
-      starts = `ab ${nextStartDate.toLocaleTimeString(['de'], {
-        hour: '2-digit',
-        hour12: false,
-        minute: '2-digit',
-      })}`;
-    }
-  } else {
-    starts = `ab ${nextStartDate.toLocaleDateString(['de-DE'], {
-      day: 'numeric',
-      month: 'short',
-    })}`;
+  const publicationWindows =
+    situation.publications?.flatMap((publication) => {
+      return publication.publicationWindows ?? [];
+    }) ?? [];
+  if (!publicationWindows.length) {
+    // If there are no publication windows, use the time intervals
+    return !!isMocoSituationAffected(situation, now);
   }
-  return starts;
+  return !!publicationWindows.some(
+    ({ endTime, startTime }: { endTime: string; startTime: string }) => {
+      return new Date(startTime) <= now && now <= new Date(endTime);
+    },
+  );
 };
 
-export const getMocoIconRefFeatures = (
-  notification: MocoNotification,
-): MocoNotificationFeature[] => {
-  const format = new GeoJSONFormat();
+// export const getMocoStartsString = (
+//   notificationProperties: MocoNotificationProperties,
+//   now: Date,
+// ) => {
+//   const next = notificationProperties.affected_time_intervals.reduce(
+//     (
+//       a: MocoDefinitions['AffectedTimeIntervals'],
+//       b: MocoDefinitions['AffectedTimeIntervals'],
+//     ) => {
+//       const aEnd = new Date(a.end);
+//       const aStart = new Date(a.start);
+//       const bStart = new Date(b.start);
+//       return now < aEnd && aStart < bStart ? a : b;
+//     },
+//     {} as MocoDefinitions['AffectedTimeIntervals'],
+//   );
+//   const nextStartDate = new Date(next.start);
+//   let starts;
+//   if (
+//     now.toDateString() === nextStartDate.toDateString() ||
+//     now.getTime() - nextStartDate.getTime() > 0
+//   ) {
+//     if (next.time_of_day_start) {
+//       starts = `ab ${next.time_of_day_start.substr(0, 5)}`;
+//     } else {
+//       starts = `ab ${nextStartDate.toLocaleTimeString(['de'], {
+//         hour: '2-digit',
+//         hour12: false,
+//         minute: '2-digit',
+//       })}`;
+//     }
+//   } else {
+//     starts = `ab ${nextStartDate.toLocaleDateString(['de-DE'], {
+//       day: 'numeric',
+//       month: 'short',
+//     })}`;
+//   }
+//   return starts;
+// };
 
-  const features = notification.features || [];
-  const lineFeatures: MocoNotificationFeature[] = features.filter((f) => {
-    return f.geometry?.type !== 'Point';
-  });
+export const getMocoIconRefFeature = (
+  publicationLineFeature: MocoNotificationFeatureToRender,
+): MocoNotificationFeatureToRender => {
+  const geometry = geojson.readGeometry(
+    publicationLineFeature.geometry,
+  ) as LineString;
 
-  const lineFeaturesUsedForIcons = lineFeatures.filter((f) => {
-    return f.properties.is_icon_ref;
-  });
+  const center = getCenter(geometry.getExtent());
+  const icon: MocoNotificationFeatureToRender = {
+    geometry: {
+      coordinates: geometry.getClosestPoint(center),
+      type: 'Point',
+    },
+    id: `${Math.random()}`,
+    properties: publicationLineFeature.properties,
+    type: 'Feature',
+  };
+  return icon;
+};
 
-  const iconsForLines = lineFeaturesUsedForIcons
-    .map((affectedLine) => {
-      const affectedLineFeature = format.readFeature(affectedLine, {
-        dataProjection: 'EPSG:4326',
-        featureProjection: 'EPSG:3857',
-      }) as Feature;
+const to4326 = (
+  geometry3857: GeoJSON.LineString | GeoJSON.Point,
+): GeoJSON.LineString | GeoJSON.Point => {
+  return geojson.writeGeometryObject(
+    geojson.readGeometry(geometry3857, {
+      dataProjection: 'EPSG:3857',
+      featureProjection: 'EPSG:4326',
+    }),
+  ) as GeoJSON.LineString | GeoJSON.Point;
+};
 
-      const geometry = affectedLineFeature.getGeometry();
+export const getMocoReasonCategoryImageName = (
+  categoryName = 'undefiniert',
+) => {
+  return categoryName
+    .toLowerCase()
+    .replace(/\s/g, '_')
+    .replace(/ü/g, 'ue')
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ß/g, 'ss');
+};
 
-      if (!geometry) {
-        return null;
-      }
+/**
+ * This function return a FeatureCollection representing a Situation,
+ * This feature collection contains a feature for each affectd lines and stops.
+ * This also creates an icon for each affected line if hasIcon property is true.
+ */
+export const getFeatureCollectionToRenderFromSituation = (
+  situation: Partial<SituationType>,
+  date: Date = new Date(),
+): MocoNotificationFeatureCollectionToRender => {
+  const features: MocoNotificationFeatureToRender[] = [];
+  const reasonCategoryImageName = getMocoReasonCategoryImageName(
+    situation.reasons?.[0]?.categoryName,
+  );
 
-      const center = getCenter(geometry.getExtent());
-      const iconRefPoint = geometry.getClosestPoint(center);
+  const situationRenderProps = {
+    reasonCategoryImageName,
+    // for backward compatibility
+    reasons_category: reasonCategoryImageName,
+  };
 
-      const iconRefFeatureProperties: MocoNotificationAsFeatureProperties = {
-        ...notification.properties,
-        ...affectedLine.properties,
-      };
+  situation?.publications?.forEach((publication) => {
+    const isAffected = isMocoSituationAffected(situation, date);
+    const isPublished = isMocoSituationPublished(situation, date);
 
-      // if (!iconRefFeatureProperties.disruption_type) {
-      //   iconRefFeatureProperties.disruption_type = 'OTHER';
-      // }
+    const publicationRenderProps = {
+      // for backward compatibility
+      condition_group: publication.serviceConditionGroup,
+      // for backward compatibility
+      isActive: isAffected,
+      isAffected,
+      isPublished,
+      // for backward compatibility
+      severity_group: publication.severityGroup,
+    };
 
-      // // Set Banner image
-      // if (iconRefFeatureProperties.disruption_type) {
-      //   iconRefFeatureProperties.disruption_type_banner =
-      //     iconRefFeatureProperties.disruption_type + '_BANNER';
-      // }
+    publication.publicationLines?.forEach((publicationLine) => {
+      publicationLine.lines.forEach((line) => {
+        line.geometry.forEach(
+          ({
+            geom,
+            graph,
+          }: {
+            geom: GeoJSON.LineString | GeoJSON.Point;
+            graph: string;
+          }) => {
+            const feature: MocoNotificationFeatureToRender = {
+              geometry: to4326(geom),
+              properties: {
+                ...situation, // for the situation id
+                ...publication, // for serviceConditionGroup and severityGroup
+                ...publicationLine, // for hasIcon
+                graph,
+                ...situationRenderProps,
+                ...publicationRenderProps,
+              },
+              type: 'Feature',
+            };
+            features.push(feature);
 
-      if (iconRefPoint) {
-        const iconForLine: MocoNotificationAsFeature = {
-          geometry: {
-            coordinates: toLonLat(iconRefPoint),
-            type: 'Point',
+            if (publicationLine.hasIcon) {
+              const iconFeature = getMocoIconRefFeature(feature);
+              features.push(iconFeature);
+            }
           },
-          id: `${Math.random()}`,
-          properties: iconRefFeatureProperties,
-          type: 'Feature',
-        };
-        return iconForLine;
-      }
-    })
-    .filter((f) => {
-      return !!f;
+        );
+      });
     });
-
-  // @ts-expect-error bad geometry type from backend
-  return iconsForLines;
-};
-
-export const getMocoNotificationsAsFeatureCollection = (
-  notifications: MocoNotification[],
-): MocoNotificationAsFeatureCollection => {
-  // Merge all features into a single GeoJSON feature collection
-  // and add the notification properties to each feature.
-
-  const features = notifications.flatMap((notification) => {
-    return (notification.features || []).map((feature) => {
-      const feat: MocoNotificationFeature = {
-        ...feature,
-        properties: {
-          ...notification.properties,
-          ...feature.properties,
+    publication.publicationStops?.forEach((publicationStop) => {
+      publicationStop.geometry.forEach(
+        ({
+          geom,
+          graph,
+        }: {
+          geom: GeoJSON.LineString | GeoJSON.Point;
+          graph: string;
+        }) => {
+          const feature: MocoNotificationFeatureToRender = {
+            geometry: to4326(geom),
+            properties: {
+              ...situation, // for the situation id
+              ...publication, // for serviceConditionGroup and severityGroup
+              ...publicationStop,
+              graph,
+              ...situationRenderProps,
+              ...publicationRenderProps,
+            },
+            type: 'Feature',
+          };
+          features.push(feature);
         },
-      };
-      const reasonCategoryName =
-        notification.properties.reasons?.[0]?.category_name;
-
-      // reasons_category is used to choose the proper icon in the style
-      // @ts-expect-error the value is a string in the style
-      feat.properties.reasons_category =
-        MOCO_IMAGE_BY_CATEGORY[
-          reasonCategoryName || MOCO_REASONS_CATEGORY.UNDEFINIERT
-        ] || MOCO_IMAGE_BY_CATEGORY[MOCO_REASONS_CATEGORY.UNDEFINIERT];
-
-      return feat;
+      );
     });
   });
-
   return {
-    // @ts-expect-error conflict between geometry types
     features,
     type: 'FeatureCollection',
   };
 };
+
+// export const getMocoSituationsAsFeatureCollection = (
+//   situations: MocoSituationToRender[],
+// ): MocoNotificationAsFeatureCollection => {
+//   situations.forEach((situation) => {});
+
+//   // Merge all features into a single GeoJSON feature collection
+//   // and add the notification properties to each feature.
+
+//   const features = notifications.flatMap((notification) => {
+//     return (notification.features || []).map((feature) => {
+//       const feat: MocoNotificationFeature = {
+//         ...feature,
+//         properties: {
+//           ...notification.properties,
+//           ...feature.properties,
+//         },
+//       };
+//       const reasonCategoryName =
+//         notification.properties.reasons?.[0]?.category_name;
+
+//       // reasons_category is used to choose the proper icon in the style
+//       // @ts-expect-error the value is a string in the style
+//       feat.properties.reasons_category =
+//         MOCO_IMAGE_BY_CATEGORY[
+//           reasonCategoryName || MOCO_REASONS_CATEGORY.UNDEFINIERT
+//         ] || MOCO_IMAGE_BY_CATEGORY[MOCO_REASONS_CATEGORY.UNDEFINIERT];
+
+//       return feat;
+//     });
+//   });
+
+//   return {
+//     // @ts-expect-error conflict between geometry types
+//     features,
+//     type: 'FeatureCollection',
+//   };
+// };
