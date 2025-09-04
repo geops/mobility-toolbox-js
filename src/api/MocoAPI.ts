@@ -22,7 +22,7 @@ export interface MocoAPIOptions {
  * const api = new MocoAPI({
  *   // publicAt: new Date(),
  *   // graph: 'osm',
- *   // url: 'https://moco.geops.io/api/v2',
+ *   // url: 'https://moco.geops.io/api/v2/',
  *   // tenant: "geopstest",
  * });
  *
@@ -43,7 +43,7 @@ class MocoAPI extends HttpAPI {
    * @param {Object} options Options.
    *
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
-   * @param {string} [options.url='https://moco.geops.io/api/v2'] Service url.
+   * @param {string} [options.url='https://moco.geops.io/api/v2/'] Service url.
    * @param {string} [options.tenant='geopstest'] SSO config to get notifications from.
    * @param {string} [options.graph='osm'] Graph to use for geometries.
    */
