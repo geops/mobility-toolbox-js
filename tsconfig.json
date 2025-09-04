@@ -18,11 +18,10 @@
     "lib": ["es6", "dom"]
   },
   "allowSyntheticDefaultImports": true,
-  "include": ["./src/**/*", "graphql-codegen-moco.ts"],
+  "include": ["./src/**/*"],
   "exclude": [
     "dev.js",
     "./src/types/*.d.ts",
-    "./src/types/moco/gql/gql.ts",
     "./node_modules/**/**/**/*",
     "./node_modules/**/**/*",
     "./node_modules/**/*",

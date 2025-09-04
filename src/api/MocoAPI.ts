@@ -69,21 +69,20 @@ class MocoAPI extends HttpAPI {
   async export(
     params: MocoExportParameters = {},
     config: RequestInit = {},
-  ): Promise<SituationTypeExtendedOffsetPaginated> {
-    const paginatedSituations = await this.fetch<
-      SituationTypeExtendedOffsetPaginated,
+  ): Promise<{ paginatedSituations: SituationTypeExtendedOffsetPaginated }> {
+    const response = await this.fetch<
+      { paginatedSituations: SituationTypeExtendedOffsetPaginated },
       MocoExportParameters
     >(
       `${this.tenant}/export/`,
       {
-        graph: this.graph,
-        tenant: this.tenant,
+        //graph: this.graph,
         ...params,
       },
       config,
     );
 
-    return paginatedSituations;
+    return response;
   }
 
   /**
@@ -96,11 +95,11 @@ class MocoAPI extends HttpAPI {
     params: MocoExportParameters = {},
     config: RequestInit = {},
   ): Promise<SituationType> {
-    const paginatedSituations = await this.fetch<
-      SituationTypeExtendedOffsetPaginated,
+    const response = await this.fetch<
+      { paginatedSituations: SituationTypeExtendedOffsetPaginated },
       MocoExportParameters
     >(`${this.tenant}/export/${id}/`, params, config);
-    return paginatedSituations?.results?.[0];
+    return response?.paginatedSituations?.results?.[0];
   }
 }
 

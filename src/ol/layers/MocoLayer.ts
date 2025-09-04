@@ -291,11 +291,15 @@ class MocoLayer extends MaplibreStyleLayer {
     let situations = this.situations ?? [];
 
     if (!this.situations && this.loadAll) {
-      const paginatedSituations = await this.api.export(
-        { graph: graphsString, public_at: publicAt.toISOString() },
+      const response = await this.api.export(
+        {
+          graph: graphsString,
+          hasGeoms: true,
+          publicAt: publicAt.toISOString(),
+        },
         { signal: this.#abortController.signal },
       );
-      situations = paginatedSituations.results || [];
+      situations = response.paginatedSituations.results || [];
     }
 
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);

@@ -68,7 +68,7 @@ const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
   // style: 'de.rvf_moco',
   style: 'de.rvf_moco',
-  url: 'https://maps.test.geops.io',
+  url: 'https://maps.style-dev.geops.io',
 });
 baseLayer.on('load', () => {
   console.log('baseLayer loaded');

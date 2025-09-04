@@ -1,3 +1,4 @@
+import { toLower } from 'lodash';
 import { getCenter } from 'ol/extent';
 import GeoJSONFormat from 'ol/format/GeoJSON';
 
@@ -51,9 +52,11 @@ export const isMocoSituationPublished = (
   now: Date = new Date(),
 ) => {
   const publicationWindows =
+    situation.publicationWindows ??
     situation.publications?.flatMap((publication) => {
       return publication.publicationWindows ?? [];
-    }) ?? [];
+    }) ??
+    [];
   if (!publicationWindows.length) {
     // If there are no publication windows, use the time intervals
     return !!isMocoSituationAffected(situation, now);
@@ -173,14 +176,14 @@ export const getFeatureCollectionToRenderFromSituation = (
     const isPublished = isMocoSituationPublished(situation, date);
 
     const publicationRenderProps = {
-      // for backward compatibility
-      condition_group: publication.serviceConditionGroup,
-      // for backward compatibility
+      // for backward compatibility with v1
+      condition_group: publication.serviceConditionGroup.toLowerCase(),
+      // for backward compatibility with v1
       isActive: isAffected,
       isAffected,
       isPublished,
-      // for backward compatibility
-      severity_group: publication.severityGroup,
+      // for backward compatibility with v1
+      severity_group: publication.severityGroup?.toLocaleLowerCase(),
     };
 
     publication.publicationLines?.forEach((publicationLine) => {
