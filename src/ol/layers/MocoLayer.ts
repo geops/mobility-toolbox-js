@@ -41,6 +41,7 @@ export interface MocoNotificationFeaturePropertiesToRender {
   geometry?: undefined; // to avoid ol problems
   graph: string;
   hasIcon?: boolean;
+  id?: string; // The situation id
   isAffected: boolean;
   isPublished: boolean;
   reasonCategoryImageName: string;

@@ -210,6 +210,7 @@ export const getFeatureCollectionToRenderFromSituation = (
                 ...situationRenderProps,
                 ...publicationRenderProps,
                 geometry: undefined, // to avoid ol problems
+                id: situation.id, // make the sure the id is always the situationId
               },
               type: 'Feature',
             };
@@ -217,6 +218,7 @@ export const getFeatureCollectionToRenderFromSituation = (
 
             if (publicationLine.hasIcon) {
               const iconFeature = getMocoIconRefFeature(feature);
+              iconFeature.properties.id = situation.id; // make the sure the id is always the situationId
               features.push(iconFeature);
             }
           },
@@ -243,6 +245,7 @@ export const getFeatureCollectionToRenderFromSituation = (
               ...situationRenderProps,
               ...publicationRenderProps,
               geometry: undefined, // to avoid ol problems
+              id: situation.id, // make the sure the id is always the situationId
             },
             type: 'Feature',
           };

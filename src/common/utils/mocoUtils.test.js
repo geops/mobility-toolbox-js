@@ -308,6 +308,7 @@ describe('mocoUtils', () => {
                     graph: 'osm',
                   },
                 ],
+                id: 'lala',
                 name: 'Freiburg-Littenweiler',
                 uid: 'a33509cdf7463912',
               },
@@ -381,6 +382,7 @@ describe('mocoUtils', () => {
 
       // We test the icon ref properties
       const iconRefProps = featureCollection.features[1].properties;
+
       expect(lineProps.title).toBe(iconRefProps.title);
       expect(lineProps.graph).toBe(iconRefProps.graph);
       expect(lineProps.serviceConditionGroup).toBe(
