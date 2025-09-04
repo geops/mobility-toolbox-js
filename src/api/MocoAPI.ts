@@ -4,7 +4,7 @@ import type { MocoExportParameters } from '../types';
 import type {
   SituationType,
   SituationTypeExtendedOffsetPaginated,
-} from '../types/moco/gql/graphql';
+} from '../types';
 
 export interface MocoAPIOptions {
   apiKey: string;

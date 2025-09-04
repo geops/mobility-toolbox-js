@@ -422,6 +422,9 @@ describe('mocoUtils', () => {
       expect(lineProps.severity_group).toBe(stopProps.severity_group);
       expect(lineProps.reasons_category).toBe(stopProps.reasons_category);
       expect(lineProps.isActive).toBe(stopProps.isActive);
+
+      // The geometry property is used by ol to store the ol/geom object so it is important that it stayed undefined
+      expect(stopProps.geometry).toBe(undefined);
     });
   });
 });

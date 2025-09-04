@@ -16,7 +16,7 @@ import type {
   ServiceConditionGroupEnumeration,
   SeverityGroupEnumeration,
   SituationType,
-} from '../../types/moco/gql/graphql';
+} from '../../types';
 
 import type { MaplibreStyleLayerOptions } from './MaplibreStyleLayer';
 
@@ -38,6 +38,7 @@ export type MocoSituationToRender = {
 } & Partial<SituationType>;
 
 export interface MocoNotificationFeaturePropertiesToRender {
+  geometry?: undefined; // to avoid ol problems
   graph: string;
   hasIcon?: boolean;
   isAffected: boolean;

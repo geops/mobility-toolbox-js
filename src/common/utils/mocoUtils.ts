@@ -1,4 +1,3 @@
-import { toLower } from 'lodash';
 import { getCenter } from 'ol/extent';
 import GeoJSONFormat from 'ol/format/GeoJSON';
 
@@ -8,7 +7,7 @@ import type {
   MocoNotificationFeatureCollectionToRender,
   MocoNotificationFeatureToRender,
 } from '../../ol/layers/MocoLayer';
-import type { SituationType } from '../../types/moco/gql/graphql';
+import type { SituationType } from '../../types';
 
 export const getTime = (str: string) => {
   return parseInt(str?.substr(0, 8).replace(/:/g, ''), 10);
@@ -122,7 +121,10 @@ export const getMocoIconRefFeature = (
       type: 'Point',
     },
     id: `${Math.random()}`,
-    properties: publicationLineFeature.properties,
+    properties: {
+      ...publicationLineFeature.properties,
+      geometry: undefined, // to avoid ol problems
+    },
     type: 'Feature',
   };
   return icon;
@@ -205,6 +207,7 @@ export const getFeatureCollectionToRenderFromSituation = (
                 graph,
                 ...situationRenderProps,
                 ...publicationRenderProps,
+                geometry: undefined, // to avoid ol problems
               },
               type: 'Feature',
             };
@@ -232,10 +235,11 @@ export const getFeatureCollectionToRenderFromSituation = (
             properties: {
               ...situation, // for the situation id
               ...publication, // for serviceConditionGroup and severityGroup
-              ...publicationStop,
+              ...publicationStop, // for the name
               graph,
               ...situationRenderProps,
               ...publicationRenderProps,
+              geometry: undefined, // to avoid ol problems
             },
             type: 'Feature',
           };
