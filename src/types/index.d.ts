@@ -29,3 +29,12 @@ export type MocoNotificationFeature = MocoDefinitions['AffectedLinesFeature'];
 
 export type MocoNotificationFeatureProperties =
   MocoDefinitions['AffectedLinesProperties'];
+
+export type MapsetPlan = {
+  admin_id: string;
+  read_id: string;
+  created_at: string;
+  modified_at: string;
+  queryparams: string;
+  data: string;
+};
