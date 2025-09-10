@@ -221,7 +221,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     getRadius = () => {
       return 0;
     },
-    getText = (text?: string) => {
+    getText = (text?: null | string) => {
       return text;
     },
     getTextColor = () => {

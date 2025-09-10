@@ -24,6 +24,9 @@
     "ol": ">=9"
   },
   "devDependencies": {
+    "@asyncapi/cli": "^3.2.0",
+    "@asyncapi/generator": "^2.7.1",
+    "@asyncapi/modelina": "^5.3.7",
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-typescript": "^7.27.1",
     "@commitlint/cli": "19.8.1",
@@ -34,6 +37,7 @@
     "@types/lodash.debounce": "4.0.9",
     "@types/lodash.throttle": "4.1.9",
     "@types/mapbox-gl": "3.4.1",
+    "@types/node": "^24.3.0",
     "@types/offscreencanvas": "2019.7.3",
     "@types/topojson": "3.2.6",
     "@types/uuid": "10.0.0",
@@ -113,6 +117,7 @@
     "tsc": "tsc",
     "types:backend": " yarn types:stops && yarn types:routing && yarn types:moco",
     "types:moco": "openapi-typescript https://moco.dev.geops.io/api/v1/swagger/?format=openapi --output src/types/moco.d.ts",
+    "types:realtime": "asyncapi generate models typescript https://backend.developer.geops.io/tralis-docs/asyncapi.json --output src/types/realtime-asyncapi-types --tsModelType=interface --tsRawPropertyNames --tsEnumType=enum && eslint --fix src/types/realtime-asyncapi-types/*.ts",
     "types:routing": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts",
     "types:stops": "openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts",
     "up": "yarn upgrade-interactive --latest"

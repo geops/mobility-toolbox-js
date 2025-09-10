@@ -1,0 +1,37 @@
+import type AnonymousSchema_226 from './AnonymousSchema_226';
+import type JourneyExtraData from './JourneyExtraData';
+import type Line from './Line';
+import type OperatorProvidesRealtimeJourney from './OperatorProvidesRealtimeJourney';
+import type Situation from './Situation';
+import type StopSequenceCall from './StopSequenceCall';
+interface StopSequence {
+  additionalProperties?: Map<string, any>;
+  color?: null | string;
+  destination: null | string;
+  extra_data: JourneyExtraData;
+  has_realtime: boolean;
+  has_realtime_journey: boolean;
+  id: string;
+  license?: null | string;
+  licenseNote?: null | string;
+  licenseUrl?: null | string;
+  line: Line | null;
+  longName?: null | string;
+  new_destination: null | string;
+  operator?: null | string;
+  operator_provides_realtime_journey: OperatorProvidesRealtimeJourney;
+  operatorUrl?: null | string;
+  publisher?: null | string;
+  publisherUrl?: null | string;
+  routeIdentifier: null | string;
+  shortName?: null | string;
+  situations: Situation[];
+  stations: StopSequenceCall[];
+  stroke?: null | string;
+  tenant?: string;
+  text_color?: null | string;
+  train_number: null | number;
+  type: AnonymousSchema_226 | null;
+  vehicle_mode: null | string;
+}
+export default StopSequence;
