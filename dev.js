@@ -21,6 +21,10 @@ import { transformExtent } from 'ol/proj';
 
 window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
+const realtimeUrl = 'https://tralis-tracker-api.dev.geops.io/ws';
+const mocoUrl = 'https://moco.dev.geops.io/api/v2/';
+const mapsUrl = 'https://maps.style-dev.geops.io';
+
 const RVF_EXTENT_4326 = [7.5, 47.7, 8.45, 48.4];
 
 const RVF_EXTENT_3857 = transformExtent(
@@ -68,7 +72,7 @@ const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
   // style: 'de.rvf_moco',
   style: 'de.rvf_moco',
-  url: 'https://maps.style-dev.geops.io',
+  url: mapsUrl,
 });
 baseLayer.on('load', () => {
   console.log('baseLayer loaded');
@@ -78,7 +82,7 @@ map.addLayer(baseLayer);
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
-  url: 'https://moco.dev.geops.io/api/v2/',
+  url: mocoUrl,
   maplibreLayer: baseLayer,
   tenant: 'rvf',
   loadAll: true,
@@ -1440,10 +1444,33 @@ const francfortExtent = buffer(
 
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
-  url: 'https://tralis-tracker-api.dev.geops.io/ws',
+  url: realtimeUrl,
+  bboxParameters: {
+    line_tags: 'rvf',
+  },
   // styleOptions: { useDelayStyle: true },
   // extent: francfortExtent,
   // graphByZoom: ['osm', 'osm', 'osm', 'osm', 'osm', 'osm', 'rvf'],
+  graphByZoom: [
+    'osm',
+    'osm',
+    'osm',
+    'osm',
+    'osm',
+    'np_topo4',
+    'np_topo5',
+    'np_topo6',
+    'np_topo7',
+    'np_topo8',
+    'np_topo9',
+    'np_topo10',
+    'np_topo11',
+    'np_topo12',
+    'np_topo13',
+    'np_topo14',
+    'np_topo15',
+    'osm',
+  ],
   // styleOptions: {
   //   delayDisplay: 0,
   //   // Define the circle color
@@ -1493,7 +1520,7 @@ const realtimeLayer = new RealtimeLayer({
   //   return traj.properties.state === 'JOURNEY_CANCELLED';
   // },
 });
-// map.addLayer(realtimeLayer);
+map.addLayer(realtimeLayer);
 
 map.addControl(new CopyrightControl());
 map.on('moveend', () => {
