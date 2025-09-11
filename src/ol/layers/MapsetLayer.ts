@@ -149,10 +149,12 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       this.getSource()?.addFeatures(features || []);
     });
 
-    this.map?.getView().fit(this.getSource()?.getExtent() || [], {
-      duration: 1000,
-      padding: [200, 200, 200, 200],
-    });
+    if (this.getSource()?.getFeatures()?.length) {
+      this.map?.getView().fit(this.getSource()?.getExtent() as number[], {
+        duration: 1000,
+        padding: [200, 200, 200, 200],
+      });
+    }
   }
 
   override setMapInternal(map: Map) {

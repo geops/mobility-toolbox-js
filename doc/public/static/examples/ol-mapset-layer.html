@@ -1,4 +1,18 @@
-<div id="map" style="width: 100%; height: 100%;"></div>
-<div style="padding:0.5em;position:absolute;top:.5em;right:.5em;max-height:calc(100% - 4.2em);max-width:35%;background-color:white;border-radius:.5em;display:flex;">
-  <pre id="content" style="margin:0;overflow:auto;font-size:.7em;">mapset layer</pre>
+<div id="app" style="padding: 10px; display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr);">
+  <div id="map" style="width:100%;height:480px;"></div>
+  <div style="width:100%;height:480px; display: flex; flex-direction: column">
+    <div style="flex: 1;display: flex; flex-direction: column;">
+      <label for="tenants-input">Tenants:</label>
+      <input id="tenants-input" type="text"/>
+    </div>
+    <div style="flex: 1;display: flex; flex-direction: column;">
+      <label for="tags-input">Tags:</label>
+      <input id="tags-input" type="text"/>
+    </div>
+
+    <div style="flex: 19; display: flex; flex-direction: column;">
+      <label for="kml-input">KML Input:</label>
+      <textarea id="kml-input" style="height: 100%;"></textarea>
+    </div>
+  </div>
 </div>

@@ -96,7 +96,7 @@ class MapsetAPI extends HttpAPI {
         bbox: this.bbox?.toString(),
         tags: this.tags?.toString(),
         tenants: this.tenants?.toString(),
-        zoom: this.zoom,
+        zoom: this.zoom.toFixed(0),
         ...apiParams,
       },
       config,
