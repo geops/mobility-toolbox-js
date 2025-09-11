@@ -202,7 +202,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
         'MapsetLayer: Error fetching plans, using dummy plans...',
         e,
       );
-      // plans = [dummy, dummy2, dummy3];
     }
 
     this.plans = plans;
