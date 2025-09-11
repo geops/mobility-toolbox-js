@@ -139,7 +139,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
 
     this.getSource()?.clear();
-    console.log(this.plans);
 
     this.plans?.forEach((plan) => {
       const features = kmlFormatter.readFeatures(
