@@ -8,12 +8,24 @@ export interface MapsetAPIOptions {
   apiKey: string;
   bbox?: number[];
   tags?: string[];
+  tenants?: string[];
   url?: string;
+  zoom?: number;
 }
 
 export interface MapsetAPIParams {
   bbox?: Extent;
   tags?: string[];
+  tenants?: string[];
+  zoom?: number;
+}
+
+export interface MapsetApiResponse {
+  count: number;
+  detail?: string;
+  next: null | string;
+  previous: null | string;
+  results: MapsetPlan[];
 }
 
 /**
@@ -37,6 +49,8 @@ export interface MapsetAPIParams {
 class MapsetAPI extends HttpAPI {
   bbox: number[] | undefined = [];
   tags: string[] = [];
+  tenants: string[] = [];
+  zoom = 1;
 
   /**
    * Constructor
@@ -46,6 +60,7 @@ class MapsetAPI extends HttpAPI {
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.url='https://editor.mapset.io/api/v1'] Service url.
    * @param {string[]} [options.tags] Tags.
+   * @param {string[]} [options.tenants] Tenants.
    * @param {number[]} [options.bbox] Bounding box.
    */
   constructor(options: MapsetAPIOptions) {
@@ -56,6 +71,8 @@ class MapsetAPI extends HttpAPI {
     });
     this.tags = options.tags || [];
     this.bbox = options.bbox;
+    this.zoom = options.zoom || 1;
+    this.tenants = options.tenants || [];
   }
 
   /**
@@ -64,7 +81,7 @@ class MapsetAPI extends HttpAPI {
    *
    * @param {MapsetAPIParams} params Request parameters.
    * @param {FetchOptions} config Options for the fetch request.
-   * @return {Promise<MapsetPlan[]>} An array of mapset plan objects with kml strings in data attribute.
+   * @return {Promise<MapsetApiResponse>} An array of mapset plan objects with kml strings in data attribute.
    * @public
    */
   async getPlans(
@@ -72,17 +89,25 @@ class MapsetAPI extends HttpAPI {
     config: RequestInit = {},
   ): Promise<MapsetPlan[]> {
     const apiParams: MapsetAPIParams = { ...params };
-    const plans = await this.fetch<MapsetPlan[]>(
-      `/plans`,
+    let res = {} as MapsetApiResponse;
+    res = await this.fetch<MapsetApiResponse>(
+      '/plan_editor/kml',
       {
         bbox: this.bbox?.toString(),
         tags: this.tags?.toString(),
+        tenants: this.tenants?.toString(),
+        zoom: this.zoom,
         ...apiParams,
       },
       config,
     );
 
-    return plans;
+    if (res.detail) {
+      console.error('Error fetching mapset plans:', res.detail);
+      throw new Error(res.detail);
+    }
+
+    return res.results || [];
   }
 }
 
