@@ -7,7 +7,11 @@ import { DEFAULT_GRAPH_MAPPING } from '../utils/getGraphByZoom';
 
 import MaplibreStyleLayer from './MaplibreStyleLayer';
 
-import type { GeoJSONSource, LayerSpecification } from 'maplibre-gl';
+import type {
+  GeoJSONSource,
+  LineLayerSpecification,
+  SymbolLayerSpecification,
+} from 'maplibre-gl';
 import type { Map } from 'ol';
 
 import type { MocoAPIOptions } from '../../api/MocoAPI';
@@ -106,12 +110,12 @@ class MocoLayer extends MaplibreStyleLayer {
     void this.updateData();
   }
 
-  get apiKey(): string {
-    return this.get('apiKey') as string;
+  get apiKey(): string | undefined {
+    return this.api.apiKey;
   }
 
   set apiKey(value: string) {
-    this.set('apiKey', value);
+    this.api.apiKey = value;
     void this.updateData();
   }
 
@@ -151,11 +155,11 @@ class MocoLayer extends MaplibreStyleLayer {
     void this.updateData();
   }
   get url(): string | undefined {
-    return this.get('url') as string | undefined;
+    return this.api.url;
   }
 
   set url(value: string) {
-    this.set('url', value);
+    this.api.url = value;
     void this.updateData();
   }
   #abortController: AbortController | null = null;
@@ -192,13 +196,16 @@ class MocoLayer extends MaplibreStyleLayer {
         tenant: options.tenant,
         url: options.url,
       }),
-      ...options,
-      layersFilter: ({ metadata }: LayerSpecification) => {
+      layersFilter: ({
+        metadata,
+        source,
+      }: LineLayerSpecification | SymbolLayerSpecification) => {
         return (
           (metadata as { 'general.filter': string })?.['general.filter'] ===
-          MOCO_MD_LAYER_FILTER
+            MOCO_MD_LAYER_FILTER || source === MOCO_SOURCE_ID
         );
       },
+      ...options,
     });
   }
 
@@ -293,14 +300,23 @@ class MocoLayer extends MaplibreStyleLayer {
     let situations = this.situations ?? [];
 
     if (!this.situations && this.loadAll) {
-      const response = await this.api.export(
-        {
-          graph: graphsString,
-          hasGeoms: true,
-          publicAt: publicAt.toISOString(),
-        },
-        { signal: this.#abortController.signal },
-      );
+      const response = await this.api
+        .export(
+          {
+            graph: graphsString,
+            hasGeoms: true,
+            publicAt: publicAt.toISOString(),
+          },
+          { signal: this.#abortController.signal },
+        )
+        .catch((error) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          if (/AbortError/.test(error?.name)) {
+            // Ignore abort error
+            return { paginatedSituations: { results: [] as SituationType[] } };
+          }
+          throw error;
+        });
       situations = response.paginatedSituations.results || [];
     }
 
@@ -317,9 +333,6 @@ class MocoLayer extends MaplibreStyleLayer {
       }),
       type: 'FeatureCollection',
     } as MocoNotificationFeatureCollectionToRender;
-    console.log(data);
-
-    console.log(this.getDataByGraph(data));
     this.#dataInternal = data;
 
     // Apply new data to the source

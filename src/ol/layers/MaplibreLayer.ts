@@ -164,6 +164,7 @@ class MaplibreLayer extends MapLibreLayer {
       url: 'https://maps.geops.io',
       ...(options || {}),
       mapLibreOptions: {
+        fadeDuration: 10,
         ...(options.mapLibreOptions || {}),
       },
     };
