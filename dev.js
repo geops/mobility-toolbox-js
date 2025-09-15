@@ -5,7 +5,7 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import LineString from 'ol/geom/LineString';
 import Modify from 'ol/interaction/Modify';
-import { MaplibreLayer, CopyrightControl, MapsetLayer } from './build/ol';
+import { MaplibreLayer, MapsetLayer } from './build/ol';
 import 'ol/ol.css';
 import { buffer, getCenter } from 'ol/extent';
 import { transformExtent } from 'ol/proj';
@@ -56,5 +56,3 @@ tagsInput?.addEventListener('change', (event) => {
   const tagsText = event.target.value;
   mapsetLayer.tags = tagsText?.split(',')?.map((t) => t.trim());
 });
-
-map.addControl(new CopyrightControl());

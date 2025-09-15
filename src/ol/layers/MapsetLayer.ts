@@ -158,14 +158,12 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
 
   override setMapInternal(map: Map) {
+    super.setMapInternal(map);
     if (map) {
-      super.setMapInternal(map);
       this.map = map;
       this.map.once('change:view', () => {
         void this.updateData();
       });
-    } else {
-      super.setMapInternal(map);
     }
   }
 
@@ -198,10 +196,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     try {
       plans = await api.getPlans({}, { signal: this.#abortController.signal });
     } catch (e) {
-      console.error(
-        'MapsetLayer: Error fetching plans, using dummy plans...',
-        e,
-      );
+      console.error('MapsetLayer: Error fetching plans...', e);
     }
 
     this.plans = plans;

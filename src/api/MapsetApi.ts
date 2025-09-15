@@ -9,6 +9,7 @@ export interface MapsetAPIOptions {
   bbox?: number[];
   tags?: string[];
   tenants?: string[];
+  timestamp?: string;
   url?: string;
   zoom?: number;
 }
@@ -17,6 +18,7 @@ export interface MapsetAPIParams {
   bbox?: Extent;
   tags?: string[];
   tenants?: string[];
+  timestamp?: string;
   zoom?: number;
 }
 
@@ -50,6 +52,7 @@ class MapsetAPI extends HttpAPI {
   bbox: number[] | undefined = [];
   tags: string[] = [];
   tenants: string[] = [];
+  timestamp: string | undefined = undefined;
   zoom = 1;
 
   /**
@@ -73,6 +76,7 @@ class MapsetAPI extends HttpAPI {
     this.bbox = options.bbox;
     this.zoom = options.zoom || 1;
     this.tenants = options.tenants || [];
+    this.timestamp = options.timestamp;
   }
 
   /**
@@ -96,6 +100,7 @@ class MapsetAPI extends HttpAPI {
         bbox: this.bbox?.toString(),
         tags: this.tags?.toString(),
         tenants: this.tenants?.toString(),
+        timestamp: this.timestamp,
         zoom: this.zoom.toFixed(0),
         ...apiParams,
       },

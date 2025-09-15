@@ -59,6 +59,4 @@ Bar</name><Style><IconStyle><scale>0</scale></IconStyle><LabelStyle><color>ff000
     const tagsText = event.target.value;
     mapsetLayer.tags = tagsText?.split(',')?.map((t) => t.trim());
   });
-
-  map.addControl(new CopyrightControl());
 };
