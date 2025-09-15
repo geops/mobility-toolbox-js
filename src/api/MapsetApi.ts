@@ -94,25 +94,31 @@ class MapsetAPI extends HttpAPI {
   ): Promise<MapsetPlan[]> {
     const apiParams: MapsetAPIParams = { ...params };
     let res = {} as MapsetApiResponse;
-    res = await this.fetch<MapsetApiResponse>(
-      '/plan_editor/kml',
-      {
-        bbox: this.bbox?.toString(),
-        tags: this.tags?.toString(),
-        tenants: this.tenants?.toString(),
-        timestamp: this.timestamp,
-        zoom: this.zoom.toFixed(0),
-        ...apiParams,
-      },
-      config,
-    );
 
-    if (res.detail) {
+    try {
+      res = await this.fetch<MapsetApiResponse>(
+        '/export/kml',
+        {
+          bbox: this.bbox?.toString(),
+          tags: this.tags?.toString(),
+          tenants: this.tenants?.toString(),
+          timestamp: this.timestamp,
+          zoom: Math.floor(this.zoom),
+          ...apiParams,
+        },
+        config,
+      );
+    } catch (e) {
+      console.error('Error fetching mapset plans:', e);
+      return []; // ✅ swallow error here
+    }
+
+    if (res?.detail) {
       console.error('Error fetching mapset plans:', res.detail);
       throw new Error(res.detail);
     }
 
-    return res.results || [];
+    return res?.results || [];
   }
 }
 

@@ -26,6 +26,7 @@ type MapsetLayerOptions = {
 const kmlFormatter = new MapsetKmlFormat();
 
 class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
+  api?: MapsetAPI;
   get apiKey(): string {
     return this.get('apiKey') as string;
   }
@@ -120,25 +121,37 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
   }
 
+  get timestamp(): string | undefined {
+    return this.get('timestamp') as string | undefined;
+  }
+  set timestamp(value: string | undefined) {
+    if (this.timestamp !== value) {
+      this.set('timestamp', value);
+      void this.updateData();
+    }
+  }
+
   #abortController: AbortController;
+
   constructor(options: MapsetLayerOptions = {}) {
     super({ ...options, source: new Vector<FeatureLike>() });
     this.apiKey = options.apiKey ?? '';
-    this.apiUrl = options.apiUrl ?? 'https://editor.mapset.io/api/v1';
+    this.apiUrl = options.apiUrl ?? 'https://editor.dev.mapset.io/api/v1';
     this.bbox = options.bbox ?? null;
     this.map = null;
     this.#abortController = new AbortController();
     this.plans = [];
     this.doNotRevert32pxScaling = options.doNotRevert32pxScaling ?? false;
+    this.api = undefined;
   }
 
   public loadPlans() {
+    this.getSource()?.clear();
+
     if (!this.plans || this.plans?.length === 0 || !this.map) {
       console.warn('MapsetLayer: No plans to load');
       return;
     }
-
-    this.getSource()?.clear();
 
     this.plans?.forEach((plan) => {
       const features = kmlFormatter.readFeatures(
@@ -149,12 +162,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       this.getSource()?.addFeatures(features || []);
     });
 
-    if (this.getSource()?.getFeatures()?.length) {
-      this.map?.getView().fit(this.getSource()?.getExtent() as number[], {
-        duration: 1000,
-        padding: [200, 200, 200, 200],
-      });
-    }
+    this.dispatchEvent('load:plans');
   }
 
   override setMapInternal(map: Map) {
@@ -182,19 +190,28 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
 
     const bbox = this.map.getView().calculateExtent(this.map.getSize());
 
-    const api = new MapsetAPI({
+    this.api = new MapsetAPI({
       apiKey: this.apiKey,
-      bbox: toLonLat(bbox) || undefined,
+      bbox:
+        (bbox && [
+          ...toLonLat([bbox[0], bbox[1]]),
+          ...toLonLat([bbox[2], bbox[3]]),
+        ]) ||
+        undefined,
       tags: this.tags || [],
       tenants: this.tenants || [],
+      timestamp: this.timestamp,
       url: this.apiUrl,
-      zoom: this.map.getView().getZoom() || 1,
+      zoom: Math.floor(this.map.getView().getZoom() || 1),
     });
 
     let plans: MapsetPlan[] = [];
 
     try {
-      plans = await api.getPlans({}, { signal: this.#abortController.signal });
+      plans = await this.api.getPlans(
+        {},
+        { signal: this.#abortController.signal },
+      );
     } catch (e) {
       console.error('MapsetLayer: Error fetching plans...', e);
     }

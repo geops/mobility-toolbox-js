@@ -46,7 +46,19 @@ class HttpAPI {
       ...(params || {}),
     });
 
-    const response = await fetch(url.toString(), config);
+    let response;
+
+    try {
+      response = await fetch(url.toString(), config);
+      if (!response.ok) {
+        console.error('HttpAPI: Network response was not ok:', response);
+        return null as T;
+      }
+    } catch (error) {
+      console.error('HttpAPI: Error fetching data:', error);
+      return null as T;
+    }
+
     const data = (await response.json()) as { error?: string } | T;
 
     if ((data as { error?: string }).error) {
