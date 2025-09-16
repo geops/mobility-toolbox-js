@@ -143,9 +143,7 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   get situations(): Partial<SituationType>[] | undefined {
-    return (
-      (this.get('situations') as Partial<SituationType>[] | undefined) ?? []
-    );
+    return this.get('situations') as Partial<SituationType>[] | undefined;
   }
 
   get tenant(): string | undefined {
