@@ -1,24 +1,15 @@
 import { MapLibreLayerRenderer } from '@geoblocks/ol-maplibre-layer/lib';
-import { toDegrees } from 'ol/math.js';
-import { toLonLat } from 'ol/proj';
 
 import type { MapLibreLayerTranslateZoomFunction } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
 import type { FrameState } from 'ol/Map';
 
 import type { MaplibreLayer } from '../layers';
 
-function sameSize(canvas: HTMLCanvasElement, frameState: FrameState): boolean {
-  return (
-    canvas.width === Math.floor(frameState.size[0] * frameState.pixelRatio) &&
-    canvas.height === Math.floor(frameState.size[1] * frameState.pixelRatio)
-  );
-}
-// /**
-//  * This class is usea renderer for Maplibre Layer to be able to use the native ol
-//  * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
-//  * @private
-//  */
-// // @ts-expect-error
+/**
+ * This class is usea renderer for Maplibre Layer to be able to use the native ol
+ * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
+ * @private
+ */
 export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   ignoreNextRender = false;
   tranaslateZoom2: MapLibreLayerTranslateZoomFunction | undefined;
@@ -73,7 +64,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   }
 
   updateReadyState() {
-    this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
-    this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady);
+    void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady.bind(this));
+    void this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady.bind(this));
   }
 }
