@@ -312,11 +312,13 @@ class MocoLayer extends MaplibreStyleLayer {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
           if (/AbortError/.test(error?.name)) {
             // Ignore abort error
-            return { paginatedSituations: { results: [] as SituationType[] } };
+            return {
+              paginatedSituations: { results: undefined },
+            };
           }
           throw error;
         });
-      this.situations = response.paginatedSituations.results || [];
+      this.situations = response.paginatedSituations.results;
     }
 
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
