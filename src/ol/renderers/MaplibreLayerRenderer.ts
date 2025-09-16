@@ -98,8 +98,9 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       map.render();
     } else if (!sameSize(mapLibreCanvas, frameState)) {
       mapLibreMap.resize();
-      mapLibreMap.redraw();
     }
+
+    mapLibreMap.redraw();
 
     return mapLibreMap.getContainer();
   }
