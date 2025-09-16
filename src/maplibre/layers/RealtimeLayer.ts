@@ -107,6 +107,7 @@ class RealtimeLayer extends Layer {
     this.source = {
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
+      // @ts-expect-error bad type definition
       attribution: (options.attribution as string[])?.join(', '),
       canvas: this.canvas as HTMLCanvasElement,
       // Set a default coordinates, it will be overrides on next data update
