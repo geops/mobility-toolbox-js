@@ -299,7 +299,6 @@ class RealtimeEngine {
 
     // Graph by zoom
     this.graphByZoom = options.graphByZoom ?? [];
-    console.log('graphByZoom', this.graphByZoom);
     this.getGraphByZoom = (zoom) => {
       if (options.getGraphByZoom) {
         return options.getGraphByZoom(zoom, this.graphByZoom);

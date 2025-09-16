@@ -322,7 +322,7 @@ class MocoLayer extends MaplibreStyleLayer {
   /**
    * This function updates the GeoJSON source data, with the current situations available in this.situations.
    * @returns
-   */
+   */ 
   async updateData(): Promise<boolean | undefined> {
     if (this.loadAll) {
       const situations = await this.loadData();
