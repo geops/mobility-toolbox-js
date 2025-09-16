@@ -1,3 +1,5 @@
+import { load } from 'ol/Image';
+
 import {
   getFeatureCollectionToRenderFromSituation,
   getGraphByZoom,
@@ -107,7 +109,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set api(value: MocoAPI) {
     this.set('api', value);
-    void this.updateData(true);
+    void this.updateData();
   }
 
   get apiKey(): string | undefined {
@@ -116,7 +118,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set apiKey(value: string) {
     this.api.apiKey = value;
-    void this.updateData(true);
+    void this.updateData();
   }
 
   get loadAll(): boolean {
@@ -125,12 +127,12 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set loadAll(value: boolean) {
     this.set('loadAll', value);
-    void this.updateData(true);
+    void this.updateData();
   }
 
   set publicAt(value: Date) {
     this.set('publicAt', value);
-    void this.updateData(true);
+    void this.updateData();
   }
 
   get publicAt(): Date {
@@ -138,6 +140,8 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   set situations(value: Partial<SituationType>[]) {
+    // If we set situations we do not want to load data from backend
+    this.loadAll = false;
     this.set('situations', value);
     void this.updateData();
   }
@@ -152,7 +156,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set tenant(value: string) {
     this.set('tenant', value);
-    void this.updateData(true);
+    void this.updateData();
   }
   get url(): string | undefined {
     return this.api.url;
@@ -160,7 +164,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set url(value: string) {
     this.api.url = value;
-    void this.updateData(true);
+    void this.updateData();
   }
   #abortController: AbortController | null = null;
 
@@ -171,9 +175,6 @@ class MocoLayer extends MaplibreStyleLayer {
     features: [],
     type: 'FeatureCollection',
   };
-
-  /** Graph mapping from the style metadata */
-  #graphMapping?: StyleMetadataGraphs;
 
   /**
    * Constructor.
@@ -212,7 +213,7 @@ class MocoLayer extends MaplibreStyleLayer {
   override attachToMap(map: Map) {
     super.attachToMap(map);
 
-    // If the source is already there (no load event triggered) update data
+    // If the source is already there (no load event triggered), we update data
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (source) {
       void this.updateData();
@@ -263,26 +264,11 @@ class MocoLayer extends MaplibreStyleLayer {
     return newData;
   }
 
-  onLoad() {
-    super.onLoad();
-    void this.updateData();
-  }
-
-  onZoomEnd() {
-    const source: GeoJSONSource | undefined =
-      this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
-    if (!source || !this.#graphMapping || !this.#dataInternal.features.length) {
-      return;
-    }
-
-    // We update the data if the graph has changed
-    const newData = this.getDataByGraph(this.#dataInternal);
-    if (newData !== this.#dataInternal) {
-      source.setData(newData);
-    }
-  }
-
-  async updateData(forceReloadAll = false): Promise<boolean | undefined> {
+  /**
+   * This functions load situations from backend depending on the current graph mapping in the style metadata.
+   * @returns
+   */
+  async loadData(): Promise<SituationType[] | undefined> {
     if (this.#abortController) {
       this.#abortController.abort();
     }
@@ -295,37 +281,59 @@ class MocoLayer extends MaplibreStyleLayer {
     const graphMapping = mdGraphs ?? DEFAULT_GRAPH_MAPPING;
     const graphsString = [...new Set(Object.values(graphMapping))].join(',');
 
-    const publicAt = this.publicAt;
+    try {
+      const response = await this.api.export(
+        {
+          graph: graphsString,
+          hasGeoms: true,
+          publicAt: this.publicAt.toISOString(),
+        },
+        { signal: this.#abortController.signal },
+      );
+      return response.paginatedSituations.results;
+    } catch (error) {
+      if (error && (error as { name: string }).name.includes('AbortError')) {
+        // Ignore abort error
+        return [];
+      }
+      throw error;
+    }
+  }
 
-    // We load notifications from backend
-    if (this.loadAll && (!this.situations || forceReloadAll)) {
-      const response = await this.api
-        .export(
-          {
-            graph: graphsString,
-            hasGeoms: true,
-            publicAt: publicAt.toISOString(),
-          },
-          { signal: this.#abortController.signal },
-        )
-        .catch((error) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-          if (/AbortError/.test(error?.name)) {
-            // Ignore abort error
-            return {
-              paginatedSituations: { results: undefined },
-            };
-          }
-          throw error;
-        });
-      this.situations = response.paginatedSituations.results;
+  onLoad() {
+    super.onLoad();
+    void this.updateData();
+  }
+
+  onZoomEnd() {
+    const source: GeoJSONSource | undefined =
+      this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
+    if (!source || !this.#dataInternal.features.length) {
+      return;
     }
 
+    // We update the data if the graph has changed
+    const newData = this.getDataByGraph(this.#dataInternal);
+    if (newData !== this.#dataInternal) {
+      source.setData(newData);
+    }
+  }
+
+  /**
+   * This function updates the GeoJSON source data, with the current situations available in this.situations.
+   * @returns
+   */
+  async updateData(): Promise<boolean | undefined> {
+    if (this.loadAll) {
+      const situations = await this.loadData();
+      // We don't use the setter here to avoid infinite loop
+      this.set('situations', situations ?? []);
+    }
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (!source) {
       // eslint-disable-next-line no-console
       console.warn('MocoLayer: No source found for id : ', MOCO_SOURCE_ID);
-      return;
+      return Promise.reject(new Error('No source found'));
     }
 
     const data = {
@@ -338,10 +346,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
     // Apply new data to the source
     (source as GeoJSONSource).setData(this.getDataByGraph(data));
-
-    this.#graphMapping = graphMapping; // Active update of data on zoom end
-
-    return true;
+    return Promise.resolve(true);
   }
 }
 
