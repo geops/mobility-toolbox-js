@@ -50,6 +50,7 @@ export interface RealtimeEngineOptions {
   ) => RealtimeGeneralizationLevel;
   getGraphByZoom?: (zoom: number, graphByZoom: string[]) => string | undefined;
   getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
+  getRefreshTimeInMs?: () => number;
   getRenderTimeIntervalByZoom?: (
     zoom: number,
     renderTimeIntervalByZoom: number[],
@@ -193,18 +194,18 @@ class RealtimeEngine {
 
   constructor(options: RealtimeEngineOptions) {
     this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
-    this._speed = options.speed || 1; // If live property is true. The speed is ignored.
-    this._style = options.style || realtimeDefaultStyle;
-    this._time = options.time || new Date();
+    this._speed = options.speed ?? 1; // If live property is true. The speed is ignored.
+    this._style = options.style ?? realtimeDefaultStyle;
+    this._time = options.time ?? new Date();
 
-    this.api = options.api || new RealtimeAPI(options);
+    this.api = options.api ?? new RealtimeAPI(options);
     this.bboxParameters = options.bboxParameters;
     this.canvas =
-      options.canvas ||
+      options.canvas ??
       (typeof document !== 'undefined'
         ? document.createElement('canvas')
         : undefined);
-    this.debug = options.debug || false;
+    this.debug = options.debug ?? false;
     this.filter = options.filter;
     this.hoverVehicleId = options.hoverVehicleId;
 
@@ -214,9 +215,9 @@ class RealtimeEngine {
      */
     this.live = options.live !== false;
 
-    this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
+    this.minZoomInterpolation = options.minZoomInterpolation ?? 8; // Min zoom level from which trains positions are not interpolated.
     this.pixelRatio =
-      options.pixelRatio ||
+      options.pixelRatio ??
       (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
     this.selectedVehicleId = options.selectedVehicleId;
     this.sort = options.sort;
@@ -225,23 +226,27 @@ class RealtimeEngine {
      * Custom options to pass as last parameter of the style function.
      */
     // @ts-expect-error good type must be defined
-    this.styleOptions = { ...realtimeConfig, ...(options.styleOptions || {}) };
-    this.tenant = options.tenant || ''; // sbb,sbh or sbm
+    this.styleOptions = { ...realtimeConfig, ...(options.styleOptions ?? {}) };
+    this.tenant = options.tenant ?? ''; // sbb,sbh or sbm
     this.trajectories = {};
-    this.useDebounce = options.useDebounce || false;
-    this.useRequestAnimationFrame = options.useRequestAnimationFrame || false;
+    this.useDebounce = options.useDebounce ?? false;
+    this.useRequestAnimationFrame = options.useRequestAnimationFrame ?? false;
     this.useThrottle = options.useThrottle !== false; // the default behavior
 
     this.getViewState =
-      options.getViewState ||
+      options.getViewState ??
       (() => {
         return {};
       });
     this.shouldRender =
-      options.shouldRender ||
+      options.shouldRender ??
       (() => {
         return true;
       });
+
+    this.getRefreshTimeInMs =
+      options.getRefreshTimeInMs ?? this.getRefreshTimeInMs.bind(this);
+
     this.onRender = options.onRender;
     this.onIdle = options.onIdle;
     this.onStart = options.onStart;
@@ -402,7 +407,7 @@ class RealtimeEngine {
    */
   getRefreshTimeInMs(): number {
     const viewState = this.getViewState();
-    const zoom = viewState.zoom || 0;
+    const zoom = viewState.zoom ?? 0;
     const roundedZoom = zoom !== undefined ? Math.round(zoom) : -1;
     const timeStep = this.getRenderTimeIntervalByZoom(roundedZoom) || 25;
     const nextTick = Math.max(25, timeStep / (this.speed || 1));

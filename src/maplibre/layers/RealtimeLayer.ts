@@ -1,16 +1,22 @@
 import { point } from '@turf/helpers';
 import transformRotate from '@turf/transform-rotate';
-import { CanvasSourceSpecification, LayerSpecification } from 'maplibre-gl';
 import { getHeight, getWidth } from 'ol/extent';
 import { fromLonLat } from 'ol/proj';
 
+import RealtimeEngine from '../../common/utils/RealtimeEngine';
+import { getSourceCoordinates } from '../utils';
+
+import Layer from './Layer';
+
+import type {
+  CanvasSourceSpecification,
+  LayerSpecification,
+} from 'maplibre-gl';
+
+import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { AnyCanvas, AnyMapGlMap } from '../../types';
 
-import RealtimeEngine, {
-  RealtimeEngineOptions,
-} from '../../common/utils/RealtimeEngine';
-import { getSourceCoordinates } from '../utils';
-import Layer, { LayerOptions } from './Layer';
+import type { LayerOptions } from './Layer';
 
 export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
 
@@ -86,7 +92,7 @@ class RealtimeLayer extends Layer {
     const id = options?.id || 'realtime';
     super({
       ...options,
-      id: 'realtime-custom-' + id,
+      id: `realtime-custom-${id}`,
     });
 
     this.#internalId = id;
@@ -101,8 +107,7 @@ class RealtimeLayer extends Layer {
     this.source = {
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
-      // @ts-expect-error bad type definition
-      attribution: options.attribution?.join(', '),
+      attribution: (options.attribution as string[])?.join(', '),
       canvas: this.canvas as HTMLCanvasElement,
       // Set a default coordinates, it will be overrides on next data update
       coordinates: [

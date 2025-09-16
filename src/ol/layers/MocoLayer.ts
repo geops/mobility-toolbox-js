@@ -143,7 +143,10 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   get situations(): Partial<SituationType>[] | undefined {
-    return this.get('situations') as Partial<SituationType>[] | undefined;
+    return (
+      (this.get('situations') as Partial<SituationType>[] | undefined) ||
+      this.#situationsInternal
+    );
   }
 
   get tenant(): string | undefined {
@@ -319,6 +322,7 @@ class MocoLayer extends MaplibreStyleLayer {
         });
       situations = response.paginatedSituations.results || [];
     }
+    this.#situationsInternal = situations;
 
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (!source) {
