@@ -107,7 +107,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set api(value: MocoAPI) {
     this.set('api', value);
-    void this.updateData();
+    void this.updateData(true);
   }
 
   get apiKey(): string | undefined {
@@ -116,7 +116,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set apiKey(value: string) {
     this.api.apiKey = value;
-    void this.updateData();
+    void this.updateData(true);
   }
 
   get loadAll(): boolean {
@@ -125,12 +125,12 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set loadAll(value: boolean) {
     this.set('loadAll', value);
-    void this.updateData();
+    void this.updateData(true);
   }
 
   set publicAt(value: Date) {
     this.set('publicAt', value);
-    void this.updateData();
+    void this.updateData(true);
   }
 
   get publicAt(): Date {
@@ -144,8 +144,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   get situations(): Partial<SituationType>[] | undefined {
     return (
-      (this.get('situations') as Partial<SituationType>[] | undefined) ||
-      this.#situationsInternal
+      (this.get('situations') as Partial<SituationType>[] | undefined) ?? []
     );
   }
 
@@ -155,7 +154,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set tenant(value: string) {
     this.set('tenant', value);
-    void this.updateData();
+    void this.updateData(true);
   }
   get url(): string | undefined {
     return this.api.url;
@@ -163,7 +162,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set url(value: string) {
     this.api.url = value;
-    void this.updateData();
+    void this.updateData(true);
   }
   #abortController: AbortController | null = null;
 
@@ -285,7 +284,7 @@ class MocoLayer extends MaplibreStyleLayer {
     }
   }
 
-  async updateData() {
+  async updateData(forceReloadAll = false): Promise<boolean | undefined> {
     if (this.#abortController) {
       this.#abortController.abort();
     }
@@ -300,9 +299,8 @@ class MocoLayer extends MaplibreStyleLayer {
 
     const publicAt = this.publicAt;
 
-    let situations = this.situations ?? [];
-
-    if (!this.situations && this.loadAll) {
+    // We load notifications from backend
+    if (this.loadAll && (!this.situations || forceReloadAll)) {
       const response = await this.api
         .export(
           {
@@ -320,9 +318,8 @@ class MocoLayer extends MaplibreStyleLayer {
           }
           throw error;
         });
-      situations = response.paginatedSituations.results || [];
+      this.situations = response.paginatedSituations.results || [];
     }
-    this.#situationsInternal = situations;
 
     const source = this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (!source) {
@@ -332,7 +329,7 @@ class MocoLayer extends MaplibreStyleLayer {
     }
 
     const data = {
-      features: situations.flatMap((situation) => {
+      features: (this.situations ?? []).flatMap((situation) => {
         return getFeatureCollectionToRenderFromSituation(situation).features;
       }),
       type: 'FeatureCollection',
