@@ -5,7 +5,7 @@ import type { Extent } from 'ol/extent';
 import type { MapsetPlan } from '../types';
 
 export interface MapsetAPIOptions {
-  apiKey: string;
+  apiKey?: string;
   bbox?: number[];
   tags?: string[];
   tenants?: string[];
@@ -69,19 +69,18 @@ class MapsetAPI extends HttpAPI {
   constructor(options: MapsetAPIOptions) {
     super({
       ...options,
-      apiKey: options.apiKey,
-      url: options.url || 'https://editor.mapset.io/api/v1',
+      url: options.url ?? 'https://editor.mapset.io/api/v1',
     });
-    this.tags = options.tags || [];
+    this.tags = options.tags ?? [];
     this.bbox = options.bbox;
-    this.zoom = options.zoom || 1;
-    this.tenants = options.tenants || [];
+    this.zoom = options.zoom ?? 1;
+    this.tenants = options.tenants ?? [];
     this.timestamp = options.timestamp;
+    this.apiKey = options.apiKey ?? '';
   }
 
   /**
-   * Get notifications from the MOCO API.
-   * Plans are returned as an array of mapset plan objects with kml strings in data attribute.
+   * Get mapset plans from the Mapset API.
    *
    * @param {MapsetAPIParams} params Request parameters.
    * @param {FetchOptions} config Options for the fetch request.
@@ -95,23 +94,19 @@ class MapsetAPI extends HttpAPI {
     const apiParams: MapsetAPIParams = { ...params };
     let res = {} as MapsetApiResponse;
 
-    try {
-      res = await this.fetch<MapsetApiResponse>(
-        '/export/kml',
-        {
-          bbox: this.bbox?.toString(),
-          tags: this.tags?.toString(),
-          tenants: this.tenants?.toString(),
-          timestamp: this.timestamp,
-          zoom: Math.floor(this.zoom),
-          ...apiParams,
-        },
-        config,
-      );
-    } catch (e) {
-      console.error('Error fetching mapset plans:', e);
-      return []; // ✅ swallow error here
-    }
+    res = await this.fetch<MapsetApiResponse>(
+      '/export/kml',
+      {
+        bbox: this.bbox?.toString(),
+        key: this.apiKey,
+        tags: this.tags?.toString(),
+        tenants: this.tenants?.toString(),
+        timestamp: this.timestamp,
+        zoom: Math.floor(this.zoom),
+        ...apiParams,
+      },
+      config,
+    );
 
     if (res?.detail) {
       console.error('Error fetching mapset plans:', res.detail);

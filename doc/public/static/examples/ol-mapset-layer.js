@@ -11,6 +11,7 @@ export default () => {
 
   const mapsetLayer = new MapsetLayer({
     tenants: ['geopstest'],
+    apiKey: window.apiKey,
   });
 
   const map = new Map({
@@ -55,7 +56,7 @@ export default () => {
     const features = mapsetLayer.getSource().getFeatures();
     if (features.length) {
       map?.getView().fit(mapsetLayer?.getSource().getExtent(), {
-        duration: 1000,
+        duration: 500,
         padding: [200, 200, 200, 200],
       });
     }
@@ -73,7 +74,7 @@ export default () => {
 
   const fetchPlansButton = document.getElementById('fetch-plans-button');
   fetchPlansButton?.addEventListener('click', () => {
-    mapsetLayer.updateData();
+    mapsetLayer.bbox = map.getView().calculateExtent(map.getSize());
     mapsetLayer.once('load:plans', zoomOnFeatures);
   });
 
