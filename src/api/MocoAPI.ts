@@ -49,9 +49,8 @@ class MocoAPI extends HttpAPI {
    */
   constructor(options: MocoAPIOptions) {
     super({
-      ...options,
-      apiKey: options.apiKey,
       url: options.url || 'https://moco.geops.io/api/v2/',
+      ...options,
     });
 
     if (options.tenant) {
