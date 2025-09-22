@@ -33,8 +33,6 @@ export interface MocoAPIOptions {
  * @private
  */
 class MocoAPI extends HttpAPI {
-  graph = 'osm';
-
   tenant = 'geopstest';
 
   /**
@@ -56,10 +54,6 @@ class MocoAPI extends HttpAPI {
     if (options.tenant) {
       this.tenant = options.tenant;
     }
-
-    if (options.graph) {
-      this.graph = options.graph;
-    }
   }
 
   /**
@@ -75,7 +69,6 @@ class MocoAPI extends HttpAPI {
     >(
       `${this.tenant}/export/`,
       {
-        //graph: this.graph,
         ...params,
       },
       config,
