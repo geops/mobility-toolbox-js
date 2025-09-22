@@ -15,6 +15,7 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** Date with time (isoformat) */
   DateTime: { input: any; output: any; }
+  GeoJSONDict: { input: any; output: any; }
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf). */
   JSON: { input: any; output: any; }
   /** Time (isoformat) */
@@ -64,7 +65,7 @@ export type DeleteSituationPayload = OperationInfo | SuccessType;
 
 export type Feature = {
   __typename?: 'Feature';
-  geometry: Scalars['JSON']['output'];
+  geometry: Scalars['GeoJSONDict']['output'];
   properties: MultiRoutingProperties;
   type: Scalars['String']['output'];
 };
@@ -99,8 +100,14 @@ export type InfoLinkType = {
 
 export type LineGraphGeometryType = {
   __typename?: 'LineGraphGeometryType';
-  geom: Scalars['JSON']['output'];
+  geom: Scalars['GeoJSONDict']['output'];
   graph: Scalars['String']['output'];
+};
+
+
+export type LineGraphGeometryTypeGeomArgs = {
+  precision?: Scalars['Int']['input'];
+  simplify?: Scalars['Int']['input'];
 };
 
 export type LineGroupInput = {
@@ -411,7 +418,7 @@ export type Query = {
   currentUser: UserType;
   multiRouting: MultiRoutingResult;
   paginatedSituations: SituationTypeExtendedOffsetPaginated;
-  previewSituation: Scalars['JSON']['output'];
+  previewSituation: SituationType;
   reasons: Array<ReasonType>;
   situation: SituationType;
   sources: Array<SourceType>;
@@ -435,7 +442,6 @@ export type QueryPaginatedSituationsArgs = {
 
 export type QueryPreviewSituationArgs = {
   data: CreateSituationInput;
-  simplify?: Scalars['Float']['input'];
   tenant: Scalars['String']['input'];
 };
 
@@ -547,7 +553,12 @@ export type SituationFilter = {
   DISTINCT?: InputMaybe<Scalars['Boolean']['input']>;
   NOT?: InputMaybe<SituationFilter>;
   OR?: InputMaybe<SituationFilter>;
+  affectedAfter?: InputMaybe<Scalars['DateTime']['input']>;
+  affectedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  affectedBefore?: InputMaybe<Scalars['DateTime']['input']>;
   editedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  hasGeoms?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
   isEdited?: InputMaybe<Scalars['Boolean']['input']>;
   publicAfter?: InputMaybe<Scalars['DateTime']['input']>;
   publicAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -633,8 +644,14 @@ export type StationProperties = {
 
 export type StopGraphGeometryType = {
   __typename?: 'StopGraphGeometryType';
-  geom: Scalars['JSON']['output'];
+  geom: Scalars['GeoJSONDict']['output'];
   graph: Scalars['String']['output'];
+};
+
+
+export type StopGraphGeometryTypeGeomArgs = {
+  precision?: Scalars['Int']['input'];
+  simplify?: Scalars['Int']['input'];
 };
 
 export type StopInput = {
@@ -661,7 +678,7 @@ export type StopResult = {
 
 export type StopType = {
   __typename?: 'StopType';
-  geom: Scalars['JSON']['output'];
+  geom: Scalars['GeoJSONDict']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   uid: Scalars['String']['output'];

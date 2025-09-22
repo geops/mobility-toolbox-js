@@ -473,7 +473,10 @@ class RealtimeEngine {
     }
 
     const vehicles = [];
-    for (const trajectory of trajectories) {
+    // Theoretically 'for' is faster then 'for-of and it is important here
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let i = 0; i < trajectories.length; i += 1) {
+      const trajectory = trajectories[i];
       const { coordinate: trajcoord } = trajectory.properties;
       if (trajcoord && containsCoordinate(extent, trajcoord)) {
         vehicles.push(trajectory);

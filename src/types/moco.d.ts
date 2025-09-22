@@ -92,12 +92,10 @@ export interface paths {
      *         tenant
      *     }
      *     affectedTimeIntervals {
-     *         id
      *         startTime
      *         endTime
      *     }
      *     publicationWindows {
-     *         id
      *         startTime
      *         endTime
      *     }
@@ -106,10 +104,13 @@ export interface paths {
      *         severityGroup
      *         serviceCondition
      *         serviceConditionGroup
+     *         publicationWindows {
+     *             startTime
+     *             endTime
+     *         }
      *         publicationStops @include(if: $includeStops) {
-     *             id
-     *             name
      *             uid
+     *             name
      *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
      *                 graph
      *                 geom(simplify:$simplify)
@@ -119,7 +120,6 @@ export interface paths {
      *             hasIcon
      *             category
      *             lines {
-     *                 id
      *                 name
      *                 operatorRef
      *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -239,12 +239,10 @@ export interface paths {
      *         tenant
      *     }
      *     affectedTimeIntervals {
-     *         id
      *         startTime
      *         endTime
      *     }
      *     publicationWindows {
-     *         id
      *         startTime
      *         endTime
      *     }
@@ -253,10 +251,13 @@ export interface paths {
      *         severityGroup
      *         serviceCondition
      *         serviceConditionGroup
+     *         publicationWindows {
+     *             startTime
+     *             endTime
+     *         }
      *         publicationStops @include(if: $includeStops) {
-     *             id
-     *             name
      *             uid
+     *             name
      *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
      *                 graph
      *                 geom(simplify:$simplify)
@@ -266,7 +267,6 @@ export interface paths {
      *             hasIcon
      *             category
      *             lines {
-     *                 id
      *                 name
      *                 operatorRef
      *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -695,12 +695,10 @@ export interface operations {
    *         tenant
    *     }
    *     affectedTimeIntervals {
-   *         id
    *         startTime
    *         endTime
    *     }
    *     publicationWindows {
-   *         id
    *         startTime
    *         endTime
    *     }
@@ -709,10 +707,13 @@ export interface operations {
    *         severityGroup
    *         serviceCondition
    *         serviceConditionGroup
+   *         publicationWindows {
+   *             startTime
+   *             endTime
+   *         }
    *         publicationStops @include(if: $includeStops) {
-   *             id
-   *             name
    *             uid
+   *             name
    *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
    *                 graph
    *                 geom(simplify:$simplify)
@@ -722,7 +723,6 @@ export interface operations {
    *             hasIcon
    *             category
    *             lines {
-   *                 id
    *                 name
    *                 operatorRef
    *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -873,12 +873,10 @@ export interface operations {
    *         tenant
    *     }
    *     affectedTimeIntervals {
-   *         id
    *         startTime
    *         endTime
    *     }
    *     publicationWindows {
-   *         id
    *         startTime
    *         endTime
    *     }
@@ -887,10 +885,13 @@ export interface operations {
    *         severityGroup
    *         serviceCondition
    *         serviceConditionGroup
+   *         publicationWindows {
+   *             startTime
+   *             endTime
+   *         }
    *         publicationStops @include(if: $includeStops) {
-   *             id
-   *             name
    *             uid
+   *             name
    *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
    *                 graph
    *                 geom(simplify:$simplify)
@@ -900,7 +901,6 @@ export interface operations {
    *             hasIcon
    *             category
    *             lines {
-   *                 id
    *                 name
    *                 operatorRef
    *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
