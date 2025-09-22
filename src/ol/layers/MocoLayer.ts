@@ -180,7 +180,8 @@ class MocoLayer extends MaplibreStyleLayer {
    * Constructor.
    *
    * @param {Object} options
-   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).   *
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
+   * @param {string} [options.apiParameters] The url parameters to be included in the MOCO API request.
    * @param {string} [options.date] The date to filter notifications. If not set, the current date is used.
    * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded, otherwise only the notifications set in 'notifications' will be displayed.
    * @param {MocoNotification[]} [options.notifications] The notifications to display. If not set and loadAll is true, all active and published notifications will be loaded.
@@ -192,8 +193,6 @@ class MocoLayer extends MaplibreStyleLayer {
     super({
       api: new MocoAPI({
         apiKey: options.apiKey,
-        // limit: 100,
-        // onlyGWithGeom: true,
         tenant: options.tenant,
         url: options.url,
       }),
@@ -287,6 +286,7 @@ class MocoLayer extends MaplibreStyleLayer {
           graph: graphsString,
           hasGeoms: true,
           publicAt: this.publicAt.toISOString(),
+          ...(this.get('apiParameters') || {}),
         },
         { signal: this.#abortController.signal },
       );
@@ -322,7 +322,7 @@ class MocoLayer extends MaplibreStyleLayer {
   /**
    * This function updates the GeoJSON source data, with the current situations available in this.situations.
    * @returns
-   */ 
+   */
   async updateData(): Promise<boolean | undefined> {
     if (this.loadAll) {
       const situations = await this.loadData();
