@@ -37,7 +37,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     return this.get('bbox') as null | number[];
   }
   set bbox(value: null | number[]) {
-    if (ths.bbox?.toString() !== value?.toString()) {
+    if (this.bbox?.toString() !== value?.toString()) {
       this.set('bbox', value);
       void this.updateData();
     }
@@ -63,13 +63,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     return this.get('tags') as string[];
   }
   set tags(value: string[]) {
-    const current = this.tags || [];
-    const changed =
-      current.length !== value.length ||
-      current.some((tag, i) => {
-        return tag.toString() !== value[i]?.toString();
-      });
-    if (changed) {
+    if (this.tags?.toString() !== value?.toString()) {
       this.set('tags', value);
       void this.updateData();
     }
@@ -79,13 +73,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     return this.get('tenants') as string[];
   }
   set tenants(value: string[]) {
-    const current = this.tenants || [];
-    const changed =
-      current.length !== value.length ||
-      current.some((tenant, i) => {
-        return tenant.toString() !== value[i]?.toString();
-      });
-    if (changed) {
+    if (this.tenants?.toString() !== value?.toString()) {
       this.set('tenants', value);
       void this.updateData();
     }

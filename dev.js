@@ -80,6 +80,17 @@ map?.getView().on('change:resolution', (evt) => {
 
 const fetchPlansButton = document.getElementById('fetch-plans-button');
 fetchPlansButton?.addEventListener('click', () => {
+  mapsetLayer.tenants = tenantsInput.value
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+  mapsetLayer.tags = tagsInput.value
+    .split(',')
+    .map((t) => t.trim())
+    .filter(Boolean);
+  mapsetLayer.apiKey = window.apiKey;
+  const timestamp = timestampInput.value;
+  mapsetLayer.timestamp = timestamp;
   mapsetLayer.bbox = map.getView().calculateExtent(map.getSize());
   mapsetLayer.once('load:plans', zoomOnFeatures);
 });
