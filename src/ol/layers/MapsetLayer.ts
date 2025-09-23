@@ -37,12 +37,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     return this.get('bbox') as null | number[];
   }
   set bbox(value: null | number[]) {
-    const changed =
-      !this.bbox ||
-      this.bbox.some((v, i) => {
-        return v.toString() !== value?.[i]?.toString();
-      });
-    if (changed) {
+    if (ths.bbox?.toString() !== value?.toString()) {
       this.set('bbox', value);
       void this.updateData();
     }
