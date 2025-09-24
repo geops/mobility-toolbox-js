@@ -170,6 +170,7 @@ export const getFeatureCollectionToRenderFromSituation = (
 
   const situationRenderProps = {
     reasonCategoryImageName,
+    reasons: situation.reasons,
     // for backward compatibility
     reasons_category: reasonCategoryImageName,
   };
@@ -211,12 +212,15 @@ export const getFeatureCollectionToRenderFromSituation = (
                 publication,
                 publicationLine,
                 situation,
+                ...publication,
+                // ...situation,
                 ...situationRenderProps,
                 ...publicationRenderProps,
                 geometry: undefined, // to avoid conflict with ol geometry property
               },
               type: 'Feature',
             };
+            // console.log(feature.properties);
             features.push(feature);
 
             if (publicationLine.hasIcon) {
