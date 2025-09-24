@@ -22,8 +22,8 @@ import { transformExtent } from 'ol/proj';
 window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
 const realtimeUrl = 'https://tralis-tracker-api.dev.geops.io/ws';
-const mocoUrl = 'https://moco.stag.geops.io/api/v2/';
-const mapsUrl = 'https://maps.style-test.geops.io';
+const mocoUrl = 'https://moco.geops.io/api/v2/';
+const mapsUrl = 'https://maps.geops.io';
 
 const RVF_EXTENT_4326 = [7.5, 47.7, 8.45, 48.4];
 
