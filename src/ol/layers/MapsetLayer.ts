@@ -5,6 +5,7 @@ import { Vector } from 'ol/source';
 import MapsetAPI from '../../api/MapsetApi';
 import MapsetKmlFormat from '../utils/MapsetKmlFormat';
 
+import type Feature from 'ol/Feature';
 import type { FeatureLike } from 'ol/Feature';
 import type { Options } from 'ol/layer/Vector';
 
@@ -15,6 +16,7 @@ import type { MobilityLayerOptions } from './Layer';
 
 type MapsetLayerOptions = {
   doNotRevert32pxScaling?: boolean;
+  silent?: boolean;
 } & MapsetAPIOptions &
   MobilityLayerOptions &
   Options;
@@ -29,7 +31,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   set apiKey(value: string) {
     if (this.apiKey !== value) {
       this.set('apiKey', value);
-      void this.updateData();
+      void this.fetchPlans();
     }
   }
 
@@ -39,7 +41,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   set bbox(value: null | number[]) {
     if (this.bbox?.toString() !== value?.toString()) {
       this.set('bbox', value);
-      void this.updateData();
+      void this.fetchPlans();
     }
   }
 
@@ -48,7 +50,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
   set doNotRevert32pxScaling(value: boolean) {
     this.set('doNotRevert32pxScaling', value);
-    this.loadPlans();
+    this.updateFeatures();
   }
 
   get plans(): MapsetPlan[] {
@@ -56,7 +58,14 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
   set plans(value: MapsetPlan[]) {
     this.set('plans', value);
-    this.loadPlans();
+    this.updateFeatures();
+  }
+
+  get silent(): boolean {
+    return this.get('silent') as boolean;
+  }
+  set silent(value: boolean) {
+    this.set('silent', value);
   }
 
   get tags(): string[] {
@@ -65,7 +74,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   set tags(value: string[]) {
     if (this.tags?.toString() !== value?.toString()) {
       this.set('tags', value);
-      void this.updateData();
+      void this.fetchPlans();
     }
   }
 
@@ -75,7 +84,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   set tenants(value: string[]) {
     if (this.tenants?.toString() !== value?.toString()) {
       this.set('tenants', value);
-      void this.updateData();
+      void this.fetchPlans();
     }
   }
 
@@ -85,7 +94,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   set timestamp(value: string | undefined) {
     if (this.timestamp !== value) {
       this.set('timestamp', value);
-      void this.updateData();
+      void this.fetchPlans();
     }
   }
 
@@ -95,39 +104,19 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   set url(value: string) {
     if (this.url !== value) {
       this.set('url', value);
-      void this.updateData();
+      void this.fetchPlans();
     }
   }
 
   #abortController: AbortController;
 
   constructor(options: MapsetLayerOptions = {}) {
-    super({ ...options, source: new Vector<FeatureLike>() });
+    super({ ...options, source: options.source ?? new Vector<FeatureLike>() });
     this.url = options.url ?? 'https://editor.dev.mapset.io/api/v1';
     this.#abortController = new AbortController();
   }
 
-  public loadPlans() {
-    this.getSource()?.clear();
-    const map = this.getMapInternal();
-
-    if (!this.plans || this.plans?.length === 0 || !map) {
-      return;
-    }
-
-    this.plans?.forEach((plan) => {
-      const features = kmlFormatter.readFeatures(
-        plan.data,
-        map.getView().getProjection(),
-        this.doNotRevert32pxScaling,
-      );
-      this.getSource()?.addFeatures(features || []);
-    });
-
-    this.dispatchEvent('load:plans');
-  }
-
-  public async updateData() {
+  public async fetchPlans() {
     const map = this.getMapInternal();
     if (!map || !this.get('url') || !map.getView()) {
       console.warn(
@@ -178,6 +167,51 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
 
     this.plans = plans;
+  }
+
+  public updateFeatures() {
+    // TODO: clear(true) is bugged the removefeature event is still sent.
+    const oldFeatures = this.getSource()?.getFeatures() ?? [];
+    if (this.silent) {
+      oldFeatures.forEach((f) => {
+        (f as Feature).set('silent', true, true);
+      });
+      this.getSource()?.clear(this.silent);
+      oldFeatures.forEach((f) => {
+        (f as Feature).unset('silent', true);
+      });
+    } else {
+      this.getSource()?.clear();
+    }
+
+    const map = this.getMapInternal();
+
+    if (!this.plans || this.plans?.length === 0 || !map) {
+      return;
+    }
+
+    const features =
+      this.plans?.flatMap((plan) => {
+        return kmlFormatter.readFeatures(
+          plan.data,
+          map.getView().getProjection(),
+          this.doNotRevert32pxScaling,
+        );
+      }) ?? [];
+
+    if (this.silent) {
+      features.forEach((f) => {
+        f.set('silent', true, true);
+      });
+      this.getSource()?.addFeatures(features);
+      features.forEach((f) => {
+        f.unset('silent', true);
+      });
+    } else {
+      this.getSource()?.addFeatures(features);
+    }
+
+    this.dispatchEvent('load:plans');
   }
 }
 
