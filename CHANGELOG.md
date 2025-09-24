@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.3.4](https://github.com/geops/mobility-toolbox-js/compare/v3.3.3...v3.3.4) (2025-09-24)
+
+
+### Bug Fixes
+
+* use graphs from style and use new moco export api  ([#225](https://github.com/geops/mobility-toolbox-js/issues/225)) ([65c3711](https://github.com/geops/mobility-toolbox-js/commit/65c3711b35e951e5c7781c576e2075ec346aed59))
+
 ### [3.3.3](https://github.com/geops/mobility-toolbox-js/compare/v3.3.2...v3.3.3) (2025-08-04)
 
 
