@@ -116,6 +116,29 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     this.#abortController = new AbortController();
   }
 
+  public async fetchPlanById(id: string) {
+    this.#abortController.abort();
+    this.#abortController = new AbortController();
+
+    this.api = new MapsetAPI({
+      apiKey: this.apiKey,
+      url: this.url,
+    });
+
+    let plan: MapsetPlan | null = null;
+
+    try {
+      plan = await this.api.getPlanById(id, {
+        signal: this.#abortController.signal,
+      });
+    } catch (e) {
+      console.error('MapsetLayer: Error fetching plan by id...', e);
+      throw e;
+    }
+
+    this.plans = plan ? [plan] : this.plans;
+  }
+
   public async fetchPlans() {
     const map = this.getMapInternal();
     if (!map || !this.get('url') || !map.getView()) {

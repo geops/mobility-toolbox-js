@@ -80,7 +80,23 @@ class MapsetAPI extends HttpAPI {
   }
 
   /**
-   * Get mapset plans from the Mapset API.
+   * Get single mapset plan by ID from the Mapset API.
+   *
+   * @param {string} ID Plan ID.
+   * @param {FetchOptions} config Options for the fetch request.
+   * @return {Promise<MapsetApiResponse>} An array of mapset plan objects with kml strings in data attribute.
+   * @public
+   */
+  async getPlanById(id: string, config: RequestInit = {}): Promise<MapsetPlan> {
+    return await this.fetch<MapsetPlan>(
+      `/meta/kml/${id}`,
+      {},
+      { method: 'GET', ...config },
+    );
+  }
+
+  /**
+   * Get multiple mapset plans from the Mapset API.
    *
    * @param {MapsetAPIParams} params Request parameters.
    * @param {FetchOptions} config Options for the fetch request.

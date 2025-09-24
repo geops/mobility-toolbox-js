@@ -96,11 +96,27 @@ Bar</name><Style><IconStyle><scale>0</scale></IconStyle><LabelStyle><color>ff000
 
   const loadKmlButton = document.getElementById('load-kml-button');
   loadKmlButton?.addEventListener('click', () => {
+    if (!kmlTextArea.value) {
+      alert('Please enter a valid KML');
+      return;
+    }
     mapsetLayer.plans = [
       {
         data: kmlTextArea.value,
       },
     ];
+  });
+
+  // Load plan by ID
+  const idInput = document?.getElementById('id-input');
+  const loadPlanButton = document.getElementById('load-plan-button');
+  loadPlanButton?.addEventListener('click', async () => {
+    const id = idInput.value.trim();
+    if (!id) {
+      alert('Please enter a plan ID');
+      return;
+    }
+    await mapsetLayer.fetchPlanById(id);
     zoomOnFeatures();
   });
 };
