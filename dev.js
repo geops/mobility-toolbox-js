@@ -111,6 +111,7 @@ loadKmlButton?.addEventListener('click', () => {
       data: kmlTextArea.value,
     },
   ];
+  zoomOnFeatures();
 });
 
 // Load plan by ID

@@ -105,6 +105,7 @@ Bar</name><Style><IconStyle><scale>0</scale></IconStyle><LabelStyle><color>ff000
         data: kmlTextArea.value,
       },
     ];
+    zoomOnFeatures();
   });
 
   // Load plan by ID
