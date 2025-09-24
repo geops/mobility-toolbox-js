@@ -1,5 +1,7 @@
-import { CustomLayerInterface, Evented } from 'maplibre-gl';
+import { Evented } from 'maplibre-gl';
 import { v4 as uuid } from 'uuid';
+
+import type { CustomLayerInterface } from 'maplibre-gl';
 
 import type { AnyMapGlMap } from '../../types';
 

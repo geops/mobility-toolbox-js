@@ -5,22 +5,28 @@ import type { FrameState } from 'ol/Map';
 
 import type { MaplibreLayer } from '../layers';
 
-// /**
-//  * This class is usea renderer for Maplibre Layer to be able to use the native ol
-//  * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
-//  * @private
-//  */
-// // @ts-expect-error
+/**
+ * This class is usea renderer for Maplibre Layer to be able to use the native ol
+ * functionnalities like map.getFeaturesAtPixel or map.hasFeatureAtPixel.
+ * @private
+ */
 export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   ignoreNextRender = false;
+  tranaslateZoom2: MapLibreLayerTranslateZoomFunction | undefined;
 
   constructor(
     layer: MaplibreLayer,
     translateZoom?: MapLibreLayerTranslateZoomFunction,
   ) {
     super(layer, translateZoom);
+    this.tranaslateZoom2 = translateZoom;
+
     this.setIsReady = this.setIsReady.bind(this);
     this.ignoreNextRender = false;
+  }
+
+  override prepareFrame(): boolean {
+    return true;
   }
 
   renderFrame(frameState: FrameState): HTMLElement {
@@ -44,7 +50,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     const container = super.renderFrame(frameState);
 
     // Mark the renderer as ready when the map is idle
-    mapLibreMap?.once('idle', this.setIsReady);
+    void mapLibreMap?.once('idle', this.setIsReady.bind(this));
 
     return container;
   }
@@ -58,7 +64,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   }
 
   updateReadyState() {
-    this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
-    this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady);
+    void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady.bind(this));
+    void this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady.bind(this));
   }
 }

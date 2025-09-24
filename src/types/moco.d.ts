@@ -4,1004 +4,613 @@
  */
 
 export interface paths {
-  '/export/notification/': {
+  "/api/schema/": {
     /**
-     * This is a read-only alternative to the main notifications endpoint with
-     * the same filters, plus `split_layers` and `filename` query parameters.
+     * OpenApi3 schema for this API. Format can be selected via content negotiation.
+     *
+     * - YAML: application/vnd.oai.openapi
+     * - JSON: application/vnd.oai.openapi+json
      */
-    get: operations['export_notification_list'];
-    parameters: {};
+    get: operations["schema_retrieve"];
   };
-  '/export/notification/{id}/': {
-    /**
-     * This is a read-only alternative to the main notifications endpoint with
-     * the same filters, plus `split_layers` and `filename` query parameters.
-     */
-    get: operations['export_notification_read'];
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-    };
-  };
-  '/export/notification/{id}/preview/': {
-    /**
-     * The `pk` may be the ID of an existing notification or `null` if it is a
-     * new object.
-     */
-    post: operations['export_notification_preview'];
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-    };
-  };
-  '/export/publication/': {
+  "/api/v1/export/publication/": {
     /** Export publications as GeoJSON */
-    get: operations['export_publication_list'];
-    parameters: {};
+    get: operations["v1_export_publication_list"];
   };
-  '/export/publication/{id}/': {
+  "/api/v1/export/publication/{id}/": {
     /** Export publications as GeoJSON */
-    get: operations['export_publication_read'];
-    parameters: {
-      path: {
-        /** A unique integer value identifying this textual content. */
-        id: number;
-      };
-    };
+    get: operations["v1_export_publication_retrieve"];
   };
-  '/notification-category/': {
+  "/api/v2/{tenant}/export/": {
     /**
-     * Usually you don't need to add new items here unless they appear in an
-     * external source for the first time.
+     * Retrun result of the following GraphQL query:
+     * ```graphql
+     *
+     * query exportPublications(
+     *     # Path parameters:
+     *     $tenant: String!,
+     *     $situationId: ID
+     *     # Pagination:
+     *     $offset: Int!,
+     *     $limit: Int!,
+     *     # Geometry selection and modification:
+     *     $graph: String,
+     *     $simplify: Int!,
+     *     $includeGeoms: Boolean!,
+     *     $includeLines: Boolean!,
+     *     $includeStops: Boolean!,
+     *     $hasGeoms: Boolean,
+     *     # Time filters:
+     *     $publicAt: DateTime,
+     *     $publicBefore: DateTime,
+     *     $publicAfter: DateTime,
+     *     $affectedAt: DateTime,
+     *     $affectedBefore: DateTime,
+     *     $affectedAfter: DateTime,
+     *     # Textual content selection:
+     *     $contentLarge: Boolean!,
+     *     $contentSmall: Boolean!,
+     *     $contentMedium: Boolean!,
+     *     $de: Boolean!,
+     *     $fr: Boolean!,
+     *     $it: Boolean!,
+     *     $en: Boolean!,
+     * ) {
+     *     paginatedSituations(
+     *         tenant: $tenant
+     *         pagination: {offset: $offset, limit: $limit}
+     *         filters: {
+     *             id: $situationId,
+     *             publicAt: $publicAt,
+     *             publicBefore: $publicBefore,
+     *             publicAfter: $publicAfter,
+     *             affectedAt: $affectedAt,
+     *             affectedBefore: $affectedBefore,
+     *             affectedAfter: $affectedAfter,
+     *             hasGeoms: $hasGeoms
+     *         }
+     *     ) {
+     *       totalCount
+     *       results {
+     *           ...situationFragment
+     *       }
+     *     }
+     * }
+     *
+     * fragment situationFragment on SituationType {
+     *     id
+     *     title
+     *     publicationStopNames
+     *     publicationLineNames
+     *     affectedTimeIntervalsStart
+     *     affectedTimeIntervalsEnd
+     *     publicationWindowsStart
+     *     publicationWindowsEnd
+     *     reasons {
+     *         name
+     *         categoryName
+     *         tenant
+     *     }
+     *     affectedTimeIntervals {
+     *         startTime
+     *         endTime
+     *     }
+     *     publicationWindows {
+     *         startTime
+     *         endTime
+     *     }
+     *     publications {
+     *         severity
+     *         severityGroup
+     *         serviceCondition
+     *         serviceConditionGroup
+     *         publicationWindows {
+     *             startTime
+     *             endTime
+     *         }
+     *         publicationStops @include(if: $includeStops) {
+     *             uid
+     *             name
+     *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+     *                 graph
+     *                 geom(simplify:$simplify)
+     *             }
+     *         }
+     *         publicationLines @include(if: $includeLines) {
+     *             hasIcon
+     *             category
+     *             lines {
+     *                 name
+     *                 operatorRef
+     *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+     *                     graph
+     *                     geom(simplify: $simplify)
+     *                 }
+     *             }
+     *         }
+     *         textualContentLarge @include(if: $contentLarge) {
+     *             ...textualContentsFragment
+     *         }
+     *         textualContentSmall @include(if: $contentSmall) {
+     *             ...textualContentsFragment
+     *         }
+     *         textualContentMedium @include(if: $contentMedium) {
+     *             ...textualContentsFragment
+     *         }
+     *     }
+     * }
+     *
+     * fragment textualContentFragment on TextualContentType {
+     *     summary
+     *     reason
+     *     description
+     *     consequence
+     *     durationText
+     *     recommendation
+     * }
+     *
+     * fragment textualContentsFragment on MultilingualTextualContentType {
+     *     de @include(if: $de) {
+     *         ...textualContentFragment
+     *     }
+     *     fr @include(if: $fr) {
+     *         ...textualContentFragment
+     *     }
+     *     it @include(if: $it) {
+     *         ...textualContentFragment
+     *     }
+     *     en @include(if: $en) {
+     *         ...textualContentFragment
+     *     }
+     * }
+     *
+     * ```
      */
-    get: operations['notification-category_list'];
+    get: operations["v2_export_retrieve"];
+  };
+  "/api/v2/{tenant}/export/{situation_id}": {
     /**
-     * Usually you don't need to add new items here unless they appear in an
-     * external source for the first time.
+     * Retrun result of the following GraphQL query:
+     * ```graphql
+     *
+     * query exportPublications(
+     *     # Path parameters:
+     *     $tenant: String!,
+     *     $situationId: ID
+     *     # Pagination:
+     *     $offset: Int!,
+     *     $limit: Int!,
+     *     # Geometry selection and modification:
+     *     $graph: String,
+     *     $simplify: Int!,
+     *     $includeGeoms: Boolean!,
+     *     $includeLines: Boolean!,
+     *     $includeStops: Boolean!,
+     *     $hasGeoms: Boolean,
+     *     # Time filters:
+     *     $publicAt: DateTime,
+     *     $publicBefore: DateTime,
+     *     $publicAfter: DateTime,
+     *     $affectedAt: DateTime,
+     *     $affectedBefore: DateTime,
+     *     $affectedAfter: DateTime,
+     *     # Textual content selection:
+     *     $contentLarge: Boolean!,
+     *     $contentSmall: Boolean!,
+     *     $contentMedium: Boolean!,
+     *     $de: Boolean!,
+     *     $fr: Boolean!,
+     *     $it: Boolean!,
+     *     $en: Boolean!,
+     * ) {
+     *     paginatedSituations(
+     *         tenant: $tenant
+     *         pagination: {offset: $offset, limit: $limit}
+     *         filters: {
+     *             id: $situationId,
+     *             publicAt: $publicAt,
+     *             publicBefore: $publicBefore,
+     *             publicAfter: $publicAfter,
+     *             affectedAt: $affectedAt,
+     *             affectedBefore: $affectedBefore,
+     *             affectedAfter: $affectedAfter,
+     *             hasGeoms: $hasGeoms
+     *         }
+     *     ) {
+     *       totalCount
+     *       results {
+     *           ...situationFragment
+     *       }
+     *     }
+     * }
+     *
+     * fragment situationFragment on SituationType {
+     *     id
+     *     title
+     *     publicationStopNames
+     *     publicationLineNames
+     *     affectedTimeIntervalsStart
+     *     affectedTimeIntervalsEnd
+     *     publicationWindowsStart
+     *     publicationWindowsEnd
+     *     reasons {
+     *         name
+     *         categoryName
+     *         tenant
+     *     }
+     *     affectedTimeIntervals {
+     *         startTime
+     *         endTime
+     *     }
+     *     publicationWindows {
+     *         startTime
+     *         endTime
+     *     }
+     *     publications {
+     *         severity
+     *         severityGroup
+     *         serviceCondition
+     *         serviceConditionGroup
+     *         publicationWindows {
+     *             startTime
+     *             endTime
+     *         }
+     *         publicationStops @include(if: $includeStops) {
+     *             uid
+     *             name
+     *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+     *                 graph
+     *                 geom(simplify:$simplify)
+     *             }
+     *         }
+     *         publicationLines @include(if: $includeLines) {
+     *             hasIcon
+     *             category
+     *             lines {
+     *                 name
+     *                 operatorRef
+     *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+     *                     graph
+     *                     geom(simplify: $simplify)
+     *                 }
+     *             }
+     *         }
+     *         textualContentLarge @include(if: $contentLarge) {
+     *             ...textualContentsFragment
+     *         }
+     *         textualContentSmall @include(if: $contentSmall) {
+     *             ...textualContentsFragment
+     *         }
+     *         textualContentMedium @include(if: $contentMedium) {
+     *             ...textualContentsFragment
+     *         }
+     *     }
+     * }
+     *
+     * fragment textualContentFragment on TextualContentType {
+     *     summary
+     *     reason
+     *     description
+     *     consequence
+     *     durationText
+     *     recommendation
+     * }
+     *
+     * fragment textualContentsFragment on MultilingualTextualContentType {
+     *     de @include(if: $de) {
+     *         ...textualContentFragment
+     *     }
+     *     fr @include(if: $fr) {
+     *         ...textualContentFragment
+     *     }
+     *     it @include(if: $it) {
+     *         ...textualContentFragment
+     *     }
+     *     en @include(if: $en) {
+     *         ...textualContentFragment
+     *     }
+     * }
+     *
+     * ```
      */
-    post: operations['notification-category_create'];
-    parameters: {};
-  };
-  '/notification/': {
-    /** Notifications are the main data type for all relevant information */
-    get: operations['notification_list'];
-    /** This is a special case because we need to clear all IDs from input. */
-    post: operations['notification_create'];
-    parameters: {};
-  };
-  '/notification/{id}/': {
-    /** Notifications are the main data type for all relevant information */
-    get: operations['notification_read'];
-    /** Notifications are the main data type for all relevant information */
-    put: operations['notification_update'];
-    /** Notifications are the main data type for all relevant information */
-    delete: operations['notification_delete'];
-    /** Notifications are the main data type for all relevant information */
-    patch: operations['notification_partial_update'];
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-    };
-  };
-  '/notification/{id}/screenshot/': {
-    /** Notifications are the main data type for all relevant information */
-    get: operations['notification_screenshot'];
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-    };
-  };
-  '/notification/{id}/upload_image/': {
-    /** Notifications are the main data type for all relevant information */
-    post: operations['notification_upload_image'];
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-    };
-  };
-  '/publication-channel/': {
-    /**
-     * Each channel has a list of graphs that it needs geometries for. The
-     * topographic default graph is always expected implicitly.
-     */
-    get: operations['publication-channel_list'];
-    parameters: {};
+    get: operations["v2_export_retrieve_2"];
   };
 }
 
-export interface definitions {
-  RelatedAffectedTimeIntervals: {
-    /** ID */
-    id?: number;
+export interface components {
+  schemas: {
+    AffectedTimeIntervals: {
+      /** Format: date-time */
+      start: string;
+      /** Format: date-time */
+      end: string;
+      /** Format: time */
+      time_of_day_start?: string | null;
+      /** Format: time */
+      time_of_day_end?: string | null;
+    };
     /**
-     * Start date and time
-     * Format: date-time
-     */
-    start: string;
-    /**
-     * End date and time
-     * Format: date-time
-     */
-    end: string;
-    /**
-     * Time of day start
-     * @description Define start of daily active time interval
-     */
-    time_of_day_start?: string;
-    /**
-     * Time of day end
-     * @description Define end of daily active time interval
-     */
-    time_of_day_end?: string;
-    /** Index */
-    index?: number;
-  };
-  MarkerExport: {
-    /** Id */
-    id?: number;
-    /** Type */
-    type?: string;
-    /** Graph */
-    graph: string;
-    /** Geom */
-    geom: string;
-  };
-  RelatedPublication: {
-    /** Id */
-    id?: number;
-    /** Channel */
-    channel?: string;
-    /**
-     * Visible from
-     * Format: date-time
-     */
-    visible_from?: string;
-    /**
-     * Visible until
-     * Format: date-time
-     */
-    visible_until?: string;
-    /** Index */
-    index?: number;
-  };
-  DeprecatedStopSerializer: {
-    /** Uid */
-    uid: string;
-    /** Name */
-    name?: string;
-    /** External id */
-    external_id?: string;
-    /** External code */
-    external_code?: string;
-  };
-  RelatedLink: {
-    /** Id */
-    id?: number;
-    /**
-     * Created at
-     * Format: date-time
-     */
-    created_at?: string;
-    /**
-     * Updated at
-     * Format: date-time
-     */
-    updated_at?: string;
-    /**
-     * Target uri
-     * Format: uri
-     */
-    uri: string;
-    /** Link label */
-    label?: string;
-    /** Mime type */
-    mime_type?: string;
-    /** Index */
-    index?: number;
-  };
-  ImageUpload: {
-    /** ID */
-    id?: number;
-    /** Filename */
-    filename: string;
-    /**
-     * File Content
-     * Format: uri
-     * @description Content of the file base64 encoded
-     */
-    file: string;
-    /** Index */
-    index?: number;
-    /**
-     * Created at
-     * Format: date-time
-     */
-    created_at?: string;
-    /**
-     * Url
-     * Format: uri
-     */
-    url?: string;
-  };
-  NotificationProperties: {
-    /** ID */
-    id?: number;
-    /** Category */
-    category: string;
-    affected_time_intervals: definitions['RelatedAffectedTimeIntervals'][];
-    markers: definitions['MarkerExport'][];
-    publications?: definitions['RelatedPublication'][];
-    start_stop?: definitions['DeprecatedStopSerializer'];
-    end_stop?: definitions['DeprecatedStopSerializer'];
-    links?: definitions['RelatedLink'][];
-    /** Created by */
-    created_by?: string;
-    /** Updated by */
-    updated_by?: string;
-    images?: definitions['ImageUpload'][];
-    /**
-     * Created at
-     * Format: date-time
-     */
-    created_at?: string;
-    /**
-     * Updated at
-     * Format: date-time
-     */
-    updated_at?: string;
-    /**
-     * Sso config
-     * Format: slug
-     */
-    sso_config?: string;
-    /**
-     * Source identifier
-     * @description Field for storing a reference to the original source
-     */
-    external_id?: string;
-    /** Title */
-    title?: string;
-    /** Long description */
-    long_description?: string;
-    /**
-     * Replacement description
-     * @description Description of alternatives and replacement services
-     */
-    replacement_description?: string;
-    /**
-     * Rail replacement
-     * @description Is a replacement for this journey available?
-     */
-    rail_replacement?: boolean;
-  };
-  RelatedAffectedProduct: {
-    /** Id */
-    id?: number;
-    /** Name */
-    name: string;
-    /** Operator */
-    operator?: string;
-    /** Index */
-    index?: number;
-  };
-  RelatedAffectedRouteStop: {
-    /** Id */
-    id?: number;
-    /** Uid */
-    uid: string;
-    /** Name */
-    name?: string;
-    /** External id */
-    external_id?: string;
-    /** External code */
-    external_code?: string;
-    /**
-     * Index
-     * @description Ignored, order in list is used
-     */
-    index?: number;
-    /** Is visable */
-    is_visable?: boolean;
-  };
-  RelatedAffectedRouteExportProperties: {
-    /** ID */
-    id?: number;
-    affected_products?: definitions['RelatedAffectedProduct'][];
-    /** Disruption type */
-    disruption_type: string;
-    stops?: definitions['RelatedAffectedRouteStop'][];
-    /** Graph */
-    graph: string;
-    /** Index */
-    index?: number;
-    /** Is icon ref */
-    is_icon_ref?: boolean;
-    /**
-     * Mot
+     * @description * `de` - De
+     * * `fr` - Fr
+     * * `it` - It
+     * * `en` - En
      * @enum {string}
      */
-    mot:
-      | 'bus'
-      | 'ferry'
-      | 'gondola'
-      | 'tram'
-      | 'rail'
-      | 'funicular'
-      | 'cable_car'
-      | 'subway';
-  };
-  AffectedRoutesExportFeature: {
-    /** Type */
-    type?: string;
-    /** Geometry */
-    geometry?: string;
-    properties: definitions['RelatedAffectedRouteExportProperties'];
-  };
-  NotificationGeoJSON: {
-    /** Type */
-    type?: string;
-    properties: definitions['NotificationProperties'];
-    features?: definitions['AffectedRoutesExportFeature'][];
-  };
-  RelatedAffectedRouteGeom: {
-    /** Id */
-    id?: number;
-    /** Graph */
-    graph: string;
-    /** Geom */
-    geom: string;
-  };
-  RelatedAffectedRoute: {
-    /** ID */
-    id?: number;
-    affected_products?: definitions['RelatedAffectedProduct'][];
-    /** Disruption type */
-    disruption_type: string;
-    geoms?: definitions['RelatedAffectedRouteGeom'][];
-    stops?: definitions['RelatedAffectedRouteStop'][];
-    /** Index */
-    index?: number;
-    /** Is icon ref */
-    is_icon_ref?: boolean;
+    DefaultLanguageEnum: "de" | "fr" | "it" | "en";
+    FeatureCollectionProperties: {
+      id: number;
+      affected_time_intervals:
+        | components["schemas"]["AffectedTimeIntervals"][]
+        | null;
+      publications: string;
+      links?: components["schemas"]["Link"][];
+      images?: components["schemas"]["Image"][];
+      sso_config: string;
+      title: string;
+      long_description: string;
+      /** @default DISRUPTION */
+      category?: string;
+      start_stop?: string | null;
+      end_stop?: string | null;
+      /** @default */
+      size?: components["schemas"]["SizeEnum"];
+      default_language: components["schemas"]["DefaultLanguageEnum"];
+      /** @default */
+      title_de?: string;
+      /** @default */
+      title_fr?: string;
+      /** @default */
+      title_it?: string;
+      /** @default */
+      title_en?: string;
+      /** @default */
+      summary_de?: string;
+      /** @default */
+      summary_fr?: string;
+      /** @default */
+      summary_it?: string;
+      /** @default */
+      summary_en?: string;
+      /** @default */
+      reason_de?: string;
+      /** @default */
+      reason_fr?: string;
+      /** @default */
+      reason_it?: string;
+      /** @default */
+      reason_en?: string;
+      /** @default */
+      description_de?: string;
+      /** @default */
+      description_fr?: string;
+      /** @default */
+      description_it?: string;
+      /** @default */
+      description_en?: string;
+      /** @default */
+      consequence_de?: string;
+      /** @default */
+      consequence_fr?: string;
+      /** @default */
+      consequence_it?: string;
+      /** @default */
+      consequence_en?: string;
+      /** @default */
+      duration_text_de?: string;
+      /** @default */
+      duration_text_fr?: string;
+      /** @default */
+      duration_text_it?: string;
+      /** @default */
+      duration_text_en?: string;
+      /** @default */
+      recommendation_de?: string;
+      /** @default */
+      recommendation_fr?: string;
+      /** @default */
+      recommendation_it?: string;
+      /** @default */
+      recommendation_en?: string;
+      reasons?: components["schemas"]["Reason"][];
+    };
+    GeoJSON: {
+      type: string;
+      properties: components["schemas"]["FeatureCollectionProperties"];
+      features: string;
+    };
+    Image: {
+      index: string;
+      image: string;
+    };
+    Link: {
+      /** Format: uri */
+      uri: string;
+      /** @default */
+      label_de?: string;
+      /** @default */
+      label_fr?: string;
+      /** @default */
+      label_it?: string;
+      /** @default */
+      label_en?: string;
+      /** @default */
+      mime_type?: string;
+      /** @default 0 */
+      index?: number;
+    };
+    Reason: {
+      /** @default */
+      name?: string;
+      /** @default */
+      category_name?: string;
+    };
     /**
-     * Mot
+     * @description * `S` - S
+     * * `M` - M
+     * * `L` - L
      * @enum {string}
      */
-    mot:
-      | 'bus'
-      | 'ferry'
-      | 'gondola'
-      | 'tram'
-      | 'rail'
-      | 'funicular'
-      | 'cable_car'
-      | 'subway';
-  };
-  RelatedMarker: {
-    /** Id */
-    id?: number;
-    /** Type */
-    type?: string;
-    /** Graph */
-    graph: string;
-    /** Geom */
-    geom: string;
-  };
-  Notification: {
-    /** ID */
-    id?: number;
-    /** Category */
-    category: string;
-    affected_routes?: definitions['RelatedAffectedRoute'][];
-    affected_time_intervals: definitions['RelatedAffectedTimeIntervals'][];
-    markers?: definitions['RelatedMarker'][];
-    publications?: definitions['RelatedPublication'][];
-    start_stop?: definitions['DeprecatedStopSerializer'];
-    end_stop?: definitions['DeprecatedStopSerializer'];
-    links?: definitions['RelatedLink'][];
-    /** Created by */
-    created_by?: string;
-    /** Updated by */
-    updated_by?: string;
-    images?: definitions['ImageUpload'][];
-    /**
-     * Created at
-     * Format: date-time
-     */
-    created_at?: string;
-    /**
-     * Updated at
-     * Format: date-time
-     */
-    updated_at?: string;
-    /**
-     * Sso config
-     * Format: slug
-     */
-    sso_config?: string;
-    /**
-     * Source identifier
-     * @description Field for storing a reference to the original source
-     */
-    external_id?: string;
-    /** Title */
-    title?: string;
-    /** Long description */
-    long_description?: string;
-    /**
-     * Replacement description
-     * @description Description of alternatives and replacement services
-     */
-    replacement_description?: string;
-    /**
-     * Rail replacement
-     * @description Is a replacement for this journey available?
-     */
-    rail_replacement?: boolean;
-  };
-  AffectedTimeIntervals: {
-    /**
-     * Start
-     * Format: date-time
-     */
-    start: string;
-    /**
-     * End
-     * Format: date-time
-     */
-    end: string;
-    /** Time of day start */
-    time_of_day_start?: string;
-    /** Time of day end */
-    time_of_day_end?: string;
-  };
-  PublicationWindow: {
-    /**
-     * Visible from
-     * Format: date-time
-     */
-    visible_from: string;
-    /**
-     * Visible until
-     * Format: date-time
-     */
-    visible_until: string;
-    /**
-     * Channel
-     * @default DEFAULT
-     */
-    channel?: string;
-    /**
-     * Index
-     * @default 0
-     */
-    index?: number;
-  };
-  Link: {
-    /**
-     * Uri
-     * Format: uri
-     */
-    uri: string;
-    /**
-     * Label de
-     * @default
-     */
-    label_de?: string;
-    /**
-     * Label fr
-     * @default
-     */
-    label_fr?: string;
-    /**
-     * Label it
-     * @default
-     */
-    label_it?: string;
-    /**
-     * Label en
-     * @default
-     */
-    label_en?: string;
-    /**
-     * Mime type
-     * @default
-     */
-    mime_type?: string;
-    /**
-     * Index
-     * @default 0
-     */
-    index?: number;
-  };
-  Image: {
-    /** Index */
-    index: string;
-    /** Image */
-    image?: string;
-  };
-  Reason: {
-    /**
-     * Name
-     * @default
-     */
-    name?: string;
-    /**
-     * Category name
-     * @default
-     */
-    category_name?: string;
-  };
-  FeatureCollectionProperties: {
-    /** Id */
-    id: number;
-    affected_time_intervals: definitions['AffectedTimeIntervals'][];
-    publications?: definitions['PublicationWindow'][];
-    links?: definitions['Link'][];
-    images?: definitions['Image'][];
-    /**
-     * Sso config
-     * Format: slug
-     */
-    sso_config: string;
-    /**
-     * Title
-     * @deprecated
-     * @default
-     */
-    title?: string;
-    /**
-     * Long description
-     * @deprecated
-     * @default
-     */
-    long_description?: string;
-    /**
-     * Category
-     * @deprecated
-     * @default DISRUPTION
-     */
-    category?: string;
-    /**
-     * Start stop
-     * @deprecated
-     */
-    start_stop?: unknown;
-    /**
-     * End stop
-     * @deprecated
-     */
-    end_stop?: unknown;
-    /**
-     * Size
-     * @default
-     * @enum {string}
-     */
-    size?: 'S' | 'M' | 'L';
-    /**
-     * Default language
-     * @enum {string}
-     */
-    default_language: 'de' | 'fr' | 'it' | 'en';
-    /**
-     * Title de
-     * @default
-     */
-    title_de?: string;
-    /**
-     * Title fr
-     * @default
-     */
-    title_fr?: string;
-    /**
-     * Title it
-     * @default
-     */
-    title_it?: string;
-    /**
-     * Title en
-     * @default
-     */
-    title_en?: string;
-    /**
-     * Summary de
-     * @default
-     */
-    summary_de?: string;
-    /**
-     * Summary fr
-     * @default
-     */
-    summary_fr?: string;
-    /**
-     * Summary it
-     * @default
-     */
-    summary_it?: string;
-    /**
-     * Summary en
-     * @default
-     */
-    summary_en?: string;
-    /**
-     * Reason de
-     * @default
-     */
-    reason_de?: string;
-    /**
-     * Reason fr
-     * @default
-     */
-    reason_fr?: string;
-    /**
-     * Reason it
-     * @default
-     */
-    reason_it?: string;
-    /**
-     * Reason en
-     * @default
-     */
-    reason_en?: string;
-    /**
-     * Description de
-     * @default
-     */
-    description_de?: string;
-    /**
-     * Description fr
-     * @default
-     */
-    description_fr?: string;
-    /**
-     * Description it
-     * @default
-     */
-    description_it?: string;
-    /**
-     * Description en
-     * @default
-     */
-    description_en?: string;
-    /**
-     * Consequence de
-     * @default
-     */
-    consequence_de?: string;
-    /**
-     * Consequence fr
-     * @default
-     */
-    consequence_fr?: string;
-    /**
-     * Consequence it
-     * @default
-     */
-    consequence_it?: string;
-    /**
-     * Consequence en
-     * @default
-     */
-    consequence_en?: string;
-    /**
-     * Duration text de
-     * @default
-     */
-    duration_text_de?: string;
-    /**
-     * Duration text fr
-     * @default
-     */
-    duration_text_fr?: string;
-    /**
-     * Duration text it
-     * @default
-     */
-    duration_text_it?: string;
-    /**
-     * Duration text en
-     * @default
-     */
-    duration_text_en?: string;
-    /**
-     * Recommendation de
-     * @default
-     */
-    recommendation_de?: string;
-    /**
-     * Recommendation fr
-     * @default
-     */
-    recommendation_fr?: string;
-    /**
-     * Recommendation it
-     * @default
-     */
-    recommendation_it?: string;
-    /**
-     * Recommendation en
-     * @default
-     */
-    recommendation_en?: string;
-    reasons?: definitions['Reason'][];
-  };
-  StopSerializer: {
-    /** Uid */
-    uid: string;
-    /** Name */
-    name: string;
-    /** External id */
-    external_id: string;
-    /** External code */
-    external_code: string;
-  };
-  AffectedProduct: {
-    /** Name */
-    name: string;
-    /**
-     * Operator
-     * @default
-     */
-    operator?: string;
-  };
-  ConsequencePeriod: {
-    /**
-     * Visible from
-     * Format: date-time
-     */
-    visible_from: string;
-    /**
-     * Visible until
-     * Format: date-time
-     */
-    visible_until?: string;
-  };
-  AffectedLineProperties: {
-    /** Graph */
-    graph: string;
-    /**
-     * Is icon ref
-     * @default false
-     */
-    is_icon_ref?: boolean;
-    stops?: definitions['StopSerializer'][];
-    affected_products?: definitions['AffectedProduct'][];
-    /** Disruption type */
-    disruption_type: string;
-    periods: definitions['ConsequencePeriod'][];
-    /**
-     * Severity
-     * @enum {string}
-     */
-    severity:
-      | 'unknown'
-      | 'verySlight'
-      | 'slight'
-      | 'normal'
-      | 'severe'
-      | 'verySevere'
-      | 'noImpact'
-      | 'undefined';
-    /**
-     * Severity group
-     * @enum {string}
-     */
-    severity_group: 'undefined' | 'low' | 'normal' | 'high';
-    /**
-     * Condition
-     * @enum {string}
-     */
-    condition:
-      | 'unknown'
-      | 'delay'
-      | 'minorDelays'
-      | 'majorDelays'
-      | 'operationTimeExtension'
-      | 'onTime'
-      | 'disturbanceRectified'
-      | 'changeOfPlatform'
-      | 'lineCancellation'
-      | 'tripCancellation'
-      | 'boarding'
-      | 'goToGate'
-      | 'stopCancelled'
-      | 'stopMoved'
-      | 'stopOnDemand'
-      | 'additionalStop'
-      | 'substitutedStop'
-      | 'diverted'
-      | 'disruption'
-      | 'limitedOperation'
-      | 'discontinuedOperation'
-      | 'irregularTraffic'
-      | 'wagonOrderChanged'
-      | 'trainShortened'
-      | 'additionalRide'
-      | 'replacementRide'
-      | 'temporarilyNonStopping'
-      | 'temporaryStopplace'
-      | 'undefinedStatus';
-    /**
-     * Condition group
-     * @enum {string}
-     */
-    condition_group: 'information' | 'changes' | 'disruption';
-  };
-  AffectedLinesFeature: {
-    /** Type */
-    type?: string;
-    /** Geometry */
-    geometry?: { [key: string]: unknown };
-    properties: definitions['AffectedLineProperties'];
-  };
-  GeoJSON: {
-    /** Type */
-    type?: string;
-    properties: definitions['FeatureCollectionProperties'];
-    features?: definitions['AffectedLinesFeature'][];
-  };
-  Category: {
-    /** ID */
-    id?: number;
-    /** Name */
-    name: string;
-  };
-  Channel: {
-    /** ID */
-    id?: number;
-    graphs: string[];
-    /** Name */
-    name: string;
+    SizeEnum: "S" | "M" | "L";
   };
 }
 
 export interface operations {
   /**
-   * This is a read-only alternative to the main notifications endpoint with
-   * the same filters, plus `split_layers` and `filename` query parameters.
+   * OpenApi3 schema for this API. Format can be selected via content negotiation.
+   *
+   * - YAML: application/vnd.oai.openapi
+   * - JSON: application/vnd.oai.openapi+json
    */
-  export_notification_list: {
+  schema_retrieve: {
     parameters: {
       query: {
-        /** publications__channel__name */
-        publications__channel__name?: string;
-        /** created_by__username */
-        created_by__username?: string;
-        /** updated_by__username */
-        updated_by__username?: string;
-        /** external_id */
-        external_id?: string;
-        /** sso_config */
-        sso_config?: string;
-        /** category */
-        category?: string;
-        /** start_time */
-        start_time?: string;
-        /** end_time */
-        end_time?: string;
-        /** public_after */
-        public_after?: string;
-        /** public_before */
-        public_before?: string;
-        /** public_at */
-        public_at?: string;
-        /** active_at */
-        active_at?: string;
-        /** product */
-        product?: string;
-        /** Use geoms for graph. Objects without matching geoms are filtered out. */
-        graph: string;
-        /** A search term. */
-        search?: string;
-        /** Which field to use when ordering the results. */
-        ordering?: string;
-        /** This is a workaround for clients that don't support GeometryCollections. This may return modified geoms using ST_Union. */
-        st_union?: boolean;
-        /** Download response as `<filename>.json` JSON file. Filename will be modified to work with any known filesystem. The file consists of a list of GeoJSON FeatureCollections. */
-        filename?: string;
+        format?: "json" | "yaml";
+        lang?:
+          | "af"
+          | "ar"
+          | "ar-dz"
+          | "ast"
+          | "az"
+          | "be"
+          | "bg"
+          | "bn"
+          | "br"
+          | "bs"
+          | "ca"
+          | "ckb"
+          | "cs"
+          | "cy"
+          | "da"
+          | "de"
+          | "dsb"
+          | "el"
+          | "en"
+          | "en-au"
+          | "en-gb"
+          | "eo"
+          | "es"
+          | "es-ar"
+          | "es-co"
+          | "es-mx"
+          | "es-ni"
+          | "es-ve"
+          | "et"
+          | "eu"
+          | "fa"
+          | "fi"
+          | "fr"
+          | "fy"
+          | "ga"
+          | "gd"
+          | "gl"
+          | "he"
+          | "hi"
+          | "hr"
+          | "hsb"
+          | "hu"
+          | "hy"
+          | "ia"
+          | "id"
+          | "ig"
+          | "io"
+          | "is"
+          | "it"
+          | "ja"
+          | "ka"
+          | "kab"
+          | "kk"
+          | "km"
+          | "kn"
+          | "ko"
+          | "ky"
+          | "lb"
+          | "lt"
+          | "lv"
+          | "mk"
+          | "ml"
+          | "mn"
+          | "mr"
+          | "ms"
+          | "my"
+          | "nb"
+          | "ne"
+          | "nl"
+          | "nn"
+          | "os"
+          | "pa"
+          | "pl"
+          | "pt"
+          | "pt-br"
+          | "ro"
+          | "ru"
+          | "sk"
+          | "sl"
+          | "sq"
+          | "sr"
+          | "sr-latn"
+          | "sv"
+          | "sw"
+          | "ta"
+          | "te"
+          | "tg"
+          | "th"
+          | "tk"
+          | "tr"
+          | "tt"
+          | "udm"
+          | "uk"
+          | "ur"
+          | "uz"
+          | "vi"
+          | "zh-hans"
+          | "zh-hant";
       };
     };
     responses: {
       200: {
-        schema: definitions['NotificationGeoJSON'][];
-      };
-    };
-  };
-  /**
-   * This is a read-only alternative to the main notifications endpoint with
-   * the same filters, plus `split_layers` and `filename` query parameters.
-   */
-  export_notification_read: {
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-      query: {
-        /** This is a workaround for clients that don't support GeometryCollections. This may return modified geoms using ST_Union. */
-        st_union?: boolean;
-        /** Use geoms for graph. Objects without matching geoms are filtered out. */
-        graph: string;
-        /** Download response as `<filename>.geojson` GeoJSON file. Filename will be modified to work with any known filesystem. */
-        filename?: string;
-      };
-    };
-    responses: {
-      200: {
-        schema: definitions['NotificationGeoJSON'];
-      };
-    };
-  };
-  /**
-   * The `pk` may be the ID of an existing notification or `null` if it is a
-   * new object.
-   */
-  export_notification_preview: {
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-      body: {
-        data: definitions['Notification'];
-      };
-      query: {
-        /** This is a workaround for clients that don't support GeometryCollections. This may return modified geoms using ST_Union. */
-        st_union?: boolean;
-        /** Use geoms for graph. Objects without matching geoms are filtered out. */
-        graph: string;
-        /** Download response as `<filename>.geojson` GeoJSON file. Filename will be modified to work with any known filesystem. */
-        filename?: string;
-      };
-    };
-    responses: {
-      200: {
-        schema: definitions['NotificationGeoJSON'];
+        content: {
+          "application/vnd.oai.openapi": { [key: string]: unknown };
+          "application/yaml": { [key: string]: unknown };
+          "application/vnd.oai.openapi+json": { [key: string]: unknown };
+          "application/json": { [key: string]: unknown };
+        };
       };
     };
   };
   /** Export publications as GeoJSON */
-  export_publication_list: {
+  v1_export_publication_list: {
     parameters: {
       query: {
-        /** Return entries which have the given size (usually you'll want to set this to `L`) */
-        size?: 'S' | 'M' | 'L';
-        /** Return entries which belong to the given tenant slug */
-        sso_config: string;
         /** Retrun geometries which are part of the given graph, multiple graphs can be separated by comma. Objects without matching geoms have an empty features list. */
         graph: string;
+        /** Which field to use when ordering the results. */
+        ordering?: string;
         /** Retrun entries which are public at the this date and time */
         public_at?: string;
         /** A search term. */
         search?: string;
-        /** Which field to use when ordering the results. */
-        ordering?: string;
-        /** This is a workaround for clients that don't support GeometryCollections. This may return modified geoms using ST_Union. */
-        st_union?: boolean;
-        /** Download response as `<filename>.json` JSON file. Filename will be modified to work with any known filesystem. The file consists of a list of GeoJSON FeatureCollections. */
-        filename?: string;
-        /** Simplification in webmercator (EPSG:3857) units (roughly meters) */
-        simplify?: number;
+        /**
+         * Return entries which have the given size (usually you'll want to set this to `L`)
+         *
+         * * `S` - S
+         * * `M` - M
+         * * `L` - L
+         */
+        size?: "L" | "M" | "S";
+        /** Return entries which belong to the given tenant slug */
+        sso_config: string;
       };
     };
     responses: {
       200: {
-        schema: definitions['GeoJSON'][];
+        content: {
+          "application/json": components["schemas"]["GeoJSON"][];
+        };
       };
     };
   };
   /** Export publications as GeoJSON */
-  export_publication_read: {
+  v1_export_publication_retrieve: {
     parameters: {
       path: {
         /** A unique integer value identifying this textual content. */
@@ -1010,210 +619,367 @@ export interface operations {
     };
     responses: {
       200: {
-        schema: definitions['GeoJSON'];
+        content: {
+          "application/json": components["schemas"]["GeoJSON"];
+        };
       };
     };
   };
   /**
-   * Usually you don't need to add new items here unless they appear in an
-   * external source for the first time.
+   * Retrun result of the following GraphQL query:
+   * ```graphql
+   *
+   * query exportPublications(
+   *     # Path parameters:
+   *     $tenant: String!,
+   *     $situationId: ID
+   *     # Pagination:
+   *     $offset: Int!,
+   *     $limit: Int!,
+   *     # Geometry selection and modification:
+   *     $graph: String,
+   *     $simplify: Int!,
+   *     $includeGeoms: Boolean!,
+   *     $includeLines: Boolean!,
+   *     $includeStops: Boolean!,
+   *     $hasGeoms: Boolean,
+   *     # Time filters:
+   *     $publicAt: DateTime,
+   *     $publicBefore: DateTime,
+   *     $publicAfter: DateTime,
+   *     $affectedAt: DateTime,
+   *     $affectedBefore: DateTime,
+   *     $affectedAfter: DateTime,
+   *     # Textual content selection:
+   *     $contentLarge: Boolean!,
+   *     $contentSmall: Boolean!,
+   *     $contentMedium: Boolean!,
+   *     $de: Boolean!,
+   *     $fr: Boolean!,
+   *     $it: Boolean!,
+   *     $en: Boolean!,
+   * ) {
+   *     paginatedSituations(
+   *         tenant: $tenant
+   *         pagination: {offset: $offset, limit: $limit}
+   *         filters: {
+   *             id: $situationId,
+   *             publicAt: $publicAt,
+   *             publicBefore: $publicBefore,
+   *             publicAfter: $publicAfter,
+   *             affectedAt: $affectedAt,
+   *             affectedBefore: $affectedBefore,
+   *             affectedAfter: $affectedAfter,
+   *             hasGeoms: $hasGeoms
+   *         }
+   *     ) {
+   *       totalCount
+   *       results {
+   *           ...situationFragment
+   *       }
+   *     }
+   * }
+   *
+   * fragment situationFragment on SituationType {
+   *     id
+   *     title
+   *     publicationStopNames
+   *     publicationLineNames
+   *     affectedTimeIntervalsStart
+   *     affectedTimeIntervalsEnd
+   *     publicationWindowsStart
+   *     publicationWindowsEnd
+   *     reasons {
+   *         name
+   *         categoryName
+   *         tenant
+   *     }
+   *     affectedTimeIntervals {
+   *         startTime
+   *         endTime
+   *     }
+   *     publicationWindows {
+   *         startTime
+   *         endTime
+   *     }
+   *     publications {
+   *         severity
+   *         severityGroup
+   *         serviceCondition
+   *         serviceConditionGroup
+   *         publicationWindows {
+   *             startTime
+   *             endTime
+   *         }
+   *         publicationStops @include(if: $includeStops) {
+   *             uid
+   *             name
+   *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+   *                 graph
+   *                 geom(simplify:$simplify)
+   *             }
+   *         }
+   *         publicationLines @include(if: $includeLines) {
+   *             hasIcon
+   *             category
+   *             lines {
+   *                 name
+   *                 operatorRef
+   *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+   *                     graph
+   *                     geom(simplify: $simplify)
+   *                 }
+   *             }
+   *         }
+   *         textualContentLarge @include(if: $contentLarge) {
+   *             ...textualContentsFragment
+   *         }
+   *         textualContentSmall @include(if: $contentSmall) {
+   *             ...textualContentsFragment
+   *         }
+   *         textualContentMedium @include(if: $contentMedium) {
+   *             ...textualContentsFragment
+   *         }
+   *     }
+   * }
+   *
+   * fragment textualContentFragment on TextualContentType {
+   *     summary
+   *     reason
+   *     description
+   *     consequence
+   *     durationText
+   *     recommendation
+   * }
+   *
+   * fragment textualContentsFragment on MultilingualTextualContentType {
+   *     de @include(if: $de) {
+   *         ...textualContentFragment
+   *     }
+   *     fr @include(if: $fr) {
+   *         ...textualContentFragment
+   *     }
+   *     it @include(if: $it) {
+   *         ...textualContentFragment
+   *     }
+   *     en @include(if: $en) {
+   *         ...textualContentFragment
+   *     }
+   * }
+   *
+   * ```
    */
-  'notification-category_list': {
+  v2_export_retrieve: {
     parameters: {
       query: {
-        /** A search term. */
-        search?: string;
-        /** Which field to use when ordering the results. */
-        ordering?: string;
+        affectedAt?: string | null;
+        contentLarge?: boolean;
+        contentMedium?: boolean;
+        contentSmall?: boolean;
+        de?: boolean;
+        en?: boolean;
+        fr?: boolean;
+        graph?: string | null;
+        hasGeoms?: boolean | null;
+        includeGeoms?: boolean;
+        includeLines?: boolean;
+        includeStops?: boolean;
+        it?: boolean;
+        limit?: number;
+        offset?: number;
+        publicAfter?: string | null;
+        publicAt?: string | null;
+        publicBefore?: string | null;
+        simplify?: number;
+        timeintervalAfter?: string | null;
+        timeintervalBefore?: string | null;
+      };
+      path: {
+        tenant: string;
       };
     };
     responses: {
-      200: {
-        schema: definitions['Category'][];
-      };
+      /** No response body */
+      200: unknown;
     };
   };
   /**
-   * Usually you don't need to add new items here unless they appear in an
-   * external source for the first time.
+   * Retrun result of the following GraphQL query:
+   * ```graphql
+   *
+   * query exportPublications(
+   *     # Path parameters:
+   *     $tenant: String!,
+   *     $situationId: ID
+   *     # Pagination:
+   *     $offset: Int!,
+   *     $limit: Int!,
+   *     # Geometry selection and modification:
+   *     $graph: String,
+   *     $simplify: Int!,
+   *     $includeGeoms: Boolean!,
+   *     $includeLines: Boolean!,
+   *     $includeStops: Boolean!,
+   *     $hasGeoms: Boolean,
+   *     # Time filters:
+   *     $publicAt: DateTime,
+   *     $publicBefore: DateTime,
+   *     $publicAfter: DateTime,
+   *     $affectedAt: DateTime,
+   *     $affectedBefore: DateTime,
+   *     $affectedAfter: DateTime,
+   *     # Textual content selection:
+   *     $contentLarge: Boolean!,
+   *     $contentSmall: Boolean!,
+   *     $contentMedium: Boolean!,
+   *     $de: Boolean!,
+   *     $fr: Boolean!,
+   *     $it: Boolean!,
+   *     $en: Boolean!,
+   * ) {
+   *     paginatedSituations(
+   *         tenant: $tenant
+   *         pagination: {offset: $offset, limit: $limit}
+   *         filters: {
+   *             id: $situationId,
+   *             publicAt: $publicAt,
+   *             publicBefore: $publicBefore,
+   *             publicAfter: $publicAfter,
+   *             affectedAt: $affectedAt,
+   *             affectedBefore: $affectedBefore,
+   *             affectedAfter: $affectedAfter,
+   *             hasGeoms: $hasGeoms
+   *         }
+   *     ) {
+   *       totalCount
+   *       results {
+   *           ...situationFragment
+   *       }
+   *     }
+   * }
+   *
+   * fragment situationFragment on SituationType {
+   *     id
+   *     title
+   *     publicationStopNames
+   *     publicationLineNames
+   *     affectedTimeIntervalsStart
+   *     affectedTimeIntervalsEnd
+   *     publicationWindowsStart
+   *     publicationWindowsEnd
+   *     reasons {
+   *         name
+   *         categoryName
+   *         tenant
+   *     }
+   *     affectedTimeIntervals {
+   *         startTime
+   *         endTime
+   *     }
+   *     publicationWindows {
+   *         startTime
+   *         endTime
+   *     }
+   *     publications {
+   *         severity
+   *         severityGroup
+   *         serviceCondition
+   *         serviceConditionGroup
+   *         publicationWindows {
+   *             startTime
+   *             endTime
+   *         }
+   *         publicationStops @include(if: $includeStops) {
+   *             uid
+   *             name
+   *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+   *                 graph
+   *                 geom(simplify:$simplify)
+   *             }
+   *         }
+   *         publicationLines @include(if: $includeLines) {
+   *             hasIcon
+   *             category
+   *             lines {
+   *                 name
+   *                 operatorRef
+   *                 geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
+   *                     graph
+   *                     geom(simplify: $simplify)
+   *                 }
+   *             }
+   *         }
+   *         textualContentLarge @include(if: $contentLarge) {
+   *             ...textualContentsFragment
+   *         }
+   *         textualContentSmall @include(if: $contentSmall) {
+   *             ...textualContentsFragment
+   *         }
+   *         textualContentMedium @include(if: $contentMedium) {
+   *             ...textualContentsFragment
+   *         }
+   *     }
+   * }
+   *
+   * fragment textualContentFragment on TextualContentType {
+   *     summary
+   *     reason
+   *     description
+   *     consequence
+   *     durationText
+   *     recommendation
+   * }
+   *
+   * fragment textualContentsFragment on MultilingualTextualContentType {
+   *     de @include(if: $de) {
+   *         ...textualContentFragment
+   *     }
+   *     fr @include(if: $fr) {
+   *         ...textualContentFragment
+   *     }
+   *     it @include(if: $it) {
+   *         ...textualContentFragment
+   *     }
+   *     en @include(if: $en) {
+   *         ...textualContentFragment
+   *     }
+   * }
+   *
+   * ```
    */
-  'notification-category_create': {
-    parameters: {
-      body: {
-        data: definitions['Category'];
-      };
-    };
-    responses: {
-      201: {
-        schema: definitions['Category'];
-      };
-    };
-  };
-  /** Notifications are the main data type for all relevant information */
-  notification_list: {
+  v2_export_retrieve_2: {
     parameters: {
       query: {
-        /** publications__channel__name */
-        publications__channel__name?: string;
-        /** created_by__username */
-        created_by__username?: string;
-        /** updated_by__username */
-        updated_by__username?: string;
-        /** external_id */
-        external_id?: string;
-        /** sso_config */
-        sso_config?: string;
-        /** category */
-        category?: string;
-        /** start_time */
-        start_time?: string;
-        /** end_time */
-        end_time?: string;
-        /** public_after */
-        public_after?: string;
-        /** public_before */
-        public_before?: string;
-        /** public_at */
-        public_at?: string;
-        /** active_at */
-        active_at?: string;
-        /** product */
-        product?: string;
-        /** Routing Graph */
-        graph?: string;
-        /** A search term. */
-        search?: string;
-        /** Which field to use when ordering the results. */
-        ordering?: string;
+        affectedAt?: string | null;
+        contentLarge?: boolean;
+        contentMedium?: boolean;
+        contentSmall?: boolean;
+        de?: boolean;
+        en?: boolean;
+        fr?: boolean;
+        graph?: string | null;
+        hasGeoms?: boolean | null;
+        includeGeoms?: boolean;
+        includeLines?: boolean;
+        includeStops?: boolean;
+        it?: boolean;
+        limit?: number;
+        offset?: number;
+        publicAfter?: string | null;
+        publicAt?: string | null;
+        publicBefore?: string | null;
+        simplify?: number;
+        timeintervalAfter?: string | null;
+        timeintervalBefore?: string | null;
       };
-    };
-    responses: {
-      200: {
-        schema: definitions['Notification'][];
-      };
-    };
-  };
-  /** This is a special case because we need to clear all IDs from input. */
-  notification_create: {
-    parameters: {
-      body: {
-        data: definitions['Notification'];
-      };
-    };
-    responses: {
-      201: {
-        schema: definitions['Notification'];
-      };
-    };
-  };
-  /** Notifications are the main data type for all relevant information */
-  notification_read: {
-    parameters: {
       path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
+        situation_id: string;
+        tenant: string;
       };
     };
     responses: {
-      200: {
-        schema: definitions['Notification'];
-      };
-    };
-  };
-  /** Notifications are the main data type for all relevant information */
-  notification_update: {
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-      body: {
-        data: definitions['Notification'];
-      };
-    };
-    responses: {
-      200: {
-        schema: definitions['Notification'];
-      };
-    };
-  };
-  /** Notifications are the main data type for all relevant information */
-  notification_delete: {
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-    };
-    responses: {
-      204: never;
-    };
-  };
-  /** Notifications are the main data type for all relevant information */
-  notification_partial_update: {
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-      body: {
-        data: definitions['Notification'];
-      };
-    };
-    responses: {
-      200: {
-        schema: definitions['Notification'];
-      };
-    };
-  };
-  /** Notifications are the main data type for all relevant information */
-  notification_screenshot: {
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-    };
-    responses: {
-      200: {
-        schema: definitions['Notification'];
-      };
-    };
-  };
-  /** Notifications are the main data type for all relevant information */
-  notification_upload_image: {
-    parameters: {
-      path: {
-        /** A unique integer value identifying this notification. */
-        id: number;
-      };
-      body: {
-        data: definitions['ImageUpload'];
-      };
-    };
-    responses: {
-      201: {
-        schema: definitions['ImageUpload'];
-      };
-    };
-  };
-  /**
-   * Each channel has a list of graphs that it needs geometries for. The
-   * topographic default graph is always expected implicitly.
-   */
-  'publication-channel_list': {
-    parameters: {
-      query: {
-        /** A search term. */
-        search?: string;
-        /** Which field to use when ordering the results. */
-        ordering?: string;
-      };
-    };
-    responses: {
-      200: {
-        schema: definitions['Channel'][];
-      };
+      /** No response body */
+      200: unknown;
     };
   };
 }
