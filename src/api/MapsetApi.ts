@@ -1,8 +1,12 @@
 import HttpAPI from './HttpAPI';
-
-import type { Extent } from 'ol/extent';
-
-import type { MapsetPlan } from '../types';
+export interface MapsetPlan {
+  admin_id: string;
+  created_at: string;
+  data: string;
+  modified_at: string;
+  queryparams: string;
+  read_id: string;
+}
 
 export interface MapsetAPIOptions {
   apiKey?: string;
@@ -15,9 +19,10 @@ export interface MapsetAPIOptions {
 }
 
 export interface MapsetAPIParams {
-  bbox?: Extent;
-  tags?: string[];
-  tenants?: string[];
+  bbox?: string;
+  key?: string;
+  tags?: string;
+  tenants?: string;
   timestamp?: string;
   zoom?: number;
 }
@@ -88,7 +93,7 @@ class MapsetAPI extends HttpAPI {
    * @public
    */
   async getPlanById(id: string, config: RequestInit = {}): Promise<MapsetPlan> {
-    return await this.fetch<MapsetPlan>(
+    return await this.fetch<MapsetPlan, Record<string, string | undefined>>(
       `/meta/kml/${id}`,
       {},
       { method: 'GET', ...config },
@@ -110,7 +115,7 @@ class MapsetAPI extends HttpAPI {
     const apiParams: MapsetAPIParams = { ...params };
     let res = {} as MapsetApiResponse;
 
-    res = await this.fetch<MapsetApiResponse>(
+    res = await this.fetch<MapsetApiResponse, MapsetAPIParams>(
       '/export/kml',
       {
         bbox: this.bbox?.toString(),

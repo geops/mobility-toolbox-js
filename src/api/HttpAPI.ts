@@ -24,9 +24,9 @@ class HttpAPI {
    *
    * @private
    */
-  async fetch<T>(
+  async fetch<T, V>(
     path: string,
-    params?: object,
+    params?: V,
     config?: RequestInit,
   ): Promise<T> {
     if (!this.url) {

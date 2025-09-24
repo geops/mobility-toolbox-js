@@ -9,12 +9,12 @@ import type Feature from 'ol/Feature';
 import type { FeatureLike } from 'ol/Feature';
 import type { Options } from 'ol/layer/Vector';
 
+import type { MapsetPlan } from '../../api/MapsetApi';
 import type { MapsetAPIOptions } from '../../api/MapsetApi';
-import type { MapsetPlan } from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
-type MapsetLayerOptions = {
+export type MapsetLayerOptions = {
   doNotRevert32pxScaling?: boolean;
   silent?: boolean;
 } & MapsetAPIOptions &
