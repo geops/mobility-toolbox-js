@@ -1,5 +1,3 @@
-import { load } from 'ol/Image';
-
 import {
   getFeatureCollectionToRenderFromSituation,
   getGraphByZoom,
@@ -17,7 +15,7 @@ import type {
 import type { Map } from 'ol';
 
 import type { MocoAPIOptions } from '../../api/MocoAPI';
-import type { MapsStyleSpecification, StyleMetadataGraphs } from '../../types';
+import type { MapsStyleSpecification, MocoExportParameters } from '../../types';
 import type {
   ServiceConditionGroupEnumeration,
   SeverityGroupEnumeration,
@@ -30,13 +28,14 @@ export const MOCO_SOURCE_ID = 'moco';
 export const MOCO_MD_LAYER_FILTER = 'moco';
 
 export type MocoLayerOptions = {
+  apiParameters?: MocoExportParameters;
   loadAll?: boolean;
   publicAt?: Date;
   situations?: Partial<SituationType>[];
   tenant?: string;
   url?: string;
 } & MaplibreStyleLayerOptions &
-  Pick<MocoAPIOptions, 'apiKey' | 'url'>;
+  Pick<MocoAPIOptions, 'apiKey' | 'tenant' | 'url'>;
 
 export type MocoSituationToRender = {
   isAffected: boolean;
@@ -118,6 +117,17 @@ class MocoLayer extends MaplibreStyleLayer {
 
   set apiKey(value: string) {
     this.api.apiKey = value;
+    void this.updateData();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  get apiParameters(): MocoExportParameters | undefined {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-redundant-type-constituents
+    return this.get('apiParameters') as MocoExportParameters | undefined;
+  }
+
+  set apiParameters(value: MocoExportParameters) {
+    this.set('apiParameters', value);
     void this.updateData();
   }
 
@@ -286,7 +296,7 @@ class MocoLayer extends MaplibreStyleLayer {
           graph: graphsString,
           hasGeoms: true,
           publicAt: this.publicAt.toISOString(),
-          ...(this.get('apiParameters') || {}),
+          ...(this.apiParameters ?? {}),
         },
         { signal: this.#abortController.signal },
       );

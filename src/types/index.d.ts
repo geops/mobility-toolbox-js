@@ -25,4 +25,6 @@ export type StopsResponse =
   StopsPaths['/']['get']['responses']['200']['schema'];
 
 export type MocoExportParameters =
-  MocoOperations.v2_export_retrieve.parameters & { apiKey?: string };
+  MocoOperations['v2_export_retrieve']['parameters']['query'] & {
+    apiKey?: string;
+  };
