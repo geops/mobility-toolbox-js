@@ -185,8 +185,10 @@ export const getFeatureCollectionToRenderFromSituation = (
       isActive: isAffected,
       isAffected,
       isPublished,
+      serviceConditionGroup: publication.serviceConditionGroup,
       // for backward compatibility with v1
       severity_group: publication.severityGroup?.toLocaleLowerCase(),
+      severityGroup: publication.severityGroup,
     };
 
     publication.publicationLines?.forEach((publicationLine) => {
@@ -203,14 +205,15 @@ export const getFeatureCollectionToRenderFromSituation = (
               geometry: to4326(geom),
               id: uuid(),
               properties: {
-                ...situation, // for the situation id
-                ...publication, // for serviceConditionGroup and severityGroup
-                ...publicationLine, // for hasIcon
                 graph,
+                hasIcon: publicationLine.hasIcon,
+                line,
+                publication,
+                publicationLine,
+                situation,
                 ...situationRenderProps,
                 ...publicationRenderProps,
-                geometry: undefined, // to avoid ol problems
-                id: situation.id, // make the sure the id is always the situationId
+                geometry: undefined, // to avoid conflict with ol geometry property
               },
               type: 'Feature',
             };
@@ -218,7 +221,7 @@ export const getFeatureCollectionToRenderFromSituation = (
 
             if (publicationLine.hasIcon) {
               const iconFeature = getMocoIconRefFeature(feature);
-              iconFeature.properties.id = situation.id; // make the sure the id is always the situationId
+              iconFeature.properties.situation = situation; // make the sure the situation is passed
               features.push(iconFeature);
             }
           },
@@ -238,14 +241,14 @@ export const getFeatureCollectionToRenderFromSituation = (
             geometry: to4326(geom),
             id: uuid(),
             properties: {
-              ...situation, // for the situation id
-              ...publication, // for serviceConditionGroup and severityGroup
-              ...publicationStop, // for the name
               graph,
+              name: publicationStop.name,
+              publication,
+              publicationStop,
+              situation,
               ...situationRenderProps,
               ...publicationRenderProps,
-              geometry: undefined, // to avoid ol problems
-              id: situation.id, // make the sure the id is always the situationId
+              geometry: undefined, // to avoid conflict with ol geometry property
             },
             type: 'Feature',
           };

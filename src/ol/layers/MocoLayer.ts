@@ -15,7 +15,15 @@ import type {
 import type { Map } from 'ol';
 
 import type { MocoAPIOptions } from '../../api/MocoAPI';
-import type { MapsStyleSpecification, MocoExportParameters } from '../../types';
+import type {
+  LineType,
+  MapsStyleSpecification,
+  MocoExportParameters,
+  PublicationLineGroupType,
+  PublicationStopType,
+  PublicationType,
+  StopType,
+} from '../../types';
 import type {
   ServiceConditionGroupEnumeration,
   SeverityGroupEnumeration,
@@ -37,22 +45,40 @@ export type MocoLayerOptions = {
 } & MaplibreStyleLayerOptions &
   Pick<MocoAPIOptions, 'apiKey' | 'tenant' | 'url'>;
 
-export type MocoSituationToRender = {
-  isAffected: boolean;
-  isPublished: boolean;
-} & Partial<SituationType>;
+export interface MocoNotificationStopPropertiesToRender {
+  name?: string;
+  publicationStop?: PublicationStopType;
+}
 
-export interface MocoNotificationFeaturePropertiesToRender {
+export interface MocoNotificationLinePropertiesToRender {
+  hasIcon?: boolean;
+  line?: LineType;
+  name?: string;
+  publicationLine?: PublicationLineGroupType;
+}
+export interface MocoNotificationSituationPropertiesToRender {
+  publication?: PublicationType;
+  situation?: Partial<SituationType>;
+}
+
+/**
+ * This type contains the properties used by the style to render the situation.
+ * The extended properties are there to avoid having to request the API again when
+ * displaying details for this feature.
+ */
+export type MocoNotificationFeaturePropertiesToRender = {
   geometry?: undefined; // to avoid ol problems
   graph: string;
-  hasIcon?: boolean;
-  id?: string; // The situation id
   isAffected: boolean;
   isPublished: boolean;
   reasonCategoryImageName: string;
   serviceConditionGroup: ServiceConditionGroupEnumeration;
   severityGroup: SeverityGroupEnumeration;
-}
+} & (
+  | MocoNotificationLinePropertiesToRender
+  | MocoNotificationStopPropertiesToRender
+) &
+  MocoNotificationSituationPropertiesToRender;
 
 export type MocoNotificationFeatureToRender = GeoJSON.Feature<
   GeoJSON.LineString | GeoJSON.Point,
@@ -64,18 +90,6 @@ export type MocoNotificationFeatureCollectionToRender =
     GeoJSON.LineString | GeoJSON.Point,
     MocoNotificationFeaturePropertiesToRender
   >;
-
-export type MocoNotification = {
-  properties: {
-    graph: string;
-    hasIcon?: boolean;
-    isAffected: boolean;
-    isPublished: boolean;
-    reasonCategoryImageName: string;
-    serviceConditionGroup: ServiceConditionGroupEnumeration;
-    severityGroup: SeverityGroupEnumeration;
-  } & Partial<SituationType>;
-} & GeoJSON.FeatureCollection;
 
 /**
  * An OpenLayers layer able to display data from the [geOps MOCO API](https://geops.com/de/solution/disruption-information).
