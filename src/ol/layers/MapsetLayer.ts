@@ -15,6 +15,7 @@ import type { MapsetAPIOptions } from '../../api/MapsetApi';
 import type { MobilityLayerOptions } from './Layer';
 
 export type MapsetLayerOptions = {
+  api: MapsetAPI;
   doNotRevert32pxScaling?: boolean;
   silent?: boolean;
 } & MapsetAPIOptions &
@@ -24,7 +25,13 @@ export type MapsetLayerOptions = {
 const kmlFormatter = new MapsetKmlFormat();
 
 class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
-  api?: MapsetAPI;
+  get api(): MapsetAPI {
+    return this.get('api') as MapsetAPI;
+  }
+  set api(value: MapsetAPI) {
+    this.set('api', value);
+  }
+
   get apiKey(): string {
     return this.get('apiKey') as string;
   }
@@ -110,43 +117,48 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
 
   #abortController: AbortController;
 
-  constructor(options: MapsetLayerOptions = {}) {
-    super({ ...options, source: options.source ?? new Vector<FeatureLike>() });
-    this.url = options.url ?? 'https://editor.dev.mapset.io/api/v1';
-    this.#abortController = new AbortController();
-  }
-
-  public async fetchPlanById(id: string) {
-    this.#abortController.abort();
-    this.#abortController = new AbortController();
-
-    this.api = new MapsetAPI({
-      apiKey: this.apiKey,
-      url: this.url,
+  /**
+   * Constructor.
+   *
+   * @param {Object} options
+   * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
+   * @param {string[]} [options.tags] The tags of the required plans.
+   * @param {number[]} [options.bbox] The bounding box to search within.
+   * @param {string} [options.timestamp] The timestamp of the required plans.
+   * @param {string[]} [options.tenants] The tenants of the required plans.
+   * @param {string} [options.url] The URL of the [geOps Mapset API](https://geops.com/de/solution/mapset).
+   * @param {number} [options.zoom=1] The zoom level to search within.
+   * @param {boolean} [options.doNotRevert32pxScaling=false] Do not revert the 32px scaling of the icons.
+   * @param {boolean} [options.silent=false] If true, features will be added and removed without triggering events.
+   * @public
+   */
+  constructor(options: MapsetLayerOptions) {
+    super({
+      ...options,
+      source: options.source ?? new Vector<FeatureLike>(),
     });
-
-    let plan: MapsetPlan | null = null;
-
-    try {
-      plan = await this.api.getPlanById(id, {
-        signal: this.#abortController.signal,
+    this.url = options.url ?? 'https://editor.mapset.io/api/v1';
+    this.api =
+      options.api ??
+      new MapsetAPI({
+        apiKey: options.apiKey,
+        bbox: options.bbox,
+        tags: options.tags,
+        tenants: options.tenants,
+        timestamp: options.timestamp,
+        url: this.url,
+        zoom: options.zoom,
       });
-    } catch (e) {
-      console.error('MapsetLayer: Error fetching plan by id...', e);
-      throw e;
-    }
-
-    this.plans = plan ? [plan] : this.plans;
+    this.#abortController = new AbortController();
   }
 
   public async fetchPlans() {
     const map = this.getMapInternal();
-    if (!map || !this.get('url') || !map.getView()) {
+    if (!map?.getView()) {
       console.warn(
         'MapsetLayer: map, view or url not set, cannot fetch plans',
         {
           map: map,
-          url: this.get('url') as string,
           view: map?.getView(),
         },
       );

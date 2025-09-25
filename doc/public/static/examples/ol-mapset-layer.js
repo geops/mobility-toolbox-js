@@ -12,6 +12,9 @@ export default () => {
   const mapsetLayer = new MapsetLayer({
     tenants: ['geopstest'],
     apiKey: window.apiKey,
+    api: new MapsetAPI({
+      apiKey: window.apiKey,
+    }),
   });
 
   const map = new Map({
@@ -25,6 +28,7 @@ export default () => {
 
   // Fetch API plans
   let qsTimeout;
+  const urlInput = document?.getElementById('url-input');
   const tagsInput = document?.getElementById('tags-input');
   const timestampInput = document?.getElementById('timestamp-input');
   const tenantsInput = document?.getElementById('tenants-input');
@@ -74,6 +78,7 @@ export default () => {
 
   const fetchPlansButton = document.getElementById('fetch-plans-button');
   fetchPlansButton?.addEventListener('click', () => {
+    mapsetLayer.url = urlInput.value || undefined;
     mapsetLayer.tenants = tenantsInput.value
       .split(',')
       .map((t) => t.trim())
@@ -109,6 +114,7 @@ Bar</name><Style><IconStyle><scale>0</scale></IconStyle><LabelStyle><color>ff000
   });
 
   // Load plan by ID
+  let abortController = new AbortController();
   const idInput = document?.getElementById('id-input');
   const loadPlanButton = document.getElementById('load-plan-button');
   loadPlanButton?.addEventListener('click', async () => {
@@ -117,7 +123,14 @@ Bar</name><Style><IconStyle><scale>0</scale></IconStyle><LabelStyle><color>ff000
       alert('Please enter a plan ID');
       return;
     }
-    await mapsetLayer.fetchPlanById(id);
+    abortController?.abort();
+    abortController = new AbortController();
+    console.log(mapsetLayer);
+
+    const plan = await mapsetLayer.api.getPlanById(id, {
+      signal: abortController.signal,
+    });
+    mapsetLayer.plans = [plan];
     zoomOnFeatures();
   });
 };

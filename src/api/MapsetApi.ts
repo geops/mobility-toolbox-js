@@ -42,9 +42,12 @@ export interface MapsetApiResponse {
  * import { MapsetAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new MapsetAPI({
- *   // graph: 'osm',
- *   // url: 'https://moco.geops.io/api/v1',
- *   // ssoConfig: "geopstest",
+ *   zoom: 10,
+ *   url: 'https://editor.mapset.io/api/v1',
+ *   tenants: "geopstest",
+ *   bbox: [8.5, 47.3, 8.6, 47.4],
+ *   tags: ['hiking', 'biking'],
+ *   apiKey: 'your-geops-api-key',
  * });
  *
  * const plans = await api.getPlans();
