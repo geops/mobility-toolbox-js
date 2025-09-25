@@ -59,4 +59,11 @@ export default [
       'Display/hide a set of layers of a Maplibre style on an OpenLayers map.',
     img: '/static/img/mapbox_style.jpg',
   },
+  {
+    name: 'Mapset Layer',
+    key: 'ol-mapset-layer',
+    description:
+      'Display [mapset](https://editor.mapset.io) plans on an OpenLayers map.',
+    img: '/static/img/mapset.png',
+  },
 ];
