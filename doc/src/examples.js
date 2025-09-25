@@ -64,6 +64,6 @@ export default [
     key: 'ol-mapset-layer',
     description:
       'Display [mapset](https://editor.mapset.io) plans on an OpenLayers map.',
-    img: '/static/img/mapbox_style.jpg',
+    img: '/static/img/mapset.png',
   },
 ];

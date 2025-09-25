@@ -76,8 +76,8 @@ class MapsetAPI extends HttpAPI {
    */
   constructor(options: MapsetAPIOptions) {
     super({
-      ...options,
       url: options.url ?? 'https://editor.mapset.io/api/v1',
+      ...options,
     });
     this.tags = options.tags ?? [];
     this.bbox = options.bbox;

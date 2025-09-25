@@ -32,9 +32,16 @@ const map = new Map({
   }),
 });
 
+const urlInput = document?.getElementById('url-input');
+const setUrlButton = document?.getElementById('set-url-button');
+setUrlButton.addEventListener('click', () => {
+  if (urlInput.value) {
+    mapsetLayer.url = urlInput.value;
+  }
+});
+
 // Fetch API plans
 let qsTimeout;
-const urlInput = document?.getElementById('url-input');
 const tagsInput = document?.getElementById('tags-input');
 const timestampInput = document?.getElementById('timestamp-input');
 const tenantsInput = document?.getElementById('tenants-input');
@@ -97,7 +104,7 @@ fetchPlansButton?.addEventListener('click', () => {
   const timestamp = timestampInput.value;
   mapsetLayer.timestamp = timestamp;
   mapsetLayer.bbox = map.getView().calculateExtent(map.getSize());
-  mapsetLayer.once('load:plans', zoomOnFeatures);
+  mapsetLayer.once('updatefeatures', zoomOnFeatures);
 });
 
 // Override KML
@@ -116,26 +123,19 @@ loadKmlButton?.addEventListener('click', () => {
       data: kmlTextArea.value,
     },
   ];
-  zoomOnFeatures();
+  mapsetLayer.once('updatefeatures', zoomOnFeatures);
 });
 
 // Load plan by ID
-let abortController = new AbortController();
 const idInput = document?.getElementById('id-input');
+idInput.value = 'dcb03ae5-9bef-4121-ba7b-3ad55e6d569e';
 const loadPlanButton = document.getElementById('load-plan-button');
-loadPlanButton?.addEventListener('click', async () => {
+loadPlanButton?.addEventListener('click', () => {
   const id = idInput.value.trim();
   if (!id) {
     alert('Please enter a plan ID');
     return;
   }
-  abortController?.abort();
-  abortController = new AbortController();
-  console.log(mapsetLayer);
-
-  const plan = await mapsetLayer.api.getPlanById(id, {
-    signal: abortController.signal,
-  });
-  mapsetLayer.plans = [plan];
-  zoomOnFeatures();
+  mapsetLayer.planId = id;
+  mapsetLayer.once('updatefeatures', zoomOnFeatures);
 });

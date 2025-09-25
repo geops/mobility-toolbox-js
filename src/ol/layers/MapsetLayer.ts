@@ -5,7 +5,7 @@ import { Vector } from 'ol/source';
 import MapsetAPI from '../../api/MapsetApi';
 import MapsetKmlFormat from '../utils/MapsetKmlFormat';
 
-import type Feature from 'ol/Feature';
+import type { Map } from 'ol';
 import type { FeatureLike } from 'ol/Feature';
 import type { Options } from 'ol/layer/Vector';
 
@@ -17,7 +17,7 @@ import type { MobilityLayerOptions } from './Layer';
 export type MapsetLayerOptions = {
   api: MapsetAPI;
   doNotRevert32pxScaling?: boolean;
-  silent?: boolean;
+  planId?: string;
 } & MapsetAPIOptions &
   MobilityLayerOptions &
   Options;
@@ -60,19 +60,22 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     this.updateFeatures();
   }
 
+  get planId(): string | undefined {
+    return this.get('planId') as string | undefined;
+  }
+  set planId(value: string | undefined) {
+    if (this.planId !== value) {
+      this.set('planId', value);
+      void this.fetchPlans(value);
+    }
+  }
+
   get plans(): MapsetPlan[] {
     return this.get('plans') as MapsetPlan[];
   }
   set plans(value: MapsetPlan[]) {
     this.set('plans', value);
     this.updateFeatures();
-  }
-
-  get silent(): boolean {
-    return this.get('silent') as boolean;
-  }
-  set silent(value: boolean) {
-    this.set('silent', value);
   }
 
   get tags(): string[] {
@@ -115,6 +118,16 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
   }
 
+  get zoom(): number {
+    return this.get('zoom') as number;
+  }
+  set zoom(value: number) {
+    if (this.zoom !== value) {
+      this.set('zoom', value);
+      void this.fetchPlans();
+    }
+  }
+
   #abortController: AbortController;
 
   /**
@@ -129,15 +142,15 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
    * @param {string} [options.url] The URL of the [geOps Mapset API](https://geops.com/de/solution/mapset).
    * @param {number} [options.zoom=1] The zoom level to search within.
    * @param {boolean} [options.doNotRevert32pxScaling=false] Do not revert the 32px scaling of the icons.
-   * @param {boolean} [options.silent=false] If true, features will be added and removed without triggering events.
    * @public
    */
   constructor(options: MapsetLayerOptions) {
     super({
-      ...options,
       source: options.source ?? new Vector<FeatureLike>(),
+      url: options.url ?? 'https://editor.mapset.io/api/v1',
+      zoom: options.zoom ?? 6,
+      ...options,
     });
-    this.url = options.url ?? 'https://editor.mapset.io/api/v1';
     this.api =
       options.api ??
       new MapsetAPI({
@@ -152,22 +165,30 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     this.#abortController = new AbortController();
   }
 
-  public async fetchPlans() {
-    const map = this.getMapInternal();
-    if (!map?.getView()) {
-      console.warn(
-        'MapsetLayer: map, view or url not set, cannot fetch plans',
-        {
-          map: map,
-          view: map?.getView(),
-        },
-      );
+  public async fetchPlans(planId?: string) {
+    this.#abortController?.abort();
+    this.#abortController = new AbortController();
+
+    if (planId) {
+      let planById: MapsetPlan;
+      try {
+        planById = await this.api.getPlanById(planId, {
+          signal: this.#abortController.signal,
+        });
+      } catch (e) {
+        // @ts-expect-error Abort errors are OK
+        if ((e?.name as string).includes('AbortError')) {
+          // Ignore abort error
+          return;
+        }
+        console.error('MapsetLayer: Error fetching plan by ID...', e);
+        throw e;
+      }
+      this.plans = [planById];
       return;
     }
 
-    this.#abortController.abort();
-    this.#abortController = new AbortController();
-
+    let plans: MapsetPlan[] = [];
     this.api = new MapsetAPI({
       apiKey: this.apiKey,
       bbox:
@@ -180,10 +201,8 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       tenants: this.tenants || [],
       timestamp: this.timestamp,
       url: this.url,
-      zoom: Math.floor(map.getView().getZoom() ?? 1),
+      zoom: this.zoom ?? 6,
     });
-
-    let plans: MapsetPlan[] = [];
 
     try {
       plans = await this.api.getPlans(
@@ -192,8 +211,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       );
     } catch (e) {
       // @ts-expect-error Abort errors are OK
-      // eslint-disable-next-line
-      if (/AbortError/.test(e?.name)) {
+      if ((e?.name as string).includes('AbortError')) {
         // Ignore abort error
         return;
       }
@@ -204,49 +222,37 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     this.plans = plans;
   }
 
-  public updateFeatures() {
-    // TODO: clear(true) is bugged the removefeature event is still sent.
-    const oldFeatures = this.getSource()?.getFeatures() ?? [];
-    if (this.silent) {
-      oldFeatures.forEach((f) => {
-        (f as Feature).set('silent', true, true);
-      });
-      this.getSource()?.clear(this.silent);
-      oldFeatures.forEach((f) => {
-        (f as Feature).unset('silent', true);
-      });
-    } else {
-      this.getSource()?.clear();
-    }
-
-    const map = this.getMapInternal();
-
-    if (!this.plans || this.plans?.length === 0 || !map) {
+  setMapInternal(map: Map | null): void {
+    super.setMapInternal(map);
+    if (this.planId) {
+      void this.fetchPlans(this.planId);
       return;
     }
+    if (this.plans) {
+      void this.fetchPlans();
+      return;
+    }
+  }
 
-    const features =
-      this.plans?.flatMap((plan) => {
-        return kmlFormatter.readFeatures(
-          plan.data,
-          map.getView().getProjection(),
-          this.doNotRevert32pxScaling,
-        );
-      }) ?? [];
+  public updateFeatures() {
+    this.getSource()?.clear();
+    const map = this.getMapInternal();
 
-    if (this.silent) {
-      features.forEach((f) => {
-        f.set('silent', true, true);
-      });
-      this.getSource()?.addFeatures(features);
-      features.forEach((f) => {
-        f.unset('silent', true);
-      });
-    } else {
+    if (map && this.plans?.length !== 0) {
+      const features =
+        this.plans?.flatMap((plan) => {
+          return kmlFormatter.readFeatures(
+            plan.data,
+            map.getView().getProjection(),
+            this.doNotRevert32pxScaling,
+          );
+        }) ?? [];
+
+      console.log(map, this.plans, features);
       this.getSource()?.addFeatures(features);
     }
 
-    this.dispatchEvent('load:plans');
+    this.dispatchEvent('updatefeatures');
   }
 }
 
