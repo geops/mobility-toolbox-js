@@ -144,7 +144,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
    * @param {boolean} [options.doNotRevert32pxScaling=false] Do not revert the 32px scaling of the icons.
    * @param {MapsetAPI} [options.api] The Mapset API instance to use.
    * @param {string} [options.planId] The ID of the Mapset plan to load.
-   * @param {MapsetPlan} [options.plans] The ID of the Mapset plan to load.
+   * @param {MapsetPlan[]} [options.plans] The ID of the Mapset plan to load. Ignored if `planId` is set.
    * @public
    */
   constructor(options: MapsetLayerOptions = {}) {
