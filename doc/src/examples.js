@@ -60,7 +60,7 @@ export default [
     img: '/static/img/mapbox_style.jpg',
   },
   {
-    name: 'Mapset Layer',
+    name: 'Mapset layer',
     key: 'ol-mapset-layer',
     description:
       'Display [mapset](https://editor.mapset.io) plans on an OpenLayers map.',
