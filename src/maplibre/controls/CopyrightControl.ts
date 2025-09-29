@@ -1,6 +1,6 @@
-import { ControlPosition, IControl } from 'maplibre-gl';
-
 import { getMapGlCopyrights } from '../../common/utils';
+
+import type { ControlPosition, IControl } from 'maplibre-gl';
 
 /**
  * @private
@@ -45,7 +45,6 @@ class CopyrightControl implements IControl {
     this.options = options;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getDefaultPosition(): ControlPosition {
     return 'bottom-right';
   }
