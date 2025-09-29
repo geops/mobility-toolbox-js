@@ -251,7 +251,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
           );
         }) ?? [];
 
-      console.log(map, this.plans, features);
       this.getSource()?.addFeatures(features);
     }
 
