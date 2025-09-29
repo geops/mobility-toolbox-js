@@ -15,7 +15,7 @@ import type { MapsetAPIOptions } from '../../api/MapsetApi';
 import type { MobilityLayerOptions } from './Layer';
 
 export type MapsetLayerOptions = {
-  api: MapsetAPI;
+  api?: MapsetAPI;
   doNotRevert32pxScaling?: boolean;
   planId?: string;
 } & MapsetAPIOptions &
@@ -142,9 +142,12 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
    * @param {string} [options.url] The URL of the [geOps Mapset API](https://geops.com/de/solution/mapset).
    * @param {number} [options.zoom=1] The zoom level to search within.
    * @param {boolean} [options.doNotRevert32pxScaling=false] Do not revert the 32px scaling of the icons.
+   * @param {MapsetAPI} [options.api] The Mapset API instance to use.
+   * @param {string} [options.planId] The ID of the Mapset plan to load.
+   * @param {MapsetPlan} [options.plans] The ID of the Mapset plan to load.
    * @public
    */
-  constructor(options: MapsetLayerOptions) {
+  constructor(options: MapsetLayerOptions = {}) {
     super({
       source: options.source ?? new Vector<FeatureLike>(),
       url: options.url ?? 'https://editor.mapset.io/api/v1',
