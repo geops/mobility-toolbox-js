@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.4.0](https://github.com/geops/mobility-toolbox-js/compare/v3.3.4...v3.4.0) (2025-09-29)
+
+
+### Features
+
+* **MapsetLayer:** add layer and API classes to load plans from mapset ([#227](https://github.com/geops/mobility-toolbox-js/issues/227)) ([5e2a561](https://github.com/geops/mobility-toolbox-js/commit/5e2a561ccd33ff6cda32f0e0bdebaaea0b9de18a))
+
 ### [3.3.4](https://github.com/geops/mobility-toolbox-js/compare/v3.3.3...v3.3.4) (2025-09-24)
 
 
