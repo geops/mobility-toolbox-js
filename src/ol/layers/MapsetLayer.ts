@@ -24,6 +24,27 @@ export type MapsetLayerOptions = {
 
 const kmlFormatter = new MapsetKmlFormat();
 
+/**
+ * An OpenLayers layer able to display plan data from [mapset](https://geops.com/de/solution/mapset).
+ *
+ * @example
+ * import { MapsetLayer } from 'mobility-toolbox-js/ol';
+ *
+ * const layer = new MapsetLayer({
+ *   apiKey: 'yourApiKey',
+ *   tenants: ['yourTenant', 'anotherTenant'],
+ *   planId: 'yourPlanId',
+ * });
+ *
+ * @see <a href="/doc/class/build/api/MapsetApi%20js~MapsetAPI%20html-offset-anchor">MapsetAPI</a>
+ * @see <a href="/example/ol-mapset-layer">OpenLayers Mapset layer example</a>
+ *
+ *
+ * @extends {ol/layer/VectorLayer~VectorLayer}
+ *
+ * @public
+ */
+
 class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   get api(): MapsetAPI {
     return this.get('api') as MapsetAPI;

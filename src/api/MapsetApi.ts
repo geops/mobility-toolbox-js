@@ -44,17 +44,17 @@ export interface MapsetApiResponse {
  * const api = new MapsetAPI({
  *   zoom: 10,
  *   url: 'https://editor.mapset.io/api/v1',
- *   tenants: "geopstest",
+ *   tenants: ['geopstest'],
  *   bbox: [8.5, 47.3, 8.6, 47.4],
  *   tags: ['hiking', 'biking'],
- *   apiKey: 'your-geops-api-key',
+ *   apiKey: 'yourApiKey',
  * });
  *
  * const plans = await api.getPlans();
  *
  * console.log('Log route:', JSON.stringify(plans));
  *
- * @private
+ * @public
  */
 class MapsetAPI extends HttpAPI {
   bbox: number[] | undefined = [];
