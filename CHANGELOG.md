@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.4.2](https://github.com/geops/mobility-toolbox-js/compare/v3.4.1...v3.4.2) (2025-10-02)
+
+
+### Bug Fixes
+
+* load properly the defualt url of MocoApi ([e691039](https://github.com/geops/mobility-toolbox-js/commit/e69103983a9db7dc86c7cf69d6b5d9198275ff6a))
+
 ### [3.4.1](https://github.com/geops/mobility-toolbox-js/compare/v3.4.0...v3.4.1) (2025-10-02)
 
 ## [3.4.0](https://github.com/geops/mobility-toolbox-js/compare/v3.3.4...v3.4.0) (2025-09-29)
