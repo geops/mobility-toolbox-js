@@ -5,7 +5,7 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import LineString from 'ol/geom/LineString';
 import Modify from 'ol/interaction/Modify';
-import { MaplibreLayer, MapsetAPI, MapsetLayer } from './build/ol';
+import { MaplibreLayer, MapsetAPI, MapsetLayer, MocoLayer } from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
 
@@ -13,6 +13,7 @@ window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
+  style: 'de.rvf_moco',
 });
 
 const mapsetLayer = new MapsetLayer({
@@ -23,15 +24,21 @@ const mapsetLayer = new MapsetLayer({
   }),
 });
 
+const mocoLayer = new MocoLayer({
+  apiKey: window.apiKey,
+  tenant: 'rvf',
+  maplibreLayer: baseLayer,
+});
+
 const map = new Map({
-  layers: [baseLayer, mapsetLayer],
+  layers: [baseLayer, mocoLayer],
   target: 'map',
   view: new View({
     center: [950690.34, 6003962.67],
     zoom: 20,
   }),
 });
-
+/*
 const urlInput = document?.getElementById('url-input');
 const setUrlButton = document?.getElementById('set-url-button');
 setUrlButton.addEventListener('click', () => {
@@ -139,3 +146,4 @@ loadPlanButton?.addEventListener('click', () => {
   mapsetLayer.planId = id;
   mapsetLayer.once('updatefeatures', zoomOnFeatures);
 });
+*/
