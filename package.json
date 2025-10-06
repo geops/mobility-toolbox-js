@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@geoblocks/ol-maplibre-layer": "^1.0.3",
+    "@geops/geops-ui": "0.3.6",
     "@turf/helpers": "7.2.0",
     "@turf/transform-rotate": "7.2.0",
     "lodash.debounce": "4.0.8",
