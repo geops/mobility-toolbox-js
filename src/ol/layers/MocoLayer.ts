@@ -348,6 +348,10 @@ class MocoLayer extends MaplibreStyleLayer {
    * @returns
    */
   async updateData(): Promise<boolean | undefined> {
+    if (this.getRenderer()) {
+      this.getRenderer().ready = false;
+    }
+
     if (this.loadAll) {
       const situations = await this.loadData();
       // We don't use the setter here to avoid infinite loop
@@ -370,6 +374,11 @@ class MocoLayer extends MaplibreStyleLayer {
 
     // Apply new data to the source
     (source as GeoJSONSource).setData(this.getDataByGraph(data));
+
+    if (this.getRenderer()) {
+      this.getRenderer().ready = true;
+    }
+
     return Promise.resolve(true);
   }
 }

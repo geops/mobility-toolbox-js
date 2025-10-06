@@ -39,7 +39,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
       // @ts-expect-error improve ts types
       callback(feature, this.layer_, feature.getGeometry());
     });
-    return features?.[0] as Feature;
+    return features?.[0];
   }
 
   override getFeatures(pixel: Pixel) {
