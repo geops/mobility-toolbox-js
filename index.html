@@ -5,9 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mobility-toolbox-js</title>
   </head>
-  <body style="margin: 0;">
-    <div id="app" style="padding: 10px; display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr);">
-      <div id="map" style="width:800px;height:800px;"></div>
+  <body style="margin: 0">
+    <div id="map" style="width: 800px; height: 400px"></div>
+    <button id="map2ToMap">&lt;- map2 to map</button>
+    <button id="mapToMap2">map to map2 -&gt;</button>
+    <div id="map2" style="width: 800px; height: 400px"></div>
+    <!-- <div
+      id="app"
+      style="
+        padding: 10px;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+      "
+    >
+      <div id="map" style="width:1000px;height:800px;"></div>
       <div style="width:100%;height: 98vh; display: flex; flex-direction: column">
         <div style="display: flex; flex: 2; gap: 10px; margin-bottom: 10px; flex-direction: column;">
           <div style="flex: 1; display: flex; gap: 10px;">
@@ -69,7 +81,7 @@
           <button id="load-plan-button" style="min-height: 40px">Load plan by ID</button>
         </div>
       </div>
-    </div>
+    </div> -->
     <script type="module" src="/dev.js"></script>
   </body>
 </html>

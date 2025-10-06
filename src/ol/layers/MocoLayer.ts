@@ -376,8 +376,13 @@ class MocoLayer extends MaplibreStyleLayer {
     // Apply new data to the source
     (source as GeoJSONSource).setData(this.getDataByGraph(data));
 
-    if (renderer) {
-      renderer.ready = true;
+    // Set the renderer as ready
+    if (renderer && this.maplibreLayer?.mapLibreMap) {
+      void this.maplibreLayer.mapLibreMap.once('idle', () => {
+        if (renderer) {
+          renderer.ready = true;
+        }
+      });
     }
 
     return Promise.resolve(true);

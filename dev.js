@@ -16,13 +16,13 @@ const baseLayer = new MaplibreLayer({
   style: 'de.rvf_moco',
 });
 
-const mapsetLayer = new MapsetLayer({
-  tenants: ['geopstest'],
-  apiKey: window.apiKey,
-  api: new MapsetAPI({
-    apiKey: window.apiKey,
-  }),
-});
+// const mapsetLayer = new MapsetLayer({
+//   tenants: ['geopstest'],
+//   apiKey: window.apiKey,
+//   api: new MapsetAPI({
+//     apiKey: window.apiKey,
+//   }),
+// });
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
@@ -38,6 +38,94 @@ const map = new Map({
     zoom: 20,
   }),
 });
+
+let map2 = new Map({
+  pixelRatio: 3,
+  target: 'map2',
+  view: new View({
+    center: map.getView().getCenter(),
+    zoom: map.getView().getZoom(),
+  }),
+});
+
+map.on('moveend', (e) => {
+  console.log('moveend');
+
+  const center = map.getView().getCenter();
+  const zoom = map.getView().getZoom();
+  map2.getView().setCenter(center);
+  map2.getView().setZoom(zoom);
+  const ll = toLonLat(center || [0, 0]);
+  console.log('map center', center, ll, zoom);
+});
+
+map.once('rendercomplete', (e) => {
+  console.log('map first rendercomplete');
+  map.on('rendercomplete', (e) => {
+    console.log('map first rendercomplete');
+  });
+
+  // const metadata = baseLayer.mapLibreMap?.getStyle()?.metadata;
+  // console.log('baseLayer metadata: ', metadata);
+  // const graphByZoom = [];
+  // for (var i = 0; i < 26; i++) {
+  //   graphByZoom.push(getGraphByZoom(i, metadata?.graphs));
+  // }
+  // realtimeLayer.engine.graphByZoom = graphByZoom;
+  // console.log('realtimeLayer.graphByZoom: ', realtimeLayer.engine.graphByZoom);
+});
+
+map2.once('rendercomplete', (e) => {
+  console.log('map2 first rendercomplete');
+  map2.on('rendercomplete', (e) => {
+    console.log('map2 rendercomplete');
+  });
+});
+
+document.getElementById('map2ToMap').onclick = () => {
+  const layers = [...map2.getLayers().getArray()];
+  map2.getLayers().clear();
+  map.setLayers(layers);
+  map.once('rendercomplete', (e) => {
+    console.log('map1 rendercomplete');
+  });
+};
+
+document.getElementById('mapToMap2').onclick = () => {
+  const layers = [...map.getLayers().getArray()];
+  map.getLayers().clear();
+  map2.setLayers(layers);
+  map2.once('rendercomplete', (e) => {
+    console.log('map2 rendercomplete');
+  });
+};
+
+document.getElementById('toggleMocoLayer').onclick = () => {
+  if (map.getLayers().getArray().includes(mocoLayer)) {
+    console.log('Removing MocoLayer');
+    map.removeLayer(mocoLayer);
+  } else {
+    console.log('Add MocoLayer');
+    map.addLayer(mocoLayer);
+    mocoLayer.maplibreLayer?.mapLibreMap?.on('load', () => {
+      console.log('MocoLayer mapLibreMap load event');
+    });
+    mocoLayer.maplibreLayer?.mapLibreMap?.on('idle', () => {
+      console.log('MocoLayer mapLibreMap load event');
+    });
+    //mocoLayer.maplibreLayer?.mapLibreMap.redraw();
+    window.mbMap = mocoLayer.maplibreLayer?.mapLibreMap;
+    console.log(
+      'Source data',
+      mocoLayer.maplibreLayer?.mapLibreMap?.getSource('rvf_moco'),
+    );
+    console.log(
+      'layer data',
+      mocoLayer.maplibreLayer?.mapLibreMap,
+      mocoLayer.maplibreLayer?.mapLibreMap.getLayer('moco-notification-line'),
+    );
+  }
+};
 /*
 const urlInput = document?.getElementById('url-input');
 const setUrlButton = document?.getElementById('set-url-button');
