@@ -28,6 +28,11 @@ const formats: Record<string, GeoJSON> = {
  * @private
  */
 export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreStyleLayer> {
+  constructor(layer: MaplibreStyleLayer) {
+    super(layer);
+    this.ready = false; // Wait first updateData to render
+  }
+
   override forEachFeatureAtCoordinate<Feature>(
     coordinate: Coordinate,
     frameState: FrameState,
