@@ -1,5 +1,4 @@
 import VectorLayer from 'ol/layer/Vector';
-import { toLonLat } from 'ol/proj';
 import { Vector } from 'ol/source';
 
 import MapsetAPI from '../../api/MapsetApi';
@@ -157,7 +156,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
    * @param {Object} options
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string[]} [options.tags] The tags of the required plans.
-   * @param {number[]} [options.bbox] The bounding box to search within.
+   * @param {number[]} [options.bbox] The bounding box to search within: [minX, minY, maxX, maxY] (https://wiki.openstreetmap.org/wiki/Bounding_box).
    * @param {string} [options.timestamp] The timestamp of the required plans.
    * @param {string[]} [options.tenants] The tenants of the required plans.
    * @param {string} [options.url] The URL of the [geOps Mapset API](https://geops.com/de/solution/mapset).
@@ -172,7 +171,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     super({
       source: options.source ?? new Vector<FeatureLike>(),
       url: options.url ?? 'https://editor.mapset.io/api/v1',
-      zoom: options.zoom ?? 6,
+      zoom: options.zoom,
       ...options,
     });
     this.api =
@@ -215,17 +214,12 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     let plans: MapsetPlan[] = [];
     this.api = new MapsetAPI({
       apiKey: this.apiKey,
-      bbox:
-        (this.bbox && [
-          ...toLonLat([this.bbox[0], this.bbox[1]]),
-          ...toLonLat([this.bbox[2], this.bbox[3]]),
-        ]) ??
-        undefined,
+      bbox: this.bbox ?? undefined,
       tags: this.tags || [],
       tenants: this.tenants || [],
       timestamp: this.timestamp,
       url: this.url,
-      zoom: this.zoom ?? 6,
+      zoom: this.zoom,
     });
 
     try {
@@ -252,10 +246,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       void this.fetchPlans(this.planId);
       return;
     }
-    if (this.plans) {
-      void this.fetchPlans();
-      return;
-    }
+    void this.fetchPlans();
   }
 
   public updateFeatures() {
