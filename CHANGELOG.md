@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.4.2](https://github.com/geops/mobility-toolbox-js/compare/v3.4.1...v3.4.2) (2025-10-02)
+
+
+### Bug Fixes
+
+* load properly the defualt url of MocoApi ([e691039](https://github.com/geops/mobility-toolbox-js/commit/e69103983a9db7dc86c7cf69d6b5d9198275ff6a))
+
+### [3.4.1](https://github.com/geops/mobility-toolbox-js/compare/v3.4.0...v3.4.1) (2025-10-02)
+
+## [3.4.0](https://github.com/geops/mobility-toolbox-js/compare/v3.3.4...v3.4.0) (2025-09-29)
+
+
+### Features
+
+* **MapsetLayer:** add layer and API classes to load plans from mapset ([#227](https://github.com/geops/mobility-toolbox-js/issues/227)) ([5e2a561](https://github.com/geops/mobility-toolbox-js/commit/5e2a561ccd33ff6cda32f0e0bdebaaea0b9de18a))
+
+### [3.3.4](https://github.com/geops/mobility-toolbox-js/compare/v3.3.3...v3.3.4) (2025-09-24)
+
+
+### Bug Fixes
+
+* use graphs from style and use new moco export api  ([#225](https://github.com/geops/mobility-toolbox-js/issues/225)) ([65c3711](https://github.com/geops/mobility-toolbox-js/commit/65c3711b35e951e5c7781c576e2075ec346aed59))
+
 ### [3.3.3](https://github.com/geops/mobility-toolbox-js/compare/v3.3.2...v3.3.3) (2025-08-04)
 
 

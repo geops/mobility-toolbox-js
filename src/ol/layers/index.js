@@ -4,6 +4,8 @@ export { default as MaplibreLayer } from './MaplibreLayer';
 export * from './MaplibreLayer';
 export { default as MaplibreStyleLayer } from './MaplibreStyleLayer';
 export * from './MaplibreStyleLayer';
+export { default as MapsetLayer } from './MapsetLayer';
+export * from './MapsetLayer';
 export { default as MocoLayer } from './MocoLayer';
 export * from './MocoLayer';
 export { default as RealtimeLayer } from './RealtimeLayer';

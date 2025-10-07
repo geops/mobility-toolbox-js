@@ -63,7 +63,7 @@ export type RealtimeLayerOptions = {
  * });
  *
  *
- * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
+ * @see <a href="/doc/class/build/api/RealtimeAPI%20js~RealtimeAPI%20html-offset-anchor">RealtimeAPI</a>
  * @see <a href="/example/ol-realtime">OpenLayers Realtime layer example</a>
  *
  *
