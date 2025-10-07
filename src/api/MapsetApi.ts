@@ -61,7 +61,7 @@ class MapsetAPI extends HttpAPI {
   tags: string[] = [];
   tenants: string[] = [];
   timestamp: string | undefined = undefined;
-  zoom = 1;
+  zoom;
 
   /**
    * Constructor
@@ -81,7 +81,7 @@ class MapsetAPI extends HttpAPI {
     });
     this.tags = options.tags ?? [];
     this.bbox = options.bbox;
-    this.zoom = options.zoom ?? 1;
+    this.zoom = options.zoom;
     this.tenants = options.tenants ?? [];
     this.timestamp = options.timestamp;
     this.apiKey = options.apiKey ?? '';
@@ -126,7 +126,7 @@ class MapsetAPI extends HttpAPI {
         tags: this.tags?.toString(),
         tenants: this.tenants?.toString(),
         timestamp: this.timestamp,
-        zoom: Math.floor(this.zoom),
+        zoom: this.zoom && Math.floor(this.zoom),
         ...apiParams,
       },
       config,
