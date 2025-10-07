@@ -9,6 +9,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 * **MapsetLayer:** remove default zoom from options ([#228](https://github.com/geops/mobility-toolbox-js/issues/228)) ([54145f7](https://github.com/geops/mobility-toolbox-js/commit/54145f7d2643962d65abe91de525bca34225ba07))
 
+### [3.4.3](https://github.com/geops/mobility-toolbox-js/compare/v3.4.2...v3.4.3) (2025-10-07)
+
+
+### Bug Fixes
+
+* **MapsetLayer:** remove default zoom from options ([#228](https://github.com/geops/mobility-toolbox-js/issues/228)) ([54145f7](https://github.com/geops/mobility-toolbox-js/commit/54145f7d2643962d65abe91de525bca34225ba07))
+
 ### [3.4.2](https://github.com/geops/mobility-toolbox-js/compare/v3.4.1...v3.4.2) (2025-10-02)
 
 
