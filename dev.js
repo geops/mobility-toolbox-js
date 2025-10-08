@@ -24,15 +24,12 @@ const mapsUrl = 'https://maps.geops.io';
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
-  style: 'de.rvf_moco',
+  style: 'travic_v2',
 });
 
 const mapsetLayer = new MapsetLayer({
   tenants: ['geopstest'],
   apiKey: window.apiKey,
-  api: new MapsetAPI({
-    apiKey: window.apiKey,
-  }),
 });
 
 const realtimeLayer = new RealtimeLayer({
@@ -153,7 +150,12 @@ fetchPlansButton?.addEventListener('click', () => {
   mapsetLayer.apiKey = window.apiKey;
   const timestamp = timestampInput.value;
   mapsetLayer.timestamp = timestamp;
-  mapsetLayer.bbox = map.getView().calculateExtent(map.getSize());
+  const latLonExtent = transformExtent(
+    map.getView().calculateExtent(map.getSize()),
+    'EPSG:3857',
+    'EPSG:4326',
+  );
+  mapsetLayer.bbox = latLonExtent;
   mapsetLayer.once('updatefeatures', zoomOnFeatures);
 });
 
