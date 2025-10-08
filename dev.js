@@ -82,7 +82,6 @@ map.on('singleclick', (evt) => {
   realtimeLayer.select([feature]);
 });
 
-/*
 const urlInput = document?.getElementById('url-input');
 const setUrlButton = document?.getElementById('set-url-button');
 setUrlButton.addEventListener('click', () => {
@@ -190,4 +189,3 @@ loadPlanButton?.addEventListener('click', () => {
   mapsetLayer.planId = id;
   mapsetLayer.once('updatefeatures', zoomOnFeatures);
 });
-*/
