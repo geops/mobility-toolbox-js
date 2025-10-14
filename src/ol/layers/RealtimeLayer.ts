@@ -149,6 +149,14 @@ class RealtimeLayer extends Layer {
     }
   }
 
+  get time() {
+    return this.engine.time || new Date();
+  }
+
+  set time(time: Date) {
+    this.engine.time = time;
+  }
+
   get trajectories() {
     return this.engine.trajectories;
   }
