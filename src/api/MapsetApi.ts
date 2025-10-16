@@ -119,7 +119,7 @@ class MapsetAPI extends HttpAPI {
     let res = {} as MapsetApiResponse;
 
     res = await this.fetch<MapsetApiResponse, MapsetAPIParams>(
-      '/export/kml',
+      '/export/kml/',
       {
         bbox: this.bbox?.toString(),
         key: this.apiKey,

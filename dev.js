@@ -138,7 +138,9 @@ map?.getView().on('change:resolution', (evt) => {
 
 const fetchPlansButton = document.getElementById('fetch-plans-button');
 fetchPlansButton?.addEventListener('click', () => {
-  mapsetLayer.url = urlInput.value || undefined;
+  if (urlInput.value) {
+    mapsetLayer.url = urlInput.value;
+  }
   mapsetLayer.tenants = tenantsInput.value
     .split(',')
     .map((t) => t.trim())
