@@ -154,6 +154,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   constructor(options: MapsetLayerOptions = {}) {
     super({
       source: options.source ?? new Vector<FeatureLike>(),
+      tenants: ['geopstest'],
       ...options,
     });
     this.api =
@@ -179,10 +180,14 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
     let planById: MapsetPlan;
     try {
+      this.dispatchEvent('featuresloadstart');
       planById = await this.api.getPlanById(planId, {
         signal: this.#abortController.signal,
       });
       this.plans = [planById];
+      console.log('MapsetLayer: fetched plans', 'featuresloadend');
+
+      this.dispatchEvent('featuresloadend');
     } catch (e) {
       // @ts-expect-error Abort errors are OK
       if ((e?.name as string).includes('AbortError')) {
@@ -192,6 +197,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       // eslint-disable-next-line no-console
       console.error('MapsetLayer: Error fetching plan by ID...', e);
       this.plans = [];
+      this.dispatchEvent('featuresloaderror');
       throw e;
     }
     return;
@@ -201,6 +207,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     if (!this.getVisible()) {
       return;
     }
+
     const view = this.getMapInternal()?.getView();
     if (!view) {
       return;
@@ -222,6 +229,8 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
 
     let plans: MapsetPlan[] = [];
     try {
+      this.dispatchEvent('featuresloadstart');
+      console.log('MapsetLayer: fetching plans...', this.tenants);
       plans = await this.api.getPlans(
         {
           bbox: extent?.toString(),
@@ -233,6 +242,9 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
         },
         { signal: this.#abortController.signal },
       );
+      this.plans = plans;
+      console.log('MapsetLayer: fetched plans', 'featuresloadend');
+      this.dispatchEvent('featuresloadend');
     } catch (e) {
       // @ts-expect-error Abort errors are OK
       if ((e?.name as string).includes('AbortError')) {
@@ -240,10 +252,9 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
         return [];
       }
       console.error('MapsetLayer: Error fetching plans...', e);
+      this.dispatchEvent('featuresloaderror');
       throw e;
     }
-
-    this.plans = plans;
   }
 
   setMapInternal(map: Map): void {

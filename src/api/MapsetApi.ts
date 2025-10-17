@@ -97,7 +97,7 @@ class MapsetAPI extends HttpAPI {
    */
   async getPlanById(id: string, config: RequestInit = {}): Promise<MapsetPlan> {
     return await this.fetch<MapsetPlan, Record<string, string | undefined>>(
-      `/meta/kml/${id}`,
+      `/meta/kml/${id}/`,
       {},
       { method: 'GET', ...config },
     );
@@ -115,10 +115,7 @@ class MapsetAPI extends HttpAPI {
     params: MapsetAPIParams = {},
     config: RequestInit = {},
   ): Promise<MapsetPlan[]> {
-    const apiParams: MapsetAPIParams = { ...params };
-    let res = {} as MapsetApiResponse;
-
-    res = await this.fetch<MapsetApiResponse, MapsetAPIParams>(
+    const res = await this.fetch<MapsetApiResponse, MapsetAPIParams>(
       '/export/kml/',
       {
         bbox: this.bbox?.toString(),
@@ -127,13 +124,12 @@ class MapsetAPI extends HttpAPI {
         tenants: this.tenants?.toString(),
         timestamp: this.timestamp,
         zoom: this.zoom && Math.floor(this.zoom),
-        ...apiParams,
+        ...params,
       },
       config,
     );
 
     if (res?.detail) {
-      console.error('Error fetching mapset plans:', res.detail);
       throw new Error(res.detail);
     }
 

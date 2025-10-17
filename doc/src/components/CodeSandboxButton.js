@@ -33,6 +33,7 @@ function CodeSandboxButton({ extraFiles = {}, html, js, ...props }) {
             'maplibre-gl': 'latest',
             'mobility-toolbox-js': 'latest',
             ol: 'latest',
+            lodash: 'latest',
           },
           description: 'Mobility example starter project',
           devDependencies: {
