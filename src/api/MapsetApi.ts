@@ -20,6 +20,7 @@ export interface MapsetAPIOptions {
 
 export interface MapsetAPIParams {
   bbox?: string;
+  defaultplans?: string;
   key?: string;
   tags?: string;
   tenants?: string;
@@ -44,24 +45,24 @@ export interface MapsetApiResponse {
  * const api = new MapsetAPI({
  *   zoom: 10,
  *   url: 'https://editor.mapset.io/api/v1',
- *   tenants: "geopstest",
+ *   tenants: ['geopstest'],
  *   bbox: [8.5, 47.3, 8.6, 47.4],
  *   tags: ['hiking', 'biking'],
- *   apiKey: 'your-geops-api-key',
+ *   apiKey: 'yourApiKey',
  * });
  *
  * const plans = await api.getPlans();
  *
  * console.log('Log route:', JSON.stringify(plans));
  *
- * @private
+ * @public
  */
 class MapsetAPI extends HttpAPI {
   bbox: number[] | undefined = [];
   tags: string[] = [];
   tenants: string[] = [];
   timestamp: string | undefined = undefined;
-  zoom = 1;
+  zoom;
 
   /**
    * Constructor
@@ -81,7 +82,7 @@ class MapsetAPI extends HttpAPI {
     });
     this.tags = options.tags ?? [];
     this.bbox = options.bbox;
-    this.zoom = options.zoom ?? 1;
+    this.zoom = options.zoom;
     this.tenants = options.tenants ?? [];
     this.timestamp = options.timestamp;
     this.apiKey = options.apiKey ?? '';
@@ -122,11 +123,12 @@ class MapsetAPI extends HttpAPI {
       '/export/kml',
       {
         bbox: this.bbox?.toString(),
+        defaultplans: this.tags?.toString() ? 'false' : 'true',
         key: this.apiKey,
         tags: this.tags?.toString(),
         tenants: this.tenants?.toString(),
         timestamp: this.timestamp,
-        zoom: Math.floor(this.zoom),
+        zoom: this.zoom && Math.floor(this.zoom),
         ...apiParams,
       },
       config,

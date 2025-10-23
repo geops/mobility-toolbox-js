@@ -263,10 +263,10 @@
   resolved "https://registry.yarnpkg.com/@geoblocks/ol-maplibre-layer/-/ol-maplibre-layer-1.0.3.tgz#996345296b0b2d1b8ad06b78424caa5b69296b6f"
   integrity sha512-NKr7iqIezw5XWKy6Dw32mYdo3tcNXIOb+wI/nguhiqKxntFvvpiQAsv38lM9xpTkqlDRd1JKLfAHaqtc7jy4Ug==
 
-"@geops/geops-ui@^0.3.5":
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.3.5.tgz#80c9f23663bb713412aff96934369d087497685e"
-  integrity sha512-u+ORoPAkSCasPm7Y8vMr6Um747G3/2MWLW2RYbdVbjmE8XsSUbJSkNr17omhJzldsYfx/WlneKtLkVuKv/iryg==
+"@geops/geops-ui@0.3.6", "@geops/geops-ui@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.3.6.tgz#f5e3f661d0db24f279a5ef51c62b3410b98647a7"
+  integrity sha512-xj6U73NoXxfyne9yE13zxP5COfp3V9g/JL/LIB/NJkatWsrqzsCfWJoqwKyw7M4gZ/gPTxuzf7Az2epWyzxVJQ==
   dependencies:
     prop-types "^15.7.2"
 
@@ -4810,9 +4810,10 @@ mkdirp@^0.5.1:
     minimist "^1.2.6"
 
 mobility-toolbox-js@./../build:
-  version "3.3.5-beta.2"
+  version "3.4.2"
   dependencies:
     "@geoblocks/ol-maplibre-layer" "^1.0.3"
+    "@geops/geops-ui" "0.3.6"
     "@turf/helpers" "7.2.0"
     "@turf/transform-rotate" "7.2.0"
     lodash.debounce "4.0.8"

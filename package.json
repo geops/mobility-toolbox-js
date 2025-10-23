@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "3.4.0",
+  "version": "3.4.5",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "exports": {
     ".": "./index.js",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@geoblocks/ol-maplibre-layer": "^1.0.3",
+    "@geops/geops-ui": "0.3.6",
     "@turf/helpers": "7.2.0",
     "@turf/transform-rotate": "7.2.0",
     "lodash.debounce": "4.0.8",

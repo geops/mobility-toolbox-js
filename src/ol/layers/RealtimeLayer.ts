@@ -63,7 +63,7 @@ export type RealtimeLayerOptions = {
  * });
  *
  *
- * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
+ * @see <a href="/doc/class/build/api/RealtimeAPI%20js~RealtimeAPI%20html-offset-anchor">RealtimeAPI</a>
  * @see <a href="/example/ol-realtime">OpenLayers Realtime layer example</a>
  *
  *
@@ -147,6 +147,14 @@ class RealtimeLayer extends Layer {
     if (this.engine) {
       this.engine.style = style;
     }
+  }
+
+  get time() {
+    return this.engine.time || new Date();
+  }
+
+  set time(time: Date) {
+    this.engine.time = time;
   }
 
   get trajectories() {
@@ -396,36 +404,22 @@ class RealtimeLayer extends Layer {
   async highlightTrajectory(
     id: RealtimeTrainId,
   ): Promise<Feature[] | undefined> {
-    const features = await this.getFullTrajectory(id);
-
-    this.cleanVectorLayer();
-
-    if (features.length) {
-      this.vectorLayer?.getSource()?.addFeatures(features);
-    }
-
-    if (
-      this.vectorLayer.getMapInternal() &&
-      this.vectorLayer.getMapInternal() !== this.getMapInternal()
-    ) {
-      this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
-    }
-
-    // Add the vector layer to the map
-    const zIndex = this.getZIndex();
-    if (zIndex !== undefined) {
-      this.vectorLayer.setZIndex(zIndex - 1);
-      if (!this.vectorLayer.getMapInternal()) {
-        this.getMapInternal()?.addLayer(this.vectorLayer);
-      }
-    } else if (!this.vectorLayer.getMapInternal()) {
-      const index =
-        this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
-      if (index) {
-        this.getMapInternal()?.getLayers().insertAt(index, this.vectorLayer);
-      }
-    }
-    return features;
+    const promise = new Promise<Feature[] | undefined>((resolve) => {
+      this.api.subscribeFullTrajectory(id, this.engine.mode, (data) => {
+        if (this.selectedVehicleId === id && data?.content) {
+          let features: Feature[] = [];
+          if (data?.content?.features?.length) {
+            features = format.readFeatures(data?.content);
+          }
+          this.updateHighlightFeatures(features);
+          resolve(features);
+        }
+      });
+    });
+    return promise;
+    // const features = await this.getFullTrajectory(id);
+    // this.updateHighlightFeatures(features);
+    // return features;
   }
 
   onMoveEnd() {
@@ -461,10 +455,6 @@ class RealtimeLayer extends Layer {
     if (!this.engine.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
-
-    if (this.selectedVehicleId) {
-      void this.highlightTrajectory(this.selectedVehicleId);
-    }
   }
 
   /**
@@ -491,11 +481,17 @@ class RealtimeLayer extends Layer {
     const feat = Array.isArray(features) ? features[0] : features;
     const id: null | string | undefined = feat?.get('train_id') as string;
     if (this.selectedVehicleId !== id) {
+      if (this.selectedVehicleId) {
+        this.api.unsubscribeFullTrajectory(this.selectedVehicleId);
+      }
       this.cleanVectorLayer();
       this.selectedVehicleId = id;
       this.engine.renderTrajectories(true);
     }
-    void this.highlightTrajectory(id);
+
+    if (id) {
+      void this.highlightTrajectory(id);
+    }
   }
 
   override setMapInternal(map: Map) {
@@ -531,6 +527,37 @@ class RealtimeLayer extends Layer {
    */
   stop() {
     this.engine.stop();
+  }
+
+  private updateHighlightFeatures(features: Feature[] | undefined) {
+    this.cleanVectorLayer();
+
+    if (features?.length) {
+      this.vectorLayer?.getSource()?.addFeatures(features);
+    }
+
+    if (
+      this.vectorLayer.getMapInternal() &&
+      this.vectorLayer.getMapInternal() !== this.getMapInternal()
+    ) {
+      this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
+    }
+
+    // Add the vector layer to the map
+    const zIndex = this.getZIndex();
+    if (zIndex !== undefined) {
+      this.vectorLayer.setZIndex(zIndex - 1);
+      if (!this.vectorLayer.getMapInternal()) {
+        this.getMapInternal()?.addLayer(this.vectorLayer);
+      }
+    } else if (!this.vectorLayer.getMapInternal()) {
+      const index =
+        this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
+      if (index) {
+        this.getMapInternal()?.getLayers().insertAt(index, this.vectorLayer);
+      }
+    }
+    return features;
   }
 }
 

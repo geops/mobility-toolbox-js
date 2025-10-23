@@ -136,9 +136,7 @@ class MocoLayer extends MaplibreStyleLayer {
     void this.updateData();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   get apiParameters(): MocoExportParameters | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-redundant-type-constituents
     return this.get('apiParameters') as MocoExportParameters | undefined;
   }
 

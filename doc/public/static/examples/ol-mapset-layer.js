@@ -1,6 +1,6 @@
 import View from 'ol/View';
 import Map from 'ol/Map';
-import { MapsetLayer, MaplibreLayer, MapsetAPI } from 'mobility-toolbox-js/ol';
+import { MapsetLayer, MaplibreLayer } from 'mobility-toolbox-js/ol';
 import 'ol/ol.css';
 
 export default () => {

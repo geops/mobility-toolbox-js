@@ -691,7 +691,13 @@ class RealtimeEngine {
       return false;
     }
 
-    const time = this.live ? Date.now() : this.time?.getTime();
+    let time = new Date();
+    if (this.live) {
+      // Save the time internally, to keep trace of the time rendered for purge.
+      this._time = time;
+    } else if (this.time) {
+      time = this.time;
+    }
 
     const trajectories = Object.values(this.trajectories);
 
@@ -713,7 +719,7 @@ class RealtimeEngine {
       {
         ...viewState,
         pixelRatio: this.pixelRatio || 1,
-        time,
+        time: time.getTime(),
       },
       {
         filter: this.filter,

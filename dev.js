@@ -5,31 +5,78 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import LineString from 'ol/geom/LineString';
 import Modify from 'ol/interaction/Modify';
-import { MaplibreLayer, MapsetAPI, MapsetLayer } from './build/ol';
+import {
+  MaplibreLayer,
+  MapsetAPI,
+  MapsetLayer,
+  MocoLayer,
+  RealtimeLayer,
+} from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
 
 window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
+// const realtimeUrl = 'https://tralis-tracker-api.dev.geops.io/ws';
+const realtimeUrl = 'wss://api.geops.io/tracker-ws/v1';
+const mocoUrl = 'https://moco.geops.io/api/v2/';
+const mapsUrl = 'https://maps.geops.io';
+
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
+  style: 'travic_v2',
 });
 
 const mapsetLayer = new MapsetLayer({
   tenants: ['geopstest'],
   apiKey: window.apiKey,
-  api: new MapsetAPI({
-    apiKey: window.apiKey,
-  }),
+});
+
+const realtimeLayer = new RealtimeLayer({
+  apiKey: window.apiKey,
+  url: realtimeUrl,
+});
+
+const mocoLayer = new MocoLayer({
+  apiKey: window.apiKey,
+  tenant: 'rvf',
+  maplibreLayer: baseLayer,
 });
 
 const map = new Map({
-  layers: [baseLayer, mapsetLayer],
+  layers: [baseLayer, realtimeLayer, mocoLayer, mapsetLayer],
   target: 'map',
   view: new View({
-    center: [950690.34, 6003962.67],
-    zoom: 20,
+    //center: [950690.34, 6003962.67], // Zürich
+    center: [872814.6006106276, 6106276.43], // Freiburg
+    zoom: 16,
   }),
+});
+
+map.on('pointermove', (evt) => {
+  if (evt.dragging) {
+    return;
+  }
+  const pixel = map.getEventPixel(evt.originalEvent);
+  const [feature] = map.getFeaturesAtPixel(pixel, {
+    filter: (l) => l === realtimeLayer,
+  });
+
+  realtimeLayer.hoverVehicleId = feature?.get('train_id');
+  map.getTargetElement().style.cursor = feature ? 'pointer' : '';
+});
+
+map.on('singleclick', (evt) => {
+  if (evt.dragging) {
+    return;
+  }
+  const pixel = map.getEventPixel(evt.originalEvent);
+  const [feature] = map.getFeaturesAtPixel(pixel, {
+    hitTolerance: 10,
+    filter: (l) => l === realtimeLayer,
+  });
+
+  realtimeLayer.select([feature]);
 });
 
 const urlInput = document?.getElementById('url-input');
@@ -103,7 +150,12 @@ fetchPlansButton?.addEventListener('click', () => {
   mapsetLayer.apiKey = window.apiKey;
   const timestamp = timestampInput.value;
   mapsetLayer.timestamp = timestamp;
-  mapsetLayer.bbox = map.getView().calculateExtent(map.getSize());
+  const latLonExtent = transformExtent(
+    map.getView().calculateExtent(map.getSize()),
+    'EPSG:3857',
+    'EPSG:4326',
+  );
+  mapsetLayer.bbox = latLonExtent;
   mapsetLayer.once('updatefeatures', zoomOnFeatures);
 });
 
