@@ -740,14 +740,6 @@ class MapsetKmlFormat {
             // We set the scale as extended metadata because the <scale> in the KML is related to a 32px img, since ol >= 6.10.
             clone.set('iconScale', newStyle.image.getScale());
           }
-
-          // Set map resolution to use for icon-to-map proportional scaling
-          if (feature.get('pictureOptions') || feature.get('scaleOptions')) {
-            clone.set(
-              'scaleOptions',
-              JSON.stringify(feature.get('scaleOptions')),
-            );
-          }
         }
 
         // In case a fill pattern should be applied (use fillPattern attribute to store pattern id, color etc)
@@ -764,6 +756,14 @@ class MapsetKmlFormat {
         // minZoom: minimum zoom level at which the feature is displayed
         if (feature.get('minZoom')) {
           clone.set('minZoom', parseFloat(feature.get('minZoom') as string));
+        }
+
+        // Set map resolution to use for feature-to-map proportional scaling
+        if (feature.get('pictureOptions') || feature.get('scaleOptions')) {
+          clone.set(
+            'scaleOptions',
+            JSON.stringify(feature.get('scaleOptions')),
+          );
         }
 
         // If only text is displayed we must specify an
