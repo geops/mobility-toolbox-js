@@ -29,6 +29,7 @@ const baseLayer = new MaplibreLayer({
 
 const mapsetLayer = new MapsetLayer({
   apiKey: window.apiKey,
+  tenants: ['rvf'],
 });
 
 const realtimeLayer = new RealtimeLayer({

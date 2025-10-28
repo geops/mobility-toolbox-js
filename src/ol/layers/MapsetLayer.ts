@@ -61,12 +61,12 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     void this.fetchPlans();
   }
 
-  get apiKey(): string {
-    return this.get('apiKey') as string;
+  get apiKey(): string | undefined {
+    return this.api.apiKey;
   }
-  set apiKey(value: string) {
-    if (this.apiKey !== value) {
-      this.set('apiKey', value);
+  set apiKey(value: string | undefined) {
+    if (this.api.apiKey !== value) {
+      this.api.apiKey = value;
       void this.fetchPlans();
     }
   }
@@ -99,21 +99,21 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
 
   get tags(): string[] {
-    return this.get('tags') as string[];
+    return this.api.tags;
   }
   set tags(value: string[]) {
-    if (this.tags?.toString() !== value?.toString()) {
-      this.set('tags', value);
+    if (this.api.tags?.toString() !== value?.toString()) {
+      this.api.tags = value;
       void this.fetchPlans();
     }
   }
 
   get tenants(): string[] {
-    return this.get('tenants') as string[];
+    return this.api.tenants;
   }
   set tenants(value: string[]) {
-    if (this.tenants?.toString() !== value?.toString()) {
-      this.set('tenants', value);
+    if (this.api.tenants?.toString() !== value?.toString()) {
+      this.api.tenants = value;
       void this.fetchPlans();
     }
   }
@@ -151,17 +151,18 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
    * @param {string} [options.url] The URL of the [geOps Mapset API](https://geops.com/de/solution/mapset).
    * @public
    */
-  constructor(options: MapsetLayerOptions = {}) {
+  constructor(options: MapsetLayerOptions) {
     super({
       source: options.source ?? new Vector<FeatureLike>(),
-      tenants: ['geopstest'],
-      ...options,
+      ...(options || {}),
     });
     this.api =
       options.api ??
       new MapsetAPI({
-        apiKey: options.apiKey ?? '',
-        url: options.url ?? 'https://editor.mapset.io/api/v1',
+        apiKey: options.apiKey,
+        tags: options.tags,
+        tenants: options.tenants,
+        url: options.url,
       });
     this.#abortController = new AbortController();
 
@@ -185,8 +186,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
         signal: this.#abortController.signal,
       });
       this.plans = [planById];
-      console.log('MapsetLayer: fetched plans', 'featuresloadend');
-
       this.dispatchEvent('featuresloadend');
     } catch (e) {
       // @ts-expect-error Abort errors are OK
@@ -230,20 +229,15 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     let plans: MapsetPlan[] = [];
     try {
       this.dispatchEvent('featuresloadstart');
-      console.log('MapsetLayer: fetching plans...', this.tenants);
       plans = await this.api.getPlans(
         {
           bbox: extent?.toString(),
-          key: this.apiKey,
-          tags: this.tags?.toString(),
-          tenants: this.tenants?.toString(),
-          timestamp: this.timestamp,
+          timestamp: this.timestamp ?? new Date().toISOString(),
           zoom,
         },
         { signal: this.#abortController.signal },
       );
       this.plans = plans;
-      console.log('MapsetLayer: fetched plans', 'featuresloadend');
       this.dispatchEvent('featuresloadend');
     } catch (e) {
       // @ts-expect-error Abort errors are OK
