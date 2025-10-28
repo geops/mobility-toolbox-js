@@ -51,10 +51,10 @@ export interface MocoNotificationStopPropertiesToRender {
 }
 
 export interface MocoNotificationLinePropertiesToRender {
-  hasIcon?: PublicationLineGroupType['hasIcon'];;
+  hasIcon?: PublicationLineGroupType['hasIcon'];
   line?: LineType;
-  name?: string;
   mot?: PublicationLineGroupType['mot'];
+  name?: string;
 }
 export interface MocoNotificationSituationPropertiesToRender {
   publicationId?: PublicationType['id'];
