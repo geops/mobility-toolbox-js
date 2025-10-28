@@ -90,7 +90,7 @@ class MocoAPI extends HttpAPI {
     const response = await this.fetch<
       { paginatedSituations: SituationTypeExtendedOffsetPaginated },
       MocoExportParameters
-    >(`${this.tenant}/export/${id}/`, params, config);
+    >(`${this.tenant}/export/${id}`, params, config);
     return response?.paginatedSituations?.results?.[0];
   }
 }

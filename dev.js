@@ -24,7 +24,8 @@ const mapsUrl = 'https://maps.geops.io';
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
-  style: 'travic_v2',
+  // style: 'travic_v2',
+  style: 'de.rvf_moco',
 });
 
 const mapsetLayer = new MapsetLayer({
