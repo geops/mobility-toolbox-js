@@ -40,6 +40,7 @@ export interface MapsetAPIOptions {
  */
 export interface MapsetGetPlansParameters {
   bbox: string;
+  defaultplans?: string;
   key?: string;
   tags?: string;
   tenants?: string;
@@ -134,6 +135,7 @@ class MapsetAPI extends HttpAPI {
     >(
       'export/kml/',
       {
+        defaultplans: this.tags?.toString() ? 'false' : 'true',
         key: this.apiKey,
         tags: this.tags?.toString(),
         tenants: this.tenants?.toString(),

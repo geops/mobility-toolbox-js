@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.4.5](https://github.com/geops/mobility-toolbox-js/compare/v3.4.3...v3.4.5) (2025-10-21)
+
+
+### Bug Fixes
+
+* **MapsetApi:** add defaultplans param to API params ([#231](https://github.com/geops/mobility-toolbox-js/issues/231)) ([75bab39](https://github.com/geops/mobility-toolbox-js/commit/75bab39e6b6033f28df958baeb9dfa2fbb4a2037))
+* save current time rendered ([e0e8125](https://github.com/geops/mobility-toolbox-js/commit/e0e81254316bed8fb4c56964593bb1362561ef60))
+* subscribe to the full trajectory ([#229](https://github.com/geops/mobility-toolbox-js/issues/229)) ([f2ed8f3](https://github.com/geops/mobility-toolbox-js/commit/f2ed8f322b078d1c6ea1e0e379938c3e8b7250c0))
+
 ### [3.4.4](https://github.com/geops/mobility-toolbox-js/compare/v3.4.3...v3.4.4) (2025-10-14)
 
 
