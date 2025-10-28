@@ -28,3 +28,8 @@ export type MocoExportParameters =
   MocoOperations['v2_export_retrieve']['parameters']['query'] & {
     apiKey?: string;
   };
+
+export type MocoExportByIdParameters =
+  MocoOperations['v2_export_retrieve_2']['parameters']['query'] & {
+    apiKey?: string;
+  };

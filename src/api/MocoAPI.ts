@@ -1,6 +1,6 @@
 import HttpAPI from './HttpAPI';
 
-import type { MocoExportParameters } from '../types';
+import type { MocoExportByIdParameters, MocoExportParameters } from '../types';
 import type {
   SituationType,
   SituationTypeExtendedOffsetPaginated,
@@ -20,13 +20,11 @@ export interface MocoAPIOptions {
  * import { MocoAPI } from 'mobility-toolbox-js/api';
  *
  * const api = new MocoAPI({
- *   // publicAt: new Date(),
- *   // graph: 'osm',
  *   // url: 'https://moco.geops.io/api/v2/',
  *   // tenant: "geopstest",
  * });
  *
- * const notifications = await api.getNotifications();
+ * const notifications = await api.export();
  *
  * console.log('Log route:', JSON.stringify(notifications));
  *
@@ -43,7 +41,6 @@ class MocoAPI extends HttpAPI {
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.url='https://moco.geops.io/api/v2/'] Service url.
    * @param {string} [options.tenant='geopstest'] SSO config to get notifications from.
-   * @param {string} [options.graph='osm'] Graph to use for geometries.
    */
   constructor(options: MocoAPIOptions) {
     super({
@@ -84,12 +81,12 @@ class MocoAPI extends HttpAPI {
    */
   async exportById(
     id: string,
-    params: MocoExportParameters = {},
+    params: MocoExportByIdParameters = {},
     config: RequestInit = {},
   ): Promise<SituationType> {
     const response = await this.fetch<
       { paginatedSituations: SituationTypeExtendedOffsetPaginated },
-      MocoExportParameters
+      MocoExportByIdParameters
     >(`${this.tenant}/export/${id}`, params, config);
     return response?.paginatedSituations?.results?.[0];
   }
