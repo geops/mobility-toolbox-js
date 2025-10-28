@@ -23,7 +23,6 @@ import type {
   PublicationStopType,
   PublicationType,
   ReasonType,
-  StopType,
 } from '../../types';
 import type {
   ServiceConditionGroupEnumeration,
@@ -106,7 +105,7 @@ export type MocoNotificationFeatureCollectionToRender =
  * const layer = new MocoLayer({
  *   apiKey: 'yourApiKey',
  *   maplibreLayer: maplibreLayer,
- *   // date: new Date(),
+ *   // publicAt: new Date(),
  *   // loadAll: true,
  *   // notifications: undefined,
  *   // tenant: "geopstest",
@@ -160,7 +159,7 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   get publicAt(): Date {
-    return (this.get('publicAt') as Date) || new Date();
+    return this.get('publicAt') as Date;
   }
 
   set situations(value: Partial<SituationType>[]) {
@@ -206,7 +205,7 @@ class MocoLayer extends MaplibreStyleLayer {
    * @param {Object} options
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.apiParameters] The url parameters to be included in the MOCO API request.
-   * @param {string} [options.date] The date to filter notifications. If not set, the current date is used.
+   * @param {string} [options.publicAt] The date to filter notifications. If not set, the current date is used.
    * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded, otherwise only the notifications set in 'notifications' will be displayed.
    * @param {MocoNotification[]} [options.notifications] The notifications to display. If not set and loadAll is true, all active and published notifications will be loaded.
    * @param {string} [options.tenant] The SSO config to use to get notifications from.
@@ -309,7 +308,8 @@ class MocoLayer extends MaplibreStyleLayer {
         {
           graph: graphsString,
           hasGeoms: true,
-          publicAt: this.publicAt.toISOString(),
+          publicAt: this.publicAt?.toISOString(),
+          publicNow: !this.publicAt, // publicNow use a backend caching optimization
           ...(this.apiParameters ?? {}),
         },
         { signal: this.#abortController.signal },

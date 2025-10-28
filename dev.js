@@ -41,6 +41,7 @@ const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
   tenant: 'rvf',
   maplibreLayer: baseLayer,
+  // publicAt: new Date(),
 });
 
 const map = new Map({
