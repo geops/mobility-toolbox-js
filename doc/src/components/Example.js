@@ -158,11 +158,14 @@ function Example({ example }) {
           <Typography className="headline" variant="h1">
             {example.name}
           </Typography>
-          <Markdown className={classes.readme}>
-            {example.description || ''}
-          </Markdown>
-          <Markdown className={classes.readme}>{example.readme || ''}</Markdown>
+          <div className={classes.readme}>
+            <Markdown>{example.description || ''}</Markdown>
+          </div>
+          <div className={classes.readme}>
+            <Markdown>{example.readme || ''}</Markdown>
+          </div>
         </Grid>
+
         <Grid item style={{ maxWidth: '100%' }} xs={12}>
           <Paper
             className={classes.paper}
