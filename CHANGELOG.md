@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.4.6](https://github.com/geops/mobility-toolbox-js/compare/v3.4.5...v3.4.6) (2025-10-29)
+
+
+### Bug Fixes
+
+* propagate situationId instead of the whole situation object for performance reason ([#232](https://github.com/geops/mobility-toolbox-js/issues/232)) ([dc012d3](https://github.com/geops/mobility-toolbox-js/commit/dc012d3edf512a90535ace9425b5bc5ca862cf31))
+* simplify mapset layer and doc ([#230](https://github.com/geops/mobility-toolbox-js/issues/230)) ([ec96726](https://github.com/geops/mobility-toolbox-js/commit/ec96726a0858a5ae08a1b12cceb6095efa37ec61))
+* update moco types ([4ed6d2c](https://github.com/geops/mobility-toolbox-js/commit/4ed6d2c31bda5fd96974aff11ad3ad51a50717b8))
+* update moco types ([b04666a](https://github.com/geops/mobility-toolbox-js/commit/b04666a0c17166490473ff4625772b83c0082b7b))
+* use publicNow for caching optimization ([af65b45](https://github.com/geops/mobility-toolbox-js/commit/af65b452b5c0f640f0c7839b253b0d422f2a91a3))
+
 ### [3.4.5](https://github.com/geops/mobility-toolbox-js/compare/v3.4.3...v3.4.5) (2025-10-21)
 
 
