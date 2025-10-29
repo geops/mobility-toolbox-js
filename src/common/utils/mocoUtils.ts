@@ -209,11 +209,10 @@ export const getFeatureCollectionToRenderFromSituation = (
                 graph,
                 hasIcon: publicationLine.hasIcon,
                 line,
-                publication,
-                publicationLine,
-                situation,
-                ...publication,
-                // ...situation,
+                mot: publicationLine.mot,
+                // We pass the ids to be able to identify the publication and the situation related to
+                publicationId: publication.id,
+                situationId: situation.id!,
                 ...situationRenderProps,
                 ...publicationRenderProps,
                 geometry: undefined, // to avoid conflict with ol geometry property
@@ -225,7 +224,7 @@ export const getFeatureCollectionToRenderFromSituation = (
 
             if (publicationLine.hasIcon) {
               const iconFeature = getMocoIconRefFeature(feature);
-              iconFeature.properties.situation = situation; // make the sure the situation is passed
+              iconFeature.properties.situationId = situation.id!; // make the sure the situation is passed
               features.push(iconFeature);
             }
           },
@@ -247,9 +246,9 @@ export const getFeatureCollectionToRenderFromSituation = (
             properties: {
               graph,
               name: publicationStop.name,
-              publication,
-              publicationStop,
-              situation,
+              publicationId: publication.id,
+              publicationStopId: publicationStop.id,
+              situationId: situation.id!,
               ...situationRenderProps,
               ...publicationRenderProps,
               geometry: undefined, // to avoid conflict with ol geometry property
