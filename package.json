@@ -117,7 +117,7 @@
     "test:watch": "yarn test --watchAll",
     "tsc": "tsc",
     "types:backend": " yarn types:stops && yarn types:routing && yarn types:moco",
-    "types:moco": "openapi-typescript https://moco.dev.geops.io/api/schema/?format=json --output src/types/moco.d.ts && graphql-codegen --config graphql-codegen-moco.ts",
+    "types:moco": "openapi-typescript https://moco.geops.io/api/schema/?format=json --output src/types/moco.d.ts && graphql-codegen --config graphql-codegen-moco.ts",
     "types:routing": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts",
     "types:stops": "openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts",
     "up": "yarn upgrade-interactive --latest"

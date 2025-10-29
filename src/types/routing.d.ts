@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  '/': {
+  "/": {
     /** Returns a route as GeoJSON */
     get: {
       parameters: {
@@ -54,30 +54,30 @@ export interface paths {
           via: string;
           /** Mode of transport */
           mot:
-            | 'rail'
-            | 'bus'
-            | 'coach'
-            | 'foot'
-            | 'tram'
-            | 'subway'
-            | 'gondola'
-            | 'funicular'
-            | 'ferry';
+            | "rail"
+            | "bus"
+            | "coach"
+            | "foot"
+            | "tram"
+            | "subway"
+            | "gondola"
+            | "funicular"
+            | "ferry";
           /** Only for mot=rail. Default is a detailed network based on OpenStreetMap. gen1 to gen4 provide rail networks with increasing levels of generalization */
-          graph?: 'gen1' | 'gen2' | 'gen3' | 'gen4';
+          graph?: "gen1" | "gen2" | "gen3" | "gen4";
           /** A line name that should be preferred */
           line?: string;
           /** Name of origin of the preferred line */
-          'line-from'?: string;
+          "line-from"?: string;
           /** Name of destination of the preferred line */
-          'line-to'?: string;
+          "line-to"?: string;
           /** Douglas-Peucker distance parameter for simplification. Default 0.5 in Mercator units */
           simplify?: number;
           /**
            * Maximum allowed ratio of hops to skip if not found. Only non-start
            * and non-end hops are counted in ratio numerator and denominator.
            */
-          'max-skip-hop-ratio'?: number;
+          "max-skip-hop-ratio"?: number;
           /**
            * Whether to include intermediate hops (stations/stops) found on the
            * route to the response. "true", "on", "yes", "y", "1" will enable
@@ -90,24 +90,24 @@ export interface paths {
            * errors. "true", "on", "yes", "y", "1" will enable the
            * fallback. Default: enabled
            */
-          'beeline-fallback'?: string;
+          "beeline-fallback"?: string;
           /**
            * Search radius for candidate edges during snapping of coordinates
            * (see "Note on coordinates" at the top) Default: -1.0
            */
-          'coord-radius'?: number;
+          "coord-radius"?: number;
           /**
            * Distance punishment factor for edge snapping of coordinates (see
            * "Note on coordinates" at the top). Large: prefer close edge. Small:
            * prefer short total route. Negative value: like worst edge
            * category. Default: -1.0
            */
-          'coord-punish'?: number;
+          "coord-punish"?: number;
           /**
            * Whether to output OSM way ids in Feature properties.
            * "true", "on", "yes", "y", "1" will enable output. Default: disabled
            */
-          'way-ids'?: string;
+          "way-ids"?: string;
         };
       };
       responses: {
@@ -130,7 +130,7 @@ export interface paths {
                  */
                 coordinates?: number[][];
                 /** @enum {string} */
-                type?: 'LineString';
+                type?: "LineString";
               };
               properties?: {
                 lines?: {
@@ -171,7 +171,7 @@ export interface paths {
                 longitude?: number;
               };
               /** @enum {string} */
-              type?: 'Feature';
+              type?: "Feature";
             };
             properties?: {
               lines?: {
@@ -192,7 +192,7 @@ export interface paths {
               skippedVias?: string[];
             };
             /** @enum {string} */
-            type?: 'FeatureCollection';
+            type?: "FeatureCollection";
           };
         };
       };
