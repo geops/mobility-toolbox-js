@@ -563,6 +563,7 @@ export type SituationFilter = {
   publicAfter?: InputMaybe<Scalars['DateTime']['input']>;
   publicAt?: InputMaybe<Scalars['DateTime']['input']>;
   publicBefore?: InputMaybe<Scalars['DateTime']['input']>;
+  publicNow?: InputMaybe<Scalars['Boolean']['input']>;
   reasons?: InputMaybe<Array<Scalars['String']['input']>>;
   sources?: InputMaybe<Array<Scalars['String']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -586,6 +587,7 @@ export type SituationType = {
   affectedTimeIntervals: Array<AffectedTimeIntervalType>;
   affectedTimeIntervalsEnd?: Maybe<Scalars['DateTime']['output']>;
   affectedTimeIntervalsStart?: Maybe<Scalars['DateTime']['output']>;
+  createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
   editedAt?: Maybe<Scalars['DateTime']['output']>;
   editedBy?: Maybe<UserType>;
@@ -697,6 +699,7 @@ export type TextualContentInput = {
   recommendation?: InputMaybe<Scalars['String']['input']>;
   remark?: InputMaybe<Scalars['String']['input']>;
   summary: Scalars['String']['input'];
+  /** @deprecated Use summary instead */
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -709,6 +712,7 @@ export type TextualContentType = {
   recommendation?: Maybe<Scalars['String']['output']>;
   remark?: Maybe<Scalars['String']['output']>;
   summary: Scalars['String']['output'];
+  /** @deprecated Use summary instead */
   title?: Maybe<Scalars['String']['output']>;
 };
 

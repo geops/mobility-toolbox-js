@@ -239,6 +239,7 @@ describe('mocoUtils', () => {
         publicationLineNames: ['11'],
         publications: [
           {
+            id: 'publication-1-374718',
             publicationLines: [
               {
                 category: 'DISRUPTION',
@@ -361,14 +362,12 @@ describe('mocoUtils', () => {
 
       // We test the line properties
       const lineProps = featureCollection.features[0].properties;
-      expect(lineProps.publication.textualContentLarge.de.summary).toBe(
-        'Haltestellen Oberried (Breisgau) Sternen/Post und Oberried (Breisgau) Adler: Haltestellenverlegung wegen einer Baumaßnahmexx',
-      );
+      expect(lineProps.publicationId).toBe('publication-1-374718');
       expect(lineProps.graph).toBe('osm');
       expect(lineProps.serviceConditionGroup).toBe('DISRUPTION');
       expect(lineProps.severityGroup).toBe('HIGH');
       expect(lineProps.hasIcon).toBe(true);
-      expect(lineProps.situation.id).toBe('374718');
+      expect(lineProps.situationId).toBe('374718');
       expect(lineProps.reasons[0].name).toBe('Aufprall eines Objekts');
       expect(lineProps.reasonCategoryImageName).toBe('unfall');
       expect(lineProps.isAffected).toBe(true);
@@ -377,7 +376,7 @@ describe('mocoUtils', () => {
       expect(lineProps.graph).toBeDefined();
       expect(lineProps.serviceConditionGroup).toBeDefined();
       expect(lineProps.severityGroup).toBeDefined();
-      expect(lineProps.situation).toBeDefined();
+      expect(lineProps.situationId).toBe('374718');
       expect(lineProps.reasons[0].name).toBeDefined();
       expect(lineProps.reasonCategoryImageName).toBeDefined();
       expect(lineProps.isAffected).toBeDefined();
@@ -398,16 +397,14 @@ describe('mocoUtils', () => {
       // We test the icon ref properties
       const iconRefProps = featureCollection.features[1].properties;
 
-      expect(lineProps.publication.textualContentLarge.de.summary).toBe(
-        iconRefProps.publication.textualContentLarge.de.summary,
-      );
+      expect(lineProps.publicationId).toBe(iconRefProps.publicationId);
       expect(lineProps.graph).toBe(iconRefProps.graph);
       expect(lineProps.serviceConditionGroup).toBe(
         iconRefProps.serviceConditionGroup,
       );
       expect(lineProps.severityGroup).toBe(iconRefProps.severityGroup);
       expect(lineProps.hasIcon).toBe(iconRefProps.hasIcon);
-      expect(lineProps.situation.id).toBe(iconRefProps.situation.id);
+      expect(lineProps.situationId).toBe(iconRefProps.situationId);
       expect(lineProps.reasonCategoryImageName).toBe(
         iconRefProps.reasonCategoryImageName,
       );
@@ -422,9 +419,7 @@ describe('mocoUtils', () => {
 
       // We test the stop properties
       const stopProps = featureCollection.features[2].properties;
-      expect(lineProps.publication.textualContentLarge.de.summary).toBe(
-        stopProps.publication.textualContentLarge.de.summary,
-      );
+      expect(lineProps.publicationId).toBe(stopProps.publicationId);
       expect(lineProps.graph).toBe(stopProps.graph);
       expect(lineProps.serviceConditionGroup).toBe(
         stopProps.serviceConditionGroup,

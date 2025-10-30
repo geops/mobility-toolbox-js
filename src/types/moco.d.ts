@@ -44,6 +44,7 @@ export interface paths {
      *     $publicAt: DateTime,
      *     $publicBefore: DateTime,
      *     $publicAfter: DateTime,
+     *     $publicNow: Boolean!,
      *     $affectedAt: DateTime,
      *     $affectedBefore: DateTime,
      *     $affectedAfter: DateTime,
@@ -61,6 +62,7 @@ export interface paths {
      *         pagination: {offset: $offset, limit: $limit}
      *         filters: {
      *             id: $situationId,
+     *             publicNow: $publicNow,
      *             publicAt: $publicAt,
      *             publicBefore: $publicBefore,
      *             publicAfter: $publicAfter,
@@ -149,6 +151,23 @@ export interface paths {
      *     recommendation
      * }
      *
+     * fragment infoLinkFragment on InfoLinkType {
+     *     uri
+     *     label {
+     *         de @include(if: $de)
+     *         fr @include(if: $fr)
+     *         it @include(if: $it)
+     *         en @include(if: $en)
+     *     }
+     * }
+     *
+     * fragment indexedImageFragment on IndexedImageType {
+     *     image {
+     *         label
+     *         absoluteUrl
+     *     }
+     * }
+     *
      * fragment textualContentsFragment on MultilingualTextualContentType {
      *     de @include(if: $de) {
      *         ...textualContentFragment
@@ -161,6 +180,12 @@ export interface paths {
      *     }
      *     en @include(if: $en) {
      *         ...textualContentFragment
+     *     }
+     *     images {
+     *         ...indexedImageFragment
+     *     }
+     *     infoLinks {
+     *         ...infoLinkFragment
      *     }
      * }
      *
@@ -191,6 +216,7 @@ export interface paths {
      *     $publicAt: DateTime,
      *     $publicBefore: DateTime,
      *     $publicAfter: DateTime,
+     *     $publicNow: Boolean!,
      *     $affectedAt: DateTime,
      *     $affectedBefore: DateTime,
      *     $affectedAfter: DateTime,
@@ -208,6 +234,7 @@ export interface paths {
      *         pagination: {offset: $offset, limit: $limit}
      *         filters: {
      *             id: $situationId,
+     *             publicNow: $publicNow,
      *             publicAt: $publicAt,
      *             publicBefore: $publicBefore,
      *             publicAfter: $publicAfter,
@@ -296,6 +323,23 @@ export interface paths {
      *     recommendation
      * }
      *
+     * fragment infoLinkFragment on InfoLinkType {
+     *     uri
+     *     label {
+     *         de @include(if: $de)
+     *         fr @include(if: $fr)
+     *         it @include(if: $it)
+     *         en @include(if: $en)
+     *     }
+     * }
+     *
+     * fragment indexedImageFragment on IndexedImageType {
+     *     image {
+     *         label
+     *         absoluteUrl
+     *     }
+     * }
+     *
      * fragment textualContentsFragment on MultilingualTextualContentType {
      *     de @include(if: $de) {
      *         ...textualContentFragment
@@ -308,6 +352,12 @@ export interface paths {
      *     }
      *     en @include(if: $en) {
      *         ...textualContentFragment
+     *     }
+     *     images {
+     *         ...indexedImageFragment
+     *     }
+     *     infoLinks {
+     *         ...infoLinkFragment
      *     }
      * }
      *
@@ -647,6 +697,7 @@ export interface operations {
    *     $publicAt: DateTime,
    *     $publicBefore: DateTime,
    *     $publicAfter: DateTime,
+   *     $publicNow: Boolean!,
    *     $affectedAt: DateTime,
    *     $affectedBefore: DateTime,
    *     $affectedAfter: DateTime,
@@ -664,6 +715,7 @@ export interface operations {
    *         pagination: {offset: $offset, limit: $limit}
    *         filters: {
    *             id: $situationId,
+   *             publicNow: $publicNow,
    *             publicAt: $publicAt,
    *             publicBefore: $publicBefore,
    *             publicAfter: $publicAfter,
@@ -752,6 +804,23 @@ export interface operations {
    *     recommendation
    * }
    *
+   * fragment infoLinkFragment on InfoLinkType {
+   *     uri
+   *     label {
+   *         de @include(if: $de)
+   *         fr @include(if: $fr)
+   *         it @include(if: $it)
+   *         en @include(if: $en)
+   *     }
+   * }
+   *
+   * fragment indexedImageFragment on IndexedImageType {
+   *     image {
+   *         label
+   *         absoluteUrl
+   *     }
+   * }
+   *
    * fragment textualContentsFragment on MultilingualTextualContentType {
    *     de @include(if: $de) {
    *         ...textualContentFragment
@@ -764,6 +833,12 @@ export interface operations {
    *     }
    *     en @include(if: $en) {
    *         ...textualContentFragment
+   *     }
+   *     images {
+   *         ...indexedImageFragment
+   *     }
+   *     infoLinks {
+   *         ...infoLinkFragment
    *     }
    * }
    *
@@ -790,6 +865,8 @@ export interface operations {
         publicAfter?: string | null;
         publicAt?: string | null;
         publicBefore?: string | null;
+        /** Preferred over publicAt to enable caching. `false` does not apply the opposite filter but disables it. */
+        publicNow?: boolean;
         simplify?: number;
         timeintervalAfter?: string | null;
         timeintervalBefore?: string | null;
@@ -825,6 +902,7 @@ export interface operations {
    *     $publicAt: DateTime,
    *     $publicBefore: DateTime,
    *     $publicAfter: DateTime,
+   *     $publicNow: Boolean!,
    *     $affectedAt: DateTime,
    *     $affectedBefore: DateTime,
    *     $affectedAfter: DateTime,
@@ -842,6 +920,7 @@ export interface operations {
    *         pagination: {offset: $offset, limit: $limit}
    *         filters: {
    *             id: $situationId,
+   *             publicNow: $publicNow,
    *             publicAt: $publicAt,
    *             publicBefore: $publicBefore,
    *             publicAfter: $publicAfter,
@@ -930,6 +1009,23 @@ export interface operations {
    *     recommendation
    * }
    *
+   * fragment infoLinkFragment on InfoLinkType {
+   *     uri
+   *     label {
+   *         de @include(if: $de)
+   *         fr @include(if: $fr)
+   *         it @include(if: $it)
+   *         en @include(if: $en)
+   *     }
+   * }
+   *
+   * fragment indexedImageFragment on IndexedImageType {
+   *     image {
+   *         label
+   *         absoluteUrl
+   *     }
+   * }
+   *
    * fragment textualContentsFragment on MultilingualTextualContentType {
    *     de @include(if: $de) {
    *         ...textualContentFragment
@@ -942,6 +1038,12 @@ export interface operations {
    *     }
    *     en @include(if: $en) {
    *         ...textualContentFragment
+   *     }
+   *     images {
+   *         ...indexedImageFragment
+   *     }
+   *     infoLinks {
+   *         ...infoLinkFragment
    *     }
    * }
    *
@@ -968,6 +1070,8 @@ export interface operations {
         publicAfter?: string | null;
         publicAt?: string | null;
         publicBefore?: string | null;
+        /** Preferred over publicAt to enable caching. `false` does not apply the opposite filter but disables it. */
+        publicNow?: boolean;
         simplify?: number;
         timeintervalAfter?: string | null;
         timeintervalBefore?: string | null;

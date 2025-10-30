@@ -1,10 +1,13 @@
 import VectorLayer from 'ol/layer/Vector';
+import { unByKey } from 'ol/Observable';
+import { transformExtent } from 'ol/proj';
 import { Vector } from 'ol/source';
 
 import MapsetAPI from '../../api/MapsetApi';
 import MapsetKmlFormat from '../utils/MapsetKmlFormat';
 
 import type { Map } from 'ol';
+import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type { Options } from 'ol/layer/Vector';
 
@@ -16,6 +19,7 @@ import type { MobilityLayerOptions } from './Layer';
 export type MapsetLayerOptions = {
   api?: MapsetAPI;
   doNotRevert32pxScaling?: boolean;
+  loadAll?: boolean;
   planId?: string;
 } & MapsetAPIOptions &
   MobilityLayerOptions &
@@ -31,8 +35,9 @@ const kmlFormatter = new MapsetKmlFormat();
  *
  * const layer = new MapsetLayer({
  *   apiKey: 'yourApiKey',
- *   tenants: ['yourTenant', 'anotherTenant'],
- *   planId: 'yourPlanId',
+ *   // tags: ['test'],
+ *   // tenants: ['geopstest'],
+ *   // url: 'https://editor.mapset.io/api/v1',
  * });
  *
  * @see <a href="/doc/class/build/api/MapsetApi%20js~MapsetAPI%20html-offset-anchor">MapsetAPI</a>
@@ -45,29 +50,23 @@ const kmlFormatter = new MapsetKmlFormat();
  */
 
 class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
+  loadAll = true;
+  olEventsKeys: EventsKey[] = [];
+
   get api(): MapsetAPI {
     return this.get('api') as MapsetAPI;
   }
   set api(value: MapsetAPI) {
     this.set('api', value);
+    void this.fetchPlans();
   }
 
-  get apiKey(): string {
-    return this.get('apiKey') as string;
+  get apiKey(): string | undefined {
+    return this.api.apiKey;
   }
-  set apiKey(value: string) {
-    if (this.apiKey !== value) {
-      this.set('apiKey', value);
-      void this.fetchPlans();
-    }
-  }
-
-  get bbox(): null | number[] {
-    return this.get('bbox') as null | number[];
-  }
-  set bbox(value: null | number[]) {
-    if (this.bbox?.toString() !== value?.toString()) {
-      this.set('bbox', value);
+  set apiKey(value: string | undefined) {
+    if (this.api.apiKey !== value) {
+      this.api.apiKey = value;
       void this.fetchPlans();
     }
   }
@@ -75,6 +74,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   get doNotRevert32pxScaling(): boolean {
     return this.get('doNotRevert32pxScaling') as boolean;
   }
+
   set doNotRevert32pxScaling(value: boolean) {
     this.set('doNotRevert32pxScaling', value);
     this.updateFeatures();
@@ -86,7 +86,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   set planId(value: string | undefined) {
     if (this.planId !== value) {
       this.set('planId', value);
-      void this.fetchPlans(value);
+      void this.fetchPlanById(value);
     }
   }
 
@@ -99,21 +99,21 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
 
   get tags(): string[] {
-    return this.get('tags') as string[];
+    return this.api.tags;
   }
   set tags(value: string[]) {
-    if (this.tags?.toString() !== value?.toString()) {
-      this.set('tags', value);
+    if (this.api.tags?.toString() !== value?.toString()) {
+      this.api.tags = value;
       void this.fetchPlans();
     }
   }
 
   get tenants(): string[] {
-    return this.get('tenants') as string[];
+    return this.api.tenants;
   }
   set tenants(value: string[]) {
-    if (this.tenants?.toString() !== value?.toString()) {
-      this.set('tenants', value);
+    if (this.api.tenants?.toString() !== value?.toString()) {
+      this.api.tenants = value;
       void this.fetchPlans();
     }
   }
@@ -129,21 +129,11 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
 
   get url(): string {
-    return this.get('url') as string;
+    return this.api?.url;
   }
   set url(value: string) {
-    if (this.url !== value) {
-      this.set('url', value);
-      void this.fetchPlans();
-    }
-  }
-
-  get zoom(): number {
-    return this.get('zoom') as number;
-  }
-  set zoom(value: number) {
-    if (this.zoom !== value) {
-      this.set('zoom', value);
+    if (this.api && this.api?.url !== value) {
+      this.api.url = value;
       void this.fetchPlans();
     }
   }
@@ -156,97 +146,131 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
    * @param {Object} options
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string[]} [options.tags] The tags of the required plans.
-   * @param {number[]} [options.bbox] The bounding box to search within: [minX, minY, maxX, maxY] (https://wiki.openstreetmap.org/wiki/Bounding_box).
    * @param {string} [options.timestamp] The timestamp of the required plans.
    * @param {string[]} [options.tenants] The tenants of the required plans.
    * @param {string} [options.url] The URL of the [geOps Mapset API](https://geops.com/de/solution/mapset).
-   * @param {number} [options.zoom=1] The zoom level to search within.
-   * @param {boolean} [options.doNotRevert32pxScaling=false] Do not revert the 32px scaling of the icons.
-   * @param {MapsetAPI} [options.api] The Mapset API instance to use.
-   * @param {string} [options.planId] The ID of the Mapset plan to load.
-   * @param {MapsetPlan[]} [options.plans] The ID of the Mapset plan to load. Ignored if `planId` is set.
    * @public
    */
-  constructor(options: MapsetLayerOptions = {}) {
+  constructor(options: MapsetLayerOptions) {
     super({
       source: options.source ?? new Vector<FeatureLike>(),
-      url: options.url ?? 'https://editor.mapset.io/api/v1',
-      zoom: options.zoom,
-      ...options,
+      ...(options || {}),
     });
     this.api =
       options.api ??
       new MapsetAPI({
         apiKey: options.apiKey,
-        bbox: options.bbox,
         tags: options.tags,
         tenants: options.tenants,
-        timestamp: options.timestamp,
-        url: this.url,
-        zoom: options.zoom,
+        url: options.url,
       });
     this.#abortController = new AbortController();
+
+    if (options.loadAll === false) {
+      this.loadAll = options.loadAll;
+    }
   }
 
-  public async fetchPlans(planId?: string) {
+  async fetchPlanById(planId?: string) {
     this.#abortController?.abort();
     this.#abortController = new AbortController();
 
-    if (planId) {
-      let planById: MapsetPlan;
-      try {
-        planById = await this.api.getPlanById(planId, {
-          signal: this.#abortController.signal,
-        });
-      } catch (e) {
-        // @ts-expect-error Abort errors are OK
-        if ((e?.name as string).includes('AbortError')) {
-          // Ignore abort error
-          return;
-        }
-        console.error('MapsetLayer: Error fetching plan by ID...', e);
-        throw e;
-      }
-      this.plans = [planById];
+    if (!planId) {
+      this.plans = [];
       return;
     }
-
-    let plans: MapsetPlan[] = [];
-    this.api = new MapsetAPI({
-      apiKey: this.apiKey,
-      bbox: this.bbox ?? undefined,
-      tags: this.tags || [],
-      tenants: this.tenants || [],
-      timestamp: this.timestamp,
-      url: this.url,
-      zoom: this.zoom,
-    });
-
+    let planById: MapsetPlan;
     try {
-      plans = await this.api.getPlans(
-        {},
-        { signal: this.#abortController.signal },
-      );
+      this.dispatchEvent('featuresloadstart');
+      planById = await this.api.getPlanById(planId, {
+        signal: this.#abortController.signal,
+      });
+      this.plans = [planById];
+      this.dispatchEvent('featuresloadend');
     } catch (e) {
       // @ts-expect-error Abort errors are OK
       if ((e?.name as string).includes('AbortError')) {
         // Ignore abort error
         return;
       }
-      console.error('MapsetLayer: Error fetching plans...', e);
+      // eslint-disable-next-line no-console
+      console.error('MapsetLayer: Error fetching plan by ID...', e);
+      this.plans = [];
+      this.dispatchEvent('featuresloaderror');
       throw e;
     }
-
-    this.plans = plans;
+    return;
   }
 
-  setMapInternal(map: Map | null): void {
-    super.setMapInternal(map);
-    if (this.planId) {
-      void this.fetchPlans(this.planId);
+  async fetchPlans() {
+    if (!this.getVisible()) {
       return;
     }
-    void this.fetchPlans();
+
+    const view = this.getMapInternal()?.getView();
+    if (!view) {
+      return;
+    }
+    const extent = transformExtent(
+      view.calculateExtent(),
+      view.getProjection(),
+      'EPSG:4326',
+    );
+    const zoom = view.getZoom();
+
+    if (!zoom || !extent) {
+      this.plans = [];
+      return;
+    }
+
+    this.#abortController?.abort();
+    this.#abortController = new AbortController();
+
+    let plans: MapsetPlan[] = [];
+    try {
+      this.dispatchEvent('featuresloadstart');
+      plans = await this.api.getPlans(
+        {
+          bbox: extent?.toString(),
+          timestamp: this.timestamp ?? new Date().toISOString(),
+          zoom,
+        },
+        { signal: this.#abortController.signal },
+      );
+      this.plans = plans;
+      this.dispatchEvent('featuresloadend');
+    } catch (e) {
+      // @ts-expect-error Abort errors are OK
+      if ((e?.name as string).includes('AbortError')) {
+        // Ignore abort error
+        return [];
+      }
+      console.error('MapsetLayer: Error fetching plans...', e);
+      this.dispatchEvent('featuresloaderror');
+      throw e;
+    }
+  }
+
+  setMapInternal(map: Map): void {
+    super.setMapInternal(map);
+
+    if (map && this.loadAll) {
+      void this.fetchPlans();
+      this.olEventsKeys.push(
+        map.on('moveend', () => {
+          void this.fetchPlans();
+        }),
+        this.on('change:visible', () => {
+          void this.fetchPlans();
+        }),
+      );
+    } else {
+      unByKey(this.olEventsKeys);
+    }
+
+    if (map && this.planId) {
+      void this.fetchPlanById(this.planId);
+    }
   }
 
   public updateFeatures() {

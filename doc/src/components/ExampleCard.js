@@ -125,9 +125,9 @@ function ExampleCard({ example }) {
               <Typography variant="h3">{example.name}</Typography>
             </Link>
             {/* Use of typography as wrapper breaks hydration of nextjs */}
-            <Markdown className="MuiTypography-root MuiTypography-body1">
-              {example.description}
-            </Markdown>
+            <div className="MuiTypography-root MuiTypography-body1">
+              <Markdown>{example.description}</Markdown>
+            </div>
           </CardContent>
           <CardActions>
             <Icon>

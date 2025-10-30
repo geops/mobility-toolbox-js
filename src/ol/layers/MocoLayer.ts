@@ -23,7 +23,6 @@ import type {
   PublicationStopType,
   PublicationType,
   ReasonType,
-  StopType,
 } from '../../types';
 import type {
   ServiceConditionGroupEnumeration,
@@ -48,18 +47,18 @@ export type MocoLayerOptions = {
 
 export interface MocoNotificationStopPropertiesToRender {
   name?: string;
-  publicationStop?: PublicationStopType;
+  publicationStopId?: PublicationStopType['id'];
 }
 
 export interface MocoNotificationLinePropertiesToRender {
-  hasIcon?: boolean;
+  hasIcon?: PublicationLineGroupType['hasIcon'];
   line?: LineType;
+  mot?: PublicationLineGroupType['mot'];
   name?: string;
-  publicationLine?: PublicationLineGroupType;
 }
 export interface MocoNotificationSituationPropertiesToRender {
-  publication?: PublicationType;
-  situation?: Partial<SituationType>;
+  publicationId?: PublicationType['id'];
+  situationId?: SituationType['id'];
 }
 
 /**
@@ -106,7 +105,7 @@ export type MocoNotificationFeatureCollectionToRender =
  * const layer = new MocoLayer({
  *   apiKey: 'yourApiKey',
  *   maplibreLayer: maplibreLayer,
- *   // date: new Date(),
+ *   // publicAt: new Date(),
  *   // loadAll: true,
  *   // notifications: undefined,
  *   // tenant: "geopstest",
@@ -160,7 +159,7 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   get publicAt(): Date {
-    return (this.get('publicAt') as Date) || new Date();
+    return this.get('publicAt') as Date;
   }
 
   set situations(value: Partial<SituationType>[]) {
@@ -190,6 +189,13 @@ class MocoLayer extends MaplibreStyleLayer {
     this.api.url = value;
     void this.updateData();
   }
+
+  // The useGraphs option allows to filter notifications depending on the current graph.
+  // Theoretically useless because this part is handled by the style itself.
+  get useGraphs(): boolean {
+    return this.get('useGraphs') as boolean;
+  }
+
   #abortController: AbortController | null = null;
 
   /**
@@ -206,9 +212,10 @@ class MocoLayer extends MaplibreStyleLayer {
    * @param {Object} options
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.apiParameters] The url parameters to be included in the MOCO API request.
-   * @param {string} [options.date] The date to filter notifications. If not set, the current date is used.
    * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded, otherwise only the notifications set in 'notifications' will be displayed.
+   * @param {boolean} [options.useGraphs=false] If true, only the notifications using the current graphs for the current zoom level will be passed to the maplibre source.
    * @param {MocoNotification[]} [options.notifications] The notifications to display. If not set and loadAll is true, all active and published notifications will be loaded.
+   * @param {string} [options.publicAt] The date to filter notifications. If not set, the current date is used.
    * @param {string} [options.tenant] The SSO config to use to get notifications from.
    * @param {string} [options.url] The URL of the [geOps MOCO API](https://geops.com/de/solution/disruption-information).
    * @public
@@ -242,13 +249,15 @@ class MocoLayer extends MaplibreStyleLayer {
       void this.updateData();
     }
 
-    const mapInternal = this.getMapInternal();
-    if (mapInternal) {
-      this.olEventsKeys.push(
-        mapInternal.on('moveend', () => {
-          this.onZoomEnd();
-        }),
-      );
+    if (this.useGraphs) {
+      const mapInternal = this.getMapInternal();
+      if (mapInternal) {
+        this.olEventsKeys.push(
+          mapInternal.on('moveend', () => {
+            this.onZoomEnd();
+          }),
+        );
+      }
     }
   }
 
@@ -309,7 +318,8 @@ class MocoLayer extends MaplibreStyleLayer {
         {
           graph: graphsString,
           hasGeoms: true,
-          publicAt: this.publicAt.toISOString(),
+          publicAt: this.publicAt?.toISOString(),
+          publicNow: !this.publicAt, // publicNow use a backend caching optimization
           ...(this.apiParameters ?? {}),
         },
         { signal: this.#abortController.signal },
@@ -369,7 +379,11 @@ class MocoLayer extends MaplibreStyleLayer {
     this.#dataInternal = data;
 
     // Apply new data to the source
-    (source as GeoJSONSource).setData(this.getDataByGraph(data));
+    if (this.useGraphs) {
+      (source as GeoJSONSource).setData(this.getDataByGraph(data));
+    } else {
+      (source as GeoJSONSource).setData(data);
+    }
     return Promise.resolve(true);
   }
 }
