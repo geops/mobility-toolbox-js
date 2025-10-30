@@ -142,7 +142,62 @@ const getLineIcon = (
   });
 };
 
+type zoomLimitsType = null | number[][];
+
+function validateZoomLimits(zoomLimits: zoomLimitsType): boolean {
+  return (
+    Array.isArray(zoomLimits) &&
+    zoomLimits.every((item) => {
+      return (
+        Array.isArray(item) &&
+        item.length === 2 &&
+        item.every((n) => {
+          return typeof n === 'number' && !Number.isNaN(n);
+        })
+      );
+    })
+  );
+}
+
 class MapsetKmlFormat {
+  /**
+   * Get Document properties.
+   * @param {String} kmlString A string representing a KML file.
+   * @returns {Object} An object containing the document properties (name, description, zoomLimits).
+   */
+  public getDocumentProperties(
+    kmlString: string,
+  ): Record<string, number | number[] | object | string | zoomLimitsType> {
+    const kmlDoc = parse(kmlString);
+    let documentProperties: Record<
+      string,
+      number | object | string | zoomLimitsType
+    > = {};
+    const documentNode = kmlDoc.getElementsByTagName('Document')[0];
+    if (documentNode) {
+      const name = documentNode.getElementsByTagName('name')[0]?.textContent;
+      const description =
+        documentNode.getElementsByTagName('description')[0]?.textContent;
+      const zoomLimitsData = documentNode
+        .getElementsByTagName('ExtendedData')[0]
+        ?.getElementsByTagName('Data')[0];
+      let zoomLimits: null | number[][] = null;
+      if (zoomLimitsData?.getAttribute('name') === 'zoomLimits') {
+        const value =
+          zoomLimitsData.getElementsByTagName('value')[0]?.textContent;
+        try {
+          zoomLimits = JSON.parse(value || '') as number[][];
+          if (!validateZoomLimits(zoomLimits)) {
+            zoomLimits = null;
+          }
+        } catch {
+          zoomLimits = null;
+        }
+      }
+      documentProperties = { description, name, zoomLimits };
+    }
+    return documentProperties;
+  }
   /**
    * Read a KML string.
    * @param {String} kmlString A string representing a KML file.
@@ -855,6 +910,14 @@ class MapsetKmlFormat {
       // Remove empty placemark added to have
       // <Document> tag
       featString = featString.replace(/<Placemark\/>/g, '');
+
+      // Add KML document zoomLimits
+      if (layer.get('zoomLimits')) {
+        featString = featString.replace(
+          /<Document>/,
+          `<Document><ExtendedData><Data name="zoomLimits"><value>${JSON.stringify(layer.get('zoomLimits'))}</value></Data></ExtendedData>`,
+        );
+      }
 
       // Add KML document name
       if (layer.get('name')) {
