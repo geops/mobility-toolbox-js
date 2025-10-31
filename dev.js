@@ -11,7 +11,6 @@ import {
   MapsetLayer,
   MocoLayer,
   RealtimeLayer,
-  realtimeHeadingStyle,
 } from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
@@ -37,8 +36,10 @@ const mapsetLayer = new MapsetLayer({
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
   url: realtimeUrl,
-  style: realtimeHeadingStyle,
-  tenant: 'trenord',
+  styleOptions: {
+    useHeadingStyle: true,
+  },
+  tenant: 'sbahnm',
 });
 
 const mocoLayer = new MocoLayer({

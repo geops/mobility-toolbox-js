@@ -94,7 +94,7 @@ const realtimeHeadingStyle: RealtimeStyleFunction = (
 ) => {
   return realtimeDefaultStyle(trajectory, viewState, {
     ...options,
-    useHeadingStyle: false,
+    useHeadingStyle: true,
   });
 };
 export default realtimeHeadingStyle;
