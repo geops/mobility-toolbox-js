@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.4.7](https://github.com/geops/mobility-toolbox-js/compare/v3.4.6...v3.4.7) (2025-10-31)
+
+
+### Bug Fixes
+
+* allow enum exports from types ([2ff315a](https://github.com/geops/mobility-toolbox-js/commit/2ff315a770ab3edb6173d8ea91c6fe394ecda7dc))
+
 ### [3.4.6](https://github.com/geops/mobility-toolbox-js/compare/v3.4.5...v3.4.6) (2025-10-29)
 
 
