@@ -21,7 +21,7 @@
   "include": ["./src/**/*"],
   "exclude": [
     "dev.js",
-    "./src/types/*.d.ts",
+    // "./src/types/*.d.ts",
     "./node_modules/**/**/**/*",
     "./node_modules/**/**/*",
     "./node_modules/**/*",

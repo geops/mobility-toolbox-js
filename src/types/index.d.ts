@@ -1,17 +1,12 @@
 import { paths as RoutingPaths } from './routing';
 import { paths as StopsPaths } from './stops';
-import {
-  paths as MocoPaths,
-  definitions as MocoDefinitions,
-  operations as MocoOperations,
-} from './moco';
-import { SituationTypeExtendedOffsetPaginated } from './moco/gql/graphql';
+import { operations as MocoOperations } from './moco';
 export * from './moco/gql/graphql';
 
-export * from './common';
-export * from './ol';
-export * from './realtime';
-export * from './maps';
+export type * from './common';
+export type * from '../ol';
+export type * from './realtime';
+export type * from './maps';
 
 export type RealtimeVersion = '1' | '2';
 
