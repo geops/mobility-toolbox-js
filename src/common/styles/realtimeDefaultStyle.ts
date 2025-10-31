@@ -1,6 +1,7 @@
 import createCanvas from '../utils/createCanvas';
 
 import type {
+  AnyCanvas,
   AnyCanvasContext,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
@@ -8,6 +9,79 @@ import type {
   StyleCache,
   ViewState,
 } from '../../types';
+
+const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
+  const ctx = canvas.getContext('2d') as AnyCanvasContext;
+  ctx?.translate(canvas.width / 2, canvas.height / 2);
+  ctx?.rotate(rotation);
+  ctx?.translate(-canvas.width / 2, -canvas.height / 2);
+};
+
+const arrowCache: Record<string, AnyCanvas | null> = {};
+
+const getArrowCanvas = (fillColor: string): AnyCanvas | null => {
+  const key = `${fillColor}`;
+  if (!arrowCache[key]) {
+    // Create the arrow canvas
+    const arrowCanvas = createCanvas(10, 14);
+    const ctx = arrowCanvas?.getContext('2d') as AnyCanvasContext;
+    if (ctx) {
+      ctx.fillStyle = fillColor;
+      ctx.beginPath();
+      ctx.moveTo(2, 2);
+      ctx.lineTo(7, 7);
+      ctx.lineTo(2, 12);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(2, 2);
+      ctx.lineTo(7, 7);
+      ctx.lineTo(2, 12);
+      ctx.lineTo(2, 2);
+      ctx.stroke();
+    }
+    arrowCache[key] = arrowCanvas;
+  }
+
+  return arrowCache[key];
+};
+
+const bufferArrowCache: Record<string, AnyCanvas | null> = {};
+
+const ARROW_MARGIN = 5;
+const getBufferArrowCanvas = (
+  canvas: AnyCanvas,
+  fillColor: string,
+  rotation = 0,
+): AnyCanvas | null => {
+  const margin = ARROW_MARGIN;
+  const bufferKey = `${fillColor},${canvas.width},${canvas.height},${rotation}`;
+  if (!bufferArrowCache[bufferKey]) {
+    // Create a buffer canvas around the current vehicle to display properly the arrow
+    const arrowCanvas = getArrowCanvas(fillColor);
+    const buffer = createCanvas(
+      canvas.width + margin * 2,
+      canvas.height + margin * 2,
+    );
+    if (arrowCanvas && buffer) {
+      const bufferCtx = buffer.getContext('2d') as AnyCanvasContext;
+
+      const rot = rotation; // + (90 * Math.PI) / 180;
+      rotateCanvas(buffer, -rot);
+
+      bufferCtx?.drawImage(
+        arrowCanvas,
+        buffer.width - arrowCanvas.width,
+        buffer.height / 2 - arrowCanvas.height / 2,
+        arrowCanvas.width,
+        arrowCanvas.height,
+      );
+    }
+
+    bufferArrowCache[bufferKey] = buffer;
+  }
+
+  return bufferArrowCache[bufferKey];
+};
 
 const cacheDelayBg: StyleCache = {};
 
@@ -236,6 +310,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     hoverVehicleId,
     selectedVehicleId,
     useDelayStyle,
+    useHeadingStyle,
   } = options;
 
   const { pixelRatio = 1, zoom } = viewState;
@@ -244,6 +319,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     delay,
     line,
     operator_provides_realtime_journey: operatorProvidesRealtime,
+    rotation,
     state,
     train_id: id,
   } = trajectory.properties;
@@ -286,7 +362,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${hover || selected}`;
+  let key = `${radius}${hover || selected}${useHeadingStyle ? rotation : ''}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}${delay}${cancelled}`;
@@ -315,7 +391,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       return null;
     }
 
-    const margin = 1 * pixelRatio;
+    const margin = 5 * pixelRatio;
     const radiusDelay = radius + 2 * pixelRatio;
     const markerSize = radius * 2;
     const size = radiusDelay * 2 + margin * 2;
@@ -372,7 +448,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       circleFillColor = getDelayColor(delay, cancelled);
     }
 
-    const circle = getCircleCanvas(
+    let circle = getCircleCanvas(
       origin,
       radius,
       circleFillColor,
@@ -381,9 +457,52 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       pixelRatio,
     );
 
+    let arrowMargin = 0;
+    let arrowUnderDelayTextMargin = 0;
+
+    if (useHeadingStyle && rotation && circle) {
+      arrowMargin = ARROW_MARGIN;
+      const radianAdjusted = rotation % (2 * Math.PI);
+      if (-1 > radianAdjusted || radianAdjusted > 1) {
+        arrowUnderDelayTextMargin = arrowMargin;
+      }
+
+      const bufferArrow = getBufferArrowCanvas(
+        circle,
+        circleFillColor,
+        rotation,
+      );
+
+      if (bufferArrow) {
+        const bufferSize = (bufferArrow.width - circle.width) / 2;
+        const vehicleWithArrow = createCanvas(
+          bufferArrow.width,
+          bufferArrow.height,
+        );
+        const context: AnyCanvasContext = vehicleWithArrow?.getContext(
+          '2d',
+        ) as AnyCanvasContext;
+        context?.drawImage(
+          bufferArrow,
+          0,
+          0,
+          bufferArrow.width,
+          bufferArrow.height,
+        );
+        context?.drawImage(
+          circle,
+          bufferSize,
+          bufferSize,
+          circle.width,
+          circle.height,
+        );
+        circle = vehicleWithArrow;
+      }
+    }
+
     // Create the canvas
-    const width = size + (delayText?.width || 0) * 2;
-    const height = size;
+    const width = (circle?.width || size) + (delayText?.width || 0) * 2;
+    const height = circle?.height || size;
     const canvas = createCanvas(width, height);
     if (canvas) {
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -392,14 +511,15 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       }
 
       // The renderTrajectories will center the image on the vehicle positions.
-      const originX = delayText?.width || 0;
+      const originX = 0 + (delayText?.width || 0);
+      const originY = 0;
 
       if (delayBg) {
-        ctx.drawImage(delayBg, originX, 0);
+        ctx.drawImage(delayBg, arrowMargin + originX, arrowMargin + originY);
       }
 
       if (circle) {
-        ctx.drawImage(circle, originX, 0);
+        ctx.drawImage(circle, originX, originY);
       }
 
       // Draw text in the circle
@@ -420,7 +540,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
 
         circleText = getTextCanvas(
           name,
-          origin,
+          origin + arrowMargin,
           textSize,
           textColor || '#000',
           circleFillColor,
@@ -434,11 +554,11 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         ctx.drawImage(circleText, originX, 0);
       }
 
-      if (delayText) {
+      if (delayText && circle?.width) {
         ctx.drawImage(
           delayText,
-          originX + Math.ceil(origin + radiusDelay) + margin,
-          Math.ceil(origin - fontSize),
+          canvas.width / 2 + circle.width / 2 - arrowUnderDelayTextMargin,
+          Math.ceil(origin - fontSize) + arrowMargin,
         );
       }
 

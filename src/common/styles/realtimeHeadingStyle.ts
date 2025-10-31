@@ -65,6 +65,10 @@ const getBufferArrowCanvas = (
     const arrowCanvas = getArrowCanvas(fillColor);
     if (arrowCanvas && buffer) {
       const bufferCtx = buffer.getContext('2d') as AnyCanvasContext;
+
+      const rot = rotation + (90 * Math.PI) / 180;
+      rotateCanvas(buffer, -rot);
+
       bufferCtx?.drawImage(
         arrowCanvas,
         buffer.width - margin,
@@ -72,10 +76,6 @@ const getBufferArrowCanvas = (
         arrowCanvas.width,
         arrowCanvas.height,
       );
-      bufferCtx?.save();
-      const rot = rotation + (90 * Math.PI) / 180;
-      rotateCanvas(buffer, -rot);
-      bufferCtx?.restore();
     }
 
     bufferArrowCache[bufferKey] = buffer;
@@ -85,53 +85,16 @@ const getBufferArrowCanvas = (
 };
 
 /**
- * A tracker style that take in account the delay.
- *
- * @param {RealtimeTrajectory} trajectory The trajectory to render.
- * @param {ViewState} viewState The view state of the map.
- * @param {RealtimeStyleOptions} options Some options to change the rendering
- * @return a canvas
- * @private
+ * @deprecated use realtimeDefaultStyle with useHeadingStyle option instead
  */
 const realtimeHeadingStyle: RealtimeStyleFunction = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => {
-  const { line, rotation, type } = trajectory.properties;
-  const { color } = line || {};
-
-  const canvas = realtimeDefaultStyle(trajectory, viewState, options);
-
-  if (canvas && rotation !== null) {
-    const circleFillColor = color || getBgColor(type, line);
-    const bufferArrow = getBufferArrowCanvas(canvas, circleFillColor, rotation);
-    if (bufferArrow) {
-      const bufferSize = (bufferArrow.width - canvas.width) / 2;
-      const vehicleWithArrow = createCanvas(
-        bufferArrow.width,
-        bufferArrow.height,
-      );
-      const context: AnyCanvasContext = vehicleWithArrow?.getContext(
-        '2d',
-      ) as AnyCanvasContext;
-      context?.drawImage(
-        bufferArrow,
-        0,
-        0,
-        bufferArrow.width,
-        bufferArrow.height,
-      );
-      context?.drawImage(
-        canvas,
-        bufferSize,
-        bufferSize,
-        canvas.width,
-        canvas.height,
-      );
-      return vehicleWithArrow;
-    }
-  }
-  return canvas;
+  return realtimeDefaultStyle(trajectory, viewState, {
+    ...options,
+    useHeadingStyle: false,
+  });
 };
 export default realtimeHeadingStyle;

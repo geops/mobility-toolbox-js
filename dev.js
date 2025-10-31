@@ -11,6 +11,7 @@ import {
   MapsetLayer,
   MocoLayer,
   RealtimeLayer,
+  realtimeHeadingStyle,
 } from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
@@ -19,13 +20,13 @@ window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
 // const realtimeUrl = 'https://tralis-tracker-api.dev.geops.io/ws';
 const realtimeUrl = 'wss://api.geops.io/tracker-ws/v1';
-const mocoUrl = 'https://moco.geops.io/api/v2/';
+const mocoUrl = 'https://moco.dev.geops.io/api/v2/';
 const mapsUrl = 'https://maps.geops.io';
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
-  // style: 'travic_v2',
-  style: 'de.rvf_moco',
+  style: 'travic_v2',
+  // style: 'de.rvf_moco',
 });
 
 const mapsetLayer = new MapsetLayer({
@@ -36,20 +37,24 @@ const mapsetLayer = new MapsetLayer({
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
   url: realtimeUrl,
+  style: realtimeHeadingStyle,
+  tenant: 'trenord',
 });
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
-  tenant: 'rvf',
+  // tenant: 'rvf',
   maplibreLayer: baseLayer,
   // publicAt: new Date(),
+  // url: mocoUrl,
 });
 
 const map = new Map({
   layers: [baseLayer, realtimeLayer, mocoLayer, mapsetLayer],
   target: 'map',
   view: new View({
-    center: [872814.6006106276, 6106276.43],
+    // center: [872814.6006106276, 6106276.43], // rvf
+    center: [1022769, 5698188], // trenord
     zoom: 16,
   }),
 });

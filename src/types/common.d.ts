@@ -67,6 +67,7 @@ export interface RealtimeStyleOptions {
   noInterpolate?: boolean;
   selectedVehicleId?: RealtimeTrainId;
   useDelayStyle?: boolean;
+  useHeadingStyle?: boolean;
 }
 
 export type RealtimeTrajectories = Record<RealtimeTrainId, RealtimeTrajectory>;
