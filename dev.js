@@ -17,8 +17,6 @@ import { toLonLat, transformExtent } from 'ol/proj';
 
 window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
-// const realtimeUrl = 'https://tralis-tracker-api.dev.geops.io/ws';
-const realtimeUrl = 'wss://api.geops.io/tracker-ws/v1';
 const mocoUrl = 'https://moco.dev.geops.io/api/v2/';
 const mapsUrl = 'https://maps.geops.io';
 
@@ -35,11 +33,14 @@ const mapsetLayer = new MapsetLayer({
 
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
-  url: realtimeUrl,
+  // apiKey: '5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e', // sbm
+  url: 'wss://api.geops.io/tracker-ws/v1/', // prod
+  // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
   styleOptions: {
     useHeadingStyle: true,
   },
-  tenant: 'sbahnm',
+  // tenant: 'sbm',
+  tenant: 'trenord',
 });
 
 const mocoLayer = new MocoLayer({
@@ -56,6 +57,7 @@ const map = new Map({
   view: new View({
     // center: [872814.6006106276, 6106276.43], // rvf
     center: [1022769, 5698188], // trenord
+    // center: [1286668, 6130216], // sbm
     zoom: 16,
   }),
 });
