@@ -144,6 +144,53 @@ const getLineIcon = (
 
 class MapsetKmlFormat {
   /**
+   * Get Document properties.
+   * @param {String} propertyName The property name to get (name, description, zoomLimits).
+   * @param {String} kmlString A string representing a KML file.
+   * @returns {Object} An object containing the document properties (name, description, zoomLimits).
+   */
+  public getDocumentProperty(propertyName: string, kmlString: string) {
+    if (!propertyName) {
+      return null;
+    }
+
+    let kmlDoc: Document;
+    try {
+      kmlDoc = parse(kmlString);
+    } catch (error) {
+      console.error('Invalid KML string', error);
+      return null;
+    }
+
+    const documentNode = kmlDoc.getElementsByTagName('Document')[0];
+    if (!documentNode) {
+      return null;
+    }
+
+    if (propertyName === 'name') {
+      return documentNode.getElementsByTagName('name')[0]?.textContent ?? null;
+    }
+
+    if (propertyName === 'description') {
+      return (
+        documentNode.getElementsByTagName('description')[0]?.textContent ?? null
+      );
+    }
+
+    const propertiesData = documentNode
+      .getElementsByTagName('ExtendedData')[0]
+      ?.getElementsByTagName('Data');
+
+    return (
+      Array.from(propertiesData || [])
+        .find((data) => {
+          return data.getAttribute('name') === propertyName;
+        })
+        ?.getElementsByTagName('value')[0]?.textContent ?? null
+    );
+  }
+
+  /**
    * Read a KML string.
    * @param {String} kmlString A string representing a KML file.
    * @param {<ol.Projection|String>} featureProjection The projection used by the map.
@@ -855,6 +902,14 @@ class MapsetKmlFormat {
       // Remove empty placemark added to have
       // <Document> tag
       featString = featString.replace(/<Placemark\/>/g, '');
+
+      // Add KML document zoomLimits
+      if (layer.get('zoomLimits')) {
+        featString = featString.replace(
+          /<Document>/,
+          `<Document><ExtendedData><Data name="zoomLimits"><value>${JSON.stringify(layer.get('zoomLimits'))}</value></Data></ExtendedData>`,
+        );
+      }
 
       // Add KML document name
       if (layer.get('name')) {
