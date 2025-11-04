@@ -19,24 +19,27 @@ const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
 
 const arrowCache: Record<string, AnyCanvas | null> = {};
 
-const getArrowCanvas = (fillColor: string): AnyCanvas | null => {
-  const key = `${fillColor}`;
+const getArrowCanvas = (
+  fillColor: string,
+  pixelRatio = 1,
+): AnyCanvas | null => {
+  const key = `${fillColor},${pixelRatio}`;
   if (!arrowCache[key]) {
     // Create the arrow canvas
-    const arrowCanvas = createCanvas(10, 14);
+    const arrowCanvas = createCanvas(10 * pixelRatio, 14 * pixelRatio);
     const ctx = arrowCanvas?.getContext('2d') as AnyCanvasContext;
     if (ctx) {
       ctx.fillStyle = fillColor;
       ctx.beginPath();
-      ctx.moveTo(2, 2);
-      ctx.lineTo(7, 7);
-      ctx.lineTo(2, 12);
+      ctx.moveTo(2 * pixelRatio, 2 * pixelRatio);
+      ctx.lineTo(7 * pixelRatio, 7 * pixelRatio);
+      ctx.lineTo(2 * pixelRatio, 12 * pixelRatio);
       ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(2, 2);
-      ctx.lineTo(7, 7);
-      ctx.lineTo(2, 12);
-      ctx.lineTo(2, 2);
+      ctx.moveTo(2 * pixelRatio, 2 * pixelRatio);
+      ctx.lineTo(7 * pixelRatio, 7 * pixelRatio);
+      ctx.lineTo(2 * pixelRatio, 12 * pixelRatio);
+      ctx.lineTo(2 * pixelRatio, 2 * pixelRatio);
       ctx.stroke();
     }
     arrowCache[key] = arrowCanvas;
@@ -52,12 +55,13 @@ const getBufferArrowCanvas = (
   canvas: AnyCanvas,
   fillColor: string,
   rotation = 0,
+  pixelRatio = 1,
 ): AnyCanvas | null => {
-  const margin = ARROW_MARGIN;
-  const bufferKey = `${fillColor},${canvas.width},${canvas.height},${rotation}`;
+  const margin = ARROW_MARGIN * pixelRatio;
+  const bufferKey = `${fillColor},${canvas.width},${canvas.height},${rotation},${pixelRatio}`;
   if (!bufferArrowCache[bufferKey]) {
     // Create a buffer canvas around the current vehicle to display properly the arrow
-    const arrowCanvas = getArrowCanvas(fillColor);
+    const arrowCanvas = getArrowCanvas(fillColor, pixelRatio);
     const buffer = createCanvas(
       canvas.width + margin * 2,
       canvas.height + margin * 2,
@@ -461,7 +465,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     let arrowUnderDelayTextMargin = 0;
 
     if (useHeadingStyle && rotation && circle) {
-      arrowMargin = ARROW_MARGIN;
+      arrowMargin = ARROW_MARGIN * pixelRatio;
       const radianAdjusted = rotation % (2 * Math.PI);
       if (-1 > radianAdjusted || radianAdjusted > 1) {
         arrowUnderDelayTextMargin = arrowMargin;
@@ -471,6 +475,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         circle,
         circleFillColor,
         rotation,
+        pixelRatio,
       );
 
       if (bufferArrow) {

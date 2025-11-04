@@ -71,7 +71,9 @@ map.on('pointermove', (evt) => {
     filter: (l) => l === realtimeLayer,
   });
 
-  realtimeLayer.hoverVehicleId = feature?.get('train_id');
+  // realtimeLayer.hoverVehicleId = feature?.get('train_id');
+
+  realtimeLayer.highlight(feature);
   map.getTargetElement().style.cursor = feature ? 'pointer' : '';
 });
 
