@@ -19,6 +19,7 @@ const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
 
 const arrowCache: Record<string, AnyCanvas | null> = {};
 
+const ARROW_WIDTH = 16;
 const getArrowCanvas = (
   fillColor: string,
   pixelRatio = 1,
@@ -26,23 +27,24 @@ const getArrowCanvas = (
   const key = `${fillColor},${pixelRatio}`;
   if (!arrowCache[key]) {
     // Create the arrow canvas
-    const arrowCanvas = createCanvas(10 * pixelRatio, 14 * pixelRatio);
-    const ctx = arrowCanvas?.getContext('2d') as AnyCanvasContext;
-    if (ctx) {
+    const padding = 2 * pixelRatio;
+    const canvas = createCanvas(ARROW_WIDTH * pixelRatio, 20 * pixelRatio);
+    const ctx = canvas?.getContext('2d') as AnyCanvasContext;
+    if (canvas && ctx) {
       ctx.fillStyle = fillColor;
       ctx.beginPath();
-      ctx.moveTo(2 * pixelRatio, 2 * pixelRatio);
-      ctx.lineTo(7 * pixelRatio, 7 * pixelRatio);
-      ctx.lineTo(2 * pixelRatio, 12 * pixelRatio);
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(canvas.width - padding, canvas.height / 2);
+      ctx.lineTo(padding, canvas.height - padding);
       ctx.fill();
       ctx.beginPath();
-      ctx.moveTo(2 * pixelRatio, 2 * pixelRatio);
-      ctx.lineTo(7 * pixelRatio, 7 * pixelRatio);
-      ctx.lineTo(2 * pixelRatio, 12 * pixelRatio);
-      ctx.lineTo(2 * pixelRatio, 2 * pixelRatio);
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(canvas.width - padding, canvas.height / 2);
+      ctx.lineTo(padding, canvas.height - padding);
+      ctx.lineTo(padding, padding);
       ctx.stroke();
     }
-    arrowCache[key] = arrowCanvas;
+    arrowCache[key] = canvas;
   }
 
   return arrowCache[key];
@@ -50,38 +52,38 @@ const getArrowCanvas = (
 
 const bufferArrowCache: Record<string, AnyCanvas | null> = {};
 
-const ARROW_MARGIN = 5;
 const getBufferArrowCanvas = (
-  canvas: AnyCanvas,
+  width: number,
+  height: number,
   fillColor: string,
   rotation = 0,
   pixelRatio = 1,
+  margin = 0,
 ): AnyCanvas | null => {
-  const margin = ARROW_MARGIN * pixelRatio;
-  const bufferKey = `${fillColor},${canvas.width},${canvas.height},${rotation},${pixelRatio}`;
+  const bufferKey = `${fillColor},${width},${height},${rotation},${pixelRatio},${margin}`;
   if (!bufferArrowCache[bufferKey]) {
     // Create a buffer canvas around the current vehicle to display properly the arrow
     const arrowCanvas = getArrowCanvas(fillColor, pixelRatio);
-    const buffer = createCanvas(
-      canvas.width + margin * 2,
-      canvas.height + margin * 2,
-    );
-    if (arrowCanvas && buffer) {
-      const bufferCtx = buffer.getContext('2d') as AnyCanvasContext;
-
-      const rot = rotation; // + (90 * Math.PI) / 180;
-      rotateCanvas(buffer, -rot);
-
-      bufferCtx?.drawImage(
-        arrowCanvas,
-        buffer.width - arrowCanvas.width,
-        buffer.height / 2 - arrowCanvas.height / 2,
-        arrowCanvas.width,
-        arrowCanvas.height,
+    if (arrowCanvas) {
+      const bufferCanvas = createCanvas(
+        width + arrowCanvas.width * 2 + margin * 2,
+        height + arrowCanvas.height * 2 + margin * 2,
       );
-    }
+      if (bufferCanvas) {
+        const bufferCtx = bufferCanvas.getContext('2d') as AnyCanvasContext;
 
-    bufferArrowCache[bufferKey] = buffer;
+        rotateCanvas(bufferCanvas, -rotation);
+
+        bufferCtx?.drawImage(
+          arrowCanvas,
+          bufferCanvas.width - arrowCanvas.width,
+          bufferCanvas.height / 2 - arrowCanvas.height / 2 - margin / 2,
+          arrowCanvas.width,
+          arrowCanvas.height,
+        );
+      }
+      bufferArrowCache[bufferKey] = bufferCanvas;
+    }
   }
 
   return bufferArrowCache[bufferKey];
@@ -95,22 +97,31 @@ const cacheDelayBg: StyleCache = {};
  * @private
  */
 export const getDelayBgCanvas = (
-  origin: number,
   radius: number,
   color: string,
+  pixelRatio = 1,
+  blurWidth = 1,
 ) => {
-  const key = `${origin}, ${radius}, ${color}`;
+  const key = `${radius}, ${color}, ${blurWidth}, ${pixelRatio}`;
+  const padding = 1 * pixelRatio; // must be the same as circle padding
+  const blur = blurWidth * pixelRatio;
   if (!cacheDelayBg[key]) {
-    const canvas = createCanvas(origin * 2, origin * 2);
-    if (canvas) {
-      const ctx = canvas.getContext('2d') as AnyCanvasContext;
-      if (!ctx) {
-        return null;
-      }
+    const size = radius * 2 + padding * 2 + blur * 2 + padding * 2;
+    const canvas = createCanvas(size, size);
+    const ctx = canvas?.getContext('2d') as AnyCanvasContext;
+
+    if (canvas && ctx) {
       ctx.beginPath();
-      ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
+      ctx.arc(
+        size / 2,
+        size / 2,
+        radius + padding + blur,
+        0,
+        2 * Math.PI,
+        false,
+      );
       ctx.fillStyle = color;
-      ctx.filter = 'blur(1px)';
+      ctx.filter = `blur(${blur}px)`;
       ctx.fill();
       cacheDelayBg[key] = canvas;
     }
@@ -118,8 +129,45 @@ export const getDelayBgCanvas = (
   return cacheDelayBg[key];
 };
 
-const cacheDelayText: StyleCache = {};
+const cacheCanvasTextSize: Record<string, { height: number; width: number }> =
+  {};
+const getCanvasTextSize = (
+  text: string,
+  font: string,
+  color: string,
+  outlineColor: string,
+  outlineWidth: number,
+  pixelRatio: number,
+) => {
+  const key = `${text}, ${font}, ${color}, ${outlineColor}, ${outlineWidth}, ${pixelRatio}`;
+  if (!cacheCanvasTextSize[key]) {
+    const canvas = createCanvas(300 * pixelRatio, 300 * pixelRatio);
+    const ctx = canvas?.getContext('2d') as CanvasRenderingContext2D;
 
+    if (canvas && ctx) {
+      // We calcuate the text size first
+      ctx.font = font;
+      ctx.textBaseline = 'hanging';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = color;
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = outlineWidth;
+      ctx.strokeText(text, 0, 0);
+      ctx.fillText(text, 0, 0);
+      const textMetrics = ctx.measureText(text);
+      const size = {
+        height:
+          textMetrics.fontBoundingBoxAscent +
+          textMetrics.fontBoundingBoxDescent,
+        width: textMetrics.width,
+      };
+      cacheCanvasTextSize[key] = size;
+    }
+  }
+  return cacheCanvasTextSize[key];
+};
+
+const cacheDelayText: StyleCache = {};
 /**
  * Draw delay text
  *
@@ -129,31 +177,41 @@ export const getDelayTextCanvas = (
   text: string,
   fontSize: number,
   font: string,
-  delayColor: string,
-  delayOutlineColor = '#000',
+  color: string,
+  outlineColor = '#000',
   pixelRatio = 1,
 ) => {
-  const key = `${text}, ${font}, ${delayColor}, ${delayOutlineColor}, ${pixelRatio}`;
+  const key = `${text}, ${font}, ${color}, ${outlineColor}, ${pixelRatio}`;
+  const padding = 2 * pixelRatio;
+  const lineWidth = 1.5 * pixelRatio;
   if (!cacheDelayText[key]) {
-    const canvas = createCanvas(
-      Math.ceil(text.length * fontSize),
-      Math.ceil(fontSize + 8 * pixelRatio),
+    const textSize = getCanvasTextSize(
+      text,
+      font,
+      color,
+      outlineColor,
+      lineWidth,
+      pixelRatio,
     );
-    if (canvas) {
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-      if (!ctx) {
-        return null;
+
+    if (textSize?.width && textSize?.height) {
+      const canvas = createCanvas(
+        textSize.width + padding * 2,
+        textSize.height + padding * 2,
+      );
+      const ctx = canvas?.getContext('2d') as CanvasRenderingContext2D;
+      if (canvas && ctx) {
+        // We calcuate the text size first
+        ctx.font = font;
+        ctx.fillStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = outlineColor;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'ideographic';
+        ctx.strokeText(text, padding, canvas.height - padding);
+        ctx.fillText(text, padding, canvas.height - padding);
+        cacheDelayText[key] = canvas;
       }
-      ctx.font = font;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.font = font;
-      ctx.fillStyle = delayColor;
-      ctx.strokeStyle = delayOutlineColor;
-      ctx.lineWidth = 1.5 * pixelRatio;
-      ctx.strokeText(text, 0, fontSize);
-      ctx.fillText(text, 0, fontSize);
-      cacheDelayText[key] = canvas;
     }
   }
   return cacheDelayText[key];
@@ -167,39 +225,45 @@ const cacheCircle: StyleCache = {};
  * @private
  */
 export const getCircleCanvas = (
-  origin: number,
   radius: number,
   color: string,
   hasStroke: boolean,
   hasDash: boolean,
   pixelRatio: number,
 ) => {
-  const key = `${origin}, ${radius}, ${color}, ${hasStroke},  ${hasDash}, ${pixelRatio}`;
+  const key = `${radius}, ${color}, ${hasStroke},  ${hasDash}, ${pixelRatio}`;
+  const padding = 1 * pixelRatio;
+  const lineWidth = hasStroke ? 1 * pixelRatio : 0;
+  const lineDash = hasDash ? [5 * pixelRatio, 3 * pixelRatio] : null;
   if (!cacheCircle[key]) {
-    const canvas = createCanvas(origin * 2, origin * 2);
+    const canvas = createCanvas(
+      radius * 2 + padding * 2,
+      radius * 2 + padding * 2,
+    );
     if (canvas) {
       const ctx = canvas.getContext('2d') as AnyCanvasContext;
       if (!ctx) {
         return null;
       }
       ctx.fillStyle = color;
-
-      if (hasStroke) {
-        ctx.lineWidth = 1 * pixelRatio;
-        ctx.strokeStyle = '#000000';
-      }
-
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = '#000000';
       ctx.beginPath();
-      ctx.arc(origin, origin, radius, 0, 2 * Math.PI, false);
+      ctx.arc(
+        canvas.width / 2,
+        canvas.height / 2,
+        radius,
+        0,
+        2 * Math.PI,
+        false,
+      );
       ctx.fill();
 
-      if (hasDash) {
-        ctx.setLineDash([5, 3]);
+      if (lineDash) {
+        ctx.setLineDash(lineDash);
       }
 
-      if (hasStroke) {
-        ctx.stroke();
-      }
+      ctx.stroke();
 
       cacheCircle[key] = canvas;
     }
@@ -216,7 +280,7 @@ const cacheText: StyleCache = {};
  */
 export const getTextCanvas = (
   text: string,
-  origin: number,
+  radius: number,
   textSize: number,
   fillColor: string,
   strokeColor: string,
@@ -224,9 +288,9 @@ export const getTextCanvas = (
   pixelRatio: number,
   getTextFont: (fontSize: number, text?: string) => string,
 ) => {
-  const key = `${text}, ${origin}, ${textSize}, ${fillColor},${strokeColor}, ${hasStroke}, ${pixelRatio}`;
+  const key = `${text}, ${radius}, ${textSize}, ${fillColor},${strokeColor}, ${hasStroke}, ${pixelRatio}`;
   if (!cacheText[key]) {
-    const canvas = createCanvas(origin * 2, origin * 2);
+    const canvas = createCanvas(radius * 2, radius * 2);
     if (canvas) {
       const ctx = canvas.getContext('2d') as AnyCanvasContext;
       if (!ctx) {
@@ -240,7 +304,7 @@ export const getTextCanvas = (
         ctx.textAlign = 'center';
         ctx.font = getTextFont(textSize + 2, text);
         ctx.strokeStyle = strokeColor;
-        ctx.strokeText(text, origin, origin);
+        ctx.strokeText(text, radius, radius);
         ctx.restore();
       }
 
@@ -250,8 +314,8 @@ export const getTextCanvas = (
       ctx.fillStyle = fillColor;
       ctx.font = getTextFont(textSize, text);
       ctx.strokeStyle = strokeColor;
-      ctx.strokeText(text, origin, origin);
-      ctx.fillText(text, origin, origin);
+      ctx.strokeText(text, radius, radius);
+      ctx.fillText(text, radius, radius);
 
       cacheText[key] = canvas;
     }
@@ -395,47 +459,10 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       return null;
     }
 
-    const margin = 5 * pixelRatio;
-    const radiusDelay = radius + 2 * pixelRatio;
-    const markerSize = radius * 2;
-    const size = radiusDelay * 2 + margin * 2;
-    const origin = size / 2;
-
-    // Draw circle delay background
-    let delayBg = null;
-    if (isDisplayStrokeAndDelay && delay !== null) {
-      delayBg = getDelayBgCanvas(
-        origin,
-        radiusDelay,
-        getDelayColor(delay, cancelled),
-      );
-    }
-
-    // Show delay if feature is hovered or if delay is above 5mins.
-    let delayText = null;
-    let fontSize = 0;
-    if (
-      isDisplayStrokeAndDelay &&
-      (hover || (delay || 0) >= delayDisplay || cancelled)
-    ) {
-      // Draw delay text
-      fontSize =
-        Math.max(
-          cancelled ? 19 : 14,
-          Math.min(cancelled ? 19 : 17, radius * 1.2),
-        ) * pixelRatio;
-      const text = getDelayText(delay, cancelled);
-
-      if (text) {
-        delayText = getDelayTextCanvas(
-          text,
-          fontSize,
-          getDelayFont(fontSize, text),
-          getDelayColor(delay, cancelled, true),
-          delayOutlineColor,
-          pixelRatio,
-        );
-      }
+    // Get the color of the vehicle
+    let circleFillColor = color || '#fff';
+    if (useDelayStyle) {
+      circleFillColor = getDelayColor(delay, cancelled);
     }
 
     const hasStroke = isDisplayStrokeAndDelay || hover || selected;
@@ -446,14 +473,25 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       delay === null &&
       operatorProvidesRealtime === 'yes';
 
-    // Get the color of the vehicle
-    let circleFillColor = color || '#fff';
-    if (useDelayStyle) {
-      circleFillColor = getDelayColor(delay, cancelled);
+    const isDisplayDelayText =
+      isDisplayStrokeAndDelay &&
+      (hover || (delay || 0) >= delayDisplay || cancelled);
+
+    // Show delay if feature is hovered or if delay is above 5mins
+    let fontSize = 0;
+    let text = null;
+    if (isDisplayDelayText) {
+      // Draw delay text
+      fontSize =
+        Math.max(
+          cancelled ? 19 : 14,
+          Math.min(cancelled ? 19 : 17, radius * 1.2),
+        ) * pixelRatio;
+      text = getDelayText(delay, cancelled);
     }
 
+    // Draw colored circle with black border
     let circle = getCircleCanvas(
-      origin,
       radius,
       circleFillColor,
       hasStroke,
@@ -461,25 +499,47 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       pixelRatio,
     );
 
-    let arrowMargin = 0;
-    let arrowUnderDelayTextMargin = 0;
+    // Draw circle delay background
+    let delayBg = null;
+    if (isDisplayStrokeAndDelay && delay !== null) {
+      delayBg = getDelayBgCanvas(
+        radius,
+        getDelayColor(delay, cancelled),
+        pixelRatio,
+      );
+    }
+
+    // Draw delay text
+    let delayText = null;
+    if (text) {
+      delayText = getDelayTextCanvas(
+        text,
+        fontSize,
+        getDelayFont(fontSize, text),
+        getDelayColor(delay, cancelled, true),
+        delayOutlineColor,
+        pixelRatio,
+      );
+    }
+
+    // Draw rotated arrow and add the circle in it
+    let isArrowOnDelaySide = true;
 
     if (useHeadingStyle && rotation && circle) {
-      arrowMargin = ARROW_MARGIN * pixelRatio;
       const radianAdjusted = rotation % (2 * Math.PI);
-      if (-1 > radianAdjusted || radianAdjusted > 1) {
-        arrowUnderDelayTextMargin = arrowMargin;
+      if (-0.5 > radianAdjusted || radianAdjusted > 0.5) {
+        isArrowOnDelaySide = false;
       }
 
       const bufferArrow = getBufferArrowCanvas(
-        circle,
+        circle.width,
+        circle.height,
         circleFillColor,
         rotation,
         pixelRatio,
       );
 
       if (bufferArrow) {
-        const bufferSize = (bufferArrow.width - circle.width) / 2;
         const vehicleWithArrow = createCanvas(
           bufferArrow.width,
           bufferArrow.height,
@@ -496,8 +556,8 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         );
         context?.drawImage(
           circle,
-          bufferSize,
-          bufferSize,
+          bufferArrow.width / 2 - circle.width / 2,
+          bufferArrow.height / 2 - circle.height / 2,
           circle.width,
           circle.height,
         );
@@ -506,8 +566,8 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     }
 
     // Create the canvas
-    const width = (circle?.width || size) + (delayText?.width || 0) * 2;
-    const height = circle?.height || size;
+    const width = (circle?.width ?? 0) + (delayText?.width ?? 0) * 2;
+    const height = circle?.height ?? 0;
     const canvas = createCanvas(width, height);
     if (canvas) {
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -515,16 +575,22 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         return null;
       }
 
-      // The renderTrajectories will center the image on the vehicle positions.
-      const originX = 0 + (delayText?.width || 0);
-      const originY = 0;
-
       if (delayBg) {
-        ctx.drawImage(delayBg, arrowMargin + originX, arrowMargin + originY);
+        // Draw in the middle of the canvas
+        ctx.drawImage(
+          delayBg,
+          canvas.width / 2 - delayBg.width / 2,
+          canvas.height / 2 - delayBg.height / 2,
+        );
       }
 
       if (circle) {
-        ctx.drawImage(circle, originX, originY);
+        // Draw in the middle of the canvas
+        ctx.drawImage(
+          circle,
+          canvas.width / 2 - circle.width / 2,
+          canvas.height / 2 - circle.height / 2,
+        );
       }
 
       // Draw text in the circle
@@ -533,7 +599,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         const fontSize2 = Math.max(radius, 10);
         const textSize = getTextSize(
           ctx,
-          markerSize,
+          radius * 2,
           name,
           fontSize2,
           getTextFont,
@@ -545,7 +611,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
 
         circleText = getTextCanvas(
           name,
-          origin + arrowMargin,
+          radius,
           textSize,
           textColor || '#000',
           circleFillColor,
@@ -556,14 +622,22 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       }
 
       if (circleText) {
-        ctx.drawImage(circleText, originX, 0);
+        ctx.drawImage(
+          circleText,
+          canvas.width / 2 - circleText.width / 2,
+          canvas.height / 2 - circleText.height / 2,
+        );
       }
 
       if (delayText && circle?.width) {
         ctx.drawImage(
           delayText,
-          canvas.width / 2 + circle.width / 2 - arrowUnderDelayTextMargin,
-          Math.ceil(origin - fontSize) + arrowMargin,
+          canvas.width / 2 +
+            (isArrowOnDelaySide
+              ? circle.width
+              : (delayBg?.width ?? circle.width)) /
+              2,
+          canvas.height / 2 - delayText.height / 2,
         );
       }
 
