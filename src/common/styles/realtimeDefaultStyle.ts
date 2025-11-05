@@ -525,7 +525,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     // Draw rotated arrow and add the circle in it
     let isArrowOnDelaySide = true;
 
-    if (useHeadingStyle && rotation && circle) {
+    if (isDisplayText && useHeadingStyle && rotation && circle) {
       const radianAdjusted = rotation % (2 * Math.PI);
       if (-0.5 > radianAdjusted || radianAdjusted > 0.5) {
         isArrowOnDelaySide = false;
