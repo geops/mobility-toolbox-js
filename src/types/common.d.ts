@@ -41,29 +41,65 @@ export interface RealtimeStyleOptions {
   delayDisplay?: number;
   delayOutlineColor?: string;
   filter?: FilterFunction;
-  getBgColor?: (type: RealtimeMot, line?: RealtimeLine) => string;
+  getColor?: (trajectory: RealtimeTrajectory, viewState: ViewState) => string;
   getDelayColor?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
     delay: null | number,
     cancelled?: boolean,
     isDelayText?: boolean,
   ) => string;
-  getDelayFont?: (fontSize: number, text?: string) => string;
-  getDelayText?: (delay: null | number, cancelled?: boolean) => string;
+  getDelayFont?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+    fontSize: number,
+    text?: string,
+  ) => string;
+  getDelayText?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+    delay: null | number,
+    cancelled?: boolean,
+  ) => string;
+  getDelayTextColor?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+    delay?: null | number,
+    cancelled?: boolean,
+  ) => string;
   getMaxRadiusForStrokeAndDelay?: () => number;
   getMaxRadiusForText?: () => number;
-  getRadius?: (type: RealtimeMot, z: number) => number;
+  getRadius?: (trajectory: RealtimeTrajectory, viewState: ViewState) => number;
   getScreenPixel?: (pixel: Pixel, viewState: ViewState) => Pixel;
-  getText?: (text?: string) => string;
-  getTextColor?: (type: RealtimeMot, line?: RealtimeLine) => string;
-  getTextFont?: (fontSize: number, text?: string) => string;
+  getText?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+    text?: string,
+  ) => string;
+  getTextColor?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+  ) => string;
+  getTextFont?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+    fontSize: number,
+    text?: string,
+  ) => string;
   getTextSize?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
     ctx: AnyCanvasContext,
     markerSize: number,
     name: string,
     fontSize: number,
-    getFont: (fontSize: number, text?: string) => string,
+    font: string,
   ) => number;
-  getArrowSize?: (radius: number, viewState: ViewState) => number[];
+  getArrowSize?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+    radius: number,
+  ) => number[];
   hoverVehicleId?: RealtimeTrainId;
   noInterpolate?: boolean;
   selectedVehicleId?: RealtimeTrainId;

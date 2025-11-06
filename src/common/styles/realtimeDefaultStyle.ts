@@ -2,6 +2,8 @@ import { buffer } from 'ol/size';
 
 import createCanvas from '../utils/createCanvas';
 
+import type { StyleOptions } from 'maplibre-gl';
+
 import type {
   AnyCanvas,
   AnyCanvasContext,
@@ -295,7 +297,7 @@ export const getTextCanvas = (
   strokeColor: string,
   hasStroke: boolean,
   pixelRatio: number,
-  getTextFont: (fontSize: number, text?: string) => string,
+  font: string,
 ) => {
   const key = `${text}, ${radius}, ${textSize}, ${fillColor},${strokeColor}, ${hasStroke}, ${pixelRatio}`;
   if (!cacheText[key]) {
@@ -311,7 +313,7 @@ export const getTextCanvas = (
         ctx.save();
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
-        ctx.font = getTextFont(textSize + 2, text);
+        ctx.font = font;
         ctx.strokeStyle = strokeColor;
         ctx.strokeText(text, radius, radius);
         ctx.restore();
@@ -321,7 +323,7 @@ export const getTextCanvas = (
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
       ctx.fillStyle = fillColor;
-      ctx.font = getTextFont(textSize, text);
+      ctx.font = font;
       ctx.strokeStyle = strokeColor;
       ctx.strokeText(text, radius, radius);
       ctx.fillText(text, radius, radius);
@@ -351,20 +353,28 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   const {
     delayDisplay = 300000,
     delayOutlineColor = '#000',
-    getArrowSize = (radius = 0) => {
+    getArrowSize = (traj, viewSt, radius = 0) => {
       return [(radius * 3) / 4, radius];
     },
-    getBgColor = () => {
-      return '#000';
+    getColor = (traj: RealtimeTrajectory): string => {
+      let color = traj?.properties?.line?.color;
+
+      if (color && !color.startsWith('#')) {
+        color = `#${color}`;
+      }
+      return color || '#000';
     },
-    getDelayColor = () => {
-      return '#000';
+    getDelayColor = (traj: RealtimeTrajectory) => {
+      return traj?.properties?.line?.color || '#000';
     },
-    getDelayFont = (fontSize: number) => {
+    getDelayFont = (traj, viewSt, fontSize: number) => {
       return `bold ${fontSize}px arial, sans-serif`;
     },
     getDelayText = () => {
       return null;
+    },
+    getDelayTextColor = () => {
+      return '#000';
     },
     getMaxRadiusForStrokeAndDelay = () => {
       return 7;
@@ -373,15 +383,26 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       return 10;
     },
     getRadius = () => {
-      return 0;
+      return 5;
     },
-    getText = (text?: string) => {
-      return text;
+    getText = (traj: RealtimeTrajectory) => {
+      return traj?.properties?.line?.name || '';
     },
-    getTextColor = () => {
-      return '#000';
+    getTextColor = (traj: RealtimeTrajectory) => {
+      let color = traj?.properties?.line?.text_color;
+
+      if (color && !color.startsWith('#')) {
+        color = `#${color}`;
+      }
+      return color || '#fff';
     },
-    getTextFont = (fontSize: number) => {
+    getTextFont = (
+      traj: RealtimeTrajectory,
+      viewSt: ViewState,
+      fontSize: number,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      text?: string,
+    ) => {
       return `bold ${fontSize}px arial, sans-serif`;
     },
     getTextSize = () => {
@@ -394,44 +415,33 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     useHeadingStyle,
   } = options;
 
-  const { pixelRatio = 1, zoom } = viewState;
-  let { type } = trajectory.properties;
+  const { pixelRatio = 1 } = viewState;
   const {
     delay,
-    line,
     operator_provides_realtime_journey: operatorProvidesRealtime,
     rotation,
     state,
     train_id: id,
   } = trajectory.properties;
-  let { color, name, text_color: textColor } = line || {};
 
-  name = getText(name);
+  const name = getText(trajectory, viewState);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  let color = getColor(trajectory, viewState);
+  let textColor = getTextColor(trajectory, viewState);
 
   const cancelled = state === 'JOURNEY_CANCELLED';
-
-  if (!type) {
-    type = 'rail';
-  }
-
-  if (!name) {
-    name = 'I';
-  }
-
-  if (color && !color.startsWith('#')) {
-    color = `#${color}`;
-  }
-
-  if (textColor && !textColor.startsWith('#')) {
-    textColor = `#${textColor}`;
-  }
-
-  const z = Math.min(Math.floor(zoom || 1), 16);
   const hover = !!(hoverVehicleId && hoverVehicleId === id);
   const selected = !!(selectedVehicleId && selectedVehicleId === id);
 
+  // Get the text color of the vehicle
+  if (useDelayStyle) {
+    color = getDelayColor(trajectory, viewState, delay, cancelled);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    textColor = getDelayTextColor(trajectory, viewState, delay, cancelled);
+  }
+
   // Calcul the radius of the circle
-  let radius = getRadius(type, z) * pixelRatio;
+  let radius = getRadius(trajectory, viewState) * pixelRatio;
   const isDisplayStrokeAndDelay =
     radius >= getMaxRadiusForStrokeAndDelay() * pixelRatio;
 
@@ -448,7 +458,6 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}${delay}${cancelled}`;
   } else {
-    color = color || getBgColor(type, line);
     key += `${color}`;
 
     if (isDisplayStrokeAndDelay) {
@@ -457,13 +466,6 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   }
 
   if (isDisplayText) {
-    // Get the text color of the vehicle
-    if (useDelayStyle) {
-      textColor = '#000000';
-    } else {
-      textColor = textColor || getTextColor(type, line);
-    }
-
     key += `${name}${textColor}`;
   }
 
@@ -473,10 +475,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     }
 
     // Get the color of the vehicle
-    let circleFillColor = color || '#fff';
-    if (useDelayStyle) {
-      circleFillColor = getDelayColor(delay, cancelled);
-    }
+    const circleFillColor = color as string;
 
     const hasStroke = isDisplayStrokeAndDelay || hover || selected;
 
@@ -505,7 +504,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
           cancelled ? 19 : 14,
           Math.min(cancelled ? 19 : 17, radius * 1.2),
         ) * pixelRatio;
-      text = getDelayText(delay, cancelled);
+      text = getDelayText(trajectory, viewState, delay, cancelled);
     }
 
     // Draw colored circle with black border
@@ -522,12 +521,29 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     if (isDisplayText && circle) {
       const fontSize2 = Math.max(radius, 10);
       const textSize = getTextSize(
+        trajectory,
+        viewState,
         circle.getContext('2d') as AnyCanvasContext,
         radius * 2,
         name,
         fontSize2,
-        getTextFont,
+        getTextFont(trajectory, viewState, fontSize2, name),
       );
+
+      console.log(
+        'getTextSize',
+        radius,
+        fontSize2,
+        getTextFont(trajectory, viewState, fontSize2, name),
+        textSize,
+      );
+      console.log(
+        'getTextSize2',
+        radius,
+        textSize,
+        getTextFont(trajectory, viewState, textSize, name),
+      );
+      const font = getTextFont(trajectory, viewState, textSize, name);
       const hasStroke2 =
         !!useDelayStyle && delay === null && operatorProvidesRealtime === 'yes';
 
@@ -535,11 +551,11 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         name,
         radius,
         textSize,
-        textColor || '#000',
+        textColor,
         circleFillColor,
         hasStroke2,
         pixelRatio,
-        getTextFont,
+        font,
       );
     }
 
@@ -548,7 +564,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     if (hasDelayBg) {
       delayBg = getDelayBgCanvas(
         radius,
-        getDelayColor(delay, cancelled),
+        getDelayColor(trajectory, viewState, delay, cancelled),
         pixelRatio,
       );
     }
@@ -559,8 +575,8 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       delayText = getDelayTextCanvas(
         text,
         fontSize,
-        getDelayFont(fontSize, text),
-        getDelayColor(delay, cancelled, true),
+        getDelayFont(trajectory, viewState, fontSize, text),
+        getDelayColor(trajectory, viewState, delay, cancelled, true),
         delayOutlineColor,
         pixelRatio,
       );
@@ -581,7 +597,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
         canvasRef.height,
         circleFillColor,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-        getArrowSize(radius / pixelRatio, viewState),
+        getArrowSize(trajectory, viewState, radius / pixelRatio),
         rotation,
         pixelRatio,
       );

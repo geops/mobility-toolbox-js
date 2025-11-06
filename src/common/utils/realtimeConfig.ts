@@ -1,4 +1,10 @@
-import type { AnyCanvasContext, RealtimeLine, RealtimeMot } from '../../types';
+import type {
+  AnyCanvasContext,
+  RealtimeLine,
+  RealtimeMot,
+  RealtimeTrajectory,
+} from '../../types';
+import type { ViewState } from '../typedefs';
 
 const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -120,10 +126,16 @@ export const getTypeIndex = (type: RealtimeMot): number => {
 /**
  * @private
  */
-export const getRadius = (type: RealtimeMot, zoom: number): number => {
+export const getRadius = (
+  trajectory: RealtimeTrajectory,
+  viewState: ViewState,
+): number => {
+  const type = trajectory.properties.type;
+  const zoom = Math.min(Math.floor(viewState.zoom || 1), 16);
   try {
     const typeIdx = getTypeIndex(type || 0);
     return radiusMapping[typeIdx][zoom];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return 1;
   }
@@ -132,21 +144,23 @@ export const getRadius = (type: RealtimeMot, zoom: number): number => {
 /**
  * @private
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getBgColor = (type: RealtimeMot, line?: RealtimeLine): string => {
+
+export const getBgColor = (trajectory: RealtimeTrajectory): string => {
+  const type = trajectory.properties.type;
   try {
     const typeIdx = getTypeIndex(type);
     return bgColors[typeIdx];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    return '#ffffff';
+    return '#000';
   }
 };
 
 /**
  * @private
  */
-export const getTextColor = (type: RealtimeMot): string => {
+export const getTextColor = (trajectory: RealtimeTrajectory): string => {
+  const type = trajectory.properties.type;
   try {
     const typeIdx = getTypeIndex(type);
     return textColors[typeIdx];
@@ -159,24 +173,28 @@ export const getTextColor = (type: RealtimeMot): string => {
  * @private
  */
 export const getTextSize = (
+  trajectory: RealtimeTrajectory,
+  viewState: ViewState,
   ctx: AnyCanvasContext,
   markerSize: number,
   text: string,
   fontSize: number,
-  getTextFont: (fontSize: number, text?: string) => string,
+  font: string,
 ): number => {
   if (!ctx) {
     return 0;
   }
-  ctx.font = getTextFont(fontSize, text);
+  ctx.font = font;
   let newText = ctx.measureText(text);
 
   const maxiter = 25;
   let i = 0;
 
   while (newText.width > markerSize - 6 && i < maxiter) {
+    const previousFontSize = fontSize;
+    // eslint-disable-next-line no-param-reassign
     fontSize -= 0.5;
-    ctx.font = getTextFont(fontSize, text);
+    ctx.font = ctx.font.replace(`${previousFontSize}px`, `${fontSize}px`);
     newText = ctx.measureText(text);
     i += 1;
   }
@@ -190,6 +208,8 @@ export const getTextSize = (
  * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
  */
 export const getDelayColor = (
+  trajectory: RealtimeTrajectory,
+  viewState: ViewState,
   delayInMs: null | number,
   cancelled?: boolean,
   isDelayText?: boolean,
@@ -218,7 +238,12 @@ export const getDelayColor = (
 /**
  * @private
  */
-export const getDelayText = (delayInMs: number, cancelled: boolean): string => {
+export const getDelayText = (
+  trajectory: RealtimeTrajectory,
+  viewState: ViewState,
+  delayInMs: number,
+  cancelled: boolean,
+): string => {
   if (cancelled) {
     return String.fromCodePoint(0x00d7);
   }
