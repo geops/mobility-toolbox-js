@@ -67,6 +67,12 @@ export interface RealtimeStyleOptions {
     delay?: null | number,
     cancelled?: boolean,
   ) => string;
+  getImage?: (
+    trajectory: RealtimeTrajectory,
+    viewState: ViewState,
+    text: string,
+    radius: number,
+  ) => AnyCanvas | null;
   getMaxRadiusForStrokeAndDelay?: () => number;
   getMaxRadiusForText?: () => number;
   getRadius?: (trajectory: RealtimeTrajectory, viewState: ViewState) => number;

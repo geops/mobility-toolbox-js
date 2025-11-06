@@ -376,6 +376,9 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     getDelayTextColor = () => {
       return '#000';
     },
+    getImage = () => {
+      return null;
+    },
     getMaxRadiusForStrokeAndDelay = () => {
       return 7;
     },
@@ -517,46 +520,43 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     );
 
     // Draw text in the center of circle
-    let circleText = null;
+    let circleText: AnyCanvas | null = null;
     if (isDisplayText && circle) {
-      const fontSize2 = Math.max(radius, 10);
-      const textSize = getTextSize(
-        trajectory,
-        viewState,
-        circle.getContext('2d') as AnyCanvasContext,
-        radius * 2,
-        name,
-        fontSize2,
-        getTextFont(trajectory, viewState, fontSize2, name),
-      );
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const image = getImage(trajectory, viewState, name, radius);
+      if (image) {
+        // If an image is provided we use it instead of text
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        circleText = image;
+      } else {
+        const fontSize2 = Math.max(radius, 10);
+        const textSize = getTextSize(
+          trajectory,
+          viewState,
+          circle.getContext('2d') as AnyCanvasContext,
+          radius * 2,
+          name,
+          fontSize2,
+          getTextFont(trajectory, viewState, fontSize2, name),
+        );
 
-      console.log(
-        'getTextSize',
-        radius,
-        fontSize2,
-        getTextFont(trajectory, viewState, fontSize2, name),
-        textSize,
-      );
-      console.log(
-        'getTextSize2',
-        radius,
-        textSize,
-        getTextFont(trajectory, viewState, textSize, name),
-      );
-      const font = getTextFont(trajectory, viewState, textSize, name);
-      const hasStroke2 =
-        !!useDelayStyle && delay === null && operatorProvidesRealtime === 'yes';
+        const font = getTextFont(trajectory, viewState, textSize, name);
+        const hasStroke2 =
+          !!useDelayStyle &&
+          delay === null &&
+          operatorProvidesRealtime === 'yes';
 
-      circleText = getTextCanvas(
-        name,
-        radius,
-        textSize,
-        textColor,
-        circleFillColor,
-        hasStroke2,
-        pixelRatio,
-        font,
-      );
+        circleText = getTextCanvas(
+          name,
+          radius,
+          textSize,
+          textColor,
+          circleFillColor,
+          hasStroke2,
+          pixelRatio,
+          font,
+        );
+      }
     }
 
     // Draw circle delay background
