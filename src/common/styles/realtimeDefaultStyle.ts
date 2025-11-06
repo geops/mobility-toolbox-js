@@ -352,7 +352,6 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     delayDisplay = 300000,
     delayOutlineColor = '#000',
     getArrowSize = (radius = 0) => {
-      console.log(radius);
       return [(radius * 3) / 4, radius];
     },
     getBgColor = () => {
@@ -516,6 +515,32 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       pixelRatio,
     );
 
+    // Draw text in the center of circle
+    let circleText = null;
+    if (isDisplayText && circle) {
+      const fontSize2 = Math.max(radius, 10);
+      const textSize = getTextSize(
+        circle.getContext('2d') as AnyCanvasContext,
+        radius * 2,
+        name,
+        fontSize2,
+        getTextFont,
+      );
+      const hasStroke2 =
+        !!useDelayStyle && delay === null && operatorProvidesRealtime === 'yes';
+
+      circleText = getTextCanvas(
+        name,
+        radius,
+        textSize,
+        textColor || '#000',
+        circleFillColor,
+        hasStroke2,
+        pixelRatio,
+        getTextFont,
+      );
+    }
+
     // Draw circle delay background
     let delayBg = null;
     if (hasDelayBg) {
@@ -561,7 +586,6 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     }
 
     // Create the canvas using the biggest width between all the elements
-
     const biggestCircleWidthWithoutArrow = Math.max(
       delayBg?.width ?? 0,
       circle?.width ?? 0,
@@ -609,40 +633,13 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       }
 
       // Draw text in the circle
-      let circleText = null;
-      if (isDisplayText) {
-        const fontSize2 = Math.max(radius, 10);
-        const textSize = getTextSize(
-          ctx,
-          radius * 2,
-          name,
-          fontSize2,
-          getTextFont,
+      if (circleText) {
+        // Draw in the middle of the canvas
+        ctx.drawImage(
+          circleText,
+          canvas.width / 2 - circleText.width / 2,
+          canvas.height / 2 - circleText.height / 2,
         );
-        const hasStroke2 =
-          !!useDelayStyle &&
-          delay === null &&
-          operatorProvidesRealtime === 'yes';
-
-        circleText = getTextCanvas(
-          name,
-          radius,
-          textSize,
-          textColor || '#000',
-          circleFillColor,
-          hasStroke2,
-          pixelRatio,
-          getTextFont,
-        );
-
-        if (circleText) {
-          // Draw in the middle of the canvas
-          ctx.drawImage(
-            circleText,
-            canvas.width / 2 - circleText.width / 2,
-            canvas.height / 2 - circleText.height / 2,
-          );
-        }
       }
 
       // Draw delay text
