@@ -379,9 +379,9 @@ const realtimeStyle: RealtimeStyleFunction = (
     getRadius = () => {
       return 5;
     },
-    getText = (traj: RealtimeTrajectory) => {
+    getText = ((traj: RealtimeTrajectory) => {
       return traj?.properties?.line?.name || 'U';
-    },
+    }) as RealtimeStyleOptions['getText'],
     getTextColor = () => {
       return '#fff';
     },
@@ -413,7 +413,7 @@ const realtimeStyle: RealtimeStyleFunction = (
     train_id: id,
   } = trajectory.properties;
 
-  const name = getText(trajectory, viewState);
+  const name = getText?.(trajectory, viewState) || '';
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   let color = getColor(trajectory, viewState);

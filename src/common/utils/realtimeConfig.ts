@@ -101,13 +101,13 @@ export const getTypeIndex = (type: RealtimeMot): number => {
 };
 
 export const getRadius = (
-  trajectory: RealtimeTrajectory,
-  viewState: ViewState,
+  trajectory?: RealtimeTrajectory,
+  viewState?: ViewState,
 ): number => {
-  const type = trajectory.properties.type;
-  const zoom = Math.min(Math.floor(viewState.zoom || 1), 16);
+  const type = trajectory?.properties?.type;
+  const zoom = Math.min(Math.floor(viewState?.zoom || 1), 16);
   try {
-    const typeIdx = getTypeIndex(type || 0);
+    const typeIdx = getTypeIndex(type ?? 'rail');
     return radiusMapping[typeIdx][zoom];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
@@ -137,15 +137,15 @@ export const getTextColor = (trajectory: RealtimeTrajectory): string => {
 };
 
 export const getTextSize = (
-  trajectory: RealtimeTrajectory,
-  viewState: ViewState,
-  ctx: AnyCanvasContext,
-  markerSize: number,
-  text: string,
-  fontSize: number,
-  font: string,
+  trajectory?: RealtimeTrajectory,
+  viewState?: ViewState,
+  ctx?: AnyCanvasContext,
+  markerSize?: number,
+  text?: string,
+  fontSize?: number,
+  font?: string,
 ): number => {
-  if (!ctx) {
+  if (!ctx || !font || !markerSize || !text || !fontSize) {
     return 0;
   }
   ctx.font = font;
@@ -166,14 +166,17 @@ export const getTextSize = (
 };
 
 export const getDelayColor = (
-  trajectory: RealtimeTrajectory,
-  viewState: ViewState,
-  delayInMs: null | number,
+  trajectory?: RealtimeTrajectory,
+  viewState?: ViewState,
+  delayInMs?: null | number,
   cancelled?: boolean,
   isDelayText?: boolean,
 ): string => {
   if (cancelled) {
     return isDelayText ? '#ff0000' : '#a0a0a0'; // red or gray
+  }
+  if (!delayInMs) {
+    return '';
   }
   if (delayInMs === null) {
     return '#a0a0a0'; // grey { r: 160, g: 160, b: 160, s: '160,160,160' };
@@ -194,10 +197,10 @@ export const getDelayColor = (
 };
 
 export const getDelayText = (
-  trajectory: RealtimeTrajectory,
-  viewState: ViewState,
-  delay: null | number,
-  cancelled: boolean,
+  trajectory?: RealtimeTrajectory,
+  viewState?: ViewState,
+  delay?: number,
+  cancelled?: boolean,
 ): string => {
   if (cancelled) {
     return String.fromCodePoint(0x00d7);
@@ -228,7 +231,7 @@ export const getDelayText = (
 };
 
 export const styleOptions: RealtimeStyleOptions = {
-  getColor,
+  getColor: getColor,
   getDelayColor,
   getDelayText,
   getRadius,

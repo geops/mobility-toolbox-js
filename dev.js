@@ -15,6 +15,7 @@ import {
   realtimeByLineStyle,
   realtimeByDelayStyle,
   realtimeStyle,
+  realtimeByMotStyle,
 } from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
@@ -43,7 +44,7 @@ const realtimeLayer = new RealtimeLayer({
   styleOptions: {
     useHeadingStyle: true,
   },
-  style: realtimeByDelayStyle,
+  style: realtimeByMotStyle,
   // tenant: 'sbm',
   tenant: 'trenord',
 });

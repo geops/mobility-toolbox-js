@@ -1,13 +1,13 @@
 import realtimeByDelayStyle from './realtimeByDelayStyle';
-import realtimeByMotTypeStyle from './realtimeByMotTypeStyle';
+import realtimeByMotStyle from './realtimeByMotStyle';
 
 export { default as realtimeByDelayStyle } from './realtimeByDelayStyle';
 export { default as realtimeByLineStyle } from './realtimeByLineStyle';
-export { default as realtimeByMotTypeStyle } from './realtimeByMotTypeStyle';
+export { default as realtimeByMotStyle } from './realtimeByMotStyle';
 export { default as realtimeSimpleStyle } from './realtimeSimpleStyle';
 export * from './realtimeStyle';
 export { default as realtimeStyle } from './realtimeStyle';
 
 // backward compatibility
-export const realtimeDefaultStyle = realtimeByMotTypeStyle;
+export const realtimeDefaultStyle = realtimeByMotStyle;
 export const realtimeDelayStyle = realtimeByDelayStyle;

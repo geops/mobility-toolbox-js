@@ -1,6 +1,8 @@
 import { Circle, Fill, Stroke, Style } from 'ol/style';
 
-import type { FeatureLike } from 'ol/Feature';
+import type Feature from 'ol/Feature';
+
+import type { RealtimeStyleOptions } from '../../types';
 
 const borderStyle = new Style({
   image: new Circle({
@@ -17,9 +19,9 @@ const borderStyle = new Style({
 });
 
 const fullTrajectorystyle = (
-  feature: FeatureLike,
+  feature: Feature,
   resolution: number,
-  options: any,
+  options?: RealtimeStyleOptions,
 ): Style[] => {
   let lineColor = '#ffffff'; // white
 
@@ -30,8 +32,12 @@ const fullTrajectorystyle = (
     stroke = `#${stroke}`;
   }
 
+  console.log(feature);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   lineColor =
-    stroke || options?.getBgColor(type, { name: feature.get('line_name') });
+    stroke ||
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    options?.getColor?.({ properties: feature.getProperties() }, undefined);
 
   // Don't allow white lines, use red instead.
   lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;

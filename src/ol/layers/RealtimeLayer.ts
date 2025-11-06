@@ -198,7 +198,7 @@ class RealtimeLayer extends Layer {
       source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
         return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
-          feature,
+          feature as Feature,
           resolution,
           this.engine.styleOptions,
         );
