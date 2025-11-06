@@ -69,6 +69,7 @@ export interface RealtimeStyleOptions {
   selectedVehicleId?: RealtimeTrainId;
   useDelayStyle?: boolean;
   useHeadingStyle?: boolean;
+  showDelayBg?: boolean;
 }
 
 export type RealtimeTrajectories = Record<RealtimeTrainId, RealtimeTrajectory>;

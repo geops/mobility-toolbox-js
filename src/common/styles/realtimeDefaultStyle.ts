@@ -389,6 +389,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     },
     hoverVehicleId,
     selectedVehicleId,
+    showDelayBg = true,
     useDelayStyle,
     useHeadingStyle,
   } = options;
@@ -489,7 +490,8 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       isDisplayStrokeAndDelay &&
       (hover || (delay || 0) >= delayDisplay || cancelled);
 
-    const hasDelayBg = isDisplayStrokeAndDelay && delay !== null;
+    const hasDelayBg =
+      !!showDelayBg && isDisplayStrokeAndDelay && delay !== null;
 
     const hasHeading = useHeadingStyle && isDisplayText && rotation;
 
@@ -585,6 +587,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       );
     }
 
+    // At this point we have the canvases to compose the final canvas.
     // Create the canvas using the biggest width between all the elements
     const biggestCircleWidthWithoutArrow = Math.max(
       delayBg?.width ?? 0,
