@@ -7,7 +7,17 @@ import { unByKey } from 'ol/Observable';
 import { Vector as VectorSource } from 'ol/source';
 import Source from 'ol/source/Source';
 
+import { realtimeDefaultStyle } from '../../common/styles';
 import RealtimeEngine from '../../common/utils/RealtimeEngine';
+import {
+  type RealtimeMode,
+  type RealtimeRenderState,
+  type RealtimeStopSequence,
+  type RealtimeStyleFunction,
+  type RealtimeTrainId,
+  type RealtimeTrajectory,
+  type ViewState,
+} from '../../types';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
@@ -25,15 +35,6 @@ import type { State } from 'ol/View';
 import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
-import type {
-  RealtimeMode,
-  RealtimeRenderState,
-  RealtimeStopSequence,
-  RealtimeStyleFunction,
-  RealtimeTrainId,
-  RealtimeTrajectory,
-  ViewState,
-} from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
@@ -185,6 +186,7 @@ class RealtimeLayer extends Layer {
       getViewState: this.getViewState.bind(this),
       onIdle: this.onRealtimeEngineIdle.bind(this),
       onRender: this.onRealtimeEngineRender.bind(this),
+      style: realtimeDefaultStyle,
       ...options,
     });
 

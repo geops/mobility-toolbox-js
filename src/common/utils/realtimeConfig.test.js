@@ -25,33 +25,33 @@ describe('trackerConfig', () => {
 
   describe('#getDelayText()', () => {
     test('returns hours', () => {
-      expect(getDelayText(6400000)).toBe('+2h');
-      expect(getDelayText(4500000)).toBe('+1h');
-      expect(getDelayText(3600000)).toBe('+1h');
+      expect(getDelayText(null, null, 6400000)).toBe('+2h');
+      expect(getDelayText(null, null, 4500000)).toBe('+1h');
+      expect(getDelayText(null, null, 3600000)).toBe('+1h');
     });
 
     test('returns minutes', () => {
-      expect(getDelayText(100000)).toBe('+2m');
-      expect(getDelayText(68000)).toBe('+1m');
-      expect(getDelayText(60000)).toBe('+1m');
+      expect(getDelayText(null, null, 100000)).toBe('+2m');
+      expect(getDelayText(null, null, 68000)).toBe('+1m');
+      expect(getDelayText(null, null, 60000)).toBe('+1m');
     });
 
     test('returns seconds', () => {
-      expect(getDelayText(1800)).toBe('+2s');
-      expect(getDelayText(1400)).toBe('+1s');
-      expect(getDelayText(1000)).toBe('+1s');
+      expect(getDelayText(null, null, 1800)).toBe('+2s');
+      expect(getDelayText(null, null, 1400)).toBe('+1s');
+      expect(getDelayText(null, null, 1000)).toBe('+1s');
     });
 
     test('returns milliseconds', () => {
-      expect(getDelayText(100)).toBe('+100ms');
-      expect(getDelayText(999)).toBe('+999ms');
+      expect(getDelayText(null, null, 100)).toBe('+100ms');
+      expect(getDelayText(null, null, 999)).toBe('+999ms');
     });
 
     test('returns empty string', () => {
-      expect(getDelayText(-45)).toBe('');
-      expect(getDelayText('lalal')).toBe('');
-      expect(getDelayText(null)).toBe('');
-      expect(getDelayText()).toBe('');
+      expect(getDelayText(null, null, -45)).toBe('');
+      expect(getDelayText(null, null, 'lalal')).toBe('');
+      expect(getDelayText(null, null, null)).toBe('');
+      expect(getDelayText(null, null)).toBe('');
     });
   });
 });

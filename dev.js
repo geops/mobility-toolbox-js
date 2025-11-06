@@ -10,7 +10,11 @@ import {
   MapsetAPI,
   MapsetLayer,
   MocoLayer,
+  realtimeDefaultStyle,
   RealtimeLayer,
+  realtimeByLineStyle,
+  realtimeByDelayStyle,
+  realtimeStyle,
 } from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
@@ -39,6 +43,7 @@ const realtimeLayer = new RealtimeLayer({
   styleOptions: {
     useHeadingStyle: true,
   },
+  style: realtimeByDelayStyle,
   // tenant: 'sbm',
   tenant: 'trenord',
 });

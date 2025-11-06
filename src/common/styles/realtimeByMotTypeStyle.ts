@@ -18,7 +18,7 @@ import type {
  * @param {RealtimeStyleOptions} options Some options to change the rendering
  * @return a canvas
  */
-const realtimeDefaultStyle: RealtimeStyleFunction = (
+const realtimeByMotTypeStyle: RealtimeStyleFunction = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
@@ -28,4 +28,4 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     ...options,
   });
 };
-export default realtimeDefaultStyle;
+export default realtimeByMotTypeStyle;

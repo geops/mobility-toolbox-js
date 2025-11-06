@@ -59,7 +59,7 @@ export interface RealtimeStyleOptions {
     trajectory: RealtimeTrajectory,
     viewState: ViewState,
     delay: null | number,
-    cancelled?: boolean,
+    cancelled: boolean,
   ) => string;
   getDelayTextColor?: (
     trajectory: RealtimeTrajectory,

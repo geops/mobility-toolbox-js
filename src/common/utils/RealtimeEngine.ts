@@ -225,8 +225,7 @@ class RealtimeEngine {
     /**
      * Custom options to pass as last parameter of the style function.
      */
-    // @ts-expect-error good type must be defined
-    this.styleOptions = { ...realtimeConfig, ...(options.styleOptions ?? {}) };
+    this.styleOptions = { ...(options.styleOptions ?? {}) };
     this.tenant = options.tenant ?? ''; // sbb,sbh or sbm
     this.trajectories = {};
     this.useDebounce = options.useDebounce ?? false;

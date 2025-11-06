@@ -1,10 +1,10 @@
 import type {
   AnyCanvasContext,
-  RealtimeLine,
   RealtimeMot,
+  RealtimeStyleOptions,
   RealtimeTrajectory,
+  ViewState,
 } from '../../types';
-import type { ViewState } from '../typedefs';
 
 const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -19,14 +19,8 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
-/**
- * @private
- */
 export const MOTS_ONLY_RAIL: RealtimeMot[] = ['rail'];
 
-/**
- * @private
- */
 export const MOTS_WITH_CABLE: RealtimeMot[] = [
   'cablecar',
   'gondola',
@@ -34,9 +28,6 @@ export const MOTS_WITH_CABLE: RealtimeMot[] = [
   'coach',
 ];
 
-/**
- * @private
- */
 export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
   'tram',
   'subway',
@@ -44,9 +35,6 @@ export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
   'bus',
 ];
 
-/**
- * @private
- */
 export const MOTS_ALL: RealtimeMot[] = [
   'tram',
   'subway',
@@ -63,8 +51,6 @@ export const MOTS_ALL: RealtimeMot[] = [
  * Trajserv value: 'Tram',  'Subway / Metro / S-Bahn',  'Train', 'Bus', 'Ferry', 'Cable Car', 'Gondola', 'Funicular', 'Long distance bus', 'Rail',
  * New endpoint use Rail instead of Train.
  * New tracker values:  null, "tram", "subway", "rail", "bus", "ferry", "cablecar", "gondola", "funicular", "coach".
- *
- * @private
  */
 export const types: RegExp[] = [
   /^Tram/i,
@@ -79,9 +65,6 @@ export const types: RegExp[] = [
   /^Rail/i, // New endpoint use Rail instead of Train.
 ];
 
-/**
- * @private
- */
 export const bgColors: string[] = [
   '#ffb400',
   '#ff5400',
@@ -95,9 +78,6 @@ export const bgColors: string[] = [
   '#ff8080',
 ];
 
-/**
- * @private
- */
 export const textColors: string[] = [
   '#000000',
   '#ffffff',
@@ -111,9 +91,6 @@ export const textColors: string[] = [
   '#000000',
 ];
 
-/**
- * @private
- */
 export const getTypeIndex = (type: RealtimeMot): number => {
   if (typeof type === 'string') {
     return types.findIndex((t) => {
@@ -123,9 +100,6 @@ export const getTypeIndex = (type: RealtimeMot): number => {
   return type;
 };
 
-/**
- * @private
- */
 export const getRadius = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
@@ -141,11 +115,7 @@ export const getRadius = (
   }
 };
 
-/**
- * @private
- */
-
-export const getBgColor = (trajectory: RealtimeTrajectory): string => {
+export const getColor = (trajectory: RealtimeTrajectory): string => {
   const type = trajectory.properties.type;
   try {
     const typeIdx = getTypeIndex(type);
@@ -156,9 +126,6 @@ export const getBgColor = (trajectory: RealtimeTrajectory): string => {
   }
 };
 
-/**
- * @private
- */
 export const getTextColor = (trajectory: RealtimeTrajectory): string => {
   const type = trajectory.properties.type;
   try {
@@ -169,9 +136,6 @@ export const getTextColor = (trajectory: RealtimeTrajectory): string => {
   }
 };
 
-/**
- * @private
- */
 export const getTextSize = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
@@ -201,12 +165,6 @@ export const getTextSize = (
   return fontSize;
 };
 
-/**
- * @private
- * @param {number} delayInMs Delay in milliseconds.
- * @param {boolean} cancelled true if the journey is cancelled.
- * @param {boolean} isDelayText true if the color is used for delay text of the symbol.
- */
 export const getDelayColor = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
@@ -235,36 +193,45 @@ export const getDelayColor = (
   return '#00a00c'; // green { r: 0, g: 160, b: 12, s: '0,160,12' };
 };
 
-/**
- * @private
- */
 export const getDelayText = (
   trajectory: RealtimeTrajectory,
   viewState: ViewState,
-  delayInMs: number,
+  delay: null | number,
   cancelled: boolean,
 ): string => {
   if (cancelled) {
     return String.fromCodePoint(0x00d7);
   }
-  if (delayInMs >= 3600000) {
-    const rounded = Math.round(delayInMs / 3600000);
+  if (!delay) {
+    return '';
+  }
+  if (delay >= 3600000) {
+    const rounded = Math.round(delay / 3600000);
     return `+${rounded}h`;
   }
 
-  if (delayInMs >= 60000) {
-    const rounded = Math.round(delayInMs / 60000);
+  if (delay >= 60000) {
+    const rounded = Math.round(delay / 60000);
     return `+${rounded}m`;
   }
 
-  if (delayInMs >= 1000) {
-    const rounded = Math.round(delayInMs / 1000);
+  if (delay >= 1000) {
+    const rounded = Math.round(delay / 1000);
     return `+${rounded}s`;
   }
 
-  if (delayInMs > 0) {
-    return `+${delayInMs}ms`;
+  if (delay > 0) {
+    return `+${delay}ms`;
   }
 
   return '';
+};
+
+export const styleOptions: RealtimeStyleOptions = {
+  getColor,
+  getDelayColor,
+  getDelayText,
+  getRadius,
+  getTextColor,
+  getTextSize,
 };
