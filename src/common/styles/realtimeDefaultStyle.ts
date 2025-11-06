@@ -1,3 +1,5 @@
+import { buffer } from 'ol/size';
+
 import createCanvas from '../utils/createCanvas';
 
 import type {
@@ -19,16 +21,19 @@ const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
 
 const arrowCache: Record<string, AnyCanvas | null> = {};
 
-const ARROW_WIDTH = 16;
 const getArrowCanvas = (
+  arrowSize: number[],
   fillColor: string,
   pixelRatio = 1,
 ): AnyCanvas | null => {
-  const key = `${fillColor},${pixelRatio}`;
+  const key = `${arrowSize.toString()},${fillColor},${pixelRatio}`;
   if (!arrowCache[key]) {
     // Create the arrow canvas
-    const padding = 2 * pixelRatio;
-    const canvas = createCanvas(ARROW_WIDTH * pixelRatio, 20 * pixelRatio);
+    const padding = 0 * pixelRatio;
+    const canvas = createCanvas(
+      arrowSize[0] * pixelRatio,
+      arrowSize[1] * pixelRatio,
+    );
     const ctx = canvas?.getContext('2d') as AnyCanvasContext;
     if (canvas && ctx) {
       ctx.fillStyle = fillColor;
@@ -56,14 +61,18 @@ const getBufferArrowCanvas = (
   width: number,
   height: number,
   fillColor: string,
+  arrowSize?: number[],
   rotation = 0,
   pixelRatio = 1,
   margin = 0,
 ): AnyCanvas | null => {
-  const bufferKey = `${fillColor},${width},${height},${rotation},${pixelRatio},${margin}`;
+  if (!arrowSize) {
+    return null;
+  }
+  const bufferKey = `${fillColor},${width},${height},${rotation},${pixelRatio},${margin}.${arrowSize.toString()}`;
   if (!bufferArrowCache[bufferKey]) {
     // Create a buffer canvas around the current vehicle to display properly the arrow
-    const arrowCanvas = getArrowCanvas(fillColor, pixelRatio);
+    const arrowCanvas = getArrowCanvas(arrowSize, fillColor, pixelRatio);
     if (arrowCanvas) {
       const bufferCanvas = createCanvas(
         width + arrowCanvas.width * 2 + margin * 2,
@@ -342,6 +351,10 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
   const {
     delayDisplay = 300000,
     delayOutlineColor = '#000',
+    getArrowSize = (radius = 0) => {
+      console.log(radius);
+      return [(radius * 3) / 4, radius];
+    },
     getBgColor = () => {
       return '#000';
     },
@@ -473,14 +486,18 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
       delay === null &&
       operatorProvidesRealtime === 'yes';
 
-    const isDisplayDelayText =
+    const hasDelayText =
       isDisplayStrokeAndDelay &&
       (hover || (delay || 0) >= delayDisplay || cancelled);
+
+    const hasDelayBg = isDisplayStrokeAndDelay && delay !== null;
+
+    const hasHeading = useHeadingStyle && isDisplayText && rotation;
 
     // Show delay if feature is hovered or if delay is above 5mins
     let fontSize = 0;
     let text = null;
-    if (isDisplayDelayText) {
+    if (hasDelayText) {
       // Draw delay text
       fontSize =
         Math.max(
@@ -491,7 +508,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
     }
 
     // Draw colored circle with black border
-    let circle = getCircleCanvas(
+    const circle = getCircleCanvas(
       radius,
       circleFillColor,
       hasStroke,
@@ -501,7 +518,7 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
 
     // Draw circle delay background
     let delayBg = null;
-    if (isDisplayStrokeAndDelay && delay !== null) {
+    if (hasDelayBg) {
       delayBg = getDelayBgCanvas(
         radius,
         getDelayColor(delay, cancelled),
@@ -524,55 +541,53 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
 
     // Draw rotated arrow and add the circle in it
     let isArrowOnDelaySide = true;
-
-    if (isDisplayText && useHeadingStyle && rotation && circle) {
+    let bufferArrow = null;
+    const canvasRef = delayBg ?? circle;
+    if (hasHeading && canvasRef && circle) {
       const radianAdjusted = rotation % (2 * Math.PI);
       if (-0.5 > radianAdjusted || radianAdjusted > 0.5) {
         isArrowOnDelaySide = false;
       }
 
-      const bufferArrow = getBufferArrowCanvas(
-        circle.width,
-        circle.height,
+      bufferArrow = getBufferArrowCanvas(
+        canvasRef.width,
+        canvasRef.height,
         circleFillColor,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
+        getArrowSize(radius / pixelRatio, viewState),
         rotation,
         pixelRatio,
       );
-
-      if (bufferArrow) {
-        const vehicleWithArrow = createCanvas(
-          bufferArrow.width,
-          bufferArrow.height,
-        );
-        const context: AnyCanvasContext = vehicleWithArrow?.getContext(
-          '2d',
-        ) as AnyCanvasContext;
-        context?.drawImage(
-          bufferArrow,
-          0,
-          0,
-          bufferArrow.width,
-          bufferArrow.height,
-        );
-        context?.drawImage(
-          circle,
-          bufferArrow.width / 2 - circle.width / 2,
-          bufferArrow.height / 2 - circle.height / 2,
-          circle.width,
-          circle.height,
-        );
-        circle = vehicleWithArrow;
-      }
     }
 
-    // Create the canvas
-    const width = (circle?.width ?? 0) + (delayText?.width ?? 0) * 2;
-    const height = circle?.height ?? 0;
+    // Create the canvas using the biggest width between all the elements
+
+    const biggestCircleWidthWithoutArrow = Math.max(
+      delayBg?.width ?? 0,
+      circle?.width ?? 0,
+    );
+    const biggestCircleWidth = Math.max(
+      bufferArrow?.width ?? 0,
+      delayBg?.width ?? 0,
+      circle?.width ?? 0,
+    );
+    const width = biggestCircleWidth + (delayText?.width ?? 0) * 2;
+    const height =
+      bufferArrow?.height ?? delayBg?.height ?? circle?.height ?? 0;
     const canvas = createCanvas(width, height);
     if (canvas) {
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
       if (!ctx) {
         return null;
+      }
+
+      if (bufferArrow) {
+        // Draw in the middle of the canvas
+        ctx?.drawImage(
+          bufferArrow,
+          canvas.width / 2 - bufferArrow.width / 2,
+          canvas.height / 2 - bufferArrow.height / 2,
+        );
       }
 
       if (delayBg) {
@@ -619,23 +634,25 @@ const realtimeDefaultStyle: RealtimeStyleFunction = (
           pixelRatio,
           getTextFont,
         );
+
+        if (circleText) {
+          // Draw in the middle of the canvas
+          ctx.drawImage(
+            circleText,
+            canvas.width / 2 - circleText.width / 2,
+            canvas.height / 2 - circleText.height / 2,
+          );
+        }
       }
 
-      if (circleText) {
-        ctx.drawImage(
-          circleText,
-          canvas.width / 2 - circleText.width / 2,
-          canvas.height / 2 - circleText.height / 2,
-        );
-      }
-
-      if (delayText && circle?.width) {
+      // Draw delay text
+      if (delayText) {
         ctx.drawImage(
           delayText,
           canvas.width / 2 +
             (isArrowOnDelaySide
-              ? circle.width
-              : (delayBg?.width ?? circle.width)) /
+              ? biggestCircleWidth
+              : biggestCircleWidthWithoutArrow) /
               2,
           canvas.height / 2 - delayText.height / 2,
         );

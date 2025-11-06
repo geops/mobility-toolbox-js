@@ -63,6 +63,7 @@ export interface RealtimeStyleOptions {
     fontSize: number,
     getFont: (fontSize: number, text?: string) => string,
   ) => number;
+  getArrowSize?: (radius: number, viewState: ViewState) => number[];
   hoverVehicleId?: RealtimeTrainId;
   noInterpolate?: boolean;
   selectedVehicleId?: RealtimeTrainId;
