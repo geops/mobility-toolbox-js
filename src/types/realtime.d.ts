@@ -119,6 +119,8 @@ export interface RealtimeFullTrajectoryProperties {
   train_id: RealtimeTrainId;
   stroke?: string;
   type?: RealtimeMot;
+  line_id?: number;
+  line_name?: string;
 }
 
 export type RealtimeGeneralizationLevel = 10 | 100 | 30 | 5;

@@ -24,7 +24,6 @@ const borderStyle = new Style({
 });
 
 const fullTrajectorystyle = (feature: Feature): Style[] => {
-  console.log(feature.getProperties());
   const { stroke, type } =
     feature.getProperties() as RealtimeFullTrajectoryProperties;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
