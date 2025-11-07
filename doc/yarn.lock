@@ -4407,7 +4407,7 @@ mkdirp@^0.5.1:
     minimist "^1.2.6"
 
 mobility-toolbox-js@./../build:
-  version "3.4.8-beta.5"
+  version "3.4.8-beta.15"
   dependencies:
     "@geoblocks/ol-maplibre-layer" "^1.0.3"
     "@geops/geops-ui" "0.3.6"

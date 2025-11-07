@@ -1,4 +1,5 @@
-import { Feature, FeatureCollection, Point } from 'geojson';
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+import type { Feature, FeatureCollection, Point } from 'geojson';
 
 export declare type RealtimeChannelModeSuffix = '_schematic' | '';
 
@@ -124,16 +125,16 @@ export interface RealtimeFullTrajectoryProperties {
   license?: string;
   licenseNote?: string;
   licenseUrl?: string;
+  line_id?: number;
+  line_name?: string;
   operator?: string;
   operatorUrl?: string;
   publisher?: string;
   publisherUrl?: string;
+  stroke?: string;
   tenant: RealtimeTenant;
   train_id: RealtimeTrainId;
-  stroke?: string;
   type?: RealtimeMot;
-  line_id?: number;
-  line_name?: string;
 }
 
 export type RealtimeGeneralizationLevel = 10 | 100 | 30 | 5;
@@ -262,8 +263,8 @@ export interface RealtimeStopSequence {
   longName?: string;
   new_destination?: string;
   operator?: string;
-  operatorUrl?: string;
   operator_provides_realtime_journey: 'no' | 'unknown' | 'yes';
+  operatorUrl?: string;
   publisher?: string;
   publisherUrl?: string;
   routeIdentifier: string;
@@ -288,10 +289,10 @@ export interface RealtimeStopSequenceResponse {
 
 export type RealtimeStopState =
   | 'BOARDING'
+  | 'HIDDEN'
+  | 'JOURNEY_CANCELLED'
   | 'LEAVING'
   | 'STOP_CANCELLED'
-  | 'JOURNEY_CANCELLED'
-  | 'HIDDEN'
   | string;
 
 export type RealtimeTenant = '' | 'sbb' | 'sbh' | 'sbm' | string;
@@ -342,6 +343,8 @@ export interface RealtimeTrajectoryProperties {
   raw_time?: string;
   ride_state?: string;
 
+  // Added by realtime engine
+  rotation?: number;
   route_identifier: string;
   routeIdentifier?: string;
   state: RealtimeTrajectoryState;
@@ -352,10 +355,8 @@ export interface RealtimeTrajectoryProperties {
   train_id?: RealtimeTrainId;
   train_number?: number;
   transmitting_vehicle?: string;
-  type: RealtimeMot;
 
-  // Added by realtime engine
-  rotation?: number;
+  type: RealtimeMot;
 }
 
 export interface RealtimeTrajectoryResponse {
