@@ -51,7 +51,7 @@ export type RealtimeLayerOptions = {
   maxNbFeaturesRequested?: number;
   styleOptions?: Partial<RealtimeStyleOptions>;
 } & MobilityLayerOptions &
-  RealtimeEngineOptions;
+  Omit<RealtimeEngineOptions, 'styleOptions'>;
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
