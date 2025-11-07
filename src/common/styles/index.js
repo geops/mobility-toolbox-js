@@ -2,6 +2,7 @@ import realtimeByDelayStyle from './realtimeByDelayStyle';
 import realtimeStyle from './realtimeStyle';
 
 export { default as realtimeByDelayStyle } from './realtimeByDelayStyle';
+export * from './realtimeDrawCanvasUtils';
 export { default as realtimeSimpleStyle } from './realtimeSimpleStyle';
 export * from './realtimeStyle';
 export { default as realtimeStyle } from './realtimeStyle';
