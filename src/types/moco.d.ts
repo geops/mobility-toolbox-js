@@ -56,6 +56,7 @@ export interface paths {
      *     $fr: Boolean!,
      *     $it: Boolean!,
      *     $en: Boolean!,
+     *     $isEdited: Boolean
      * ) {
      *     paginatedSituations(
      *         tenant: $tenant
@@ -69,7 +70,11 @@ export interface paths {
      *             affectedAt: $affectedAt,
      *             affectedBefore: $affectedBefore,
      *             affectedAfter: $affectedAfter,
-     *             hasGeoms: $hasGeoms
+     *             hasGeoms: $hasGeoms,
+     *             isEdited: $isEdited
+     *         }
+     *         order: {
+     *             startDate: ASC
      *         }
      *     ) {
      *       totalCount
@@ -88,6 +93,9 @@ export interface paths {
      *     affectedTimeIntervalsEnd
      *     publicationWindowsStart
      *     publicationWindowsEnd
+     *     source {
+     *         name
+     *     }
      *     reasons {
      *         name
      *         categoryName
@@ -111,6 +119,7 @@ export interface paths {
      *             endTime
      *         }
      *         publicationStops @include(if: $includeStops) {
+     *             id
      *             uid
      *             name
      *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -121,6 +130,7 @@ export interface paths {
      *         publicationLines @include(if: $includeLines) {
      *             hasIcon
      *             category
+     *             mot
      *             lines {
      *                 name
      *                 operatorRef
@@ -228,6 +238,7 @@ export interface paths {
      *     $fr: Boolean!,
      *     $it: Boolean!,
      *     $en: Boolean!,
+     *     $isEdited: Boolean
      * ) {
      *     paginatedSituations(
      *         tenant: $tenant
@@ -241,7 +252,11 @@ export interface paths {
      *             affectedAt: $affectedAt,
      *             affectedBefore: $affectedBefore,
      *             affectedAfter: $affectedAfter,
-     *             hasGeoms: $hasGeoms
+     *             hasGeoms: $hasGeoms,
+     *             isEdited: $isEdited
+     *         }
+     *         order: {
+     *             startDate: ASC
      *         }
      *     ) {
      *       totalCount
@@ -260,6 +275,9 @@ export interface paths {
      *     affectedTimeIntervalsEnd
      *     publicationWindowsStart
      *     publicationWindowsEnd
+     *     source {
+     *         name
+     *     }
      *     reasons {
      *         name
      *         categoryName
@@ -283,6 +301,7 @@ export interface paths {
      *             endTime
      *         }
      *         publicationStops @include(if: $includeStops) {
+     *             id
      *             uid
      *             name
      *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -293,6 +312,7 @@ export interface paths {
      *         publicationLines @include(if: $includeLines) {
      *             hasIcon
      *             category
+     *             mot
      *             lines {
      *                 name
      *                 operatorRef
@@ -709,6 +729,7 @@ export interface operations {
    *     $fr: Boolean!,
    *     $it: Boolean!,
    *     $en: Boolean!,
+   *     $isEdited: Boolean
    * ) {
    *     paginatedSituations(
    *         tenant: $tenant
@@ -722,7 +743,11 @@ export interface operations {
    *             affectedAt: $affectedAt,
    *             affectedBefore: $affectedBefore,
    *             affectedAfter: $affectedAfter,
-   *             hasGeoms: $hasGeoms
+   *             hasGeoms: $hasGeoms,
+   *             isEdited: $isEdited
+   *         }
+   *         order: {
+   *             startDate: ASC
    *         }
    *     ) {
    *       totalCount
@@ -741,6 +766,9 @@ export interface operations {
    *     affectedTimeIntervalsEnd
    *     publicationWindowsStart
    *     publicationWindowsEnd
+   *     source {
+   *         name
+   *     }
    *     reasons {
    *         name
    *         categoryName
@@ -764,6 +792,7 @@ export interface operations {
    *             endTime
    *         }
    *         publicationStops @include(if: $includeStops) {
+   *             id
    *             uid
    *             name
    *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -774,6 +803,7 @@ export interface operations {
    *         publicationLines @include(if: $includeLines) {
    *             hasIcon
    *             category
+   *             mot
    *             lines {
    *                 name
    *                 operatorRef
@@ -859,6 +889,7 @@ export interface operations {
         includeGeoms?: boolean;
         includeLines?: boolean;
         includeStops?: boolean;
+        isEdited?: boolean | null;
         it?: boolean;
         limit?: number;
         offset?: number;
@@ -914,6 +945,7 @@ export interface operations {
    *     $fr: Boolean!,
    *     $it: Boolean!,
    *     $en: Boolean!,
+   *     $isEdited: Boolean
    * ) {
    *     paginatedSituations(
    *         tenant: $tenant
@@ -927,7 +959,11 @@ export interface operations {
    *             affectedAt: $affectedAt,
    *             affectedBefore: $affectedBefore,
    *             affectedAfter: $affectedAfter,
-   *             hasGeoms: $hasGeoms
+   *             hasGeoms: $hasGeoms,
+   *             isEdited: $isEdited
+   *         }
+   *         order: {
+   *             startDate: ASC
    *         }
    *     ) {
    *       totalCount
@@ -946,6 +982,9 @@ export interface operations {
    *     affectedTimeIntervalsEnd
    *     publicationWindowsStart
    *     publicationWindowsEnd
+   *     source {
+   *         name
+   *     }
    *     reasons {
    *         name
    *         categoryName
@@ -969,6 +1008,7 @@ export interface operations {
    *             endTime
    *         }
    *         publicationStops @include(if: $includeStops) {
+   *             id
    *             uid
    *             name
    *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -979,6 +1019,7 @@ export interface operations {
    *         publicationLines @include(if: $includeLines) {
    *             hasIcon
    *             category
+   *             mot
    *             lines {
    *                 name
    *                 operatorRef
@@ -1064,6 +1105,7 @@ export interface operations {
         includeGeoms?: boolean;
         includeLines?: boolean;
         includeStops?: boolean;
+        isEdited?: boolean | null;
         it?: boolean;
         limit?: number;
         offset?: number;

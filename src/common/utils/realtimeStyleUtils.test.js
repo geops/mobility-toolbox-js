@@ -1,4 +1,4 @@
-import { getDelayText, getTypeIndex } from './realtimeConfig';
+import { getDelayText, getTypeIndex } from './realtimeStyleUtils';
 
 describe('trackerConfig', () => {
   describe('#getTypeIndex()', () => {
@@ -6,8 +6,8 @@ describe('trackerConfig', () => {
       const obj = { foo: 'foo' };
       expect(getTypeIndex(obj)).toBe(obj);
       expect(getTypeIndex(0)).toBe(0);
-      expect(getTypeIndex(null)).toBe(null);
-      expect(getTypeIndex(undefined)).toBe(undefined);
+      expect(getTypeIndex(null)).toBe(10);
+      expect(getTypeIndex(undefined)).toBe(10);
     });
 
     test('find good index for new tracker values', () => {
@@ -51,7 +51,7 @@ describe('trackerConfig', () => {
       expect(getDelayText(-45)).toBe('');
       expect(getDelayText('lalal')).toBe('');
       expect(getDelayText(null)).toBe('');
-      expect(getDelayText()).toBe('');
+      expect(getDelayText(null, null)).toBe('');
     });
   });
 });

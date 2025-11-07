@@ -1,6 +1,13 @@
 import { Circle, Fill, Stroke, Style } from 'ol/style';
 
-import type { FeatureLike } from 'ol/Feature';
+import { getColorForType } from '../../common/utils/realtimeStyleUtils';
+
+import type Feature from 'ol/Feature';
+
+import type {
+  RealtimeFullTrajectoryProperties,
+  RealtimeLayer,
+} from '../../types';
 
 const borderStyle = new Style({
   image: new Circle({
@@ -16,25 +23,15 @@ const borderStyle = new Style({
   zIndex: 2,
 });
 
-const fullTrajectorystyle = (
-  feature: FeatureLike,
-  resolution: number,
-  options: any,
-): Style[] => {
-  let lineColor = '#ffffff'; // white
+const fullTrajectorystyle = (feature: Feature): Style[] => {
+  const { stroke, type } =
+    feature.getProperties() as RealtimeFullTrajectoryProperties;
 
-  const type = feature.get('type');
-  let stroke = feature.get('stroke');
+  let lineColor = stroke || getColorForType(type) || '#000';
 
-  if (stroke && stroke[0] !== '#') {
-    stroke = `#${stroke}`;
+  if (lineColor && !lineColor.startsWith('#')) {
+    lineColor = `#${lineColor}`;
   }
-
-  lineColor =
-    stroke || options?.getBgColor(type, { name: feature.get('line_name') });
-
-  // Don't allow white lines, use red instead.
-  lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
 
   const style = [
     borderStyle,

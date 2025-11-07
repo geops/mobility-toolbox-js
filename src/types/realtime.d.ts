@@ -1,4 +1,5 @@
-import { Feature, FeatureCollection, Point } from 'geojson';
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+import type { Feature, FeatureCollection, Point } from 'geojson';
 
 export declare type RealtimeChannelModeSuffix = '_schematic' | '';
 
@@ -38,30 +39,43 @@ export interface RealtimeDeletedVehiclesResponse {
 }
 
 export interface RealtimeDeparture {
-  at_station_ds100: string;
+  aimedArrivalTime?: number;
+  aimedDepartureTime?: number;
+  arrivalDelay?: number;
+  arrivalTime?: number;
+  at_station_ds100?: string; // TODO Verify it still exists
+  at_stoppoint: string;
   call_id: number;
-  created_at: string;
-  formation: any;
+  changes: unknown[];
+  created_at: number;
+  departureDelay?: number;
+  departureTime?: number;
+  formation?: unknown;
   fzo_estimated_time: number;
   has_fzo: boolean;
+  has_realtime_journey: boolean;
+  journey_start_time?: number;
   line: RealtimeLine;
-  min_arrival_time: number;
-  new_to: boolean;
+  min_arrival_time?: number;
+  new_to?: boolean; // TODO Verify it still exists
   next_stoppoints: string[];
-  no_stop_between: boolean;
-  no_stop_till: any;
-  platform: string;
-  ris_aimed_time: number;
-  ris_estimated_time: number;
-  state: string; /// (BOARDING|STOP_CANCELLED|JOURNEY_CANCELLED|HIDDEN)/
-  time: number;
-  timediff: number; // This property seems to alawy been 0
-  timestamp: number; // This property seems to never exists
+  no_stop_between?: boolean; // TODO Verify it still exists
+  no_stop_till?: unknown; // TODO Verify it still exists
+  operator_provides_fzo: boolean;
+  platform?: string;
+  ris_aimed_time?: number;
+  ris_estimated_time?: number;
+  state: RealtimeStopState; /// (BOARDING|STOP_CANCELLED|JOURNEY_CANCELLED|HIDDEN)/
+  tenant: RealtimeTenant;
+  time?: number;
+  timediff?: number; // TODO Verify it still exists
+  timestamp?: number; // TODO Verify it still exists
   to: string[];
   train_id: RealtimeTrainId;
-  train_number: number;
-  train_type: number;
+  train_number?: number;
+  train_type?: number;
   updated_at: number;
+  vehicle_mode?: string;
 }
 
 export interface RealtimeDepartureExtended extends RealtimeDeparture {
@@ -111,12 +125,16 @@ export interface RealtimeFullTrajectoryProperties {
   license?: string;
   licenseNote?: string;
   licenseUrl?: string;
+  line_id?: number;
+  line_name?: string;
   operator?: string;
   operatorUrl?: string;
   publisher?: string;
   publisherUrl?: string;
+  stroke?: string;
   tenant: RealtimeTenant;
   train_id: RealtimeTrainId;
+  type?: RealtimeMot;
 }
 
 export type RealtimeGeneralizationLevel = 10 | 100 | 30 | 5;
@@ -139,6 +157,7 @@ export interface RealtimeLine {
   id: number;
   name: string;
   stroke: string;
+  tags: string[];
   text_color: string;
 }
 
@@ -220,34 +239,45 @@ export interface RealtimeStop {
   coordinate: number[];
   departureDelay: number;
   departureTime: number;
+  formation_id?: unknown;
   noDropOff?: boolean;
   noPickUp?: boolean;
+  platform?: unknown;
   state?: RealtimeStopState;
-  stationId: RealtimeStationId;
+  stationId?: RealtimeStationId;
   stationName: string;
+  stopUID: string;
 }
 
 export interface RealtimeStopSequence {
-  backgroundColor?: string;
   color?: string;
   destination: string;
+  extra_data?: Record<string, unknown>;
+  has_realtime: boolean;
+  has_realtime_journey: boolean;
   id: RealtimeTrainId;
   license?: string;
   licenseNote?: string;
   licenseUrl?: string;
+  line?: RealtimeLine;
   longName?: string;
   new_destination?: string;
   operator?: string;
+  operator_provides_realtime_journey: 'no' | 'unknown' | 'yes';
   operatorUrl?: string;
   publisher?: string;
   publisherUrl?: string;
   routeIdentifier: string;
   shortName: string;
+  situations?: unknown[];
   stations: RealtimeStop[];
   stroke?: RealtimeTenant;
+  tenant: RealtimeTenant;
   text_color: string;
+  train_number?: number;
   type: RealtimeMot;
-  vehicleType: number;
+  vehicle_mode?: string;
+  vehicleType: number; // TODO: Verify this property exists
 }
 
 export interface RealtimeStopSequenceResponse {
@@ -257,7 +287,13 @@ export interface RealtimeStopSequenceResponse {
   timestamp: number;
 }
 
-export type RealtimeStopState = 'BOARDING' | 'LEAVING' | string;
+export type RealtimeStopState =
+  | 'BOARDING'
+  | 'HIDDEN'
+  | 'JOURNEY_CANCELLED'
+  | 'LEAVING'
+  | 'STOP_CANCELLED'
+  | string;
 
 export type RealtimeTenant = '' | 'sbb' | 'sbh' | 'sbm' | string;
 
@@ -307,6 +343,8 @@ export interface RealtimeTrajectoryProperties {
   raw_time?: string;
   ride_state?: string;
 
+  // Added by realtime engine
+  rotation?: number;
   route_identifier: string;
   routeIdentifier?: string;
   state: RealtimeTrajectoryState;
@@ -317,10 +355,8 @@ export interface RealtimeTrajectoryProperties {
   train_id?: RealtimeTrainId;
   train_number?: number;
   transmitting_vehicle?: string;
-  type: RealtimeMot;
 
-  // Added by realtime engine
-  rotation?: number;
+  type: RealtimeMot;
 }
 
 export interface RealtimeTrajectoryResponse {
