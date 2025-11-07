@@ -4,6 +4,9 @@ export default [
     ignores: [
       'build/*',
       '__mocks__/*',
+      'src/types/stops.d.ts',
+      'src/types/routing.d.ts',
+      'src/types/moco.d.ts',
       'dev.js',
       'doc/**/*',
       './eslint.config.mjs',

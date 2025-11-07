@@ -1,7 +1,8 @@
-import { Feature } from 'ol';
-import { Coordinate } from 'ol/coordinate';
 import { ObjectEvent } from 'ol/Object';
-import { Pixel } from 'ol/pixel';
+
+import type { Feature } from 'ol';
+import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
 
 import type {
   CopyrightControl as MbCopyrightControl,
@@ -36,8 +37,8 @@ export interface ViewState {
   rotation?: number;
   size?: number[];
   time?: number;
-  zoom?: number;
   visible?: boolean;
+  zoom?: number;
 }
 
 export interface RealtimeStyleOptions {
@@ -112,9 +113,9 @@ export interface RealtimeStyleOptions {
   hoverVehicleId?: RealtimeTrainId;
   noInterpolate?: boolean;
   selectedVehicleId?: RealtimeTrainId;
+  showDelayBg: boolean;
   useDelayStyle: boolean;
   useHeadingStyle: boolean;
-  showDelayBg: boolean;
 }
 
 export type RealtimeTrajectories = Record<RealtimeTrainId, RealtimeTrajectory>;
@@ -151,10 +152,10 @@ export interface LayerGetFeatureInfoResponse {
 }
 
 export interface LayerGetFeatureInfoOptions {
-  nb?: number;
   hitTolerance: number;
+  nb?: number;
 }
 
-export type RoutingGraph = [RoutingParameters['graph'] | 'osm', number, number];
+export type RoutingGraph = ['osm' | RoutingParameters['graph'], number, number];
 export type RoutingMot = RoutingParameters['mot'];
 export type RoutingViaPoint = Coordinate | string;
