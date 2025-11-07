@@ -26,8 +26,8 @@ const borderStyle = new Style({
 const fullTrajectorystyle = (feature: Feature): Style[] => {
   const { stroke, type } =
     feature.getProperties() as RealtimeFullTrajectoryProperties;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  let lineColor = stroke || getColorForType(type) || '#000';
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  let lineColor = (stroke || getColorForType(type) || '#000') as string;
 
   if (lineColor && !lineColor.startsWith('#')) {
     lineColor = `#${lineColor}`;
