@@ -150,8 +150,9 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return 14;
   },
   showDelayBg: true,
+  showDelayText: true,
+  showHeading: false,
   useDelayStyle: false,
-  useHeadingStyle: false,
 
   // We apply the style options for mot by default to have a usable style out of the box
   ...styleOptionsForMot,

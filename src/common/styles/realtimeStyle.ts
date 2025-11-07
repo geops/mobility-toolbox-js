@@ -53,8 +53,9 @@ const realtimeStyle: RealtimeStyleFunction = (
     hoverVehicleId,
     selectedVehicleId,
     showDelayBg,
+    showDelayText,
+    showHeading,
     useDelayStyle,
-    useHeadingStyle,
   } = options;
 
   const { pixelRatio = 1 } = viewState;
@@ -94,7 +95,7 @@ const realtimeStyle: RealtimeStyleFunction = (
   const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${hover || selected}${useHeadingStyle ? rotation : ''}`;
+  let key = `${radius}${hover || selected}${showHeading ? rotation : ''}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}${delay}${cancelled}`;
@@ -127,13 +128,13 @@ const realtimeStyle: RealtimeStyleFunction = (
       operatorProvidesRealtime === 'yes';
 
     const hasDelayText =
+      showDelayText &&
       isDisplayStrokeAndDelay &&
       (hover || (delay || 0) >= delayDisplay || cancelled);
 
-    const hasDelayBg =
-      !!showDelayBg && isDisplayStrokeAndDelay && delay !== null;
+    const hasDelayBg = showDelayBg && isDisplayStrokeAndDelay && delay !== null;
 
-    const hasHeading = useHeadingStyle && isDisplayText && rotation;
+    const hasHeading = showHeading && isDisplayText && rotation;
 
     // Show delay if feature is hovered or if delay is above 5mins
     let fontSize = 0;
