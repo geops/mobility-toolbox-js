@@ -4,7 +4,6 @@ import {
   type RealtimeTrajectory,
   type ViewState,
 } from '../../types';
-import { styleOptions } from '../utils/realtimeConfig';
 
 import realtimeStyle from './realtimeStyle';
 
@@ -23,16 +22,17 @@ const realtimeByLineStyle: RealtimeStyleFunction = (
   options: RealtimeStyleOptions,
 ) => {
   return realtimeStyle(trajectory, viewState, {
-    ...styleOptions,
-    getColor: (traj: RealtimeTrajectory): string => {
+    ...options,
+    getColor: (traj?: RealtimeTrajectory): string => {
       let color = traj?.properties?.line?.color;
 
       if (color && !color.startsWith('#')) {
         color = `#${color}`;
       }
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       return color || '#000';
     },
-    getTextColor: (traj: RealtimeTrajectory) => {
+    getTextColor: (traj?: RealtimeTrajectory) => {
       let color = traj?.properties?.line?.text_color;
 
       if (color && !color.startsWith('#')) {
@@ -40,7 +40,6 @@ const realtimeByLineStyle: RealtimeStyleFunction = (
       }
       return color || '#fff';
     },
-    ...options,
   });
 };
 

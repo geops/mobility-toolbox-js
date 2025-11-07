@@ -5,9 +5,13 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { fromLonLat } from 'ol/proj';
 
 import { RealtimeAPI, RealtimeModes } from '../../api';
-import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
+import realtimeStyle from '../styles/realtimeStyle';
 
-import * as realtimeConfig from './realtimeConfig';
+import {
+  MOTS_ONLY_RAIL,
+  MOTS_WITHOUT_CABLE,
+  styleOptionsForMot,
+} from './realtimeStyleUtils';
 import renderTrajectories from './renderTrajectories';
 
 import type { FeatureCollection } from 'geojson';
@@ -86,6 +90,74 @@ export interface RealtimeEngineOptions {
 }
 
 /**
+ * Basic style options used by default in the RealtimeEngine.
+ */
+export const defaultStyleOptions: RealtimeStyleOptions = {
+  delayDisplay: 300000,
+  delayOutlineColor: '#000',
+  getArrowSize: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+    radius = 0,
+  ) => {
+    return [(radius * 3) / 4, radius];
+  },
+  getColor: () => {
+    return '#000';
+  },
+  getDelayColor: () => {
+    return '#000';
+  },
+  getDelayFont: (
+    traj?: RealtimeTrajectory,
+    viewState?: ViewState,
+    fontSize?: number,
+  ) => {
+    return `bold ${fontSize}px arial, sans-serif`;
+  },
+  getDelayText: () => {
+    return '';
+  },
+  getDelayTextColor: () => {
+    return '#000';
+  },
+  getImage: () => {
+    return null;
+  },
+  getMaxRadiusForStrokeAndDelay: () => {
+    return 7;
+  },
+  getMaxRadiusForText: () => {
+    return 10;
+  },
+  getRadius: () => {
+    return 5;
+  },
+  getText: ((traj: RealtimeTrajectory) => {
+    return traj?.properties?.line?.name || 'U';
+  }) as RealtimeStyleOptions['getText'],
+  getTextColor: () => {
+    return '#fff';
+  },
+  getTextFont: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+    fontSize?: number,
+  ) => {
+    return `bold ${fontSize}px arial, sans-serif`;
+  },
+  getTextSize: () => {
+    return 14;
+  },
+  showDelayBg: true,
+  useDelayStyle: false,
+  useHeadingStyle: false,
+
+  // We apply the style options for mot by default to have a usable style out of the box
+  ...styleOptionsForMot,
+};
+
+/**
  * This class is responsible for drawing trajectories from a realtime API in a canvas,
  * depending on the map's view state and at a specific time.
  *
@@ -136,7 +208,7 @@ class RealtimeEngine {
   selectedVehicle!: RealtimeTrajectory;
   selectedVehicleId?: RealtimeTrainId;
   sort?: SortFunction;
-  styleOptions?: RealtimeStyleOptions;
+  styleOptions: RealtimeStyleOptions;
   tenant: RealtimeTenant;
   throttleRenderTrajectories: (
     viewState: ViewState,
@@ -195,7 +267,7 @@ class RealtimeEngine {
   constructor(options: RealtimeEngineOptions) {
     this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
     this._speed = options.speed ?? 1; // If live property is true. The speed is ignored.
-    this._style = options.style ?? realtimeDefaultStyle;
+    this._style = options.style ?? realtimeStyle;
     this._time = options.time ?? new Date();
 
     this.api = options.api ?? new RealtimeAPI(options);
@@ -225,7 +297,10 @@ class RealtimeEngine {
     /**
      * Custom options to pass as last parameter of the style function.
      */
-    this.styleOptions = { ...(options.styleOptions ?? {}) };
+    this.styleOptions = {
+      ...defaultStyleOptions,
+      ...(options.styleOptions ?? {}),
+    };
     this.tenant = options.tenant ?? ''; // sbb,sbh or sbm
     this.trajectories = {};
     this.useDebounce = options.useDebounce ?? false;
@@ -256,17 +331,17 @@ class RealtimeEngine {
     // Mots by zoom
     // Server will block non train before zoom 9
     this.motsByZoom = options.motsByZoom ?? [
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_WITHOUT_CABLE,
-      realtimeConfig.MOTS_WITHOUT_CABLE,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_WITHOUT_CABLE,
+      MOTS_WITHOUT_CABLE,
     ];
     this.getMotsByZoom = (zoom) => {
       if (options.getMotsByZoom) {
@@ -721,6 +796,7 @@ class RealtimeEngine {
         time: time.getTime(),
       },
       {
+        ...this.styleOptions,
         filter: this.filter,
         hoverVehicleId: this.hoverVehicleId,
         noInterpolate:
@@ -728,7 +804,6 @@ class RealtimeEngine {
             ? true
             : noInterpolate,
         selectedVehicleId: this.selectedVehicleId,
-        ...this.styleOptions,
       },
     );
 

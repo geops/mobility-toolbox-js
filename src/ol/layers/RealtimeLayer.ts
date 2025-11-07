@@ -35,6 +35,7 @@ import type { State } from 'ol/View';
 import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
+import type { RealtimeStyleOptions } from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
@@ -45,9 +46,10 @@ export type RealtimeLayerOptions = {
   fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
-    options: any,
+    layer: RealtimeLayer,
   ) => void;
   maxNbFeaturesRequested?: number;
+  styleOptions?: Partial<RealtimeStyleOptions>;
 } & MobilityLayerOptions &
   RealtimeEngineOptions;
 
@@ -150,6 +152,14 @@ class RealtimeLayer extends Layer {
     }
   }
 
+  get styleOptions() {
+    return this.engine.styleOptions;
+  }
+
+  set styleOptions(options) {
+    this.engine.styleOptions = options;
+  }
+
   get time() {
     return this.engine.time || new Date();
   }
@@ -200,7 +210,7 @@ class RealtimeLayer extends Layer {
         return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
           feature as Feature,
           resolution,
-          this.engine.styleOptions,
+          this,
         );
       },
       updateWhileAnimating: this.allowRenderWhenAnimating,

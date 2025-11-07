@@ -1,4 +1,4 @@
-import realtimeDefaultStyle from './realtimeDefaultStyle';
+import realtimeStyle from './realtimeStyle';
 
 import type {
   RealtimeStyleFunction,
@@ -20,7 +20,7 @@ const realtimeDelayStyle: RealtimeStyleFunction = (
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => {
-  return realtimeDefaultStyle(trajectory, viewState, {
+  return realtimeStyle(trajectory, viewState, {
     ...options,
     useDelayStyle: true,
   });

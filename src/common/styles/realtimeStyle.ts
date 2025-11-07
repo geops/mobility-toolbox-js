@@ -339,67 +339,25 @@ const realtimeStyle: RealtimeStyleFunction = (
   options: RealtimeStyleOptions,
 ) => {
   const {
-    delayDisplay = 300000,
-    delayOutlineColor = '#000',
-    getArrowSize = (
-      traj: RealtimeTrajectory,
-      viewSt: ViewState,
-      radius = 0,
-    ) => {
-      return [(radius * 3) / 4, radius];
-    },
-    getColor = () => {
-      return '#000';
-    },
-    getDelayColor = () => {
-      return '#000';
-    },
-    getDelayFont = ((
-      traj: RealtimeTrajectory,
-      viewSt: ViewState,
-      fontSize: number,
-    ) => {
-      return `bold ${fontSize}px arial, sans-serif`;
-    }) as RealtimeStyleOptions['getDelayFont'],
-    getDelayText = () => {
-      return null;
-    },
-    getDelayTextColor = () => {
-      return '#000';
-    },
-    getImage = () => {
-      return null;
-    },
-    getMaxRadiusForStrokeAndDelay = () => {
-      return 7;
-    },
-    getMaxRadiusForText = () => {
-      return 10;
-    },
-    getRadius = () => {
-      return 5;
-    },
-    getText = ((traj: RealtimeTrajectory) => {
-      return traj?.properties?.line?.name || 'U';
-    }) as RealtimeStyleOptions['getText'],
-    getTextColor = () => {
-      return '#fff';
-    },
-    getTextFont = (
-      traj: RealtimeTrajectory,
-      viewSt: ViewState,
-      fontSize: number,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      text?: string,
-    ) => {
-      return `bold ${fontSize}px arial, sans-serif`;
-    },
-    getTextSize = () => {
-      return 14;
-    },
+    delayDisplay,
+    delayOutlineColor,
+    getArrowSize,
+    getColor,
+    getDelayColor,
+    getDelayFont,
+    getDelayText,
+    getDelayTextColor,
+    getImage,
+    getMaxRadiusForStrokeAndDelay,
+    getMaxRadiusForText,
+    getRadius,
+    getText,
+    getTextColor,
+    getTextFont,
+    getTextSize,
     hoverVehicleId,
     selectedVehicleId,
-    showDelayBg = true,
+    showDelayBg,
     useDelayStyle,
     useHeadingStyle,
   } = options;
@@ -561,7 +519,6 @@ const realtimeStyle: RealtimeStyleFunction = (
       delayText = getDelayTextCanvas(
         text,
         fontSize,
-        // @ts-expect-error improve types
         getDelayFont(trajectory, viewState, fontSize, text),
         getDelayColor(trajectory, viewState, delay, cancelled, true),
         delayOutlineColor,

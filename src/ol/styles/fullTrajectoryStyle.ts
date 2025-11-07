@@ -1,8 +1,13 @@
 import { Circle, Fill, Stroke, Style } from 'ol/style';
 
+import { getColorForType } from '../../common/utils/realtimeStyleUtils';
+
 import type Feature from 'ol/Feature';
 
-import type { RealtimeStyleOptions } from '../../types';
+import type {
+  RealtimeFullTrajectoryProperties,
+  RealtimeLayer,
+} from '../../types';
 
 const borderStyle = new Style({
   image: new Circle({
@@ -18,29 +23,16 @@ const borderStyle = new Style({
   zIndex: 2,
 });
 
-const fullTrajectorystyle = (
-  feature: Feature,
-  resolution: number,
-  options?: RealtimeStyleOptions,
-): Style[] => {
-  let lineColor = '#ffffff'; // white
-
-  const type = feature.get('type');
-  let stroke = feature.get('stroke');
-
-  if (stroke && stroke[0] !== '#') {
-    stroke = `#${stroke}`;
-  }
-
-  console.log(feature);
+const fullTrajectorystyle = (feature: Feature): Style[] => {
+  console.log(feature.getProperties());
+  const { stroke, type } =
+    feature.getProperties() as RealtimeFullTrajectoryProperties;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  lineColor =
-    stroke ||
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    options?.getColor?.({ properties: feature.getProperties() }, undefined);
+  let lineColor = stroke || getColorForType(type) || '#000';
 
-  // Don't allow white lines, use red instead.
-  lineColor = /#ffffff/i.test(lineColor) ? '#ff0000' : lineColor;
+  if (lineColor && !lineColor.startsWith('#')) {
+    lineColor = `#${lineColor}`;
+  }
 
   const style = [
     borderStyle,

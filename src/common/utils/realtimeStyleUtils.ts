@@ -1,5 +1,6 @@
 import type {
   AnyCanvasContext,
+  RealtimeLine,
   RealtimeMot,
   RealtimeStyleOptions,
   RealtimeTrajectory,
@@ -100,25 +101,28 @@ export const getTypeIndex = (type: RealtimeMot): number => {
   return type;
 };
 
-export const getRadius = (
-  trajectory?: RealtimeTrajectory,
-  viewState?: ViewState,
+export const getRadiusForTypeAndZoom = (
+  type?: RealtimeMot,
+  zoom?: number,
 ): number => {
-  const type = trajectory?.properties?.type;
-  const zoom = Math.min(Math.floor(viewState?.zoom || 1), 16);
+  const z = Math.min(Math.floor(zoom ?? 1), 16);
   try {
     const typeIdx = getTypeIndex(type ?? 'rail');
-    return radiusMapping[typeIdx][zoom];
+    return radiusMapping[typeIdx][z];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return 1;
   }
 };
 
-export const getColor = (trajectory: RealtimeTrajectory): string => {
-  const type = trajectory.properties.type;
+/**
+ * @deprecated use getRadiusForTypeAndZoom
+ */
+export const getRadius = getRadiusForTypeAndZoom;
+
+export const getColorForType = (type?: RealtimeMot): string => {
   try {
-    const typeIdx = getTypeIndex(type);
+    const typeIdx = getTypeIndex(type || 'rail');
     return bgColors[typeIdx];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
@@ -126,19 +130,38 @@ export const getColor = (trajectory: RealtimeTrajectory): string => {
   }
 };
 
-export const getTextColor = (trajectory: RealtimeTrajectory): string => {
-  const type = trajectory.properties.type;
+/**
+ * @deprecated use getColorForType
+ */
+export const getBgColor = getColorForType;
+
+export const getTextColorForType = (type?: RealtimeMot): string => {
   try {
-    const typeIdx = getTypeIndex(type);
+    const typeIdx = getTypeIndex(type || 'rail');
     return textColors[typeIdx];
   } catch (e) {
     return '#ffffff';
   }
 };
 
+export const getTextColorForLine = (
+  line?: RealtimeLine,
+): string | undefined => {
+  let color = line?.text_color;
+
+  if (color && !color.startsWith('#')) {
+    color = `#${color}`;
+  }
+
+  return color;
+};
+
+/**
+ * @deprecated use getTextColorForType
+ */
+export const getTextColor = getTextColorForType;
+
 export const getTextSize = (
-  trajectory?: RealtimeTrajectory,
-  viewState?: ViewState,
   ctx?: AnyCanvasContext,
   markerSize?: number,
   text?: string,
@@ -166,8 +189,6 @@ export const getTextSize = (
 };
 
 export const getDelayColor = (
-  trajectory?: RealtimeTrajectory,
-  viewState?: ViewState,
   delayInMs?: null | number,
   cancelled?: boolean,
   isDelayText?: boolean,
@@ -196,12 +217,7 @@ export const getDelayColor = (
   return '#00a00c'; // green { r: 0, g: 160, b: 12, s: '0,160,12' };
 };
 
-export const getDelayText = (
-  trajectory?: RealtimeTrajectory,
-  viewState?: ViewState,
-  delay?: number,
-  cancelled?: boolean,
-): string => {
+export const getDelayText = (delay?: number, cancelled?: boolean): string => {
   if (cancelled) {
     return String.fromCodePoint(0x00d7);
   }
@@ -230,11 +246,70 @@ export const getDelayText = (
   return '';
 };
 
-export const styleOptions: RealtimeStyleOptions = {
-  getColor: getColor,
-  getDelayColor,
-  getDelayText,
-  getRadius,
-  getTextColor,
-  getTextSize,
+export const getColorForLine = (line?: RealtimeLine): string | undefined => {
+  let color = line?.color;
+
+  if (color && !color.startsWith('#')) {
+    color = `#${color}`;
+  }
+
+  return color;
+};
+
+/**
+ * This object is the default style options for the realtime layer.
+ * The colors are defined depending of the trajectory`s line, and if it does
+ * not exist, depending of the mot type of the trajectory.
+ */
+export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
+  getColor: (trajectory?: RealtimeTrajectory): string => {
+    return (
+      getColorForLine(trajectory?.properties?.line) ||
+      getColorForType(trajectory?.properties?.type) ||
+      '#000'
+    );
+  },
+  getDelayColor: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+    delayInMs?: null | number,
+    cancelled?: boolean,
+    isDelayText?: boolean,
+  ): string => {
+    return getDelayColor(delayInMs, cancelled, isDelayText) || 'transparent';
+  },
+  getDelayText: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+    delay?: number,
+    cancelled?: boolean,
+  ): string => {
+    return getDelayText(delay, cancelled) || '';
+  },
+  getRadius: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+  ): number => {
+    return (
+      getRadiusForTypeAndZoom(trajectory?.properties?.type, viewState?.zoom) ||
+      1
+    );
+  },
+  getTextColor: (trajectory: RealtimeTrajectory): string => {
+    return (
+      getTextColorForLine(trajectory.properties.line) ||
+      getTextColorForType(trajectory.properties.type)
+    );
+  },
+  getTextSize: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+    ctx?: AnyCanvasContext,
+    markerSize?: number,
+    text?: string,
+    fontSize?: number,
+    font?: string,
+  ): number => {
+    return getTextSize(ctx, markerSize, text, fontSize, font) || 12;
+  },
 };

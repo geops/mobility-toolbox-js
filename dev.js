@@ -12,10 +12,6 @@ import {
   MocoLayer,
   realtimeDefaultStyle,
   RealtimeLayer,
-  realtimeByLineStyle,
-  realtimeByDelayStyle,
-  realtimeStyle,
-  realtimeByMotStyle,
 } from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
@@ -42,11 +38,15 @@ const realtimeLayer = new RealtimeLayer({
   url: 'wss://api.geops.io/tracker-ws/v1/', // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
   styleOptions: {
-    useHeadingStyle: true,
+    // useHeadingStyle: true,
+    // useDelayStyle: true,
   },
-  style: realtimeByMotStyle,
+  // style: realtimeByMotStyle,
   // tenant: 'sbm',
   tenant: 'trenord',
+  // bboxParameters: {
+  //   line_tags: 'RVF',
+  // },
 });
 
 const mocoLayer = new MocoLayer({

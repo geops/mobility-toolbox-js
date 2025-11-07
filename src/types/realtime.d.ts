@@ -117,6 +117,8 @@ export interface RealtimeFullTrajectoryProperties {
   publisherUrl?: string;
   tenant: RealtimeTenant;
   train_id: RealtimeTrainId;
+  stroke?: string;
+  type?: RealtimeMot;
 }
 
 export type RealtimeGeneralizationLevel = 10 | 100 | 30 | 5;
