@@ -27,7 +27,7 @@ const fullTrajectorystyle = (feature: Feature): Style[] => {
   const { stroke, type } =
     feature.getProperties() as RealtimeFullTrajectoryProperties;
 
-  let lineColor = stroke || getColorForType(type) || '#000';
+  let lineColor = stroke || getColorForType(type as string) || '#000';
 
   if (lineColor && !lineColor.startsWith('#')) {
     lineColor = `#${lineColor}`;

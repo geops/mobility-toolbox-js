@@ -64,6 +64,7 @@ export const types: RegExp[] = [
   /^Funicular/i,
   /^(Long distance bus|coach)/i,
   /^Rail/i, // New endpoint use Rail instead of Train.
+  /^unknown/i, // in case the type is not defined
 ];
 
 export const bgColors: string[] = [
@@ -77,6 +78,7 @@ export const bgColors: string[] = [
   '#00d237',
   '#b5b5b5',
   '#ff8080',
+  '#ffb400',
 ];
 
 export const textColors: string[] = [
@@ -92,24 +94,41 @@ export const textColors: string[] = [
   '#000000',
 ];
 
-export const getTypeIndex = (type: number | RealtimeMot): number => {
-  if (typeof type === 'string') {
-    return (
-      types.findIndex((t) => {
-        return t.test(type);
-      }) || 0
-    );
+export const DEFAULT_TYPE = 'unknown';
+export const findDefaultIndexType = () => {
+  return types.findIndex((r) => {
+    return r.test(DEFAULT_TYPE);
+  });
+};
+
+export const getTypeIndex = (
+  type?: 'unknown' | number | RealtimeMot,
+): number => {
+  const t = type;
+
+  if (t === undefined || t === null) {
+    return findDefaultIndexType();
   }
-  return type;
+
+  if (typeof t === 'string') {
+    const index = types.findIndex((r) => {
+      return r.test(t);
+    });
+    if (index === -1) {
+      return findDefaultIndexType();
+    }
+    return index;
+  }
+  return t;
 };
 
 export const getRadiusForTypeAndZoom = (
-  type: number | RealtimeMot,
+  type?: RealtimeMot,
   zoom?: number,
 ): number => {
   const z = Math.min(Math.floor(zoom ?? 1), 16);
   try {
-    const typeIdx = getTypeIndex(type || 0);
+    const typeIdx = getTypeIndex(type);
     return radiusMapping[typeIdx][z];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
@@ -122,7 +141,7 @@ export const getRadiusForTypeAndZoom = (
  */
 export const getRadius = getRadiusForTypeAndZoom;
 
-export const getColorForType = (type: number | RealtimeMot): string => {
+export const getColorForType = (type?: RealtimeMot): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return bgColors[typeIdx];
@@ -137,7 +156,7 @@ export const getColorForType = (type: number | RealtimeMot): string => {
  */
 export const getBgColor = getColorForType;
 
-export const getTextColorForType = (type: number | RealtimeMot): string => {
+export const getTextColorForType = (type?: RealtimeMot): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return textColors[typeIdx];
@@ -267,7 +286,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
   getColor: (trajectory?: RealtimeTrajectory): string => {
     return (
       getColorForLine(trajectory?.properties?.line) ||
-      getColorForType(trajectory?.properties?.type || 0) ||
+      getColorForType(trajectory?.properties?.type) ||
       '#000'
     );
   },
@@ -293,10 +312,8 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     viewState?: ViewState,
   ): number => {
     return (
-      getRadiusForTypeAndZoom(
-        trajectory?.properties?.type || 0,
-        viewState?.zoom,
-      ) || 1
+      getRadiusForTypeAndZoom(trajectory?.properties?.type, viewState?.zoom) ||
+      1
     );
   },
   getTextColor: (trajectory: RealtimeTrajectory): string => {
