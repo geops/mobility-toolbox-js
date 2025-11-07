@@ -43,7 +43,7 @@ const realtimeLayer = new RealtimeLayer({
   },
   // style: realtimeByMotStyle,
   // tenant: 'sbm',
-  tenant: 'trenord',
+  // tenant: 'trenord',
   // bboxParameters: {
   //   line_tags: 'RVF',
   // },
@@ -58,7 +58,12 @@ const mocoLayer = new MocoLayer({
 });
 
 const map = new Map({
-  layers: [baseLayer, realtimeLayer, mocoLayer, mapsetLayer],
+  layers: [
+    baseLayer,
+    realtimeLayer,
+    // mocoLayer,
+    // mapsetLayer
+  ],
   target: 'map',
   view: new View({
     // center: [872814.6006106276, 6106276.43], // rvf
@@ -74,12 +79,14 @@ map.on('pointermove', (evt) => {
   }
   const pixel = map.getEventPixel(evt.originalEvent);
   const [feature] = map.getFeaturesAtPixel(pixel, {
-    filter: (l) => l === realtimeLayer,
+    hitTolerance: 10,
+    layerFilter: (l) => l === realtimeLayer,
   });
 
   // realtimeLayer.hoverVehicleId = feature?.get('train_id');
 
   realtimeLayer.highlight(feature);
+  console.log(feature?.getProperties());
   map.getTargetElement().style.cursor = feature ? 'pointer' : '';
 });
 
@@ -90,10 +97,14 @@ map.on('singleclick', (evt) => {
   const pixel = map.getEventPixel(evt.originalEvent);
   const [feature] = map.getFeaturesAtPixel(pixel, {
     hitTolerance: 10,
-    filter: (l) => l === realtimeLayer,
+    layerFilter: (l) => l === realtimeLayer,
   });
 
   realtimeLayer.select([feature]);
+});
+map.on('moveend', () => {
+  const zoom = map.getView().getZoom();
+  console.log('Current zoom level:', zoom);
 });
 
 // const urlInput = document?.getElementById('url-input');

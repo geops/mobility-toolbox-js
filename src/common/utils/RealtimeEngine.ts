@@ -80,7 +80,7 @@ export interface RealtimeEngineOptions {
   sort?: SortFunction;
   speed?: number;
   style?: RealtimeStyleFunction;
-  styleOptions?: RealtimeStyleOptions;
+  styleOptions?: Partial<RealtimeStyleOptions>;
   tenant?: RealtimeTenant;
   time?: Date;
   url?: string;
