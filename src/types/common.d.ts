@@ -1,29 +1,17 @@
-import { ObjectEvent } from 'ol/Object';
-
 import type { Feature } from 'ol';
 import type { Coordinate } from 'ol/coordinate';
 import type { Pixel } from 'ol/pixel';
 
 import type {
   CopyrightControl as MbCopyrightControl,
-  layer as MbLayer,
   RealtimeLayer as MbRealtimeLayer,
 } from '../maplibre';
 import type {
-  MapboxLayer,
-  MaplibreLayer,
-  MapsetLayer,
   CopyrightControl as OlCopyrightControl,
-  layer as OlLayer,
   RealtimeLayer as OlRealtimeLayer,
 } from '../ol';
 
-import type {
-  RealtimeLine,
-  RealtimeMot,
-  RealtimeTrainId,
-  RealtimeTrajectory,
-} from './realtime';
+import type { RealtimeTrainId, RealtimeTrajectory } from './realtime';
 
 import type { RoutingParameters } from '.';
 
