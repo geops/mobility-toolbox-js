@@ -281,7 +281,7 @@ class RealtimeAPI {
   getFullTrajectory(
     id: RealtimeTrainId,
     mode: RealtimeMode,
-    generalizationLevel: RealtimeGeneralizationLevel | undefined,
+    generalizationLevel?: RealtimeGeneralizationLevel,
   ): Promise<WebSocketAPIMessageEventData<RealtimeFullTrajectory>> {
     let suffix = '';
     if (this.version === '1') {
