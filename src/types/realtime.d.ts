@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import type { Feature, FeatureCollection, Point } from 'geojson';
 
+import type { components } from './realtimerest.d.ts';
+
+export { operations as RealtimeRestOperations } from './realtimerest.d.ts';
+
 export declare type RealtimeChannelModeSuffix = '_schematic' | '';
 
 export declare type RealtimeMode = 'raw' | 'schematic' | 'topographic';
+
+export type RealtimeTrainsByRouteIdentifierResult =
+  components['schemas']['TrainsByRouteIdentifierResult'];
 
 /**
  * @type RealtimeBbox
@@ -92,15 +99,6 @@ export interface RealtimeExtraGeomDeleted {
   properties: RealtimeExtraGeomProperties;
   type: 'Deleted';
 }
-// minX: number,
-// minY: number,
-// maxX: number,
-// maxY: number,
-// zoom: number,
-// string?,
-// `gen_level=${RealtimeGeneralizationLevel}`| undefined,
-// `tenant=${UnionConcat<RealtimeTenant, ','>}`!,
-// `mots=${UnionConcat<RealtimeMot, ','>}`!,
 
 export interface RealtimeExtraGeomProperties {
   ref: number | string;
@@ -114,30 +112,19 @@ export interface RealtimeExtraGeomsResponse {
   source: `extra_geoms`;
   timestamp: number;
 }
+export type RealtimeFeedCollection = components['schemas']['FeedCollection'];
+export type RealtimeFeed = components['schemas']['Feed'];
 
-export interface RealtimeFullTrajectory extends FeatureCollection {
-  properties: RealtimeFullTrajectoryProperties;
-}
+export type RealtimeFullTrajectoryCollection =
+  components['schemas']['FullTrajectoryCollection'];
 
-export interface RealtimeFullTrajectoryProperties {
-  gen_level?: RealtimeGeneralizationLevel;
-  gen_range: [number, number];
-  license?: string;
-  licenseNote?: string;
-  licenseUrl?: string;
-  line_id?: number;
-  line_name?: string;
-  operator?: string;
-  operatorUrl?: string;
-  publisher?: string;
-  publisherUrl?: string;
-  stroke?: string;
-  tenant: RealtimeTenant;
-  train_id: RealtimeTrainId;
-  type?: RealtimeMot;
-}
+export type RealtimeFullTrajectory = components['schemas']['FullTrajectory'];
 
-export type RealtimeGeneralizationLevel = 10 | 100 | 30 | 5;
+export type RealtimeFullTrajectoryCollectionProperties =
+  components['schemas']['FullTrajectoryCollectionProperties'];
+
+export type RealtimeFullTrajectoryProperties =
+  components['schemas']['FullTrajectoryProperties'];
 
 export interface RealtimeHealth {
   heathly: boolean;
@@ -152,14 +139,7 @@ export interface RealtimeHealthCheckResponse {
   timestamp: number;
 }
 
-export interface RealtimeLine {
-  color: string;
-  id: number;
-  name: string;
-  stroke: string;
-  tags: string[];
-  text_color: string;
-}
+export type RealtimeLine = components['schemas']['Line'];
 
 export type RealtimeMot =
   | 'bus'
@@ -249,36 +229,9 @@ export interface RealtimeStop {
   stopUID: string;
 }
 
-export interface RealtimeStopSequence {
-  color?: string;
-  destination: string;
-  extra_data?: Record<string, unknown>;
-  has_realtime: boolean;
-  has_realtime_journey: boolean;
-  id: RealtimeTrainId;
-  license?: string;
-  licenseNote?: string;
-  licenseUrl?: string;
-  line?: RealtimeLine;
-  longName?: string;
-  new_destination?: string;
-  operator?: string;
-  operator_provides_realtime_journey: 'no' | 'unknown' | 'yes';
-  operatorUrl?: string;
-  publisher?: string;
-  publisherUrl?: string;
-  routeIdentifier: string;
-  shortName: string;
-  situations?: unknown[];
-  stations: RealtimeStop[];
-  stroke?: RealtimeTenant;
-  tenant: RealtimeTenant;
-  text_color: string;
-  train_number?: number;
-  type: RealtimeMot;
-  vehicle_mode?: string;
+export type RealtimeStopSequence = {
   vehicleType: number; // TODO: Verify this property exists
-}
+} & components['schemas']['StopSequence'];
 
 export interface RealtimeStopSequenceResponse {
   client_reference: '';
@@ -306,58 +259,31 @@ export interface RealtimeTimetableResponse {
 
 export type RealtimeTrainId = string;
 
-export interface RealtimeTrajectory extends Feature {
+export type RealtimeTrajectory = {
   properties: RealtimeTrajectoryProperties;
-}
+} & components['schemas']['TrackerTrajectory'];
 
-export interface RealtimeTrajectoryProperties {
-  // Tralis and trafimage
-  bounds: [number, number, number, number];
-
-  // Only after first rendering on a map
-  coordinate?: [number, number];
-
-  delay: null | number;
-
-  // Tralis
+export type RealtimeTrajectoryProperties = {
+  coordinate?: [number, number]; // Added by RealtimeEnging after first rendering on a map
+  delay: null | number; // Override REST api defs:
   event?: string;
   event_delay?: number;
-  event_timestamp: number;
-  event_timestamp?: number;
-  gen_level?: RealtimeGeneralizationLevel;
-  gen_range: [number, number];
-  has_journey: boolean;
-  has_realtime: boolean;
-  has_realtime_journey: boolean;
-  line?: RealtimeLine;
+  line: RealtimeLine; // TOOD verfy why this does not appears in the REST api schema
   name?: string; // deprecated, name is an old property, use line.name instead.
   operator?: string; // deprecated, operator is an old property, use tenant instead.
-  operator_provides_realtime_journey: 'no' | 'unknown' | 'yes';
   original_line?: RealtimeLine;
   original_rake?: string;
   original_train_number?: number;
   position_correction?: number;
   rake?: string;
   raw_coordinates?: [number, number];
-
   raw_time?: string;
   ride_state?: string;
-
-  // Added by realtime engine
-  rotation?: number;
-  route_identifier: string;
-  routeIdentifier?: string;
-  state: RealtimeTrajectoryState;
-  tenant: string;
-  time_intervals?: number[][];
-  time_since_update?: string;
-  timestamp: number;
-  train_id?: RealtimeTrainId;
+  rotation?: number; // Added by realtime engine  after first rendering on a map
   train_number?: number;
-  transmitting_vehicle?: string;
 
-  type: RealtimeMot;
-}
+  transmitting_vehicle?: string;
+} & components['schemas']['TrackerTrajectoryProperties'];
 
 export interface RealtimeTrajectoryResponse {
   client_reference: '';

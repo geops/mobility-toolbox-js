@@ -104,6 +104,9 @@
  * @external {StopsResponse} https://developer.geops.io/apis/stops
  */
 /**
+ * @external {RealtimeFullTrajectoryCollection} https://developer.geops.io/apis/realtime#model-FullTrajectoryCollection
+ */
+/**
  * @external {RealtimeFullTrajectory} https://developer.geops.io/apis/realtime#model-FullTrajectory
  */
 /**
