@@ -64,7 +64,7 @@ class RealtimeRestAPI extends HttpAPI {
     return this.fetch<
       RealtimeFeedCollection,
       RealtimeRestOperations['feeds_feeds__get']['parameters']['query']
-    >('feeds', params, config);
+    >('feeds/', params, config);
   }
 
   /**
@@ -79,7 +79,7 @@ class RealtimeRestAPI extends HttpAPI {
     return this.fetch<
       RealtimeTrainsByRouteIdentifierResult,
       RealtimeRestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query']
-    >(`trains_by_route_identifier/${this.tenant}`, params, config);
+    >(`trains_by_route_identifier/${this.tenant}/`, params, config);
   }
 
   /**
@@ -94,7 +94,7 @@ class RealtimeRestAPI extends HttpAPI {
     return this.fetch<
       RealtimeTrajectoryCollection,
       RealtimeRestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
-    >(`trajectories/${this.tenant}`, params, config);
+    >(`trajectories/${this.tenant}/`, params, config);
   }
 }
 
