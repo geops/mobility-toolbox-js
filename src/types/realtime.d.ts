@@ -12,6 +12,9 @@ export declare type RealtimeMode = 'raw' | 'schematic' | 'topographic';
 export type RealtimeTrainsByRouteIdentifierResult =
   components['schemas']['TrainsByRouteIdentifierResult'];
 
+export type RealtimeTrajectoryCollection =
+  components['schemas']['TrajectoryCollection'];
+
 /**
  * @type RealtimeBbox
  */

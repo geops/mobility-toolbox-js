@@ -6,6 +6,7 @@ import type {
   RealtimeFeedCollection,
   RealtimeRestOperations,
   RealtimeTrainsByRouteIdentifierResult,
+  RealtimeTrajectoryCollection,
 } from '../types';
 
 export interface RealtimeRestAPIOptions {
@@ -69,7 +70,7 @@ class RealtimeRestAPI extends HttpAPI {
   }
 
   /**
-   * Get Trains by route identifier.
+   * Search for trains by route identifier.
    */
   trainsByRouteIdentifier(
     params: RealtimeRestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query'] = {
@@ -81,6 +82,21 @@ class RealtimeRestAPI extends HttpAPI {
       RealtimeTrainsByRouteIdentifierResult,
       RealtimeRestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query']
     >(`trains_by_route_identifier/${this.tenant}`, params, config);
+  }
+
+  /**
+   * Get trajectories for a tenant.
+   */
+  trajectories(
+    params: Partial<
+      RealtimeRestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
+    > = {},
+    config?: RequestInit,
+  ): Promise<RealtimeTrajectoryCollection> {
+    return this.fetch<
+      RealtimeTrajectoryCollection,
+      RealtimeRestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
+    >(`trajectories/${this.tenant}`, params, config);
   }
 }
 
