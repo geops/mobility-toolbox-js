@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
-import type { Feature, FeatureCollection, Point } from 'geojson';
+import type { Feature, Point } from 'geojson';
 
 import type { components } from './realtimerest.d.ts';
 
@@ -15,7 +15,6 @@ export type RealtimeTrainsByRouteIdentifierResult =
 export type RealtimeTrajectoryCollection =
   components['schemas']['TrajectoryCollection'];
 
-export type RealtimeTrainDetail = components['schemas']['TrainDetail'];
 export type RealtimeRouteIdentifierMatch =
   components['schemas']['RouteIdentifierMatch'];
 

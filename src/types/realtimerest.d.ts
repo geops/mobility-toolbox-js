@@ -316,12 +316,17 @@ export interface components {
     };
     /** RouteIdentifierMatch */
     RouteIdentifierMatch: {
+      /** Bounds */
+      bounds: number[];
+      /** Destination */
+      destination: Partial<string> & Partial<unknown>;
       /** Exact Match */
       exact_match: boolean;
+      line: components['schemas']['Line'];
       /** Route Identifier */
       route_identifier: string;
-      /** Trains */
-      trains: components['schemas']['TrainDetail'][];
+      /** Train Id */
+      train_id: string;
     };
     /** SerializedCancellationChange */
     SerializedCancellationChange: {
@@ -619,14 +624,6 @@ export interface components {
         | 'subway'
         | 'tram';
     };
-    /** TrainDetail */
-    TrainDetail: {
-      /** Bounds */
-      bounds: number[];
-      line: components['schemas']['Line'];
-      /** Train Id */
-      train_id: string;
-    };
     /** TrainsByRouteIdentifierResult */
     TrainsByRouteIdentifierResult: {
       /** Matches */
@@ -894,5 +891,3 @@ export interface operations {
     };
   };
 }
-
-export interface external {}
