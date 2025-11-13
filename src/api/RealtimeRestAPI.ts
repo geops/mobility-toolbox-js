@@ -1,5 +1,3 @@
-import { type StopsParameters, type StopsResponse } from '../types';
-
 import HttpAPI from './HttpAPI';
 
 import type {
