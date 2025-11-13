@@ -16,6 +16,8 @@ export type RealtimeTrajectoryCollection =
   components['schemas']['TrajectoryCollection'];
 
 export type RealtimeTrainDetail = components['schemas']['TrainDetail'];
+export type RealtimeRouteIdentifierMatch =
+  components['schemas']['RouteIdentifierMatch'];
 
 /**
  * @type RealtimeBbox
