@@ -4,10 +4,7 @@ import { getColorForType } from '../../common/utils/realtimeStyleUtils';
 
 import type Feature from 'ol/Feature';
 
-import type {
-  RealtimeFullTrajectoryProperties,
-  RealtimeLayer,
-} from '../../types';
+import type { RealtimeFullTrajectoryProperties } from '../../types';
 
 const borderStyle = new Style({
   image: new Circle({

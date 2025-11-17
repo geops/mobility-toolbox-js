@@ -7,8 +7,7 @@ import type {
   RealtimeBbox,
   RealtimeDeparture,
   RealtimeExtraGeom,
-  RealtimeFullTrajectory,
-  RealtimeGeneralizationLevel,
+  RealtimeFullTrajectoryCollection,
   RealtimeMode,
   RealtimeNews,
   RealtimeStation,
@@ -275,14 +274,14 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
-   * @return {Promise<{data: { content: RealtimeFullTrajectory }}>} Return a full trajectory.
+   * @return {Promise<{data: { content: RealtimeFullTrajectoryCollection }}>} Return a full trajectory.
    * @public
    */
   getFullTrajectory(
     id: RealtimeTrainId,
     mode: RealtimeMode,
-    generalizationLevel?: RealtimeGeneralizationLevel,
-  ): Promise<WebSocketAPIMessageEventData<RealtimeFullTrajectory>> {
+    generalizationLevel?: string,
+  ): Promise<WebSocketAPIMessageEventData<RealtimeFullTrajectoryCollection>> {
     let suffix = '';
     if (this.version === '1') {
       suffix = getModeSuffix(mode, RealtimeModes);
@@ -297,7 +296,7 @@ class RealtimeAPI {
       channel.push(`gen${generalizationLevel}`);
     }
 
-    return this.get<RealtimeFullTrajectory>(channel.join('_'));
+    return this.get<RealtimeFullTrajectoryCollection>(channel.join('_'));
   }
 
   /**
@@ -535,7 +534,7 @@ class RealtimeAPI {
    *
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
-   * @param {function(data:{content: RealtimeFullTrajectory})} onMessage Function called on each message of the channel.
+   * @param {function(data:{content: RealtimeFullTrajectoryCollection})} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
@@ -543,7 +542,7 @@ class RealtimeAPI {
   subscribeFullTrajectory(
     id: RealtimeTrainId,
     mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<RealtimeFullTrajectory>,
+    onMessage: WebSocketAPIMessageCallback<RealtimeFullTrajectoryCollection>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -759,7 +758,7 @@ class RealtimeAPI {
    */
   unsubscribeFullTrajectory(
     id: RealtimeTrainId,
-    onMessage?: WebSocketAPIMessageCallback<RealtimeFullTrajectory>,
+    onMessage?: WebSocketAPIMessageCallback<RealtimeFullTrajectoryCollection>,
   ) {
     this.unsubscribe('full_trajectory', `_${id}`, onMessage);
   }

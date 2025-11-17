@@ -57,10 +57,7 @@ const createRealtimeFilters = (
       return parseInt(item, 10);
     });
     const routeFilter = (item: RealtimeTrajectory) => {
-      const routeIdentifier =
-        item.properties.route_identifier ||
-        item.properties.routeIdentifier ||
-        '';
+      const routeIdentifier = item.properties.route_identifier || '';
       const routeId = parseInt(routeIdentifier.split('.')[0], 10);
       return routeList.includes(routeId);
     };
