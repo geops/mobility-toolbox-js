@@ -69,6 +69,11 @@ interface IconOptions {
   zIndex: number;
 }
 
+interface ScaleOptions {
+  defaultScale?: number;
+  resolution: number;
+}
+
 // Comes from ol >= 6.7,
 // https://github.com/openlayers/openlayers/blob/main/src/ol/format/KML.js#L320
 const scaleForSize = (size: Size) => {
@@ -168,7 +173,7 @@ class MapsetKmlFormat {
           transform(
             JSON.parse(circleGeometryCenter as string) as Coordinate,
             EPSG_4326,
-            featureProjection || EPSG_4326,
+            featureProjection ?? EPSG_4326,
           ),
           parseFloat(circleGeometryRadius as string),
         );
@@ -257,6 +262,13 @@ class MapsetKmlFormat {
 
     if (feature.get('zIndex')) {
       style?.setZIndex(parseInt(feature.get('zIndex') as string, 10));
+    }
+
+    const scaleOptions = (feature.get('pictureOptions') ??
+      feature.get('scaleOptions')) as ScaleOptions | string;
+    if (scaleOptions && typeof scaleOptions === 'string') {
+      const parsed = JSON.parse(scaleOptions) as ScaleOptions;
+      feature.set('scaleOptions', parsed);
     }
 
     // if the feature is a Point and we are offline, we use default vector
@@ -409,32 +421,18 @@ class MapsetKmlFormat {
       stroke = null;
 
       styles = (feat, resolution) => {
-        /* Options to be used for picture scaling with map, should have at least
+        /* Options to be used for feature scaling with map, should have at least
          * a resolution attribute (this is the map resolution at the zoom level when
-         * the picture is created), can take an optional constant for further scale
+         * the feature is created), can take an optional constant for further scale
          * adjustment.
          * e.g. { resolution: 0.123, defaultScale: 1 / 6 }
          */
 
-        interface PictureOptions {
-          defaultScale?: number;
-          resolution: number;
-        }
-
-        if (feat.get('pictureOptions')) {
-          let pictureOptions = feat.get('pictureOptions') as
-            | PictureOptions
-            | string;
-          if (typeof pictureOptions === 'string') {
-            pictureOptions = JSON.parse(pictureOptions) as PictureOptions;
-          }
-          (feat as FeatureType).set('pictureOptions', pictureOptions);
-          if (pictureOptions.resolution) {
-            image?.setScale(
-              (pictureOptions.resolution / resolution) *
-                (pictureOptions?.defaultScale ?? 1),
-            );
-          }
+        const scaleOpts = feat.get('scaleOptions') as ScaleOptions;
+        if (scaleOpts && image instanceof Icon && scaleOpts.resolution) {
+          image.setScale(
+            (scaleOpts.resolution / resolution) * (scaleOpts.defaultScale ?? 1),
+          );
         }
 
         return new Style({
@@ -742,14 +740,6 @@ class MapsetKmlFormat {
             // We set the scale as extended metadata because the <scale> in the KML is related to a 32px img, since ol >= 6.10.
             clone.set('iconScale', newStyle.image.getScale());
           }
-
-          // Set map resolution to use for icon-to-map proportional scaling
-          if (feature.get('pictureOptions')) {
-            clone.set(
-              'pictureOptions',
-              JSON.stringify(feature.get('pictureOptions')),
-            );
-          }
         }
 
         // In case a fill pattern should be applied (use fillPattern attribute to store pattern id, color etc)
@@ -766,6 +756,14 @@ class MapsetKmlFormat {
         // minZoom: minimum zoom level at which the feature is displayed
         if (feature.get('minZoom')) {
           clone.set('minZoom', parseFloat(feature.get('minZoom') as string));
+        }
+
+        // Set map resolution to use for feature-to-map proportional scaling
+        if (feature.get('pictureOptions') || feature.get('scaleOptions')) {
+          clone.set(
+            'scaleOptions',
+            JSON.stringify(feature.get('scaleOptions')),
+          );
         }
 
         // If only text is displayed we must specify an
