@@ -57,8 +57,11 @@ const createRealtimeFilters = (
       return parseInt(item, 10);
     });
     const routeFilter = (item: RealtimeTrajectory) => {
+      console.log(item.properties.route_identifier);
       const routeIdentifier = item.properties.route_identifier || '';
       const routeId = parseInt(routeIdentifier.split('.')[0], 10);
+
+      console.log(routeList, routeId);
       return routeList.includes(routeId);
     };
     filterList.push(routeFilter);
@@ -79,6 +82,7 @@ const createRealtimeFilters = (
   if (!filterList.length) {
     return null;
   }
+  console.log(`Created ${filterList.length} realtime filters`);
 
   return (item: RealtimeTrajectory) => {
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
