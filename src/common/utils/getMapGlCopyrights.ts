@@ -1,5 +1,7 @@
 import removeDuplicate from './removeDuplicate';
 
+import type { Style } from 'maplibre-gl';
+
 export interface Source {
   attribution: string;
   options: {
@@ -25,10 +27,13 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
   if (!style) {
     return [];
   }
-  const { sourceCaches } = style;
-  let copyrights: string[] = [];
 
-  Object.values(sourceCaches).forEach((value) => {
+  // @ts-expect-error -  sourceCaches exists in maplibre-gl < 5.11.0
+  const { sourceCaches, tileManagers } = style;
+  let copyrights: string[] = [];
+  const sourceCacheObj =
+    tileManagers || (sourceCaches as Style['tileManagers']) || {};
+  Object.values(sourceCacheObj).forEach((value) => {
     if (value.used) {
       const source = value.getSource();
 
