@@ -67,7 +67,7 @@
     "mock-socket": "9.3.1",
     "next": "15.5.6",
     "next-transpile-modules": "10.0.1",
-    "ol": "10.7.0",
+    "ol": "10.6.0",
     "openapi-typescript": "5",
     "prettier": "3.7.4",
     "raw-loader": "4.0.2",
