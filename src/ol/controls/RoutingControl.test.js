@@ -15,7 +15,7 @@ describe('RoutingControl', () => {
   let map;
 
   beforeEach(() => {
-    const target = document.createElement('div');
+    const target = document.createElement('canvas');
     document.body.appendChild(target);
     map = new Map({
       target,
@@ -57,7 +57,7 @@ describe('RoutingControl', () => {
       [950476.4055933182, 6003322.253698345],
       [950389.0813034325, 6003656.659274571],
     ];
-    control.drawRoute(control.viaPoints).then(() => {
+    void control.drawRoute(control.viaPoints).then(() => {
       // Should use correct URL
       expect(fetch.mock.calls[0][0]).toEqual(
         'https://foo.ch/?key=foo&coord-punish=1000&coord-radius=100&elevation=false&graph=osm&mot=bus&resolve-hops=false&via=47.3739194713294%2C8.538274823394632%7C47.37595378493421%2C8.537490375951839',
@@ -93,7 +93,7 @@ describe('RoutingControl', () => {
     });
     map.addControl(control);
     control.viaPoints = ['a4dca961d199ff76', 'e3666f03cba06b2b'];
-    control.drawRoute(control.viaPoints).then(() => {
+    void control.drawRoute(control.viaPoints).then(() => {
       // Should use correct URL
       expect(fetch.mock.calls[0][0]).toEqual(
         'https://foo.ch/lookup/a4dca961d199ff76?key=foo',
@@ -135,7 +135,7 @@ describe('RoutingControl', () => {
     const error = new Error('Error');
     error.name = 'AbortError';
     fetch.mockRejectOnce(error);
-    control.drawRoute().then((data) => {
+    void control.drawRoute().then((data) => {
       expect(data).toEqual([undefined]);
       done();
     });
@@ -158,7 +158,7 @@ describe('RoutingControl', () => {
       [950389.0813034325, 6003656.659274571],
       'e3666f03cba06b2b',
     ];
-    control.drawRoute(control.viaPoints).then(() => {
+    void control.drawRoute(control.viaPoints).then(() => {
       const { searchParams } = new URL(fetch.mock.calls[1][0]);
       expect(searchParams.get('via')).toBe(
         '@47.3739194713294,8.538274823394632|@47.37595378493421,8.537490375951839|!e3666f03cba06b2b',
@@ -190,7 +190,7 @@ describe('RoutingControl', () => {
       '!stationid', // will send a stops lookup request fo the station id
       [950389, 6003656],
     ];
-    control.drawRoute(control.viaPoints).then(() => {
+    void control.drawRoute(control.viaPoints).then(() => {
       const params = new URL(fetch.mock.calls[2][0]).searchParams;
       expect(params.get('via')).toBe(
         '46.2,7.1|@46.2,7.1|@46.2,7$1|station name$2|station name@46.2,7|stationname@46.2,7.7$3|!stationid|47.375949774398805,8.537489645590679',

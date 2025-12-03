@@ -15,7 +15,7 @@ describe('getFeatureInfoAtCoordinate', () => {
 
   beforeEach(() => {
     map = new Map({
-      target: document.createElement('div'),
+      target: document.createElement('canvas'),
       view: new OLView({ resolution: 5 }),
     });
     map.setSize([100, 100]);
