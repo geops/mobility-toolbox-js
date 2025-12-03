@@ -180,10 +180,10 @@ class MaplibreLayer extends MapLibreLayer {
             const style = this.mapLibreMap?.style;
 
             // @ts-expect-error -  sourceCaches exists in maplibre-gl < 5.11.0
-            if (!!style && !style.sourceCaches) {
+            if (!!this.mapLibreMap && !!style && !style.sourceCaches) {
               // @ts-expect-error -  sourceCaches exists in maplibre-gl < 5.11.0
-              this.mapLibreMap?.style.sourceCaches =
-                this.mapLibreMap?.style.tileManagers ?? {};
+              this.mapLibreMap.style.sourceCaches =
+                this.mapLibreMap.style.tileManagers ?? {};
             }
             return getMapLibreAttributions(this.mapLibreMap);
           },
