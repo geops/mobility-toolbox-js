@@ -22,7 +22,6 @@ import type {
   AnyCanvas,
   LayerGetFeatureInfoOptions,
   RealtimeBbox,
-  RealtimeGeneralizationLevel,
   RealtimeMode,
   RealtimeMot,
   RealtimeRenderState,
@@ -47,11 +46,11 @@ export interface RealtimeEngineOptions {
   canvas?: HTMLCanvasElement;
   debug?: boolean;
   filter?: FilterFunction;
-  generalizationLevelByZoom?: RealtimeGeneralizationLevel[];
+  generalizationLevelByZoom?: string[];
   getGeneralizationLevelByZoom?: (
     zoom: number,
-    generalizationLevelByZoom: RealtimeGeneralizationLevel[],
-  ) => RealtimeGeneralizationLevel;
+    generalizationLevelByZoom: string[],
+  ) => string;
   getGraphByZoom?: (zoom: number, graphByZoom: string[]) => string | undefined;
   getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
   getRefreshTimeInMs?: () => number;
@@ -184,9 +183,9 @@ class RealtimeEngine {
   debug: boolean;
   filter?: FilterFunction;
   format: GeoJSON;
-  generalizationLevel?: RealtimeGeneralizationLevel;
-  generalizationLevelByZoom: RealtimeGeneralizationLevel[];
-  getGeneralizationLevelByZoom: (zoom: number) => RealtimeGeneralizationLevel;
+  generalizationLevel?: string;
+  generalizationLevelByZoom: string[];
+  getGeneralizationLevelByZoom: (zoom: number) => string;
   getGraphByZoom: (zoom: number) => string | undefined;
   getMotsByZoom: (zoom: number) => RealtimeMot[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;

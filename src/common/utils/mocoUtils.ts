@@ -219,7 +219,6 @@ export const getFeatureCollectionToRenderFromSituation = (
               },
               type: 'Feature',
             };
-            // console.log(feature.properties);
             features.push(feature);
 
             if (publicationLine.hasIcon) {

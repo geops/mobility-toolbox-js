@@ -2,7 +2,7 @@
 import * as types from './graphql';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 
-const documents: never[] = [];
+const documents: Record<string, unknown> = {};
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  *
@@ -18,7 +18,7 @@ const documents: never[] = [];
 export function graphql(source: string): unknown;
 
 export function graphql(source: string) {
-  return (documents as any)[source] ?? {};
+  return documents[source] ?? {};
 }
 
 export type DocumentType<TDocumentNode extends DocumentNode<any, any>> =

@@ -49,3 +49,11 @@ Object.defineProperty(window, 'Worker', {
   writable: true,
   value: Worker,
 });
+
+class TextEncoder {
+  constructor() {}
+  encode() {}
+  decode() {}
+}
+
+global.TextDecoder = TextEncoder;
