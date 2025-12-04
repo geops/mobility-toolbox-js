@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.6.0](https://github.com/geops/mobility-toolbox-js/compare/v3.5.0...v3.6.0) (2025-12-04)
+
+
+### Features
+
+* add private realtime rest api  class ([#236](https://github.com/geops/mobility-toolbox-js/issues/236)) ([c7feff5](https://github.com/geops/mobility-toolbox-js/commit/c7feff54b96c402d7ce37cc66ec19d8b7f54c6f9))
+
+
+### Bug Fixes
+
+* allow undefined parameter ([e489fa6](https://github.com/geops/mobility-toolbox-js/commit/e489fa6b7af3db5e4583ca739027ed64d0688680))
+
 ## [3.5.0](https://github.com/geops/mobility-toolbox-js/compare/v3.4.7...v3.5.0) (2025-11-07)
 
 
