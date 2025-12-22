@@ -296,6 +296,14 @@ class MaplibreStyleLayer extends Layer {
     const visibilityValue = this.getVisible() ? 'visible' : 'none';
     const layers = style.layers || [];
 
+    // OL sets -Infinity, Infinity for minZoom and maxZoom.
+    const isFiniteMinZoom = Number.isFinite(this.getMinZoom());
+    const isFiniteMaxZoom = Number.isFinite(this.getMaxZoom());
+
+    // Maplibre zoom = ol zoom - 1
+    const minZoom = isFiniteMinZoom ? this.getMinZoom() - 1 : 0;
+    const maxZoom = isFiniteMaxZoom ? this.getMaxZoom() - 1 : 24;
+
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < layers.length; i += 1) {
       const layer = layers[i];
@@ -306,15 +314,14 @@ class MaplibreStyleLayer extends Layer {
         if (mapLibreMap.getLayer(id)) {
           mapLibreMap.setLayoutProperty(id, 'visibility', visibilityValue);
 
-          // OL sets -Infinity, Infinity for minZoom and maxZoom.
-          if (
-            Number.isFinite(this.getMinZoom()) ||
-            Number.isFinite(this.getMaxZoom())
-          ) {
+          if (isFiniteMinZoom || isFiniteMaxZoom) {
+            const currentMinZoom = mapLibreMap.getLayer(id)?.minzoom ?? 0;
+            const currentMaxZoom = mapLibreMap.getLayer(id)?.maxzoom ?? 24;
+
             mapLibreMap.setLayerZoomRange(
               id,
-              Number.isFinite(this.getMinZoom()) ? this.getMinZoom() - 1 : 0, // Maplibre zoom = ol zoom - 1
-              Number.isFinite(this.getMaxZoom()) ? this.getMaxZoom() - 1 : 24,
+              currentMinZoom < minZoom ? minZoom : currentMinZoom,
+              currentMaxZoom > maxZoom ? maxZoom : currentMaxZoom,
             );
           }
         }
