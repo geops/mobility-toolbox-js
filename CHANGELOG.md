@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.1](https://github.com/geops/mobility-toolbox-js/compare/v3.6.0...v3.6.1) (2025-12-22)
+
+
+### Bug Fixes
+
+* set  minZoom and maxZoom properly for MaplibreStyleLayer ([#237](https://github.com/geops/mobility-toolbox-js/issues/237)) ([faf4546](https://github.com/geops/mobility-toolbox-js/commit/faf4546691b8e4afbe5987f60225fb8c6e3bc99a))
+* update dependencies ([84cda67](https://github.com/geops/mobility-toolbox-js/commit/84cda6790b013371bc71961bff2a64dbf9ae6497))
+
 ## [3.6.0](https://github.com/geops/mobility-toolbox-js/compare/v3.5.0...v3.6.0) (2025-12-04)
 
 
