@@ -4,29 +4,25 @@
  */
 
 export interface paths {
-  '/calls/{train_id}/': {
+  "/trajectories/{feed_name}/": {
     /**
-     * Get the stop sequences for the current journeys of the given train
+     * Get all current trajectories between two stops for the given feed
      *
-     * This is equivalent to calling
+     * This is roughly equivalent to calling
      *
-     *     GET stopsequence_<train_id>
+     *     BBOX <x_min> <y_min> <x_max> <y_max> <zoom> [tenant=<feed_name>] [gen_level=<gen_level>] [graph=graph]
      *
-     * on the websocket.
+     * on the websocket but does not support all Websocket API parameters and
+     * `feed_name` is not optional for the HTTP-API. Geometries are not simplified as
+     * in the BBOX command.
      */
-    get: operations['calls_calls__train_id___get'];
+    get: operations["trajectories_trajectories__feed_name___get"];
   };
-  '/feeds/': {
-    /**
-     * Get a list of all active feeds
-     *
-     * This is the only endpoint without Websocket API equivalent, where this info
-     * is not needed normally (the `BBOX` command picks all the relevant data for
-     * you).
-     */
-    get: operations['feeds_feeds__get'];
+  "/trains_by_route_identifier/{feed_name}/": {
+    /** Search for active trains in a specific feed/tenant by route identifier. */
+    get: operations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"];
   };
-  '/journeys/{train_id}/': {
+  "/journeys/{train_id}/": {
     /**
      * Get geometries for the current journeys of the given train
      *
@@ -40,9 +36,41 @@ export interface paths {
      *
      * on the websocket with gen_level and graph as in the BBOX command.
      */
-    get: operations['full_trajectory_journeys__train_id___get'];
+    get: operations["full_trajectory_journeys__train_id___get"];
   };
-  '/lines/{tag}/': {
+  "/calls/{train_id}/": {
+    /**
+     * Get the stop sequences for the current journeys of the given train
+     *
+     * This is equivalent to calling
+     *
+     *     GET stopsequence_<train_id>
+     *
+     * on the websocket.
+     */
+    get: operations["calls_calls__train_id___get"];
+  };
+  "/feeds/": {
+    /**
+     * Get a list of all active feeds
+     *
+     * This is the only endpoint without Websocket API equivalent, where this info
+     * is not needed normally (the `BBOX` command picks all the relevant data for
+     * you).
+     */
+    get: operations["feeds_feeds__get"];
+  };
+  "/lines/{tag}/vias/": {
+    /**
+     * Return matching lines with a list of stop lists for routing
+     *
+     * Each item in the vias list should be treated as a list of vias for the Routing-API.
+     * The goal of this method is to compile an undirected, routable representation of the
+     * line, values are meaningless apart from that.
+     */
+    get: operations["get_via_stops_lines__tag__vias__get"];
+  };
+  "/lines/{tag}/": {
     /**
      * Get all lines with the given tag
      *
@@ -52,35 +80,7 @@ export interface paths {
      * `operator_name` to be set. By default only ungenealized data is
      * returned. Set `graph` to select another line network.
      */
-    get: operations['get_lines_for_tag_lines__tag___get'];
-  };
-  '/lines/{tag}/vias/': {
-    /**
-     * Return matching lines with a list of stop lists for routing
-     *
-     * Each item in the vias list should be treated as a list of vias for the Routing-API.
-     * The goal of this method is to compile an undirected, routable representation of the
-     * line, values are meaningless apart from that.
-     */
-    get: operations['get_via_stops_lines__tag__vias__get'];
-  };
-  '/trains_by_route_identifier/{feed_name}/': {
-    /** Search for active trains in a specific feed/tenant by route identifier. */
-    get: operations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get'];
-  };
-  '/trajectories/{feed_name}/': {
-    /**
-     * Get all current trajectories between two stops for the given feed
-     *
-     * This is roughly equivalent to calling
-     *
-     *     BBOX <x_min> <y_min> <x_max> <y_max> <zoom> [tenant=<feed_name>] [gen_level=<gen_level>] [graph=graph]
-     *
-     * on the websocket but does not support all Websocket API parameters and
-     * `feed_name` is not optional for the HTTP-API. Geometries are not simplified as
-     * in the BBOX command.
-     */
-    get: operations['trajectories_trajectories__feed_name___get'];
+    get: operations["get_lines_for_tag_lines__tag___get"];
   };
 }
 
@@ -88,19 +88,10 @@ export interface components {
   schemas: {
     /** Feed */
     Feed: {
-      /** Bbox */
-      bbox?: Partial<number[]> & Partial<unknown>;
-      /** Color */
-      color: string;
-      /** Has Realtime Feed */
-      has_realtime_feed: boolean;
-      license: components['schemas']['License'];
-      /** Name */
-      name: Partial<string> & Partial<unknown>;
       /** Short Name */
       short_name: string;
-      /** Trajectory Count */
-      trajectory_count?: Partial<number> & Partial<unknown>;
+      /** Name */
+      name: Partial<string> & Partial<unknown>;
       /** Url */
       url: Partial<string> & Partial<unknown>;
       /** Valid From */
@@ -109,19 +100,28 @@ export interface components {
       valid_to: Partial<number> & Partial<unknown>;
       /** Version */
       version: Partial<string> & Partial<unknown>;
+      license: components["schemas"]["License"];
+      /** Has Realtime Feed */
+      has_realtime_feed: boolean;
       /** X */
       x?: Partial<number> & Partial<unknown>;
       /** Y */
       y?: Partial<number> & Partial<unknown>;
+      /** Bbox */
+      bbox?: Partial<number[]> & Partial<unknown>;
+      /** Color */
+      color: string;
+      /** Trajectory Count */
+      trajectory_count?: Partial<number> & Partial<unknown>;
     };
     /** FeedCollection */
     FeedCollection: {
+      /** Trajectory Count */
+      trajectory_count?: Partial<number> & Partial<unknown>;
       /** Feed Count */
       feed_count: number;
       /** Feeds */
-      feeds: Record<string, unknown>;
-      /** Trajectory Count */
-      trajectory_count?: Partial<number> & Partial<unknown>;
+      feeds: { [key: string]: unknown };
     };
     /**
      * FullTrajectory
@@ -135,91 +135,91 @@ export interface components {
      * the stops.
      */
     FullTrajectory: {
-      /** Geometry */
-      geometry: Partial<components['schemas']['GeometryCollectionGeometry']> &
-        Partial<components['schemas']['LineStringGeometry']> &
-        Partial<components['schemas']['MultiLineStringGeometry']>;
-      properties: components['schemas']['FullTrajectoryProperties'];
       /**
        * Type
        * @constant
        */
-      type: 'Feature';
+      type: "Feature";
+      /** Geometry */
+      geometry: Partial<components["schemas"]["GeometryCollectionGeometry"]> &
+        Partial<components["schemas"]["LineStringGeometry"]> &
+        Partial<components["schemas"]["MultiLineStringGeometry"]>;
+      properties: components["schemas"]["FullTrajectoryProperties"];
     };
     /**
      * FullTrajectoryCollection
      * @description All trajectories for the journeys of a train as a GeoJSON FeatureCollection.
      */
     FullTrajectoryCollection: {
-      /** Features */
-      features: components['schemas']['FullTrajectory'][];
-      properties: components['schemas']['FullTrajectoryCollectionProperties'];
       /**
        * Type
        * @constant
        */
-      type: 'FeatureCollection';
+      type: "FeatureCollection";
+      properties: components["schemas"]["FullTrajectoryCollectionProperties"];
+      /** Features */
+      features: components["schemas"]["FullTrajectory"][];
     };
     /** FullTrajectoryCollectionProperties */
     FullTrajectoryCollectionProperties: {
-      /** Gen Level */
-      gen_level: Partial<number> & Partial<unknown>;
-      /** Gen Range */
-      gen_range: number[];
-      /** Graph */
-      graph: string;
-      /** License */
-      license?: Partial<string> & Partial<unknown>;
-      /** Licensenote */
-      licenseNote?: Partial<string> & Partial<unknown>;
-      /** Licenseurl */
-      licenseUrl?: Partial<string> & Partial<unknown>;
-      /** Operator */
-      operator?: Partial<string> & Partial<unknown>;
-      /** Operatorurl */
-      operatorUrl?: Partial<string> & Partial<unknown>;
+      /** Tenant */
+      tenant?: string;
       /** Publisher */
       publisher?: Partial<string> & Partial<unknown>;
       /** Publisherurl */
       publisherUrl?: Partial<string> & Partial<unknown>;
-      /** Tenant */
-      tenant?: string;
+      /** Operator */
+      operator?: Partial<string> & Partial<unknown>;
+      /** Operatorurl */
+      operatorUrl?: Partial<string> & Partial<unknown>;
+      /** License */
+      license?: Partial<string> & Partial<unknown>;
+      /** Licenseurl */
+      licenseUrl?: Partial<string> & Partial<unknown>;
+      /** Licensenote */
+      licenseNote?: Partial<string> & Partial<unknown>;
+      /** Graph */
+      graph: string;
+      /** Gen Level */
+      gen_level: Partial<number> & Partial<unknown>;
+      /** Gen Range */
+      gen_range: number[];
       /** Train Id */
       train_id: string;
     };
     /** FullTrajectoryProperties */
     FullTrajectoryProperties: {
+      /** Stroke */
+      stroke?: Partial<string> & Partial<unknown>;
+      /** Line Name */
+      line_name?: Partial<string> & Partial<unknown>;
+      /** Type */
+      type?: Partial<
+        | "tram"
+        | "subway"
+        | "rail"
+        | "bus"
+        | "ferry"
+        | "cablecar"
+        | "gondola"
+        | "funicular"
+        | "coach"
+      > &
+        Partial<unknown>;
       /** Event Timestamp */
       event_timestamp?: Partial<number> & Partial<unknown>;
-      /** Gen Level */
-      gen_level: Partial<number> & Partial<unknown>;
-      /** Gen Range */
-      gen_range: number[];
-      /** Graph */
-      graph: string;
+      /** Train Id */
+      train_id: string;
       /** Journey Id */
       journey_id: number;
       /** Line Id */
       line_id: number;
-      /** Line Name */
-      line_name?: Partial<string> & Partial<unknown>;
-      /** Stroke */
-      stroke?: Partial<string> & Partial<unknown>;
-      /** Train Id */
-      train_id: string;
-      /** Type */
-      type?: Partial<
-        | 'bus'
-        | 'cablecar'
-        | 'coach'
-        | 'ferry'
-        | 'funicular'
-        | 'gondola'
-        | 'rail'
-        | 'subway'
-        | 'tram'
-      > &
-        Partial<unknown>;
+      /** Graph */
+      graph: string;
+      /** Gen Level */
+      gen_level: Partial<number> & Partial<unknown>;
+      /** Gen Range */
+      gen_range: number[];
     };
     /**
      * GeometryCollectionGeometry
@@ -229,125 +229,125 @@ export interface components {
      * context. (Multi)LineStrings represent a trajectory.
      */
     GeometryCollectionGeometry: {
-      /** Geometries */
-      geometries: (Partial<components['schemas']['LineStringGeometry']> &
-        Partial<components['schemas']['MultiLineStringGeometry']> &
-        Partial<components['schemas']['MultiPointGeometry']>)[];
       /**
        * Type
        * @constant
        */
-      type: 'GeometryCollection';
+      type: "GeometryCollection";
+      /** Geometries */
+      geometries: (Partial<components["schemas"]["LineStringGeometry"]> &
+        Partial<components["schemas"]["MultiPointGeometry"]> &
+        Partial<components["schemas"]["MultiLineStringGeometry"]>)[];
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
-      detail?: components['schemas']['ValidationError'][];
+      detail?: components["schemas"]["ValidationError"][];
     };
     /** JourneyExtraData */
     JourneyExtraData: {
-      /** Event Location Name */
-      event_location_name?: Partial<string> & Partial<unknown>;
       /** Event Timestamp */
       event_timestamp?: Partial<string> & Partial<unknown>;
+      /** Event Location Name */
+      event_location_name?: Partial<string> & Partial<unknown>;
     };
     /** License */
     License: {
       /** Name */
       name: Partial<string> & Partial<unknown>;
-      /** Note */
-      note: Partial<string> & Partial<unknown>;
       /** Url */
       url: Partial<string> & Partial<unknown>;
+      /** Note */
+      note: Partial<string> & Partial<unknown>;
     };
     /** Line */
     Line: {
-      /** Color */
-      color: Partial<string> & Partial<unknown>;
       /** Id */
       id: number;
       /** Name */
       name: Partial<string> & Partial<unknown>;
+      /** Color */
+      color: Partial<string> & Partial<unknown>;
+      /** Text Color */
+      text_color: Partial<string> & Partial<unknown>;
       /** Stroke */
       stroke: Partial<string> & Partial<unknown>;
       /** Tags */
       tags: string[];
-      /** Text Color */
-      text_color: Partial<string> & Partial<unknown>;
     };
     /** LineStringGeometry */
     LineStringGeometry: {
-      /** Coordinates */
-      coordinates: Partial<number>[][];
       /**
        * Type
        * @constant
        */
-      type: 'LineString';
+      type: "LineString";
+      /** Coordinates */
+      coordinates: (Partial<number> & Partial<number>)[][];
     };
     /** LineViaStop */
     LineViaStop: {
+      /** Name */
+      name: string;
       /** Lat */
       lat: number;
       /** Lon */
       lon: number;
-      /** Name */
-      name: string;
     };
     /** MultiLineStringGeometry */
     MultiLineStringGeometry: {
-      /** Coordinates */
-      coordinates: Partial<number>[][][];
       /**
        * Type
        * @constant
        */
-      type: 'MultiLineString';
+      type: "MultiLineString";
+      /** Coordinates */
+      coordinates: (Partial<number> & Partial<number>)[][][];
     };
     /** MultiPointGeometry */
     MultiPointGeometry: {
-      /** Coordinates */
-      coordinates: Partial<number>[][];
       /**
        * Type
        * @constant
        */
-      type: 'MultiPoint';
+      type: "MultiPoint";
+      /** Coordinates */
+      coordinates: (Partial<number> & Partial<number>)[][];
     };
     /** RouteIdentifierMatch */
     RouteIdentifierMatch: {
+      /** Train Id */
+      train_id: string;
+      line: components["schemas"]["Line"];
       /** Bounds */
       bounds: number[];
       /** Destination */
       destination: Partial<string> & Partial<unknown>;
-      /** Exact Match */
-      exact_match: boolean;
-      line: components['schemas']['Line'];
       /** Route Identifier */
       route_identifier: string;
-      /** Train Id */
-      train_id: string;
+      /** Exact Match */
+      exact_match: boolean;
     };
     /** SerializedCancellationChange */
     SerializedCancellationChange: {
-      /** New To */
-      new_to?: Partial<string> & Partial<unknown>;
-      /** No Stop Between */
-      no_stop_between?: (Partial<string> & Partial<unknown>)[];
-      /** No Stop Till */
-      no_stop_till?: Partial<string> & Partial<unknown>;
       /** Old To */
       old_to?: Partial<string> & Partial<unknown>;
       /** State */
       state?: Partial<
-        | 'BOARDING'
-        | 'JOURNEY_CANCELLED'
-        | 'LEAVING'
-        | 'PENDING'
-        | 'STOP_CANCELLED'
-        | 'TIME_BASED'
+        | "LEAVING"
+        | "BOARDING"
+        | "STOP_CANCELLED"
+        | "JOURNEY_CANCELLED"
+        | "TIME_BASED"
+        | "PENDING"
       > &
         Partial<unknown>;
+      /** New To */
+      new_to?: Partial<string> & Partial<unknown>;
+      /** No Stop Till */
+      no_stop_till?: Partial<string> & Partial<unknown>;
+      /** No Stop Between */
+      no_stop_between?: (Partial<string> & Partial<unknown>)[];
     };
     /** Situation */
     Situation: {
@@ -356,183 +356,183 @@ export interface components {
     };
     /** StopSequence */
     StopSequence: {
-      /** Color */
-      color?: Partial<string> & Partial<unknown>;
-      /** Destination */
-      destination: Partial<string> & Partial<unknown>;
-      extra_data: components['schemas']['JourneyExtraData'];
       /** Has Realtime */
       has_realtime: boolean;
       /** Has Realtime Journey */
       has_realtime_journey: boolean;
-      /** Id */
-      id: string;
-      /** License */
-      license?: Partial<string> & Partial<unknown>;
-      /** Licensenote */
-      licenseNote?: Partial<string> & Partial<unknown>;
-      /** Licenseurl */
-      licenseUrl?: Partial<string> & Partial<unknown>;
-      line: Partial<components['schemas']['Line']> & Partial<unknown>;
-      /** Longname */
-      longName?: Partial<string> & Partial<unknown>;
-      /** New Destination */
-      new_destination: Partial<string> & Partial<unknown>;
-      /** Operator */
-      operator?: Partial<string> & Partial<unknown>;
       /**
        * Operator Provides Realtime Journey
        * @enum {string}
        */
-      operator_provides_realtime_journey: 'maybe' | 'no' | 'unknown' | 'yes';
-      /** Operatorurl */
-      operatorUrl?: Partial<string> & Partial<unknown>;
+      operator_provides_realtime_journey: "yes" | "no" | "maybe" | "unknown";
+      /** Tenant */
+      tenant?: string;
       /** Publisher */
       publisher?: Partial<string> & Partial<unknown>;
       /** Publisherurl */
       publisherUrl?: Partial<string> & Partial<unknown>;
-      /** Routeidentifier */
-      routeIdentifier: Partial<string> & Partial<unknown>;
-      /** Shortname */
-      shortName?: Partial<string> & Partial<unknown>;
-      /** Situations */
-      situations: components['schemas']['Situation'][];
-      /** Stations */
-      stations: components['schemas']['StopSequenceCall'][];
+      /** Operator */
+      operator?: Partial<string> & Partial<unknown>;
+      /** Operatorurl */
+      operatorUrl?: Partial<string> & Partial<unknown>;
+      /** License */
+      license?: Partial<string> & Partial<unknown>;
+      /** Licenseurl */
+      licenseUrl?: Partial<string> & Partial<unknown>;
+      /** Licensenote */
+      licenseNote?: Partial<string> & Partial<unknown>;
+      /** Color */
+      color?: Partial<string> & Partial<unknown>;
       /** Stroke */
       stroke?: Partial<string> & Partial<unknown>;
-      /** Tenant */
-      tenant?: string;
       /** Text Color */
       text_color?: Partial<string> & Partial<unknown>;
-      /** Train Number */
-      train_number: Partial<number> & Partial<unknown>;
-      /** Type */
-      type: Partial<
-        | 'bus'
-        | 'cablecar'
-        | 'coach'
-        | 'ferry'
-        | 'funicular'
-        | 'gondola'
-        | 'rail'
-        | 'subway'
-        | 'tram'
-      > &
-        Partial<unknown>;
+      /** Shortname */
+      shortName?: Partial<string> & Partial<unknown>;
+      /** Longname */
+      longName?: Partial<string> & Partial<unknown>;
+      /** Id */
+      id: string;
       /** Vehicle Mode */
       vehicle_mode: Partial<string> & Partial<unknown>;
+      /** Train Number */
+      train_number: Partial<number> & Partial<unknown>;
+      line: Partial<components["schemas"]["Line"]> & Partial<unknown>;
+      /** Destination */
+      destination: Partial<string> & Partial<unknown>;
+      /** New Destination */
+      new_destination: Partial<string> & Partial<unknown>;
+      /** Routeidentifier */
+      routeIdentifier: Partial<string> & Partial<unknown>;
+      /** Situations */
+      situations: components["schemas"]["Situation"][];
+      /** Type */
+      type: Partial<
+        | "tram"
+        | "subway"
+        | "rail"
+        | "bus"
+        | "ferry"
+        | "cablecar"
+        | "gondola"
+        | "funicular"
+        | "coach"
+      > &
+        Partial<unknown>;
+      extra_data: components["schemas"]["JourneyExtraData"];
+      /** Stations */
+      stations: components["schemas"]["StopSequenceCall"][];
     };
     /** StopSequenceCall */
     StopSequenceCall: {
-      /** Aimedarrivaltime */
-      aimedArrivalTime: Partial<number> & Partial<unknown>;
-      /** Aimeddeparturetime */
-      aimedDepartureTime: Partial<number> & Partial<unknown>;
+      /** State */
+      state?: Partial<
+        | "LEAVING"
+        | "BOARDING"
+        | "STOP_CANCELLED"
+        | "JOURNEY_CANCELLED"
+        | "TIME_BASED"
+        | "PENDING"
+      > &
+        Partial<unknown>;
+      /** Changes */
+      changes?: components["schemas"]["SerializedCancellationChange"][];
+      /** Formation Id */
+      formation_id: Partial<number> & Partial<unknown>;
       /** Arrivaldelay */
       arrivalDelay: Partial<number> & Partial<unknown>;
       /** Arrivaltime */
       arrivalTime: Partial<number> & Partial<unknown>;
+      /** Aimedarrivaltime */
+      aimedArrivalTime: Partial<number> & Partial<unknown>;
       /** Cancelled */
       cancelled: boolean;
-      /** Changes */
-      changes?: components['schemas']['SerializedCancellationChange'][];
-      /** Coordinate */
-      coordinate: Partial<number>[];
       /** Departuredelay */
       departureDelay: Partial<number> & Partial<unknown>;
       /** Departuretime */
       departureTime: Partial<number> & Partial<unknown>;
-      /** Formation Id */
-      formation_id: Partial<number> & Partial<unknown>;
+      /** Aimeddeparturetime */
+      aimedDepartureTime: Partial<number> & Partial<unknown>;
       /** Nodropoff */
       noDropOff: Partial<boolean> & Partial<unknown>;
       /** Nopickup */
       noPickUp: Partial<boolean> & Partial<unknown>;
-      /** Platform */
-      platform: Partial<string> & Partial<unknown>;
-      /** State */
-      state?: Partial<
-        | 'BOARDING'
-        | 'JOURNEY_CANCELLED'
-        | 'LEAVING'
-        | 'PENDING'
-        | 'STOP_CANCELLED'
-        | 'TIME_BASED'
-      > &
-        Partial<unknown>;
       /** Stationid */
       stationId: Partial<number> & Partial<unknown>;
       /** Stationname */
       stationName: Partial<string> & Partial<unknown>;
+      /** Coordinate */
+      coordinate: (Partial<number> & Partial<number>)[];
+      /** Platform */
+      platform: Partial<string> & Partial<unknown>;
       /** Stopuid */
       stopUID: Partial<string> & Partial<unknown>;
     };
     /** TagLineDetail */
     TagLineDetail: {
-      /** Color */
-      color: Partial<string> & Partial<unknown>;
       /** Id */
       id: number;
-      /** Mot */
-      mot: Partial<'unknown'> &
-        Partial<
-          | 'bus'
-          | 'cablecar'
-          | 'coach'
-          | 'ferry'
-          | 'funicular'
-          | 'gondola'
-          | 'rail'
-          | 'subway'
-          | 'tram'
-        >;
       /** Name */
       name: Partial<string> & Partial<unknown>;
-      /** Operator Name */
-      operator_name: Partial<string> & Partial<unknown>;
-      /** Short Name */
-      short_name: Partial<string> & Partial<unknown>;
+      /** Color */
+      color: Partial<string> & Partial<unknown>;
+      /** Text Color */
+      text_color: Partial<string> & Partial<unknown>;
       /** Stroke */
       stroke: Partial<string> & Partial<unknown>;
       /** Tags */
       tags: string[];
-      /** Text Color */
-      text_color: Partial<string> & Partial<unknown>;
+      /** Operator Name */
+      operator_name: Partial<string> & Partial<unknown>;
+      /** Short Name */
+      short_name: Partial<string> & Partial<unknown>;
+      /** Mot */
+      mot: Partial<
+        | "tram"
+        | "subway"
+        | "rail"
+        | "bus"
+        | "ferry"
+        | "cablecar"
+        | "gondola"
+        | "funicular"
+        | "coach"
+      > &
+        Partial<"unknown">;
     };
     /** TagLineDetailWithVias */
     TagLineDetailWithVias: {
-      /** Color */
-      color: Partial<string> & Partial<unknown>;
       /** Id */
       id: number;
-      /** Mot */
-      mot: Partial<'unknown'> &
-        Partial<
-          | 'bus'
-          | 'cablecar'
-          | 'coach'
-          | 'ferry'
-          | 'funicular'
-          | 'gondola'
-          | 'rail'
-          | 'subway'
-          | 'tram'
-        >;
       /** Name */
       name: Partial<string> & Partial<unknown>;
-      /** Operator Name */
-      operator_name: Partial<string> & Partial<unknown>;
-      /** Short Name */
-      short_name: Partial<string> & Partial<unknown>;
+      /** Color */
+      color: Partial<string> & Partial<unknown>;
+      /** Text Color */
+      text_color: Partial<string> & Partial<unknown>;
       /** Stroke */
       stroke: Partial<string> & Partial<unknown>;
       /** Tags */
       tags: string[];
-      /** Text Color */
-      text_color: Partial<string> & Partial<unknown>;
+      /** Operator Name */
+      operator_name: Partial<string> & Partial<unknown>;
+      /** Short Name */
+      short_name: Partial<string> & Partial<unknown>;
+      /** Mot */
+      mot: Partial<
+        | "tram"
+        | "subway"
+        | "rail"
+        | "bus"
+        | "ferry"
+        | "cablecar"
+        | "gondola"
+        | "funicular"
+        | "coach"
+      > &
+        Partial<"unknown">;
       /** Vias */
-      vias: components['schemas']['LineViaStop'][][];
+      vias: components["schemas"]["LineViaStop"][][];
     };
     /**
      * TrackerTrajectory
@@ -557,93 +557,95 @@ export interface components {
      * client.
      */
     TrackerTrajectory: {
-      geometry: components['schemas']['LineStringGeometry'];
-      properties: components['schemas']['TrackerTrajectoryProperties'];
       /**
        * Type
        * @constant
        */
-      type: 'Feature';
+      type: "Feature";
+      geometry: components["schemas"]["LineStringGeometry"];
+      properties: components["schemas"]["TrackerTrajectoryProperties"];
     };
     /** TrackerTrajectoryProperties */
     TrackerTrajectoryProperties: {
-      /** Bounds */
-      bounds: number[];
-      /** Delay */
-      delay?: Partial<number> & Partial<unknown>;
-      /** Event Timestamp */
-      event_timestamp?: Partial<number> & Partial<unknown>;
-      /** Gen Level */
-      gen_level: Partial<number> & Partial<unknown>;
-      /** Gen Range */
-      gen_range: number[];
-      /** Graph */
-      graph: string;
-      /** Has Journey */
-      has_journey: boolean;
       /** Has Realtime */
       has_realtime: boolean;
       /** Has Realtime Journey */
       has_realtime_journey: boolean;
-      line?: Partial<components['schemas']['Line']> & Partial<unknown>;
       /**
        * Operator Provides Realtime Journey
        * @enum {string}
        */
-      operator_provides_realtime_journey: 'maybe' | 'no' | 'unknown' | 'yes';
-      /** Route Identifier */
-      route_identifier?: Partial<string> & Partial<unknown>;
-      /** State */
-      state?: Partial<'BOARDING' | 'DRIVING' | 'JOURNEY_CANCELLED'> &
-        Partial<unknown>;
-      /** Tenant */
-      tenant: string;
-      /** Time Intervals */
-      time_intervals: (Partial<number> & Partial<unknown>)[][];
-      /** Time Since Update */
-      time_since_update?: Partial<number> & Partial<unknown>;
-      /**
-       * Timestamp
-       * Format: date-time
-       */
-      timestamp: number;
-      /** Train Id */
-      train_id: string;
+      operator_provides_realtime_journey: "yes" | "no" | "maybe" | "unknown";
+      /** Graph */
+      graph: string;
+      /** Gen Level */
+      gen_level: Partial<number> & Partial<unknown>;
+      /** Gen Range */
+      gen_range: number[];
       /**
        * Type
        * @enum {string}
        */
       type:
-        | 'bus'
-        | 'cablecar'
-        | 'coach'
-        | 'ferry'
-        | 'funicular'
-        | 'gondola'
-        | 'rail'
-        | 'subway'
-        | 'tram';
+        | "tram"
+        | "subway"
+        | "rail"
+        | "bus"
+        | "ferry"
+        | "cablecar"
+        | "gondola"
+        | "funicular"
+        | "coach";
+      /** Bounds */
+      bounds: number[];
+      /** Tenant */
+      tenant: string;
+      /** Time Intervals */
+      time_intervals: (Partial<number> &
+        Partial<number> &
+        Partial<unknown>)[][];
+      /** Train Id */
+      train_id: string;
+      /**
+       * Timestamp
+       * Format: date-time
+       */
+      timestamp: number;
+      /** Has Journey */
+      has_journey: boolean;
+      /** Event Timestamp */
+      event_timestamp?: Partial<number> & Partial<unknown>;
+      line?: Partial<components["schemas"]["Line"]> & Partial<unknown>;
+      /** State */
+      state?: Partial<"DRIVING" | "BOARDING" | "JOURNEY_CANCELLED"> &
+        Partial<unknown>;
+      /** Time Since Update */
+      time_since_update?: Partial<number> & Partial<unknown>;
+      /** Delay */
+      delay?: Partial<number> & Partial<unknown>;
+      /** Route Identifier */
+      route_identifier?: Partial<string> & Partial<unknown>;
     };
     /** TrainsByRouteIdentifierResult */
     TrainsByRouteIdentifierResult: {
       /** Matches */
-      matches: components['schemas']['RouteIdentifierMatch'][];
+      matches: components["schemas"]["RouteIdentifierMatch"][];
     };
     /** TrajectoryCollection */
     TrajectoryCollection: {
-      /** Features */
-      features: components['schemas']['TrackerTrajectory'][];
       /**
        * Type
        * @default FeatureCollection
        * @constant
        */
-      type?: 'FeatureCollection';
+      type?: "FeatureCollection";
+      /** Features */
+      features: components["schemas"]["TrackerTrajectory"][];
     };
     /** ValidationError */
     ValidationError: {
       /** Location */
-      loc: (Partial<number> & Partial<string>)[];
+      loc: (Partial<string> & Partial<number>)[];
       /** Message */
       msg: string;
       /** Error Type */
@@ -654,60 +656,72 @@ export interface components {
 
 export interface operations {
   /**
-   * Get the stop sequences for the current journeys of the given train
+   * Get all current trajectories between two stops for the given feed
    *
-   * This is equivalent to calling
+   * This is roughly equivalent to calling
    *
-   *     GET stopsequence_<train_id>
+   *     BBOX <x_min> <y_min> <x_max> <y_max> <zoom> [tenant=<feed_name>] [gen_level=<gen_level>] [graph=graph]
    *
-   * on the websocket.
+   * on the websocket but does not support all Websocket API parameters and
+   * `feed_name` is not optional for the HTTP-API. Geometries are not simplified as
+   * in the BBOX command.
    */
-  calls_calls__train_id___get: {
+  trajectories_trajectories__feed_name___get: {
     parameters: {
       path: {
-        train_id: string;
+        feed_name: string;
+      };
+      query: {
+        bbox?: Partial<string> & Partial<unknown>;
+        gen_level?: Partial<number> & Partial<unknown>;
+        channel_prefix?: string;
+        /** @deprecated */
+        validate_output?: boolean;
+        graph?: Partial<string> & Partial<unknown>;
       };
     };
     responses: {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['StopSequence'][];
+          "application/json": components["schemas"]["TrajectoryCollection"];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
-  /**
-   * Get a list of all active feeds
-   *
-   * This is the only endpoint without Websocket API equivalent, where this info
-   * is not needed normally (the `BBOX` command picks all the relevant data for
-   * you).
-   */
-  feeds_feeds__get: {
+  /** Search for active trains in a specific feed/tenant by route identifier. */
+  trains_by_route_identifier_trains_by_route_identifier__feed_name___get: {
     parameters: {
+      path: {
+        /** The feed name (aka tenant short name). */
+        feed_name: string;
+      };
       query: {
-        include_counts?: boolean;
-        raw_data?: boolean;
+        /** Whether to return only exact matches (up to case sensitivity if applicable). If false, substring matches are also considered. */
+        exact_match: boolean;
+        /** Query to match against route identifiers. */
+        query?: string;
+        /** Whether the search is case sensitive. */
+        case_sensitive?: boolean;
       };
     };
     responses: {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['FeedCollection'];
+          "application/json": components["schemas"]["TrainsByRouteIdentifierResult"];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -731,8 +745,8 @@ export interface operations {
         train_id: string;
       };
       query: {
-        channel_prefix?: string;
         gen_level?: Partial<number> & Partial<unknown>;
+        channel_prefix?: string;
         graph?: Partial<string> & Partial<unknown>;
       };
     };
@@ -740,13 +754,104 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['FullTrajectoryCollection'];
+          "application/json": components["schemas"]["FullTrajectoryCollection"];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  /**
+   * Get the stop sequences for the current journeys of the given train
+   *
+   * This is equivalent to calling
+   *
+   *     GET stopsequence_<train_id>
+   *
+   * on the websocket.
+   */
+  calls_calls__train_id___get: {
+    parameters: {
+      path: {
+        train_id: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["StopSequence"][];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  /**
+   * Get a list of all active feeds
+   *
+   * This is the only endpoint without Websocket API equivalent, where this info
+   * is not needed normally (the `BBOX` command picks all the relevant data for
+   * you).
+   */
+  feeds_feeds__get: {
+    parameters: {
+      query: {
+        include_counts?: boolean;
+        raw_data?: boolean;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["FeedCollection"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  /**
+   * Return matching lines with a list of stop lists for routing
+   *
+   * Each item in the vias list should be treated as a list of vias for the Routing-API.
+   * The goal of this method is to compile an undirected, routable representation of the
+   * line, values are meaningless apart from that.
+   */
+  get_via_stops_lines__tag__vias__get: {
+    parameters: {
+      path: {
+        tag: string;
+      };
+      query: {
+        operator_name?: Partial<string> & Partial<unknown>;
+        name?: Partial<string> & Partial<unknown>;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["TagLineDetailWithVias"][];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -766,128 +871,27 @@ export interface operations {
         tag: string;
       };
       query: {
-        format?: 'geojson' | 'json';
-        graph?: Partial<string> & Partial<unknown>;
-        name?: Partial<string> & Partial<unknown>;
         operator_name?: Partial<string> & Partial<unknown>;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          'application/json': components['schemas']['TagLineDetail'][];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          'application/json': components['schemas']['HTTPValidationError'];
-        };
-      };
-    };
-  };
-  /**
-   * Return matching lines with a list of stop lists for routing
-   *
-   * Each item in the vias list should be treated as a list of vias for the Routing-API.
-   * The goal of this method is to compile an undirected, routable representation of the
-   * line, values are meaningless apart from that.
-   */
-  get_via_stops_lines__tag__vias__get: {
-    parameters: {
-      path: {
-        tag: string;
-      };
-      query: {
         name?: Partial<string> & Partial<unknown>;
-        operator_name?: Partial<string> & Partial<unknown>;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          'application/json': components['schemas']['TagLineDetailWithVias'][];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          'application/json': components['schemas']['HTTPValidationError'];
-        };
-      };
-    };
-  };
-  /** Search for active trains in a specific feed/tenant by route identifier. */
-  trains_by_route_identifier_trains_by_route_identifier__feed_name___get: {
-    parameters: {
-      path: {
-        /** The feed name (aka tenant short name). */
-        feed_name: string;
-      };
-      query: {
-        /** Whether the search is case sensitive. */
-        case_sensitive?: boolean;
-        /** Whether to return only exact matches (up to case sensitivity if applicable). If false, substring matches are also considered. */
-        exact_match: boolean;
-        /** Query to match against route identifiers. */
-        query?: string;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          'application/json': components['schemas']['TrainsByRouteIdentifierResult'];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          'application/json': components['schemas']['HTTPValidationError'];
-        };
-      };
-    };
-  };
-  /**
-   * Get all current trajectories between two stops for the given feed
-   *
-   * This is roughly equivalent to calling
-   *
-   *     BBOX <x_min> <y_min> <x_max> <y_max> <zoom> [tenant=<feed_name>] [gen_level=<gen_level>] [graph=graph]
-   *
-   * on the websocket but does not support all Websocket API parameters and
-   * `feed_name` is not optional for the HTTP-API. Geometries are not simplified as
-   * in the BBOX command.
-   */
-  trajectories_trajectories__feed_name___get: {
-    parameters: {
-      path: {
-        feed_name: string;
-      };
-      query: {
-        bbox?: Partial<string> & Partial<unknown>;
-        channel_prefix?: string;
-        gen_level?: Partial<number> & Partial<unknown>;
+        format?: "json" | "geojson";
         graph?: Partial<string> & Partial<unknown>;
-        /** @deprecated */
-        validate_output?: boolean;
       };
     };
     responses: {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['TrajectoryCollection'];
+          "application/json": components["schemas"]["TagLineDetail"][];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
   };
 }
+
+export interface external {}
