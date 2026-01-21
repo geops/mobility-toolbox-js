@@ -57,6 +57,9 @@ export interface paths {
      *     $it: Boolean!,
      *     $en: Boolean!,
      *     $isEdited: Boolean
+     *     $bbox: [Float!]
+     *     $bbox_srid: Int!
+     *     $bbox_graph: String!
      * ) {
      *     paginatedSituations(
      *         tenant: $tenant
@@ -71,7 +74,12 @@ export interface paths {
      *             affectedBefore: $affectedBefore,
      *             affectedAfter: $affectedAfter,
      *             hasGeoms: $hasGeoms,
-     *             isEdited: $isEdited
+     *             isEdited: $isEdited,
+     *             bbox: {
+     *                 bbox: $bbox,
+     *                 srid: $bbox_srid,
+     *                 graph: $bbox_graph
+     *             },
      *         }
      *         order: {
      *             startDate: ASC
@@ -239,6 +247,9 @@ export interface paths {
      *     $it: Boolean!,
      *     $en: Boolean!,
      *     $isEdited: Boolean
+     *     $bbox: [Float!]
+     *     $bbox_srid: Int!
+     *     $bbox_graph: String!
      * ) {
      *     paginatedSituations(
      *         tenant: $tenant
@@ -253,7 +264,12 @@ export interface paths {
      *             affectedBefore: $affectedBefore,
      *             affectedAfter: $affectedAfter,
      *             hasGeoms: $hasGeoms,
-     *             isEdited: $isEdited
+     *             isEdited: $isEdited,
+     *             bbox: {
+     *                 bbox: $bbox,
+     *                 srid: $bbox_srid,
+     *                 graph: $bbox_graph
+     *             },
      *         }
      *         order: {
      *             startDate: ASC
@@ -730,6 +746,9 @@ export interface operations {
    *     $it: Boolean!,
    *     $en: Boolean!,
    *     $isEdited: Boolean
+   *     $bbox: [Float!]
+   *     $bbox_srid: Int!
+   *     $bbox_graph: String!
    * ) {
    *     paginatedSituations(
    *         tenant: $tenant
@@ -744,7 +763,12 @@ export interface operations {
    *             affectedBefore: $affectedBefore,
    *             affectedAfter: $affectedAfter,
    *             hasGeoms: $hasGeoms,
-   *             isEdited: $isEdited
+   *             isEdited: $isEdited,
+   *             bbox: {
+   *                 bbox: $bbox,
+   *                 srid: $bbox_srid,
+   *                 graph: $bbox_graph
+   *             },
    *         }
    *         order: {
    *             startDate: ASC
@@ -878,6 +902,10 @@ export interface operations {
     parameters: {
       query: {
         affectedAt?: string | null;
+        /** min_x, min_y, max_x, max_y */
+        bbox?: number[] | null;
+        bbox_graph?: string;
+        bbox_srid?: number;
         contentLarge?: boolean;
         contentMedium?: boolean;
         contentSmall?: boolean;
@@ -946,6 +974,9 @@ export interface operations {
    *     $it: Boolean!,
    *     $en: Boolean!,
    *     $isEdited: Boolean
+   *     $bbox: [Float!]
+   *     $bbox_srid: Int!
+   *     $bbox_graph: String!
    * ) {
    *     paginatedSituations(
    *         tenant: $tenant
@@ -960,7 +991,12 @@ export interface operations {
    *             affectedBefore: $affectedBefore,
    *             affectedAfter: $affectedAfter,
    *             hasGeoms: $hasGeoms,
-   *             isEdited: $isEdited
+   *             isEdited: $isEdited,
+   *             bbox: {
+   *                 bbox: $bbox,
+   *                 srid: $bbox_srid,
+   *                 graph: $bbox_graph
+   *             },
    *         }
    *         order: {
    *             startDate: ASC
@@ -1094,6 +1130,10 @@ export interface operations {
     parameters: {
       query: {
         affectedAt?: string | null;
+        /** min_x, min_y, max_x, max_y */
+        bbox?: number[] | null;
+        bbox_graph?: string;
+        bbox_srid?: number;
         contentLarge?: boolean;
         contentMedium?: boolean;
         contentSmall?: boolean;

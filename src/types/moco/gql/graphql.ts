@@ -15,12 +15,14 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** Date with time (isoformat) */
   DateTime: { input: any; output: any; }
+  /** Geometry object as descibed in RFC 7946 section 3.1 with SRID=3857. */
   GeoJSONDict: { input: any; output: any; }
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf). */
   JSON: { input: any; output: any; }
   /** Time (isoformat) */
   Time: { input: any; output: any; }
   UUID: { input: any; output: any; }
+  /** Represents a file upload. */
   Upload: { input: any; output: any; }
 };
 
@@ -45,6 +47,12 @@ export type AssetType = {
   absoluteUrl: Scalars['String']['output'];
   label: Scalars['String']['output'];
   uuid: Scalars['UUID']['output'];
+};
+
+export type BboxFilterInput = {
+  bbox?: InputMaybe<Array<Scalars['Float']['input']>>;
+  graph?: Scalars['String']['input'];
+  srid?: Scalars['Int']['input'];
 };
 
 export type CreateSituationInput = {
@@ -204,6 +212,14 @@ export type MultiRoutingResult = {
   type: Scalars['String']['output'];
 };
 
+export type MultilingualTextualContentFilter = {
+  AND?: InputMaybe<MultilingualTextualContentFilter>;
+  DISTINCT?: InputMaybe<Scalars['Boolean']['input']>;
+  NOT?: InputMaybe<MultilingualTextualContentFilter>;
+  OR?: InputMaybe<MultilingualTextualContentFilter>;
+  size?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type MultilingualTextualContentInput = {
   de?: InputMaybe<TextualContentInput>;
   en?: InputMaybe<TextualContentInput>;
@@ -222,6 +238,7 @@ export type MultilingualTextualContentType = {
   images: Array<IndexedImageType>;
   infoLinks: Array<InfoLinkType>;
   it?: Maybe<TextualContentType>;
+  size: Scalars['String']['output'];
 };
 
 export type Mutation = {
@@ -387,6 +404,7 @@ export type PublicationStopTypeGeometryArgs = {
 
 export type PublicationType = {
   __typename?: 'PublicationType';
+  effectivePublicationWindows: Array<TimeIntervalType>;
   id: Scalars['ID']['output'];
   perspectives: Array<Scalars['String']['output']>;
   publicationLines: Array<PublicationLineGroupType>;
@@ -396,9 +414,18 @@ export type PublicationType = {
   serviceConditionGroup: ServiceConditionGroupEnumeration;
   severity: SeverityEnumeration;
   severityGroup: SeverityGroupEnumeration;
+  /** @deprecated Use textualContents field instead */
   textualContentLarge?: Maybe<MultilingualTextualContentType>;
+  /** @deprecated Use textualContents field instead */
   textualContentMedium?: Maybe<MultilingualTextualContentType>;
+  /** @deprecated Use textualContents field instead */
   textualContentSmall?: Maybe<MultilingualTextualContentType>;
+  textualContents: Array<MultilingualTextualContentType>;
+};
+
+
+export type PublicationTypeTextualContentsArgs = {
+  filters?: InputMaybe<MultilingualTextualContentFilter>;
 };
 
 export type PublicationWindowInput = {
@@ -556,6 +583,7 @@ export type SituationFilter = {
   affectedAfter?: InputMaybe<Scalars['DateTime']['input']>;
   affectedAt?: InputMaybe<Scalars['DateTime']['input']>;
   affectedBefore?: InputMaybe<Scalars['DateTime']['input']>;
+  bbox?: InputMaybe<BboxFilterInput>;
   editedAt?: InputMaybe<Scalars['DateTime']['input']>;
   hasGeoms?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -589,8 +617,13 @@ export type SituationType = {
   affectedTimeIntervalsStart?: Maybe<Scalars['DateTime']['output']>;
   createdAt: Scalars['DateTime']['output'];
   description: Scalars['String']['output'];
+  detailDe: Scalars['String']['output'];
+  detailEn: Scalars['String']['output'];
+  detailFr: Scalars['String']['output'];
+  detailIt: Scalars['String']['output'];
   editedAt?: Maybe<Scalars['DateTime']['output']>;
   editedBy?: Maybe<UserType>;
+  effectivePublicationWindows: Array<TimeIntervalType>;
   id: Scalars['ID']['output'];
   language: Scalars['String']['output'];
   publicationLineNames: Array<Scalars['String']['output']>;
@@ -714,6 +747,12 @@ export type TextualContentType = {
   summary: Scalars['String']['output'];
   /** @deprecated Use summary instead */
   title?: Maybe<Scalars['String']['output']>;
+};
+
+export type TimeIntervalType = {
+  __typename?: 'TimeIntervalType';
+  endTime: Scalars['DateTime']['output'];
+  startTime: Scalars['DateTime']['output'];
 };
 
 export type UpdateSituationInput = {
