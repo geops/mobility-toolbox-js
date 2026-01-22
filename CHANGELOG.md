@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.2](https://github.com/geops/mobility-toolbox-js/compare/v3.6.1...v3.6.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* use publicAt when situations are loaded without the api([#238](https://github.com/geops/mobility-toolbox-js/issues/238)) ([27e87c9](https://github.com/geops/mobility-toolbox-js/commit/27e87c912239e2d4aa77bc8ba2b57fa23e33a07d))
+
 ### [3.6.1](https://github.com/geops/mobility-toolbox-js/compare/v3.6.0...v3.6.1) (2025-12-22)
 
 
