@@ -372,7 +372,10 @@ class MocoLayer extends MaplibreStyleLayer {
 
     const data = {
       features: (this.situations ?? []).flatMap((situation) => {
-        return getFeatureCollectionToRenderFromSituation(situation).features;
+        return getFeatureCollectionToRenderFromSituation(
+          situation,
+          this.publicAt,
+        ).features;
       }),
       type: 'FeatureCollection',
     } as MocoNotificationFeatureCollectionToRender;

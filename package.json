@@ -2,7 +2,7 @@
   "name": "mobility-toolbox-js",
   "license": "MIT",
   "description": "Toolbox for JavaScript applications in the domains of mobility and logistics.",
-  "version": "3.6.1",
+  "version": "3.6.2-beta.0",
   "homepage": "https://mobility-toolbox-js.geops.io/",
   "exports": {
     ".": "./index.js",
@@ -116,7 +116,7 @@
     "test": "TZ='UTC' jest ",
     "test:watch": "yarn test --watchAll",
     "tsc": "tsc",
-    "types:backend": " yarn types:stops && yarn types:routing && yarn types:moco && yarn types:realtime",
+    "types:backend": " yarn types:stops && yarn types:routing && yarn types:moco && yarn types:realtime && yarn format",
     "types:moco": "openapi-typescript https://moco.geops.io/api/schema/?format=json --output src/types/moco.d.ts && graphql-codegen --config graphql-codegen-moco.ts",
     "types:realtime": "openapi-typescript  https://tralis-tracker-api.geops.io/api/openapi.json --output src/types/realtimerest.d.ts",
     "types:routing": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts",
