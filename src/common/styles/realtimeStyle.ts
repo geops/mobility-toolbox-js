@@ -233,7 +233,6 @@ const realtimeStyle: RealtimeStyleFunction = (
         canvasRef.width,
         canvasRef.height,
         circleFillColor,
-
         getArrowSize(trajectory, viewState, radius / pixelRatio),
         rotation,
         pixelRatio,
