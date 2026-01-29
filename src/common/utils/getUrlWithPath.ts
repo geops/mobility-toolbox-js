@@ -18,8 +18,8 @@ const getUrlWithPath = (url: string, path: string): string => {
     newUrl = `${newUrl}/`;
   }
 
-  if (path.startsWith('/')) {
-    newPath = path.substring(1);
+  if (newPath.startsWith('/')) {
+    newPath = newPath.substring(1);
   }
   return newUrl + newPath;
 };

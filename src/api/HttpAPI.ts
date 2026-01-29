@@ -42,7 +42,7 @@ class HttpAPI {
       throw new Error(`No apiKey defined for request to ${this.url}`);
     }
 
-    const url = getUrlWithParams(getUrlWithPath(this.url, path), {
+    const url = getUrlWithParams(getUrlWithPath(this.url, path || ''), {
       key: !this.apiKey || this.apiKey === 'public' ? undefined : this.apiKey,
       ...(params || {}),
     });
