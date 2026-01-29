@@ -217,11 +217,8 @@ export const getDelayColor = (
   if (cancelled) {
     return isDelayText ? '#ff0000' : '#a0a0a0'; // red or gray
   }
-  if (!delayInMs) {
-    return '';
-  }
-  if (delayInMs === null) {
-    return '#a0a0a0'; // grey { r: 160, g: 160, b: 160, s: '160,160,160' };
+  if (delayInMs === null || delayInMs === undefined) {
+    return ''; // grey { r: 160, g: 160, b: 160, s: '160,160,160' };
   }
   if (delayInMs >= 3600000) {
     return '#ed004c'; // pink { r: 237, g: 0, b: 76, s: '237,0,76' };
