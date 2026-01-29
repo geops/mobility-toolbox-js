@@ -58,12 +58,7 @@ const mocoLayer = new MocoLayer({
 });
 
 const map = new Map({
-  layers: [
-    baseLayer,
-    realtimeLayer,
-    // mocoLayer,
-    // mapsetLayer
-  ],
+  layers: [baseLayer, realtimeLayer, mocoLayer, mapsetLayer],
   target: 'map',
   view: new View({
     // center: [872814.6006106276, 6106276.43], // rvf
