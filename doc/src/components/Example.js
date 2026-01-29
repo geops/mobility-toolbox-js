@@ -64,7 +64,7 @@ function Example({ example }) {
 
   useEffect(() => {
     // Get the public api key
-    fetch('https://backend.developer.geops.io/publickey')
+    fetch('https://developer.geops.io/publickey')
       .then((response) => {
         return response.json();
       })
