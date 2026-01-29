@@ -26,5 +26,14 @@ describe('getUrlWithPath', () => {
       const url = getUrlWithPath('https://foo.ch?key=value', 'bar');
       expect(url.toString()).toEqual('https://foo.ch/bar');
     });
+
+    test('without a path', () => {
+      let url = getUrlWithPath('https://foo.ch', null);
+      expect(url.toString()).toEqual('https://foo.ch/');
+      url = getUrlWithPath('https://foo.ch', '');
+      expect(url.toString()).toEqual('https://foo.ch/');
+      url = getUrlWithPath('https://foo.ch', undefined);
+      expect(url.toString()).toEqual('https://foo.ch/');
+    });
   });
 });

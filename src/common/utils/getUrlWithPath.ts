@@ -5,7 +5,7 @@
  * @param {Object<String,String>} params a list of key/value pair to add to the url.
  * @private
  */
-const getUrlWithPath = (url: string, path: string): string => {
+const getUrlWithPath = (url: string, path?: string): string => {
   const urlObj = new URL(url);
   let newUrl = url;
   let newPath = path;
@@ -18,10 +18,10 @@ const getUrlWithPath = (url: string, path: string): string => {
     newUrl = `${newUrl}/`;
   }
 
-  if (newPath.startsWith('/')) {
+  if (newPath?.startsWith('/')) {
     newPath = newPath.substring(1);
   }
-  return newUrl + newPath;
+  return newUrl + (newPath ?? '');
 };
 
 export default getUrlWithPath;
