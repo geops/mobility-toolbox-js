@@ -4,6 +4,7 @@ import { transformExtent } from 'ol/proj';
 import { Vector } from 'ol/source';
 
 import MapsetAPI from '../../api/MapsetApi';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 import MapsetKmlFormat from '../utils/MapsetKmlFormat';
 
 import type { Map } from 'ol';
@@ -169,6 +170,9 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     if (options.loadAll === false) {
       this.loadAll = options.loadAll;
     }
+
+    // For backward compatibility with v2
+    defineDeprecatedProperties(this, options);
   }
 
   async fetchPlanById(planId?: string) {
