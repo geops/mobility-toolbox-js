@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.3](https://github.com/geops/mobility-toolbox-js/compare/v3.6.2...v3.6.3) (2026-01-30)
+
+
+### Bug Fixes
+
+* handle url and path  with or witout slash ([#239](https://github.com/geops/mobility-toolbox-js/issues/239)) ([d50ecf8](https://github.com/geops/mobility-toolbox-js/commit/d50ecf8321e225fd1dcbd1e4108d4c384e69f11b))
+
 ### [3.6.2](https://github.com/geops/mobility-toolbox-js/compare/v3.6.1...v3.6.2) (2026-01-22)
 
 
