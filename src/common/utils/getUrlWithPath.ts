@@ -1,7 +1,7 @@
 /**
  * Concatenate an url with a path to avoid double slash.
  * @param {string} url a url.
- * @param {string} url a path.
+ * @param {string} path a path.
  * @param {Object<String,String>} params a list of key/value pair to add to the url.
  * @private
  */
