@@ -7,6 +7,7 @@ import { unByKey } from 'ol/Observable';
 import { Source } from 'ol/source';
 
 import { getUrlWithParams } from '../../common/utils';
+import getUrlWithPath from '../../common/utils/getUrlWithPath';
 import MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
@@ -37,7 +38,7 @@ const buildStyleUrl = (
   apiKey: string,
   apiKeyName: string,
 ) => {
-  return getUrlWithParams(`${url}/styles/${style}/style.json`, {
+  return getUrlWithParams(getUrlWithPath(url, `/styles/${style}/style.json`), {
     [apiKeyName]: apiKey,
   }).toString();
 };

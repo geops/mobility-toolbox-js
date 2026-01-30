@@ -256,7 +256,9 @@ export const getCircleCanvas = (
         ctx.setLineDash(lineDash);
       }
 
-      ctx.stroke();
+      if (lineWidth > 0) {
+        ctx.stroke();
+      }
 
       cacheCircle[key] = canvas;
     }

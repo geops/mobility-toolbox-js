@@ -1,4 +1,5 @@
 import getUrlWithParams from '../common/utils/getUrlWithParams';
+import getUrlWithPath from '../common/utils/getUrlWithPath';
 
 export interface HttpAPIOptions {
   apiKey?: string;
@@ -41,7 +42,7 @@ class HttpAPI {
       throw new Error(`No apiKey defined for request to ${this.url}`);
     }
 
-    const url = getUrlWithParams(`${this.url}${path || ''}`, {
+    const url = getUrlWithParams(getUrlWithPath(this.url, path), {
       key: !this.apiKey || this.apiKey === 'public' ? undefined : this.apiKey,
       ...(params || {}),
     });
