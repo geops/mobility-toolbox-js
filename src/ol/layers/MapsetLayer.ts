@@ -36,7 +36,7 @@ const kmlFormatter = new MapsetKmlFormat();
  *
  * const layer = new MapsetLayer({
  *   apiKey: 'yourApiKey',
- *   // tags: ['test'],
+ *   tags: ['test'],
  *   // tenants: ['geopstest'],
  *   // url: 'https://editor.mapset.io/api/v1',
  * });
@@ -146,9 +146,9 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
    *
    * @param {Object} options
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
-   * @param {string[]} [options.tags] The tags of the required plans.
-   * @param {string} [options.timestamp] The timestamp of the required plans.
+   * @param {string[]} options.tags The tags of the required plans.
    * @param {string[]} [options.tenants] The tenants of the required plans.
+   * @param {string} [options.timestamp] The timestamp of the required plans.
    * @param {string} [options.url] The URL of the [geOps Mapset API](https://geops.com/de/solution/mapset).
    * @public
    */
