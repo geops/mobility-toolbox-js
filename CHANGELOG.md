@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.4](https://github.com/geops/mobility-toolbox-js/compare/v3.6.3...v3.6.4) (2026-02-03)
+
+
+### Bug Fixes
+
+* add serviceCondition and severity properties ([#240](https://github.com/geops/mobility-toolbox-js/issues/240)) ([44505fb](https://github.com/geops/mobility-toolbox-js/commit/44505fb05292a31a24d01c19193b63e8a59c70fa))
+
 ### [3.6.3](https://github.com/geops/mobility-toolbox-js/compare/v3.6.2...v3.6.3) (2026-01-30)
 
 
