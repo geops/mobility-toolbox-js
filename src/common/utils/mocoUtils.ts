@@ -188,6 +188,7 @@ export const getFeatureCollectionToRenderFromSituation = (
       isPublished,
       serviceCondition: publication.serviceCondition,
       serviceConditionGroup: publication.serviceConditionGroup,
+      severity: publication.severity,
       // for backward compatibility with v1
       severity_group: publication.severityGroup?.toLocaleLowerCase(),
       severityGroup: publication.severityGroup,
