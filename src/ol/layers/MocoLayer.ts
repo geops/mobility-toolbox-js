@@ -23,6 +23,8 @@ import type {
   PublicationStopType,
   PublicationType,
   ReasonType,
+  ServiceConditionEnumeration,
+  SeverityEnumeration,
 } from '../../types';
 import type {
   ServiceConditionGroupEnumeration,
@@ -73,7 +75,9 @@ export type MocoNotificationFeaturePropertiesToRender = {
   isPublished: boolean;
   reasonCategoryImageName: string;
   reasons?: ReasonType[];
+  serviceCondition: ServiceConditionEnumeration;
   serviceConditionGroup: ServiceConditionGroupEnumeration;
+  severity: SeverityEnumeration;
   severityGroup: SeverityGroupEnumeration;
 } & (
   | MocoNotificationLinePropertiesToRender
