@@ -1725,13 +1725,6 @@
     globals "^16.0.0"
     typescript-eslint "^8.45.0"
 
-"@geops/geops-ui@0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@geops/geops-ui/-/geops-ui-0.3.6.tgz#f5e3f661d0db24f279a5ef51c62b3410b98647a7"
-  integrity sha512-xj6U73NoXxfyne9yE13zxP5COfp3V9g/JL/LIB/NJkatWsrqzsCfWJoqwKyw7M4gZ/gPTxuzf7Az2epWyzxVJQ==
-  dependencies:
-    prop-types "^15.7.2"
-
 "@graphql-codegen/add@^6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@graphql-codegen/add/-/add-6.0.0.tgz#d195051d7c4bd6d3955a92361cc9eec7784bb541"
@@ -10002,7 +9995,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.7.2, prop-types@^15.8.1:
+prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
   integrity sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==
