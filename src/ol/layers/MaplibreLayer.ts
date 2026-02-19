@@ -227,7 +227,6 @@ class MaplibreLayer extends MapLibreLayer {
       this.updateMaplibreMap.bind(this),
       150,
     );
-    updateMaplibreMapDebounced();
     this.olEventsKeys.push(
       this.on('propertychange', (evt: ObjectEvent) => {
         if (/(url|style|apiKey|apiKeyName)/.test(evt.key)) {

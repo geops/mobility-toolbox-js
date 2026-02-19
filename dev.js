@@ -23,8 +23,9 @@ const mapsUrl = 'https://maps.geops.io';
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
-  style: 'travic_v2',
+  // style: 'tralis_munich_schematic_v3',
   // style: 'de.rvf_moco',
+  // url: 'https://maps.geops.io/styles/tralis_munich_schematic_v3/style.json?key=5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e',
 });
 
 const mapsetLayer = new MapsetLayer({
@@ -58,13 +59,19 @@ const mocoLayer = new MocoLayer({
 });
 
 const map = new Map({
-  layers: [baseLayer, realtimeLayer, mocoLayer, mapsetLayer],
+  layers: [
+    baseLayer,
+    // realtimeLayer,
+    // mocoLayer,
+    // mapsetLayer
+  ],
   target: 'map',
   view: new View({
     // center: [872814.6006106276, 6106276.43], // rvf
-    center: [1022769, 5698188], // trenord
+    // center: [1022769, 5698188], // trenord
     // center: [1286668, 6130216], // sbm
-    zoom: 16,
+    center: [2383522, 1674321], // sbm schematic
+    zoom: 5.5,
   }),
 });
 
