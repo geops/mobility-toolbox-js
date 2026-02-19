@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.5](https://github.com/geops/mobility-toolbox-js/compare/v3.6.4...v3.6.5) (2026-02-19)
+
+
+### Bug Fixes
+
+* do not reload the style when we add the layer to the map ([c1a9adb](https://github.com/geops/mobility-toolbox-js/commit/c1a9adb215eefd0c57813ca5b3f9c918a88d3ea9))
+* remove geops-ui deps from root dependencies ([cadcfbe](https://github.com/geops/mobility-toolbox-js/commit/cadcfbe0e26b019dcce83a7678ea261d15494032))
+
 ### [3.6.4](https://github.com/geops/mobility-toolbox-js/compare/v3.6.3...v3.6.4) (2026-02-03)
 
 
