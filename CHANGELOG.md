@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.6](https://github.com/geops/mobility-toolbox-js/compare/v3.6.5...v3.6.6) (2026-02-20)
+
+
+### Bug Fixes
+
+* improve text size claculation when browser is zoomed ([cf1d405](https://github.com/geops/mobility-toolbox-js/commit/cf1d405873c5e6e1d7be791664a9deae41971d64))
+
 ### [3.6.5](https://github.com/geops/mobility-toolbox-js/compare/v3.6.4...v3.6.5) (2026-02-19)
 
 
