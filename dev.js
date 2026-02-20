@@ -61,17 +61,17 @@ const mocoLayer = new MocoLayer({
 const map = new Map({
   layers: [
     baseLayer,
-    // realtimeLayer,
+    realtimeLayer,
     // mocoLayer,
     // mapsetLayer
   ],
   target: 'map',
   view: new View({
     // center: [872814.6006106276, 6106276.43], // rvf
-    // center: [1022769, 5698188], // trenord
+    center: [1022769, 5698188], // trenord
     // center: [1286668, 6130216], // sbm
-    center: [2383522, 1674321], // sbm schematic
-    zoom: 5.5,
+    // center: [2383522, 1674321], // sbm schematic
+    zoom: 13,
   }),
 });
 

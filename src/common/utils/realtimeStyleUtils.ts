@@ -194,11 +194,10 @@ export const getTextSize = (
   }
   ctx.font = font;
   let newText = ctx.measureText(text);
-
   const maxiter = 25;
   let i = 0;
 
-  while (newText.width > markerSize - 6 && i < maxiter) {
+  while (newText.width > markerSize && i < maxiter) {
     const previousFontSize = fontSize;
     // eslint-disable-next-line no-param-reassign
     fontSize -= 0.5;

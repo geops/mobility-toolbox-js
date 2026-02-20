@@ -78,7 +78,6 @@ const realtimeStyle: RealtimeStyleFunction = (
   // Get the text color of the vehicle
   if (useDelayStyle) {
     color = getDelayColor(trajectory, viewState, delay, cancelled);
-
     textColor = getDelayTextColor(trajectory, viewState, delay, cancelled);
   }
 
@@ -166,15 +165,24 @@ const realtimeStyle: RealtimeStyleFunction = (
         // If an image is provided we use it instead of text
         circleText = image;
       } else {
+        const padding = 6 * pixelRatio;
         const fontSize2 = Math.max(radius, 10);
+
+        // Initialize the context font for calculation
+
+        // The canvas automatically round the font size to 1 number after
+        // the comma, so we need to round also the fontSize for calculation
+        // when the browser is zoomed.
+        const toFontFixed = Number(fontSize2.toFixed(1));
+
         const textSize = getTextSize(
           trajectory,
           viewState,
           circle.getContext('2d') as AnyCanvasContext,
-          radius * 2,
+          radius * 2 - padding,
           name,
-          fontSize2,
-          getTextFont(trajectory, viewState, fontSize2, name),
+          toFontFixed,
+          getTextFont(trajectory, viewState, toFontFixed, name),
         );
 
         const font = getTextFont(trajectory, viewState, textSize, name);
