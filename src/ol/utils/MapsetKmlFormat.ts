@@ -903,14 +903,6 @@ class MapsetKmlFormat {
       // <Document> tag
       featString = featString.replace(/<Placemark\/>/g, '');
 
-      // Add KML document zoomLimits
-      if (layer.get('zoomLimits')) {
-        featString = featString.replace(
-          /<Document>/,
-          `<Document><ExtendedData><Data name="zoomLimits"><value>${JSON.stringify(layer.get('zoomLimits'))}</value></Data></ExtendedData>`,
-        );
-      }
-
       // Add KML document name
       if (layer.get('name')) {
         featString = featString.replace(
