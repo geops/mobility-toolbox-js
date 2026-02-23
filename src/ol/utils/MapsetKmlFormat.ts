@@ -542,9 +542,9 @@ class MapsetKmlFormat {
 
   /**
    * Create a KML string.
-   * @param {VectorLayer} layer A react-spatial VectorLayer.
+   * @param {VectorLayer} layer A openlayers VectorLayer.
    * @param {<ol.Projection|String>} featureProjection The current projection used by the features.
-   * @param {<boolean>} fixGxyAndGxh If the KML contains gx:w and gx:h, (ol >= 6.7), it will fix the bug introduced by https://github.com/openlayers/openlayers/pull/12695.
+   * @param {<boolean>} mapResolution The current map resolution.
    */
   public writeFeatures(
     layer: Vector<VectorSource<FeatureLike>>,
