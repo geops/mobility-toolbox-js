@@ -203,13 +203,15 @@ class MapsetKmlFormat {
       feature.getStyleFunction();
 
     // Store maxZoom in properties
-    if (isPositiveNumberOrZero(feature.get('maxZoom'))) {
-      feature.set('maxZoom', parseFloat(feature.get('maxZoom') as string));
+    const maxZoom = parseFloat(feature.get('maxZoom') as string);
+    if (isPositiveNumberOrZero(maxZoom)) {
+      feature.set('maxZoom', maxZoom);
     }
 
     // Store minZoom in properties
-    if (isPositiveNumberOrZero(feature.get('minZoom'))) {
-      feature.set('minZoom', parseFloat(feature.get('minZoom') as string));
+    const minZoom = parseFloat(feature.get('minZoom') as string);
+    if (isPositiveNumberOrZero(minZoom)) {
+      feature.set('minZoom', minZoom);
     }
 
     // The use of clone is part of the scale fix for OL > 6.7
@@ -550,7 +552,6 @@ class MapsetKmlFormat {
     mapResolution: number,
   ) {
     let featString;
-    // const olLayer = layer.olLayer || layer.get('olLayer') || layer;
     const exportFeatures = [];
 
     [...(layer?.getSource()?.getFeatures() ?? [])]
@@ -760,13 +761,15 @@ class MapsetKmlFormat {
         }
 
         // maxZoom: maximum zoom level at which the feature is displayed
-        if (isPositiveNumberOrZero(feature.get('maxZoom'))) {
-          clone.set('maxZoom', parseFloat(feature.get('maxZoom') as string));
+        const maxZoom = parseFloat(feature.get('maxZoom') as string);
+        if (isPositiveNumberOrZero(maxZoom)) {
+          clone.set('maxZoom', maxZoom);
         }
 
         // minZoom: minimum zoom level at which the feature is displayed
-        if (isPositiveNumberOrZero(feature.get('minZoom'))) {
-          clone.set('minZoom', parseFloat(feature.get('minZoom') as string));
+        const minZoom = parseFloat(feature.get('minZoom') as string);
+        if (isPositiveNumberOrZero(minZoom)) {
+          clone.set('minZoom', minZoom);
         }
 
         // If only text is displayed we must specify an
