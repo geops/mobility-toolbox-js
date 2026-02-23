@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  "/": {
+  '/': {
     /** Returns a stop (or multiple) as GeoJSON FeatureCollection */
     get: {
       parameters: {
@@ -17,27 +17,27 @@ export interface paths {
            * comma seperated list, order chooses which agency will be preferred
            * as ident_source (for id and code fields)
            */
-          prefagencies?: "sbb" | "db";
+          prefagencies?: 'sbb' | 'db';
           /**
            * comma seperated list of mot's which should be available
            * at the stop
            */
           mots?:
-            | "bus"
-            | "ferry"
-            | "gondola"
-            | "tram"
-            | "rail"
-            | "funicular"
-            | "cable_car"
-            | "subway";
+            | 'bus'
+            | 'ferry'
+            | 'gondola'
+            | 'tram'
+            | 'rail'
+            | 'funicular'
+            | 'cable_car'
+            | 'subway';
           /**
            * left,bottom,right,up coordinates in WGS84 wherein the
            * station should lie
            */
           bbox?: string;
           /** which field to look up, default: all of them */
-          field?: "id" | "name" | "coords";
+          field?: 'id' | 'name' | 'coords';
           /**
            * Coordinates in WGS84 (in lat,lon order) used to rank stops close to
            * this position higher
@@ -50,10 +50,10 @@ export interface paths {
         200: {
           schema: {
             /** @enum {string} */
-            type?: "FeatureCollection";
+            type?: 'FeatureCollection';
             features?: {
               /** @enum {string} */
-              type?: "Feature";
+              type?: 'Feature';
               properties?: {
                 /** @description internal ID */
                 uid?: string;
@@ -79,7 +79,7 @@ export interface paths {
                 translated_names?: {
                   value?: string;
                   /** @enum {string} */
-                  language?: "de" | "en" | "fr" | "it";
+                  language?: 'de' | 'en' | 'fr' | 'it';
                 }[];
                 /** @description Means of transport that are available at this station */
                 mot?: {
@@ -114,7 +114,7 @@ export interface paths {
               /** @description the coordinates of the stop */
               geometry?: {
                 /** @enum {string} */
-                type?: "Point";
+                type?: 'Point';
                 /**
                  * @example [
                  *   7.439119,
@@ -130,7 +130,7 @@ export interface paths {
         400: {
           schema: {
             /** @enum {string} */
-            error?: "400 Bad Request: Limit has to be an integer between 1 and 500";
+            error?: '400 Bad Request: Limit has to be an integer between 1 and 500';
           };
         };
       };

@@ -16,17 +16,14 @@ const sortByDelay = (
 
   // We put cancelled train inbetween green and yellow trains
   // >=180000ms corresponds to yellow train
-  // @ts-expect-error
+  // @ts-expect-error  Verify that this property exists
   if (props1.cancelled && !props2.cancelled) {
-    // @ts-expect-error
     return props2.delay < 180000 ? -1 : 1;
   }
-  // @ts-expect-error
+  // @ts-expect-error  Verify that this property exists
   if (props2.cancelled && !props1.cancelled) {
-    // @ts-expect-error
     return props1.delay < 180000 ? 1 : -1;
   }
-  // @ts-expect-error
   return props2.delay - props1.delay;
 };
 

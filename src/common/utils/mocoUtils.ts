@@ -186,7 +186,9 @@ export const getFeatureCollectionToRenderFromSituation = (
       isActive: isAffected,
       isAffected,
       isPublished,
+      serviceCondition: publication.serviceCondition,
       serviceConditionGroup: publication.serviceConditionGroup,
+      severity: publication.severity,
       // for backward compatibility with v1
       severity_group: publication.severityGroup?.toLocaleLowerCase(),
       severityGroup: publication.severityGroup,
@@ -219,7 +221,6 @@ export const getFeatureCollectionToRenderFromSituation = (
               },
               type: 'Feature',
             };
-            // console.log(feature.properties);
             features.push(feature);
 
             if (publicationLine.hasIcon) {

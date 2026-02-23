@@ -10,7 +10,7 @@ import type {
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
-  RealtimeTrajectories,
+  RealtimeTrajectory,
   ViewState,
 } from '../../types';
 
@@ -30,7 +30,7 @@ import type {
  */
 const renderTrajectories = (
   canvas: AnyCanvas,
-  trajectories: RealtimeTrajectories,
+  trajectories: RealtimeTrajectory[],
   style: RealtimeStyleFunction,
   viewState: ViewState,
   options: RealtimeStyleOptions,
@@ -109,11 +109,13 @@ const renderTrajectories = (
     const trajectory = trajectories[i];
 
     // Filter out trajectories
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     if (filter && !filter(trajectory)) {
       continue;
     }
 
     // We simplify the trajectory object
+    // @ts-expect-error improve types
     const { timeOffset, train_id: id } = trajectory.properties;
     // We set the rotation and the timeFraction of the trajectory (used by tralis).
     // if rotation === null that seems there is no rotation available.
@@ -124,7 +126,7 @@ const renderTrajectories = (
     );
 
     // We store  the current vehicle position to the trajectory.
-    trajectories[i].properties.coordinate = coord;
+    trajectories[i].properties.coordinate = coord as [number, number];
     trajectories[i].properties.rotation = rotationIcon;
 
     if (!coord) {

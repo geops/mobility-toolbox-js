@@ -4,24 +4,24 @@
  */
 
 export interface paths {
-  "/api/schema/": {
+  '/api/schema/': {
     /**
      * OpenApi3 schema for this API. Format can be selected via content negotiation.
      *
      * - YAML: application/vnd.oai.openapi
      * - JSON: application/vnd.oai.openapi+json
      */
-    get: operations["schema_retrieve"];
+    get: operations['schema_retrieve'];
   };
-  "/api/v1/export/publication/": {
+  '/api/v1/export/publication/': {
     /** Export publications as GeoJSON */
-    get: operations["v1_export_publication_list"];
+    get: operations['v1_export_publication_list'];
   };
-  "/api/v1/export/publication/{id}/": {
+  '/api/v1/export/publication/{id}/': {
     /** Export publications as GeoJSON */
-    get: operations["v1_export_publication_retrieve"];
+    get: operations['v1_export_publication_retrieve'];
   };
-  "/api/v2/{tenant}/export/": {
+  '/api/v2/{tenant}/export/': {
     /**
      * Retrun result of the following GraphQL query:
      * ```graphql
@@ -56,6 +56,10 @@ export interface paths {
      *     $fr: Boolean!,
      *     $it: Boolean!,
      *     $en: Boolean!,
+     *     $isEdited: Boolean
+     *     $bbox: [Float!]
+     *     $bbox_srid: Int!
+     *     $bbox_graph: String!
      * ) {
      *     paginatedSituations(
      *         tenant: $tenant
@@ -69,7 +73,16 @@ export interface paths {
      *             affectedAt: $affectedAt,
      *             affectedBefore: $affectedBefore,
      *             affectedAfter: $affectedAfter,
-     *             hasGeoms: $hasGeoms
+     *             hasGeoms: $hasGeoms,
+     *             isEdited: $isEdited,
+     *             bbox: {
+     *                 bbox: $bbox,
+     *                 srid: $bbox_srid,
+     *                 graph: $bbox_graph
+     *             },
+     *         }
+     *         order: {
+     *             startDate: ASC
      *         }
      *     ) {
      *       totalCount
@@ -88,6 +101,9 @@ export interface paths {
      *     affectedTimeIntervalsEnd
      *     publicationWindowsStart
      *     publicationWindowsEnd
+     *     source {
+     *         name
+     *     }
      *     reasons {
      *         name
      *         categoryName
@@ -111,6 +127,7 @@ export interface paths {
      *             endTime
      *         }
      *         publicationStops @include(if: $includeStops) {
+     *             id
      *             uid
      *             name
      *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -121,6 +138,7 @@ export interface paths {
      *         publicationLines @include(if: $includeLines) {
      *             hasIcon
      *             category
+     *             mot
      *             lines {
      *                 name
      *                 operatorRef
@@ -191,9 +209,9 @@ export interface paths {
      *
      * ```
      */
-    get: operations["v2_export_retrieve"];
+    get: operations['v2_export_retrieve'];
   };
-  "/api/v2/{tenant}/export/{situation_id}": {
+  '/api/v2/{tenant}/export/{situation_id}': {
     /**
      * Retrun result of the following GraphQL query:
      * ```graphql
@@ -228,6 +246,10 @@ export interface paths {
      *     $fr: Boolean!,
      *     $it: Boolean!,
      *     $en: Boolean!,
+     *     $isEdited: Boolean
+     *     $bbox: [Float!]
+     *     $bbox_srid: Int!
+     *     $bbox_graph: String!
      * ) {
      *     paginatedSituations(
      *         tenant: $tenant
@@ -241,7 +263,16 @@ export interface paths {
      *             affectedAt: $affectedAt,
      *             affectedBefore: $affectedBefore,
      *             affectedAfter: $affectedAfter,
-     *             hasGeoms: $hasGeoms
+     *             hasGeoms: $hasGeoms,
+     *             isEdited: $isEdited,
+     *             bbox: {
+     *                 bbox: $bbox,
+     *                 srid: $bbox_srid,
+     *                 graph: $bbox_graph
+     *             },
+     *         }
+     *         order: {
+     *             startDate: ASC
      *         }
      *     ) {
      *       totalCount
@@ -260,6 +291,9 @@ export interface paths {
      *     affectedTimeIntervalsEnd
      *     publicationWindowsStart
      *     publicationWindowsEnd
+     *     source {
+     *         name
+     *     }
      *     reasons {
      *         name
      *         categoryName
@@ -283,6 +317,7 @@ export interface paths {
      *             endTime
      *         }
      *         publicationStops @include(if: $includeStops) {
+     *             id
      *             uid
      *             name
      *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -293,6 +328,7 @@ export interface paths {
      *         publicationLines @include(if: $includeLines) {
      *             hasIcon
      *             category
+     *             mot
      *             lines {
      *                 name
      *                 operatorRef
@@ -363,7 +399,7 @@ export interface paths {
      *
      * ```
      */
-    get: operations["v2_export_retrieve_2"];
+    get: operations['v2_export_retrieve_2'];
   };
 }
 
@@ -386,15 +422,15 @@ export interface components {
      * * `en` - En
      * @enum {string}
      */
-    DefaultLanguageEnum: "de" | "fr" | "it" | "en";
+    DefaultLanguageEnum: 'de' | 'fr' | 'it' | 'en';
     FeatureCollectionProperties: {
       id: number;
       affected_time_intervals:
-        | components["schemas"]["AffectedTimeIntervals"][]
+        | components['schemas']['AffectedTimeIntervals'][]
         | null;
       publications: string;
-      links?: components["schemas"]["Link"][];
-      images?: components["schemas"]["Image"][];
+      links?: components['schemas']['Link'][];
+      images?: components['schemas']['Image'][];
       sso_config: string;
       title: string;
       long_description: string;
@@ -403,8 +439,8 @@ export interface components {
       start_stop?: string | null;
       end_stop?: string | null;
       /** @default */
-      size?: components["schemas"]["SizeEnum"];
-      default_language: components["schemas"]["DefaultLanguageEnum"];
+      size?: components['schemas']['SizeEnum'];
+      default_language: components['schemas']['DefaultLanguageEnum'];
       /** @default */
       title_de?: string;
       /** @default */
@@ -461,11 +497,11 @@ export interface components {
       recommendation_it?: string;
       /** @default */
       recommendation_en?: string;
-      reasons?: components["schemas"]["Reason"][];
+      reasons?: components['schemas']['Reason'][];
     };
     GeoJSON: {
       type: string;
-      properties: components["schemas"]["FeatureCollectionProperties"];
+      properties: components['schemas']['FeatureCollectionProperties'];
       features: string;
     };
     Image: {
@@ -500,7 +536,7 @@ export interface components {
      * * `L` - L
      * @enum {string}
      */
-    SizeEnum: "S" | "M" | "L";
+    SizeEnum: 'S' | 'M' | 'L';
   };
 }
 
@@ -514,115 +550,115 @@ export interface operations {
   schema_retrieve: {
     parameters: {
       query: {
-        format?: "json" | "yaml";
+        format?: 'json' | 'yaml';
         lang?:
-          | "af"
-          | "ar"
-          | "ar-dz"
-          | "ast"
-          | "az"
-          | "be"
-          | "bg"
-          | "bn"
-          | "br"
-          | "bs"
-          | "ca"
-          | "ckb"
-          | "cs"
-          | "cy"
-          | "da"
-          | "de"
-          | "dsb"
-          | "el"
-          | "en"
-          | "en-au"
-          | "en-gb"
-          | "eo"
-          | "es"
-          | "es-ar"
-          | "es-co"
-          | "es-mx"
-          | "es-ni"
-          | "es-ve"
-          | "et"
-          | "eu"
-          | "fa"
-          | "fi"
-          | "fr"
-          | "fy"
-          | "ga"
-          | "gd"
-          | "gl"
-          | "he"
-          | "hi"
-          | "hr"
-          | "hsb"
-          | "hu"
-          | "hy"
-          | "ia"
-          | "id"
-          | "ig"
-          | "io"
-          | "is"
-          | "it"
-          | "ja"
-          | "ka"
-          | "kab"
-          | "kk"
-          | "km"
-          | "kn"
-          | "ko"
-          | "ky"
-          | "lb"
-          | "lt"
-          | "lv"
-          | "mk"
-          | "ml"
-          | "mn"
-          | "mr"
-          | "ms"
-          | "my"
-          | "nb"
-          | "ne"
-          | "nl"
-          | "nn"
-          | "os"
-          | "pa"
-          | "pl"
-          | "pt"
-          | "pt-br"
-          | "ro"
-          | "ru"
-          | "sk"
-          | "sl"
-          | "sq"
-          | "sr"
-          | "sr-latn"
-          | "sv"
-          | "sw"
-          | "ta"
-          | "te"
-          | "tg"
-          | "th"
-          | "tk"
-          | "tr"
-          | "tt"
-          | "udm"
-          | "uk"
-          | "ur"
-          | "uz"
-          | "vi"
-          | "zh-hans"
-          | "zh-hant";
+          | 'af'
+          | 'ar'
+          | 'ar-dz'
+          | 'ast'
+          | 'az'
+          | 'be'
+          | 'bg'
+          | 'bn'
+          | 'br'
+          | 'bs'
+          | 'ca'
+          | 'ckb'
+          | 'cs'
+          | 'cy'
+          | 'da'
+          | 'de'
+          | 'dsb'
+          | 'el'
+          | 'en'
+          | 'en-au'
+          | 'en-gb'
+          | 'eo'
+          | 'es'
+          | 'es-ar'
+          | 'es-co'
+          | 'es-mx'
+          | 'es-ni'
+          | 'es-ve'
+          | 'et'
+          | 'eu'
+          | 'fa'
+          | 'fi'
+          | 'fr'
+          | 'fy'
+          | 'ga'
+          | 'gd'
+          | 'gl'
+          | 'he'
+          | 'hi'
+          | 'hr'
+          | 'hsb'
+          | 'hu'
+          | 'hy'
+          | 'ia'
+          | 'id'
+          | 'ig'
+          | 'io'
+          | 'is'
+          | 'it'
+          | 'ja'
+          | 'ka'
+          | 'kab'
+          | 'kk'
+          | 'km'
+          | 'kn'
+          | 'ko'
+          | 'ky'
+          | 'lb'
+          | 'lt'
+          | 'lv'
+          | 'mk'
+          | 'ml'
+          | 'mn'
+          | 'mr'
+          | 'ms'
+          | 'my'
+          | 'nb'
+          | 'ne'
+          | 'nl'
+          | 'nn'
+          | 'os'
+          | 'pa'
+          | 'pl'
+          | 'pt'
+          | 'pt-br'
+          | 'ro'
+          | 'ru'
+          | 'sk'
+          | 'sl'
+          | 'sq'
+          | 'sr'
+          | 'sr-latn'
+          | 'sv'
+          | 'sw'
+          | 'ta'
+          | 'te'
+          | 'tg'
+          | 'th'
+          | 'tk'
+          | 'tr'
+          | 'tt'
+          | 'udm'
+          | 'uk'
+          | 'ur'
+          | 'uz'
+          | 'vi'
+          | 'zh-hans'
+          | 'zh-hant';
       };
     };
     responses: {
       200: {
         content: {
-          "application/vnd.oai.openapi": { [key: string]: unknown };
-          "application/yaml": { [key: string]: unknown };
-          "application/vnd.oai.openapi+json": { [key: string]: unknown };
-          "application/json": { [key: string]: unknown };
+          'application/vnd.oai.openapi': { [key: string]: unknown };
+          'application/yaml': { [key: string]: unknown };
+          'application/vnd.oai.openapi+json': { [key: string]: unknown };
+          'application/json': { [key: string]: unknown };
         };
       };
     };
@@ -646,7 +682,7 @@ export interface operations {
          * * `M` - M
          * * `L` - L
          */
-        size?: "L" | "M" | "S";
+        size?: 'L' | 'M' | 'S';
         /** Return entries which belong to the given tenant slug */
         sso_config: string;
       };
@@ -654,7 +690,7 @@ export interface operations {
     responses: {
       200: {
         content: {
-          "application/json": components["schemas"]["GeoJSON"][];
+          'application/json': components['schemas']['GeoJSON'][];
         };
       };
     };
@@ -670,7 +706,7 @@ export interface operations {
     responses: {
       200: {
         content: {
-          "application/json": components["schemas"]["GeoJSON"];
+          'application/json': components['schemas']['GeoJSON'];
         };
       };
     };
@@ -709,6 +745,10 @@ export interface operations {
    *     $fr: Boolean!,
    *     $it: Boolean!,
    *     $en: Boolean!,
+   *     $isEdited: Boolean
+   *     $bbox: [Float!]
+   *     $bbox_srid: Int!
+   *     $bbox_graph: String!
    * ) {
    *     paginatedSituations(
    *         tenant: $tenant
@@ -722,7 +762,16 @@ export interface operations {
    *             affectedAt: $affectedAt,
    *             affectedBefore: $affectedBefore,
    *             affectedAfter: $affectedAfter,
-   *             hasGeoms: $hasGeoms
+   *             hasGeoms: $hasGeoms,
+   *             isEdited: $isEdited,
+   *             bbox: {
+   *                 bbox: $bbox,
+   *                 srid: $bbox_srid,
+   *                 graph: $bbox_graph
+   *             },
+   *         }
+   *         order: {
+   *             startDate: ASC
    *         }
    *     ) {
    *       totalCount
@@ -741,6 +790,9 @@ export interface operations {
    *     affectedTimeIntervalsEnd
    *     publicationWindowsStart
    *     publicationWindowsEnd
+   *     source {
+   *         name
+   *     }
    *     reasons {
    *         name
    *         categoryName
@@ -764,6 +816,7 @@ export interface operations {
    *             endTime
    *         }
    *         publicationStops @include(if: $includeStops) {
+   *             id
    *             uid
    *             name
    *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -774,6 +827,7 @@ export interface operations {
    *         publicationLines @include(if: $includeLines) {
    *             hasIcon
    *             category
+   *             mot
    *             lines {
    *                 name
    *                 operatorRef
@@ -848,6 +902,10 @@ export interface operations {
     parameters: {
       query: {
         affectedAt?: string | null;
+        /** min_x, min_y, max_x, max_y */
+        bbox?: number[] | null;
+        bbox_graph?: string;
+        bbox_srid?: number;
         contentLarge?: boolean;
         contentMedium?: boolean;
         contentSmall?: boolean;
@@ -859,6 +917,7 @@ export interface operations {
         includeGeoms?: boolean;
         includeLines?: boolean;
         includeStops?: boolean;
+        isEdited?: boolean | null;
         it?: boolean;
         limit?: number;
         offset?: number;
@@ -914,6 +973,10 @@ export interface operations {
    *     $fr: Boolean!,
    *     $it: Boolean!,
    *     $en: Boolean!,
+   *     $isEdited: Boolean
+   *     $bbox: [Float!]
+   *     $bbox_srid: Int!
+   *     $bbox_graph: String!
    * ) {
    *     paginatedSituations(
    *         tenant: $tenant
@@ -927,7 +990,16 @@ export interface operations {
    *             affectedAt: $affectedAt,
    *             affectedBefore: $affectedBefore,
    *             affectedAfter: $affectedAfter,
-   *             hasGeoms: $hasGeoms
+   *             hasGeoms: $hasGeoms,
+   *             isEdited: $isEdited,
+   *             bbox: {
+   *                 bbox: $bbox,
+   *                 srid: $bbox_srid,
+   *                 graph: $bbox_graph
+   *             },
+   *         }
+   *         order: {
+   *             startDate: ASC
    *         }
    *     ) {
    *       totalCount
@@ -946,6 +1018,9 @@ export interface operations {
    *     affectedTimeIntervalsEnd
    *     publicationWindowsStart
    *     publicationWindowsEnd
+   *     source {
+   *         name
+   *     }
    *     reasons {
    *         name
    *         categoryName
@@ -969,6 +1044,7 @@ export interface operations {
    *             endTime
    *         }
    *         publicationStops @include(if: $includeStops) {
+   *             id
    *             uid
    *             name
    *             geometry(filters: {graph: $graph}) @include(if: $includeGeoms) {
@@ -979,6 +1055,7 @@ export interface operations {
    *         publicationLines @include(if: $includeLines) {
    *             hasIcon
    *             category
+   *             mot
    *             lines {
    *                 name
    *                 operatorRef
@@ -1053,6 +1130,10 @@ export interface operations {
     parameters: {
       query: {
         affectedAt?: string | null;
+        /** min_x, min_y, max_x, max_y */
+        bbox?: number[] | null;
+        bbox_graph?: string;
+        bbox_srid?: number;
         contentLarge?: boolean;
         contentMedium?: boolean;
         contentSmall?: boolean;
@@ -1064,6 +1145,7 @@ export interface operations {
         includeGeoms?: boolean;
         includeLines?: boolean;
         includeStops?: boolean;
+        isEdited?: boolean | null;
         it?: boolean;
         limit?: number;
         offset?: number;

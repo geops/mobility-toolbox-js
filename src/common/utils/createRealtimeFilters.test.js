@@ -14,7 +14,7 @@ const ireta = {
     line: {
       name: 'IRETA',
     },
-    routeIdentifier: '0022.000827.004:7',
+    route_identifier: '0022.000827.004:7',
     tenant: 'BAR',
   },
 };

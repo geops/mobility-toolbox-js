@@ -7,7 +7,17 @@ import { unByKey } from 'ol/Observable';
 import { Vector as VectorSource } from 'ol/source';
 import Source from 'ol/source/Source';
 
+import { realtimeDefaultStyle } from '../../common/styles';
 import RealtimeEngine from '../../common/utils/RealtimeEngine';
+import {
+  type RealtimeMode,
+  type RealtimeRenderState,
+  type RealtimeStopSequence,
+  type RealtimeStyleFunction,
+  type RealtimeTrainId,
+  type RealtimeTrajectory,
+  type ViewState,
+} from '../../types';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
@@ -20,20 +30,13 @@ import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import type { ObjectEvent } from 'ol/Object';
+import type LayerRenderer from 'ol/renderer/Layer';
 import type { State } from 'ol/View';
 
 import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
-import type {
-  RealtimeMode,
-  RealtimeRenderState,
-  RealtimeStopSequence,
-  RealtimeStyleFunction,
-  RealtimeTrainId,
-  RealtimeTrajectory,
-  ViewState,
-} from '../../types';
+import type { RealtimeStyleOptions } from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
@@ -44,11 +47,12 @@ export type RealtimeLayerOptions = {
   fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
-    options: any,
+    layer: RealtimeLayer,
   ) => void;
   maxNbFeaturesRequested?: number;
+  styleOptions?: Partial<RealtimeStyleOptions>;
 } & MobilityLayerOptions &
-  RealtimeEngineOptions;
+  Omit<RealtimeEngineOptions, 'styleOptions'>;
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
@@ -73,7 +77,7 @@ export type RealtimeLayerOptions = {
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  * @public
  */
-class RealtimeLayer extends Layer {
+class RealtimeLayer extends Layer<Source> {
   allowRenderWhenAnimating?: boolean = false;
   currentZoom?: number;
   engine: RealtimeEngine;
@@ -149,6 +153,14 @@ class RealtimeLayer extends Layer {
     }
   }
 
+  get styleOptions() {
+    return this.engine.styleOptions;
+  }
+
+  set styleOptions(options) {
+    this.engine.styleOptions = options;
+  }
+
   get time() {
     return this.engine.time || new Date();
   }
@@ -174,6 +186,7 @@ class RealtimeLayer extends Layer {
     // We use a group to be able to add custom vector layer in extended class.
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
+      minZoom: 4, // The websocket returns nothing before zoom level 4
       source: new Source({}), // TODO set some attributions
       ...options,
     });
@@ -185,6 +198,7 @@ class RealtimeLayer extends Layer {
       getViewState: this.getViewState.bind(this),
       onIdle: this.onRealtimeEngineIdle.bind(this),
       onRender: this.onRealtimeEngineRender.bind(this),
+      style: realtimeDefaultStyle,
       ...options,
     });
 
@@ -193,12 +207,13 @@ class RealtimeLayer extends Layer {
     // We store the layer used to highlight the full Trajectory
 
     this.vectorLayer = new VectorLayer<VectorSource>({
+      minZoom: this.getMinZoom(),
       source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
         return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
-          feature,
+          feature as Feature,
           resolution,
-          this.engine.styleOptions,
+          this,
         );
       },
       updateWhileAnimating: this.allowRenderWhenAnimating,
@@ -443,7 +458,7 @@ class RealtimeLayer extends Layer {
   ) {
     this.renderedViewState = { ...viewState } as State;
     // @ts-expect-error  - we are in the same class
-    const { container } = this.getRenderer() as RealtimeLayerRenderer;
+    const { container } = this.getRenderer()!;
     if (container) {
       container.style.transform = '';
     }

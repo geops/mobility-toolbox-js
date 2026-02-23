@@ -2,6 +2,76 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.6](https://github.com/geops/mobility-toolbox-js/compare/v3.6.5...v3.6.6) (2026-02-20)
+
+
+### Bug Fixes
+
+* improve text size claculation when browser is zoomed ([cf1d405](https://github.com/geops/mobility-toolbox-js/commit/cf1d405873c5e6e1d7be791664a9deae41971d64))
+
+### [3.6.5](https://github.com/geops/mobility-toolbox-js/compare/v3.6.4...v3.6.5) (2026-02-19)
+
+
+### Bug Fixes
+
+* do not reload the style when we add the layer to the map ([c1a9adb](https://github.com/geops/mobility-toolbox-js/commit/c1a9adb215eefd0c57813ca5b3f9c918a88d3ea9))
+* remove geops-ui deps from root dependencies ([cadcfbe](https://github.com/geops/mobility-toolbox-js/commit/cadcfbe0e26b019dcce83a7678ea261d15494032))
+
+### [3.6.4](https://github.com/geops/mobility-toolbox-js/compare/v3.6.3...v3.6.4) (2026-02-03)
+
+
+### Bug Fixes
+
+* add serviceCondition and severity properties ([#240](https://github.com/geops/mobility-toolbox-js/issues/240)) ([44505fb](https://github.com/geops/mobility-toolbox-js/commit/44505fb05292a31a24d01c19193b63e8a59c70fa))
+
+### [3.6.3](https://github.com/geops/mobility-toolbox-js/compare/v3.6.2...v3.6.3) (2026-01-30)
+
+
+### Bug Fixes
+
+* handle url and path  with or witout slash ([#239](https://github.com/geops/mobility-toolbox-js/issues/239)) ([d50ecf8](https://github.com/geops/mobility-toolbox-js/commit/d50ecf8321e225fd1dcbd1e4108d4c384e69f11b))
+
+### [3.6.2](https://github.com/geops/mobility-toolbox-js/compare/v3.6.1...v3.6.2) (2026-01-22)
+
+
+### Bug Fixes
+
+* use publicAt when situations are loaded without the api([#238](https://github.com/geops/mobility-toolbox-js/issues/238)) ([27e87c9](https://github.com/geops/mobility-toolbox-js/commit/27e87c912239e2d4aa77bc8ba2b57fa23e33a07d))
+
+### [3.6.1](https://github.com/geops/mobility-toolbox-js/compare/v3.6.0...v3.6.1) (2025-12-22)
+
+
+### Bug Fixes
+
+* set  minZoom and maxZoom properly for MaplibreStyleLayer ([#237](https://github.com/geops/mobility-toolbox-js/issues/237)) ([faf4546](https://github.com/geops/mobility-toolbox-js/commit/faf4546691b8e4afbe5987f60225fb8c6e3bc99a))
+* update dependencies ([84cda67](https://github.com/geops/mobility-toolbox-js/commit/84cda6790b013371bc71961bff2a64dbf9ae6497))
+
+## [3.6.0](https://github.com/geops/mobility-toolbox-js/compare/v3.5.0...v3.6.0) (2025-12-04)
+
+
+### Features
+
+* add private realtime rest api  class ([#236](https://github.com/geops/mobility-toolbox-js/issues/236)) ([c7feff5](https://github.com/geops/mobility-toolbox-js/commit/c7feff54b96c402d7ce37cc66ec19d8b7f54c6f9))
+
+
+### Bug Fixes
+
+* allow undefined parameter ([e489fa6](https://github.com/geops/mobility-toolbox-js/commit/e489fa6b7af3db5e4583ca739027ed64d0688680))
+
+## [3.5.0](https://github.com/geops/mobility-toolbox-js/compare/v3.4.7...v3.5.0) (2025-11-07)
+
+
+### Features
+
+* refactor the realtime style and add more options to display heading and delay ([#235](https://github.com/geops/mobility-toolbox-js/issues/235)) ([45ca425](https://github.com/geops/mobility-toolbox-js/commit/45ca4250946881c30604541a82e9192b8a560586))
+
+### [3.4.7](https://github.com/geops/mobility-toolbox-js/compare/v3.4.6...v3.4.7) (2025-10-31)
+
+
+### Bug Fixes
+
+* allow enum exports from types ([2ff315a](https://github.com/geops/mobility-toolbox-js/commit/2ff315a770ab3edb6173d8ea91c6fe394ecda7dc))
+
 ### [3.4.6](https://github.com/geops/mobility-toolbox-js/compare/v3.4.5...v3.4.6) (2025-10-29)
 
 
