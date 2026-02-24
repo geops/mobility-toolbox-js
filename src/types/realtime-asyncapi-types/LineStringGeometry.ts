@@ -1,7 +1,7 @@
-import type ReservedType from './ReservedType';
+import type GeometryType from './GeometryType';
 interface LineStringGeometry {
   additionalProperties?: Map<string, any>;
   coordinates: number[][];
-  type: ReservedType.LINE_STRING;
+  type: GeometryType.LINE_STRING;
 }
 export default LineStringGeometry;

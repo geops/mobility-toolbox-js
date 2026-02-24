@@ -1,2 +1,7 @@
-type OperatorProvidesRealtimeJourney = 'maybe' | 'no' | 'unknown' | 'yes';
+enum OperatorProvidesRealtimeJourney {
+  MAYBE = 'maybe',
+  NO = 'no',
+  UNKNOWN = 'unknown',
+  YES = 'yes',
+}
 export default OperatorProvidesRealtimeJourney;

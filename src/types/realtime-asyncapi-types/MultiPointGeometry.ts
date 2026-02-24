@@ -1,7 +1,7 @@
-import type ReservedType from './ReservedType';
+import type GeometryType from './GeometryType';
 interface MultiPointGeometry {
   additionalProperties?: Map<string, any>;
   coordinates: number[][];
-  type: ReservedType.MULTI_POINT;
+  type: GeometryType.MULTI_POINT;
 }
 export default MultiPointGeometry;

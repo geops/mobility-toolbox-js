@@ -1,2 +1,4 @@
-type Content = 'PONG';
+enum Content {
+  PONG = 'PONG',
+}
 export default Content;

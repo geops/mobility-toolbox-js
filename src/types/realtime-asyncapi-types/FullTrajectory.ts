@@ -1,8 +1,8 @@
 import type FullTrajectoryProperties from './FullTrajectoryProperties';
 import type GeometryCollectionGeometry from './GeometryCollectionGeometry';
+import type GeometryType from './GeometryType';
 import type LineStringGeometry from './LineStringGeometry';
 import type MultiLineStringGeometry from './MultiLineStringGeometry';
-import type ReservedType from './ReservedType';
 interface FullTrajectory {
   additionalProperties?: Map<string, any>;
   geometry:
@@ -10,6 +10,6 @@ interface FullTrajectory {
     | LineStringGeometry
     | MultiLineStringGeometry;
   properties: FullTrajectoryProperties;
-  type: ReservedType.FEATURE;
+  type: GeometryType.FEATURE;
 }
 export default FullTrajectory;

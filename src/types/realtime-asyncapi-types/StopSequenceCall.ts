@@ -1,5 +1,5 @@
-import type AnonymousSchema_236 from './AnonymousSchema_236';
 import type SerializedCancellationChange from './SerializedCancellationChange';
+import type TCallStateEnum from './TCallStateEnum';
 interface StopSequenceCall {
   additionalProperties?: Map<string, any>;
   aimedArrivalTime: null | number;
@@ -15,7 +15,7 @@ interface StopSequenceCall {
   noDropOff: boolean | null;
   noPickUp: boolean | null;
   platform: null | string;
-  state?: AnonymousSchema_236 | null;
+  state?: null | TCallStateEnum;
   stationId: null | number;
   stationName: null | string;
   stopUID: null | string;

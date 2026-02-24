@@ -1,10 +1,10 @@
 import type FullTrajectory from './FullTrajectory';
 import type FullTrajectoryCollectionProperties from './FullTrajectoryCollectionProperties';
-import type ReservedType from './ReservedType';
+import type GeometryType from './GeometryType';
 interface FullTrajectoryCollection {
   additionalProperties?: Map<string, any>;
   features: FullTrajectory[];
   properties: FullTrajectoryCollectionProperties;
-  type: ReservedType.FEATURE_COLLECTION;
+  type: GeometryType.FEATURE_COLLECTION;
 }
 export default FullTrajectoryCollection;
