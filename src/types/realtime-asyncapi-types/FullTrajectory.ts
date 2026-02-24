@@ -4,7 +4,7 @@ import type GeometryType from './GeometryType';
 import type LineStringGeometry from './LineStringGeometry';
 import type MultiLineStringGeometry from './MultiLineStringGeometry';
 interface FullTrajectory {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   geometry:
     | GeometryCollectionGeometry
     | LineStringGeometry

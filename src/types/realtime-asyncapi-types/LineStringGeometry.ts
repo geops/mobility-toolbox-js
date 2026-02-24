@@ -1,6 +1,6 @@
 import type GeometryType from './GeometryType';
 interface LineStringGeometry {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   coordinates: number[][];
   type: GeometryType.LINE_STRING;
 }

@@ -1,3 +1,5 @@
+import TmotCode from '../../types/realtime-asyncapi-types/TmotCode';
+
 import type {
   AnyCanvasContext,
   RealtimeLine,
@@ -20,32 +22,32 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
-export const MOTS_ONLY_RAIL: RealtimeMot[] = ['rail'];
+export const MOTS_ONLY_RAIL: RealtimeMot[] = [TmotCode.RAIL];
 
 export const MOTS_WITH_CABLE: RealtimeMot[] = [
-  'cablecar',
-  'gondola',
-  'funicular',
-  'coach',
+  TmotCode.CABLECAR,
+  TmotCode.GONDOLA,
+  TmotCode.FUNICULAR,
+  TmotCode.COACH,
 ];
 
 export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
-  'tram',
-  'subway',
-  'rail',
-  'bus',
+  TmotCode.TRAM,
+  TmotCode.SUBWAY,
+  TmotCode.RAIL,
+  TmotCode.BUS,
 ];
 
 export const MOTS_ALL: RealtimeMot[] = [
-  'tram',
-  'subway',
-  'rail',
-  'bus',
-  'ferry',
-  'cablecar',
-  'gondola',
-  'funicular',
-  'coach',
+  TmotCode.TRAM,
+  TmotCode.SUBWAY,
+  TmotCode.RAIL,
+  TmotCode.BUS,
+  TmotCode.FERRY,
+  TmotCode.CABLECAR,
+  TmotCode.GONDOLA,
+  TmotCode.FUNICULAR,
+  TmotCode.COACH,
 ];
 
 /**
@@ -102,7 +104,7 @@ export const findDefaultIndexType = () => {
 };
 
 export const getTypeIndex = (
-  type?: 'unknown' | number | RealtimeMot,
+  type?: 'unknown' | null | number | RealtimeMot,
 ): number => {
   const t = type;
 
@@ -141,7 +143,7 @@ export const getRadiusForTypeAndZoom = (
  */
 export const getRadius = getRadiusForTypeAndZoom;
 
-export const getColorForType = (type?: RealtimeMot): string => {
+export const getColorForType = (type?: null | RealtimeMot): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return bgColors[typeIdx];
@@ -160,14 +162,15 @@ export const getTextColorForType = (type?: RealtimeMot): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return textColors[typeIdx];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return '#ffffff';
   }
 };
 
 export const getTextColorForLine = (
-  line?: RealtimeLine,
-): string | undefined => {
+  line?: null | RealtimeLine,
+): null | string | undefined => {
   let color = line?.text_color;
 
   if (color && !color.startsWith('#')) {
@@ -263,7 +266,9 @@ export const getDelayText = (delay?: number, cancelled?: boolean): string => {
   return '';
 };
 
-export const getColorForLine = (line?: RealtimeLine): string | undefined => {
+export const getColorForLine = (
+  line?: null | RealtimeLine,
+): null | string | undefined => {
   let color = line?.color;
 
   if (color && !color.startsWith('#')) {
@@ -315,7 +320,8 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
   getTextColor: (trajectory: RealtimeTrajectory): string => {
     return (
       getTextColorForLine(trajectory.properties.line) ||
-      getTextColorForType(trajectory.properties.type)
+      getTextColorForType(trajectory.properties.type) ||
+      '#000000'
     );
   },
   getTextSize: (

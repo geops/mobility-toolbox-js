@@ -5,7 +5,7 @@ import type Situation from './Situation';
 import type StopSequenceCall from './StopSequenceCall';
 import type TmotCode from './TmotCode';
 interface StopSequence {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   color?: null | string;
   destination: null | string;
   extra_data: JourneyExtraData;

@@ -2,7 +2,7 @@ import type ClientReference from './ClientReference';
 import type Content from './Content';
 import type Source from './Source';
 interface PongMessage {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   client_reference: ClientReference;
   content: Content.PONG;
   source: Source.WEBSOCKET;

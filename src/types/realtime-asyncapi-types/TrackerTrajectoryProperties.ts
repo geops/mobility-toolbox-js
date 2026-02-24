@@ -3,7 +3,7 @@ import type OperatorProvidesRealtimeJourney from './OperatorProvidesRealtimeJour
 import type TmotCode from './TmotCode';
 import type TTrainStateEnum from './TTrainStateEnum';
 interface TrackerTrajectoryProperties {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   bounds: number[];
   delay?: null | number;
   event_timestamp?: null | number;

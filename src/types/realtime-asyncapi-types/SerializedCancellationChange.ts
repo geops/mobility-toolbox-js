@@ -1,6 +1,6 @@
 import type TCallStateEnum from './TCallStateEnum';
 interface SerializedCancellationChange {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   new_to?: null | string;
   no_stop_between?: (null | string)[];
   no_stop_till?: null | string;

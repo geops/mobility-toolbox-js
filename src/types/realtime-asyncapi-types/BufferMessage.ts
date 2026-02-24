@@ -3,7 +3,7 @@ import type DeletedVehicleMessage from './DeletedVehicleMessage';
 import type PartialTrajectoryMessage from './PartialTrajectoryMessage';
 import type Source from './Source';
 interface BufferMessage {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   client_reference: ClientReference;
   content: (DeletedVehicleMessage | null | PartialTrajectoryMessage)[];
   source: Source.BUFFER;

@@ -3,7 +3,7 @@ import type LineStringGeometry from './LineStringGeometry';
 import type MultiLineStringGeometry from './MultiLineStringGeometry';
 import type MultiPointGeometry from './MultiPointGeometry';
 interface GeometryCollectionGeometry {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   geometries: (
     | LineStringGeometry
     | MultiLineStringGeometry

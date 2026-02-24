@@ -1,6 +1,6 @@
 import type StopSequence from './StopSequence';
 interface StopSequenceMessage {
-  additionalProperties?: Map<string, any>;
+  additionalProperties?: Map<string, unknown>;
   client_reference: string;
   content: null | StopSequence[];
   source: string;

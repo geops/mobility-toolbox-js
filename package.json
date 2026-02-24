@@ -24,9 +24,9 @@
     "ol": ">=9"
   },
   "devDependencies": {
-    "@asyncapi/cli": "^3.2.0",
-    "@asyncapi/generator": "^2.7.1",
-    "@asyncapi/modelina": "^5.3.7",
+    "@asyncapi/cli": "^6.0.0",
+    "@asyncapi/generator": "^3.2.0",
+    "@asyncapi/modelina": "^5.10.1",
     "@babel/preset-env": "^7.28.6",
     "@babel/preset-typescript": "^7.28.5",
     "@commitlint/cli": "20.3.1",
