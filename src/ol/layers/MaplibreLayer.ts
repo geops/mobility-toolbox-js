@@ -1,8 +1,13 @@
-import { MapLibreLayer } from '@geoblocks/ol-maplibre-layer/lib';
+import {
+  getMapLibreAttributions,
+  MapLibreLayer,
+} from '@geoblocks/ol-maplibre-layer/lib';
 import debounce from 'lodash.debounce';
 import { unByKey } from 'ol/Observable';
+import { Source } from 'ol/source';
 
 import { getUrlWithParams } from '../../common/utils';
+import getUrlWithPath from '../../common/utils/getUrlWithPath';
 import MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 
@@ -33,7 +38,7 @@ const buildStyleUrl = (
   apiKey: string,
   apiKeyName: string,
 ) => {
-  return getUrlWithParams(`${url}/styles/${style}/style.json`, {
+  return getUrlWithParams(getUrlWithPath(url, `/styles/${style}/style.json`), {
     [apiKeyName]: apiKey,
   }).toString();
 };
@@ -164,8 +169,26 @@ class MaplibreLayer extends MapLibreLayer {
       url: 'https://maps.geops.io',
       ...(options || {}),
       mapLibreOptions: {
+        fadeDuration: 10,
         ...(options.mapLibreOptions || {}),
       },
+      source:
+        options.source ??
+        new Source({
+          // We define a default source until https://github.com/geoblocks/ol-maplibre-layer/pull/274/files
+          // is merged and published
+          attributions: () => {
+            const style = this.mapLibreMap?.style;
+
+            // @ts-expect-error -  sourceCaches exists in maplibre-gl < 5.11.0
+            if (!!this.mapLibreMap && !!style && !style.sourceCaches) {
+              // @ts-expect-error -  sourceCaches exists in maplibre-gl < 5.11.0
+              this.mapLibreMap.style.sourceCaches =
+                this.mapLibreMap.style.tileManagers ?? {};
+            }
+            return getMapLibreAttributions(this.mapLibreMap);
+          },
+        }),
     };
 
     if (
@@ -204,7 +227,6 @@ class MaplibreLayer extends MapLibreLayer {
       this.updateMaplibreMap.bind(this),
       150,
     );
-    updateMaplibreMapDebounced();
     this.olEventsKeys.push(
       this.on('propertychange', (evt: ObjectEvent) => {
         if (/(url|style|apiKey|apiKeyName)/.test(evt.key)) {

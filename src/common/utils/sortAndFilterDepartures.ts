@@ -43,6 +43,11 @@ const sortAndfilterDepartures = (
     const departure: RealtimeDepartureExtended = {
       ...departures[i],
     };
+    if (!departure.time) {
+      // eslint-disable-next-line no-console
+      console.warn('Departure without time found, skipping it.', departure);
+      continue;
+    }
     const time = new Date(departure.time).getTime();
 
     // Only show departures within the next 30 minutes
@@ -50,7 +55,10 @@ const sortAndfilterDepartures = (
       // If 2 trains are boarding at the same platform,
       // remove the older one.
       if (departure.state === 'BOARDING') {
-        if (!platformsBoarding.includes(departure.platform)) {
+        if (
+          departure.platform &&
+          !platformsBoarding.includes(departure.platform)
+        ) {
           platformsBoarding.push(departure.platform);
         } else {
           departure.state = 'HIDDEN';
@@ -62,7 +70,7 @@ const sortAndfilterDepartures = (
       if (
         previousDeparture &&
         departure.to[0] === previousDeparture.to[0] &&
-        Math.abs(time - previousDeparture.time) < 1000 &&
+        Math.abs(time - (previousDeparture.time || 0)) < 1000 &&
         departure.line.name === previousDeparture.line.name
       ) {
         departure.state = 'HIDDEN';

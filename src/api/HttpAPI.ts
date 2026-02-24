@@ -1,4 +1,5 @@
 import getUrlWithParams from '../common/utils/getUrlWithParams';
+import getUrlWithPath from '../common/utils/getUrlWithPath';
 
 export interface HttpAPIOptions {
   apiKey?: string;
@@ -24,9 +25,9 @@ class HttpAPI {
    *
    * @private
    */
-  async fetch<T>(
+  async fetch<T, V>(
     path: string,
-    params?: object,
+    params?: V,
     config?: RequestInit,
   ): Promise<T> {
     if (!this.url) {
@@ -41,7 +42,7 @@ class HttpAPI {
       throw new Error(`No apiKey defined for request to ${this.url}`);
     }
 
-    const url = getUrlWithParams(`${this.url}${path || ''}`, {
+    const url = getUrlWithParams(getUrlWithPath(this.url, path), {
       key: !this.apiKey || this.apiKey === 'public' ? undefined : this.apiKey,
       ...(params || {}),
     });

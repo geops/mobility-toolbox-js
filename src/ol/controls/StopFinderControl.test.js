@@ -8,7 +8,7 @@ describe('StopFinderControl', () => {
   let map;
 
   beforeEach(() => {
-    const target = document.createElement('div');
+    const target = document.createElement('canvas');
     document.body.appendChild(target);
     map = new Map({
       target,

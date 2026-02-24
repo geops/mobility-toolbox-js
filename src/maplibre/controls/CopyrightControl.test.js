@@ -14,7 +14,7 @@ describe('CopyrightControl', () => {
 
   test('should set some properties onAdd', () => {
     const control = new CopyrightControl();
-    const map = { on: () => {}, off: () => {} };
+    const map = { off: () => {}, on: () => {} };
     control.onAdd(map);
     expect(control.container).toBeDefined();
     expect(control.map).toBe(map);
@@ -22,7 +22,7 @@ describe('CopyrightControl', () => {
 
   test('should remove some properties onRemove', () => {
     const control = new CopyrightControl();
-    const map = { on: () => {}, off: () => {} };
+    const map = { off: () => {}, on: () => {} };
     control.onAdd(map);
     const container = control.onRemove(map);
     expect(control.map).toBeUndefined();

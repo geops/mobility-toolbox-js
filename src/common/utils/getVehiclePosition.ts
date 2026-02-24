@@ -33,6 +33,7 @@ const getVehiclePosition = (
   const {
     coordinate,
     olGeometry,
+    rotation: oldRotation,
     time_intervals: timeIntervals,
   } = trajectory.properties;
   let { coordinates, type } = trajectory.geometry as
@@ -40,7 +41,7 @@ const getVehiclePosition = (
     | GeoJSON.Point;
   let geometry = olGeometry;
   let coord;
-  let rotation;
+  let rotation = oldRotation;
 
   // If an olGeometry exists we use it. It avoids to create one each time.
   if (geometry) {
@@ -54,9 +55,7 @@ const getVehiclePosition = (
   } else if (type === 'Point') {
     coord = coordinates as Position;
   } else if (type === 'LineString') {
-    if (!geometry) {
-      geometry = new LineString(coordinates);
-    }
+    geometry ??= new LineString(coordinates);
     const intervals = timeIntervals || [[]];
     const firstInterval = intervals[0];
     const lastInterval = intervals[intervals.length - 1];
@@ -106,7 +105,6 @@ const getVehiclePosition = (
       geometry,
     );
   }
-
   return { coord, rotation };
 };
 

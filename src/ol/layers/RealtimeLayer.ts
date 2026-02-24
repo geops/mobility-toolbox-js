@@ -7,7 +7,17 @@ import { unByKey } from 'ol/Observable';
 import { Vector as VectorSource } from 'ol/source';
 import Source from 'ol/source/Source';
 
+import { realtimeDefaultStyle } from '../../common/styles';
 import RealtimeEngine from '../../common/utils/RealtimeEngine';
+import {
+  type RealtimeMode,
+  type RealtimeRenderState,
+  type RealtimeStopSequence,
+  type RealtimeStyleFunction,
+  type RealtimeTrainId,
+  type RealtimeTrajectory,
+  type ViewState,
+} from '../../types';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
@@ -20,18 +30,13 @@ import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import type { ObjectEvent } from 'ol/Object';
+import type LayerRenderer from 'ol/renderer/Layer';
 import type { State } from 'ol/View';
 
 import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
-import type {
-  RealtimeMode,
-  RealtimeRenderState,
-  RealtimeStopSequence,
-  RealtimeTrainId,
-  ViewState,
-} from '../../types';
+import type { RealtimeStyleOptions } from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
@@ -42,11 +47,12 @@ export type RealtimeLayerOptions = {
   fullTrajectoryStyle?: (
     feature: FeatureLike,
     resolution: number,
-    options: any,
+    layer: RealtimeLayer,
   ) => void;
   maxNbFeaturesRequested?: number;
+  styleOptions?: Partial<RealtimeStyleOptions>;
 } & MobilityLayerOptions &
-  RealtimeEngineOptions;
+  Omit<RealtimeEngineOptions, 'styleOptions'>;
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
@@ -61,7 +67,7 @@ export type RealtimeLayerOptions = {
  * });
  *
  *
- * @see <a href="/api/class/src/api/RealtimeAPI%20js~RealtimeAPI%20html">RealtimeAPI</a>
+ * @see <a href="/doc/class/build/api/RealtimeAPI%20js~RealtimeAPI%20html-offset-anchor">RealtimeAPI</a>
  * @see <a href="/example/ol-realtime">OpenLayers Realtime layer example</a>
  *
  *
@@ -71,7 +77,7 @@ export type RealtimeLayerOptions = {
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  * @public
  */
-class RealtimeLayer extends Layer {
+class RealtimeLayer extends Layer<Source> {
   allowRenderWhenAnimating?: boolean = false;
   currentZoom?: number;
   engine: RealtimeEngine;
@@ -137,6 +143,32 @@ class RealtimeLayer extends Layer {
     this.engine.sort = sort;
   }
 
+  get style() {
+    return this.engine?.style;
+  }
+
+  set style(style: RealtimeStyleFunction) {
+    if (this.engine) {
+      this.engine.style = style;
+    }
+  }
+
+  get styleOptions() {
+    return this.engine.styleOptions;
+  }
+
+  set styleOptions(options) {
+    this.engine.styleOptions = options;
+  }
+
+  get time() {
+    return this.engine.time || new Date();
+  }
+
+  set time(time: Date) {
+    this.engine.time = time;
+  }
+
   get trajectories() {
     return this.engine.trajectories;
   }
@@ -154,6 +186,7 @@ class RealtimeLayer extends Layer {
     // We use a group to be able to add custom vector layer in extended class.
     // For example TrajservLayer use a vectorLayer to display the complete trajectory.
     super({
+      minZoom: 4, // The websocket returns nothing before zoom level 4
       source: new Source({}), // TODO set some attributions
       ...options,
     });
@@ -165,6 +198,7 @@ class RealtimeLayer extends Layer {
       getViewState: this.getViewState.bind(this),
       onIdle: this.onRealtimeEngineIdle.bind(this),
       onRender: this.onRealtimeEngineRender.bind(this),
+      style: realtimeDefaultStyle,
       ...options,
     });
 
@@ -173,12 +207,13 @@ class RealtimeLayer extends Layer {
     // We store the layer used to highlight the full Trajectory
 
     this.vectorLayer = new VectorLayer<VectorSource>({
+      minZoom: this.getMinZoom(),
       source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
         return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
-          feature,
+          feature as Feature,
           resolution,
-          this.engine.styleOptions,
+          this,
         );
       },
       updateWhileAnimating: this.allowRenderWhenAnimating,
@@ -188,6 +223,14 @@ class RealtimeLayer extends Layer {
     this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
 
     this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
+  }
+
+  /**
+   * Add a trajectory.
+   * @param trajectory
+   */
+  addTrajectory(trajectory: RealtimeTrajectory) {
+    this.engine?.addTrajectory(trajectory);
   }
 
   attachToMap() {
@@ -376,36 +419,22 @@ class RealtimeLayer extends Layer {
   async highlightTrajectory(
     id: RealtimeTrainId,
   ): Promise<Feature[] | undefined> {
-    const features = await this.getFullTrajectory(id);
-
-    this.cleanVectorLayer();
-
-    if (features.length) {
-      this.vectorLayer?.getSource()?.addFeatures(features);
-    }
-
-    if (
-      this.vectorLayer.getMapInternal() &&
-      this.vectorLayer.getMapInternal() !== this.getMapInternal()
-    ) {
-      this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
-    }
-
-    // Add the vector layer to the map
-    const zIndex = this.getZIndex();
-    if (zIndex !== undefined) {
-      this.vectorLayer.setZIndex(zIndex - 1);
-      if (!this.vectorLayer.getMapInternal()) {
-        this.getMapInternal()?.addLayer(this.vectorLayer);
-      }
-    } else if (!this.vectorLayer.getMapInternal()) {
-      const index =
-        this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
-      if (index) {
-        this.getMapInternal()?.getLayers().insertAt(index, this.vectorLayer);
-      }
-    }
-    return features;
+    const promise = new Promise<Feature[] | undefined>((resolve) => {
+      this.api.subscribeFullTrajectory(id, this.engine.mode, (data) => {
+        if (this.selectedVehicleId === id && data?.content) {
+          let features: Feature[] = [];
+          if (data?.content?.features?.length) {
+            features = format.readFeatures(data?.content);
+          }
+          this.updateHighlightFeatures(features);
+          resolve(features);
+        }
+      });
+    });
+    return promise;
+    // const features = await this.getFullTrajectory(id);
+    // this.updateHighlightFeatures(features);
+    // return features;
   }
 
   onMoveEnd() {
@@ -429,7 +458,7 @@ class RealtimeLayer extends Layer {
   ) {
     this.renderedViewState = { ...viewState } as State;
     // @ts-expect-error  - we are in the same class
-    const { container } = this.getRenderer() as RealtimeLayerRenderer;
+    const { container } = this.getRenderer()!;
     if (container) {
       container.style.transform = '';
     }
@@ -441,10 +470,15 @@ class RealtimeLayer extends Layer {
     if (!this.engine.isUpdateBboxOnMoveEnd || !this.getVisible()) {
       return;
     }
+  }
 
-    if (this.selectedVehicleId) {
-      void this.highlightTrajectory(this.selectedVehicleId);
-    }
+  /**
+   * Remove a trajectory.
+   *
+   * @param trajectoryOrId
+   */
+  removeTrajectory(trajectoryOrId: RealtimeTrainId | RealtimeTrajectory) {
+    this.engine?.removeTrajectory(trajectoryOrId);
   }
 
   /**
@@ -462,11 +496,17 @@ class RealtimeLayer extends Layer {
     const feat = Array.isArray(features) ? features[0] : features;
     const id: null | string | undefined = feat?.get('train_id') as string;
     if (this.selectedVehicleId !== id) {
+      if (this.selectedVehicleId) {
+        this.api.unsubscribeFullTrajectory(this.selectedVehicleId);
+      }
       this.cleanVectorLayer();
       this.selectedVehicleId = id;
       this.engine.renderTrajectories(true);
     }
-    void this.highlightTrajectory(id);
+
+    if (id) {
+      void this.highlightTrajectory(id);
+    }
   }
 
   override setMapInternal(map: Map) {
@@ -502,6 +542,37 @@ class RealtimeLayer extends Layer {
    */
   stop() {
     this.engine.stop();
+  }
+
+  private updateHighlightFeatures(features: Feature[] | undefined) {
+    this.cleanVectorLayer();
+
+    if (features?.length) {
+      this.vectorLayer?.getSource()?.addFeatures(features);
+    }
+
+    if (
+      this.vectorLayer.getMapInternal() &&
+      this.vectorLayer.getMapInternal() !== this.getMapInternal()
+    ) {
+      this.vectorLayer.getMapInternal()?.removeLayer(this.vectorLayer);
+    }
+
+    // Add the vector layer to the map
+    const zIndex = this.getZIndex();
+    if (zIndex !== undefined) {
+      this.vectorLayer.setZIndex(zIndex - 1);
+      if (!this.vectorLayer.getMapInternal()) {
+        this.getMapInternal()?.addLayer(this.vectorLayer);
+      }
+    } else if (!this.vectorLayer.getMapInternal()) {
+      const index =
+        this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
+      if (index) {
+        this.getMapInternal()?.getLayers().insertAt(index, this.vectorLayer);
+      }
+    }
+    return features;
   }
 }
 

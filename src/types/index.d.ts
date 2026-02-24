@@ -1,10 +1,12 @@
-import { paths as RoutingPaths } from './routing';
-import { paths as StopsPaths } from './stops';
-import { paths as MocoPaths, definitions as MocoDefinitions } from './moco';
+import type { operations as MocoOperations } from './moco';
+import type { paths as RoutingPaths } from './routing';
+import type { paths as StopsPaths } from './stops';
+export type * from '../ol';
 
-export * from './common';
-export * from './ol';
-export * from './realtime';
+export type * from './common';
+export type * from './maps';
+export * from './moco/gql/graphql';
+export type * from './realtime';
 
 export type RealtimeVersion = '1' | '2';
 
@@ -17,15 +19,10 @@ export type StopsParameters = StopsPaths['/']['get']['parameters']['query'];
 export type StopsResponse =
   StopsPaths['/']['get']['responses']['200']['schema'];
 
-/** MOCO definitions */
-export type MocoDefinitions = MocoDefinitions;
-export type MocoParameters =
-  MocoPaths['/export/publication/']['get']['parameters']['query'];
-export type MocoNotification = MocoDefinitions['GeoJSON'];
-export type MocoNotificationProperties =
-  MocoDefinitions['FeatureCollectionProperties'];
+export type MocoExportParameters = {
+  apiKey?: string;
+} & MocoOperations['v2_export_retrieve']['parameters']['query'];
 
-export type MocoNotificationFeature = MocoDefinitions['AffectedLinesFeature'];
-
-export type MocoNotificationFeatureProperties =
-  MocoDefinitions['AffectedLinesProperties'];
+export type MocoExportByIdParameters = {
+  apiKey?: string;
+} & MocoOperations['v2_export_retrieve_2']['parameters']['query'];

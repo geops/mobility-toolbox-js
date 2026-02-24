@@ -9,7 +9,9 @@ export { default as getMapGlCopyrights } from './getMapGlCopyrights';
 export { default as getUrlWithParams } from './getUrlWithParams';
 export { default as getVehiclePosition } from './getVehiclePosition';
 export * from './mocoUtils';
-export * as realtimeConfig from './realtimeConfig';
+/* @deprecated use realtimeStyleUtils instead. */
+export * as realtimeConfig from './realtimeStyleUtils';
+export * as realtimeStyleUtils from './realtimeStyleUtils';
 export { default as removeDuplicate } from './removeDuplicate';
 export { default as renderTrajectories } from './renderTrajectories';
 export { default as sortAndFilterDepartures } from './sortAndFilterDepartures';

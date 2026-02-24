@@ -1,6 +1,7 @@
-import { getWidth, getHeight } from 'ol/extent';
+import { getHeight, getWidth } from 'ol/extent';
 import { fromLonLat } from 'ol/proj';
-import { AnyMapGlMap } from '../../types';
+
+import type { AnyMapGlMap } from '../../types';
 
 /**
  * Get the current resolution of a Maplibre map.
@@ -11,7 +12,7 @@ const getMercatorResolution = (map: AnyMapGlMap) => {
   const a = fromLonLat(bounds[0]);
   const b = fromLonLat(bounds[1]);
   const extent = [...a, ...b];
-  const { width, height } = map.getCanvas();
+  const { height, width } = map.getCanvas();
   const xResolution = getWidth(extent) / width;
   const yResolution = getHeight(extent) / height;
   return Math.max(xResolution, yResolution);

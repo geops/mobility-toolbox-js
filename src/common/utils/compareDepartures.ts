@@ -33,11 +33,44 @@ const compareDepartures = (
   const now = Date.now();
 
   if (sortByMinArrivalTime) {
-    aDuration = new Date(a.min_arrival_time || a.time).getTime() - now;
-    bDuration = new Date(b.min_arrival_time || b.time).getTime() - now;
+    const aTime = a.min_arrival_time || a.time;
+    const bTime = b.min_arrival_time || b.time;
+    if (!aTime && !bTime) {
+      return 0;
+    }
+    if (!aTime) {
+      return 1;
+    }
+    if (!bTime) {
+      return -1;
+    }
+    if (aTime && bTime) {
+      aDuration = new Date(aTime).getTime() - now;
+      bDuration = new Date(bTime).getTime() - now;
+    }
   } else {
-    aDuration = new Date(a.time).getTime() - now;
-    bDuration = new Date(b.time).getTime() - now;
+    if (!a.time && !b.time) {
+      return 0;
+    }
+    if (!a.time) {
+      return 1;
+    }
+    if (!b.time) {
+      return -1;
+    }
+    if (a.time && b.time) {
+      aDuration = new Date(a.time).getTime() - now;
+      bDuration = new Date(b.time).getTime() - now;
+    }
+  }
+  if (!aDuration && !bDuration) {
+    return 0;
+  }
+  if (!aDuration) {
+    return 1;
+  }
+  if (!bDuration) {
+    return -1;
   }
 
   return aDuration - bDuration;

@@ -30,17 +30,18 @@ const getOLTileLayer = (options = {}) => {
   return layer;
 };
 
-const getLayer = (copyrights, visible = true) =>
-  getOLTileLayer({
+const getLayer = (copyrights, visible = true) => {
+  return getOLTileLayer({
     copyrights,
     visible,
   });
+};
 
 describe('CopyrightControl', () => {
   let map;
 
   beforeEach(() => {
-    const target = document.createElement('div');
+    const target = document.createElement('canvas');
     document.body.appendChild(target);
     map = new Map({
       target,

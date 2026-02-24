@@ -5,9 +5,13 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { fromLonLat } from 'ol/proj';
 
 import { RealtimeAPI, RealtimeModes } from '../../api';
-import realtimeDefaultStyle from '../styles/realtimeDefaultStyle';
+import realtimeStyle from '../styles/realtimeStyle';
 
-import * as realtimeConfig from './realtimeConfig';
+import {
+  MOTS_ONLY_RAIL,
+  MOTS_WITHOUT_CABLE,
+  styleOptionsForMot,
+} from './realtimeStyleUtils';
 import renderTrajectories from './renderTrajectories';
 
 import type { FeatureCollection } from 'geojson';
@@ -18,7 +22,6 @@ import type {
   AnyCanvas,
   LayerGetFeatureInfoOptions,
   RealtimeBbox,
-  RealtimeGeneralizationLevel,
   RealtimeMode,
   RealtimeMot,
   RealtimeRenderState,
@@ -43,17 +46,20 @@ export interface RealtimeEngineOptions {
   canvas?: HTMLCanvasElement;
   debug?: boolean;
   filter?: FilterFunction;
-  generalizationLevelByZoom?: RealtimeGeneralizationLevel[];
+  generalizationLevelByZoom?: string[];
   getGeneralizationLevelByZoom?: (
     zoom: number,
-    generalizationLevelByZoom: RealtimeGeneralizationLevel[],
-  ) => RealtimeGeneralizationLevel;
+    generalizationLevelByZoom: string[],
+  ) => string;
+  getGraphByZoom?: (zoom: number, graphByZoom: string[]) => string | undefined;
   getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
+  getRefreshTimeInMs?: () => number;
   getRenderTimeIntervalByZoom?: (
     zoom: number,
     renderTimeIntervalByZoom: number[],
   ) => number;
   getViewState?: () => ViewState;
+  graphByZoom?: string[];
   hoverVehicleId?: RealtimeTrainId;
   isUpdateBboxOnMoveEnd?: boolean;
   live?: boolean;
@@ -73,7 +79,7 @@ export interface RealtimeEngineOptions {
   sort?: SortFunction;
   speed?: number;
   style?: RealtimeStyleFunction;
-  styleOptions?: RealtimeStyleOptions;
+  styleOptions?: Partial<RealtimeStyleOptions>;
   tenant?: RealtimeTenant;
   time?: Date;
   url?: string;
@@ -81,6 +87,75 @@ export interface RealtimeEngineOptions {
   useRequestAnimationFrame?: boolean;
   useThrottle?: boolean;
 }
+
+/**
+ * Basic style options used by default in the RealtimeEngine.
+ */
+export const defaultStyleOptions: RealtimeStyleOptions = {
+  delayDisplay: 300000,
+  delayOutlineColor: '#000',
+  getArrowSize: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+    radius = 0,
+  ) => {
+    return [(radius * 3) / 4, radius];
+  },
+  getColor: () => {
+    return '#000';
+  },
+  getDelayColor: () => {
+    return '#000';
+  },
+  getDelayFont: (
+    traj?: RealtimeTrajectory,
+    viewState?: ViewState,
+    fontSize?: number,
+  ) => {
+    return `bold ${fontSize}px arial, sans-serif`;
+  },
+  getDelayText: () => {
+    return '';
+  },
+  getDelayTextColor: () => {
+    return '#000';
+  },
+  getImage: () => {
+    return null;
+  },
+  getMaxRadiusForStrokeAndDelay: () => {
+    return 7;
+  },
+  getMaxRadiusForText: () => {
+    return 10;
+  },
+  getRadius: () => {
+    return 5;
+  },
+  getText: ((traj: RealtimeTrajectory) => {
+    return traj?.properties?.line?.name || 'U';
+  }) as RealtimeStyleOptions['getText'],
+  getTextColor: () => {
+    return '#fff';
+  },
+  getTextFont: (
+    trajectory?: RealtimeTrajectory,
+    viewState?: ViewState,
+    fontSize?: number,
+  ) => {
+    return `bold ${fontSize}px arial, sans-serif`;
+  },
+  getTextSize: () => {
+    return 14;
+  },
+  showDelayBg: true,
+  showDelayText: true,
+  showHeading: false,
+  useDelayStyle: false,
+
+  // We apply the style options for mot by default to have a usable style out of the box
+  ...styleOptionsForMot,
+};
 
 /**
  * This class is responsible for drawing trajectories from a realtime API in a canvas,
@@ -108,11 +183,13 @@ class RealtimeEngine {
   debug: boolean;
   filter?: FilterFunction;
   format: GeoJSON;
-  generalizationLevel?: RealtimeGeneralizationLevel;
-  generalizationLevelByZoom: RealtimeGeneralizationLevel[];
-  getGeneralizationLevelByZoom: (zoom: number) => RealtimeGeneralizationLevel;
+  generalizationLevel?: string;
+  generalizationLevelByZoom: string[];
+  getGeneralizationLevelByZoom: (zoom: number) => string;
+  getGraphByZoom: (zoom: number) => string | undefined;
   getMotsByZoom: (zoom: number) => RealtimeMot[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
+  graphByZoom: string[];
   hoverVehicleId?: RealtimeTrainId;
   isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
@@ -131,7 +208,7 @@ class RealtimeEngine {
   selectedVehicle!: RealtimeTrajectory;
   selectedVehicleId?: RealtimeTrainId;
   sort?: SortFunction;
-  styleOptions?: RealtimeStyleOptions;
+  styleOptions: RealtimeStyleOptions;
   tenant: RealtimeTenant;
   throttleRenderTrajectories: (
     viewState: ViewState,
@@ -189,18 +266,18 @@ class RealtimeEngine {
 
   constructor(options: RealtimeEngineOptions) {
     this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
-    this._speed = options.speed || 1; // If live property is true. The speed is ignored.
-    this._style = options.style || realtimeDefaultStyle;
-    this._time = options.time || new Date();
+    this._speed = options.speed ?? 1; // If live property is true. The speed is ignored.
+    this._style = options.style ?? realtimeStyle;
+    this._time = options.time ?? new Date();
 
-    this.api = options.api || new RealtimeAPI(options);
+    this.api = options.api ?? new RealtimeAPI(options);
     this.bboxParameters = options.bboxParameters;
     this.canvas =
-      options.canvas ||
+      options.canvas ??
       (typeof document !== 'undefined'
         ? document.createElement('canvas')
         : undefined);
-    this.debug = options.debug || false;
+    this.debug = options.debug ?? false;
     this.filter = options.filter;
     this.hoverVehicleId = options.hoverVehicleId;
 
@@ -210,9 +287,9 @@ class RealtimeEngine {
      */
     this.live = options.live !== false;
 
-    this.minZoomInterpolation = options.minZoomInterpolation || 8; // Min zoom level from which trains positions are not interpolated.
+    this.minZoomInterpolation = options.minZoomInterpolation ?? 8; // Min zoom level from which trains positions are not interpolated.
     this.pixelRatio =
-      options.pixelRatio ||
+      options.pixelRatio ??
       (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
     this.selectedVehicleId = options.selectedVehicleId;
     this.sort = options.sort;
@@ -220,24 +297,30 @@ class RealtimeEngine {
     /**
      * Custom options to pass as last parameter of the style function.
      */
-    // @ts-expect-error good type must be defined
-    this.styleOptions = { ...realtimeConfig, ...(options.styleOptions || {}) };
-    this.tenant = options.tenant || ''; // sbb,sbh or sbm
+    this.styleOptions = {
+      ...defaultStyleOptions,
+      ...(options.styleOptions ?? {}),
+    };
+    this.tenant = options.tenant ?? ''; // sbb,sbh or sbm
     this.trajectories = {};
-    this.useDebounce = options.useDebounce || false;
-    this.useRequestAnimationFrame = options.useRequestAnimationFrame || false;
+    this.useDebounce = options.useDebounce ?? false;
+    this.useRequestAnimationFrame = options.useRequestAnimationFrame ?? false;
     this.useThrottle = options.useThrottle !== false; // the default behavior
 
     this.getViewState =
-      options.getViewState ||
+      options.getViewState ??
       (() => {
         return {};
       });
     this.shouldRender =
-      options.shouldRender ||
+      options.shouldRender ??
       (() => {
         return true;
       });
+
+    this.getRefreshTimeInMs =
+      options.getRefreshTimeInMs ?? this.getRefreshTimeInMs.bind(this);
+
     this.onRender = options.onRender;
     this.onIdle = options.onIdle;
     this.onStart = options.onStart;
@@ -245,25 +328,28 @@ class RealtimeEngine {
 
     this.format = new GeoJSON();
 
-    // Server will block non train before zoom 9
-    this.motsByZoom = options.motsByZoom || [
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_ONLY_RAIL,
-      realtimeConfig.MOTS_WITHOUT_CABLE,
-      realtimeConfig.MOTS_WITHOUT_CABLE,
-    ];
-
     // Mots by zoom
+    // Server will block non train before zoom 9
+    this.motsByZoom = options.motsByZoom ?? [
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_ONLY_RAIL,
+      MOTS_WITHOUT_CABLE,
+      MOTS_WITHOUT_CABLE,
+    ];
     this.getMotsByZoom = (zoom) => {
       if (options.getMotsByZoom) {
         return options.getMotsByZoom(zoom, this.motsByZoom);
+      }
+
+      if (zoom > this.motsByZoom.length - 1) {
+        return this.motsByZoom[this.motsByZoom.length - 1];
       }
       return this.motsByZoom[zoom];
     };
@@ -277,7 +363,24 @@ class RealtimeEngine {
           this.generalizationLevelByZoom,
         );
       }
+      if (zoom > this.generalizationLevelByZoom.length - 1) {
+        return this.generalizationLevelByZoom[
+          this.generalizationLevelByZoom.length - 1
+        ];
+      }
       return this.generalizationLevelByZoom[zoom];
+    };
+
+    // Graph by zoom
+    this.graphByZoom = options.graphByZoom ?? [];
+    this.getGraphByZoom = (zoom) => {
+      if (options.getGraphByZoom) {
+        return options.getGraphByZoom(zoom, this.graphByZoom);
+      }
+      if (zoom > this.graphByZoom.length - 1) {
+        return this.graphByZoom?.[this.graphByZoom.length - 1];
+      }
+      return this.graphByZoom?.[zoom];
     };
 
     // Render time interval by zoom
@@ -377,7 +480,7 @@ class RealtimeEngine {
    */
   getRefreshTimeInMs(): number {
     const viewState = this.getViewState();
-    const zoom = viewState.zoom || 0;
+    const zoom = viewState.zoom ?? 0;
     const roundedZoom = zoom !== undefined ? Math.round(zoom) : -1;
     const timeStep = this.getRenderTimeIntervalByZoom(roundedZoom) || 25;
     const nextTick = Math.max(25, timeStep / (this.speed || 1));
@@ -432,9 +535,9 @@ class RealtimeEngine {
   ): FeatureCollection {
     const { resolution } = this.getViewState();
     const { hitTolerance, nb } = options || {};
-    const ext = buffer(
+    const extent = buffer(
       [...coordinate, ...coordinate],
-      (hitTolerance || 5) * (resolution || 1),
+      (hitTolerance ?? 5) * (resolution ?? 1),
     );
     let trajectories = Object.values(this.trajectories || {});
 
@@ -444,10 +547,13 @@ class RealtimeEngine {
     }
 
     const vehicles = [];
+    // Theoretically 'for' is faster then 'for-of and it is important here
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < trajectories.length; i += 1) {
-      const { coordinate: trajcoord } = trajectories[i].properties;
-      if (trajcoord && containsCoordinate(ext, trajcoord)) {
-        vehicles.push(trajectories[i]);
+      const trajectory = trajectories[i];
+      const { coordinate: trajcoord } = trajectory.properties;
+      if (trajcoord && containsCoordinate(extent, trajcoord)) {
+        vehicles.push(trajectory);
       }
       if (vehicles.length === nb) {
         break;
@@ -659,7 +765,13 @@ class RealtimeEngine {
       return false;
     }
 
-    const time = this.live ? Date.now() : this.time?.getTime();
+    let time = new Date();
+    if (this.live) {
+      // Save the time internally, to keep trace of the time rendered for purge.
+      this._time = time;
+    } else if (this.time) {
+      time = this.time;
+    }
 
     const trajectories = Object.values(this.trajectories);
 
@@ -681,9 +793,10 @@ class RealtimeEngine {
       {
         ...viewState,
         pixelRatio: this.pixelRatio || 1,
-        time,
+        time: time.getTime(),
       },
       {
+        ...this.styleOptions,
         filter: this.filter,
         hoverVehicleId: this.hoverVehicleId,
         noInterpolate:
@@ -691,7 +804,6 @@ class RealtimeEngine {
             ? true
             : noInterpolate,
         selectedVehicleId: this.selectedVehicleId,
-        ...this.styleOptions,
       },
     );
 
@@ -706,7 +818,7 @@ class RealtimeEngine {
 
     const viewState = this.getViewState();
     const extent = viewState.extent;
-    const zoom = viewState.zoom || 0;
+    const zoom = viewState.zoom ?? 0;
 
     if (!extent || Number.isNaN(zoom)) {
       return;
@@ -749,7 +861,7 @@ class RealtimeEngine {
     /* @private */
     this.mots = this.getMotsByZoom(zoomFloor);
     if (this.mots) {
-      bbox.push(`mots=${this.mots}`);
+      bbox.push(`mots=${this.mots.toString()}`);
     }
 
     if (this.tenant) {
@@ -760,8 +872,14 @@ class RealtimeEngine {
       bbox.push(`channel_prefix=${this.mode}`);
     }
 
+    const graph = this.getGraphByZoom(zoomFloor);
+    if (graph) {
+      bbox.push(`graph=${graph}`);
+    }
+
     if (this.bboxParameters) {
       Object.entries(this.bboxParameters).forEach(([key, value]) => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         bbox.push(`${key}=${value}`);
       });
     }
