@@ -12,7 +12,6 @@ import { Circle, Fill, Icon, Stroke, Style, Text } from 'ol/style';
 import { parse } from 'ol/xml';
 
 import getPolygonPattern from './getMapsetPolygonPattern';
-import isPositiveNumberOrZero from './isPositiveNumberOrZero';
 
 import type { Feature as FeatureType } from 'ol';
 import type { Color } from 'ol/color';
@@ -169,7 +168,7 @@ class MapsetKmlFormat {
           transform(
             JSON.parse(circleGeometryCenter as string) as Coordinate,
             EPSG_4326,
-            featureProjection ?? EPSG_4326,
+            featureProjection || EPSG_4326,
           ),
           parseFloat(circleGeometryRadius as string),
         );
@@ -204,13 +203,13 @@ class MapsetKmlFormat {
 
     // Store maxZoom in properties
     const maxZoom = parseFloat(feature.get('maxZoom') as string);
-    if (isPositiveNumberOrZero(maxZoom)) {
+    if (!Number.isNaN(maxZoom)) {
       feature.set('maxZoom', maxZoom);
     }
 
     // Store minZoom in properties
     const minZoom = parseFloat(feature.get('minZoom') as string);
-    if (isPositiveNumberOrZero(minZoom)) {
+    if (!Number.isNaN(minZoom)) {
       feature.set('minZoom', minZoom);
     }
 
@@ -762,13 +761,13 @@ class MapsetKmlFormat {
 
         // maxZoom: maximum zoom level at which the feature is displayed
         const maxZoom = parseFloat(feature.get('maxZoom') as string);
-        if (isPositiveNumberOrZero(maxZoom)) {
+        if (!Number.isNaN(maxZoom)) {
           clone.set('maxZoom', maxZoom);
         }
 
         // minZoom: minimum zoom level at which the feature is displayed
         const minZoom = parseFloat(feature.get('minZoom') as string);
-        if (isPositiveNumberOrZero(minZoom)) {
+        if (!Number.isNaN(minZoom)) {
           clone.set('minZoom', minZoom);
         }
 
