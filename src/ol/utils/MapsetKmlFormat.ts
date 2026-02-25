@@ -202,13 +202,15 @@ class MapsetKmlFormat {
       feature.getStyleFunction();
 
     // Store maxZoom in properties
-    if (feature.get('maxZoom')) {
-      feature.set('maxZoom', parseFloat(feature.get('maxZoom') as string));
+    const maxZoom = parseFloat(feature.get('maxZoom') as string);
+    if (!Number.isNaN(maxZoom)) {
+      feature.set('maxZoom', maxZoom);
     }
 
     // Store minZoom in properties
-    if (feature.get('minZoom')) {
-      feature.set('minZoom', parseFloat(feature.get('minZoom') as string));
+    const minZoom = parseFloat(feature.get('minZoom') as string);
+    if (!Number.isNaN(minZoom)) {
+      feature.set('minZoom', minZoom);
     }
 
     // The use of clone is part of the scale fix for OL > 6.7
@@ -539,9 +541,9 @@ class MapsetKmlFormat {
 
   /**
    * Create a KML string.
-   * @param {VectorLayer} layer A react-spatial VectorLayer.
+   * @param {VectorLayer} layer A openlayers VectorLayer.
    * @param {<ol.Projection|String>} featureProjection The current projection used by the features.
-   * @param {<boolean>} fixGxyAndGxh If the KML contains gx:w and gx:h, (ol >= 6.7), it will fix the bug introduced by https://github.com/openlayers/openlayers/pull/12695.
+   * @param {<boolean>} mapResolution The current map resolution.
    */
   public writeFeatures(
     layer: Vector<VectorSource<FeatureLike>>,
@@ -549,7 +551,6 @@ class MapsetKmlFormat {
     mapResolution: number,
   ) {
     let featString;
-    // const olLayer = layer.olLayer || layer.get('olLayer') || layer;
     const exportFeatures = [];
 
     [...(layer?.getSource()?.getFeatures() ?? [])]
@@ -759,13 +760,15 @@ class MapsetKmlFormat {
         }
 
         // maxZoom: maximum zoom level at which the feature is displayed
-        if (feature.get('maxZoom')) {
-          clone.set('maxZoom', parseFloat(feature.get('maxZoom') as string));
+        const maxZoom = parseFloat(feature.get('maxZoom') as string);
+        if (!Number.isNaN(maxZoom)) {
+          clone.set('maxZoom', maxZoom);
         }
 
         // minZoom: minimum zoom level at which the feature is displayed
-        if (feature.get('minZoom')) {
-          clone.set('minZoom', parseFloat(feature.get('minZoom') as string));
+        const minZoom = parseFloat(feature.get('minZoom') as string);
+        if (!Number.isNaN(minZoom)) {
+          clone.set('minZoom', minZoom);
         }
 
         // If only text is displayed we must specify an
