@@ -250,6 +250,8 @@ export interface components {
       event_location_name?: Partial<string> & Partial<unknown>;
       /** Event Timestamp */
       event_timestamp?: Partial<string> & Partial<unknown>;
+      /** Transport Code */
+      transport_code?: Partial<string> & Partial<unknown>;
     };
     /** License */
     License: {
@@ -892,5 +894,4 @@ export interface operations {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface external {}
+export type external = object;

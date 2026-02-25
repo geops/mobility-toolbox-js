@@ -4,27 +4,42 @@ const sortByDelay = (
   traj1: RealtimeTrajectory,
   traj2: RealtimeTrajectory,
 ): number => {
-  const props1 = traj1.properties;
-  const props2 = traj2.properties;
+  const { cancelled: cancelled1, delay: delay1 } = traj1.properties;
+  const { cancelled: cancelled2, delay: delay2 } = traj2.properties;
 
-  if (props1.delay === null && props2.delay !== null) {
+  if (
+    (delay1 === null || delay1 === undefined) &&
+    delay2 !== null &&
+    delay2 !== undefined
+  ) {
     return 1;
   }
-  if (props2.delay === null && props1.delay !== null) {
+  if (
+    (delay2 === null || delay2 === undefined) &&
+    delay1 !== null &&
+    delay1 !== undefined
+  ) {
     return -1;
+  }
+
+  if (
+    delay1 === null ||
+    delay1 === undefined ||
+    delay2 === null ||
+    delay2 === undefined
+  ) {
+    return 0;
   }
 
   // We put cancelled train inbetween green and yellow trains
   // >=180000ms corresponds to yellow train
-  // @ts-expect-error  Verify that this property exists
-  if (props1.cancelled && !props2.cancelled) {
-    return props2.delay < 180000 ? -1 : 1;
+  if (cancelled1 && !cancelled2) {
+    return delay2 < 180000 ? -1 : 1;
   }
-  // @ts-expect-error  Verify that this property exists
-  if (props2.cancelled && !props1.cancelled) {
-    return props1.delay < 180000 ? 1 : -1;
+  if (cancelled2 && !cancelled1) {
+    return delay1 < 180000 ? 1 : -1;
   }
-  return props2.delay - props1.delay;
+  return delay2 - delay1;
 };
 
 export default sortByDelay;
