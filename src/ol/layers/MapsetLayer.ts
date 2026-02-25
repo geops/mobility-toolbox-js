@@ -74,10 +74,17 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   get doNotRevert32pxScaling(): boolean {
     return this.get('doNotRevert32pxScaling') as boolean;
   }
-
   set doNotRevert32pxScaling(value: boolean) {
     this.set('doNotRevert32pxScaling', value);
     this.updateFeatures();
+  }
+
+  get name(): string | undefined {
+    return this.get('name') as string | undefined;
+  }
+
+  set name(value: string | undefined) {
+    this.set('name', value);
   }
 
   get planId(): string | undefined {
@@ -286,6 +293,28 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
             this.doNotRevert32pxScaling,
           );
         }) ?? [];
+
+      features.forEach((feature) => {
+        feature.set('style', feature.getStyle());
+        feature.setStyle((feat, resolution) => {
+          const currentZoom = map.getView()?.getZoomForResolution(resolution);
+          const minZoom = feat.get('minZoom') as number | undefined;
+          const maxZoom = feat.get('maxZoom') as number | undefined;
+          const style = feat.get('style') as
+            | ReturnType<typeof feature.getStyle>
+            | undefined;
+
+          if (
+            currentZoom !== undefined &&
+            ((minZoom !== undefined && currentZoom < minZoom) ||
+              (maxZoom !== undefined && currentZoom > maxZoom))
+          ) {
+            return undefined;
+          }
+
+          return style instanceof Function ? style(feat, resolution) : style;
+        });
+      });
 
       this.getSource()?.addFeatures(features);
     }
