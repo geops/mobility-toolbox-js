@@ -70,6 +70,25 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       mapLibreCanvas.style.opacity = opacity;
     }
 
+    console.log('### before comparaison mapLibreMap');
+    console.log(
+      'viewState',
+      frameState.size,
+      frameState.size.map((size) => {
+        return size * frameState.pixelRatio;
+      }),
+      frameState,
+    );
+    console.log(
+      'mapLibreMap',
+      [`${mapLibreMap.getCanvas().width}`, `${mapLibreMap.getCanvas().height}`],
+      [
+        `${mapLibreMap.getCanvas().style.width}`,
+        `${mapLibreMap.getCanvas().style.height}`,
+      ],
+      [`${mapLibreMap.transform?.width}`, `${mapLibreMap.transform?.height}`],
+    );
+
     if (!mapLibreCanvas.isConnected) {
       // The canvas is not connected to the DOM, request a map rendering at the next animation frame
       // to set the canvas size.
@@ -86,7 +105,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       mapLibreMap.resize();
     }
 
-    console.log('### redrawing mapLibreMap');
+    console.log('### before redrawing mapLibreMap');
     console.log(
       'viewState',
       frameState.size,
@@ -97,15 +116,36 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     );
     console.log(
       'mapLibreMap',
-      [mapLibreMap.getCanvas().width, mapLibreMap.getCanvas().height],
+      [`${mapLibreMap.getCanvas().width}`, `${mapLibreMap.getCanvas().height}`],
       [
-        mapLibreMap.getCanvas().style.width,
-        mapLibreMap.getCanvas().style.height,
+        `${mapLibreMap.getCanvas().style.width}`,
+        `${mapLibreMap.getCanvas().style.height}`,
       ],
-      [mapLibreMap.transform?.width, mapLibreMap.transform?.height],
+      [`${mapLibreMap.transform?.width}`, `${mapLibreMap.transform?.height}`],
     );
 
     mapLibreMap.redraw();
+
+    console.log('### after redrawing mapLibreMap');
+    console.log(
+      'viewState',
+      frameState.size,
+      frameState.size.map((size) => {
+        return size * frameState.pixelRatio;
+      }),
+      window.devicePixelRatio,
+      frameState.pixelRatio,
+      frameState,
+    );
+    console.log(
+      'mapLibreMap',
+      [`${mapLibreMap.getCanvas().width}`, `${mapLibreMap.getCanvas().height}`],
+      [
+        `${mapLibreMap.getCanvas().style.width}`,
+        `${mapLibreMap.getCanvas().style.height}`,
+      ],
+      [`${mapLibreMap.transform?.width}`, `${mapLibreMap.transform?.height}`],
+    );
 
     // Mark the renderer as ready when the map is idle
     void mapLibreMap?.once('idle', this.setIsReady.bind(this));
