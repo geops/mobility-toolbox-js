@@ -50,7 +50,6 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     }
 
     this.ready = false;
-    this.ignoreNextRender = false;
     this.updateReadyState();
 
     const mapLibreCanvas = mapLibreMap.getCanvas();
@@ -94,7 +93,10 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   }
 
   updateReadyState() {
-    void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady.bind(this));
-    void this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady.bind(this));
+    // this.setIsReady is bound in the constructor
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    void this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady);
   }
 }
