@@ -3,9 +3,17 @@ import { toDegrees } from 'ol/math.js';
 import { toLonLat } from 'ol/proj';
 
 import type { MapLibreLayerTranslateZoomFunction } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
+import type { Map } from 'maplibre-gl';
 import type { FrameState } from 'ol/Map';
 
 import type { MaplibreLayer } from '../layers';
+
+function sameSize(map: Map, frameState: FrameState): boolean {
+  return (
+    map.transform.width === Math.floor(frameState.size[0]) &&
+    map.transform.height === Math.floor(frameState.size[1])
+  );
+}
 
 /**
  * This class is usea renderer for Maplibre Layer to be able to use the native ol
@@ -14,14 +22,14 @@ import type { MaplibreLayer } from '../layers';
  */
 export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   ignoreNextRender = false;
-  tranaslateZoom2: MapLibreLayerTranslateZoomFunction | undefined;
+  translateZoom2: MapLibreLayerTranslateZoomFunction | undefined;
 
   constructor(
     layer: MaplibreLayer,
     translateZoom?: MapLibreLayerTranslateZoomFunction,
   ) {
     super(layer, translateZoom);
-    this.tranaslateZoom2 = translateZoom;
+    this.translateZoom2 = translateZoom;
 
     this.setIsReady = this.setIsReady.bind(this);
     this.ignoreNextRender = false;
@@ -60,8 +68,8 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
         number,
       ],
       zoom:
-        (this.tranaslateZoom2
-          ? this.tranaslateZoom2(viewState.zoom)
+        (this.translateZoom2
+          ? this.translateZoom2(viewState.zoom)
           : viewState.zoom) - 1,
     });
 
@@ -70,82 +78,15 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       mapLibreCanvas.style.opacity = opacity;
     }
 
-    console.log('### before comparaison mapLibreMap');
-    console.log(
-      'viewState',
-      frameState.size,
-      frameState.size.map((size) => {
-        return size * frameState.pixelRatio;
-      }),
-      frameState,
-    );
-    console.log(
-      'mapLibreMap',
-      [`${mapLibreMap.getCanvas().width}`, `${mapLibreMap.getCanvas().height}`],
-      [
-        `${mapLibreMap.getCanvas().style.width}`,
-        `${mapLibreMap.getCanvas().style.height}`,
-      ],
-      [`${mapLibreMap.transform?.width}`, `${mapLibreMap.transform?.height}`],
-    );
-
     if (!mapLibreCanvas.isConnected) {
       // The canvas is not connected to the DOM, request a map rendering at the next animation frame
       // to set the canvas size.
       map.render();
-    } else if (
-      !(
-        mapLibreCanvas.width ===
-          Math.floor(frameState.size[0] * frameState.pixelRatio) &&
-        mapLibreCanvas.height ===
-          Math.floor(frameState.size[1] * frameState.pixelRatio)
-      )
-    ) {
-      console.log('resize mapLibreMap viewSTate', frameState);
+    } else if (!sameSize(mapLibreMap, frameState)) {
       mapLibreMap.resize();
     }
 
-    console.log('### before redrawing mapLibreMap');
-    console.log(
-      'viewState',
-      frameState.size,
-      frameState.size.map((size) => {
-        return size * frameState.pixelRatio;
-      }),
-      frameState,
-    );
-    console.log(
-      'mapLibreMap',
-      [`${mapLibreMap.getCanvas().width}`, `${mapLibreMap.getCanvas().height}`],
-      [
-        `${mapLibreMap.getCanvas().style.width}`,
-        `${mapLibreMap.getCanvas().style.height}`,
-      ],
-      [`${mapLibreMap.transform?.width}`, `${mapLibreMap.transform?.height}`],
-    );
-
     mapLibreMap.redraw();
-
-    console.log('### after redrawing mapLibreMap');
-    console.log(
-      'viewState',
-      frameState.size,
-      frameState.size.map((size) => {
-        return size * frameState.pixelRatio;
-      }),
-      window.devicePixelRatio,
-      frameState.pixelRatio,
-      frameState,
-    );
-    console.log(
-      'mapLibreMap',
-      [`${mapLibreMap.getCanvas().width}`, `${mapLibreMap.getCanvas().height}`],
-      [
-        `${mapLibreMap.getCanvas().style.width}`,
-        `${mapLibreMap.getCanvas().style.height}`,
-      ],
-      [`${mapLibreMap.transform?.width}`, `${mapLibreMap.transform?.height}`],
-    );
 
     // Mark the renderer as ready when the map is idle
     void mapLibreMap?.once('idle', this.setIsReady.bind(this));
