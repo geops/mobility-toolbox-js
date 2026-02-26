@@ -49,15 +49,8 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
 
     super.renderFrame(frameState);
 
-    const mapLibreCanvas = mapLibreMap.getCanvas();
-    if (
-      mapLibreCanvas.clientWidth !== Math.floor(frameState.size[0]) ||
-      mapLibreCanvas.clientHeight !== Math.floor(frameState.size[1])
-    ) {
-      // Force resize
-      mapLibreMap.resize();
-      mapLibreMap.redraw();
-    }
+    // Force resize
+    mapLibreMap.resize();
 
     // Mark the renderer as ready when the map is idle
     void mapLibreMap?.once('idle', this.setIsReady.bind(this));
