@@ -49,10 +49,6 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       return null;
     }
 
-    if (this.ready && this.ignoreNextRender) {
-      this.ignoreNextRender = false;
-      return mapLibreMap?.getContainer();
-    }
     this.ready = false;
     this.ignoreNextRender = false;
     this.updateReadyState();
@@ -88,17 +84,12 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
 
     mapLibreMap.redraw();
 
-    // Mark the renderer as ready when the map is idle
-    void mapLibreMap?.once('idle', this.setIsReady.bind(this));
-
     return mapLibreMap.getContainer();
   }
 
   setIsReady() {
     if (!this.ready) {
       this.ready = true;
-      this.ignoreNextRender = true;
-      this.getLayer().changed();
     }
   }
 
