@@ -52,6 +52,15 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
 
+    if (
+      this.ready &&
+      this.ignoreNextRender &&
+      sameSize(mapLibreMap, frameState)
+    ) {
+      this.ignoreNextRender = false;
+      return mapLibreMap.getContainer();
+    }
+
     this.ready = false;
 
     const mapLibreCanvas = mapLibreMap.getCanvas();
@@ -94,6 +103,8 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   setIsReady() {
     if (!this.ready) {
       this.ready = true;
+      this.ignoreNextRender = true;
+      this.getLayer()?.changed();
     }
   }
 }
