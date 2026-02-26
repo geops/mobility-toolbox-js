@@ -1,4 +1,6 @@
 import { MapLibreLayerRenderer } from '@geoblocks/ol-maplibre-layer/lib';
+import { toDegrees } from 'ol/math.js';
+import { toLonLat } from 'ol/proj';
 
 import type { MapLibreLayerTranslateZoomFunction } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
 import type { FrameState } from 'ol/Map';
@@ -47,40 +49,60 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     this.ignoreNextRender = false;
     this.updateReadyState();
 
-    super.renderFrame(frameState);
-
     const mapLibreCanvas = mapLibreMap.getCanvas();
-    if (
-      mapLibreCanvas.clientWidth !==
-        Math.floor(frameState.size[0] * frameState.pixelRatio) ||
-      mapLibreCanvas.clientHeight !==
-        Math.floor(frameState.size[1] * frameState.pixelRatio) ||
-      mapLibreCanvas.style.width !== `${frameState.size[0]}px` ||
-      mapLibreCanvas.style.height !== `${frameState.size[1]}px`
-    ) {
-      if (
-        mapLibreCanvas.clientWidth !==
-          Math.floor(frameState.size[0] * frameState.pixelRatio) ||
-        mapLibreCanvas.clientHeight !==
-          Math.floor(frameState.size[1] * frameState.pixelRatio)
-      ) {
-        console.log('MapLibre canvas size is not correct, resizing...');
+    const { viewState } = frameState;
 
-        // Force resize
-        // mapLibreMap.resize();
-        // mapLibreMap.redraw();
-      }
-      if (
-        mapLibreCanvas.style.width !== `${frameState.size[0]}px` ||
-        mapLibreCanvas.style.height !== `${frameState.size[1]}px`
-      ) {
-        console.log('MapLibre canvas style size is not correct, resizing...');
+    // adjust view parameters in MapLibre
+    mapLibreMap.jumpTo({
+      bearing: toDegrees(-viewState.rotation),
+      center: toLonLat(viewState.center, viewState.projection) as [
+        number,
+        number,
+      ],
+      zoom:
+        (this.tranaslateZoom2
+          ? this.tranaslateZoom2(viewState.zoom)
+          : viewState.zoom) - 1,
+    });
 
-        // Force resize
-        mapLibreMap.resize();
-        mapLibreMap.redraw();
-      }
+    const opacity = layer.getOpacity().toString();
+    if (opacity !== mapLibreCanvas?.style.opacity) {
+      mapLibreCanvas.style.opacity = opacity;
     }
+
+    if (!mapLibreCanvas.isConnected) {
+      // The canvas is not connected to the DOM, request a map rendering at the next animation frame
+      // to set the canvas size.
+      map.render();
+    } else if (
+      !(
+        canvas.width ===
+          Math.floor(frameState.size[0] * frameState.pixelRatio) &&
+        canvas.height === Math.floor(frameState.size[1] * frameState.pixelRatio)
+      )
+    ) {
+      console.log('resize mapLibreMap viewSTate', frameState);
+      mapLibreMap.resize();
+    }
+
+    console.log('### redrawing mapLibreMap');
+    console.log(
+      'viewState',
+      frameState.size,
+      frameState.pixelRatio,
+      frameState,
+    );
+    console.log(
+      'mapLibreMap',
+      [mapLibreMap.getCanvas().width, mapLibreMap.getCanvas().height],
+      [
+        mapLibreMap.getCanvas().style.width,
+        mapLibreMap.getCanvas().style.height,
+      ],
+      [mapLibreMap.transform?.width, mapLibreMap.transform?.height],
+    );
+
+    mapLibreMap.redraw();
 
     // Mark the renderer as ready when the map is idle
     void mapLibreMap?.once('idle', this.setIsReady.bind(this));
