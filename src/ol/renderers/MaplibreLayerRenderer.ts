@@ -76,9 +76,10 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       map.render();
     } else if (
       !(
-        canvas.width ===
+        mapLibreCanvas.width ===
           Math.floor(frameState.size[0] * frameState.pixelRatio) &&
-        canvas.height === Math.floor(frameState.size[1] * frameState.pixelRatio)
+        mapLibreCanvas.height ===
+          Math.floor(frameState.size[1] * frameState.pixelRatio)
       )
     ) {
       console.log('resize mapLibreMap viewSTate', frameState);
@@ -89,7 +90,9 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     console.log(
       'viewState',
       frameState.size,
-      frameState.pixelRatio,
+      frameState.size.map((size) => {
+        return size * frameState.pixelRatio;
+      }),
       frameState,
     );
     console.log(
