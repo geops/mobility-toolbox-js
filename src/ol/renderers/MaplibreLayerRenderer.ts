@@ -49,8 +49,10 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       return null;
     }
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
+
     this.ready = false;
-    this.updateReadyState();
 
     const mapLibreCanvas = mapLibreMap.getCanvas();
     const { viewState } = frameState;
@@ -83,6 +85,9 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
 
     mapLibreMap.redraw();
 
+    // this.setIsReady is bound in the constructor
+    void this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady);
+
     return mapLibreMap.getContainer();
   }
 
@@ -90,13 +95,5 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     if (!this.ready) {
       this.ready = true;
     }
-  }
-
-  updateReadyState() {
-    // this.setIsReady is bound in the constructor
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    void this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady);
   }
 }
