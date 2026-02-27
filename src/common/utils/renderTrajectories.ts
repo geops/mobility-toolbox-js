@@ -161,7 +161,7 @@ const renderTrajectories = (
 
     if (resolution < 1) {
       const roundedPX = px.map((p) => {
-        return Math.round(p);
+        return Math.round(p / 5) * 5;
       });
       const key = `${roundedPX.toString()}`;
       if (!cachePixel[key]) {
