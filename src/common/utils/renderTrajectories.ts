@@ -169,6 +169,12 @@ const renderTrajectories = (
         cacheNbTrainAtPixel[key] = 1;
         cacheDistanceOffset[key] = 40 * resolution;
       } else {
+        // console.log(
+        //   'Collision detected for train id',
+        //   id,
+        //   'at pixel',
+        //   roundedPX,
+        // );
         // if (!hoverVehicleId) {
         px[0] += 40 * cacheNbTrainAtPixel[key];
         // // }

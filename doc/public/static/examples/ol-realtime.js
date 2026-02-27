@@ -11,6 +11,9 @@ export default () => {
   // Creates the Realtime layer
   const realtime = new RealtimeLayer({
     apiKey: window.apiKey,
+    styleOptions: {
+      showHeading: true,
+    },
   });
 
   // Creates the map
