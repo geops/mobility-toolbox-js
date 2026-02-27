@@ -39,6 +39,7 @@ const realtimeLayer = new RealtimeLayer({
   url: 'wss://api.geops.io/tracker-ws/v1/', // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
   styleOptions: {
+    showHeading: true,
     // useHeadingStyle: true,
     // useDelayStyle: true,
   },
