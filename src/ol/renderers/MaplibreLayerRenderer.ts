@@ -52,6 +52,9 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
 
+    // When the browser is zoomed it could happens that the renderFrame call for readyness
+    // in setIsReady is called with a different size than the one of the mapLibreMap,
+    // so we need to render.
     if (
       this.ready &&
       this.ignoreNextRender &&
