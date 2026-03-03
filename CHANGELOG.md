@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.8](https://github.com/geops/mobility-toolbox-js/compare/v3.6.7...v3.6.8) (2026-03-03)
+
+
+### Bug Fixes
+
+* avoid js error if requests are empty ([83aeba7](https://github.com/geops/mobility-toolbox-js/commit/83aeba7d2fe1def6a27cf9aa35098a5dc3185144))
+
+### [3.6.7](https://github.com/geops/mobility-toolbox-js/compare/v3.6.6...v3.6.7) (2026-02-25)
+
+
+### Bug Fixes
+
+* **MapsetKmlFormat:** accept zero for maxZoom/minZoom values ([#241](https://github.com/geops/mobility-toolbox-js/issues/241)) ([521f422](https://github.com/geops/mobility-toolbox-js/commit/521f422a61a773b3126bff23b7556dc8fa2b0625))
+
 ### [3.6.6](https://github.com/geops/mobility-toolbox-js/compare/v3.6.5...v3.6.6) (2026-02-20)
 
 
