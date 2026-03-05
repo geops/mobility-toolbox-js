@@ -30,7 +30,6 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
   ) {
     super(layer, translateZoom);
     this.translateZoom2 = translateZoom;
-
     this.setIsReady = this.setIsReady.bind(this);
     this.ignoreNextRender = false;
   }
@@ -50,7 +49,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     }
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    void this.getLayer()?.mapLibreMap?.off('idle', this.setIsReady);
+    void mapLibreMap.off('idle', this.setIsReady);
 
     // When the browser is zoomed it could happens that the renderFrame call for readyness
     // in setIsReady is called with a different size than the one of the mapLibreMap,
@@ -65,7 +64,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     }
 
     this.ready = false;
-
+    this.ignoreNextRender = false;
     const mapLibreCanvas = mapLibreMap.getCanvas();
     const { viewState } = frameState;
 
@@ -95,12 +94,12 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       mapLibreMap.resize();
     }
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    void mapLibreMap.once('idle', this.setIsReady);
+
     mapLibreMap.redraw();
 
-    // this.setIsReady is bound in the constructor
-    void this.getLayer()?.mapLibreMap?.once('idle', this.setIsReady);
-
-    return mapLibreMap.getContainer();
+    return mapLibreMap.getCanvasContainer();
   }
 
   setIsReady() {
