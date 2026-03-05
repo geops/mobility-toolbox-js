@@ -18,6 +18,7 @@ import type { MobilityLayerOptions } from './Layer';
 
 export type MapsetLayerOptions = {
   api?: MapsetAPI;
+  applyMinMaxZoom?: boolean;
   doNotRevert32pxScaling?: boolean;
   loadAll?: boolean;
   planId?: string;
@@ -71,6 +72,13 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
   }
 
+  get applyMinMaxZoom(): boolean | undefined {
+    return this.get('applyMinMaxZoom') as boolean | undefined;
+  }
+  set applyMinMaxZoom(value: boolean | undefined) {
+    this.set('applyMinMaxZoom', value);
+  }
+
   get doNotRevert32pxScaling(): boolean {
     return this.get('doNotRevert32pxScaling') as boolean;
   }
@@ -82,7 +90,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   get name(): string | undefined {
     return this.get('name') as string | undefined;
   }
-
   set name(value: string | undefined) {
     this.set('name', value);
   }
@@ -143,6 +150,15 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       this.api.url = value;
       void this.fetchPlans();
     }
+  }
+
+  get zoomToResolution(): ((zoom: number) => number) | undefined {
+    return this.get('zoomToResolution') as
+      | ((zoom: number) => number)
+      | undefined;
+  }
+  set zoomToResolution(value: ((zoom: number) => number) | undefined) {
+    this.set('zoomToResolution', value);
   }
 
   #abortController: AbortController;
@@ -287,34 +303,17 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     if (map && this.plans?.length !== 0) {
       const features =
         this.plans?.flatMap((plan) => {
-          return kmlFormatter.readFeatures(
-            plan.data,
-            map.getView().getProjection(),
-            this.doNotRevert32pxScaling,
-          );
+          return kmlFormatter.readFeatures(plan.data, {
+            applyMinMaxZoom: this.applyMinMaxZoom ?? true,
+            doNotRevert32pxScaling: this.doNotRevert32pxScaling ?? false,
+            featureProjection: map.getView().getProjection(),
+            zoomToResolution:
+              this.zoomToResolution ??
+              ((zoom: number) => {
+                return map.getView().getResolutionForZoom(zoom);
+              }),
+          });
         }) ?? [];
-
-      features.forEach((feature) => {
-        feature.set('style', feature.getStyle());
-        feature.setStyle((feat, resolution) => {
-          const currentZoom = map.getView()?.getZoomForResolution(resolution);
-          const minZoom = feat.get('minZoom') as number | undefined;
-          const maxZoom = feat.get('maxZoom') as number | undefined;
-          const style = feat.get('style') as
-            | ReturnType<typeof feature.getStyle>
-            | undefined;
-
-          if (
-            currentZoom !== undefined &&
-            ((minZoom !== undefined && currentZoom < minZoom) ||
-              (maxZoom !== undefined && currentZoom > maxZoom))
-          ) {
-            return undefined;
-          }
-
-          return style instanceof Function ? style(feat, resolution) : style;
-        });
-      });
 
       this.getSource()?.addFeatures(features);
     }

@@ -31,6 +31,51 @@ import type {
 
 import type { PolygonFillPatternInput } from './getMapsetPolygonPattern';
 
+export const isFeatureOutsideZoomLimit = (
+  feature: FeatureLike,
+  resolution: number,
+  zoomToResolution?: (zoom: number) => number,
+) => {
+  const minZoom = feature.get('minZoom') as number | undefined;
+  const maxZoom = feature.get('maxZoom') as number | undefined;
+  const minRes = minZoom ? zoomToResolution?.(minZoom) : undefined;
+  const maxRes = maxZoom ? zoomToResolution?.(maxZoom) : undefined;
+
+  return (
+    (minRes !== undefined && resolution > minRes) ||
+    (maxRes !== undefined && resolution < maxRes)
+  );
+};
+
+const getStylesArray = (
+  styles: Style | Style[] | StyleFunction | undefined,
+  feature: FeatureLike,
+  resolution: number,
+): Style[] => {
+  if (!styles) {
+    return [];
+  }
+
+  // Style is a function
+  if (typeof styles === 'function') {
+    const resolved = styles(feature, resolution);
+
+    if (!resolved) {
+      return [];
+    }
+
+    return Array.isArray(resolved) ? resolved : [resolved];
+  }
+
+  // Style is already an array
+  if (Array.isArray(styles)) {
+    return styles;
+  }
+
+  // Single Style
+  return [styles];
+};
+
 const CIRCLE_GEOMETRY_CENTER = 'circleGeometryCenter';
 const CIRCLE_GEOMETRY_RADIUS = 'circleGeometryRadius';
 const EPSG_4326 = get('EPSG:4326') as ProjectionLike;
@@ -137,23 +182,39 @@ const getLineIcon = (
   });
 };
 
+interface FormatOptionsType {
+  applyMinMaxZoom?: boolean;
+  doNotRevert32pxScaling?: boolean;
+  featureProjection: ProjectionLike;
+  zoomToResolution?: (zoom: number) => number;
+}
+
 class MapsetKmlFormat {
   /**
    * Read a KML string.
    * @param {String} kmlString A string representing a KML file.
-   * @param {<ol.Projection|String>} featureProjection The projection used by the map.
+   * @param {<ol.Map>} map The OpenLayers map instance.
    * @param {<boolean>} doNotRevert32pxScaling Set it to true if you use ol < 6.7 and last version of react-spatial, Fix the 32px scaling, introduced by (ol >= 6.7), see https://github.com/openlayers/openlayers/pull/12695.
    */
   public readFeatures(
     kmlString: string,
-    featureProjection: ProjectionLike,
-    doNotRevert32pxScaling = false,
+    formatOptions: FormatOptionsType = {
+      applyMinMaxZoom: true,
+      doNotRevert32pxScaling: false,
+      featureProjection: EPSG_4326,
+    },
   ): FeatureType[] {
     // Since ol 6.7, the KML follows better the spec and GoogleEarth interpretation, see https://github.com/openlayers/openlayers/pull/12695.
     // so the <scale> value is interpreted using an image size of 32px.
     // So when revert32pxScaling is true we fix back the scale, to use only, if you use an OL < 6.7.
     // Now the writeFeatures function use the iconScale extended data to set the image's scale.
     // If the extended data is not found it will look at this boolean to define if we must revert the scale or not.
+    const {
+      applyMinMaxZoom,
+      doNotRevert32pxScaling,
+      featureProjection,
+      zoomToResolution,
+    }: FormatOptionsType = formatOptions;
     const features = new KML().readFeatures(kmlString, {
       featureProjection,
     });
@@ -178,7 +239,30 @@ class MapsetKmlFormat {
       }
 
       this.sanitizeFeature(feature, doNotRevert32pxScaling);
+
+      if (applyMinMaxZoom) {
+        // Hide features when outside zoom limits
+        feature.setStyle((feat, resolution) => {
+          const styles = feat.get('style') as
+            | ReturnType<typeof feature.getStyle>
+            | undefined;
+          const stylesArray = getStylesArray(styles, feat, resolution);
+
+          const isOutsideZoomLimit = isFeatureOutsideZoomLimit(
+            feature,
+            resolution,
+            zoomToResolution,
+          );
+
+          if (isOutsideZoomLimit) {
+            return undefined;
+          }
+
+          return stylesArray;
+        });
+      }
     });
+
     return features;
   }
 
@@ -507,6 +591,7 @@ class MapsetKmlFormat {
         );
       }
     }
+    feature.set('style', styles);
     feature.setStyle(styles as StyleLike);
   }
 
