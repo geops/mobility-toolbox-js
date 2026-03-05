@@ -99,7 +99,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
 
     mapLibreMap.redraw();
 
-    return mapLibreMap.getCanvasContainer();
+    return mapLibreMap.getContainer();
   }
 
   setIsReady() {
