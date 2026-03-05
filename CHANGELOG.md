@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.10](https://github.com/geops/mobility-toolbox-js/compare/v3.6.9...v3.6.10) (2026-03-05)
+
+
+### Bug Fixes
+
+* fix bug in maplibre renderer ([a4a725a](https://github.com/geops/mobility-toolbox-js/commit/a4a725ae5fa9852d3ece861b578617fd6c7f3c78))
+* udate browserslist ([c9f7dcb](https://github.com/geops/mobility-toolbox-js/commit/c9f7dcb7765d74ec53474e4b3a3b7ce40b71e2f4))
+
 ### [3.6.9](https://github.com/geops/mobility-toolbox-js/compare/v3.6.8...v3.6.9) (2026-03-05)
 
 
