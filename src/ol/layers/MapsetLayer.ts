@@ -4,6 +4,7 @@ import { transformExtent } from 'ol/proj';
 import { Vector } from 'ol/source';
 
 import MapsetAPI from '../../api/MapsetApi';
+import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 import MapsetKmlFormat from '../utils/MapsetKmlFormat';
 
 import type { Map } from 'ol';
@@ -70,21 +71,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       this.api.apiKey = value;
       void this.fetchPlans();
     }
-  }
-
-  get doNotRevert32pxScaling(): boolean {
-    return this.get('doNotRevert32pxScaling') as boolean;
-  }
-  set doNotRevert32pxScaling(value: boolean) {
-    this.set('doNotRevert32pxScaling', value);
-    this.updateFeatures();
-  }
-
-  get name(): string | undefined {
-    return this.get('name') as string | undefined;
-  }
-  set name(value: string | undefined) {
-    this.set('name', value);
   }
 
   get planId(): string | undefined {
@@ -176,6 +162,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     if (options.loadAll === false) {
       this.loadAll = options.loadAll;
     }
+    defineDeprecatedProperties(this, options);
   }
 
   async fetchPlanById(planId?: string) {
