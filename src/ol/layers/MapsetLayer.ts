@@ -14,15 +14,14 @@ import type { Options } from 'ol/layer/Vector';
 
 import type { MapsetPlan } from '../../api/MapsetApi';
 import type { MapsetAPIOptions } from '../../api/MapsetApi';
+import type { MapsetKmlFormatReadOptions } from '../utils/MapsetKmlFormat';
 
 import type { MobilityLayerOptions } from './Layer';
 
 export type MapsetLayerOptions = {
   api?: MapsetAPI;
-  applyMinMaxZoom?: boolean;
-  doNotRevert32pxScaling?: boolean;
-  loadAll?: boolean;
   planId?: string;
+  readOptions?: MapsetKmlFormatReadOptions;
 } & MapsetAPIOptions &
   MobilityLayerOptions &
   Options;
@@ -239,7 +238,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
         // Ignore abort error
         return [];
       }
-      console.error('MapsetLayer: Error fetching plans...', e);
       this.dispatchEvent('featuresloaderror');
       throw e;
     }
@@ -275,11 +273,11 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       const features =
         this.plans?.flatMap((plan) => {
           return kmlFormatter.readFeatures(plan.data, {
-            doNotRevert32pxScaling: this.doNotRevert32pxScaling ?? false,
             featureProjection: map.getView().getProjection(),
             getResolutionForZoom: (zoom: number) => {
               return map.getView().getResolutionForZoom(zoom);
             },
+            ...((this.get('readOptions') ?? {}) as MapsetKmlFormatReadOptions),
           });
         }) ?? [];
 

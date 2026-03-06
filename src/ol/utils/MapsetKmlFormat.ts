@@ -138,7 +138,7 @@ const getLineIcon = (
   });
 };
 
-type MapsetKmlReadOptions = {
+export type MapsetKmlFormatReadOptions = {
   applyMinMaxZoom?: boolean;
   doNotRevert32pxScaling?: boolean;
   getResolutionForZoom?: (zoom: number) => number;
@@ -156,14 +156,14 @@ class MapsetKmlFormat {
    */
   public readFeatures(
     kmlString: string,
-    formatOptions: MapsetKmlReadOptions = {},
+    formatOptions: MapsetKmlFormatReadOptions = {},
   ): FeatureType[] {
     // Since ol 6.7, the KML follows better the spec and GoogleEarth interpretation, see https://github.com/openlayers/openlayers/pull/12695.
     // so the <scale> value is interpreted using an image size of 32px.
     // So when revert32pxScaling is true we fix back the scale, to use only, if you use an OL < 6.7.
     // Now the writeFeatures function use the iconScale extended data to set the image's scale.
     // If the extended data is not found it will look at this boolean to define if we must revert the scale or not.
-    const { featureProjection = EPSG_4326 }: MapsetKmlReadOptions =
+    const { featureProjection = EPSG_4326 }: MapsetKmlFormatReadOptions =
       formatOptions;
     const features = new KML().readFeatures(kmlString, formatOptions);
     features.forEach((feature) => {
