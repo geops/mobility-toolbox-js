@@ -20,6 +20,7 @@ import type { MobilityLayerOptions } from './Layer';
 
 export type MapsetLayerOptions = {
   api?: MapsetAPI;
+  loadAll?: boolean;
   planId?: string;
   readOptions?: MapsetKmlFormatReadOptions;
 } & MapsetAPIOptions &
