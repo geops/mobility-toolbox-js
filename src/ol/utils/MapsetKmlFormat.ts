@@ -208,7 +208,7 @@ class MapsetKmlFormat {
 
   public sanitizeFeature(
     feature: FeatureType,
-    formatOptions: MapsetKmlReadOptions,
+    formatOptions: MapsetKmlFormatReadOptions,
   ) {
     const {
       applyMinMaxZoom = true,
