@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.8](https://github.com/geops/mobility-toolbox-js/compare/v3.6.8-beta.3...v3.6.8) (2026-03-06)
+
+
+### Bug Fixes
+
+* remove use of lodash replace ([4cb8703](https://github.com/geops/mobility-toolbox-js/commit/4cb870396937bd592f0ba57b4ff80b0a2f6e3050))
+* remove useless properties ([33fd64c](https://github.com/geops/mobility-toolbox-js/commit/33fd64c4a91f6d250bd441bbf0a9469993265bb7))
+* remove useless properties ([33db5b8](https://github.com/geops/mobility-toolbox-js/commit/33db5b860c0eac633e8b99205537459426944ca4))
+* remove useless properties ([f7ab65b](https://github.com/geops/mobility-toolbox-js/commit/f7ab65becb548560e0ea8e07acd8b55c49783cb2))
+* remove useless properties ([10b6916](https://github.com/geops/mobility-toolbox-js/commit/10b6916d8bdf9aaa84e2ce8a8c8f8da2c37ac773))
+
 ### [3.6.7](https://github.com/geops/mobility-toolbox-js/compare/v3.6.6...v3.6.7) (2026-02-25)
 
 
