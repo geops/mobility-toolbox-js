@@ -1,4 +1,3 @@
-import { min, replace } from 'lodash';
 import { Feature, getUid } from 'ol';
 import { asString } from 'ol/color';
 import KML from 'ol/format/KML';
@@ -350,7 +349,10 @@ class MapsetKmlFormat {
         if (feature.get('textArray')) {
           try {
             const textArray = JSON.parse(
-              replace(feature.get('textArray') as string, /\r?\n/g, '\\n'),
+              ((feature.get('textArray') || '') as string).replace(
+                /\r?\n/g,
+                '\\n',
+              ),
             ) as string[];
             text.setText(textArray);
           } catch (err) {
