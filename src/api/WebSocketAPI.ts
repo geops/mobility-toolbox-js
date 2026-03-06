@@ -265,6 +265,9 @@ class WebSocketAPI {
         const index = this.requests.findIndex((request) => {
           return requestString === request.requestString && cb === request.cb;
         });
+        if (index === -1) {
+          return;
+        }
         const { onErrorCb, onMessageCb } = this.requests[index];
         this.removeEvents(onMessageCb, onErrorCb);
         this.requests.splice(index, 1);

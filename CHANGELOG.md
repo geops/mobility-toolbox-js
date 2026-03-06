@@ -2,16 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [3.6.8](https://github.com/geops/mobility-toolbox-js/compare/v3.6.8-beta.3...v3.6.8) (2026-03-06)
+### [3.6.10](https://github.com/geops/mobility-toolbox-js/compare/v3.6.9...v3.6.10) (2026-03-05)
 
 
 ### Bug Fixes
 
-* remove use of lodash replace ([4cb8703](https://github.com/geops/mobility-toolbox-js/commit/4cb870396937bd592f0ba57b4ff80b0a2f6e3050))
-* remove useless properties ([33fd64c](https://github.com/geops/mobility-toolbox-js/commit/33fd64c4a91f6d250bd441bbf0a9469993265bb7))
-* remove useless properties ([33db5b8](https://github.com/geops/mobility-toolbox-js/commit/33db5b860c0eac633e8b99205537459426944ca4))
-* remove useless properties ([f7ab65b](https://github.com/geops/mobility-toolbox-js/commit/f7ab65becb548560e0ea8e07acd8b55c49783cb2))
-* remove useless properties ([10b6916](https://github.com/geops/mobility-toolbox-js/commit/10b6916d8bdf9aaa84e2ce8a8c8f8da2c37ac773))
+* fix bug in maplibre renderer ([a4a725a](https://github.com/geops/mobility-toolbox-js/commit/a4a725ae5fa9852d3ece861b578617fd6c7f3c78))
+* udate browserslist ([c9f7dcb](https://github.com/geops/mobility-toolbox-js/commit/c9f7dcb7765d74ec53474e4b3a3b7ce40b71e2f4))
+
+### [3.6.9](https://github.com/geops/mobility-toolbox-js/compare/v3.6.8...v3.6.9) (2026-03-05)
+
+
+### Bug Fixes
+
+* properly update the maplibre map on browser zoom changes ([#246](https://github.com/geops/mobility-toolbox-js/issues/246)) ([699e5eb](https://github.com/geops/mobility-toolbox-js/commit/699e5eb8bd48944919a9cea5e36e4620e5a4f94a))
+* update types ([62abfa1](https://github.com/geops/mobility-toolbox-js/commit/62abfa17218d71a0f82e1d5ae32c2e0a8db0ace0))
+
+### [3.6.7](https://github.com/geops/mobility-toolbox-js/compare/v3.6.8...v3.6.7) (2026-03-05)
+
+
+### Bug Fixes
+
+* properly update the maplibre map on browser zoom changes ([#246](https://github.com/geops/mobility-toolbox-js/issues/246)) ([699e5eb](https://github.com/geops/mobility-toolbox-js/commit/699e5eb8bd48944919a9cea5e36e4620e5a4f94a))
+* update types ([62abfa1](https://github.com/geops/mobility-toolbox-js/commit/62abfa17218d71a0f82e1d5ae32c2e0a8db0ace0))
+
+### [3.6.8](https://github.com/geops/mobility-toolbox-js/compare/v3.6.7...v3.6.8) (2026-03-03)
+
+
+### Bug Fixes
+
+* avoid js error if requests are empty ([83aeba7](https://github.com/geops/mobility-toolbox-js/commit/83aeba7d2fe1def6a27cf9aa35098a5dc3185144))
 
 ### [3.6.7](https://github.com/geops/mobility-toolbox-js/compare/v3.6.6...v3.6.7) (2026-02-25)
 
