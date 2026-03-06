@@ -29,8 +29,11 @@ const baseLayer = new MaplibreLayer({
 });
 
 const mapsetLayer = new MapsetLayer({
+  // apiKey: window.apiKey,
+  // tenants: ['rvf'],
   apiKey: window.apiKey,
-  tenants: ['rvf'],
+  tags: ['mobility-portal-sob'],
+  tenants: ['geopsmarketing'],
 });
 
 const realtimeLayer = new RealtimeLayer({
@@ -61,9 +64,9 @@ const mocoLayer = new MocoLayer({
 const map = new Map({
   layers: [
     baseLayer,
-    realtimeLayer,
+    // realtimeLayer,
     // mocoLayer,
-    // mapsetLayer
+    mapsetLayer,
   ],
   target: 'map',
   view: new View({

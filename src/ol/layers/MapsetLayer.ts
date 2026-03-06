@@ -72,13 +72,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
   }
 
-  get applyMinMaxZoom(): boolean | undefined {
-    return this.get('applyMinMaxZoom') as boolean | undefined;
-  }
-  set applyMinMaxZoom(value: boolean | undefined) {
-    this.set('applyMinMaxZoom', value);
-  }
-
   get doNotRevert32pxScaling(): boolean {
     return this.get('doNotRevert32pxScaling') as boolean;
   }
@@ -150,15 +143,6 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       this.api.url = value;
       void this.fetchPlans();
     }
-  }
-
-  get zoomToResolution(): ((zoom: number) => number) | undefined {
-    return this.get('zoomToResolution') as
-      | ((zoom: number) => number)
-      | undefined;
-  }
-  set zoomToResolution(value: ((zoom: number) => number) | undefined) {
-    this.set('zoomToResolution', value);
   }
 
   #abortController: AbortController;
@@ -304,14 +288,11 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
       const features =
         this.plans?.flatMap((plan) => {
           return kmlFormatter.readFeatures(plan.data, {
-            applyMinMaxZoom: this.applyMinMaxZoom ?? true,
             doNotRevert32pxScaling: this.doNotRevert32pxScaling ?? false,
             featureProjection: map.getView().getProjection(),
-            zoomToResolution:
-              this.zoomToResolution ??
-              ((zoom: number) => {
-                return map.getView().getResolutionForZoom(zoom);
-              }),
+            getResolutionForZoom: (zoom: number) => {
+              return map.getView().getResolutionForZoom(zoom);
+            },
           });
         }) ?? [];
 
