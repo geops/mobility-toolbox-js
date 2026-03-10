@@ -30,7 +30,6 @@ import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import type { ObjectEvent } from 'ol/Object';
-import type LayerRenderer from 'ol/renderer/Layer';
 import type { State } from 'ol/View';
 
 import type { FilterFunction, SortFunction } from '../../common/typedefs';

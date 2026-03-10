@@ -1,4 +1,3 @@
-import { replace } from 'lodash';
 import { Feature, getUid } from 'ol';
 import { asString } from 'ol/color';
 import KML from 'ol/format/KML';
@@ -18,6 +17,7 @@ import type { Color } from 'ol/color';
 import type { ColorLike } from 'ol/colorlike';
 import type { Coordinate } from 'ol/coordinate';
 import type { FeatureLike } from 'ol/Feature';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { SimpleGeometry } from 'ol/geom';
 import type { Vector } from 'ol/layer';
 import type { ProjectionLike } from 'ol/proj';
@@ -137,26 +137,34 @@ const getLineIcon = (
   });
 };
 
+export type MapsetKmlFormatReadOptions = {
+  applyMinMaxZoom?: boolean;
+  doNotRevert32pxScaling?: boolean;
+  getResolutionForZoom?: (zoom: number) => number;
+} & ReadOptions;
+
 class MapsetKmlFormat {
   /**
    * Read a KML string.
+   *
    * @param {String} kmlString A string representing a KML file.
-   * @param {<ol.Projection|String>} featureProjection The projection used by the map.
-   * @param {<boolean>} doNotRevert32pxScaling Set it to true if you use ol < 6.7 and last version of react-spatial, Fix the 32px scaling, introduced by (ol >= 6.7), see https://github.com/openlayers/openlayers/pull/12695.
+   * @param {Object} formatOptions  used to read and writes features. It extends the ol KML format read options with some custom options.
+   * @param {boolean} [formatOptions.applyMinMaxZoom=true] Generate a style function to apply the minZoom and maxZoom properties of features if they are defined and if the getResolutionForZoom function is provided in options. The style function will return undefined for features that are out of the zoom range defined by minZoom and maxZoom, so they will not be displayed on the map.
+   * @param {boolean} [formatOptions.doNotRevert32pxScaling=false] Set it to true if you use ol < 6.7 and last version of react-spatial, Fix the 32px scaling, introduced by (ol >= 6.7), see https://github.com/openlayers/openlayers/pull/12695.
+   * @param {function} [formatOptions.getResolutionForZoom] A function to get the resolution for a given zoom level. Mandatory if applyMinMaxZoom is true. It can be the map.getView().getResolutionForZoom function.
    */
   public readFeatures(
     kmlString: string,
-    featureProjection: ProjectionLike,
-    doNotRevert32pxScaling = false,
+    formatOptions: MapsetKmlFormatReadOptions = {},
   ): FeatureType[] {
     // Since ol 6.7, the KML follows better the spec and GoogleEarth interpretation, see https://github.com/openlayers/openlayers/pull/12695.
     // so the <scale> value is interpreted using an image size of 32px.
     // So when revert32pxScaling is true we fix back the scale, to use only, if you use an OL < 6.7.
     // Now the writeFeatures function use the iconScale extended data to set the image's scale.
     // If the extended data is not found it will look at this boolean to define if we must revert the scale or not.
-    const features = new KML().readFeatures(kmlString, {
-      featureProjection,
-    });
+    const { featureProjection = EPSG_4326 }: MapsetKmlFormatReadOptions =
+      formatOptions;
+    const features = new KML().readFeatures(kmlString, formatOptions);
     features.forEach((feature) => {
       // Transform back polygon to circle geometry
       const {
@@ -168,7 +176,7 @@ class MapsetKmlFormat {
           transform(
             JSON.parse(circleGeometryCenter as string) as Coordinate,
             EPSG_4326,
-            featureProjection || EPSG_4326,
+            featureProjection,
           ),
           parseFloat(circleGeometryRadius as string),
         );
@@ -177,8 +185,9 @@ class MapsetKmlFormat {
         feature.setGeometry(circle);
       }
 
-      this.sanitizeFeature(feature, doNotRevert32pxScaling);
+      this.sanitizeFeature(feature, formatOptions);
     });
+
     return features;
   }
 
@@ -196,10 +205,17 @@ class MapsetKmlFormat {
     return new XMLSerializer().serializeToString(kmlDoc);
   }
 
-  public sanitizeFeature(feature: FeatureType, doNotRevert32pxScaling = false) {
+  public sanitizeFeature(
+    feature: FeatureType,
+    formatOptions: MapsetKmlFormatReadOptions,
+  ) {
+    const {
+      applyMinMaxZoom = true,
+      doNotRevert32pxScaling = false,
+      getResolutionForZoom,
+    } = formatOptions;
     const geom = feature.getGeometry();
-    let styles: StyleFunction | StyleLike[] | undefined =
-      feature.getStyleFunction();
+    let styles: StyleLike | undefined = feature.getStyleFunction();
 
     // Store maxZoom in properties
     const maxZoom = parseFloat(feature.get('maxZoom') as string);
@@ -333,7 +349,10 @@ class MapsetKmlFormat {
         if (feature.get('textArray')) {
           try {
             const textArray = JSON.parse(
-              replace(feature.get('textArray') as string, /\r?\n/g, '\\n'),
+              ((feature.get('textArray') || '') as string).replace(
+                /\r?\n/g,
+                '\\n',
+              ),
             ) as string[];
             text.setText(textArray);
           } catch (err) {
@@ -410,7 +429,7 @@ class MapsetKmlFormat {
       fill = null;
       stroke = null;
 
-      styles = (feat, resolution) => {
+      styles = ((feat, resolution) => {
         /* Options to be used for picture scaling with map, should have at least
          * a resolution attribute (this is the map resolution at the zoom level when
          * the picture is created), can take an optional constant for further scale
@@ -446,7 +465,7 @@ class MapsetKmlFormat {
           text: text ?? undefined,
           zIndex: style.getZIndex(),
         });
-      };
+      }) as StyleFunction;
     }
 
     // Remove image and text styles for polygons and lines
@@ -477,12 +496,12 @@ class MapsetKmlFormat {
 
         /* We set the fill pattern for polygons */
         if (!style?.getFill()) {
-          (styles[0] as Style).setFill(new Fill());
+          styles[0].setFill(new Fill());
         }
         const patternOrColor = fillPatternOptions?.empty
           ? [0, 0, 0, 0]
           : getPolygonPattern(fillPatternOptions.id, fillPatternOptions.color);
-        (styles[0] as Style)?.getFill()?.setColor(patternOrColor as ColorLike);
+        styles[0]?.getFill()?.setColor(patternOrColor as ColorLike);
       }
 
       // Add line's icons styles
@@ -507,7 +526,42 @@ class MapsetKmlFormat {
         );
       }
     }
-    feature.setStyle(styles as StyleLike);
+
+    // Apply minZoom and maxZoom properties if they are defined on the feature
+    // and if the getResolutionForZoom function is provided in options
+    let styleFunction: StyleFunction | undefined = undefined;
+    if (
+      applyMinMaxZoom &&
+      getResolutionForZoom &&
+      (!Number.isNaN(feature.get('minZoom') as number) ||
+        !Number.isNaN(feature.get('maxZoom') as number))
+    ) {
+      styleFunction = (feat: FeatureLike, resolution: number) => {
+        const minRes = getResolutionForZoom(
+          (feature.get('minZoom') as number) || -Infinity,
+        );
+
+        const maxRes = getResolutionForZoom(
+          (feature.get('maxZoom') as number) || Infinity,
+        );
+
+        // We test if the resolution exists because you could call the styleFuntion
+        // with an  undefined resolution like in mapset to get the actula styles
+        // without applying the min max zoom filter.
+        if (
+          !Number.isNaN(resolution) &&
+          (resolution >= minRes || maxRes >= resolution)
+        ) {
+          return;
+        }
+        if (typeof styles === 'function') {
+          return styles(feat, resolution);
+        }
+        return styles;
+      };
+    }
+
+    feature.setStyle(styleFunction ?? styles);
   }
 
   /**
