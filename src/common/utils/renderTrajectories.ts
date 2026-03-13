@@ -104,6 +104,9 @@ const renderTrajectories = (
   let selectedVehicleImg;
   let selectedVehiclePx;
   const renderedTrajectories = [];
+  const cachePixel: Record<string, Pixel> = {};
+  const cacheNbTrainAtPixel: Record<string, number> = {};
+  const cacheDistanceOffset: Record<string, number> = {};
 
   for (let i = trajectories.length - 1; i >= 0; i -= 1) {
     const trajectory = trajectories[i];
@@ -156,6 +159,34 @@ const renderTrajectories = (
       continue;
     }
 
+    if (resolution < 1) {
+      const roundedPX = px.map((p) => {
+        return Math.round(p / 5) * 5;
+      });
+      const key = `${roundedPX.toString()}`;
+      if (!cachePixel[key]) {
+        cachePixel[key] = px;
+        cacheNbTrainAtPixel[key] = 1;
+        cacheDistanceOffset[key] = 40 * resolution;
+      } else {
+        // console.log(
+        //   'Collision detected for train id',
+        //   id,
+        //   'at pixel',
+        //   roundedPX,
+        // );
+        // if (!hoverVehicleId) {
+        px[0] += 40 * cacheNbTrainAtPixel[key];
+        // // }
+        trajectories[i].properties.coordinate = [
+          coord[0] + cacheDistanceOffset[key],
+          coord[1],
+        ];
+        cacheNbTrainAtPixel[key]++;
+        cacheDistanceOffset[key] += 40 * resolution;
+      }
+    }
+
     if (hoverVehicleId !== id && selectedVehicleId !== id) {
       // To optimize the performance we use integer as pixel coordinate
       // to avoid an additional work by the browser on zoom level < 12.
@@ -164,6 +195,7 @@ const renderTrajectories = (
         [px[0] - vehicleImg.width / 2, px[1] - vehicleImg.height / 2],
         viewState,
       );
+
       context?.drawImage(vehicleImg, x, y);
     }
 
@@ -171,6 +203,7 @@ const renderTrajectories = (
       // Store the canvas to draw it at the end
       hoverVehicleImg = vehicleImg;
       hoverVehiclePx = px;
+      // console.log(resolution);
     }
 
     if (selectedVehicleId && selectedVehicleId === id) {

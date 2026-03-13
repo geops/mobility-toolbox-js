@@ -42,6 +42,7 @@ const realtimeLayer = new RealtimeLayer({
   url: 'wss://api.geops.io/tracker-ws/v1/', // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
   styleOptions: {
+    showHeading: true,
     // useHeadingStyle: true,
     // useDelayStyle: true,
   },
@@ -91,7 +92,9 @@ map.on('pointermove', (evt) => {
   // realtimeLayer.hoverVehicleId = feature?.get('train_id');
 
   realtimeLayer.highlight(feature);
-  console.log(feature?.getProperties());
+  if (feature) {
+    console.log(feature?.getProperties());
+  }
   map.getTargetElement().style.cursor = feature ? 'pointer' : '';
 });
 
