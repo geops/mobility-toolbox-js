@@ -80,6 +80,7 @@ export interface paths {
      *                 srid: $bbox_srid,
      *                 graph: $bbox_graph
      *             },
+     *             isActive: true,
      *         }
      *         order: {
      *             startDate: ASC
@@ -157,6 +158,12 @@ export interface paths {
      *         textualContentMedium @include(if: $contentMedium) {
      *             ...textualContentsFragment
      *         }
+     *         images {
+     *             ...indexedImageFragment
+     *         }
+     *         infoLinks {
+     *             ...infoLinkFragment
+     *         }
      *     }
      * }
      *
@@ -198,12 +205,6 @@ export interface paths {
      *     }
      *     en @include(if: $en) {
      *         ...textualContentFragment
-     *     }
-     *     images {
-     *         ...indexedImageFragment
-     *     }
-     *     infoLinks {
-     *         ...infoLinkFragment
      *     }
      * }
      *
@@ -270,6 +271,7 @@ export interface paths {
      *                 srid: $bbox_srid,
      *                 graph: $bbox_graph
      *             },
+     *             isActive: true,
      *         }
      *         order: {
      *             startDate: ASC
@@ -347,6 +349,12 @@ export interface paths {
      *         textualContentMedium @include(if: $contentMedium) {
      *             ...textualContentsFragment
      *         }
+     *         images {
+     *             ...indexedImageFragment
+     *         }
+     *         infoLinks {
+     *             ...infoLinkFragment
+     *         }
      *     }
      * }
      *
@@ -388,12 +396,6 @@ export interface paths {
      *     }
      *     en @include(if: $en) {
      *         ...textualContentFragment
-     *     }
-     *     images {
-     *         ...indexedImageFragment
-     *     }
-     *     infoLinks {
-     *         ...infoLinkFragment
      *     }
      * }
      *
@@ -769,6 +771,7 @@ export interface operations {
    *                 srid: $bbox_srid,
    *                 graph: $bbox_graph
    *             },
+   *             isActive: true,
    *         }
    *         order: {
    *             startDate: ASC
@@ -846,6 +849,12 @@ export interface operations {
    *         textualContentMedium @include(if: $contentMedium) {
    *             ...textualContentsFragment
    *         }
+   *         images {
+   *             ...indexedImageFragment
+   *         }
+   *         infoLinks {
+   *             ...infoLinkFragment
+   *         }
    *     }
    * }
    *
@@ -887,12 +896,6 @@ export interface operations {
    *     }
    *     en @include(if: $en) {
    *         ...textualContentFragment
-   *     }
-   *     images {
-   *         ...indexedImageFragment
-   *     }
-   *     infoLinks {
-   *         ...infoLinkFragment
    *     }
    * }
    *
@@ -997,6 +1000,7 @@ export interface operations {
    *                 srid: $bbox_srid,
    *                 graph: $bbox_graph
    *             },
+   *             isActive: true,
    *         }
    *         order: {
    *             startDate: ASC
@@ -1074,6 +1078,12 @@ export interface operations {
    *         textualContentMedium @include(if: $contentMedium) {
    *             ...textualContentsFragment
    *         }
+   *         images {
+   *             ...indexedImageFragment
+   *         }
+   *         infoLinks {
+   *             ...infoLinkFragment
+   *         }
    *     }
    * }
    *
@@ -1115,12 +1125,6 @@ export interface operations {
    *     }
    *     en @include(if: $en) {
    *         ...textualContentFragment
-   *     }
-   *     images {
-   *         ...indexedImageFragment
-   *     }
-   *     infoLinks {
-   *         ...infoLinkFragment
    *     }
    * }
    *

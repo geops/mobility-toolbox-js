@@ -250,6 +250,8 @@ export interface components {
       event_location_name?: Partial<string> & Partial<unknown>;
       /** Event Timestamp */
       event_timestamp?: Partial<string> & Partial<unknown>;
+      /** Transport Code */
+      transport_code?: Partial<string> & Partial<unknown>;
     };
     /** License */
     License: {
