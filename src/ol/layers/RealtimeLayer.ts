@@ -32,7 +32,6 @@ import type Feature from 'ol/Feature';
 import type { ObjectEvent } from 'ol/Object';
 import type { State } from 'ol/View';
 
-import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
 import type { RealtimeStyleOptions } from '../../types';
@@ -76,7 +75,7 @@ export type RealtimeLayerOptions = {
  * @classproperty {boolean} allowRenderWhenAnimating - Allow rendering of the layer when the map is animating.
  * @public
  */
-class RealtimeLayer extends Layer<Source> {
+class RealtimeLayer extends Layer<Source, RealtimeLayerRenderer> {
   allowRenderWhenAnimating?: boolean = false;
   currentZoom?: number;
   engine: RealtimeEngine;
@@ -98,11 +97,11 @@ class RealtimeLayer extends Layer<Source> {
     return this.engine.canvas;
   }
 
-  get filter(): FilterFunction | undefined {
+  get filter(): ((item: RealtimeTrajectory) => boolean) | undefined {
     return this.engine.filter;
   }
 
-  set filter(filter: FilterFunction) {
+  set filter(filter: (item: RealtimeTrajectory) => boolean) {
     this.engine.filter = filter;
   }
 
@@ -112,6 +111,14 @@ class RealtimeLayer extends Layer<Source> {
 
   set hoverVehicleId(id: RealtimeTrainId) {
     this.engine.hoverVehicleId = id;
+  }
+
+  get hoverVehicleIds(): RealtimeTrainId[] | undefined {
+    return this.engine.hoverVehicleIds;
+  }
+
+  set hoverVehicleIds(ids: RealtimeTrainId[]) {
+    this.engine.hoverVehicleIds = ids;
   }
 
   get mode() {
@@ -134,11 +141,13 @@ class RealtimeLayer extends Layer<Source> {
     this.engine.selectedVehicleId = id;
   }
 
-  get sort(): SortFunction | undefined {
+  get sort():
+    | ((a: RealtimeTrajectory, b: RealtimeTrajectory) => number)
+    | undefined {
     return this.engine.sort;
   }
 
-  set sort(sort: SortFunction) {
+  set sort(sort: (a: RealtimeTrajectory, b: RealtimeTrajectory) => number) {
     this.engine.sort = sort;
   }
 
@@ -219,9 +228,9 @@ class RealtimeLayer extends Layer<Source> {
       updateWhileInteracting: true,
     });
 
-    this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
+    this.onZoomEndDebounced = debounce(this.onZoomEnd.bind(this), 100);
 
-    this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
+    this.onMoveEndDebounced = debounce(this.onMoveEnd.bind(this), 100);
   }
 
   /**
@@ -267,23 +276,29 @@ class RealtimeLayer extends Layer<Source> {
             this.onMoveEndDebounced(evt);
           },
         ),
-        this.on('change:visible', (evt: ObjectEvent) => {
-          if (evt.target.getVisible()) {
-            this.engine.start();
-          } else {
-            this.engine.stop();
-          }
-        }),
-        this.on('propertychange', (evt: ObjectEvent) => {
-          // We apply every property change event related to visiblity to the vectorlayer
-          if (
-            /(opacity|visible|zIndex|minResolution|maxResolution|minZoom|maxZoom)/.test(
-              evt.key,
-            )
-          ) {
-            this.vectorLayer.set(evt.key, evt.target.get(evt.key));
-          }
-        }),
+        this.on(
+          'change:visible',
+          (evt: { target: RealtimeLayer } & Omit<ObjectEvent, 'target'>) => {
+            if (evt.target.getVisible()) {
+              this.engine.start();
+            } else {
+              this.engine.stop();
+            }
+          },
+        ),
+        this.on(
+          'propertychange',
+          (evt: { target: RealtimeLayer } & Omit<ObjectEvent, 'target'>) => {
+            // We apply every property change event related to visiblity to the vectorlayer
+            if (
+              /(opacity|visible|zIndex|minResolution|maxResolution|minZoom|maxZoom)/.test(
+                evt.key,
+              )
+            ) {
+              this.vectorLayer.set(evt.key, evt.target.get(evt.key));
+            }
+          },
+        ),
       );
     }
   }
@@ -301,7 +316,10 @@ class RealtimeLayer extends Layer<Source> {
    * @public
    */
   clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
-    return new RealtimeLayer({ ...this.get('options'), ...newOptions });
+    return new RealtimeLayer({
+      ...(this.get('options') as RealtimeLayerOptions),
+      ...newOptions,
+    });
   }
 
   createRenderer() {
@@ -370,7 +388,9 @@ class RealtimeLayer extends Layer<Source> {
     };
   }
 
-  getVehicles(filterFunc: FilterFunction) {
+  getVehicles(
+    filterFunc: (item: RealtimeTrajectory) => boolean,
+  ): RealtimeTrajectory[] {
     return this.engine.getVehicles(filterFunc);
   }
 
@@ -404,10 +424,13 @@ class RealtimeLayer extends Layer<Source> {
   }
 
   highlight(features: Feature | Feature[]) {
-    const feat = Array.isArray(features) ? features[0] : features;
-    const id: null | string | undefined = feat?.get('train_id') as string;
-    if (this.hoverVehicleId !== id) {
-      this.hoverVehicleId = id;
+    const feats = Array.isArray(features) ? features : [features];
+    const ids = feats.map((f) => {
+      return f.get('train_id') as string;
+    });
+    if (this.hoverVehicleIds?.join() !== ids.join()) {
+      this.hoverVehicleId = ids[0];
+      this.hoverVehicleIds = ids;
       this.engine.renderTrajectories(true);
     }
   }
@@ -456,7 +479,7 @@ class RealtimeLayer extends Layer<Source> {
     viewState: ViewState,
   ) {
     this.renderedViewState = { ...viewState } as State;
-    // @ts-expect-error  - we are in the same class
+    // @ts-expect-error  - we are in the same classs
     const { container } = this.getRenderer()!;
     if (container) {
       container.style.transform = '';
@@ -494,6 +517,7 @@ class RealtimeLayer extends Layer<Source> {
   select(features: Feature | Feature[]) {
     const feat = Array.isArray(features) ? features[0] : features;
     const id: null | string | undefined = feat?.get('train_id') as string;
+    console.log('selected id', id);
     if (this.selectedVehicleId !== id) {
       if (this.selectedVehicleId) {
         this.api.unsubscribeFullTrajectory(this.selectedVehicleId);

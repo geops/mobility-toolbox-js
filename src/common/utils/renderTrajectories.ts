@@ -10,6 +10,7 @@ import type {
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
+  RealtimeTrainId,
   RealtimeTrajectory,
   ViewState,
 } from '../../types';
@@ -62,6 +63,7 @@ const renderTrajectories = (
         : pixel;
     },
     hoverVehicleId,
+    hoverVehicleIds,
     noInterpolate = false,
     selectedVehicleId,
   } = options;
@@ -104,15 +106,16 @@ const renderTrajectories = (
   let selectedVehicleImg;
   let selectedVehiclePx;
   const renderedTrajectories = [];
-  const cachePixel: Record<string, Pixel> = {};
-  const cacheNbTrainAtPixel: Record<string, number> = {};
-  const cacheDistanceOffset: Record<string, number> = {};
+  const cacheStyle: Record<RealtimeTrainId, AnyCanvas> = {};
+  // const cachePixel: Record<string, Pixel> = {};
+  // const cacheNbTrainAtPixel: Record<string, number> = {};
+  // const cacheDistanceOffset: Record<string, number> = {};
 
   for (let i = trajectories.length - 1; i >= 0; i -= 1) {
     const trajectory = trajectories[i];
+    delete cacheStyle[trajectory.properties.train_id];
 
     // Filter out trajectories
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     if (filter && !filter(trajectory)) {
       continue;
     }
@@ -158,36 +161,40 @@ const renderTrajectories = (
     if (!vehicleImg) {
       continue;
     }
+    cacheStyle[trajectory.properties.train_id] = vehicleImg;
 
-    if (resolution < 1) {
-      const roundedPX = px.map((p) => {
-        return Math.round(p / 5) * 5;
-      });
-      const key = `${roundedPX.toString()}`;
-      if (!cachePixel[key]) {
-        cachePixel[key] = px;
-        cacheNbTrainAtPixel[key] = 1;
-        cacheDistanceOffset[key] = 40 * resolution;
-      } else {
-        // console.log(
-        //   'Collision detected for train id',
-        //   id,
-        //   'at pixel',
-        //   roundedPX,
-        // );
-        // if (!hoverVehicleId) {
-        px[0] += 40 * cacheNbTrainAtPixel[key];
-        // // }
-        trajectories[i].properties.coordinate = [
-          coord[0] + cacheDistanceOffset[key],
-          coord[1],
-        ];
-        cacheNbTrainAtPixel[key]++;
-        cacheDistanceOffset[key] += 40 * resolution;
-      }
-    }
+    // if (resolution < 1) {
+    //   const roundedPX = px.map((p) => {
+    //     return Math.round(p / 40) * 40;
+    //   });
+    //   const key = `${roundedPX.toString()}`;
+    //   if (!cachePixel[key]) {
+    //     cachePixel[key] = px;
+    //     cacheNbTrainAtPixel[key] = 1;
+    //     cacheDistanceOffset[key] = 40 * resolution;
+    //   } else {
+    //     // console.log(
+    //     //   'Collision detected for train id',
+    //     //   id,
+    //     //   'at pixel',
+    //     //   roundedPX,
+    //     // );
+    //     // if (!hoverVehicleId) {
+    //     px[0] += 40 * cacheNbTrainAtPixel[key];
+    //     // // }
+    //     trajectories[i].properties.coordinate = [
+    //       coord[0] + cacheDistanceOffset[key],
+    //       coord[1],
+    //     ];
+    //     cacheNbTrainAtPixel[key]++;
+    //     cacheDistanceOffset[key] += 40 * resolution;
+    //   }
+    // }
 
-    if (hoverVehicleId !== id && selectedVehicleId !== id) {
+    if (
+      (hoverVehicleIds?.length ?? 0) <= 1 ||
+      (!hoverVehicleIds?.includes(id) && selectedVehicleId !== id)
+    ) {
       // To optimize the performance we use integer as pixel coordinate
       // to avoid an additional work by the browser on zoom level < 12.
       // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas?retiredLocale=de#avoid_floating-point_coordinates_and_use_integers_instead
@@ -201,8 +208,8 @@ const renderTrajectories = (
 
     if (hoverVehicleId && hoverVehicleId === id) {
       // Store the canvas to draw it at the end
-      hoverVehicleImg = vehicleImg;
-      hoverVehiclePx = px;
+      // hoverVehicleImg = vehicleImg;
+      // hoverVehiclePx = px;
       // console.log(resolution);
     }
 
@@ -224,15 +231,22 @@ const renderTrajectories = (
   }
 
   if (hoverVehicleImg && hoverVehiclePx) {
-    context?.drawImage(
-      hoverVehicleImg,
-      Math.floor(hoverVehiclePx[0] - hoverVehicleImg.width / 2),
-      Math.floor(hoverVehiclePx[1] - hoverVehicleImg.height / 2),
+    console.log(
+      'hoverVehicleId',
+      hoverVehicleId,
+      'hoverVehicleIds',
+      hoverVehicleIds,
     );
+    // context?.drawImage(
+    //   hoverVehicleImg,
+    //   Math.floor(hoverVehiclePx[0] - hoverVehicleImg.width / 2),
+    //   Math.floor(hoverVehiclePx[1] - hoverVehicleImg.height / 2),
+    // );
   }
   return {
     // isReady: true,
     renderedTrajectories,
+    styleCacheByTrajectoryId: cacheStyle,
   };
 };
 

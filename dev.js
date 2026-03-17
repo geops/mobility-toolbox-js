@@ -15,6 +15,10 @@ import {
 } from './build/ol';
 import 'ol/ol.css';
 import { toLonLat, transformExtent } from 'ol/proj';
+import { Icon, Style, Circle, Fill, Stroke } from 'ol/style';
+import { Point } from 'ol/geom';
+import { radiansToDegrees } from '@turf/helpers';
+import { NEXT_CACHE_TAG_MAX_LENGTH } from 'next/dist/lib/constants';
 
 window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
@@ -48,10 +52,104 @@ const realtimeLayer = new RealtimeLayer({
   },
   // style: realtimeByMotStyle,
   // tenant: 'sbm',
-  // tenant: 'trenord',
+  tenant: 'trenord',
   // bboxParameters: {
   //   line_tags: 'RVF',
   // },
+});
+
+const getPointOnLine = (angleDeg, distance, originX = 0, originY = 0) => {
+  // 1. Convert angle from degrees to radians
+  const angleRad = (angleDeg + 90) * (Math.PI / 180);
+
+  // 2. Calculate the offset from the origin using Cosine (X) and Sine (Y)
+  const deltaX = Math.cos(angleRad) * distance;
+  const deltaY = Math.sin(angleRad) * distance;
+
+  // 3. Add the offset to the origin coordinates
+  const x = originX + deltaX;
+  const y = originY - deltaY;
+
+  return [
+    Math.floor(x), // Rounded for better readability
+    Math.floor(y),
+  ];
+};
+
+const cacheFirtsAnchor = [];
+let cacheFirstRotation = 0;
+const realtimeLayerHover = new VectorLayer({
+  source: new VectorSource(),
+  style: (feature) => {
+    // const canvas =
+    //   realtimeLayer.engine.renderState?.styleCacheByTrajectoryId?.[
+    //     feature.get('train_id')
+    //   ];
+    const canvas = realtimeLayer.style(
+      {
+        type: 'Feature',
+        properties: feature.getProperties(),
+        geometry: {
+          type: 'LineString',
+          coordinates: feature.getGeometry()?.getCoordinates() || [],
+        },
+      },
+      realtimeLayer.renderedViewState,
+      {
+        ...realtimeLayer.styleOptions,
+        showDelayText: false,
+        showDelayBg: true,
+        hoverVehicleId: feature.get('train_id'),
+        hoverVehicleIds: [feature.get('train_id')],
+      },
+    );
+    const index = realtimeLayer.hoverVehicleIds?.indexOf(
+      feature.get('train_id'),
+    );
+    if (index === 0) {
+      cacheFirstRotation = feature.get('rotation') || 0;
+    }
+
+    if (canvas) {
+      return new Style({
+        image: new Icon({
+          img: canvas,
+          imgSize: [canvas.width, canvas.height],
+          scale: 1,
+          anchor: getPointOnLine(
+            radiansToDegrees(cacheFirstRotation),
+            (index * canvas.height) / 2,
+            canvas.width / 2,
+            canvas.height / 2,
+          ),
+          anchorXUnits: 'pixels',
+          anchorYUnits: 'pixels',
+        }),
+        geometry: (feature) => {
+          const coords = feature.get('coordinate');
+          if (coords) {
+            return new Point(coords);
+          }
+          return feature.getGeometry();
+        },
+      });
+    }
+    return new Style({
+      image: new Circle({
+        radius: 50,
+        fill: new Fill({ color: 'rgba(255, 0, 0, 0.5)' }),
+        stroke: new Stroke({ color: 'red', width: 2 }),
+      }),
+      stroke: new Stroke({ color: 'blue', width: 20 }),
+      geometry: (feature) => {
+        const coords = feature.get('coordinate');
+        if (coords) {
+          return new Point(coords);
+        }
+        return feature.getGeometry();
+      },
+    });
+  },
 });
 
 const mocoLayer = new MocoLayer({
@@ -65,9 +163,10 @@ const mocoLayer = new MocoLayer({
 const map = new Map({
   layers: [
     baseLayer,
-    // realtimeLayer,
+    realtimeLayer,
+    realtimeLayerHover,
     // mocoLayer,
-    mapsetLayer,
+    // mapsetLayer,
   ],
   target: 'map',
   view: new View({
@@ -84,18 +183,32 @@ map.on('pointermove', (evt) => {
     return;
   }
   const pixel = map.getEventPixel(evt.originalEvent);
-  const [feature] = map.getFeaturesAtPixel(pixel, {
-    hitTolerance: 10,
+  const features = map.getFeaturesAtPixel(pixel, {
+    hitTolerance: 15,
     layerFilter: (l) => l === realtimeLayer,
   });
+  const featuresHovered = map
+    .getFeaturesAtPixel(pixel, {
+      hitTolerance: 15,
+      layerFilter: (l) => l === realtimeLayerHover,
+    })
+    .filter((f) => realtimeLayer.selectedVehicleId !== f.get('train_id'));
+  console.log(features.map((f) => f.get('train_id')));
 
-  // realtimeLayer.hoverVehicleId = feature?.get('train_id');
+  const featuresIds = features.map((f) => f.get('train_id'));
+  const featuresHoveredIds = featuresHovered.map((f) => f.get('train_id'));
+  const noFeaturesHovered =
+    !featuresHovered.length && !featuresHoveredIds.length;
 
-  realtimeLayer.highlight(feature);
-  if (feature) {
-    console.log(feature?.getProperties());
+  if (features.length > featuresHovered.length || noFeaturesHovered) {
+    realtimeLayer.highlight(features);
+    realtimeLayerHover.getSource().clear();
+    realtimeLayerHover.getSource().addFeatures(features);
+    if (features.length) {
+      console.log(features.map((f) => f.getProperties()));
+    }
+    map.getTargetElement().style.cursor = features.length ? 'pointer' : '';
   }
-  map.getTargetElement().style.cursor = feature ? 'pointer' : '';
 });
 
 map.on('singleclick', (evt) => {
@@ -107,8 +220,13 @@ map.on('singleclick', (evt) => {
     hitTolerance: 10,
     layerFilter: (l) => l === realtimeLayer,
   });
+  const [featureHover] = map.getFeaturesAtPixel(pixel, {
+    hitTolerance: 30,
+    layerFilter: (l) => l === realtimeLayerHover,
+  });
+  realtimeLayerHover.getSource().clear();
 
-  realtimeLayer.select([feature]);
+  realtimeLayer.select([featureHover || feature]);
 });
 map.on('moveend', () => {
   const zoom = map.getView().getZoom();

@@ -50,7 +50,8 @@ const realtimeStyle: RealtimeStyleFunction = (
     getTextColor,
     getTextFont,
     getTextSize,
-    hoverVehicleId,
+    // hoverVehicleId,
+    hoverVehicleIds,
     selectedVehicleId,
     showDelayBg,
     showDelayText,
@@ -72,7 +73,7 @@ const realtimeStyle: RealtimeStyleFunction = (
   let color = getColor(trajectory, viewState);
   let textColor = getTextColor(trajectory, viewState);
   const cancelled = state === 'JOURNEY_CANCELLED';
-  const hover = !!(hoverVehicleId && hoverVehicleId === id);
+  const hover = hoverVehicleIds?.includes(id);
   const selected = !!(selectedVehicleId && selectedVehicleId === id);
 
   // Get the text color of the vehicle
@@ -91,10 +92,25 @@ const realtimeStyle: RealtimeStyleFunction = (
       ? radius + 5 * pixelRatio
       : 14 * pixelRatio;
   }
+
+  if (radius === 0) {
+    return null;
+  }
+
+  // Calcul if the text should be diplayed or not
   const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
+  const hasDelayText =
+    showDelayText &&
+    isDisplayStrokeAndDelay &&
+    ((hover ?? (delay || 0) >= delayDisplay) || cancelled);
+
+  const hasDelayBg = showDelayBg && isDisplayStrokeAndDelay && delay !== null;
+
+  const hasHeading = showHeading && isDisplayText && rotation;
+
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${hover || selected}${showHeading ? rotation : ''}`;
+  let key = `${radius}${hover ?? selected}${hasHeading ? rotation : ''}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}${delay}${cancelled}`;
@@ -106,34 +122,23 @@ const realtimeStyle: RealtimeStyleFunction = (
     }
   }
 
+  key += `${showDelayText}${showDelayBg}`;
+
   if (isDisplayText) {
     key += `${name}${textColor}`;
   }
 
   if (!cache[key]) {
-    if (radius === 0) {
-      return null;
-    }
-
     // Get the color of the vehicle
     const circleFillColor = color;
 
     const hasStroke = isDisplayStrokeAndDelay || hover || selected;
 
     const hasDash =
-      !!isDisplayStrokeAndDelay &&
-      !!useDelayStyle &&
+      useDelayStyle &&
+      isDisplayStrokeAndDelay &&
       delay === null &&
       operatorProvidesRealtime === 'yes';
-
-    const hasDelayText =
-      showDelayText &&
-      isDisplayStrokeAndDelay &&
-      (hover || (delay || 0) >= delayDisplay || cancelled);
-
-    const hasDelayBg = showDelayBg && isDisplayStrokeAndDelay && delay !== null;
-
-    const hasHeading = showHeading && isDisplayText && rotation;
 
     // Show delay if feature is hovered or if delay is above 5mins
     let fontSize = 0;
