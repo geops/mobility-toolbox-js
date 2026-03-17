@@ -191,10 +191,7 @@ const renderTrajectories = (
     //   }
     // }
 
-    if (
-      (hoverVehicleIds?.length ?? 0) <= 1 ||
-      (!hoverVehicleIds?.includes(id) && selectedVehicleId !== id)
-    ) {
+    if (hoverVehicleId !== id && selectedVehicleId !== id) {
       // To optimize the performance we use integer as pixel coordinate
       // to avoid an additional work by the browser on zoom level < 12.
       // See https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Optimizing_canvas?retiredLocale=de#avoid_floating-point_coordinates_and_use_integers_instead
@@ -208,9 +205,8 @@ const renderTrajectories = (
 
     if (hoverVehicleId && hoverVehicleId === id) {
       // Store the canvas to draw it at the end
-      // hoverVehicleImg = vehicleImg;
-      // hoverVehiclePx = px;
-      // console.log(resolution);
+      hoverVehicleImg = vehicleImg;
+      hoverVehiclePx = px;
     }
 
     if (selectedVehicleId && selectedVehicleId === id) {
@@ -231,17 +227,11 @@ const renderTrajectories = (
   }
 
   if (hoverVehicleImg && hoverVehiclePx) {
-    console.log(
-      'hoverVehicleId',
-      hoverVehicleId,
-      'hoverVehicleIds',
-      hoverVehicleIds,
+    context?.drawImage(
+      hoverVehicleImg,
+      Math.floor(hoverVehiclePx[0] - hoverVehicleImg.width / 2),
+      Math.floor(hoverVehiclePx[1] - hoverVehicleImg.height / 2),
     );
-    // context?.drawImage(
-    //   hoverVehicleImg,
-    //   Math.floor(hoverVehiclePx[0] - hoverVehicleImg.width / 2),
-    //   Math.floor(hoverVehiclePx[1] - hoverVehicleImg.height / 2),
-    // );
   }
   return {
     // isReady: true,

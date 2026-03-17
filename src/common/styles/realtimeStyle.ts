@@ -50,8 +50,8 @@ const realtimeStyle: RealtimeStyleFunction = (
     getTextColor,
     getTextFont,
     getTextSize,
-    // hoverVehicleId,
-    hoverVehicleIds,
+    hoverVehicleId,
+    // hoverVehicleIds,
     selectedVehicleId,
     showDelayBg,
     showDelayText,
@@ -67,20 +67,8 @@ const realtimeStyle: RealtimeStyleFunction = (
     state,
     train_id: id,
   } = trajectory.properties;
-
-  const name = getText?.(trajectory, viewState) || '';
-
-  let color = getColor(trajectory, viewState);
-  let textColor = getTextColor(trajectory, viewState);
-  const cancelled = state === 'JOURNEY_CANCELLED';
-  const hover = hoverVehicleIds?.includes(id);
+  const hover = !!(hoverVehicleId && hoverVehicleId === id);
   const selected = !!(selectedVehicleId && selectedVehicleId === id);
-
-  // Get the text color of the vehicle
-  if (useDelayStyle) {
-    color = getDelayColor(trajectory, viewState, delay, cancelled);
-    textColor = getDelayTextColor(trajectory, viewState, delay, cancelled);
-  }
 
   // Calcul the radius of the circle
   let radius = getRadius(trajectory, viewState) * pixelRatio;
@@ -95,6 +83,17 @@ const realtimeStyle: RealtimeStyleFunction = (
 
   if (radius === 0) {
     return null;
+  }
+
+  const name = getText?.(trajectory, viewState) || '';
+  let color = getColor(trajectory, viewState);
+  let textColor = getTextColor(trajectory, viewState);
+  const cancelled = state === 'JOURNEY_CANCELLED';
+
+  // Get the text color of the vehicle
+  if (useDelayStyle) {
+    color = getDelayColor(trajectory, viewState, delay, cancelled);
+    textColor = getDelayTextColor(trajectory, viewState, delay, cancelled);
   }
 
   // Calcul if the text should be diplayed or not

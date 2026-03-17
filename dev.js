@@ -78,8 +78,10 @@ const getPointOnLine = (angleDeg, distance, originX = 0, originY = 0) => {
 
 const cacheFirtsAnchor = [];
 let cacheFirstRotation = 0;
+let featuresHighlightedIds = [];
 const realtimeLayerHover = new VectorLayer({
   source: new VectorSource(),
+  minZoom: 14,
   style: (feature) => {
     // const canvas =
     //   realtimeLayer.engine.renderState?.styleCacheByTrajectoryId?.[
@@ -100,12 +102,10 @@ const realtimeLayerHover = new VectorLayer({
         showDelayText: false,
         showDelayBg: true,
         hoverVehicleId: feature.get('train_id'),
-        hoverVehicleIds: [feature.get('train_id')],
       },
     );
-    const index = realtimeLayer.hoverVehicleIds?.indexOf(
-      feature.get('train_id'),
-    );
+    const index = featuresHighlightedIds?.indexOf(feature.get('train_id'));
+    console.log('index', index, feature.get('train_id'));
     if (index === 0) {
       cacheFirstRotation = feature.get('rotation') || 0;
     }
@@ -187,12 +187,10 @@ map.on('pointermove', (evt) => {
     hitTolerance: 15,
     layerFilter: (l) => l === realtimeLayer,
   });
-  const featuresHovered = map
-    .getFeaturesAtPixel(pixel, {
-      hitTolerance: 15,
-      layerFilter: (l) => l === realtimeLayerHover,
-    })
-    .filter((f) => realtimeLayer.selectedVehicleId !== f.get('train_id'));
+
+  const featuresHovered = map.getFeaturesAtPixel(pixel, {
+    layerFilter: (l) => l === realtimeLayerHover,
+  });
   console.log(features.map((f) => f.get('train_id')));
 
   const featuresIds = features.map((f) => f.get('train_id'));
@@ -200,15 +198,41 @@ map.on('pointermove', (evt) => {
   const noFeaturesHovered =
     !featuresHovered.length && !featuresHoveredIds.length;
 
-  if (features.length > featuresHovered.length || noFeaturesHovered) {
-    realtimeLayer.highlight(features);
-    realtimeLayerHover.getSource().clear();
-    realtimeLayerHover.getSource().addFeatures(features);
-    if (features.length) {
-      console.log(features.map((f) => f.getProperties()));
-    }
-    map.getTargetElement().style.cursor = features.length ? 'pointer' : '';
+  if ((map.getView().getZoom() || 0) >= realtimeLayerHover.getMinZoom()) {
+    realtimeLayer.filter = (feature) => {
+      return !featuresHighlightedIds?.includes(feature.properties.train_id);
+    };
+  } else {
+    realtimeLayer.filter = null;
   }
+
+  console.log(
+    'BEFORE features',
+    featuresHovered.length,
+    features.length,
+    featuresHighlightedIds.length,
+  );
+
+  if (!featuresHovered.length && !features.length) {
+    console.log('CLEAR features', featuresHovered.length, features.length);
+    realtimeLayerHover.getSource().clear(true);
+    featuresHighlightedIds = [];
+  } else if (features.length > 1 && !featuresHighlightedIds.length) {
+    console.log(
+      'ADD features',
+      featuresHoveredIds,
+      featuresHovered.length,
+      features.length,
+      featuresIds,
+    );
+    realtimeLayerHover.getSource().addFeatures(features);
+    featuresHighlightedIds = featuresIds;
+  } else if (!featuresHovered.length && features.length === 1) {
+    realtimeLayer.highlight(features[0]);
+  }
+
+  map.getTargetElement().style.cursor =
+    features.length || featuresHovered.length ? 'pointer' : '';
 });
 
 map.on('singleclick', (evt) => {
@@ -217,17 +241,20 @@ map.on('singleclick', (evt) => {
   }
   const pixel = map.getEventPixel(evt.originalEvent);
   const [feature] = map.getFeaturesAtPixel(pixel, {
-    hitTolerance: 10,
+    hitTolerance: 15,
     layerFilter: (l) => l === realtimeLayer,
   });
   const [featureHover] = map.getFeaturesAtPixel(pixel, {
-    hitTolerance: 30,
+    hitTolerance: 15,
     layerFilter: (l) => l === realtimeLayerHover,
   });
-  realtimeLayerHover.getSource().clear();
 
-  realtimeLayer.select([featureHover || feature]);
+  realtimeLayer.select(featureHover || feature);
+  realtimeLayerHover.getSource().clear();
+  realtimeLayerHover.changed();
+  realtimeLayer.filter = null;
 });
+
 map.on('moveend', () => {
   const zoom = map.getView().getZoom();
   console.log('Current zoom level:', zoom);
