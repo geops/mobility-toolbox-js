@@ -42,6 +42,7 @@
     "@types/uuid": "11.0.0",
     "@typescript-eslint/eslint-plugin": "8.53.1",
     "@typescript-eslint/parser": "8.53.1",
+    "@viz-kit/esbuild-analyzer": "^1.0.0",
     "cypress": "15.8.1",
     "esbuild": "0.27.2",
     "esdoc": "1.1.0",

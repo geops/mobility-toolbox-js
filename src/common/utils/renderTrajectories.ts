@@ -10,6 +10,7 @@ import type {
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
+  RealtimeTrainId,
   RealtimeTrajectory,
   ViewState,
 } from '../../types';
@@ -62,6 +63,7 @@ const renderTrajectories = (
         : pixel;
     },
     hoverVehicleId,
+    hoverVehicleIds,
     noInterpolate = false,
     selectedVehicleId,
   } = options;
@@ -104,12 +106,16 @@ const renderTrajectories = (
   let selectedVehicleImg;
   let selectedVehiclePx;
   const renderedTrajectories = [];
+  const cacheStyle: Record<RealtimeTrainId, AnyCanvas> = {};
+  // const cachePixel: Record<string, Pixel> = {};
+  // const cacheNbTrainAtPixel: Record<string, number> = {};
+  // const cacheDistanceOffset: Record<string, number> = {};
 
   for (let i = trajectories.length - 1; i >= 0; i -= 1) {
     const trajectory = trajectories[i];
+    delete cacheStyle[trajectory.properties.train_id];
 
     // Filter out trajectories
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     if (filter && !filter(trajectory)) {
       continue;
     }
@@ -155,6 +161,35 @@ const renderTrajectories = (
     if (!vehicleImg) {
       continue;
     }
+    cacheStyle[trajectory.properties.train_id] = vehicleImg;
+
+    // if (resolution < 1) {
+    //   const roundedPX = px.map((p) => {
+    //     return Math.round(p / 40) * 40;
+    //   });
+    //   const key = `${roundedPX.toString()}`;
+    //   if (!cachePixel[key]) {
+    //     cachePixel[key] = px;
+    //     cacheNbTrainAtPixel[key] = 1;
+    //     cacheDistanceOffset[key] = 40 * resolution;
+    //   } else {
+    //     // console.log(
+    //     //   'Collision detected for train id',
+    //     //   id,
+    //     //   'at pixel',
+    //     //   roundedPX,
+    //     // );
+    //     // if (!hoverVehicleId) {
+    //     px[0] += 40 * cacheNbTrainAtPixel[key];
+    //     // // }
+    //     trajectories[i].properties.coordinate = [
+    //       coord[0] + cacheDistanceOffset[key],
+    //       coord[1],
+    //     ];
+    //     cacheNbTrainAtPixel[key]++;
+    //     cacheDistanceOffset[key] += 40 * resolution;
+    //   }
+    // }
 
     if (hoverVehicleId !== id && selectedVehicleId !== id) {
       // To optimize the performance we use integer as pixel coordinate
@@ -164,6 +199,7 @@ const renderTrajectories = (
         [px[0] - vehicleImg.width / 2, px[1] - vehicleImg.height / 2],
         viewState,
       );
+
       context?.drawImage(vehicleImg, x, y);
     }
 
@@ -200,6 +236,7 @@ const renderTrajectories = (
   return {
     // isReady: true,
     renderedTrajectories,
+    styleCacheByTrajectoryId: cacheStyle,
   };
 };
 

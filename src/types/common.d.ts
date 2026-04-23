@@ -32,7 +32,7 @@ export interface ViewState {
 export interface RealtimeStyleOptions {
   delayDisplay: number;
   delayOutlineColor: string;
-  filter?: FilterFunction;
+  filter?: (item: RealtimeTrajectory) => boolean;
   getArrowSize: (
     trajectory?: RealtimeTrajectory,
     viewState?: ViewState,
@@ -99,6 +99,7 @@ export interface RealtimeStyleOptions {
     font: string,
   ) => number;
   hoverVehicleId?: RealtimeTrainId;
+  hoverVehicleIds?: RealtimeTrainId[];
   noInterpolate?: boolean;
   selectedVehicleId?: RealtimeTrainId;
   showDelayBg: boolean;
@@ -119,6 +120,7 @@ export interface RealtimeRenderState {
   center?: Coordinate;
   renderedTrajectories?: RealtimeTrajectory[];
   rotation?: number;
+  styleCacheByTrajectoryId?: Record<RealtimeTrainId, AnyCanvas>;
   zoom?: number;
 }
 

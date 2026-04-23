@@ -32,7 +32,6 @@ import type {
   RealtimeTrajectory,
   ViewState,
 } from '../../types';
-import type { FilterFunction, SortFunction } from '../typedefs';
 
 export interface RealtimeEngineOptions {
   api?: RealtimeAPI;
@@ -45,7 +44,7 @@ export interface RealtimeEngineOptions {
   buffer?: number[];
   canvas?: HTMLCanvasElement;
   debug?: boolean;
-  filter?: FilterFunction;
+  filter?: (item: RealtimeTrajectory) => boolean;
   generalizationLevelByZoom?: string[];
   getGeneralizationLevelByZoom?: (
     zoom: number,
@@ -61,6 +60,7 @@ export interface RealtimeEngineOptions {
   getViewState?: () => ViewState;
   graphByZoom?: string[];
   hoverVehicleId?: RealtimeTrainId;
+  hoverVehicleIds?: RealtimeTrainId[];
   isUpdateBboxOnMoveEnd?: boolean;
   live?: boolean;
   minZoomInterpolation?: number;
@@ -76,7 +76,7 @@ export interface RealtimeEngineOptions {
   renderTimeIntervalByZoom?: number[];
   selectedVehicleId?: RealtimeTrainId;
   shouldRender?: () => boolean;
-  sort?: SortFunction;
+  sort?: (a: RealtimeTrajectory, b: RealtimeTrajectory) => number;
   speed?: number;
   style?: RealtimeStyleFunction;
   styleOptions?: Partial<RealtimeStyleOptions>;
@@ -181,7 +181,7 @@ class RealtimeEngine {
     noInterpolate?: boolean,
   ) => void;
   debug: boolean;
-  filter?: FilterFunction;
+  filter?: (item: RealtimeTrajectory) => boolean;
   format: GeoJSON;
   generalizationLevel?: string;
   generalizationLevelByZoom: string[];
@@ -191,6 +191,7 @@ class RealtimeEngine {
   getRenderTimeIntervalByZoom: (zoom: number) => number;
   graphByZoom: string[];
   hoverVehicleId?: RealtimeTrainId;
+  hoverVehicleIds?: RealtimeTrainId[];
   isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
   live?: boolean;
@@ -207,7 +208,7 @@ class RealtimeEngine {
   requestId?: number;
   selectedVehicle!: RealtimeTrajectory;
   selectedVehicleId?: RealtimeTrainId;
-  sort?: SortFunction;
+  sort?: (a: RealtimeTrajectory, b: RealtimeTrajectory) => number;
   styleOptions: RealtimeStyleOptions;
   tenant: RealtimeTenant;
   throttleRenderTrajectories: (
@@ -404,12 +405,14 @@ class RealtimeEngine {
 
     // Define throttling and debounce render function
     this.throttleRenderTrajectories = throttle(
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.renderTrajectoriesInternal,
       50,
       { leading: false, trailing: true },
     );
 
     this.debounceRenderTrajectories = debounce(
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.renderTrajectoriesInternal,
       50,
       { leading: true, maxWait: 5000, trailing: true },
@@ -433,9 +436,7 @@ class RealtimeEngine {
    * @private
    */
   addTrajectory(trajectory: RealtimeTrajectory) {
-    if (!this.trajectories) {
-      this.trajectories = {};
-    }
+    this.trajectories ??= {};
     const id = trajectory.properties.train_id;
     if (id !== undefined) {
       this.trajectories[id] = trajectory;
@@ -448,6 +449,7 @@ class RealtimeEngine {
     // We stop the rendering and the websocket when hide and start again when show.
     document.addEventListener(
       'visibilitychange',
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
   }
@@ -455,6 +457,7 @@ class RealtimeEngine {
   detachFromMap() {
     document.removeEventListener(
       'visibilitychange',
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
 
@@ -488,12 +491,14 @@ class RealtimeEngine {
     // TODO: see if this should go elsewhere.
     if (this.useThrottle) {
       this.throttleRenderTrajectories = throttle(
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         this.renderTrajectoriesInternal,
         nextThrottleTick,
         { leading: true, trailing: true },
       );
     } else if (this.useDebounce) {
       this.debounceRenderTrajectories = debounce(
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         this.renderTrajectoriesInternal,
         nextThrottleTick,
         { leading: true, maxWait: 5000, trailing: true },
@@ -511,10 +516,11 @@ class RealtimeEngine {
    * @param {function} filterFc A function use to filter results.
    * @return {Array<Object>} Array of vehicle.
    */
-  getVehicles(filterFc: FilterFunction) {
+  getVehicles(
+    filterFc: (item: RealtimeTrajectory) => boolean,
+  ): RealtimeTrajectory[] {
     return (
       (this.trajectories &&
-        // @ts-expect-error good type must be defined
         Object.values(this.trajectories).filter(filterFc)) ||
       []
     );
@@ -542,7 +548,6 @@ class RealtimeEngine {
     let trajectories = Object.values(this.trajectories || {});
 
     if (this.sort) {
-      // @ts-expect-error good type must be defined
       trajectories = trajectories.sort(this.sort);
     }
 
@@ -777,7 +782,6 @@ class RealtimeEngine {
 
     // console.time('sort');
     if (this.sort) {
-      // @ts-expect-error type problem
       trajectories.sort(this.sort);
     }
     // console.timeEnd('sort');
@@ -799,6 +803,7 @@ class RealtimeEngine {
         ...this.styleOptions,
         filter: this.filter,
         hoverVehicleId: this.hoverVehicleId,
+        hoverVehicleIds: this.hoverVehicleIds,
         noInterpolate:
           (viewState.zoom || 0) < this.minZoomInterpolation
             ? true
@@ -907,12 +912,14 @@ class RealtimeEngine {
     this.api.open();
     this.api.subscribeTrajectory(
       this.mode,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onTrajectoryMessage,
       undefined,
       this.isUpdateBboxOnMoveEnd,
     );
     this.api.subscribeDeletedVehicles(
       this.mode,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDeleteTrajectoryMessage,
       undefined,
       this.isUpdateBboxOnMoveEnd,
@@ -948,7 +955,9 @@ class RealtimeEngine {
   }
 
   stop() {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     this.api.unsubscribeTrajectory(this.onTrajectoryMessage);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);
     this.api.close();
     if (this.onStop) {
