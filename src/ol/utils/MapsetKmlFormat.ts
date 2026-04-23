@@ -550,7 +550,7 @@ class MapsetKmlFormat {
         // without applying the min max zoom filter.
         if (
           !Number.isNaN(resolution) &&
-          (resolution >= minRes || maxRes >= resolution)
+          (resolution > minRes || maxRes > resolution)
         ) {
           return;
         }
