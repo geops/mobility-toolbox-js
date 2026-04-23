@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.12](https://github.com/geops/mobility-toolbox-js/compare/v3.6.11...v3.6.12) (2026-04-23)
+
+
+### Bug Fixes
+
+* include the minZoom/maxZoom limit int eh visiblity detection ([b76b2a5](https://github.com/geops/mobility-toolbox-js/commit/b76b2a57723748e5f7b00a4ff4f6f7ce22124ea1))
+
 ### [3.6.11](https://github.com/geops/mobility-toolbox-js/compare/v3.6.10...v3.6.11) (2026-03-10)
 
 
