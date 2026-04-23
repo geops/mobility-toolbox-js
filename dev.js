@@ -18,7 +18,6 @@ import { toLonLat, transformExtent } from 'ol/proj';
 import { Icon, Style, Circle, Fill, Stroke } from 'ol/style';
 import { Point } from 'ol/geom';
 import { radiansToDegrees } from '@turf/helpers';
-import { NEXT_CACHE_TAG_MAX_LENGTH } from 'next/dist/lib/constants';
 
 window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
 
