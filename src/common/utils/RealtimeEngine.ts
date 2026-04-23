@@ -615,6 +615,7 @@ class RealtimeEngine {
     const {
       geometry,
       properties: {
+        // @ts-expect-error - missing type definition
         raw_coordinates: rawCoordinates,
         time_since_update: timeSinceUpdate,
       },
@@ -669,7 +670,10 @@ class RealtimeEngine {
       const timeIntervals = trajectory?.properties?.time_intervals;
       if (this.time && timeIntervals?.length) {
         const lastTimeInterval = timeIntervals[timeIntervals.length - 1][0];
-        if (lastTimeInterval < this.time.getTime()) {
+        if (
+          lastTimeInterval !== null &&
+          lastTimeInterval < this.time.getTime()
+        ) {
           this.removeTrajectory(key);
         }
       }

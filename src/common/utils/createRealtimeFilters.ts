@@ -1,4 +1,7 @@
-import type { RealtimeTrajectory } from '../../types';
+import type {
+  RealtimeTrajectory,
+  RealtimeTrajectoryProperties,
+} from '../../types';
 /**
  * Return a filter functions based on some parameters of a vehicle.
  *
@@ -24,7 +27,9 @@ const createRealtimeFilters = (
     const regexLineList: string[] =
       typeof regexLine === 'string' ? [regexLine] : regexLine;
     const lineFilter = (item: RealtimeTrajectory) => {
-      const name = item.properties.name || item.properties.line?.name || '';
+      const name =
+        // @ts-expect-error - missing name in type definition
+        (item.properties.name as string) ?? item.properties.line?.name ?? '';
       if (!name) {
         return false;
       }
@@ -41,7 +46,9 @@ const createRealtimeFilters = (
       return l.replace(/\s+/g, '').toUpperCase();
     });
     const lineFilter = (item: RealtimeTrajectory) => {
-      const { line: linee, name } = item.properties;
+      const { line: linee, name } = item.properties as {
+        name?: string;
+      } & RealtimeTrajectoryProperties;
       const lineName = (name || linee?.name || '').toUpperCase();
       if (!lineName) {
         return false;
@@ -69,7 +76,9 @@ const createRealtimeFilters = (
     const operatorFilter = (item: RealtimeTrajectory) => {
       return operatorList.some((op) => {
         // operaotr is the old property tenant is the new one
-        const tenant = item.properties.operator || item.properties.tenant || '';
+        const tenant =
+          // @ts-expect-error - missing operator in type definition
+          (item.properties.operator as string) || item.properties.tenant || '';
         return new RegExp(op, 'i').test(tenant);
       });
     };

@@ -894,5 +894,4 @@ export interface operations {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface external {}
+export type external = object;

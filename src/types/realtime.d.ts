@@ -1,9 +1,25 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+export { operations as RealtimeRestOperations } from './realtimerest.d.ts';
+
 import type { Feature, Point } from 'geojson';
 
+import type BufferMessage from './realtime-asyncapi-types/BufferMessage';
+import type DeletedVehicleMessage from './realtime-asyncapi-types/DeletedVehicleMessage';
+import type FullTrajectory from './realtime-asyncapi-types/FullTrajectory';
+import type FullTrajectoryCollection from './realtime-asyncapi-types/FullTrajectoryCollection';
+import type FullTrajectoryCollectionProperties from './realtime-asyncapi-types/FullTrajectoryCollectionProperties';
+import type FullTrajectoryProperties from './realtime-asyncapi-types/FullTrajectoryProperties';
+import type Line from './realtime-asyncapi-types/Line';
+import type PartialTrajectoryMessage from './realtime-asyncapi-types/PartialTrajectoryMessage';
+import type StopSequence from './realtime-asyncapi-types/StopSequence';
+import type StopSequenceCall from './realtime-asyncapi-types/StopSequenceCall';
+import type StopSequenceMessage from './realtime-asyncapi-types/StopSequenceMessage';
+import type TCallStateEnum from './realtime-asyncapi-types/TCallStateEnum';
+import type TmotCode from './realtime-asyncapi-types/TmotCode';
+import type TrackerTrajectory from './realtime-asyncapi-types/TrackerTrajectory';
+import type TrackerTrajectoryProperties from './realtime-asyncapi-types/TrackerTrajectoryProperties.js';
+import type TTrainStateEnum from './realtime-asyncapi-types/TTrainStateEnum';
 import type { components } from './realtimerest.d.ts';
-
-export { operations as RealtimeRestOperations } from './realtimerest.d.ts';
 
 export declare type RealtimeChannelModeSuffix = '_schematic' | '';
 
@@ -25,12 +41,7 @@ export type RealtimeBbox = (number | string)[];
 
 export type RealtimeBuffer = [number, number];
 
-export interface RealtimeBufferResponse {
-  client_reference: '';
-  content: RealtimeTrajectoryResponse[];
-  source: 'buffer';
-  timestamp: number;
-}
+export type RealtimeBufferResponse = BufferMessage;
 
 export type RealtimeChannelName =
   | 'buffer'
@@ -44,12 +55,7 @@ export type RealtimeChannelName =
   | `timetable_${RealtimeStationId}`
   | `trajectory${RealtimeChannelModeSuffix}`;
 
-export interface RealtimeDeletedVehiclesResponse {
-  client_reference: null;
-  content: string;
-  source: `deleted_vehicles${RealtimeChannelModeSuffix}`;
-  timestamp: number;
-}
+export type RealtimeDeletedVehiclesResponse = DeletedVehicleMessage;
 
 export interface RealtimeDeparture {
   aimedArrivalTime?: number;
@@ -121,16 +127,14 @@ export interface RealtimeExtraGeomsResponse {
 export type RealtimeFeedCollection = components['schemas']['FeedCollection'];
 export type RealtimeFeed = components['schemas']['Feed'];
 
-export type RealtimeFullTrajectoryCollection =
-  components['schemas']['FullTrajectoryCollection'];
+export type RealtimeFullTrajectoryCollection = FullTrajectoryCollection;
 
-export type RealtimeFullTrajectory = components['schemas']['FullTrajectory'];
+export type RealtimeFullTrajectory = FullTrajectory;
 
 export type RealtimeFullTrajectoryCollectionProperties =
-  components['schemas']['FullTrajectoryCollectionProperties'];
+  FullTrajectoryCollectionProperties;
 
-export type RealtimeFullTrajectoryProperties =
-  components['schemas']['FullTrajectoryProperties'];
+export type RealtimeFullTrajectoryProperties = FullTrajectoryProperties;
 
 export interface RealtimeHealth {
   heathly: boolean;
@@ -145,18 +149,9 @@ export interface RealtimeHealthCheckResponse {
   timestamp: number;
 }
 
-export type RealtimeLine = components['schemas']['Line'];
+export type RealtimeLine = Line;
 
-export type RealtimeMot =
-  | 'bus'
-  | 'cablecar'
-  | 'coach'
-  | 'ferry'
-  | 'funicular'
-  | 'gondola'
-  | 'rail'
-  | 'subway'
-  | 'tram';
+export type RealtimeMot = TmotCode;
 
 export interface RealtimeNews {
   incident_program: boolean;
@@ -216,43 +211,13 @@ export interface RealtimeStationResponse {
   timestamp: number;
 }
 
-export interface RealtimeStop {
-  aimedArrivalTime: number;
-  aimedDepartureTime: number;
-  arrivalDelay?: number;
-  arrivalTime: number;
-  cancelled: boolean;
-  coordinate: number[];
-  departureDelay: number;
-  departureTime: number;
-  formation_id?: unknown;
-  noDropOff?: boolean;
-  noPickUp?: boolean;
-  platform?: unknown;
-  state?: RealtimeStopState;
-  stationId?: RealtimeStationId;
-  stationName: string;
-  stopUID: string;
-}
+export type RealtimeStop = StopSequenceCall;
 
-export type RealtimeStopSequence = {
-  vehicleType: number; // TODO: Verify this property exists
-} & components['schemas']['StopSequence'];
+export type RealtimeStopSequence = StopSequence;
 
-export interface RealtimeStopSequenceResponse {
-  client_reference: '';
-  content: RealtimeStopSequence[];
-  source: `stopsequence_${RealtimeTenant}_${RealtimeTrainId}`;
-  timestamp: number;
-}
+export type RealtimeStopSequenceResponse = StopSequenceMessage;
 
-export type RealtimeStopState =
-  | 'BOARDING'
-  | 'HIDDEN'
-  | 'JOURNEY_CANCELLED'
-  | 'LEAVING'
-  | 'STOP_CANCELLED'
-  | string;
+export type RealtimeStopState = TCallStateEnum;
 
 export type RealtimeTenant = '' | 'sbb' | 'sbh' | 'sbm' | string;
 
@@ -265,44 +230,19 @@ export interface RealtimeTimetableResponse {
 
 export type RealtimeTrainId = string;
 
-export type RealtimeTrajectory = {
-  properties: RealtimeTrajectoryProperties;
-} & components['schemas']['TrackerTrajectory'];
+export type RealtimeTrajectoryResponse = PartialTrajectoryMessage;
+
+export type RealtimeTrajectoryState = TTrainStateEnum;
 
 export type RealtimeTrajectoryProperties = {
-  coordinate?: [number, number]; // Added by RealtimeEnging after first rendering on a map
-  delay: null | number; // Override REST api defs:
-  event?: string;
-  event_delay?: number;
-  line: RealtimeLine; // TOOD verfy why this does not appears in the REST api schema
-  name?: string; // deprecated, name is an old property, use line.name instead.
-  operator?: string; // deprecated, operator is an old property, use tenant instead.
-  original_line?: RealtimeLine;
-  original_rake?: string;
-  original_train_number?: number;
-  position_correction?: number;
-  rake?: string;
-  raw_coordinates?: [number, number];
-  raw_time?: string;
-  ride_state?: string;
-  rotation?: number; // Added by realtime engine  after first rendering on a map
-  train_number?: number;
+  cancelled: boolean; // to chekc if it commes from backend or if it is generated by the RealtimeAPI class
+  coordinate?: number[]; // Prop added when rendered on the map, not in the backend response
+  rotation?: null | number; // Prop added when rendered on the map, not in the backend response
+} & TrackerTrajectoryProperties;
 
-  transmitting_vehicle?: string;
-} & components['schemas']['TrackerTrajectoryProperties'];
-
-export interface RealtimeTrajectoryResponse {
-  client_reference: '';
-  content: RealtimeTrajectory;
-  source: `trajectory${RealtimeChannelModeSuffix}`;
-  timestamp: number;
-}
-
-export type RealtimeTrajectoryState =
-  | 'BOARDING'
-  | 'HIDDEN'
-  | 'JOURNEY_CANCELLED'
-  | 'STOP_CANCELLED';
+export type RealtimeTrajectory = {
+  properties: RealtimeTrajectoryProperties;
+} & TrackerTrajectory;
 
 export interface RealtimeTransfer {
   lines: string[];
