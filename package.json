@@ -17,7 +17,7 @@
     "@turf/transform-rotate": "7.3.2",
     "lodash.debounce": "4.0.8",
     "lodash.throttle": "4.1.1",
-    "uuid": "13.0.0"
+    "uuid": "14.0.0"
   },
   "peerDependencies": {
     "maplibre-gl": ">=4",
