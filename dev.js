@@ -24,7 +24,7 @@ const mapsUrl = 'https://maps.geops.io';
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
   // style: 'tralis_munich_schematic_v3',
-  // style: 'de.rvf_moco',
+  style: 'de.rvf_moco',
   // url: 'https://maps.geops.io/styles/tralis_munich_schematic_v3/style.json?key=5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e',
 });
 
@@ -39,7 +39,7 @@ const mapsetLayer = new MapsetLayer({
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
   // apiKey: '5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e', // sbm
-  url: 'wss://api.geops.io/tracker-ws/v1/', // prod
+  // url: 'wss://api.geops.io/tracker-ws/v1/', // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
   styleOptions: {
     // useHeadingStyle: true,
@@ -55,8 +55,10 @@ const realtimeLayer = new RealtimeLayer({
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
-  // tenant: 'rvf',
+  tenant: 'rvf',
   maplibreLayer: baseLayer,
+  loadByZoom: true,
+  // useGraphs: false,
   // publicAt: new Date(),
   // url: mocoUrl,
 });
@@ -65,13 +67,13 @@ const map = new Map({
   layers: [
     baseLayer,
     // realtimeLayer,
-    // mocoLayer,
-    mapsetLayer,
+    mocoLayer,
+    // mapsetLayer,
   ],
   target: 'map',
   view: new View({
-    // center: [872814.6006106276, 6106276.43], // rvf
-    center: [1022769, 5698188], // trenord
+    center: [872814.6006106276, 6106276.43], // rvf
+    // center: [1022769, 5698188], // trenord
     // center: [1286668, 6130216], // sbm
     // center: [2383522, 1674321], // sbm schematic
     zoom: 13,

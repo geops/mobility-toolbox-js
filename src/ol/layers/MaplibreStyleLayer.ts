@@ -318,6 +318,7 @@ class MaplibreStyleLayer extends Layer {
             const currentMinZoom = mapLibreMap.getLayer(id)?.minzoom ?? 0;
             const currentMaxZoom = mapLibreMap.getLayer(id)?.maxzoom ?? 24;
 
+            
             mapLibreMap.setLayerZoomRange(
               id,
               currentMinZoom < minZoom ? minZoom : currentMinZoom,
