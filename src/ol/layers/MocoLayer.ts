@@ -272,7 +272,7 @@ class MocoLayer extends MaplibreStyleLayer {
       const mapInternal = this.getMapInternal();
       if (mapInternal) {
         this.olEventsKeys.push(
-          mapInternal.on('moveend', () => {
+          mapInternal.on('zoomend', () => {
             if (this.loadByZoom) {
               void this.updateData();
             } else {
