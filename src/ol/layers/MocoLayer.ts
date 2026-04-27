@@ -270,13 +270,11 @@ class MocoLayer extends MaplibreStyleLayer {
     }
 
     if (this.useGraphs || this.loadByZoom) {
-      const mapInternal = this.getMapInternal();
-      if (mapInternal) {
         this.olEventsKeys.push(
           mapInternal.on('moveend', () => {
             if (this.loadByZoom) {
               void this.updateData();
-            } else {
+            } else if (this.useGraphs) {
               this.onZoomEnd();
             }
           }),
