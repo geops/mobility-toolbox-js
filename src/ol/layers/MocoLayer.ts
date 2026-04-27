@@ -231,7 +231,8 @@ class MocoLayer extends MaplibreStyleLayer {
    * @param {Object} options
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.apiParameters] The url parameters to be included in the MOCO API request.
-   * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded, otherwise only the notifications set in 'notifications' will be displayed.
+   * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded at once, otherwise only the notifications set in 'notifications' will be displayed.
+   * @param {boolean} [options.loadByZoom=false] If true, notifications will be loaded based on the current zoom level. Use this option only if you see performance issues with loadAll.
    * @param {boolean} [options.useGraphs=false] If true, only the notifications using the current graphs for the current zoom level will be passed to the maplibre source.
    * @param {MocoNotification[]} [options.notifications] The notifications to display. If not set and loadAll is true, all active and published notifications will be loaded.
    * @param {string} [options.publicAt] The date to filter notifications. If not set, the current date is used.
