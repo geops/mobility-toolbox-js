@@ -1,8 +1,8 @@
 import type { operations as MocoOperations } from './moco';
 import type { paths as RoutingPaths } from './routing';
 import type { paths as StopsPaths } from './stops';
-export type * from '../ol';
 
+export type * from '../ol';
 export type * from './common';
 export type * from './maps';
 export * from './moco/gql/graphql';

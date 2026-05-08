@@ -40,6 +40,7 @@ export const MOCO_MD_LAYER_FILTER = 'moco';
 export type MocoLayerOptions = {
   apiParameters?: MocoExportParameters;
   loadAll?: boolean;
+  loadByZoom?: boolean;
   publicAt?: Date;
   situations?: Partial<SituationType>[];
   tenant?: string;
@@ -157,6 +158,15 @@ class MocoLayer extends MaplibreStyleLayer {
     void this.updateData();
   }
 
+  get loadByZoom(): boolean {
+    return (this.get('loadByZoom') as boolean) ?? false;
+  }
+
+  set loadByZoom(value: boolean) {
+    this.set('loadByZoom', value);
+    void this.updateData();
+  }
+
   set publicAt(value: Date) {
     this.set('publicAt', value);
     void this.updateData();
@@ -211,12 +221,18 @@ class MocoLayer extends MaplibreStyleLayer {
   };
 
   /**
+   * Cache the request responses when loadByZoom is true
+   */
+  #fetchCache: Record<string, SituationType[]> = {};
+
+  /**
    * Constructor.
    *
    * @param {Object} options
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.apiParameters] The url parameters to be included in the MOCO API request.
-   * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded, otherwise only the notifications set in 'notifications' will be displayed.
+   * @param {boolean} [options.loadAll=true] If true, all active and published notifications will be loaded at once, otherwise only the notifications set in 'notifications' will be displayed.
+   * @param {boolean} [options.loadByZoom=false] If true, notifications will be loaded based on the current zoom level. Use this option only if you see performance issues with loadAll.
    * @param {boolean} [options.useGraphs=false] If true, only the notifications using the current graphs for the current zoom level will be passed to the maplibre source.
    * @param {MocoNotification[]} [options.notifications] The notifications to display. If not set and loadAll is true, all active and published notifications will be loaded.
    * @param {string} [options.publicAt] The date to filter notifications. If not set, the current date is used.
@@ -252,16 +268,18 @@ class MocoLayer extends MaplibreStyleLayer {
     if (source) {
       void this.updateData();
     }
+    const mapInternal = this.getMapInternal();
 
-    if (this.useGraphs) {
-      const mapInternal = this.getMapInternal();
-      if (mapInternal) {
-        this.olEventsKeys.push(
-          mapInternal.on('moveend', () => {
+    if (mapInternal && (this.useGraphs || this.loadByZoom)) {
+      this.olEventsKeys.push(
+        mapInternal.on('moveend', () => {
+          if (this.loadByZoom) {
+            void this.updateData();
+          } else if (this.useGraphs) {
             this.onZoomEnd();
-          }),
-        );
-      }
+          }
+        }),
+      );
     }
   }
 
@@ -279,6 +297,49 @@ class MocoLayer extends MaplibreStyleLayer {
     if (this.#abortController) {
       this.#abortController.abort();
       this.#abortController = null;
+    }
+  }
+
+  async fetchData(
+    params: Partial<MocoExportParameters>,
+    config: RequestInit = {},
+  ): Promise<SituationType[] | undefined> {
+    const requestParameters = {
+      hasGeoms: true,
+      publicAt: this.publicAt?.toISOString(),
+      publicNow: !this.publicAt, // publicNow use a backend caching optimization
+      ...(this.apiParameters ?? {}),
+      ...params,
+    };
+
+    // Cache the request response for one minute to avoid too much requests on the backend
+    let cacheKey: string | undefined;
+    try {
+      cacheKey = JSON.stringify({
+        config,
+        requestParameters,
+        time: Math.floor(Date.now() / 60000),
+      });
+      if (this.#fetchCache[cacheKey]) {
+        return this.#fetchCache[cacheKey];
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Error stringifying fetch parameters for caching', error);
+    }
+
+    try {
+      const response = await this.api.export(requestParameters, config);
+      if (response?.paginatedSituations?.results && cacheKey) {
+        this.#fetchCache[cacheKey] = response.paginatedSituations.results;
+      }
+      return response.paginatedSituations.results;
+    } catch (error) {
+      if (error && (error as { name: string }).name.includes('AbortError')) {
+        // Ignore abort error
+        return [];
+      }
+      throw error;
     }
   }
 
@@ -317,25 +378,34 @@ class MocoLayer extends MaplibreStyleLayer {
     const graphMapping = mdGraphs ?? DEFAULT_GRAPH_MAPPING;
     const graphsString = [...new Set(Object.values(graphMapping))].join(',');
 
-    try {
-      const response = await this.api.export(
-        {
-          graph: graphsString,
-          hasGeoms: true,
-          publicAt: this.publicAt?.toISOString(),
-          publicNow: !this.publicAt, // publicNow use a backend caching optimization
-          ...(this.apiParameters ?? {}),
-        },
-        { signal: this.#abortController.signal },
-      );
-      return response.paginatedSituations.results;
-    } catch (error) {
-      if (error && (error as { name: string }).name.includes('AbortError')) {
-        // Ignore abort error
-        return [];
-      }
-      throw error;
+    return this.fetchData(
+      { graph: graphsString },
+      { signal: this.#abortController.signal },
+    );
+  }
+  /**
+   * This functions load situations from backend depending on the current graph mapping in the style metadata.
+   * @returns
+   */
+  async loadDataByZoom(): Promise<SituationType[] | undefined> {
+    if (this.#abortController) {
+      this.#abortController.abort();
     }
+    this.#abortController = new AbortController();
+
+    const mdGraphs = (
+      this.maplibreLayer?.mapLibreMap?.getStyle() as MapsStyleSpecification
+    ).metadata?.graphs;
+
+    const graphsString = getGraphByZoom(
+      this.getMapInternal()?.getView()?.getZoom(),
+      mdGraphs,
+    );
+
+    return this.fetchData(
+      { graph: graphsString },
+      { signal: this.#abortController.signal },
+    );
   }
 
   onLoad() {
@@ -362,7 +432,11 @@ class MocoLayer extends MaplibreStyleLayer {
    * @returns
    */
   async updateData(): Promise<boolean | undefined> {
-    if (this.loadAll) {
+    if (this.loadByZoom) {
+      const situations = await this.loadDataByZoom();
+      // We don't use the setter here to avoid infinite loop
+      this.set('situations', situations ?? []);
+    } else if (this.loadAll) {
       const situations = await this.loadData();
       // We don't use the setter here to avoid infinite loop
       this.set('situations', situations ?? []);
