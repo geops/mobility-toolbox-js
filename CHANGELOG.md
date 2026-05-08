@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.6.13](https://github.com/geops/mobility-toolbox-js/compare/v3.6.12...v3.6.13) (2026-05-08)
+
+
+### Bug Fixes
+
+* add new option loadByzoom for MocoLayer ([#260](https://github.com/geops/mobility-toolbox-js/issues/260)) ([c8a2a37](https://github.com/geops/mobility-toolbox-js/commit/c8a2a376ae2fda306c62fd9ad6faab16286737c0))
+
 ### [3.6.12](https://github.com/geops/mobility-toolbox-js/compare/v3.6.11...v3.6.12) (2026-04-23)
 
 
