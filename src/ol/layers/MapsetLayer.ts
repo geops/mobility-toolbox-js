@@ -3,7 +3,7 @@ import { unByKey } from 'ol/Observable';
 import { transformExtent } from 'ol/proj';
 import { Vector } from 'ol/source';
 
-import MapsetAPI from '../../api/MapsetApi';
+import MapsetAPI from '../../api/MapsetAPI';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 import MapsetKmlFormat from '../utils/MapsetKmlFormat';
 
@@ -12,8 +12,8 @@ import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type { Options } from 'ol/layer/Vector';
 
-import type { MapsetPlan } from '../../api/MapsetApi';
-import type { MapsetAPIOptions } from '../../api/MapsetApi';
+import type { MapsetPlan } from '../../api/MapsetAPI';
+import type { MapsetAPIOptions } from '../../api/MapsetAPI';
 import type { MapsetKmlFormatReadOptions } from '../utils/MapsetKmlFormat';
 
 import type { MobilityLayerOptions } from './Layer';
@@ -42,7 +42,7 @@ const kmlFormatter = new MapsetKmlFormat();
  *   // url: 'https://editor.mapset.io/api/v1',
  * });
  *
- * @see <a href="/doc/class/build/api/MapsetApi%20js~MapsetAPI%20html-offset-anchor">MapsetAPI</a>
+ * @see <a href="/doc/class/build/api/MapsetAPI%20js~MapsetAPI%20html-offset-anchor">MapsetAPI</a>
  * @see <a href="/example/ol-mapset-layer">OpenLayers Mapset layer example</a>
  *
  *

@@ -268,18 +268,18 @@ class MocoLayer extends MaplibreStyleLayer {
     if (source) {
       void this.updateData();
     }
+    const mapInternal = this.getMapInternal();
 
-    if (this.useGraphs || this.loadByZoom) {
-        this.olEventsKeys.push(
-          mapInternal.on('moveend', () => {
-            if (this.loadByZoom) {
-              void this.updateData();
-            } else if (this.useGraphs) {
-              this.onZoomEnd();
-            }
-          }),
-        );
-      }
+    if (mapInternal && (this.useGraphs || this.loadByZoom)) {
+      this.olEventsKeys.push(
+        mapInternal.on('moveend', () => {
+          if (this.loadByZoom) {
+            void this.updateData();
+          } else if (this.useGraphs) {
+            this.onZoomEnd();
+          }
+        }),
+      );
     }
   }
 

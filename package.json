@@ -13,11 +13,11 @@
   },
   "dependencies": {
     "@geoblocks/ol-maplibre-layer": "^1.0.3",
-    "@turf/helpers": "7.3.2",
-    "@turf/transform-rotate": "7.3.2",
+    "@turf/helpers": "7.3.5",
+    "@turf/transform-rotate": "7.3.5",
     "lodash.debounce": "4.0.8",
     "lodash.throttle": "4.1.1",
-    "uuid": "13.0.0"
+    "uuid": "14.0.0"
   },
   "peerDependencies": {
     "maplibre-gl": ">=4",
@@ -36,7 +36,6 @@
     "@types/lodash": "^4.17.23",
     "@types/lodash.debounce": "4.0.9",
     "@types/lodash.throttle": "4.1.9",
-    "@types/mapbox-gl": "3.4.1",
     "@types/offscreencanvas": "2019.7.3",
     "@types/topojson": "3.2.6",
     "@types/uuid": "11.0.0",
