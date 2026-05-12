@@ -70,6 +70,7 @@ export type BboxFilterInput = {
 
 export type CreateSituationInput = {
   affectedTimeIntervals: Array<AffectedTimeIntervalInput>;
+  isActive?: Scalars['Boolean']['input'];
   publicationWindows: Array<PublicationWindowInput>;
   publications: Array<PublicationInput>;
   reasons: Array<Scalars['String']['input']>;
@@ -235,8 +236,6 @@ export type MultilingualTextualContentInput = {
   de?: InputMaybe<TextualContentInput>;
   en?: InputMaybe<TextualContentInput>;
   fr?: InputMaybe<TextualContentInput>;
-  images: Array<IndexedImageInput>;
-  infoLinks: Array<InfoLinkInput>;
   it?: InputMaybe<TextualContentInput>;
 };
 
@@ -246,8 +245,6 @@ export type MultilingualTextualContentType = {
   en?: Maybe<TextualContentType>;
   fr?: Maybe<TextualContentType>;
   id: Scalars['ID']['output'];
-  images: Array<IndexedImageType>;
-  infoLinks: Array<InfoLinkType>;
   it?: Maybe<TextualContentType>;
   size: Scalars['String']['output'];
 };
@@ -348,6 +345,8 @@ export type PlatformType = {
 };
 
 export type PublicationInput = {
+  images: Array<IndexedImageInput>;
+  infoLinks: Array<InfoLinkInput>;
   perspectives: Array<Scalars['String']['input']>;
   publicationLines: Array<LineGroupInput>;
   publicationStops: Array<StopInput>;
@@ -412,6 +411,8 @@ export type PublicationType = {
   __typename?: 'PublicationType';
   effectivePublicationWindows: Array<TimeIntervalType>;
   id: Scalars['ID']['output'];
+  images: Array<IndexedImageType>;
+  infoLinks: Array<InfoLinkType>;
   perspectives: Array<Scalars['String']['output']>;
   publicationLines: Array<PublicationLineGroupType>;
   publicationStops: Array<PublicationStopType>;
@@ -584,6 +585,7 @@ export type SituationFilter = {
   editedAt?: InputMaybe<Scalars['DateTime']['input']>;
   hasGeoms?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
   isEdited?: InputMaybe<Scalars['Boolean']['input']>;
   publicAfter?: InputMaybe<Scalars['DateTime']['input']>;
   publicAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -622,6 +624,7 @@ export type SituationType = {
   editedBy?: Maybe<UserType>;
   effectivePublicationWindows: Array<TimeIntervalType>;
   id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
   language: Scalars['String']['output'];
   publicationLineNames: Array<Scalars['String']['output']>;
   publicationStopNames: Array<Scalars['String']['output']>;
@@ -753,6 +756,7 @@ export type TimeIntervalType = {
 export type UpdateSituationInput = {
   affectedTimeIntervals: Array<AffectedTimeIntervalInput>;
   id: Scalars['ID']['input'];
+  isActive?: Scalars['Boolean']['input'];
   publicationWindows: Array<PublicationWindowInput>;
   publications: Array<PublicationInput>;
   reasons: Array<Scalars['String']['input']>;
