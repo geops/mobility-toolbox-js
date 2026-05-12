@@ -9,15 +9,7 @@ import Source from 'ol/source/Source';
 
 import { realtimeDefaultStyle } from '../../common/styles';
 import RealtimeEngine from '../../common/utils/RealtimeEngine';
-import {
-  type RealtimeMode,
-  type RealtimeRenderState,
-  type RealtimeStopSequence,
-  type RealtimeStyleFunction,
-  type RealtimeTrainId,
-  type RealtimeTrajectory,
-  type ViewState,
-} from '../../types';
+import { type ViewState } from '../../types';
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
@@ -29,13 +21,19 @@ import type { Map, MapEvent } from 'ol';
 import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
+import type BaseLayer from 'ol/layer/Base';
 import type { ObjectEvent } from 'ol/Object';
 import type { State } from 'ol/View';
 
 import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
-import type { RealtimeStyleOptions } from '../../types';
+import type {
+  Realtime,
+  RealtimeRenderState,
+  RealtimeStyleFunction,
+  RealtimeStyleOptions,
+} from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
@@ -106,11 +104,11 @@ class RealtimeLayer extends Layer<Source> {
     this.engine.filter = filter;
   }
 
-  get hoverVehicleId(): RealtimeTrainId | undefined {
+  get hoverVehicleId(): Realtime.TrainId | undefined {
     return this.engine.hoverVehicleId;
   }
 
-  set hoverVehicleId(id: RealtimeTrainId) {
+  set hoverVehicleId(id: Realtime.TrainId) {
     this.engine.hoverVehicleId = id;
   }
 
@@ -118,7 +116,7 @@ class RealtimeLayer extends Layer<Source> {
     return this.engine.mode;
   }
 
-  set mode(mode: RealtimeMode) {
+  set mode(mode: Realtime.Mode) {
     this.engine.mode = mode;
   }
 
@@ -126,11 +124,11 @@ class RealtimeLayer extends Layer<Source> {
     return this.engine.pixelRatio;
   }
 
-  get selectedVehicleId(): RealtimeTrainId | undefined {
+  get selectedVehicleId(): Realtime.TrainId | undefined {
     return this.engine.selectedVehicleId;
   }
 
-  set selectedVehicleId(id: RealtimeTrainId) {
+  set selectedVehicleId(id: Realtime.TrainId) {
     this.engine.selectedVehicleId = id;
   }
 
@@ -219,16 +217,16 @@ class RealtimeLayer extends Layer<Source> {
       updateWhileInteracting: true,
     });
 
-    this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
+    this.onZoomEndDebounced = debounce(this.onZoomEnd.bind(this), 100);
 
-    this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
+    this.onMoveEndDebounced = debounce(this.onMoveEnd.bind(this), 100);
   }
 
   /**
    * Add a trajectory.
    * @param trajectory
    */
-  addTrajectory(trajectory: RealtimeTrajectory) {
+  addTrajectory(trajectory: Realtime.TrackerTrajectory) {
     this.engine?.addTrajectory(trajectory);
   }
 
@@ -268,7 +266,7 @@ class RealtimeLayer extends Layer<Source> {
           },
         ),
         this.on('change:visible', (evt: ObjectEvent) => {
-          if (evt.target.getVisible()) {
+          if ((evt.target as BaseLayer).getVisible()) {
             this.engine.start();
           } else {
             this.engine.stop();
@@ -281,7 +279,10 @@ class RealtimeLayer extends Layer<Source> {
               evt.key,
             )
           ) {
-            this.vectorLayer.set(evt.key, evt.target.get(evt.key));
+            this.vectorLayer.set(
+              evt.key,
+              (evt.target as BaseLayer).get(evt.key),
+            );
           }
         }),
       );
@@ -301,7 +302,10 @@ class RealtimeLayer extends Layer<Source> {
    * @public
    */
   clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
-    return new RealtimeLayer({ ...this.get('options'), ...newOptions });
+    return new RealtimeLayer({
+      ...(this.get('options') as RealtimeLayerOptions),
+      ...newOptions,
+    });
   }
 
   createRenderer() {
@@ -324,7 +328,7 @@ class RealtimeLayer extends Layer<Source> {
    * @returns {Promise<Feature[]>} A list of features representing a full trajectory.
    * @public
    */
-  async getFullTrajectory(id: RealtimeTrainId): Promise<Feature[]> {
+  async getFullTrajectory(id: Realtime.TrainId): Promise<Feature[]> {
     const data = await this.engine.api.getFullTrajectory(
       id,
       this.engine.mode,
@@ -342,10 +346,12 @@ class RealtimeLayer extends Layer<Source> {
    * Get the stop sequences of a vehicle.
    *
    * @param {string} id A vehicle's id.
-   * @returns {Promise<RealtimeStopSequence[]>} An array of stop sequences.
+   * @returns {Promise<null | RealtimeStopSequence[]>} An array of stop sequences or null if not available.
    * @public
    */
-  async getStopSequences(id: RealtimeTrainId): Promise<RealtimeStopSequence[]> {
+  async getStopSequences(
+    id: Realtime.TrainId,
+  ): Promise<null | Realtime.StopSequence[]> {
     const data = await this.engine.api.getStopSequence(id);
     return data?.content;
   }
@@ -356,9 +362,9 @@ class RealtimeLayer extends Layer<Source> {
    * @param {RealtimeTrainId} id A vehicle's id.
    * @returns {Promise<{fullTrajectory: Feature[], stopSequences: RealtimeStopSequence[]}>} An object containing the full trajectory and the stop sequences.
    */
-  async getTrajectoryInfos(id: RealtimeTrainId): Promise<{
+  async getTrajectoryInfos(id: Realtime.TrainId): Promise<{
     fullTrajectory: Feature[];
-    stopSequences: RealtimeStopSequence[];
+    stopSequences: Realtime.StopSequence[];
   }> {
     // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
     // Then we combine them in one response.
@@ -366,7 +372,7 @@ class RealtimeLayer extends Layer<Source> {
     const [stopSequences, fullTrajectory] = await Promise.all(promises);
     return {
       fullTrajectory: fullTrajectory as Feature[],
-      stopSequences: stopSequences as RealtimeStopSequence[],
+      stopSequences: stopSequences!,
     };
   }
 
@@ -416,7 +422,7 @@ class RealtimeLayer extends Layer<Source> {
    * Highlight the trajectory of journey.
    */
   async highlightTrajectory(
-    id: RealtimeTrainId,
+    id: Realtime.TrainId,
   ): Promise<Feature[] | undefined> {
     const promise = new Promise<Feature[] | undefined>((resolve) => {
       this.api.subscribeFullTrajectory(id, this.engine.mode, (data) => {
@@ -459,7 +465,7 @@ class RealtimeLayer extends Layer<Source> {
     // @ts-expect-error  - we are in the same class
     const { container } = this.getRenderer()!;
     if (container) {
-      container.style.transform = '';
+      (container as HTMLDivElement).style.transform = '';
     }
   }
 
@@ -476,7 +482,9 @@ class RealtimeLayer extends Layer<Source> {
    *
    * @param trajectoryOrId
    */
-  removeTrajectory(trajectoryOrId: RealtimeTrainId | RealtimeTrajectory) {
+  removeTrajectory(
+    trajectoryOrId: Realtime.TrackerTrajectory | Realtime.TrainId,
+  ) {
     this.engine?.removeTrajectory(trajectoryOrId);
   }
 

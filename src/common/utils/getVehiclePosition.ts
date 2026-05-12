@@ -4,7 +4,7 @@ import type { Position } from 'geojson';
 import type { Coordinate } from 'ol/coordinate';
 import type { SimpleGeometry } from 'ol/geom';
 
-import type { RealtimeTrajectory } from '../../types';
+import type { RenderedTrackerTrajectory } from './RealtimeEngine';
 
 export interface VehiclePosition {
   coord?: Coordinate;
@@ -27,7 +27,7 @@ const getVehiclePosition = (
       coordinate?: Coordinate;
       olGeometry?: SimpleGeometry;
     };
-  } & RealtimeTrajectory,
+  } & RenderedTrackerTrajectory,
   noInterpolate: boolean,
 ): VehiclePosition => {
   const {
@@ -41,7 +41,7 @@ const getVehiclePosition = (
     | GeoJSON.Point;
   let geometry = olGeometry;
   let coord;
-  let rotation = oldRotation;
+  let rotation = oldRotation ?? null;
 
   // If an olGeometry exists we use it. It avoids to create one each time.
   if (geometry) {

@@ -4,7 +4,8 @@ import { buffer, containsCoordinate, intersects } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import { fromLonLat } from 'ol/proj';
 
-import { RealtimeAPI, RealtimeModes } from '../../api';
+import { RealtimeAPI } from '../../api';
+import { Realtime } from '../../types';
 import realtimeStyle from '../styles/realtimeStyle';
 
 import {
@@ -21,15 +22,9 @@ import type { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
 import type {
   AnyCanvas,
   LayerGetFeatureInfoOptions,
-  RealtimeBbox,
-  RealtimeMode,
-  RealtimeMot,
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
-  RealtimeTenant,
-  RealtimeTrainId,
-  RealtimeTrajectory,
   ViewState,
 } from '../../types';
 import type { FilterFunction, SortFunction } from '../typedefs';
@@ -52,7 +47,10 @@ export interface RealtimeEngineOptions {
     generalizationLevelByZoom: string[],
   ) => string;
   getGraphByZoom?: (zoom: number, graphByZoom: string[]) => string | undefined;
-  getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
+  getMotsByZoom?: (
+    zoom: number,
+    motsByZoom: Realtime.TmotCode[][],
+  ) => Realtime.TmotCode[];
   getRefreshTimeInMs?: () => number;
   getRenderTimeIntervalByZoom?: (
     zoom: number,
@@ -60,12 +58,13 @@ export interface RealtimeEngineOptions {
   ) => number;
   getViewState?: () => ViewState;
   graphByZoom?: string[];
-  hoverVehicleId?: RealtimeTrainId;
+  hoverVehicleId?: Realtime.TrainId;
   isUpdateBboxOnMoveEnd?: boolean;
   live?: boolean;
   minZoomInterpolation?: number;
-  mode?: RealtimeMode;
-  motsByZoom?: RealtimeMot[][];
+  mode?: Realtime.Mode;
+  motsByZoom?: Realtime.TmotCode[][];
+
   onIdle?: (realtimeEngine: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeEngine: RealtimeEngine) => void;
@@ -74,13 +73,13 @@ export interface RealtimeEngineOptions {
   pixelRatio?: number;
   prefix?: string;
   renderTimeIntervalByZoom?: number[];
-  selectedVehicleId?: RealtimeTrainId;
+  selectedVehicleId?: Realtime.TrainId;
   shouldRender?: () => boolean;
   sort?: SortFunction;
   speed?: number;
   style?: RealtimeStyleFunction;
   styleOptions?: Partial<RealtimeStyleOptions>;
-  tenant?: RealtimeTenant;
+  tenant?: Realtime.Tenant;
   time?: Date;
   url?: string;
   useDebounce?: boolean;
@@ -95,7 +94,7 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
   delayDisplay: 300000,
   delayOutlineColor: '#000',
   getArrowSize: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     radius = 0,
   ) => {
@@ -108,7 +107,7 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return '#000';
   },
   getDelayFont: (
-    traj?: RealtimeTrajectory,
+    traj?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     fontSize?: number,
   ) => {
@@ -132,14 +131,14 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
   getRadius: () => {
     return 5;
   },
-  getText: ((traj: RealtimeTrajectory) => {
+  getText: ((traj: Realtime.TrackerTrajectory) => {
     return traj?.properties?.line?.name || 'U';
   }) as RealtimeStyleOptions['getText'],
   getTextColor: () => {
     return '#fff';
   },
   getTextFont: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     fontSize?: number,
   ) => {
@@ -156,6 +155,13 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
   // We apply the style options for mot by default to have a usable style out of the box
   ...styleOptionsForMot,
 };
+export interface RenderedTrackerTrajectory extends Realtime.TrackerTrajectory {
+  properties: {
+    cancelled?: boolean;
+    coordinate?: Coordinate;
+    rotation?: null | number;
+  } & Realtime.TrackerTrajectory['properties'];
+}
 
 /**
  * This class is responsible for drawing trajectories from a realtime API in a canvas,
@@ -165,7 +171,7 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
  */
 class RealtimeEngine {
   _idleTimeout?: number;
-  _mode: RealtimeMode;
+  _mode: Realtime.Mode;
   _speed: number;
   _style: RealtimeStyleFunction;
   _time: Date;
@@ -187,16 +193,16 @@ class RealtimeEngine {
   generalizationLevelByZoom: string[];
   getGeneralizationLevelByZoom: (zoom: number) => string;
   getGraphByZoom: (zoom: number) => string | undefined;
-  getMotsByZoom: (zoom: number) => RealtimeMot[];
+  getMotsByZoom: (zoom: number) => Realtime.TmotCode[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
   graphByZoom: string[];
-  hoverVehicleId?: RealtimeTrainId;
+  hoverVehicleId?: Realtime.TrainId;
   isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
   live?: boolean;
   minZoomInterpolation: number;
-  mots?: RealtimeMot[];
-  motsByZoom: RealtimeMot[][];
+  mots?: Realtime.TmotCode[];
+  motsByZoom: Realtime.TmotCode[][];
   onIdle?: (realtimeLayer: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeLayer: RealtimeEngine) => void;
@@ -205,16 +211,16 @@ class RealtimeEngine {
   renderState?: RealtimeRenderState;
   renderTimeIntervalByZoom: number[];
   requestId?: number;
-  selectedVehicle!: RealtimeTrajectory;
-  selectedVehicleId?: RealtimeTrainId;
+  selectedVehicle!: Realtime.TrackerTrajectory;
+  selectedVehicleId?: Realtime.TrainId;
   sort?: SortFunction;
   styleOptions: RealtimeStyleOptions;
-  tenant: RealtimeTenant;
+  tenant: Realtime.Tenant;
   throttleRenderTrajectories: (
     viewState: ViewState,
     noInterpolate?: boolean,
   ) => void;
-  trajectories?: Record<RealtimeTrainId, RealtimeTrajectory>;
+  trajectories?: Record<Realtime.TrainId, Realtime.TrackerTrajectory>;
   updateTimeDelay?: number;
   updateTimeInterval?: number;
   useDebounce?: boolean;
@@ -224,7 +230,7 @@ class RealtimeEngine {
   get mode() {
     return this._mode;
   }
-  set mode(newMode: RealtimeMode) {
+  set mode(newMode: Realtime.Mode) {
     if (newMode === this._mode) {
       return;
     }
@@ -265,7 +271,7 @@ class RealtimeEngine {
   }
 
   constructor(options: RealtimeEngineOptions) {
-    this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
+    this._mode = options.mode || Realtime.ModeEnum.TOPOGRAPHIC;
     this._speed = options.speed ?? 1; // If live property is true. The speed is ignored.
     this._style = options.style ?? realtimeStyle;
     this._time = options.time ?? new Date();
@@ -301,7 +307,7 @@ class RealtimeEngine {
       ...defaultStyleOptions,
       ...(options.styleOptions ?? {}),
     };
-    this.tenant = options.tenant ?? ''; // sbb,sbh or sbm
+    this.tenant = options.tenant ?? Realtime.TenantEnum.EMPTY; // sbb,sbh or sbm
     this.trajectories = {};
     this.useDebounce = options.useDebounce ?? false;
     this.useRequestAnimationFrame = options.useRequestAnimationFrame ?? false;
@@ -404,13 +410,13 @@ class RealtimeEngine {
 
     // Define throttling and debounce render function
     this.throttleRenderTrajectories = throttle(
-      this.renderTrajectoriesInternal,
+      this.renderTrajectoriesInternal.bind(this),
       50,
       { leading: false, trailing: true },
     );
 
     this.debounceRenderTrajectories = debounce(
-      this.renderTrajectoriesInternal,
+      this.renderTrajectoriesInternal.bind(this),
       50,
       { leading: true, maxWait: 5000, trailing: true },
     );
@@ -432,7 +438,7 @@ class RealtimeEngine {
    * @param {RealtimeTrajectory} trajectory The trajectory to add.
    * @private
    */
-  addTrajectory(trajectory: RealtimeTrajectory) {
+  addTrajectory(trajectory: Realtime.TrackerTrajectory) {
     if (!this.trajectories) {
       this.trajectories = {};
     }
@@ -488,13 +494,13 @@ class RealtimeEngine {
     // TODO: see if this should go elsewhere.
     if (this.useThrottle) {
       this.throttleRenderTrajectories = throttle(
-        this.renderTrajectoriesInternal,
+        this.renderTrajectoriesInternal.bind(this),
         nextThrottleTick,
         { leading: true, trailing: true },
       );
     } else if (this.useDebounce) {
       this.debounceRenderTrajectories = debounce(
-        this.renderTrajectoriesInternal,
+        this.renderTrajectoriesInternal.bind(this),
         nextThrottleTick,
         { leading: true, maxWait: 5000, trailing: true },
       );
@@ -574,7 +580,7 @@ class RealtimeEngine {
    * @override
    */
   onDeleteTrajectoryMessage(
-    data: WebSocketAPIMessageEventData<RealtimeTrainId>,
+    data: WebSocketAPIMessageEventData<Realtime.TrainId>,
   ) {
     if (!data.content) {
       return;
@@ -605,7 +611,9 @@ class RealtimeEngine {
    *
    * @private
    */
-  onTrajectoryMessage(data: WebSocketAPIMessageEventData<RealtimeTrajectory>) {
+  onTrajectoryMessage(
+    data: WebSocketAPIMessageEventData<Realtime.TrackerTrajectory>,
+  ) {
     this.updateIdleState();
     if (!data.content) {
       return;
@@ -634,7 +642,7 @@ class RealtimeEngine {
 
     if (
       this.debug &&
-      this.mode === RealtimeModes.TOPOGRAPHIC &&
+      this.mode === Realtime.ModeEnum.TOPOGRAPHIC &&
       rawCoordinates
     ) {
       // @ts-expect-error missing type definition
@@ -690,7 +698,7 @@ class RealtimeEngine {
    * @return {boolean} if the trajectory must be displayed or not.
    * @private
    */
-  purgeTrajectory(trajectory: RealtimeTrajectory) {
+  purgeTrajectory(trajectory: Realtime.TrackerTrajectory) {
     const viewState = this.getViewState();
     const extent = viewState.extent;
     const { bounds, type } = trajectory.properties;
@@ -705,7 +713,9 @@ class RealtimeEngine {
     return false;
   }
 
-  removeTrajectory(trajectoryOrId: RealtimeTrainId | RealtimeTrajectory) {
+  removeTrajectory(
+    trajectoryOrId: Realtime.TrackerTrajectory | Realtime.TrainId,
+  ) {
     let id: string | undefined;
     if (typeof trajectoryOrId !== 'string') {
       id = trajectoryOrId?.properties?.train_id;
@@ -848,7 +858,7 @@ class RealtimeEngine {
     // The extent does not need to be precise under meter, so we round floor/ceil the values.
     const [minX, minY, maxX, maxY] = extent;
 
-    const bbox: RealtimeBbox = [
+    const bbox: Realtime.Bbox = [
       Math.floor(minX),
       Math.floor(minY),
       Math.ceil(maxX),
@@ -872,7 +882,7 @@ class RealtimeEngine {
       bbox.push(`tenant=${this.tenant}`);
     }
 
-    if (this.mode !== 'topographic') {
+    if (this.mode !== Realtime.ModeEnum.TOPOGRAPHIC) {
       bbox.push(`channel_prefix=${this.mode}`);
     }
 

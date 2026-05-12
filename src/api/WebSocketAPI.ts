@@ -1,20 +1,8 @@
-import type { RealtimeTrajectoryResponse } from '../types';
-
 export declare interface WebSocketAPIMessageEventData<T> {
-  // | RealtimeFullTrajectory;
-  client_reference: null | number | string;
-  content: T;
+  additionalProperties?: Map<string, unknown>;
+  client_reference: null | string;
+  content: null | T;
   source: string;
-  // | T
-  // | string
-  // | Feature
-  // | RealtimeTrajectoryResponse[]
-  // | RealtimeDeparture
-  // | RealtimeNews[]
-  // | RealtimeStation
-  // | RealtimeExtraGeom
-  // | RealtimeTrajectory
-  // | RealtimeStopSequence[]
   timestamp: number;
 }
 
@@ -28,7 +16,7 @@ export declare interface WebSocketAPIRequest<T> {
   cb: WebSocketAPIMessageCallback<T>;
   errorCb?: EventListener;
   onErrorCb?: EventListener;
-  onMessageCb: WebSocketAPIMessageEventListener;
+  onMessageCb: MessageEventListener;
   params: WebSocketAPIParameters;
   requestString: string;
 }
@@ -37,29 +25,21 @@ export declare interface WebSocketAPISubscription<T> {
   cb: WebSocketAPIMessageCallback<T>;
   errorCb?: EventListener;
   onErrorCb?: EventListener;
-  onMessageCb: WebSocketAPIMessageEventListener;
+  onMessageCb: MessageEventListener;
   params: WebSocketAPIParameters;
   quiet: boolean;
 }
 
-export type WebSocketAPIBufferMessageEventData = {
-  source: 'buffer';
-} & WebSocketAPIMessageEventData<RealtimeTrajectoryResponse[]>;
-
 /**
  * This type represents a function that has been call with each feature returned by the websocket.
  */
-export type WebSocketAPIMessageCallback<T> = (
-  data: WebSocketAPIMessageEventData<T>,
-) => void;
+export type WebSocketAPIMessageCallback<T> = (data: T) => void;
 
-export type WebSocketAPIMessageEvent = {
-  data: string;
-} & Event;
+// export type WebSocketAPIMessageEvent = {
+//   data: string;
+// } & Event;
 
-export type WebSocketAPIMessageEventListener = (
-  evt: WebSocketAPIMessageEvent,
-) => void;
+export type MessageEventListener = <T>(evt: MessageEvent<T>) => void;
 
 export type WebSocketAPISubscribed = Record<string, boolean>;
 /**
@@ -109,10 +89,7 @@ class WebSocketAPI {
     return reqStr.trim();
   }
 
-  addEvents(
-    onMessage: WebSocketAPIMessageEventListener,
-    onError?: EventListener,
-  ) {
+  addEvents(onMessage: MessageEventListener, onError?: EventListener) {
     if (this.websocket) {
       this.websocket.addEventListener('message', onMessage);
 
@@ -143,7 +120,8 @@ class WebSocketAPI {
    * @param {function} onOpen Callback called when the websocket connection is opened and before subscriptions of previous subscriptions.
    * @private
    */
-  connect(url: string, onOpen = () => {}) {
+
+  connect(url: string, onOpen: () => void) {
     // if no url specify, close the current websocket and do nothing.
     if (!url) {
       this.websocket?.close();
@@ -167,11 +145,11 @@ class WebSocketAPI {
 
     if (!this.open) {
       this.websocket.addEventListener('open', () => {
-        onOpen();
+        onOpen?.();
         this.subscribePreviousSubscriptions();
       });
     } else {
-      onOpen();
+      onOpen?.();
       this.subscribePreviousSubscriptions();
     }
   }
@@ -249,7 +227,7 @@ class WebSocketAPI {
    * @param {function} errorCb Callback on error and close event
    * @private
    */
-  get<T>(
+  get<T extends WebSocketAPIMessageEventData<unknown>>(
     params: WebSocketAPIParameters,
     cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
@@ -274,7 +252,7 @@ class WebSocketAPI {
       };
     };
 
-    const { onErrorCb, onMessageCb } = this.listen(
+    const { onErrorCb, onMessageCb } = this.listen<T>(
       params,
       once(cb),
       errorCb && once(errorCb),
@@ -313,25 +291,23 @@ class WebSocketAPI {
    * @return {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
    * @private
    */
-  listen<T>(
+  listen<T extends WebSocketAPIMessageEventData<unknown>>(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIMessageCallback<T>,
+    cb: MessageEventListener,
     errorCb?: EventListener,
   ): {
     onErrorCb?: EventListener;
-    onMessageCb: WebSocketAPIMessageEventListener;
+    onMessageCb: MessageEventListener;
   } {
     // Remove the previous identical callback
     this.unlisten(params, cb);
 
     // We wrap the message callback to be sure we only propagate the message if it is for the right channel.
-    const onMessage: WebSocketAPIMessageEventListener = (
-      evt: WebSocketAPIMessageEvent,
-    ) => {
-      let data: WebSocketAPIMessageEventData<T>;
+    const onMessage = (evt: MessageEvent) => {
+      let data: T;
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        data = JSON.parse(evt.data);
+        data = JSON.parse(evt.data as string);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error('WebSocket: unable to parse JSON data', err, evt.data);
@@ -341,16 +317,17 @@ class WebSocketAPI {
       source += params.args ? ` ${params.args}` : '';
 
       // Buffer channel message return a list of other channels to propagate to proper callbacks.
-      let contents: WebSocketAPIMessageEventData<T>[];
+      let contents: T[];
 
+      // In buffer message case, we need to propagate the message to the proper callbacks,
+      // because the buffer channel is used as an optimization to send multiple messages at once.
       if (data.source === 'buffer') {
         // @ts-expect-error - We know that the data is a WebSocketAPIBufferMessageEventData
-        contents = (data as unknown as WebSocketAPIBufferMessageEventData)
-          .content;
+        contents = data.content;
       } else {
         contents = [data];
       }
-      contents.forEach((content: WebSocketAPIMessageEventData<T>) => {
+      contents.forEach((content: T) => {
         // Because of backend optimization, the last content is null.
         if (
           content?.source === source &&
@@ -366,10 +343,7 @@ class WebSocketAPI {
     return { onErrorCb: errorCb, onMessageCb: onMessage };
   }
 
-  removeEvents(
-    onMessage: WebSocketAPIMessageEventListener,
-    onError?: EventListener,
-  ) {
+  removeEvents(onMessage: MessageEventListener, onError?: EventListener) {
     if (this.websocket) {
       this.websocket.removeEventListener('message', onMessage);
 
@@ -419,9 +393,9 @@ class WebSocketAPI {
    * @param {boolean} quiet if false, no GET or SUB requests are send, only the callback is registered.
    * @private
    */
-  subscribe<T>(
+  subscribe<T extends WebSocketAPIMessageCallback<unknown>>(
     params: WebSocketAPIParameters,
-    cb: WebSocketAPIMessageCallback<T>,
+    cb: MessageEventListener,
     errorCb?: EventListener,
     quiet = false,
   ) {
@@ -433,10 +407,8 @@ class WebSocketAPI {
     });
     const newSubscr = { cb, errorCb, onErrorCb, onMessageCb, params, quiet };
     if (index > -1) {
-      // @ts-expect-error - We know that the subscriptions is an array of WebSocketAPISubscription
       this.subscriptions[index] = newSubscr;
     } else {
-      // @ts-expect-error - We know that the subscriptions is an array of WebSocketAPISubscription
       this.subscriptions.push(newSubscr);
     }
 
@@ -473,10 +445,7 @@ class WebSocketAPI {
    * @param {function} cb Callback used when listen.
    * @private
    */
-  unlisten<T>(
-    params: WebSocketAPIParameters,
-    cb: WebSocketAPIMessageCallback<T>,
-  ) {
+  unlisten<T>(params: WebSocketAPIParameters, cb: MessageEventListener) {
     [...(this.subscriptions || []), ...(this.requests || [])]
       .filter((s) => {
         return s.params.channel === params.channel && (!cb || s.cb === cb);

@@ -1,7 +1,4 @@
-import type {
-  RealtimeTrajectory,
-  RealtimeTrajectoryProperties,
-} from '../../types';
+import type { Realtime } from '../../types';
 /**
  * Return a filter functions based on some parameters of a vehicle.
  *
@@ -16,8 +13,9 @@ const createRealtimeFilters = (
   route: string | string[],
   operator: string | string[],
   regexLine: string | string[],
-): ((trajectory: RealtimeTrajectory) => boolean) | null => {
-  const filterList: ((trajectory: RealtimeTrajectory) => boolean)[] = [];
+): ((trajectory: Realtime.TrackerTrajectory) => boolean) | null => {
+  const filterList: ((trajectory: Realtime.TrackerTrajectory) => boolean)[] =
+    [];
 
   if (!line && !route && !operator && !regexLine) {
     return null;
@@ -26,7 +24,7 @@ const createRealtimeFilters = (
   if (regexLine) {
     const regexLineList: string[] =
       typeof regexLine === 'string' ? [regexLine] : regexLine;
-    const lineFilter = (item: RealtimeTrajectory) => {
+    const lineFilter = (item: Realtime.TrackerTrajectory) => {
       const name =
         // @ts-expect-error - missing name in type definition
         (item.properties.name as string) ?? item.properties.line?.name ?? '';
@@ -45,10 +43,8 @@ const createRealtimeFilters = (
     const lineList = lineFiltersList.map((l) => {
       return l.replace(/\s+/g, '').toUpperCase();
     });
-    const lineFilter = (item: RealtimeTrajectory) => {
-      const { line: linee, name } = item.properties as {
-        name?: string;
-      } & RealtimeTrajectoryProperties;
+    const lineFilter = (item: Realtime.TrackerTrajectory) => {
+      const { line: linee, name } = item.properties;
       const lineName = (name || linee?.name || '').toUpperCase();
       if (!lineName) {
         return false;
@@ -63,7 +59,7 @@ const createRealtimeFilters = (
     const routeList = routes.map((item) => {
       return parseInt(item, 10);
     });
-    const routeFilter = (item: RealtimeTrajectory) => {
+    const routeFilter = (item: Realtime.TrackerTrajectory) => {
       const routeIdentifier = item.properties.route_identifier || '';
       const routeId = parseInt(routeIdentifier.split('.')[0], 10);
       return routeList.includes(routeId);
@@ -73,7 +69,7 @@ const createRealtimeFilters = (
 
   if (operator) {
     const operatorList = typeof operator === 'string' ? [operator] : operator;
-    const operatorFilter = (item: RealtimeTrajectory) => {
+    const operatorFilter = (item: Realtime.TrackerTrajectory) => {
       return operatorList.some((op) => {
         // operaotr is the old property tenant is the new one
         const tenant =
@@ -89,7 +85,7 @@ const createRealtimeFilters = (
     return null;
   }
 
-  return (item: RealtimeTrajectory) => {
+  return (item: Realtime.TrackerTrajectory) => {
     // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < filterList.length; i += 1) {
       if (!filterList[i](item)) {

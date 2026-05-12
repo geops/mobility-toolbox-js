@@ -2,10 +2,8 @@ import TmotCode from '../../types/realtime-asyncapi-types/TmotCode';
 
 import type {
   AnyCanvasContext,
-  RealtimeLine,
-  RealtimeMot,
+  Realtime,
   RealtimeStyleOptions,
-  RealtimeTrajectory,
   ViewState,
 } from '../../types';
 
@@ -22,23 +20,23 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
-export const MOTS_ONLY_RAIL: RealtimeMot[] = [TmotCode.RAIL];
+export const MOTS_ONLY_RAIL: Realtime.TmotCode[] = [TmotCode.RAIL];
 
-export const MOTS_WITH_CABLE: RealtimeMot[] = [
+export const MOTS_WITH_CABLE: Realtime.TmotCode[] = [
   TmotCode.CABLECAR,
   TmotCode.GONDOLA,
   TmotCode.FUNICULAR,
   TmotCode.COACH,
 ];
 
-export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
+export const MOTS_WITHOUT_CABLE: Realtime.TmotCode[] = [
   TmotCode.TRAM,
   TmotCode.SUBWAY,
   TmotCode.RAIL,
   TmotCode.BUS,
 ];
 
-export const MOTS_ALL: RealtimeMot[] = [
+export const MOTS_ALL: Realtime.TmotCode[] = [
   TmotCode.TRAM,
   TmotCode.SUBWAY,
   TmotCode.RAIL,
@@ -104,7 +102,7 @@ export const findDefaultIndexType = () => {
 };
 
 export const getTypeIndex = (
-  type?: 'unknown' | null | number | RealtimeMot,
+  type?: 'unknown' | null | number | Realtime.TmotCode,
 ): number => {
   const t = type;
 
@@ -125,7 +123,7 @@ export const getTypeIndex = (
 };
 
 export const getRadiusForTypeAndZoom = (
-  type?: RealtimeMot,
+  type?: Realtime.TmotCode,
   zoom?: number,
 ): number => {
   const z = Math.min(Math.floor(zoom ?? 1), 16);
@@ -143,7 +141,7 @@ export const getRadiusForTypeAndZoom = (
  */
 export const getRadius = getRadiusForTypeAndZoom;
 
-export const getColorForType = (type?: null | RealtimeMot): string => {
+export const getColorForType = (type?: null | Realtime.TmotCode): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return bgColors[typeIdx];
@@ -158,7 +156,7 @@ export const getColorForType = (type?: null | RealtimeMot): string => {
  */
 export const getBgColor = getColorForType;
 
-export const getTextColorForType = (type?: RealtimeMot): string => {
+export const getTextColorForType = (type?: Realtime.TmotCode): string => {
   try {
     const typeIdx = getTypeIndex(type);
     return textColors[typeIdx];
@@ -169,7 +167,7 @@ export const getTextColorForType = (type?: RealtimeMot): string => {
 };
 
 export const getTextColorForLine = (
-  line?: null | RealtimeLine,
+  line?: null | Realtime.Line,
 ): null | string | undefined => {
   let color = line?.text_color;
 
@@ -267,7 +265,7 @@ export const getDelayText = (delay?: number, cancelled?: boolean): string => {
 };
 
 export const getColorForLine = (
-  line?: null | RealtimeLine,
+  line?: null | Realtime.Line,
 ): null | string | undefined => {
   let color = line?.color;
 
@@ -284,7 +282,7 @@ export const getColorForLine = (
  * not exist, depending of the mot type of the trajectory.
  */
 export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
-  getColor: (trajectory?: RealtimeTrajectory): string => {
+  getColor: (trajectory?: Realtime.TrackerTrajectory): string => {
     return (
       getColorForLine(trajectory?.properties?.line) ||
       getColorForType(trajectory?.properties?.type) ||
@@ -292,7 +290,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     );
   },
   getDelayColor: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     delayInMs?: null | number,
     cancelled?: boolean,
@@ -301,7 +299,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     return getDelayColor(delayInMs, cancelled, isDelayText) || 'transparent';
   },
   getDelayText: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     delay?: number,
     cancelled?: boolean,
@@ -309,7 +307,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     return getDelayText(delay, cancelled) || '';
   },
   getRadius: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
   ): number => {
     return (
@@ -317,7 +315,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
       1
     );
   },
-  getTextColor: (trajectory: RealtimeTrajectory): string => {
+  getTextColor: (trajectory: Realtime.TrackerTrajectory): string => {
     return (
       getTextColorForLine(trajectory.properties.line) ||
       getTextColorForType(trajectory.properties.type) ||
@@ -325,7 +323,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     );
   },
   getTextSize: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     ctx?: AnyCanvasContext,
     markerSize?: number,

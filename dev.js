@@ -65,9 +65,9 @@ const mocoLayer = new MocoLayer({
 
 const map = new Map({
   layers: [
-    baseLayer,
-    // realtimeLayer,
-    mocoLayer,
+    // baseLayer,
+    realtimeLayer,
+    // mocoLayer,
     // mapsetLayer,
   ],
   target: 'map',

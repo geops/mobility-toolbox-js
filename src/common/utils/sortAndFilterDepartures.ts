@@ -3,7 +3,7 @@ import TCallStateEnum from '../../types/realtime-asyncapi-types/TCallStateEnum';
 import compareDepartures from './compareDepartures';
 
 import type { RealtimeAPIDeparturesById } from '../../api/RealtimeAPI';
-import type { RealtimeDepartureExtended } from '../../types';
+import type { Realtime } from '../../types';
 
 /**
  * This function sort Departures by arrival time and filter out unwanted departures:
@@ -21,7 +21,7 @@ const sortAndfilterDepartures = (
   depObject: RealtimeAPIDeparturesById,
   sortByMinArrivalTime = false,
   maxDepartureAge = 30,
-): RealtimeDepartureExtended[] => {
+): Realtime.TimeTableCall[] => {
   const departures = Object.keys(depObject).map((k) => {
     return depObject[k];
   });
@@ -42,7 +42,7 @@ const sortAndfilterDepartures = (
   let previousDeparture = null;
 
   for (let i = departures.length - 1; i >= 0; i -= 1) {
-    const departure: RealtimeDepartureExtended = {
+    const departure: Realtime.TimeTableCall = {
       ...departures[i],
     };
     if (!departure.time) {

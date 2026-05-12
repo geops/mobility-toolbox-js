@@ -1,8 +1,8 @@
-import type { RealtimeTrajectory } from '../../types';
+import type { RenderedTrackerTrajectory } from './RealtimeEngine';
 
 const sortByDelay = (
-  traj1: RealtimeTrajectory,
-  traj2: RealtimeTrajectory,
+  traj1: RenderedTrackerTrajectory,
+  traj2: RenderedTrackerTrajectory,
 ): number => {
   const { cancelled: cancelled1, delay: delay1 } = traj1.properties;
   const { cancelled: cancelled2, delay: delay2 } = traj2.properties;

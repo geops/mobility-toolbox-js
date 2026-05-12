@@ -1,11 +1,6 @@
 import HttpAPI from './HttpAPI';
 
-import type {
-  RealtimeFeedCollection,
-  RealtimeRestOperations,
-  RealtimeTrainsByRouteIdentifierResult,
-  RealtimeTrajectoryCollection,
-} from '../types';
+import type { Realtime } from '../types';
 
 export interface RealtimeRestAPIOptions {
   apiKey?: string;
@@ -57,13 +52,13 @@ class RealtimeRestAPI extends HttpAPI {
    */
   feeds(
     params: Partial<
-      RealtimeRestOperations['feeds_feeds__get']['parameters']['query']
+      Realtime.RestOperations['feeds_feeds__get']['parameters']['query']
     > = {},
     config?: RequestInit,
-  ): Promise<RealtimeFeedCollection> {
+  ): Promise<Realtime.FeedCollection> {
     return this.fetch<
-      RealtimeFeedCollection,
-      RealtimeRestOperations['feeds_feeds__get']['parameters']['query']
+      Realtime.FeedCollection,
+      Realtime.RestOperations['feeds_feeds__get']['parameters']['query']
     >('feeds/', params, config);
   }
 
@@ -71,14 +66,14 @@ class RealtimeRestAPI extends HttpAPI {
    * Search for trains by route identifier.
    */
   trainsByRouteIdentifier(
-    params: RealtimeRestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query'] = {
+    params: Realtime.RestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query'] = {
       exact_match: true,
     },
     config?: RequestInit,
-  ): Promise<RealtimeTrainsByRouteIdentifierResult> {
+  ): Promise<Realtime.TrainsByRouteIdentifierResult> {
     return this.fetch<
-      RealtimeTrainsByRouteIdentifierResult,
-      RealtimeRestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query']
+      Realtime.TrainsByRouteIdentifierResult,
+      Realtime.RestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query']
     >(`trains_by_route_identifier/${this.tenant}/`, params, config);
   }
 
@@ -87,13 +82,13 @@ class RealtimeRestAPI extends HttpAPI {
    */
   trajectories(
     params: Partial<
-      RealtimeRestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
+      Realtime.RestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
     > = {},
     config?: RequestInit,
-  ): Promise<RealtimeTrajectoryCollection> {
+  ): Promise<Realtime.TrajectoryCollection> {
     return this.fetch<
-      RealtimeTrajectoryCollection,
-      RealtimeRestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
+      Realtime.TrajectoryCollection,
+      Realtime.RestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
     >(`trajectories/${this.tenant}/`, params, config);
   }
 }

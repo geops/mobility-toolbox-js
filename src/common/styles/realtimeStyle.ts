@@ -3,7 +3,6 @@ import {
   type AnyCanvasContext,
   type RealtimeStyleFunction,
   type RealtimeStyleOptions,
-  type RealtimeTrajectory,
   type StyleCache,
   type ViewState,
 } from '../../types';
@@ -19,6 +18,8 @@ import {
   getTextCanvas,
 } from './realtimeDrawCanvasUtils';
 
+import type { RenderedTrackerTrajectory } from '../utils/RealtimeEngine';
+
 const cache: StyleCache = {};
 
 /**
@@ -31,7 +32,7 @@ const cache: StyleCache = {};
  * @return a canvas
  */
 const realtimeStyle: RealtimeStyleFunction = (
-  trajectory: RealtimeTrajectory,
+  trajectory: RenderedTrackerTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => {

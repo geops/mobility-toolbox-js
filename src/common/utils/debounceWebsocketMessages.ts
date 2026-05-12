@@ -11,11 +11,13 @@ import type {
  * @param {number} [timeout = 100] debounce timeout in ms
  * @private
  */
-const debounceWebsocketMessages = (
-  onUpdate: (objects: unknown[]) => void,
-  getObjectId?: (object: unknown) => string,
+const debounceWebsocketMessages = <
+  T extends WebSocketAPIMessageEventData<unknown>,
+>(
+  onUpdate: (objects: T[]) => void,
+  getObjectId?: (object: T) => string,
   timeout = 100,
-): WebSocketAPIMessageCallback<unknown> => {
+): T => {
   const updateTimeout: Record<string, number> = {};
 
   const objectsById: Record<string, unknown> = {};
@@ -35,7 +37,7 @@ const debounceWebsocketMessages = (
 
     updateTimeout[source] = window.setTimeout(() => {
       const objectToReturn = getObjectId ? Object.values(objectsById) : objects;
-      onUpdate(objectToReturn);
+      onUpdate({ ...data, content: objectToReturn } as T);
     }, timeout);
   };
 };
