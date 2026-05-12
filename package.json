@@ -63,7 +63,7 @@
     "lint-staged": "16.2.7",
     "maplibre-gl": "5.16.0",
     "mock-socket": "9.3.1",
-    "next": "15.5.6",
+    "next": "15.5.18",
     "next-transpile-modules": "10.0.1",
     "ol": "10.7.0",
     "openapi-typescript": "5",
