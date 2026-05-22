@@ -1,4 +1,8 @@
+packages:
+  - doc
+
 onlyBuiltDependencies:
+  - '@parcel/watcher'
   - core-js
   - cypress
   - esbuild

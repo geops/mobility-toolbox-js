@@ -1,30 +1,11 @@
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import makeStyles from '@mui/styles/makeStyles';
 import React, { useEffect, useState } from 'react';
 
 import ExampleCard from './ExampleCard';
 
-const useStyles = makeStyles((theme) => {
-  return {
-    example: {
-      '&.MuiGrid-item': {
-        padding: '0 !important',
-      },
-    },
-    filterField: {
-      marginBottom: 40,
-      width: '100%',
-    },
-    header: {
-      marginBottom: 40,
-    },
-  };
-});
-
 function Examples({ examples = [] }) {
-  const classes = useStyles();
   const [filter, setFilter] = useState('');
   const [filteredExamples, setFilteredExamples] = useState(examples);
 
@@ -47,41 +28,40 @@ function Examples({ examples = [] }) {
   }, [filter, examples]);
 
   return (
-    <Grid container spacing={2}>
-      <Grid className={classes.filterField} item xs={12}>
-        <Typography className={classes.header} variant="h1">
-          Examples
-        </Typography>
-        <TextField
-          onChange={(e) => {
-            return setFilter(e.target.value);
-          }}
-          placeholder="Filter..."
-          value={filter}
-          variant="standard"
-        />
-      </Grid>
-      {!filteredExamples.length && (
-        <Grid item xs={12}>
-          Nothing found.
-        </Grid>
-      )}
-      {filteredExamples.map((example) => {
-        return (
-          <Grid
-            className={classes.example}
-            container
-            item
-            key={example.key}
-            lg={4}
-            sm={6}
-            xs={12}
+    <>
+      <Grid container spacing={2} style={{ marginBottom: 40, padding: 15 }}>
+        <Grid size={{ xs: 12 }}>
+          <Typography
+            style={{
+              marginBottom: '40px',
+            }}
+            variant="h1"
           >
-            <ExampleCard example={example} />
-          </Grid>
-        );
-      })}
-    </Grid>
+            Examples
+          </Typography>
+          <TextField
+            onChange={(e) => {
+              return setFilter(e.target.value);
+            }}
+            placeholder="Filter..."
+            value={filter}
+            variant="standard"
+          />
+        </Grid>
+        {!filteredExamples.length && (
+          <Grid size={{ xs: 12 }}>Nothing found.</Grid>
+        )}
+      </Grid>
+      <Grid container spacing={2}>
+        {filteredExamples.map((example) => {
+          return (
+            <Grid key={example.key} size={{ xs: 12, sm: 6, lg: 4 }}>
+              <ExampleCard example={example} />
+            </Grid>
+          );
+        })}
+      </Grid>
+    </>
   );
 }
 

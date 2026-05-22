@@ -1,61 +1,74 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable import/no-relative-packages */
 import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import Grid from '@mui/material/Grid';
-import Hidden from '@mui/material/Hidden';
 import { version } from '../../../../package.json';
 import EsdocContent from './EsdocContent';
 import EsdocNavigation from './EsdocNavigation';
 import EsdocSearch from './EsdocSearch';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  content: {
-    padding: theme.spacing(1),
-    paddingBottom: 115,
-    margin: '0 auto',
-    maxWidth: '740px',
-  },
-  navWrapper: {
-    height: 'calc(100% - 32px)',
-    padding: theme.spacing(2),
-    backgroundColor: 'rgb(239, 239, 239)',
-  },
-}));
+import { Box } from '@mui/material';
 
 function Esdoc({ path }) {
-  const classes = useStyles();
-
   if (!path) {
     return null;
   }
 
   return (
-    <div className={`esdoc ${classes.root}`}>
-      <Hidden smUp>
-        <Grid container>
-          <Grid item xs={12} className={classes.content}>
+    <div
+      className={`esdoc`}
+      style={{
+        width: '100%',
+      }}
+    >
+      <Box display={{ xs: 'none', sm: 'block' }}>
+        <Grid>
+          <Grid
+            size={{ xs: 12 }}
+            sx={(theme) => {
+              return {
+                padding: theme.spacing(1),
+                paddingBottom: 115,
+                margin: '0 auto',
+                maxWidth: '740px',
+              };
+            }}
+          >
             <EsdocContent path={path} />
           </Grid>
         </Grid>
-      </Hidden>
-      <Hidden only="xs">
-        <Grid container wrap="nowrap">
-          <Grid item style={{ minWidth: 260, maxWidth: 300 }}>
-            <div className={classes.navWrapper}>
+      </Box>
+      <Box display={{ xs: 'block', sm: 'none' }}>
+        <Grid wrap="nowrap">
+          <Grid style={{ minWidth: 260, maxWidth: 300 }}>
+            <Box
+              sx={(theme) => {
+                return {
+                  height: 'calc(100% - 32px)',
+                  padding: theme.spacing(2),
+                  backgroundColor: 'rgb(239, 239, 239)',
+                };
+              }}
+            >
               {version}
               <EsdocSearch />
               <EsdocNavigation />
-            </div>
+            <Box>
           </Grid>
-          <Grid item xs={9} className={classes.content}>
+          <Grid
+            size={{ xs: 9 }}
+            sx={(theme) => {
+              return {
+                padding: theme.spacing(1),
+                paddingBottom: 115,
+                margin: '0 auto',
+                maxWidth: '740px',
+              };
+            }}
+          >
             <EsdocContent path={path} />
           </Grid>
         </Grid>
-      </Hidden>
+      </Box>
     </div>
   );
 }

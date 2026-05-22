@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@geoblocks/ol-maplibre-layer": "^1.0.3",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@turf/helpers": "7.3.5",
     "@turf/transform-rotate": "7.3.5",
     "lodash.debounce": "4.0.8",
@@ -63,8 +64,6 @@
     "lint-staged": "16.2.7",
     "maplibre-gl": "5.16.0",
     "mock-socket": "9.3.1",
-    "next": "15.5.6",
-    "next-transpile-modules": "10.0.1",
     "ol": "10.7.0",
     "openapi-typescript": "5",
     "prettier": "3.8.1",

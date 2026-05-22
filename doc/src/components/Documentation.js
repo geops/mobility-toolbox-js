@@ -1,25 +1,9 @@
-import makeStyles from '@mui/styles/makeStyles';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
 import Esdoc from './Esdoc/Esdoc';
 
-const useStyles = makeStyles({
-  iframe: {
-    border: 0,
-    flexGrow: 1,
-    overflow: 'hidden',
-  },
-  root: {
-    display: 'flex',
-    flexGrow: 1,
-    height: '100%',
-    justifyContent: 'center',
-  },
-});
-
 function Documentation() {
-  const classes = useStyles();
   const {
     query: { slug },
   } = useRouter();
@@ -34,7 +18,14 @@ function Documentation() {
   }, [slug]);
 
   return (
-    <div className={classes.root}>
+    <div
+      style={{
+        display: 'flex',
+        flexGrow: 1,
+        height: '100%',
+        justifyContent: 'center',
+      }}
+    >
       <Esdoc path={path} />
     </div>
   );

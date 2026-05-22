@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable react/prop-types */
 import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import Markdown from 'react-markdown';
 import FileDocLinkHTML from './FileDocLinkHTML';
@@ -16,13 +15,6 @@ import ExperimentalHTML from './ExperimentalHTML';
 import DeprecatedHTML from './DeprecatedHTML';
 import { parseExample } from './DocBuilderUtils';
 
-const useStyles = makeStyles({
-  root: {
-    height: '100%',
-    width: '100%',
-  },
-});
-
 /**
  * build class output.
  * https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin/src/Builder/ClassDocBuilder.js#L30
@@ -31,14 +23,18 @@ const useStyles = makeStyles({
  * @private
  */
 function ClassDoc({ doc }) {
-  const classes = useStyles();
   if (!doc) {
     return null;
   }
   const { name, access, version, since } = doc;
 
   return (
-    <div className={classes.root}>
+    <div
+      style={{
+        height: '100%',
+        width: '100%',
+      }}
+    >
       <div className="header-notice">
         {/*
         doc.export && importPath && importStyle && (
