@@ -7,6 +7,7 @@ import LineString from 'ol/geom/LineString';
 import Modify from 'ol/interaction/Modify';
 import {
   MaplibreLayer,
+  MaplibreStyleLayer,
   MapsetAPI,
   MapsetLayer,
   MocoLayer,
@@ -36,29 +37,38 @@ const mapsetLayer = new MapsetLayer({
   tenants: ['geopsmarketing'],
 });
 
+const lnpLayer = new MaplibreStyleLayer({
+  isQueryable: true,
+  // hideInLegend: true,
+  layersFilter: (l) => {
+    return l.source === 'network_plans';
+  },
+  maplibreLayer: baseLayer,
+});
+
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
   // apiKey: '5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e', // sbm
   // url: 'wss://api.geops.io/tracker-ws/v1/', // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
+  url: 'https://api.geops.io/tracker-http/v1/', // rvf
   styleOptions: {
     // useHeadingStyle: true,
     // useDelayStyle: true,
   },
   // style: realtimeByMotStyle,
   // tenant: 'sbm',
-  // tenant: 'trenord',
-  // bboxParameters: {
-  //   line_tags: 'RVF',
-  // },
-  visible: false,
+  bboxParameters: {
+    line_tags: 'RVF',
+  },
+  visible: true,
 });
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
   tenant: 'rvf',
   maplibreLayer: baseLayer,
-  lnpLayer: realtimeLayer,
+  lnpLayer: lnpLayer,
   loadByZoom: true,
   // publicAt: new Date(),
   // url: mocoUrl,
@@ -67,9 +77,10 @@ const mocoLayer = new MocoLayer({
 const map = new Map({
   layers: [
     baseLayer,
-    realtimeLayer,
+    lnpLayer,
     mocoLayer,
     // mapsetLayer,
+    realtimeLayer,
   ],
   target: 'map',
   view: new View({
@@ -118,12 +129,12 @@ const toggleLayerVisibilityButton = document?.getElementById(
   'toggle-visiblity-button',
 );
 toggleLayerVisibilityButton.addEventListener('click', () => {
-  if (realtimeLayer.getVisible()) {
-    realtimeLayer.setVisible(false);
-    toggleLayerVisibilityButton.textContent = 'Show Realtime Layer';
+  if (lnpLayer.getVisible()) {
+    lnpLayer.setVisible(false);
+    toggleLayerVisibilityButton.textContent = 'Show LNP Layer';
   } else {
-    realtimeLayer.setVisible(true);
-    toggleLayerVisibilityButton.textContent = 'Hide Realtime Layer';
+    lnpLayer.setVisible(true);
+    toggleLayerVisibilityButton.textContent = 'Hide LNP Layer';
   }
 });
 // const urlInput = document?.getElementById('url-input');

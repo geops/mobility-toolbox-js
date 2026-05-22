@@ -23,6 +23,8 @@ import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
 import getGraphByZoomFromStyleMetadata from '../utils/getGraphByZoomFromStyleMetadata';
 
+import { deprecated } from './MaplibreLayer';
+
 import type { DebouncedFunc } from 'lodash';
 import type { Map, MapEvent } from 'ol';
 import type { EventsKey } from 'ol/events';
