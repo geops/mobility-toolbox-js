@@ -29,6 +29,7 @@ import type { Map, MapEvent } from 'ol';
 import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
+import type BaseLayer from 'ol/layer/Base';
 import type { ObjectEvent } from 'ol/Object';
 import type { State } from 'ol/View';
 
@@ -225,7 +226,7 @@ class RealtimeLayer extends Layer<Source> {
       minZoom: this.getMinZoom(),
       source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
-        return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
+        return (options.fullTrajectoryStyle ?? fullTrajectoryStyle)(
           feature as Feature,
           resolution,
           this,
@@ -235,9 +236,9 @@ class RealtimeLayer extends Layer<Source> {
       updateWhileInteracting: true,
     });
 
-    this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
+    this.onZoomEndDebounced = debounce(this.onZoomEnd.bind(this), 100);
 
-    this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
+    this.onMoveEndDebounced = debounce(this.onMoveEnd.bind(this), 100);
   }
 
   /**
@@ -284,7 +285,7 @@ class RealtimeLayer extends Layer<Source> {
           },
         ),
         this.on('change:visible', (evt: ObjectEvent) => {
-          if (evt.target.getVisible()) {
+          if ((evt.target as BaseLayer).getVisible()) {
             this.engine.start();
           } else {
             this.engine.stop();
@@ -297,7 +298,10 @@ class RealtimeLayer extends Layer<Source> {
               evt.key,
             )
           ) {
-            this.vectorLayer.set(evt.key, evt.target.get(evt.key));
+            this.vectorLayer.set(
+              evt.key,
+              (evt.target as BaseLayer).get(evt.key),
+            );
           }
         }),
       );
@@ -317,7 +321,10 @@ class RealtimeLayer extends Layer<Source> {
    * @public
    */
   clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
-    return new RealtimeLayer({ ...this.get('options'), ...newOptions });
+    return new RealtimeLayer({
+      ...(this.get('options') as RealtimeLayerOptions),
+      ...newOptions,
+    });
   }
 
   createRenderer() {
@@ -345,7 +352,7 @@ class RealtimeLayer extends Layer<Source> {
       id,
       this.engine.mode,
       this.engine.getGeneralizationLevelByZoom(
-        Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
+        Math.floor(this.getMapInternal()?.getView()?.getZoom() ?? 0),
       ),
     );
     if (data?.content?.features?.length) {
@@ -475,7 +482,7 @@ class RealtimeLayer extends Layer<Source> {
     // @ts-expect-error  - we are in the same class
     const { container } = this.getRenderer()!;
     if (container) {
-      container.style.transform = '';
+      (container as HTMLDivElement).style.transform = '';
     }
   }
 
@@ -537,7 +544,8 @@ class RealtimeLayer extends Layer<Source> {
   shouldRender() {
     return this.allowRenderWhenAnimating
       ? false
-      : this.getMapInternal()?.getView().getAnimating() ||
+      : // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        this.getMapInternal()?.getView().getAnimating() ||
           this.getMapInternal()?.getView().getInteracting();
   }
 
@@ -581,10 +589,10 @@ class RealtimeLayer extends Layer<Source> {
         this.getMapInternal()?.addLayer(this.vectorLayer);
       }
     } else if (!this.vectorLayer.getMapInternal()) {
-      const index =
-        this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
-      if (index) {
-        this.getMapInternal()?.getLayers().insertAt(index, this.vectorLayer);
+      const map = this.getMapInternal();
+      if (map) {
+        const index = map.getLayers().getArray().indexOf(this);
+        map.getLayers().insertAt(index, this.vectorLayer);
       }
     }
     return features;

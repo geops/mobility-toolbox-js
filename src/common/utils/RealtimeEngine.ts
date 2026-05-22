@@ -384,29 +384,29 @@ class RealtimeEngine {
     };
 
     // Generalization levels by zoom
-    this.generalizationLevelByZoom = options.generalizationLevelByZoom ?? [];
+    this._generalizationLevelByZoom = options.generalizationLevelByZoom ?? [];
     this.getGeneralizationLevelByZoom = (zoom) => {
       if (options.getGeneralizationLevelByZoom) {
         return options.getGeneralizationLevelByZoom(
           zoom,
-          this.generalizationLevelByZoom,
+          this._generalizationLevelByZoom,
         );
       }
-      if (zoom > this.generalizationLevelByZoom.length - 1) {
-        return this.generalizationLevelByZoom[
-          this.generalizationLevelByZoom.length - 1
+      if (zoom > this._generalizationLevelByZoom.length - 1) {
+        return this._generalizationLevelByZoom[
+          this._generalizationLevelByZoom.length - 1
         ];
       }
-      return this.generalizationLevelByZoom[zoom];
+      return this._generalizationLevelByZoom[zoom];
     };
 
     // Graph by zoom
-    this.graphByZoom = options.graphByZoom ?? [];
+    this._graphByZoom = options.graphByZoom ?? [];
     this.getGraphByZoom = (zoom) => {
       if (options.getGraphByZoom) {
-        return options.getGraphByZoom(zoom, this.graphByZoom);
+        return options.getGraphByZoom(zoom, this._graphByZoom);
       }
-      return getGraphByZoom(zoom, this.graphByZoom);
+      return getGraphByZoom(zoom, this._graphByZoom);
     };
 
     // Render time interval by zoom
