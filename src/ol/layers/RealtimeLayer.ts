@@ -21,8 +21,7 @@ import {
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
-
-import { deprecated } from './MaplibreLayer';
+import getGraphByZoomFromStyleMetadata from '../utils/getGraphByZoomFromStyleMetadata';
 
 import type { DebouncedFunc } from 'lodash';
 import type { Map, MapEvent } from 'ol';
@@ -36,7 +35,11 @@ import type { State } from 'ol/View';
 import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
-import type { RealtimeStyleOptions } from '../../types';
+import type {
+  MaplibreLayer,
+  MapsStyleSpecification,
+  RealtimeStyleOptions,
+} from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
@@ -49,6 +52,22 @@ export type RealtimeLayerOptions = {
     resolution: number,
     layer: RealtimeLayer,
   ) => void;
+  /**
+   * This options is here to faciliate the use of Realtime layer in combination mit LNP daten,
+   * for example it uses different graph depending on the visibility of an LNP layer.
+   * You can also obtain the same behavior using application code, just do not set the layer
+   * if you want to do so.
+   * @experimental
+   */
+  lnpLayer?: BaseLayer;
+  /**
+   * This options is here to faciliate the use of Realtime layer in combination mit LNP daten,
+   * for example it uses different graph depending on the visibility of an LNP layer.
+   * You can also obtain the same behavior using application code, just do not set the layer
+   * if you want to do so.
+   * @experimental
+   */
+  maplibreLayer?: MaplibreLayer;
   maxNbFeaturesRequested?: number;
   styleOptions?: Partial<RealtimeStyleOptions>;
 } & MobilityLayerOptions &
@@ -79,6 +98,7 @@ export type RealtimeLayerOptions = {
  */
 class RealtimeLayer extends Layer<Source> {
   allowRenderWhenAnimating?: boolean = false;
+  cachedGraphByZoom: string[] = [];
   currentZoom?: number;
   engine: RealtimeEngine;
   maxNbFeaturesRequested = 100;
@@ -129,6 +149,14 @@ class RealtimeLayer extends Layer<Source> {
 
   set hoverVehicleId(id: RealtimeTrainId) {
     this.engine.hoverVehicleId = id;
+  }
+
+  get lnpLayer(): Layer | undefined {
+    return this.get('lnpLayer') as Layer | undefined;
+  }
+
+  get maplibreLayer(): MaplibreLayer | undefined {
+    return this.get('maplibreLayer') as MaplibreLayer | undefined;
   }
 
   get mode() {
@@ -239,6 +267,7 @@ class RealtimeLayer extends Layer<Source> {
     this.onZoomEndDebounced = debounce(this.onZoomEnd.bind(this), 100);
 
     this.onMoveEndDebounced = debounce(this.onMoveEnd.bind(this), 100);
+    this.updateGraphByZoom = this.updateGraphByZoom.bind(this);
   }
 
   /**
@@ -306,6 +335,28 @@ class RealtimeLayer extends Layer<Source> {
         }),
       );
     }
+
+    if (this.maplibreLayer) {
+      const mbMap = this.maplibreLayer?.mapLibreMap;
+
+      void mbMap?.once('idle', this.updateGraphByZoom);
+      if (!mbMap) {
+        this.olEventsKeys.push(
+          // @ts-expect-error - load is a valid event
+          this.maplibreLayer.once('load', this.updateGraphByZoom),
+        );
+      }
+    }
+
+    if (this.lnpLayer) {
+      if (this.lnpLayer?.getVisible()) {
+        this.updateGraphByZoom();
+      }
+
+      this.olEventsKeys.push(
+        this.lnpLayer.on('change:visible', this.updateGraphByZoom),
+      );
+    }
   }
 
   cleanVectorLayer() {
@@ -335,6 +386,7 @@ class RealtimeLayer extends Layer<Source> {
    * Destroy the container of the tracker.
    */
   detachFromMap() {
+    this.maplibreLayer?.mapLibreMap?.off('idle', this.updateGraphByZoom);
     unByKey(this.olEventsKeys);
     this.getMapInternal()?.removeLayer(this.vectorLayer);
     this.engine.detachFromMap();
@@ -566,6 +618,21 @@ class RealtimeLayer extends Layer<Source> {
   stop() {
     this.engine.stop();
   }
+
+  private updateGraphByZoom = () => {
+    const graphByZoom = [];
+    const mbMap = this.maplibreLayer?.mapLibreMap;
+    if (mbMap && this.lnpLayer?.getVisible()) {
+      const graphs = (mbMap?.getStyle() as MapsStyleSpecification).metadata
+        ?.graphs;
+      if (graphs) {
+        for (let i = 0; i < 26; i++) {
+          graphByZoom.push(getGraphByZoomFromStyleMetadata(i, graphs));
+        }
+      }
+    }
+    this.graphByZoom = graphByZoom;
+  };
 
   private updateHighlightFeatures(features: Feature[] | undefined) {
     this.cleanVectorLayer();

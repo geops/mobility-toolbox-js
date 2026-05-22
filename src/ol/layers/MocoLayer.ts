@@ -65,8 +65,19 @@ const getMocoLayersFilter = (lnpLayer?: BaseLayer) => {
 
 export type MocoLayerOptions = {
   apiParameters?: MocoExportParameters;
+  /**
+   * TODO: Not used right now. But will be in the future.
+   * @experimental
+   */
   generalizationLevelByZoom?: string[];
   graphByZoom?: string[];
+  /**
+   * This options is here to faciliate the use of Moco layer in combination mit LNP daten,
+   * for example it uses different graph depending on the visibility of an LNP layer.
+   * You can also obtain the same behavior using application code, just do not set the layer
+   * if you want to do so.
+   * @experimental
+   */
   lnpLayer?: BaseLayer;
   loadAll?: boolean;
   loadByZoom?: boolean;
@@ -254,12 +265,6 @@ class MocoLayer extends MaplibreStyleLayer {
   set url(value: string) {
     this.api.url = value;
     void this.updateData();
-  }
-
-  // The useGraphsFromStyle option allows to set the  graphByZoom  property directly form the style of the maplibreLayer.
-  // If false the graphByZoom property wil be used.
-  get useGraphsFromStyle(): boolean {
-    return (this.get('useGraphsFromStyle') as boolean) ?? true;
   }
 
   #abortController: AbortController | null = null;
