@@ -5,6 +5,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { fromLonLat } from 'ol/proj';
 
 import { RealtimeAPI, RealtimeModes } from '../../api';
+import getGraphByZoom from '../../ol/utils/getGraphByZoom';
 import realtimeStyle from '../styles/realtimeStyle';
 
 import {
@@ -164,17 +165,19 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
  * This class is totally agnostic from Maplibre or OpenLayers and must stay taht way.
  */
 class RealtimeEngine {
+  _generalizationLevelByZoom: string[] = [];
+  _graphByZoom: string[] = [];
   _idleTimeout?: number;
   _mode: RealtimeMode;
   _speed: number;
   _style: RealtimeStyleFunction;
   _time: Date;
+
   api: RealtimeAPI;
   bboxParameters?: Record<
     string,
     boolean | boolean[] | number | number[] | string | string[]
   >;
-
   canvas?: AnyCanvas;
   debounceRenderTrajectories: (
     viewState: ViewState,
@@ -184,12 +187,10 @@ class RealtimeEngine {
   filter?: FilterFunction;
   format: GeoJSON;
   generalizationLevel?: string;
-  generalizationLevelByZoom: string[];
   getGeneralizationLevelByZoom: (zoom: number) => string;
   getGraphByZoom: (zoom: number) => string | undefined;
   getMotsByZoom: (zoom: number) => RealtimeMot[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
-  graphByZoom: string[];
   hoverVehicleId?: RealtimeTrainId;
   isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
@@ -221,9 +222,36 @@ class RealtimeEngine {
   useRequestAnimationFrame?: boolean;
   useThrottle?: boolean;
 
+  get generalizationLevelByZoom() {
+    return this._generalizationLevelByZoom;
+  }
+  set generalizationLevelByZoom(generalizationLevelByZoom: string[]) {
+    if (
+      JSON.stringify(this._generalizationLevelByZoom) ===
+      JSON.stringify(generalizationLevelByZoom)
+    ) {
+      return;
+    }
+    this._generalizationLevelByZoom = generalizationLevelByZoom;
+    this.setBbox();
+  }
+
+  get graphByZoom() {
+    return this._graphByZoom;
+  }
+
+  set graphByZoom(graphByZoom: string[]) {
+    if (JSON.stringify(this._graphByZoom) === JSON.stringify(graphByZoom)) {
+      return;
+    }
+    this._graphByZoom = graphByZoom;
+    this.setBbox();
+  }
+
   get mode() {
     return this._mode;
   }
+
   set mode(newMode: RealtimeMode) {
     if (newMode === this._mode) {
       return;
@@ -265,6 +293,7 @@ class RealtimeEngine {
   }
 
   constructor(options: RealtimeEngineOptions) {
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
     this._speed = options.speed ?? 1; // If live property is true. The speed is ignored.
     this._style = options.style ?? realtimeStyle;
@@ -355,36 +384,33 @@ class RealtimeEngine {
     };
 
     // Generalization levels by zoom
-    this.generalizationLevelByZoom = options.generalizationLevelByZoom || [];
+    this._generalizationLevelByZoom = options.generalizationLevelByZoom ?? [];
     this.getGeneralizationLevelByZoom = (zoom) => {
       if (options.getGeneralizationLevelByZoom) {
         return options.getGeneralizationLevelByZoom(
           zoom,
-          this.generalizationLevelByZoom,
+          this._generalizationLevelByZoom,
         );
       }
-      if (zoom > this.generalizationLevelByZoom.length - 1) {
-        return this.generalizationLevelByZoom[
-          this.generalizationLevelByZoom.length - 1
+      if (zoom > this._generalizationLevelByZoom.length - 1) {
+        return this._generalizationLevelByZoom[
+          this._generalizationLevelByZoom.length - 1
         ];
       }
-      return this.generalizationLevelByZoom[zoom];
+      return this._generalizationLevelByZoom[zoom];
     };
 
     // Graph by zoom
-    this.graphByZoom = options.graphByZoom ?? [];
+    this._graphByZoom = options.graphByZoom ?? [];
     this.getGraphByZoom = (zoom) => {
       if (options.getGraphByZoom) {
-        return options.getGraphByZoom(zoom, this.graphByZoom);
+        return options.getGraphByZoom(zoom, this._graphByZoom);
       }
-      if (zoom > this.graphByZoom.length - 1) {
-        return this.graphByZoom?.[this.graphByZoom.length - 1];
-      }
-      return this.graphByZoom?.[zoom];
+      return getGraphByZoom(zoom, this._graphByZoom);
     };
 
     // Render time interval by zoom
-    this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom || [
+    this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom ?? [
       100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400,
       300, 250, 180, 90, 60, 50, 50, 50, 50, 50,
     ];
@@ -404,13 +430,13 @@ class RealtimeEngine {
 
     // Define throttling and debounce render function
     this.throttleRenderTrajectories = throttle(
-      this.renderTrajectoriesInternal,
+      this.renderTrajectoriesInternal.bind(this),
       50,
       { leading: false, trailing: true },
     );
 
     this.debounceRenderTrajectories = debounce(
-      this.renderTrajectoriesInternal,
+      this.renderTrajectoriesInternal.bind(this),
       50,
       { leading: true, maxWait: 5000, trailing: true },
     );
@@ -433,9 +459,7 @@ class RealtimeEngine {
    * @private
    */
   addTrajectory(trajectory: RealtimeTrajectory) {
-    if (!this.trajectories) {
-      this.trajectories = {};
-    }
+    this.trajectories ??= {};
     const id = trajectory.properties.train_id;
     if (id !== undefined) {
       this.trajectories[id] = trajectory;
@@ -448,6 +472,7 @@ class RealtimeEngine {
     // We stop the rendering and the websocket when hide and start again when show.
     document.addEventListener(
       'visibilitychange',
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
   }
@@ -455,6 +480,7 @@ class RealtimeEngine {
   detachFromMap() {
     document.removeEventListener(
       'visibilitychange',
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
 
@@ -488,13 +514,13 @@ class RealtimeEngine {
     // TODO: see if this should go elsewhere.
     if (this.useThrottle) {
       this.throttleRenderTrajectories = throttle(
-        this.renderTrajectoriesInternal,
+        this.renderTrajectoriesInternal.bind(this),
         nextThrottleTick,
         { leading: true, trailing: true },
       );
     } else if (this.useDebounce) {
       this.debounceRenderTrajectories = debounce(
-        this.renderTrajectoriesInternal,
+        this.renderTrajectoriesInternal.bind(this),
         nextThrottleTick,
         { leading: true, maxWait: 5000, trailing: true },
       );
@@ -515,7 +541,7 @@ class RealtimeEngine {
     return (
       (this.trajectories &&
         // @ts-expect-error good type must be defined
-        Object.values(this.trajectories).filter(filterFc)) ||
+        Object.values(this.trajectories).filter(filterFc)) ??
       []
     );
   }
@@ -534,12 +560,12 @@ class RealtimeEngine {
     options?: LayerGetFeatureInfoOptions,
   ): FeatureCollection {
     const { resolution } = this.getViewState();
-    const { hitTolerance, nb } = options || {};
+    const { hitTolerance, nb } = options ?? {};
     const extent = buffer(
       [...coordinate, ...coordinate],
       (hitTolerance ?? 5) * (resolution ?? 1),
     );
-    let trajectories = Object.values(this.trajectories || {});
+    let trajectories = Object.values(this.trajectories ?? {});
 
     if (this.sort) {
       // @ts-expect-error good type must be defined
@@ -665,7 +691,7 @@ class RealtimeEngine {
    * Remove all trajectories that are in the past.
    */
   purgeOutOfDateTrajectories() {
-    Object.entries(this.trajectories || {}).forEach(([key, trajectory]) => {
+    Object.entries(this.trajectories ?? {}).forEach(([key, trajectory]) => {
       const timeIntervals = trajectory?.properties?.time_intervals;
       if (this.time && timeIntervals?.length) {
         const lastTimeInterval = timeIntervals[timeIntervals.length - 1][0];
@@ -792,7 +818,7 @@ class RealtimeEngine {
       this.style,
       {
         ...viewState,
-        pixelRatio: this.pixelRatio || 1,
+        pixelRatio: this.pixelRatio ?? 1,
         time: time.getTime(),
       },
       {
@@ -800,7 +826,7 @@ class RealtimeEngine {
         filter: this.filter,
         hoverVehicleId: this.hoverVehicleId,
         noInterpolate:
-          (viewState.zoom || 0) < this.minZoomInterpolation
+          (viewState.zoom ?? 0) < this.minZoomInterpolation
             ? true
             : noInterpolate,
         selectedVehicleId: this.selectedVehicleId,
@@ -907,12 +933,14 @@ class RealtimeEngine {
     this.api.open();
     this.api.subscribeTrajectory(
       this.mode,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onTrajectoryMessage,
       undefined,
       this.isUpdateBboxOnMoveEnd,
     );
     this.api.subscribeDeletedVehicles(
       this.mode,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDeleteTrajectoryMessage,
       undefined,
       this.isUpdateBboxOnMoveEnd,
@@ -948,7 +976,9 @@ class RealtimeEngine {
   }
 
   stop() {
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     this.api.unsubscribeTrajectory(this.onTrajectoryMessage);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);
     this.api.close();
     if (this.onStop) {

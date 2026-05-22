@@ -21,6 +21,7 @@ import {
 import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
 import { fullTrajectoryStyle } from '../styles';
 import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+import getGraphByZoomFromStyleMetadata from '../utils/getGraphByZoomFromStyleMetadata';
 
 import { deprecated } from './MaplibreLayer';
 
@@ -29,13 +30,18 @@ import type { Map, MapEvent } from 'ol';
 import type { EventsKey } from 'ol/events';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
+import type BaseLayer from 'ol/layer/Base';
 import type { ObjectEvent } from 'ol/Object';
 import type { State } from 'ol/View';
 
 import type { FilterFunction, SortFunction } from '../../common/typedefs';
 import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
 import type { RealtimeAPI } from '../../maplibre';
-import type { RealtimeStyleOptions } from '../../types';
+import type {
+  MaplibreLayer,
+  MapsStyleSpecification,
+  RealtimeStyleOptions,
+} from '../../types';
 
 import type { MobilityLayerOptions } from './Layer';
 
@@ -48,6 +54,22 @@ export type RealtimeLayerOptions = {
     resolution: number,
     layer: RealtimeLayer,
   ) => void;
+  /**
+   * This options is here to faciliate the use of Realtime layer in combination mit LNP daten,
+   * for example it uses different graph depending on the visibility of an LNP layer.
+   * You can also obtain the same behavior using application code, just do not set the layer
+   * if you want to do so.
+   * @experimental
+   */
+  lnpLayer?: BaseLayer;
+  /**
+   * This options is here to faciliate the use of Realtime layer in combination mit LNP daten,
+   * for example it uses different graph depending on the visibility of an LNP layer.
+   * You can also obtain the same behavior using application code, just do not set the layer
+   * if you want to do so.
+   * @experimental
+   */
+  maplibreLayer?: MaplibreLayer;
   maxNbFeaturesRequested?: number;
   styleOptions?: Partial<RealtimeStyleOptions>;
 } & MobilityLayerOptions &
@@ -78,6 +100,7 @@ export type RealtimeLayerOptions = {
  */
 class RealtimeLayer extends Layer<Source> {
   allowRenderWhenAnimating?: boolean = false;
+  cachedGraphByZoom: string[] = [];
   currentZoom?: number;
   engine: RealtimeEngine;
   maxNbFeaturesRequested = 100;
@@ -106,12 +129,36 @@ class RealtimeLayer extends Layer<Source> {
     this.engine.filter = filter;
   }
 
+  get generalizationLevelByZoom() {
+    return this.engine.generalizationLevelByZoom;
+  }
+
+  set generalizationLevelByZoom(generalizationLevelByZoom: string[]) {
+    this.engine.generalizationLevelByZoom = generalizationLevelByZoom;
+  }
+
+  get graphByZoom() {
+    return this.engine.graphByZoom;
+  }
+
+  set graphByZoom(graphByZoom: string[]) {
+    this.engine.graphByZoom = graphByZoom;
+  }
+
   get hoverVehicleId(): RealtimeTrainId | undefined {
     return this.engine.hoverVehicleId;
   }
 
   set hoverVehicleId(id: RealtimeTrainId) {
     this.engine.hoverVehicleId = id;
+  }
+
+  get lnpLayer(): Layer | undefined {
+    return this.get('lnpLayer') as Layer | undefined;
+  }
+
+  get maplibreLayer(): MaplibreLayer | undefined {
+    return this.get('maplibreLayer') as MaplibreLayer | undefined;
   }
 
   get mode() {
@@ -209,7 +256,7 @@ class RealtimeLayer extends Layer<Source> {
       minZoom: this.getMinZoom(),
       source: new VectorSource<Feature>({ features: [] }),
       style: (feature, resolution) => {
-        return (options.fullTrajectoryStyle || fullTrajectoryStyle)(
+        return (options.fullTrajectoryStyle ?? fullTrajectoryStyle)(
           feature as Feature,
           resolution,
           this,
@@ -219,9 +266,10 @@ class RealtimeLayer extends Layer<Source> {
       updateWhileInteracting: true,
     });
 
-    this.onZoomEndDebounced = debounce(this.onZoomEnd, 100);
+    this.onZoomEndDebounced = debounce(this.onZoomEnd.bind(this), 100);
 
-    this.onMoveEndDebounced = debounce(this.onMoveEnd, 100);
+    this.onMoveEndDebounced = debounce(this.onMoveEnd.bind(this), 100);
+    this.updateGraphByZoom = this.updateGraphByZoom.bind(this);
   }
 
   /**
@@ -268,7 +316,7 @@ class RealtimeLayer extends Layer<Source> {
           },
         ),
         this.on('change:visible', (evt: ObjectEvent) => {
-          if (evt.target.getVisible()) {
+          if ((evt.target as BaseLayer).getVisible()) {
             this.engine.start();
           } else {
             this.engine.stop();
@@ -281,9 +329,34 @@ class RealtimeLayer extends Layer<Source> {
               evt.key,
             )
           ) {
-            this.vectorLayer.set(evt.key, evt.target.get(evt.key));
+            this.vectorLayer.set(
+              evt.key,
+              (evt.target as BaseLayer).get(evt.key),
+            );
           }
         }),
+      );
+    }
+
+    if (this.maplibreLayer) {
+      const mbMap = this.maplibreLayer?.mapLibreMap;
+
+      void mbMap?.once('idle', this.updateGraphByZoom);
+      if (!mbMap) {
+        this.olEventsKeys.push(
+          // @ts-expect-error - load is a valid event
+          this.maplibreLayer.once('load', this.updateGraphByZoom),
+        );
+      }
+    }
+
+    if (this.lnpLayer) {
+      if (this.lnpLayer?.getVisible()) {
+        this.updateGraphByZoom();
+      }
+
+      this.olEventsKeys.push(
+        this.lnpLayer.on('change:visible', this.updateGraphByZoom),
       );
     }
   }
@@ -301,7 +374,10 @@ class RealtimeLayer extends Layer<Source> {
    * @public
    */
   clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
-    return new RealtimeLayer({ ...this.get('options'), ...newOptions });
+    return new RealtimeLayer({
+      ...(this.get('options') as RealtimeLayerOptions),
+      ...newOptions,
+    });
   }
 
   createRenderer() {
@@ -312,6 +388,7 @@ class RealtimeLayer extends Layer<Source> {
    * Destroy the container of the tracker.
    */
   detachFromMap() {
+    this.maplibreLayer?.mapLibreMap?.off('idle', this.updateGraphByZoom);
     unByKey(this.olEventsKeys);
     this.getMapInternal()?.removeLayer(this.vectorLayer);
     this.engine.detachFromMap();
@@ -329,7 +406,7 @@ class RealtimeLayer extends Layer<Source> {
       id,
       this.engine.mode,
       this.engine.getGeneralizationLevelByZoom(
-        Math.floor(this.getMapInternal()?.getView()?.getZoom() || 0),
+        Math.floor(this.getMapInternal()?.getView()?.getZoom() ?? 0),
       ),
     );
     if (data?.content?.features?.length) {
@@ -459,7 +536,7 @@ class RealtimeLayer extends Layer<Source> {
     // @ts-expect-error  - we are in the same class
     const { container } = this.getRenderer()!;
     if (container) {
-      container.style.transform = '';
+      (container as HTMLDivElement).style.transform = '';
     }
   }
 
@@ -521,7 +598,8 @@ class RealtimeLayer extends Layer<Source> {
   shouldRender() {
     return this.allowRenderWhenAnimating
       ? false
-      : this.getMapInternal()?.getView().getAnimating() ||
+      : // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        this.getMapInternal()?.getView().getAnimating() ||
           this.getMapInternal()?.getView().getInteracting();
   }
 
@@ -542,6 +620,21 @@ class RealtimeLayer extends Layer<Source> {
   stop() {
     this.engine.stop();
   }
+
+  private updateGraphByZoom = () => {
+    const graphByZoom = [];
+    const mbMap = this.maplibreLayer?.mapLibreMap;
+    if (mbMap && this.lnpLayer?.getVisible()) {
+      const graphs = (mbMap?.getStyle() as MapsStyleSpecification)?.metadata
+        ?.graphs;
+      if (graphs) {
+        for (let i = 0; i < 26; i++) {
+          graphByZoom.push(getGraphByZoomFromStyleMetadata(i, graphs));
+        }
+      }
+    }
+    this.graphByZoom = graphByZoom;
+  };
 
   private updateHighlightFeatures(features: Feature[] | undefined) {
     this.cleanVectorLayer();
@@ -565,10 +658,10 @@ class RealtimeLayer extends Layer<Source> {
         this.getMapInternal()?.addLayer(this.vectorLayer);
       }
     } else if (!this.vectorLayer.getMapInternal()) {
-      const index =
-        this.getMapInternal()?.getLayers().getArray().indexOf(this) || 0;
-      if (index) {
-        this.getMapInternal()?.getLayers().insertAt(index, this.vectorLayer);
+      const map = this.getMapInternal();
+      if (map) {
+        const index = map.getLayers().getArray().indexOf(this);
+        map.getLayers().insertAt(index, this.vectorLayer);
       }
     }
     return features;

@@ -7,6 +7,7 @@ import LineString from 'ol/geom/LineString';
 import Modify from 'ol/interaction/Modify';
 import {
   MaplibreLayer,
+  MaplibreStyleLayer,
   MapsetAPI,
   MapsetLayer,
   MocoLayer,
@@ -36,29 +37,39 @@ const mapsetLayer = new MapsetLayer({
   tenants: ['geopsmarketing'],
 });
 
+const lnpLayer = new MaplibreStyleLayer({
+  isQueryable: true,
+  // hideInLegend: true,
+  layersFilter: (l) => {
+    return l.source === 'network_plans';
+  },
+  maplibreLayer: baseLayer,
+});
+
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
   // apiKey: '5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e', // sbm
   // url: 'wss://api.geops.io/tracker-ws/v1/', // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
+  url: 'https://api.geops.io/tracker-http/v1/', // rvf
   styleOptions: {
     // useHeadingStyle: true,
     // useDelayStyle: true,
   },
   // style: realtimeByMotStyle,
   // tenant: 'sbm',
-  // tenant: 'trenord',
-  // bboxParameters: {
-  //   line_tags: 'RVF',
-  // },
+  bboxParameters: {
+    line_tags: 'RVF',
+  },
+  visible: true,
 });
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
   tenant: 'rvf',
   maplibreLayer: baseLayer,
+  lnpLayer: lnpLayer,
   loadByZoom: true,
-  // useGraphs: false,
   // publicAt: new Date(),
   // url: mocoUrl,
 });
@@ -66,9 +77,10 @@ const mocoLayer = new MocoLayer({
 const map = new Map({
   layers: [
     baseLayer,
-    // realtimeLayer,
+    lnpLayer,
     mocoLayer,
     // mapsetLayer,
+    realtimeLayer,
   ],
   target: 'map',
   view: new View({
@@ -113,7 +125,18 @@ map.on('moveend', () => {
   const zoom = map.getView().getZoom();
   console.log('Current zoom level:', zoom);
 });
-
+const toggleLayerVisibilityButton = document?.getElementById(
+  'toggle-visiblity-button',
+);
+toggleLayerVisibilityButton.addEventListener('click', () => {
+  if (lnpLayer.getVisible()) {
+    lnpLayer.setVisible(false);
+    toggleLayerVisibilityButton.textContent = 'Show LNP Layer';
+  } else {
+    lnpLayer.setVisible(true);
+    toggleLayerVisibilityButton.textContent = 'Hide LNP Layer';
+  }
+});
 // const urlInput = document?.getElementById('url-input');
 // const setUrlButton = document?.getElementById('set-url-button');
 // setUrlButton.addEventListener('click', () => {
