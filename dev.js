@@ -51,14 +51,15 @@ const realtimeLayer = new RealtimeLayer({
   // bboxParameters: {
   //   line_tags: 'RVF',
   // },
+  visible: false,
 });
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
   tenant: 'rvf',
   maplibreLayer: baseLayer,
+  lnpLayer: realtimeLayer,
   loadByZoom: true,
-  // useGraphs: false,
   // publicAt: new Date(),
   // url: mocoUrl,
 });
@@ -66,7 +67,7 @@ const mocoLayer = new MocoLayer({
 const map = new Map({
   layers: [
     baseLayer,
-    // realtimeLayer,
+    realtimeLayer,
     mocoLayer,
     // mapsetLayer,
   ],
@@ -113,7 +114,18 @@ map.on('moveend', () => {
   const zoom = map.getView().getZoom();
   console.log('Current zoom level:', zoom);
 });
-
+const toggleLayerVisibilityButton = document?.getElementById(
+  'toggle-visiblity-button',
+);
+toggleLayerVisibilityButton.addEventListener('click', () => {
+  if (realtimeLayer.getVisible()) {
+    realtimeLayer.setVisible(false);
+    toggleLayerVisibilityButton.textContent = 'Show Realtime Layer';
+  } else {
+    realtimeLayer.setVisible(true);
+    toggleLayerVisibilityButton.textContent = 'Hide Realtime Layer';
+  }
+});
 // const urlInput = document?.getElementById('url-input');
 // const setUrlButton = document?.getElementById('set-url-button');
 // setUrlButton.addEventListener('click', () => {

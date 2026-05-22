@@ -106,6 +106,22 @@ class RealtimeLayer extends Layer<Source> {
     this.engine.filter = filter;
   }
 
+  get generalizationLevelByZoom() {
+    return this.engine.generalizationLevelByZoom;
+  }
+
+  set generalizationLevelByZoom(generalizationLevelByZoom: string[]) {
+    this.engine.generalizationLevelByZoom = generalizationLevelByZoom;
+  }
+
+  get graphByZoom() {
+    return this.engine.graphByZoom;
+  }
+
+  set graphByZoom(graphByZoom: string[]) {
+    this.engine.graphByZoom = graphByZoom;
+  }
+
   get hoverVehicleId(): RealtimeTrainId | undefined {
     return this.engine.hoverVehicleId;
   }
