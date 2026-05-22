@@ -16,13 +16,6 @@ export default [
   },
   ...flat,
   {
-    languageOptions: {
-      parserOptions: {
-        project: './tsconfig.json',
-      },
-    },
-  },
-  {
     rules: {},
   },
   {

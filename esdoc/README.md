@@ -4,7 +4,7 @@ To generate the api documentation. We use [Esdoc](https://esdoc.org/).
 
 ## Build
 
-`yarn apidoc`  : Build only the api documentation in `../apidoc` folder. Use it for development.
+`pnpm apidoc`  : Build only the api documentation in `../apidoc` folder. Use it for development.
 
 ## Configuration
 
@@ -22,6 +22,6 @@ Some [plugins](https://github.com/esdoc/esdoc-plugins) for inspiration.
 
 Esdoc generates a coverage page.
 
-Run `yarn  apidoc` .
+Run `pnpm  apidoc` .
 
 Then opens `../apidoc/source.html` with your favorite browser.

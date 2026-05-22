@@ -1,27 +1,42 @@
 /* eslint-disable */
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = T | null | undefined;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
+export type MakeEmpty<
+  T extends { [key: string]: unknown },
+  K extends keyof T,
+> = { [_ in K]?: never };
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never;
+    };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
   /** Date with time (isoformat) */
-  DateTime: { input: any; output: any; }
-  GeoJSONDict: { input: any; output: any; }
+  DateTime: { input: any; output: any };
+  /** Geometry object as descibed in RFC 7946 section 3.1 with SRID=3857. */
+  GeoJSONDict: { input: any; output: any };
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf). */
-  JSON: { input: any; output: any; }
+  JSON: { input: any; output: any };
   /** Time (isoformat) */
-  Time: { input: any; output: any; }
-  UUID: { input: any; output: any; }
-  Upload: { input: any; output: any; }
+  Time: { input: any; output: any };
+  UUID: { input: any; output: any };
+  /** Represents a file upload. */
+  Upload: { input: any; output: any };
 };
 
 export type AffectedTimeIntervalInput = {
@@ -55,6 +70,7 @@ export type BboxFilterInput = {
 
 export type CreateSituationInput = {
   affectedTimeIntervals: Array<AffectedTimeIntervalInput>;
+  isActive?: Scalars['Boolean']['input'];
   publicationWindows: Array<PublicationWindowInput>;
   publications: Array<PublicationInput>;
   reasons: Array<Scalars['String']['input']>;
@@ -110,7 +126,6 @@ export type LineGraphGeometryType = {
   graph: Scalars['String']['output'];
 };
 
-
 export type LineGraphGeometryTypeGeomArgs = {
   precision?: Scalars['Int']['input'];
   simplify?: Scalars['Int']['input'];
@@ -145,7 +160,6 @@ export type LineType = {
   viaStops: Array<StopType>;
 };
 
-
 export type LineTypeGeometryArgs = {
   filters?: InputMaybe<PublicationLineGeomFilter>;
 };
@@ -159,7 +173,7 @@ export enum MotChoices {
   Gondola = 'GONDOLA',
   Rail = 'RAIL',
   Subway = 'SUBWAY',
-  Tram = 'TRAM'
+  Tram = 'TRAM',
 }
 
 export type MultiLingualLabelInput = {
@@ -222,8 +236,6 @@ export type MultilingualTextualContentInput = {
   de?: InputMaybe<TextualContentInput>;
   en?: InputMaybe<TextualContentInput>;
   fr?: InputMaybe<TextualContentInput>;
-  images: Array<IndexedImageInput>;
-  infoLinks: Array<InfoLinkInput>;
   it?: InputMaybe<TextualContentInput>;
 };
 
@@ -233,8 +245,6 @@ export type MultilingualTextualContentType = {
   en?: Maybe<TextualContentType>;
   fr?: Maybe<TextualContentType>;
   id: Scalars['ID']['output'];
-  images: Array<IndexedImageType>;
-  infoLinks: Array<InfoLinkType>;
   it?: Maybe<TextualContentType>;
   size: Scalars['String']['output'];
 };
@@ -247,22 +257,18 @@ export type Mutation = {
   uploadImage: UploadImagePayload;
 };
 
-
 export type MutationCreateSituationArgs = {
   data: CreateSituationInput;
   tenant: Scalars['String']['input'];
 };
 
-
 export type MutationDeleteSituationArgs = {
   data: DeleteSituationInput;
 };
 
-
 export type MutationUpdateSituationArgs = {
   data: UpdateSituationInput;
 };
-
 
 export type MutationUploadImageArgs = {
   data: ImageUploadInput;
@@ -311,7 +317,7 @@ export enum OperationMessageKind {
   Info = 'INFO',
   Permission = 'PERMISSION',
   Validation = 'VALIDATION',
-  Warning = 'WARNING'
+  Warning = 'WARNING',
 }
 
 export enum Ordering {
@@ -320,7 +326,7 @@ export enum Ordering {
   AscNullsLast = 'ASC_NULLS_LAST',
   Desc = 'DESC',
   DescNullsFirst = 'DESC_NULLS_FIRST',
-  DescNullsLast = 'DESC_NULLS_LAST'
+  DescNullsLast = 'DESC_NULLS_LAST',
 }
 
 export type PaginationMeta = {
@@ -339,6 +345,8 @@ export type PlatformType = {
 };
 
 export type PublicationInput = {
+  images: Array<IndexedImageInput>;
+  infoLinks: Array<InfoLinkInput>;
   perspectives: Array<Scalars['String']['input']>;
   publicationLines: Array<LineGroupInput>;
   publicationStops: Array<StopInput>;
@@ -375,7 +383,7 @@ export enum PublicationLineStyleCategoryChoices {
   RailReplacement = 'RAIL_REPLACEMENT',
   SpecialEvent = 'SPECIAL_EVENT',
   VehicleFaulure = 'VEHICLE_FAULURE',
-  Warning = 'WARNING'
+  Warning = 'WARNING',
 }
 
 export type PublicationStopGeomFilter = {
@@ -395,7 +403,6 @@ export type PublicationStopType = {
   uid: Scalars['String']['output'];
 };
 
-
 export type PublicationStopTypeGeometryArgs = {
   filters?: InputMaybe<PublicationStopGeomFilter>;
 };
@@ -404,6 +411,8 @@ export type PublicationType = {
   __typename?: 'PublicationType';
   effectivePublicationWindows: Array<TimeIntervalType>;
   id: Scalars['ID']['output'];
+  images: Array<IndexedImageType>;
+  infoLinks: Array<InfoLinkType>;
   perspectives: Array<Scalars['String']['output']>;
   publicationLines: Array<PublicationLineGroupType>;
   publicationStops: Array<PublicationStopType>;
@@ -420,7 +429,6 @@ export type PublicationType = {
   textualContentSmall?: Maybe<MultilingualTextualContentType>;
   textualContents: Array<MultilingualTextualContentType>;
 };
-
 
 export type PublicationTypeTextualContentsArgs = {
   filters?: InputMaybe<MultilingualTextualContentFilter>;
@@ -451,11 +459,9 @@ export type Query = {
   stops: Array<StopResult>;
 };
 
-
 export type QueryMultiRoutingArgs = {
   params: MultiRoutingParamsType;
 };
-
 
 export type QueryPaginatedSituationsArgs = {
   filters?: InputMaybe<SituationFilter>;
@@ -464,34 +470,28 @@ export type QueryPaginatedSituationsArgs = {
   tenant: Scalars['String']['input'];
 };
 
-
 export type QueryPreviewSituationArgs = {
   data: CreateSituationInput;
   tenant: Scalars['String']['input'];
 };
 
-
 export type QueryReasonsArgs = {
   filters?: InputMaybe<ReasonFilter>;
 };
-
 
 export type QuerySituationArgs = {
   pk: Scalars['ID']['input'];
   tenant: Scalars['String']['input'];
 };
 
-
 export type QuerySourcesArgs = {
   filters?: InputMaybe<SourceFilter>;
 };
-
 
 export type QueryStopArgs = {
   id: Scalars['ID']['input'];
   tenant: Scalars['String']['input'];
 };
-
 
 export type QueryStopsArgs = {
   limit?: Scalars['Int']['input'];
@@ -546,13 +546,13 @@ export enum ServiceConditionEnumeration {
   TripCancellation = 'TRIP_CANCELLATION',
   UndefinedStatus = 'UNDEFINED_STATUS',
   Unknown = 'UNKNOWN',
-  WagonOrderChanged = 'WAGON_ORDER_CHANGED'
+  WagonOrderChanged = 'WAGON_ORDER_CHANGED',
 }
 
 export enum ServiceConditionGroupEnumeration {
   Changes = 'CHANGES',
   Disruption = 'DISRUPTION',
-  Information = 'INFORMATION'
+  Information = 'INFORMATION',
 }
 
 export enum SeverityEnumeration {
@@ -563,14 +563,14 @@ export enum SeverityEnumeration {
   Undefined = 'UNDEFINED',
   Unknown = 'UNKNOWN',
   VerySevere = 'VERY_SEVERE',
-  VerySlight = 'VERY_SLIGHT'
+  VerySlight = 'VERY_SLIGHT',
 }
 
 export enum SeverityGroupEnumeration {
   High = 'HIGH',
   Low = 'LOW',
   Normal = 'NORMAL',
-  Undefined = 'UNDEFINED'
+  Undefined = 'UNDEFINED',
 }
 
 export type SituationFilter = {
@@ -585,6 +585,7 @@ export type SituationFilter = {
   editedAt?: InputMaybe<Scalars['DateTime']['input']>;
   hasGeoms?: InputMaybe<Scalars['Boolean']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
   isEdited?: InputMaybe<Scalars['Boolean']['input']>;
   publicAfter?: InputMaybe<Scalars['DateTime']['input']>;
   publicAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -623,6 +624,7 @@ export type SituationType = {
   editedBy?: Maybe<UserType>;
   effectivePublicationWindows: Array<TimeIntervalType>;
   id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
   language: Scalars['String']['output'];
   publicationLineNames: Array<Scalars['String']['output']>;
   publicationStopNames: Array<Scalars['String']['output']>;
@@ -635,7 +637,6 @@ export type SituationType = {
   tenantSlug: Scalars['String']['output'];
   title: Scalars['String']['output'];
 };
-
 
 export type SituationTypeReasonsArgs = {
   filters?: InputMaybe<ReasonFilter>;
@@ -680,7 +681,6 @@ export type StopGraphGeometryType = {
   geom: Scalars['GeoJSONDict']['output'];
   graph: Scalars['String']['output'];
 };
-
 
 export type StopGraphGeometryTypeGeomArgs = {
   precision?: Scalars['Int']['input'];
@@ -756,6 +756,7 @@ export type TimeIntervalType = {
 export type UpdateSituationInput = {
   affectedTimeIntervals: Array<AffectedTimeIntervalInput>;
   id: Scalars['ID']['input'];
+  isActive?: Scalars['Boolean']['input'];
   publicationWindows: Array<PublicationWindowInput>;
   publications: Array<PublicationInput>;
   reasons: Array<Scalars['String']['input']>;
