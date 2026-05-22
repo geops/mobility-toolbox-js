@@ -625,7 +625,7 @@ class RealtimeLayer extends Layer<Source> {
     const graphByZoom = [];
     const mbMap = this.maplibreLayer?.mapLibreMap;
     if (mbMap && this.lnpLayer?.getVisible()) {
-      const graphs = (mbMap?.getStyle() as MapsStyleSpecification).metadata
+      const graphs = (mbMap?.getStyle() as MapsStyleSpecification)?.metadata
         ?.graphs;
       if (graphs) {
         for (let i = 0; i < 26; i++) {
