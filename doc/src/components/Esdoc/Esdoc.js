@@ -21,7 +21,7 @@ function Esdoc({ path }) {
       }}
     >
       <Box display={{ xs: 'none', sm: 'block' }}>
-        <Grid>
+        <Grid container>
           <Grid
             size={{ xs: 12 }}
             sx={(theme) => {
@@ -38,7 +38,7 @@ function Esdoc({ path }) {
         </Grid>
       </Box>
       <Box display={{ xs: 'block', sm: 'none' }}>
-        <Grid wrap="nowrap">
+        <Grid container wrap="nowrap">
           <Grid style={{ minWidth: 260, maxWidth: 300 }}>
             <Box
               sx={(theme) => {
@@ -52,7 +52,7 @@ function Esdoc({ path }) {
               {version}
               <EsdocSearch />
               <EsdocNavigation />
-            <Box>
+            </Box>
           </Grid>
           <Grid
             size={{ xs: 9 }}
