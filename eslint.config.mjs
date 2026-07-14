@@ -26,7 +26,7 @@ export default [
     rules: {},
   },
   {
-    files: ['src/setupTests.js', '**/*.test.js'],
+    files: ['src/setupTests.js', '**/*.test.js', '**/*.test.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/unbound-method': 'off',

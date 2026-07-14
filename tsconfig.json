@@ -15,7 +15,8 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "lib": ["es6", "dom"]
+    "lib": ["es6", "dom"],
+    "types": ["jest"]
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],
