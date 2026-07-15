@@ -138,6 +138,5 @@
     "type": "git",
     "url": "https://github.com/geops/mobility-toolbox-js"
   },
-  "sideEffects": false,
-  "type": "module"
+  "sideEffects": false
 }
