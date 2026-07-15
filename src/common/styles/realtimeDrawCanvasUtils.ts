@@ -1,9 +1,9 @@
-import createCanvas from '../utils/createCanvas';
+import createCanvas from "../utils/createCanvas";
 
-import type { AnyCanvas, AnyCanvasContext, StyleCache } from '../../types';
+import type { AnyCanvas, AnyCanvasContext, StyleCache } from "../../types";
 
 export const rotateCanvas = (canvas: AnyCanvas, rotation: number) => {
-  const ctx = canvas.getContext('2d') as AnyCanvasContext;
+  const ctx = canvas.getContext("2d") as AnyCanvasContext;
   ctx?.translate(canvas.width / 2, canvas.height / 2);
   ctx?.rotate(rotation);
   ctx?.translate(-canvas.width / 2, -canvas.height / 2);
@@ -24,7 +24,7 @@ export const getArrowCanvas = (
       arrowSize[0] * pixelRatio,
       arrowSize[1] * pixelRatio,
     );
-    const ctx = canvas?.getContext('2d') as AnyCanvasContext;
+    const ctx = canvas?.getContext("2d") as AnyCanvasContext;
     if (canvas && ctx) {
       ctx.fillStyle = fillColor;
       ctx.beginPath();
@@ -69,7 +69,7 @@ export const getBufferArrowCanvas = (
         height + arrowCanvas.height * 2 + margin * 2,
       );
       if (bufferCanvas) {
-        const bufferCtx = bufferCanvas.getContext('2d') as AnyCanvasContext;
+        const bufferCtx = bufferCanvas.getContext("2d") as AnyCanvasContext;
 
         rotateCanvas(bufferCanvas, -rotation);
 
@@ -105,7 +105,7 @@ export const getDelayBgCanvas = (
   if (!cacheDelayBg[key]) {
     const size = radius * 2 + padding * 2 + blur * 2 + padding * 2;
     const canvas = createCanvas(size, size);
-    const ctx = canvas?.getContext('2d') as AnyCanvasContext;
+    const ctx = canvas?.getContext("2d") as AnyCanvasContext;
 
     if (canvas && ctx) {
       ctx.beginPath();
@@ -139,13 +139,13 @@ export const getCanvasTextSize = (
   const key = `${text}, ${font}, ${color}, ${outlineColor}, ${outlineWidth}, ${pixelRatio}`;
   if (!cacheCanvasTextSize[key]) {
     const canvas = createCanvas(300 * pixelRatio, 300 * pixelRatio);
-    const ctx = canvas?.getContext('2d') as CanvasRenderingContext2D;
+    const ctx = canvas?.getContext("2d") as CanvasRenderingContext2D;
 
     if (canvas && ctx) {
       // We calcuate the text size first
       ctx.font = font;
-      ctx.textBaseline = 'hanging';
-      ctx.textAlign = 'left';
+      ctx.textBaseline = "hanging";
+      ctx.textAlign = "left";
       ctx.fillStyle = color;
       ctx.strokeStyle = outlineColor;
       ctx.lineWidth = outlineWidth;
@@ -173,7 +173,7 @@ export const getDelayTextCanvas = (
   fontSize: number,
   font: string,
   color: string,
-  outlineColor = '#000',
+  outlineColor = "#000",
   pixelRatio = 1,
 ) => {
   const key = `${text}, ${font}, ${color}, ${outlineColor}, ${pixelRatio}`;
@@ -194,15 +194,15 @@ export const getDelayTextCanvas = (
         textSize.width + padding * 2,
         textSize.height + padding * 2,
       );
-      const ctx = canvas?.getContext('2d') as CanvasRenderingContext2D;
+      const ctx = canvas?.getContext("2d") as CanvasRenderingContext2D;
       if (canvas && ctx) {
         // We calcuate the text size first
         ctx.font = font;
         ctx.fillStyle = color;
         ctx.lineWidth = lineWidth;
         ctx.strokeStyle = outlineColor;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'ideographic';
+        ctx.textAlign = "left";
+        ctx.textBaseline = "ideographic";
         ctx.strokeText(text, padding, canvas.height - padding);
         ctx.fillText(text, padding, canvas.height - padding);
         cacheDelayText[key] = canvas;
@@ -234,13 +234,13 @@ export const getCircleCanvas = (
       radius * 2 + padding * 2,
     );
     if (canvas) {
-      const ctx = canvas.getContext('2d') as AnyCanvasContext;
+      const ctx = canvas.getContext("2d") as AnyCanvasContext;
       if (!ctx) {
         return null;
       }
       ctx.fillStyle = color;
       ctx.lineWidth = lineWidth;
-      ctx.strokeStyle = '#000000';
+      ctx.strokeStyle = "#000000";
       ctx.beginPath();
       ctx.arc(
         canvas.width / 2,
@@ -285,7 +285,7 @@ export const getTextCanvas = (
   if (!cacheText[key]) {
     const canvas = createCanvas(radius * 2, radius * 2);
     if (canvas) {
-      const ctx = canvas.getContext('2d') as AnyCanvasContext;
+      const ctx = canvas.getContext("2d") as AnyCanvasContext;
       if (!ctx) {
         return null;
       }
@@ -293,8 +293,8 @@ export const getTextCanvas = (
       // Draw a stroke to the text only if a provider provides realtime but we don't use it.
       if (hasStroke) {
         ctx.save();
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'center';
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
         ctx.font = font;
         ctx.strokeStyle = strokeColor;
         ctx.strokeText(text, radius, radius);
@@ -302,8 +302,8 @@ export const getTextCanvas = (
       }
 
       // Draw a text
-      ctx.textBaseline = 'middle';
-      ctx.textAlign = 'center';
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "center";
       ctx.fillStyle = fillColor;
       ctx.font = font;
       ctx.strokeStyle = strokeColor;

@@ -1,9 +1,9 @@
-import fetch from 'jest-fetch-mock';
-import WS from 'jest-websocket-mock';
-import Map from 'ol/Map';
-import View from 'ol/View';
+import fetch from "jest-fetch-mock";
+import WS from "jest-websocket-mock";
+import Map from "ol/Map";
+import View from "ol/View";
 
-import RealtimeLayer from './RealtimeLayer';
+import RealtimeLayer from "./RealtimeLayer";
 
 // create a WS instance, listening on port 1234 on localhost
 let layer;
@@ -12,17 +12,17 @@ let onClick;
 let olMap;
 let server;
 
-describe('RealtimeLayer', () => {
+describe("RealtimeLayer", () => {
   beforeEach(() => {
-    server = new WS('ws://localhost:1234');
+    server = new WS("ws://localhost:1234");
     global.fetch = fetch;
     fetch.resetMocks();
 
     onClick = jest.fn();
     layer = new RealtimeLayer({
-      apiKey: 'apiKey',
+      apiKey: "apiKey",
       onClick,
-      url: 'ws://localhost:1234',
+      url: "ws://localhost:1234",
     });
 
     olMap = new Map({
@@ -42,38 +42,38 @@ describe('RealtimeLayer', () => {
     WS.clean();
   });
 
-  test('should be instanced.', () => {
+  test("should be instanced.", () => {
     expect(layer).toBeInstanceOf(RealtimeLayer);
   });
 
-  test('should clone', () => {
-    const clone = layer.clone({ name: 'clone' });
+  test("should clone", () => {
+    const clone = layer.clone({ name: "clone" });
     expect(clone).not.toBe(layer);
-    expect(clone.name).toBe('clone');
+    expect(clone.name).toBe("clone");
     expect(clone).toBeInstanceOf(RealtimeLayer);
   });
 
-  test('should use the sort function.', () => {
+  test("should use the sort function.", () => {
     const fn = () => {
       return true;
     };
     const laye = new RealtimeLayer({
-      apiKey: 'apiKey',
+      apiKey: "apiKey",
       sort: fn,
-      url: 'ws://localhost:1234',
+      url: "ws://localhost:1234",
     });
     expect(laye).toBeInstanceOf(RealtimeLayer);
     expect(laye.sort).toBe(fn);
   });
 
-  test('should use filter function.', () => {
+  test("should use filter function.", () => {
     const fn = () => {
       return true;
     };
     const laye = new RealtimeLayer({
-      apiKey: 'apiKey',
+      apiKey: "apiKey",
       filter: fn, // reverse the array
-      url: 'ws://localhost:1234',
+      url: "ws://localhost:1234",
     });
     expect(laye).toBeInstanceOf(RealtimeLayer);
     expect(laye.filter).toBe(fn);

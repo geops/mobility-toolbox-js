@@ -1,13 +1,13 @@
-import debounce from 'lodash.debounce';
-import OLLayer from 'ol/layer/Layer';
-import { unByKey } from 'ol/Observable';
-import LayerRenderer from 'ol/renderer/Layer';
+import debounce from "lodash.debounce";
+import OLLayer from "ol/layer/Layer";
+import { unByKey } from "ol/Observable";
+import LayerRenderer from "ol/renderer/Layer";
 
-import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+import defineDeprecatedProperties from "../utils/defineDeprecatedProperties";
 
-import type { Map } from 'ol';
-import type { EventsKey } from 'ol/events';
-import type { Options } from 'ol/layer/Layer';
+import type { Map } from "ol";
+import type { EventsKey } from "ol/events";
+import type { Options } from "ol/layer/Layer";
 
 export type MobilityLayerOptions = {
   children?: any[];
@@ -23,8 +23,8 @@ export type MobilityLayerOptions = {
 
 let deprecated: (message: string) => void = () => {};
 if (
-  typeof window !== 'undefined' &&
-  new URLSearchParams(window.location.search).get('deprecated')
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("deprecated")
 ) {
   deprecated = debounce((message: string) => {
     // eslint-disable-next-line no-console
@@ -39,7 +39,7 @@ class EmptyLayerRenderer extends LayerRenderer<OLLayer> {
 
   renderFrame() {
     // Return an empty div as a placeholder HTMLElement
-    return document.createElement('div');
+    return document.createElement("div");
   }
 }
 
@@ -53,7 +53,7 @@ class Layer extends OLLayer {
   constructor(options: MobilityLayerOptions = {}) {
     super(options);
     defineDeprecatedProperties(this, options);
-    deprecated('Layer is deprecated. Use an OpenLayers Layer instead.');
+    deprecated("Layer is deprecated. Use an OpenLayers Layer instead.");
 
     // Backward compatibility
     this.olEventsKeys = [];
@@ -61,7 +61,7 @@ class Layer extends OLLayer {
 
   clone(newOptions: MobilityLayerOptions): Layer {
     return new Layer({
-      ...((this.get('options') as MobilityLayerOptions) || {}),
+      ...((this.get("options") as MobilityLayerOptions) || {}),
       ...(newOptions || {}),
     });
   }

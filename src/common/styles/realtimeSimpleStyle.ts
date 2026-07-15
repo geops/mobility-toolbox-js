@@ -1,10 +1,10 @@
-import createCanvas from '../utils/createCanvas';
+import createCanvas from "../utils/createCanvas";
 
 import type {
   AnyCanvas,
   AnyCanvasContext,
   RealtimeStyleFunction,
-} from '../../types';
+} from "../../types";
 
 /**
  * A very simple tracker style.
@@ -15,13 +15,13 @@ let canvas: AnyCanvas | null;
 const realtimeSimpleStyle: RealtimeStyleFunction = () => {
   if (!canvas) {
     canvas = createCanvas(15, 15);
-    const ctx: AnyCanvasContext = canvas?.getContext('2d') as AnyCanvasContext;
+    const ctx: AnyCanvasContext = canvas?.getContext("2d") as AnyCanvasContext;
     if (ctx) {
       ctx.arc(8, 8, 5, 0, 2 * Math.PI, false);
-      ctx.fillStyle = '#8ED6FF';
+      ctx.fillStyle = "#8ED6FF";
       ctx.fill();
       ctx.lineWidth = 3;
-      ctx.strokeStyle = 'black';
+      ctx.strokeStyle = "black";
       ctx.stroke();
       ctx.lineWidth = 3;
     }

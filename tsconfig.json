@@ -13,9 +13,8 @@
     // "Go to Definition" in VSCode
     // "declarationMap": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "lib": ["es6", "dom"]
+    "lib": ["es2019", "dom"]
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],

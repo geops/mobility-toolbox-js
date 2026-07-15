@@ -1,6 +1,6 @@
-import HttpAPI from './HttpAPI';
+import HttpAPI from "./HttpAPI";
 
-import type { StopsParameters, StopsResponse } from '../types';
+import type { StopsParameters, StopsResponse } from "../types";
 
 export interface StopsAPIOptions {
   apiKey?: string;
@@ -35,7 +35,7 @@ class StopsAPI extends HttpAPI {
    */
   constructor(options: StopsAPIOptions = {}) {
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-    super({ ...options, url: options.url || 'https://api.geops.io/stops/v1/' });
+    super({ ...options, url: options.url || "https://api.geops.io/stops/v1/" });
   }
 
   /**
@@ -47,7 +47,7 @@ class StopsAPI extends HttpAPI {
    * @public
    */
   search(params: StopsParameters, config: RequestInit): Promise<StopsResponse> {
-    return this.fetch('', params as object, config);
+    return this.fetch("", params, config);
   }
 }
 

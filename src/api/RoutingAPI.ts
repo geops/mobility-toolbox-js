@@ -1,6 +1,6 @@
-import HttpAPI from './HttpAPI';
+import HttpAPI from "./HttpAPI";
 
-import type { RoutingParameters, RoutingResponse } from '../types';
+import type { RoutingParameters, RoutingResponse } from "../types";
 
 export interface RoutingAPIOptions {
   apiKey?: string;
@@ -37,7 +37,7 @@ class RoutingAPI extends HttpAPI {
    * @public
    */
   constructor(options: RoutingAPIOptions = {}) {
-    super({ url: 'https://api.geops.io/routing/v1/', ...options });
+    super({ url: "https://api.geops.io/routing/v1/", ...options });
   }
 
   /**
@@ -52,7 +52,7 @@ class RoutingAPI extends HttpAPI {
     params: RoutingParameters,
     config: RequestInit,
   ): Promise<RoutingResponse> {
-    return this.fetch('', params as object, config);
+    return this.fetch("", params, config);
   }
 }
 

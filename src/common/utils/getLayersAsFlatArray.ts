@@ -1,5 +1,5 @@
-import type BaseLayer from 'ol/layer/Base';
-import type LayerGroup from 'ol/layer/Group';
+import type BaseLayer from "ol/layer/Base";
+import type LayerGroup from "ol/layer/Group";
 
 const getLayersAsFlatArray = (
   layersOrLayer: BaseLayer | BaseLayer[],
@@ -15,7 +15,7 @@ const getLayersAsFlatArray = (
     const children =
       // @ts-expect-error children is deprecated
       (layer.children as BaseLayer[]) ||
-      (layer.get('children') as BaseLayer[]) ||
+      (layer.get("children") as BaseLayer[]) ||
       (layer as LayerGroup).getLayers?.()?.getArray();
     flatLayers = flatLayers.concat(getLayersAsFlatArray(children || []));
   });

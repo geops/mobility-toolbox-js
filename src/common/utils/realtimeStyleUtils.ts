@@ -5,7 +5,7 @@ import type {
   RealtimeStyleOptions,
   RealtimeTrajectory,
   ViewState,
-} from '../../types';
+} from "../../types";
 
 const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -20,32 +20,32 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
-export const MOTS_ONLY_RAIL: RealtimeMot[] = ['rail'];
+export const MOTS_ONLY_RAIL: RealtimeMot[] = ["rail"];
 
 export const MOTS_WITH_CABLE: RealtimeMot[] = [
-  'cablecar',
-  'gondola',
-  'funicular',
-  'coach',
+  "cablecar",
+  "gondola",
+  "funicular",
+  "coach",
 ];
 
 export const MOTS_WITHOUT_CABLE: RealtimeMot[] = [
-  'tram',
-  'subway',
-  'rail',
-  'bus',
+  "tram",
+  "subway",
+  "rail",
+  "bus",
 ];
 
 export const MOTS_ALL: RealtimeMot[] = [
-  'tram',
-  'subway',
-  'rail',
-  'bus',
-  'ferry',
-  'cablecar',
-  'gondola',
-  'funicular',
-  'coach',
+  "tram",
+  "subway",
+  "rail",
+  "bus",
+  "ferry",
+  "cablecar",
+  "gondola",
+  "funicular",
+  "coach",
 ];
 
 /**
@@ -68,33 +68,33 @@ export const types: RegExp[] = [
 ];
 
 export const bgColors: string[] = [
-  '#ffb400',
-  '#ff5400',
-  '#ff8080',
-  '#ea0000',
-  '#3000ff',
-  '#ffb400',
-  '#41a27b',
-  '#00d237',
-  '#b5b5b5',
-  '#ff8080',
-  '#ffb400',
+  "#ffb400",
+  "#ff5400",
+  "#ff8080",
+  "#ea0000",
+  "#3000ff",
+  "#ffb400",
+  "#41a27b",
+  "#00d237",
+  "#b5b5b5",
+  "#ff8080",
+  "#ffb400",
 ];
 
 export const textColors: string[] = [
-  '#000000',
-  '#ffffff',
-  '#000000',
-  '#ffffff',
-  '#ffffff',
-  '#000000',
-  '#ffffff',
-  '#000000',
-  '#000000',
-  '#000000',
+  "#000000",
+  "#ffffff",
+  "#000000",
+  "#ffffff",
+  "#ffffff",
+  "#000000",
+  "#ffffff",
+  "#000000",
+  "#000000",
+  "#000000",
 ];
 
-export const DEFAULT_TYPE = 'unknown';
+export const DEFAULT_TYPE = "unknown";
 export const findDefaultIndexType = () => {
   return types.findIndex((r) => {
     return r.test(DEFAULT_TYPE);
@@ -102,7 +102,7 @@ export const findDefaultIndexType = () => {
 };
 
 export const getTypeIndex = (
-  type?: 'unknown' | number | RealtimeMot,
+  type?: "unknown" | number | RealtimeMot,
 ): number => {
   const t = type;
 
@@ -110,7 +110,7 @@ export const getTypeIndex = (
     return findDefaultIndexType();
   }
 
-  if (typeof t === 'string') {
+  if (typeof t === "string") {
     const index = types.findIndex((r) => {
       return r.test(t);
     });
@@ -147,7 +147,7 @@ export const getColorForType = (type?: RealtimeMot): string => {
     return bgColors[typeIdx];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    return '#000';
+    return "#000";
   }
 };
 
@@ -161,7 +161,7 @@ export const getTextColorForType = (type?: RealtimeMot): string => {
     const typeIdx = getTypeIndex(type);
     return textColors[typeIdx];
   } catch (e) {
-    return '#ffffff';
+    return "#ffffff";
   }
 };
 
@@ -170,7 +170,7 @@ export const getTextColorForLine = (
 ): string | undefined => {
   let color = line?.text_color;
 
-  if (color && !color.startsWith('#')) {
+  if (color && !color.startsWith("#")) {
     color = `#${color}`;
   }
 
@@ -214,24 +214,24 @@ export const getDelayColor = (
   isDelayText?: boolean,
 ): string => {
   if (cancelled) {
-    return isDelayText ? '#ff0000' : '#a0a0a0'; // red or gray
+    return isDelayText ? "#ff0000" : "#a0a0a0"; // red or gray
   }
   if (delayInMs === null || delayInMs === undefined) {
-    return ''; // grey { r: 160, g: 160, b: 160, s: '160,160,160' };
+    return ""; // grey { r: 160, g: 160, b: 160, s: '160,160,160' };
   }
   if (delayInMs >= 3600000) {
-    return '#ed004c'; // pink { r: 237, g: 0, b: 76, s: '237,0,76' };
+    return "#ed004c"; // pink { r: 237, g: 0, b: 76, s: '237,0,76' };
   }
   if (delayInMs >= 500000) {
-    return '#e80000'; // red { r: 232, g: 0, b: 0, s: '232,0,0' };
+    return "#e80000"; // red { r: 232, g: 0, b: 0, s: '232,0,0' };
   }
   if (delayInMs >= 300000) {
-    return '#ff4a00'; // orange { r: 255, g: 74, b: 0, s: '255,74,0' };
+    return "#ff4a00"; // orange { r: 255, g: 74, b: 0, s: '255,74,0' };
   }
   if (delayInMs >= 180000) {
-    return '#f7bf00'; // yellow { r: 247, g: 191, b: 0, s: '247,191,0' };
+    return "#f7bf00"; // yellow { r: 247, g: 191, b: 0, s: '247,191,0' };
   }
-  return '#00a00c'; // green { r: 0, g: 160, b: 12, s: '0,160,12' };
+  return "#00a00c"; // green { r: 0, g: 160, b: 12, s: '0,160,12' };
 };
 
 export const getDelayText = (delay?: number, cancelled?: boolean): string => {
@@ -239,7 +239,7 @@ export const getDelayText = (delay?: number, cancelled?: boolean): string => {
     return String.fromCodePoint(0x00d7);
   }
   if (!delay) {
-    return '';
+    return "";
   }
   if (delay >= 3600000) {
     const rounded = Math.round(delay / 3600000);
@@ -260,13 +260,13 @@ export const getDelayText = (delay?: number, cancelled?: boolean): string => {
     return `+${delay}ms`;
   }
 
-  return '';
+  return "";
 };
 
 export const getColorForLine = (line?: RealtimeLine): string | undefined => {
   let color = line?.color;
 
-  if (color && !color.startsWith('#')) {
+  if (color && !color.startsWith("#")) {
     color = `#${color}`;
   }
 
@@ -283,7 +283,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     return (
       getColorForLine(trajectory?.properties?.line) ||
       getColorForType(trajectory?.properties?.type) ||
-      '#000'
+      "#000"
     );
   },
   getDelayColor: (
@@ -293,7 +293,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     cancelled?: boolean,
     isDelayText?: boolean,
   ): string => {
-    return getDelayColor(delayInMs, cancelled, isDelayText) || 'transparent';
+    return getDelayColor(delayInMs, cancelled, isDelayText) || "transparent";
   },
   getDelayText: (
     trajectory?: RealtimeTrajectory,
@@ -301,7 +301,7 @@ export const styleOptionsForMot: Partial<RealtimeStyleOptions> = {
     delay?: number,
     cancelled?: boolean,
   ): string => {
-    return getDelayText(delay, cancelled) || '';
+    return getDelayText(delay, cancelled) || "";
   },
   getRadius: (
     trajectory?: RealtimeTrajectory,

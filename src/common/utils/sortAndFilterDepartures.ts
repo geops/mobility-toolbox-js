@@ -1,7 +1,7 @@
-import compareDepartures from './compareDepartures';
+import compareDepartures from "./compareDepartures";
 
-import type { RealtimeAPIDeparturesById } from '../../api/RealtimeAPI';
-import type { RealtimeDepartureExtended } from '../../types';
+import type { RealtimeAPIDeparturesById } from "../../api/RealtimeAPI";
+import type { RealtimeDepartureExtended } from "../../types";
 
 /**
  * This function sort Departures by arrival time and filter out unwanted departures:
@@ -45,7 +45,7 @@ const sortAndfilterDepartures = (
     };
     if (!departure.time) {
       // eslint-disable-next-line no-console
-      console.warn('Departure without time found, skipping it.', departure);
+      console.warn("Departure without time found, skipping it.", departure);
       continue;
     }
     const time = new Date(departure.time).getTime();
@@ -54,14 +54,14 @@ const sortAndfilterDepartures = (
     if (time > past && time < future) {
       // If 2 trains are boarding at the same platform,
       // remove the older one.
-      if (departure.state === 'BOARDING') {
+      if (departure.state === "BOARDING") {
         if (
           departure.platform &&
           !platformsBoarding.includes(departure.platform)
         ) {
           platformsBoarding.push(departure.platform);
         } else {
-          departure.state = 'HIDDEN';
+          departure.state = "HIDDEN";
         }
       }
 
@@ -73,7 +73,7 @@ const sortAndfilterDepartures = (
         Math.abs(time - (previousDeparture.time || 0)) < 1000 &&
         departure.line.name === previousDeparture.line.name
       ) {
-        departure.state = 'HIDDEN';
+        departure.state = "HIDDEN";
       }
 
       if (/(STOP_CANCELLED|JOURNEY_CANCELLED)/.test(departure.state)) {

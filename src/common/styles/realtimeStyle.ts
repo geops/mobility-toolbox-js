@@ -1,13 +1,4 @@
-import {
-  type AnyCanvas,
-  type AnyCanvasContext,
-  type RealtimeStyleFunction,
-  type RealtimeStyleOptions,
-  type RealtimeTrajectory,
-  type StyleCache,
-  type ViewState,
-} from '../../types';
-import createCanvas from '../utils/createCanvas';
+import createCanvas from "../utils/createCanvas";
 
 import {
   getBufferArrowCanvas,
@@ -15,7 +6,16 @@ import {
   getDelayBgCanvas,
   getDelayTextCanvas,
   getTextCanvas,
-} from './realtimeDrawCanvasUtils';
+} from "./realtimeDrawCanvasUtils";
+
+import type {
+  AnyCanvas,
+  RealtimeStyleFunction,
+  RealtimeStyleOptions,
+  RealtimeTrajectory,
+  StyleCache,
+  ViewState,
+} from "../../types";
 
 const cache: StyleCache = {};
 
@@ -67,11 +67,11 @@ const realtimeStyle: RealtimeStyleFunction = (
     train_id: id,
   } = trajectory.properties;
 
-  const name = getText?.(trajectory, viewState) || '';
+  const name = getText?.(trajectory, viewState) || "";
 
   let color = getColor(trajectory, viewState);
   let textColor = getTextColor(trajectory, viewState);
-  const cancelled = state === 'JOURNEY_CANCELLED';
+  const cancelled = state === "JOURNEY_CANCELLED";
   const hover = !!(hoverVehicleId && hoverVehicleId === id);
   const selected = !!(selectedVehicleId && selectedVehicleId === id);
 
@@ -94,7 +94,7 @@ const realtimeStyle: RealtimeStyleFunction = (
   const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${hover || selected}${showHeading ? rotation : ''}`;
+  let key = `${radius}${hover || selected}${showHeading ? rotation : ""}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}${delay}${cancelled}`;
@@ -124,7 +124,7 @@ const realtimeStyle: RealtimeStyleFunction = (
       !!isDisplayStrokeAndDelay &&
       !!useDelayStyle &&
       delay === null &&
-      operatorProvidesRealtime === 'yes';
+      operatorProvidesRealtime === "yes";
 
     const hasDelayText =
       showDelayText &&
@@ -178,7 +178,7 @@ const realtimeStyle: RealtimeStyleFunction = (
         const textSize = getTextSize(
           trajectory,
           viewState,
-          circle.getContext('2d') as AnyCanvasContext,
+          circle.getContext("2d") as CanvasRenderingContext2D,
           radius * 2 - padding,
           name,
           toFontFixed,
@@ -189,7 +189,7 @@ const realtimeStyle: RealtimeStyleFunction = (
         const hasStroke2 =
           !!useDelayStyle &&
           delay === null &&
-          operatorProvidesRealtime === 'yes';
+          operatorProvidesRealtime === "yes";
 
         circleText = getTextCanvas(
           name,
@@ -263,7 +263,7 @@ const realtimeStyle: RealtimeStyleFunction = (
       bufferArrow?.height ?? delayBg?.height ?? circle?.height ?? 0;
     const canvas = createCanvas(width, height);
     if (canvas) {
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
       if (!ctx) {
         return null;
       }

@@ -1,12 +1,12 @@
-import { MapLibreLayerRenderer } from '@geoblocks/ol-maplibre-layer/lib';
-import { toDegrees } from 'ol/math.js';
-import { toLonLat } from 'ol/proj';
+import { MapLibreLayerRenderer } from "@geoblocks/ol-maplibre-layer/lib";
+import { toDegrees } from "ol/math.js";
+import { toLonLat } from "ol/proj";
 
-import type { MapLibreLayerTranslateZoomFunction } from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
-import type { Map } from 'maplibre-gl';
-import type { FrameState } from 'ol/Map';
+import type { MapLibreLayerTranslateZoomFunction } from "@geoblocks/ol-maplibre-layer/lib/MapLibreLayer";
+import type { Map } from "maplibre-gl";
+import type { FrameState } from "ol/Map";
 
-import type { MaplibreLayer } from '../layers';
+import type { MaplibreLayer } from "../layers";
 
 function sameSize(map: Map, frameState: FrameState): boolean {
   return (
@@ -49,7 +49,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     }
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    void mapLibreMap.off('idle', this.setIsReady);
+    void mapLibreMap.off("idle", this.setIsReady);
 
     // When the browser is zoomed it could happens that the renderFrame call for readyness
     // in setIsReady is called with a different size than the one of the mapLibreMap,
@@ -95,7 +95,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     }
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    void mapLibreMap.once('idle', this.setIsReady);
+    void mapLibreMap.once("idle", this.setIsReady);
 
     mapLibreMap.redraw();
 

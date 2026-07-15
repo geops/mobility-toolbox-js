@@ -1,26 +1,26 @@
 import {
   getMapLibreAttributions,
   MapLibreLayer,
-} from '@geoblocks/ol-maplibre-layer/lib';
-import debounce from 'lodash.debounce';
-import { unByKey } from 'ol/Observable';
-import { Source } from 'ol/source';
+} from "@geoblocks/ol-maplibre-layer/lib";
+import debounce from "lodash.debounce";
+import { unByKey } from "ol/Observable";
+import { Source } from "ol/source";
 
-import { getUrlWithParams } from '../../common/utils';
-import getUrlWithPath from '../../common/utils/getUrlWithPath';
-import MaplibreLayerRenderer from '../renderers/MaplibreLayerRenderer';
-import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+import { getUrlWithParams } from "../../common/utils";
+import getUrlWithPath from "../../common/utils/getUrlWithPath";
+import MaplibreLayerRenderer from "../renderers/MaplibreLayerRenderer";
+import defineDeprecatedProperties from "../utils/defineDeprecatedProperties";
 
 import type {
   MapLibreLayerOptions,
   MapLibreOptions,
-} from '@geoblocks/ol-maplibre-layer/lib/MapLibreLayer';
-import type { QueryRenderedFeaturesOptions } from 'maplibre-gl';
-import type { EventsKey } from 'ol/events';
-import type Map from 'ol/Map';
-import type { ObjectEvent } from 'ol/Object';
+} from "@geoblocks/ol-maplibre-layer/lib/MapLibreLayer";
+import type { QueryRenderedFeaturesOptions } from "maplibre-gl";
+import type { EventsKey } from "ol/events";
+import type Map from "ol/Map";
+import type { ObjectEvent } from "ol/Object";
 
-import type { MobilityLayerOptions } from './Layer';
+import type { MobilityLayerOptions } from "./Layer";
 
 export type MaplibreLayerOptions = {
   apiKey?: string;
@@ -30,7 +30,7 @@ export type MaplibreLayerOptions = {
   style?: maplibregl.StyleSpecification | null | string;
   url?: string;
 } & MobilityLayerOptions &
-  Omit<MapLibreLayerOptions, 'mapLibreOptions'>;
+  Omit<MapLibreLayerOptions, "mapLibreOptions">;
 
 const buildStyleUrl = (
   url: string,
@@ -45,8 +45,8 @@ const buildStyleUrl = (
 
 export let deprecated: (message: string) => void = () => {};
 if (
-  typeof window !== 'undefined' &&
-  new URLSearchParams(window.location.search).get('deprecated')
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("deprecated")
 ) {
   deprecated = debounce((message: string) => {
     console.warn(message);
@@ -87,18 +87,18 @@ class MaplibreLayer extends MapLibreLayer {
   public olEventsKeys: EventsKey[] = [];
 
   set apiKey(newValue: string) {
-    this.set('apiKey', newValue);
+    this.set("apiKey", newValue);
   }
   get apiKey(): string {
-    return this.get('apiKey') as string;
+    return this.get("apiKey") as string;
   }
 
   set apiKeyName(newValue: string) {
-    this.set('apiKeyName', newValue);
+    this.set("apiKeyName", newValue);
   }
 
   get apiKeyName(): string {
-    return this.get('apiKeyName') as string;
+    return this.get("apiKeyName") as string;
   }
 
   /**
@@ -106,7 +106,7 @@ class MaplibreLayer extends MapLibreLayer {
    */
   get maplibreMap(): maplibregl.Map | undefined {
     deprecated(
-      'MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.',
+      "MaplibreLayer.maplibreMap is deprecated. Use layer.mapLibreMap.",
     );
     return this.mapLibreMap!;
   }
@@ -125,24 +125,24 @@ class MaplibreLayer extends MapLibreLayer {
    * @deprecated Use layer.mapLibreMap.
    */
   get mbMap(): maplibregl.Map | undefined {
-    deprecated('MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.');
+    deprecated("MaplibreLayer.mbMap is deprecated. Use layer.maplibreMap.");
     return this.maplibreMap!;
   }
 
   get style(): string {
-    return this.get('style') as string;
+    return this.get("style") as string;
   }
 
   set style(newValue: string) {
-    this.set('style', newValue);
+    this.set("style", newValue);
   }
 
   get url(): string {
-    return this.get('url') as string;
+    return this.get("url") as string;
   }
 
   set url(newValue: string) {
-    this.set('url', newValue);
+    this.set("url", newValue);
   }
 
   /**
@@ -159,14 +159,14 @@ class MaplibreLayer extends MapLibreLayer {
     // Backward compatibility
     if (options.mapOptions && !options.mapLibreOptions) {
       deprecated(
-        'MaplibreLayer.mapOptions is deprecated. Use mapLibreOptions instead.',
+        "MaplibreLayer.mapOptions is deprecated. Use mapLibreOptions instead.",
       );
       options.mapLibreOptions = options.mapOptions;
     }
     const newOptions = {
-      apiKeyName: 'key',
-      style: 'travic_v2',
-      url: 'https://maps.geops.io',
+      apiKeyName: "key",
+      style: "travic_v2",
+      url: "https://maps.geops.io",
       ...(options || {}),
       mapLibreOptions: {
         fadeDuration: 10,
@@ -193,14 +193,14 @@ class MaplibreLayer extends MapLibreLayer {
 
     if (
       !newOptions.mapLibreOptions.style &&
-      newOptions.url?.includes('style.json')
+      newOptions.url?.includes("style.json")
     ) {
       newOptions.mapLibreOptions.style = newOptions.url;
     } else if (
       !newOptions.mapLibreOptions.style &&
       newOptions.apiKey &&
       newOptions.style &&
-      typeof newOptions.style === 'string'
+      typeof newOptions.style === "string"
     ) {
       newOptions.mapLibreOptions.style = buildStyleUrl(
         newOptions.url,
@@ -216,7 +216,7 @@ class MaplibreLayer extends MapLibreLayer {
 
     // We save the options to be able to clone the layer.
     // and to see if the style is defined by the maplibreOptions given by the user.
-    this.set('options', options);
+    this.set("options", options);
   }
 
   /**
@@ -228,7 +228,7 @@ class MaplibreLayer extends MapLibreLayer {
       150,
     );
     this.olEventsKeys.push(
-      this.on('propertychange', (evt: ObjectEvent) => {
+      this.on("propertychange", (evt: ObjectEvent) => {
         if (/(url|style|apiKey|apiKeyName)/.test(evt.key)) {
           updateMaplibreMapDebounced();
         }
@@ -245,7 +245,7 @@ class MaplibreLayer extends MapLibreLayer {
    */
   clone(newOptions: MaplibreLayerOptions): MaplibreLayer {
     return new MaplibreLayer({
-      ...((this.get('options') as MaplibreLayerOptions) || {}),
+      ...((this.get("options") as MaplibreLayerOptions) || {}),
       ...(newOptions || {}),
     });
   }
@@ -273,7 +273,7 @@ class MaplibreLayer extends MapLibreLayer {
     // If the style is a complete style object, use it directly.
     if (
       this.style &&
-      typeof this.style === 'object' &&
+      typeof this.style === "object" &&
       (this.style as maplibregl.StyleSpecification).name &&
       (this.style as maplibregl.StyleSpecification).version
     ) {
@@ -281,12 +281,12 @@ class MaplibreLayer extends MapLibreLayer {
     }
 
     // If the url set is already a complete style url, use it directly.
-    if (this.url.includes('style.json')) {
+    if (this.url.includes("style.json")) {
       return this.url;
     }
 
     // If the user has defined the style by the maplibreOptions, we use it directly.
-    const opts = this.get('options') as MaplibreLayerOptions;
+    const opts = this.get("options") as MaplibreLayerOptions;
     if (opts?.mapLibreOptions?.style) {
       return opts.mapLibreOptions.style;
     }
@@ -309,7 +309,7 @@ class MaplibreLayer extends MapLibreLayer {
     try {
       this.mapLibreMap?.setStyle(this.getStyle(), { diff: false });
     } catch (e) {
-      console.error('Error while updating MaplibreMap', e);
+      console.error("Error while updating MaplibreMap", e);
     }
   }
 }

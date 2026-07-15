@@ -1,5 +1,5 @@
-import type { RealtimeModesType } from '../../api/RealtimeAPI';
-import type { RealtimeMode } from '../../types';
+import type { RealtimeModesType } from "../../api/RealtimeAPI";
+import type { RealtimeMode } from "../../types";
 
 /**
  * Get the websocket channel suffix, depending on the current mode.
@@ -11,7 +11,7 @@ const getModeSuffix = (
   mode: RealtimeMode,
   modes: RealtimeModesType,
 ): string => {
-  return mode === modes.SCHEMATIC ? '_schematic' : '';
+  return mode === modes.SCHEMATIC ? "_schematic" : "";
 };
 
 export default getModeSuffix;

@@ -1,15 +1,15 @@
-import Control from 'ol/control/Control';
-import { inView } from 'ol/layer/Layer';
+import Control from "ol/control/Control";
+import { inView } from "ol/layer/Layer";
 
-import createDefaultCopyrightElement from '../../common/utils/createDefaultCopyrightElt';
-import removeDuplicate from '../../common/utils/removeDuplicate';
+import createDefaultCopyrightElement from "../../common/utils/createDefaultCopyrightElt";
+import removeDuplicate from "../../common/utils/removeDuplicate";
 
-import type { MapEvent } from 'ol';
-import type { Options } from 'ol/control/Control';
-import type { ViewStateLayerStateExtent } from 'ol/View';
+import type { MapEvent } from "ol";
+import type { Options } from "ol/control/Control";
+import type { ViewStateLayerStateExtent } from "ol/View";
 
 export type CopyrightControlOptions = {
-  className?: 'string';
+  className?: "string";
   format?: (copyrights: string[]) => string;
 } & Options;
 
@@ -45,7 +45,7 @@ class CopyrightControl extends Control {
    */
   constructor(options: CopyrightControlOptions = {}) {
     const element = createDefaultCopyrightElement();
-    element.className = options.className || 'mbt-copyright';
+    element.className = options.className || "mbt-copyright";
     super({
       element,
       ...options,
@@ -53,13 +53,13 @@ class CopyrightControl extends Control {
     this.format =
       options.format ||
       ((copyrights) => {
-        return copyrights?.join(' | ');
+        return copyrights?.join(" | ");
       });
   }
 
   render({ frameState }: MapEvent) {
     if (!frameState) {
-      this.element.innerHTML = '';
+      this.element.innerHTML = "";
       return;
     }
     let copyrights: string[] = [];
@@ -76,8 +76,8 @@ class CopyrightControl extends Control {
           );
         }
 
-        if (layer?.get('copyrights') as string[]) {
-          let copyProp = layer.get('copyrights') as string[];
+        if (layer?.get("copyrights") as string[]) {
+          let copyProp = layer.get("copyrights") as string[];
           copyProp = !Array.isArray(copyProp) ? [copyProp] : copyProp;
           if (copyProp?.length) {
             copyrights.push(...copyProp);

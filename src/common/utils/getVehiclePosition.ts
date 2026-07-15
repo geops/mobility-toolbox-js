@@ -1,10 +1,10 @@
-import { LineString } from 'ol/geom';
+import { LineString } from "ol/geom";
 
-import type { Position } from 'geojson';
-import type { Coordinate } from 'ol/coordinate';
-import type { SimpleGeometry } from 'ol/geom';
+import type { Position } from "geojson";
+import type { Coordinate } from "ol/coordinate";
+import type { SimpleGeometry } from "ol/geom";
 
-import type { RealtimeTrajectory } from '../../types';
+import type { RealtimeTrajectory } from "../../types";
 
 export interface VehiclePosition {
   coord?: Coordinate;
@@ -34,8 +34,7 @@ const getVehiclePosition = (
     time_intervals: timeIntervals,
   } = trajectory.properties;
   let { coordinates, type } = trajectory.geometry as
-    | GeoJSON.LineString
-    | GeoJSON.Point;
+    GeoJSON.LineString | GeoJSON.Point;
   let geometry = olGeometry;
   let coord;
   let rotation = oldRotation;
@@ -49,9 +48,9 @@ const getVehiclePosition = (
 
   if (noInterpolate && coordinate) {
     coord = coordinate;
-  } else if (type === 'Point') {
+  } else if (type === "Point") {
     coord = coordinates as Position;
-  } else if (type === 'LineString') {
+  } else if (type === "LineString") {
     geometry ??= new LineString(coordinates);
     const intervals = timeIntervals || [[]];
     const firstInterval = intervals[0];
@@ -91,7 +90,7 @@ const getVehiclePosition = (
   } else {
     // eslint-disable-next-line no-console
     console.error(
-      'This geometry type is not supported. Only Point or LineString are. Current geometry: ',
+      "This geometry type is not supported. Only Point or LineString are. Current geometry: ",
       geometry,
     );
   }

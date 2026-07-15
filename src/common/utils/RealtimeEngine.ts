@@ -1,24 +1,24 @@
-import debounce from 'lodash.debounce';
-import throttle from 'lodash.throttle';
-import { buffer, containsCoordinate, intersects } from 'ol/extent';
-import GeoJSON from 'ol/format/GeoJSON';
-import { fromLonLat } from 'ol/proj';
+import debounce from "lodash.debounce";
+import throttle from "lodash.throttle";
+import { buffer, containsCoordinate, intersects } from "ol/extent";
+import GeoJSON from "ol/format/GeoJSON";
+import { fromLonLat } from "ol/proj";
 
-import { RealtimeAPI, RealtimeModes } from '../../api';
-import getGraphByZoom from '../../ol/utils/getGraphByZoom';
-import realtimeStyle from '../styles/realtimeStyle';
+import { RealtimeAPI, RealtimeModes } from "../../api";
+import getGraphByZoom from "../../ol/utils/getGraphByZoom";
+import realtimeStyle from "../styles/realtimeStyle";
 
 import {
   MOTS_ONLY_RAIL,
   MOTS_WITHOUT_CABLE,
   styleOptionsForMot,
-} from './realtimeStyleUtils';
-import renderTrajectories from './renderTrajectories';
+} from "./realtimeStyleUtils";
+import renderTrajectories from "./renderTrajectories";
 
-import type { FeatureCollection } from 'geojson';
-import type { Coordinate } from 'ol/coordinate';
+import type { FeatureCollection } from "geojson";
+import type { Coordinate } from "ol/coordinate";
 
-import type { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
+import type { WebSocketAPIMessageEventData } from "../../api/WebSocketAPI";
 import type {
   AnyCanvas,
   LayerGetFeatureInfoOptions,
@@ -32,8 +32,8 @@ import type {
   RealtimeTrainId,
   RealtimeTrajectory,
   ViewState,
-} from '../../types';
-import type { FilterFunction, SortFunction } from '../typedefs';
+} from "../../types";
+import type { FilterFunction, SortFunction } from "../typedefs";
 
 export interface RealtimeEngineOptions {
   api?: RealtimeAPI;
@@ -94,7 +94,7 @@ export interface RealtimeEngineOptions {
  */
 export const defaultStyleOptions: RealtimeStyleOptions = {
   delayDisplay: 300000,
-  delayOutlineColor: '#000',
+  delayOutlineColor: "#000",
   getArrowSize: (
     trajectory?: RealtimeTrajectory,
     viewState?: ViewState,
@@ -103,10 +103,10 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return [(radius * 3) / 4, radius];
   },
   getColor: () => {
-    return '#000';
+    return "#000";
   },
   getDelayColor: () => {
-    return '#000';
+    return "#000";
   },
   getDelayFont: (
     traj?: RealtimeTrajectory,
@@ -116,10 +116,10 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return `bold ${fontSize}px arial, sans-serif`;
   },
   getDelayText: () => {
-    return '';
+    return "";
   },
   getDelayTextColor: () => {
-    return '#000';
+    return "#000";
   },
   getImage: () => {
     return null;
@@ -134,10 +134,10 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return 5;
   },
   getText: ((traj: RealtimeTrajectory) => {
-    return traj?.properties?.line?.name || 'U';
-  }) as RealtimeStyleOptions['getText'],
+    return traj?.properties?.line?.name || "U";
+  }) as RealtimeStyleOptions["getText"],
   getTextColor: () => {
-    return '#fff';
+    return "#fff";
   },
   getTextFont: (
     trajectory?: RealtimeTrajectory,
@@ -303,8 +303,8 @@ class RealtimeEngine {
     this.bboxParameters = options.bboxParameters;
     this.canvas =
       options.canvas ??
-      (typeof document !== 'undefined'
-        ? document.createElement('canvas')
+      (typeof document !== "undefined"
+        ? document.createElement("canvas")
         : undefined);
     this.debug = options.debug ?? false;
     this.filter = options.filter;
@@ -319,7 +319,7 @@ class RealtimeEngine {
     this.minZoomInterpolation = options.minZoomInterpolation ?? 8; // Min zoom level from which trains positions are not interpolated.
     this.pixelRatio =
       options.pixelRatio ??
-      (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
+      (typeof window !== "undefined" ? window.devicePixelRatio : 1);
     this.selectedVehicleId = options.selectedVehicleId;
     this.sort = options.sort;
 
@@ -330,7 +330,7 @@ class RealtimeEngine {
       ...defaultStyleOptions,
       ...(options.styleOptions ?? {}),
     };
-    this.tenant = options.tenant ?? ''; // sbb,sbh or sbm
+    this.tenant = options.tenant ?? ""; // sbb,sbh or sbm
     this.trajectories = {};
     this.useDebounce = options.useDebounce ?? false;
     this.useRequestAnimationFrame = options.useRequestAnimationFrame ?? false;
@@ -471,7 +471,7 @@ class RealtimeEngine {
     // To avoid browser hanging when the tab is not visible for a certain amount of time,
     // We stop the rendering and the websocket when hide and start again when show.
     document.addEventListener(
-      'visibilitychange',
+      "visibilitychange",
       // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
@@ -479,7 +479,7 @@ class RealtimeEngine {
 
   detachFromMap() {
     document.removeEventListener(
-      'visibilitychange',
+      "visibilitychange",
       // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
@@ -487,7 +487,7 @@ class RealtimeEngine {
     this.stop();
 
     if (this.canvas) {
-      const context = this.canvas.getContext('2d');
+      const context = this.canvas.getContext("2d");
       if (context) {
         (context as CanvasRenderingContext2D).clearRect(
           0,
@@ -585,7 +585,7 @@ class RealtimeEngine {
         break;
       }
     }
-    return { features: vehicles, type: 'FeatureCollection' };
+    return { features: vehicles, type: "FeatureCollection" };
   }
 
   getViewState: () => ViewState = () => {
@@ -665,7 +665,7 @@ class RealtimeEngine {
       // @ts-expect-error missing type definition
       trajectory.properties.olGeometry = this.format.readGeometry({
         coordinates: fromLonLat(rawCoordinates),
-        type: 'Point',
+        type: "Point",
       });
     } else {
       // @ts-expect-error missing type definition
@@ -729,7 +729,7 @@ class RealtimeEngine {
 
   removeTrajectory(trajectoryOrId: RealtimeTrainId | RealtimeTrajectory) {
     let id: string | undefined;
-    if (typeof trajectoryOrId !== 'string') {
+    if (typeof trajectoryOrId !== "string") {
       id = trajectoryOrId?.properties?.train_id;
     } else {
       id = trajectoryOrId;
@@ -894,7 +894,7 @@ class RealtimeEngine {
       bbox.push(`tenant=${this.tenant}`);
     }
 
-    if (this.mode !== 'topographic') {
+    if (this.mode !== "topographic") {
       bbox.push(`channel_prefix=${this.mode}`);
     }
 

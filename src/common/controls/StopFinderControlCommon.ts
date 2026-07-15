@@ -1,7 +1,7 @@
-import { StopsAPI } from '../../api';
+import { StopsAPI } from "../../api";
 
-import type { StopsAPIOptions } from '../../api/StopsAPI';
-import type { StopsParameters, StopsResponse } from '../../types';
+import type { StopsAPIOptions } from "../../api/StopsAPI";
+import type { StopsParameters, StopsResponse } from "../../types";
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
   ArrayType[number];
@@ -10,7 +10,7 @@ export type StopFinderControlCommonOptions = {
   apiParams: StopsParameters;
   element: HTMLElement;
   onSuggestionClick?: (
-    suggestion: ArrayElement<NonNullable<StopsResponse['features']>>,
+    suggestion: ArrayElement<NonNullable<StopsResponse["features"]>>,
     evt: MouseEvent,
   ) => void;
   placeholder?: string;
@@ -54,7 +54,7 @@ class StopFinderControlCommon {
     const { apiKey, apiParams, placeholder, url } = options || {};
 
     this.apiParams = { limit: 20, ...(apiParams || {}) };
-    this.placeholder = placeholder || 'Search for a stop...';
+    this.placeholder = placeholder || "Search for a stop...";
 
     const apiOptions: { apiKey?: string; url?: string } = { apiKey };
     if (url) {
@@ -74,17 +74,17 @@ class StopFinderControlCommon {
       return;
     }
 
-    this.inputElt.value = '';
-    this.suggestionsElt.innerHTML = '';
-    this.clearElt.style.display = 'none';
+    this.inputElt.value = "";
+    this.suggestionsElt.innerHTML = "";
+    this.clearElt.style.display = "none";
   }
 
   createElement({ element }: StopFinderControlCommonOptions) {
     // Create input element
-    this.inputElt = document.createElement('input');
-    this.inputElt.type = 'text';
+    this.inputElt = document.createElement("input");
+    this.inputElt.type = "text";
     this.inputElt.placeholder = this.placeholder;
-    this.inputElt.autocomplete = 'off';
+    this.inputElt.autocomplete = "off";
     this.inputElt.onkeyup = (evt) => {
       this.abortController?.abort();
       this.abortController = new AbortController();
@@ -94,29 +94,29 @@ class StopFinderControlCommon {
       );
     };
     Object.assign(this.inputElt.style, {
-      padding: '10px 30px 10px 10px',
+      padding: "10px 30px 10px 10px",
     });
     element.appendChild(this.inputElt);
 
     // Create suggestions list element
-    this.suggestionsElt = document.createElement('div');
+    this.suggestionsElt = document.createElement("div");
     Object.assign(this.suggestionsElt.style, {
-      backgroundColor: 'white',
-      cursor: 'pointer',
-      overflowY: 'auto',
+      backgroundColor: "white",
+      cursor: "pointer",
+      overflowY: "auto",
     });
     element.appendChild(this.suggestionsElt);
 
-    this.clearElt = document.createElement('div');
+    this.clearElt = document.createElement("div");
     Object.assign(this.clearElt.style, {
-      cursor: 'pointer',
-      display: 'none',
-      fontSize: '200%',
-      padding: '0 10px',
-      position: 'absolute',
-      right: '0',
+      cursor: "pointer",
+      display: "none",
+      fontSize: "200%",
+      padding: "0 10px",
+      position: "absolute",
+      right: "0",
     });
-    this.clearElt.innerHTML = '×';
+    this.clearElt.innerHTML = "×";
     this.clearElt.onclick = () => {
       return this.clear();
     };
@@ -129,17 +129,17 @@ class StopFinderControlCommon {
       return;
     }
 
-    this.suggestionsElt.style.display = suggestions.length ? 'block' : 'none';
-    this.suggestionsElt.innerHTML = '';
+    this.suggestionsElt.style.display = suggestions.length ? "block" : "none";
+    this.suggestionsElt.innerHTML = "";
 
     suggestions.forEach((suggestion) => {
-      const suggElt = document.createElement('div');
-      suggElt.innerHTML = suggestion?.properties?.name || '';
+      const suggElt = document.createElement("div");
+      suggElt.innerHTML = suggestion?.properties?.name || "";
       suggElt.onclick = (evt) => {
         this.options?.onSuggestionClick?.(suggestion, evt);
       };
       Object.assign(suggElt.style, {
-        padding: '5px 12px',
+        padding: "5px 12px",
       });
       this.suggestionsElt?.appendChild(suggElt);
     });
@@ -158,7 +158,7 @@ class StopFinderControlCommon {
     }
 
     if (this.clearElt) {
-      this.clearElt.style.display = 'block';
+      this.clearElt.style.display = "block";
     }
 
     return this.api

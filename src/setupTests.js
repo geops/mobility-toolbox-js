@@ -1,10 +1,10 @@
-import fetchRouteResponse from '../data/fetchRoute.json';
-import fetchTrajectoriesResponse from '../data/fetchTrajectories.json';
-import fetchTrajectoryByIdResponse from '../data/fetchTrajectoryById.json';
-import fetchTrajectoryStationsResponse from '../data/fetchTrajectoryStations.json';
-import stopsSearchResponse from '../data/stopsSearch.json';
+import fetchRouteResponse from "../data/fetchRoute.json";
+import fetchTrajectoriesResponse from "../data/fetchTrajectories.json";
+import fetchTrajectoryByIdResponse from "../data/fetchTrajectoryById.json";
+import fetchTrajectoryStationsResponse from "../data/fetchTrajectoryStations.json";
+import stopsSearchResponse from "../data/stopsSearch.json";
 
-import 'jest-canvas-mock';
+import "jest-canvas-mock";
 
 global.fetchTrajectoryByIdResponse = fetchTrajectoryByIdResponse;
 global.fetchTrajectoriesResponse = fetchTrajectoriesResponse;
@@ -13,11 +13,11 @@ global.stopsSearchResponse = stopsSearchResponse;
 global.fetchRouteResponse = fetchRouteResponse;
 
 global.URL.createObjectURL = jest.fn(() => {
-  return 'fooblob';
+  return "fooblob";
 });
 
 window.OffscreenCanvas = () => {
-  return document.createElement('canvas');
+  return document.createElement("canvas");
 };
 
 /* eslint-disable */
@@ -45,7 +45,7 @@ class Worker {
   }
 }
 
-Object.defineProperty(window, 'Worker', {
+Object.defineProperty(window, "Worker", {
   writable: true,
   value: Worker,
 });

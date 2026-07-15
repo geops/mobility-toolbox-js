@@ -1,8 +1,8 @@
-import { apply, compose, create } from 'ol/transform';
+import { apply, compose, create } from "ol/transform";
 
-import getVehiclePosition from './getVehiclePosition';
+import getVehiclePosition from "./getVehiclePosition";
 
-import type { Pixel } from 'ol/pixel';
+import type { Pixel } from "ol/pixel";
 
 import type {
   AnyCanvas,
@@ -12,7 +12,7 @@ import type {
   RealtimeStyleOptions,
   RealtimeTrajectory,
   ViewState,
-} from '../../types';
+} from "../../types";
 
 /**
  * Draw all the trajectories available in a canvas.
@@ -65,7 +65,7 @@ const renderTrajectories = (
     noInterpolate = false,
     selectedVehicleId,
   } = options;
-  const context: AnyCanvasContext = canvas.getContext('2d') as AnyCanvasContext;
+  const context: AnyCanvasContext = canvas.getContext("2d") as AnyCanvasContext;
   context?.clearRect(0, 0, canvas.width, canvas.height);
 
   const [width, height] = size;

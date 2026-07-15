@@ -1,4 +1,4 @@
-import type { RealtimeTrajectory } from '../../types';
+import type { RealtimeTrajectory } from "../../types";
 
 const sortByDelay = (
   traj1: RealtimeTrajectory,
