@@ -83,8 +83,7 @@ describe('MapsetKmlFormat', () => {
       </ExtendedData>
       <Style>
         <IconStyle>
-          <scale>1</scale>      expect(parseInt(point.get('zIndex') as string, 10)).toBe(4);
-
+          <scale>1</scale>
           <Icon>
             <href>https://example.com/icon.png</href>
           </Icon>
