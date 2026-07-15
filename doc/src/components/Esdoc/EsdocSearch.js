@@ -53,21 +53,17 @@ function EsdocSearch() {
       />
       <ul className="search-result">
         {Object.entries(resultsByKind).map(([kind, result]) => {
-          return (
-            !!result.length && (
-              <React.Fragment key={kind}>
-                <li className="search-separator">{kind}</li>
-                {result.map((pair) => {
-                  const href = `/doc/${pair[1]}`.replace(/\./g, '%20');
-                  return (
-                    <li key={href}>
-                      <a href={href}>{pair[2]}</a>
-                    </li>
-                  );
-                })}
-              </React.Fragment>
-            )
-          );
+          return (!!result.length && (<React.Fragment key={kind}>
+            <li className="search-separator">{kind}</li>
+            {result.map((pair) => {
+              const href = `/doc/${pair[1]}`.replace(/\./g, '%20');
+              return (
+                <li key={href}>
+                  <a href={href}>{pair[2]}</a>
+                </li>
+              );
+            })}
+          </React.Fragment>));
         })}
       </ul>
     </div>

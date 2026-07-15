@@ -1,18 +1,7 @@
-import React from 'react';
-import { Container } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
-import EXAMPLES from '../../src/examples';
-import Example from '../../src/components/Example';
-
-const useStyles = makeStyles({
-  content: {
-    flexGrow: 1,
-    overflowY: 'auto',
-    paddingBottom: 115,
-    margin: 'auto',
-    marginTop: 30,
-  },
-});
+import React from "react";
+import { Container } from "@mui/material";
+import EXAMPLES from "../../src/examples";
+import Example from "../../src/components/Example";
 
 export async function getStaticPaths() {
   return {
@@ -41,9 +30,16 @@ export async function getStaticProps({ params }) {
 }
 
 function ExamplePage({ example }) {
-  const classes = useStyles();
   return (
-    <Container className={classes.content}>
+    <Container
+      sx={{
+        flexGrow: 1,
+        overflowY: "auto",
+        paddingBottom: 115,
+        margin: "auto",
+        marginTop: 30,
+      }}
+    >
       <Example example={example} />
     </Container>
   );

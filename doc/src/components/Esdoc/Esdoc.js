@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable import/no-relative-packages */
-import React from 'react';
-import Grid from '@mui/material/Grid';
-import { version } from '../../../../package.json';
-import EsdocContent from './EsdocContent';
-import EsdocNavigation from './EsdocNavigation';
-import EsdocSearch from './EsdocSearch';
-import { Box } from '@mui/material';
+import React from "react";
+import Grid from "@mui/material/Grid";
+import { version } from "../../../../package.json";
+import EsdocContent from "./EsdocContent";
+import EsdocNavigation from "./EsdocNavigation";
+import EsdocSearch from "./EsdocSearch";
+import { Box } from "@mui/material";
 
 function Esdoc({ path }) {
   if (!path) {
@@ -17,10 +17,12 @@ function Esdoc({ path }) {
     <div
       className={`esdoc`}
       style={{
-        width: '100%',
+        width: "100%",
       }}
     >
-      <Box display={{ xs: 'none', sm: 'block' }}>
+      <Box sx={{
+        display: { xs: "none", sm: "block" }
+      }}>
         <Grid container>
           <Grid
             size={{ xs: 12 }}
@@ -28,8 +30,8 @@ function Esdoc({ path }) {
               return {
                 padding: theme.spacing(1),
                 paddingBottom: 115,
-                margin: '0 auto',
-                maxWidth: '740px',
+                margin: "0 auto",
+                maxWidth: "740px",
               };
             }}
           >
@@ -37,15 +39,17 @@ function Esdoc({ path }) {
           </Grid>
         </Grid>
       </Box>
-      <Box display={{ xs: 'block', sm: 'none' }}>
+      <Box sx={{
+        display: { xs: "block", sm: "none" }
+      }}>
         <Grid container wrap="nowrap">
           <Grid style={{ minWidth: 260, maxWidth: 300 }}>
             <Box
               sx={(theme) => {
                 return {
-                  height: 'calc(100% - 32px)',
+                  height: "calc(100% - 32px)",
                   padding: theme.spacing(2),
-                  backgroundColor: 'rgb(239, 239, 239)',
+                  backgroundColor: "rgb(239, 239, 239)",
                 };
               }}
             >
@@ -60,8 +64,8 @@ function Esdoc({ path }) {
               return {
                 padding: theme.spacing(1),
                 paddingBottom: 115,
-                margin: '0 auto',
-                maxWidth: '740px',
+                margin: "0 auto",
+                maxWidth: "740px",
               };
             }}
           >

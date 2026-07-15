@@ -10,7 +10,6 @@
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.2.0",
     "@mui/material-nextjs": "^9.1.1",
-    "@mui/styles": "^6.4.8",
     "codesandbox": "2.2.3",
     "maplibre-gl": "5.24.0",
     "mobility-toolbox-js": "./../build",
