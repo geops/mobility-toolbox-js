@@ -21,7 +21,7 @@ export async function getStaticProps() {
 
 function ExamplesPage({ examples }) {
   return (
-    <Container sx={contentSx}>
+    <Container style={contentSx}>
       <Examples examples={examples} />
     </Container>
   );

@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
-import React from 'react';
-import NavDoc from './NavDoc';
+import React from "react";
+import NavDoc from "./NavDoc";
 
 function EsdocNavigation() {
   return (

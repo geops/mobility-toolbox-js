@@ -32,7 +32,7 @@ export async function getStaticProps({ params }) {
 function ExamplePage({ example }) {
   return (
     <Container
-      sx={{
+      style={{
         flexGrow: 1,
         overflowY: "auto",
         paddingBottom: 115,

@@ -12,7 +12,7 @@ const contentSx = {
 
 function HomePage() {
   return (
-    <Container sx={contentSx}>
+    <Container style={contentSx}>
       <Home />
     </Container>
   );

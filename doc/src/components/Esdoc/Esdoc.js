@@ -20,37 +20,37 @@ function Esdoc({ path }) {
         width: "100%",
       }}
     >
-      <Box sx={{
-        display: { xs: "none", sm: "block" }
-      }}>
+      <Box
+        sx={{
+          display: { xs: "block", sm: "none" },
+        }}
+      >
         <Grid container>
           <Grid
             size={{ xs: 12 }}
-            sx={(theme) => {
-              return {
-                padding: theme.spacing(1),
-                paddingBottom: 115,
-                margin: "0 auto",
-                maxWidth: "740px",
-              };
+            style={{
+              padding: "12px",
+              paddingBottom: "115px",
+              margin: "0 auto",
+              maxWidth: "740px",
             }}
           >
             <EsdocContent path={path} />
           </Grid>
         </Grid>
       </Box>
-      <Box sx={{
-        display: { xs: "block", sm: "none" }
-      }}>
+      <Box
+        sx={{
+          display: { xs: "none", sm: "block" },
+        }}
+      >
         <Grid container wrap="nowrap">
-          <Grid style={{ minWidth: 260, maxWidth: 300 }}>
+          <Grid size={{ xs: 3 }} style={{ minWidth: 260, maxWidth: 300 }}>
             <Box
-              sx={(theme) => {
-                return {
-                  height: "calc(100% - 32px)",
-                  padding: theme.spacing(2),
-                  backgroundColor: "rgb(239, 239, 239)",
-                };
+              style={{
+                height: "calc(100% - 32px)",
+                padding: "12px",
+                backgroundColor: "rgb(239, 239, 239)",
               }}
             >
               {version}
@@ -60,13 +60,11 @@ function Esdoc({ path }) {
           </Grid>
           <Grid
             size={{ xs: 9 }}
-            sx={(theme) => {
-              return {
-                padding: theme.spacing(1),
-                paddingBottom: 115,
-                margin: "0 auto",
-                maxWidth: "740px",
-              };
+            style={{
+              padding: "12px",
+              paddingBottom: "115px",
+              margin: "0 auto",
+              maxWidth: "740px",
             }}
           >
             <EsdocContent path={path} />
