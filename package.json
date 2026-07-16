@@ -34,6 +34,7 @@
     "@graphql-codegen/typescript": "^6.1.0",
     "@graphql-codegen/typescript-operations": "^6.1.0",
     "@types/geojson": "7946.0.16",
+    "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
     "@types/lodash.debounce": "4.0.9",
     "@types/lodash.throttle": "4.1.9",

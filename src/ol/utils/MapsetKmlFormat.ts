@@ -133,7 +133,7 @@ const getLineIcon = (
       size: icon.size, // ie 11
       src: icon.url,
     }),
-    zIndex: icon.zIndex,
+    zIndex: parseInt(feature.get("zIndex") as string, 10),
   });
 };
 
@@ -619,6 +619,12 @@ class MapsetKmlFormat {
       })
       .forEach((feature) => {
         const clone = feature.clone() as FeatureType;
+        const zIndex =
+          feature?.get("zIndex") !== undefined &&
+          feature?.get("zIndex") !== null
+            ? (parseInt(feature?.get("zIndex") as string, 10) ?? 0)
+            : undefined;
+
         if (clone.getGeometry()?.getType() === "Circle") {
           // We transform circle elements into polygons
           // because circle not supported in KML spec and in ol KML parser
@@ -667,11 +673,14 @@ class MapsetKmlFormat {
           image: mainStyle?.getImage() ?? undefined,
           stroke: mainStyle?.getStroke() ?? undefined,
           text: mainStyle?.getText() ?? undefined,
-          zIndex: mainStyle?.getZIndex() ?? undefined,
+          zIndex: zIndex,
         };
 
-        if (newStyle.zIndex) {
-          clone.set("zIndex", newStyle.zIndex);
+        // Persist zIndex as ExtendedData so it survives the KML roundtrip.
+        // KML has no native concept of zIndex, so we store it on the feature
+        // properties and re-apply it on read (see sanitizeFeature).
+        if (zIndex !== undefined) {
+          clone.set("zIndex", zIndex);
         }
 
         const text = newStyle.text?.getText();
