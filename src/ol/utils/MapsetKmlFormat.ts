@@ -274,7 +274,11 @@ class MapsetKmlFormat {
     }
 
     if (feature.get("zIndex")) {
-      style?.setZIndex(parseInt(feature.get("zIndex") as string, 10));
+      const zIndex = parseInt(feature.get("zIndex") as string, 10);
+      if (!Number.isNaN(zIndex)) {
+        feature.set("zIndex", zIndex);
+      }
+      style?.setZIndex(zIndex);
     }
 
     // if the feature is a Point and we are offline, we use default vector
