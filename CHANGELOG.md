@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.8.0](https://github.com/geops/mobility-toolbox-js/compare/v3.7.0...v3.8.0) (2026-07-16)
+
+
+### Features
+
+* use pnpm ([df212ef](https://github.com/geops/mobility-toolbox-js/commit/df212effb12592a358ef6d28a9020ac055613b5a))
+
+
+### Bug Fixes
+
+* add mext in root for vercel ([5f1a069](https://github.com/geops/mobility-toolbox-js/commit/5f1a069e4ad49e69c6361ee18b009fe34c702682))
+* add mext in root for vercel ([2f8ad8a](https://github.com/geops/mobility-toolbox-js/commit/2f8ad8af095d44d9955e3835f1992466fa771a4d))
+* fix api doc css ([ed1495f](https://github.com/geops/mobility-toolbox-js/commit/ed1495f315633cda37899178d6fd447b3290906b))
+* fix click on example ([6f29b20](https://github.com/geops/mobility-toolbox-js/commit/6f29b202ad37dff638c2d5b1f3de6c543a7304a0))
+* fix use of makeStyles ([0d0570a](https://github.com/geops/mobility-toolbox-js/commit/0d0570a8e24da898f25fa497ca74742077b4cf3e))
+* up to mui9 ([0715fc6](https://github.com/geops/mobility-toolbox-js/commit/0715fc69c878cb2aad236bb32315fa9e2eb5c46a))
+* up to mui9 ([055023f](https://github.com/geops/mobility-toolbox-js/commit/055023f8cca48fa6891770abc9a2454a9d53d3f3))
+* use default prettier config ([2987e12](https://github.com/geops/mobility-toolbox-js/commit/2987e1256f09e0d1c6c6a36449fc6beb171e83cf))
+* use default prettier config ([962ffcb](https://github.com/geops/mobility-toolbox-js/commit/962ffcb5d55a127a5ae97077d1cbff2f124892f0))
+
 ## [3.7.0](https://github.com/geops/mobility-toolbox-js/compare/v3.6.13...v3.7.0) (2026-05-22)
 
 
