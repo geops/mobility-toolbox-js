@@ -2,25 +2,25 @@ import {
   getFeatureCollectionToRenderFromSituation,
   getGraphByZoom,
   MocoAPI,
-} from '..';
+} from "..";
 import getGraphByZoomFromStyleMetadata, {
   DEFAULT_GRAPH,
   DEFAULT_GRAPH_MAPPING,
-} from '../utils/getGraphByZoomFromStyleMetadata';
+} from "../utils/getGraphByZoomFromStyleMetadata";
 
-import MaplibreStyleLayer from './MaplibreStyleLayer';
+import MaplibreStyleLayer from "./MaplibreStyleLayer";
 
 import type {
   GeoJSONSource,
   LayerSpecification,
   LineLayerSpecification,
   SymbolLayerSpecification,
-} from 'maplibre-gl';
-import type { Map } from 'ol';
-import type { Layer } from 'ol/layer';
-import type BaseLayer from 'ol/layer/Base';
+} from "maplibre-gl";
+import type { Map } from "ol";
+import type { Layer } from "ol/layer";
+import type BaseLayer from "ol/layer/Base";
 
-import type { MocoAPIOptions } from '../../api/MocoAPI';
+import type { MocoAPIOptions } from "../../api/MocoAPI";
 import type {
   LineType,
   MapsStyleSpecification,
@@ -31,18 +31,18 @@ import type {
   ReasonType,
   ServiceConditionEnumeration,
   SeverityEnumeration,
-} from '../../types';
+} from "../../types";
 import type {
   ServiceConditionGroupEnumeration,
   SeverityGroupEnumeration,
   SituationType,
-} from '../../types';
+} from "../../types";
 
-import type { MaplibreStyleLayerOptions } from './MaplibreStyleLayer';
+import type { MaplibreStyleLayerOptions } from "./MaplibreStyleLayer";
 
-export const MOCO_SOURCE_ID = 'moco';
-export const MAPS_MD_GENERAL_FILTER = 'general.filter';
-export const MOCO_MD_LAYER_FILTER = 'moco';
+export const MOCO_SOURCE_ID = "moco";
+export const MAPS_MD_GENERAL_FILTER = "general.filter";
+export const MOCO_MD_LAYER_FILTER = "moco";
 export const MOCO_MD_LAYER_FILTER_LNP = `${MOCO_MD_LAYER_FILTER}.lnp`;
 
 const getMocoLayersFilter = (lnpLayer?: BaseLayer) => {
@@ -87,22 +87,22 @@ export type MocoLayerOptions = {
   url?: string;
   useGraphsFromStyle?: boolean;
 } & MaplibreStyleLayerOptions &
-  Pick<MocoAPIOptions, 'apiKey' | 'tenant' | 'url'>;
+  Pick<MocoAPIOptions, "apiKey" | "tenant" | "url">;
 
 export interface MocoNotificationStopPropertiesToRender {
   name?: string;
-  publicationStopId?: PublicationStopType['id'];
+  publicationStopId?: PublicationStopType["id"];
 }
 
 export interface MocoNotificationLinePropertiesToRender {
-  hasIcon?: PublicationLineGroupType['hasIcon'];
+  hasIcon?: PublicationLineGroupType["hasIcon"];
   line?: LineType;
-  mot?: PublicationLineGroupType['mot'];
+  mot?: PublicationLineGroupType["mot"];
   name?: string;
 }
 export interface MocoNotificationSituationPropertiesToRender {
-  publicationId?: PublicationType['id'];
-  situationId?: SituationType['id'];
+  publicationId?: PublicationType["id"];
+  situationId?: SituationType["id"];
 }
 
 /**
@@ -164,11 +164,11 @@ export type MocoNotificationFeatureCollectionToRender =
  */
 class MocoLayer extends MaplibreStyleLayer {
   get api(): MocoAPI {
-    return this.get('api') as MocoAPI;
+    return this.get("api") as MocoAPI;
   }
 
   set api(value: MocoAPI) {
-    this.set('api', value);
+    this.set("api", value);
     void this.updateData();
   }
 
@@ -182,79 +182,79 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   get apiParameters(): MocoExportParameters | undefined {
-    return this.get('apiParameters') as MocoExportParameters | undefined;
+    return this.get("apiParameters") as MocoExportParameters | undefined;
   }
 
   set apiParameters(value: MocoExportParameters) {
-    this.set('apiParameters', value);
+    this.set("apiParameters", value);
     void this.updateData();
   }
 
   get generalizationLevelByZoom() {
-    return (this.get('generalizationLevelByZoom') as string[]) ?? [];
+    return (this.get("generalizationLevelByZoom") as string[]) ?? [];
   }
 
   set generalizationLevelByZoom(generalizationLevelByZoom: string[]) {
-    this.set('generalizationLevelByZoom', generalizationLevelByZoom);
+    this.set("generalizationLevelByZoom", generalizationLevelByZoom);
     void this.updateData();
   }
 
   get graphByZoom(): null | string[] | undefined {
-    return this.get('graphByZoom') as null | string[] | undefined;
+    return this.get("graphByZoom") as null | string[] | undefined;
   }
 
   set graphByZoom(graphByZoom: null | string[] | undefined) {
-    this.set('graphByZoom', graphByZoom);
+    this.set("graphByZoom", graphByZoom);
     void this.updateData();
   }
 
   get lnpLayer(): Layer | undefined {
-    return this.get('lnpLayer') as Layer | undefined;
+    return this.get("lnpLayer") as Layer | undefined;
   }
 
   get loadAll(): boolean {
-    return (this.get('loadAll') as boolean) ?? true;
+    return (this.get("loadAll") as boolean) ?? true;
   }
 
   set loadAll(value: boolean) {
-    this.set('loadAll', value);
+    this.set("loadAll", value);
     void this.updateData();
   }
 
   get loadByZoom(): boolean {
-    return (this.get('loadByZoom') as boolean) ?? false;
+    return (this.get("loadByZoom") as boolean) ?? false;
   }
 
   set loadByZoom(value: boolean) {
-    this.set('loadByZoom', value);
+    this.set("loadByZoom", value);
     void this.updateData();
   }
 
   set publicAt(value: Date) {
-    this.set('publicAt', value);
+    this.set("publicAt", value);
     void this.updateData();
   }
   get publicAt(): Date {
-    return this.get('publicAt') as Date;
+    return this.get("publicAt") as Date;
   }
 
   set situations(value: Partial<SituationType>[]) {
     // If we set situations we do not want to load data from backend
     this.loadAll = false;
-    this.set('situations', value);
+    this.set("situations", value);
     void this.updateData();
   }
 
   get situations(): Partial<SituationType>[] | undefined {
-    return this.get('situations') as Partial<SituationType>[] | undefined;
+    return this.get("situations") as Partial<SituationType>[] | undefined;
   }
 
   get tenant(): string | undefined {
-    return this.get('tenant') as string | undefined;
+    return this.get("tenant") as string | undefined;
   }
 
   set tenant(value: string) {
-    this.set('tenant', value);
+    this.set("tenant", value);
     void this.updateData();
   }
 
@@ -274,7 +274,7 @@ class MocoLayer extends MaplibreStyleLayer {
    */
   #dataInternal: MocoNotificationFeatureCollectionToRender = {
     features: [],
-    type: 'FeatureCollection',
+    type: "FeatureCollection",
   };
 
   /**
@@ -320,7 +320,7 @@ class MocoLayer extends MaplibreStyleLayer {
 
     if (mapInternal && this.loadByZoom) {
       this.olEventsKeys.push(
-        mapInternal.on('moveend', () => {
+        mapInternal.on("moveend", () => {
           if (this.loadByZoom) {
             void this.updateData();
           }
@@ -332,7 +332,7 @@ class MocoLayer extends MaplibreStyleLayer {
         this.layersFilter = getMocoLayersFilter(this.lnpLayer);
       }
       this.olEventsKeys.push(
-        this.lnpLayer.on('change:visible', () => {
+        this.lnpLayer.on("change:visible", () => {
           this.layersFilter = getMocoLayersFilter(this.lnpLayer);
 
           if (this.loadByZoom) {
@@ -350,7 +350,7 @@ class MocoLayer extends MaplibreStyleLayer {
       // Remove the data from the map
       (source as GeoJSONSource).setData({
         features: [],
-        type: 'FeatureCollection',
+        type: "FeatureCollection",
       });
     }
 
@@ -385,7 +385,7 @@ class MocoLayer extends MaplibreStyleLayer {
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.warn('Error stringifying fetch parameters for caching', error);
+      console.warn("Error stringifying fetch parameters for caching", error);
     }
 
     try {
@@ -395,7 +395,7 @@ class MocoLayer extends MaplibreStyleLayer {
       }
       return response.paginatedSituations.results;
     } catch (error) {
-      if (error && (error as { name: string }).name.includes('AbortError')) {
+      if (error && (error as { name: string }).name.includes("AbortError")) {
         // Ignore abort error
         return [];
       }
@@ -416,7 +416,7 @@ class MocoLayer extends MaplibreStyleLayer {
       features: (data?.features || []).filter((feature) => {
         return feature.properties?.graph === graph;
       }),
-      type: 'FeatureCollection',
+      type: "FeatureCollection",
     };
     return newData;
   }
@@ -445,7 +445,7 @@ class MocoLayer extends MaplibreStyleLayer {
       graphs = Object.values(graphMapping);
     }
 
-    const graphsString = [...new Set(graphs)].join(',');
+    const graphsString = [...new Set(graphs)].join(",");
     return this.fetchData(
       { graph: graphsString },
       { signal: this.#abortController.signal },
@@ -493,18 +493,18 @@ class MocoLayer extends MaplibreStyleLayer {
     if (this.loadByZoom) {
       const situations = await this.loadDataByZoom();
       // We don't use the setter here to avoid infinite loop
-      this.set('situations', situations ?? []);
+      this.set("situations", situations ?? []);
     } else if (this.loadAll) {
       const situations = await this.loadData();
       // We don't use the setter here to avoid infinite loop
-      this.set('situations', situations ?? []);
+      this.set("situations", situations ?? []);
     }
     const source: GeoJSONSource | undefined =
       this.maplibreLayer?.mapLibreMap?.getSource(MOCO_SOURCE_ID);
     if (!source) {
       // eslint-disable-next-line no-console
-      console.warn('MocoLayer: No source found for id : ', MOCO_SOURCE_ID);
-      return Promise.reject(new Error('No source found'));
+      console.warn("MocoLayer: No source found for id : ", MOCO_SOURCE_ID);
+      return Promise.reject(new Error("No source found"));
     }
 
     const data = {
@@ -514,7 +514,7 @@ class MocoLayer extends MaplibreStyleLayer {
           this.publicAt,
         ).features;
       }),
-      type: 'FeatureCollection',
+      type: "FeatureCollection",
     } as MocoNotificationFeatureCollectionToRender;
 
     this.#dataInternal = data;

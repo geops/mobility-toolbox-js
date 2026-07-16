@@ -526,7 +526,6 @@ class RoutingControl extends Control {
               'coord-punish': 1000.0,
               'coord-radius': 100.0,
               elevation: false,
-              // @ts-expect-error improve type graph must include osm in the enum
               graph,
               mot: this.mot,
               'resolve-hops': false,

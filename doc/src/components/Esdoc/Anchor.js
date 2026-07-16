@@ -1,8 +1,10 @@
+"use client";
+
 /* eslint-disable react/prop-types */
 /* eslint-disable no-underscore-dangle */
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Scrollchor } from 'react-scrollchor';
+import React, { useMemo } from "react";
+import PropTypes from "prop-types";
+import { Scrollchor } from "react-scrollchor";
 
 const propTypes = {
   /**
@@ -25,10 +27,15 @@ const propTypes = {
  * @private
  */
 function Anchor({ path, children, ...other }) {
-  const pathElements = path.split('#');
-  if (pathElements[0] === window.location.pathname) {
+  const pathElements = path.split("#");
+
+  const win = useMemo(() => {
+    return typeof window !== "undefined" ? window : undefined;
+  }, []);
+
+  if (win && pathElements[0] === win.location.pathname) {
     const anchor = pathElements[1];
-    const to = anchor ? `#${anchor}` : '';
+    const to = anchor ? `#${anchor}` : "";
 
     return (
       <Scrollchor

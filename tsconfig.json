@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./build",
+    "rootDir": "./src",
     "allowJs": true,
     "target": "es6",
     "strict": true,
@@ -13,9 +14,8 @@
     // "Go to Definition" in VSCode
     // "declarationMap": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "lib": ["es6", "dom"]
+    "lib": ["es2019", "dom"]
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],

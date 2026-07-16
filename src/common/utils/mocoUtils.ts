@@ -1,17 +1,17 @@
-import { getCenter } from 'ol/extent';
-import GeoJSONFormat from 'ol/format/GeoJSON';
-import { v4 as uuid } from 'uuid';
+import { getCenter } from "ol/extent";
+import GeoJSONFormat from "ol/format/GeoJSON";
+import { v4 as uuid } from "uuid";
 
-import type { LineString } from 'ol/geom';
+import type { LineString } from "ol/geom";
 
 import type {
   MocoNotificationFeatureCollectionToRender,
   MocoNotificationFeatureToRender,
-} from '../../ol/layers/MocoLayer';
-import type { SituationType } from '../../types';
+} from "../../ol/layers/MocoLayer";
+import type { SituationType } from "../../types";
 
 export const getTime = (str: string) => {
-  return parseInt(str?.substr(0, 8).replace(/:/g, ''), 10);
+  return parseInt(str?.substr(0, 8).replace(/:/g, ""), 10);
 };
 const geojson = new GeoJSONFormat();
 
@@ -24,8 +24,8 @@ export const isMocoSituationAffected = (
 ) => {
   return !!situation.affectedTimeIntervals?.some((affectedTimeInterval) => {
     const {
-      dailyEndTime = '',
-      dailyStartTime = '',
+      dailyEndTime = "",
+      dailyStartTime = "",
       endTime,
       startTime,
     } = affectedTimeInterval as {
@@ -119,14 +119,14 @@ export const getMocoIconRefFeature = (
   const icon: MocoNotificationFeatureToRender = {
     geometry: {
       coordinates: geometry.getClosestPoint(center),
-      type: 'Point',
+      type: "Point",
     },
     id: uuid(),
     properties: {
       ...publicationLineFeature.properties,
       geometry: undefined, // to avoid ol problems
     },
-    type: 'Feature',
+    type: "Feature",
   };
   return icon;
 };
@@ -136,22 +136,22 @@ const to4326 = (
 ): GeoJSON.LineString | GeoJSON.Point => {
   return geojson.writeGeometryObject(
     geojson.readGeometry(geometry3857, {
-      dataProjection: 'EPSG:3857',
-      featureProjection: 'EPSG:4326',
+      dataProjection: "EPSG:3857",
+      featureProjection: "EPSG:4326",
     }),
   ) as GeoJSON.LineString | GeoJSON.Point;
 };
 
 export const getMocoReasonCategoryImageName = (
-  categoryName = 'undefiniert',
+  categoryName = "undefiniert",
 ) => {
   return categoryName
     .toLowerCase()
-    .replace(/\s/g, '_')
-    .replace(/ü/g, 'ue')
-    .replace(/ä/g, 'ae')
-    .replace(/ö/g, 'oe')
-    .replace(/ß/g, 'ss');
+    .replace(/\s/g, "_")
+    .replace(/ü/g, "ue")
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ß/g, "ss");
 };
 
 /**
@@ -219,7 +219,7 @@ export const getFeatureCollectionToRenderFromSituation = (
                 ...publicationRenderProps,
                 geometry: undefined, // to avoid conflict with ol geometry property
               },
-              type: 'Feature',
+              type: "Feature",
             };
             features.push(feature);
 
@@ -254,7 +254,7 @@ export const getFeatureCollectionToRenderFromSituation = (
               ...publicationRenderProps,
               geometry: undefined, // to avoid conflict with ol geometry property
             },
-            type: 'Feature',
+            type: "Feature",
           };
           features.push(feature);
         },
@@ -263,7 +263,7 @@ export const getFeatureCollectionToRenderFromSituation = (
   });
   return {
     features,
-    type: 'FeatureCollection',
+    type: "FeatureCollection",
   };
 };
 

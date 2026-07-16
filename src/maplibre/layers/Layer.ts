@@ -1,15 +1,15 @@
-import { Evented } from 'maplibre-gl';
-import { v4 as uuid } from 'uuid';
+import { Evented } from "maplibre-gl";
+import { v4 as uuid } from "uuid";
 
-import type { CustomLayerInterface } from 'maplibre-gl';
+import type { CustomLayerInterface } from "maplibre-gl";
 
-import type { AnyMapGlMap } from '../../types';
+import type { AnyMapGlMap } from "../../types";
 
 export interface LayerOptions {
   id?: string;
 }
 
-export type CUSTOM = 'custom';
+export type CUSTOM = "custom";
 
 /**
  * A class representing a layer to display on an Maplibre map.
@@ -30,7 +30,7 @@ class Layer extends Evented implements CustomLayerInterface {
 
   options: LayerOptions = {};
 
-  type: CUSTOM = 'custom';
+  type: CUSTOM = "custom";
 
   constructor(options: LayerOptions = {}) {
     super();

@@ -1,11 +1,11 @@
-import realtimeStyle from './realtimeStyle';
+import realtimeStyle from "./realtimeStyle";
 
 import type {
   RealtimeStyleFunction,
   RealtimeStyleOptions,
   RealtimeTrajectory,
   ViewState,
-} from '../../types';
+} from "../../types";
 /**
  * A tracker style that display the delay as backgroundColor.
  *

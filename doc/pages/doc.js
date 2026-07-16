@@ -1,20 +1,16 @@
-import React from 'react';
-import { Container } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
-import Documentation from '../src/components/Documentation';
+import React from "react";
+import { Container } from "@mui/material";
+import Documentation from "../src/components/Documentation";
 
-const useStyles = makeStyles({
-  root: {
-    flexGrow: 1,
-    overflowY: 'auto',
-    padding: 0,
-  },
-});
+const rootSx = {
+  flexGrow: 1,
+  overflowY: "auto",
+  padding: 0,
+};
 
 function ApiPage() {
-  const classes = useStyles();
   return (
-    <Container className={classes.root}>
+    <Container sx={rootSx}>
       <Documentation />
     </Container>
   );

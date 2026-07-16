@@ -24,19 +24,19 @@ Visit https://mobility-toolbox-js.geops.io/
 Install the library and the peer dependencies:
 
 ```bash
-yarn add ol maplibre-gl mobility-toolbox-js
+pnpm add ol maplibre-gl mobility-toolbox-js
 ```
 
 ## Development
 
 ```bash
-yarn install
-yarn dev
+pnpm install
+pnpm dev
 ```
 
-`yarn dev` starts a vite server using the `index.html` file at the root of the project.
+`pnpm dev` starts a vite server using the `index.html` file at the root of the project.
 This html file loads the `dev.js` file. Use this file to develop the library.
-Each time you modifiy the library code you have to run `yarn build:tsc` to see the changes.
+Each time you modifiy the library code you have to run `pnpm build:tsc` to see the changes.
 
 ## Development documentation
 

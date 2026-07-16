@@ -1,22 +1,22 @@
-import removeDuplicate from './removeDuplicate';
+import removeDuplicate from "./removeDuplicate";
 
-describe('removeDuplicate()', () => {
-  test('removes duplicates', () => {
+describe("removeDuplicate()", () => {
+  test("removes duplicates", () => {
     expect(
       removeDuplicate([
-        'a',
-        ' ',
-        '   ',
-        'b',
-        'a',
+        "a",
+        " ",
+        "   ",
+        "b",
+        "a",
         undefined,
         null,
-        'A',
+        "A",
         0,
-        'c',
-        'b',
-        'B',
+        "c",
+        "b",
+        "B",
       ]),
-    ).toEqual(['a', 'b', 'c']);
+    ).toEqual(["a", "b", "c"]);
   });
 });

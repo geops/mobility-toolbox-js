@@ -10,13 +10,13 @@ jobs:
       image: cypress/browsers:node-22.17.1-chrome-138.0.7204.157-1-ff-140.0.4-edge-138.0.3351.83-1
       options: --user 1001
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - run: yarn install --frozen-lockfile
-      - run: yarn cypress info
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm cypress info
       - run: node --version
       - run: node -p 'os.cpus()'
-      - run: yarn cy:test:chrome
+      - run: pnpm cy:test:chrome
   edge:
     runs-on: ubuntu-latest
     container:
@@ -24,13 +24,13 @@ jobs:
       image: cypress/browsers:node-22.17.1-chrome-138.0.7204.157-1-ff-140.0.4-edge-138.0.3351.83-1
       options: --user 1001
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - run: yarn install --frozen-lockfile
-      - run: yarn cypress info
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm cypress info
       - run: node --version
       - run: node -p 'os.cpus()'
-      - run: yarn cy:test:edge
+      - run: pnpm cy:test:edge
 
   # chrome:
   #   runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
   #       with:
   #         # Specify Browser since container image is compile with Firefox
   #         browser: chrome
-  #         start: yarn start
+  #         start: pnpm start
   #         wait-on: 'http://localhost:3000'
 
   # edge:
@@ -99,5 +99,5 @@ jobs:
   #       with:
   #         # Specify Browser since container image is compile with Firefox
   #         browser: edge
-  #         start: yarn start
+  #         start: pnpm start
   #         wait-on: 'http://localhost:3000'

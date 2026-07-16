@@ -1,6 +1,6 @@
-import removeDuplicate from './removeDuplicate';
+import removeDuplicate from "./removeDuplicate";
 
-import type { Style } from 'maplibre-gl';
+import type { Style } from "maplibre-gl";
 
 export interface Source {
   attribution: string;
@@ -32,7 +32,7 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
   const { sourceCaches, tileManagers } = style;
   let copyrights: string[] = [];
   const sourceCacheObj =
-    tileManagers || (sourceCaches as Style['tileManagers']) || {};
+    tileManagers || (sourceCaches as Style["tileManagers"]) || {};
   Object.values(sourceCacheObj).forEach((value) => {
     if (value.used) {
       const source = value.getSource();
@@ -44,7 +44,7 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
 
       if (attribution) {
         copyrights = copyrights.concat(
-          attribution.replace(/&copy;/g, '©').split(/(<a.*?<\/a>)/),
+          attribution.replace(/&copy;/g, "©").split(/(<a.*?<\/a>)/),
         );
       }
     }

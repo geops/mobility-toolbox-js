@@ -1,6 +1,6 @@
-import type { StyleMetadataGraphs } from '../../types';
+import type { StyleMetadataGraphs } from "../../types";
 
-export const DEFAULT_GRAPH = 'osm';
+export const DEFAULT_GRAPH = "osm";
 
 export const DEFAULT_GRAPH_MAPPING: StyleMetadataGraphs = {
   1: DEFAULT_GRAPH,

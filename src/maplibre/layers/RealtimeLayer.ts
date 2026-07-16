@@ -1,22 +1,22 @@
-import { point } from '@turf/helpers';
-import transformRotate from '@turf/transform-rotate';
-import { getHeight, getWidth } from 'ol/extent';
-import { fromLonLat } from 'ol/proj';
+import { point } from "@turf/helpers";
+import transformRotate from "@turf/transform-rotate";
+import { getHeight, getWidth } from "ol/extent";
+import { fromLonLat } from "ol/proj";
 
-import RealtimeEngine from '../../common/utils/RealtimeEngine';
-import { getSourceCoordinates } from '../utils';
+import RealtimeEngine from "../../common/utils/RealtimeEngine";
+import { getSourceCoordinates } from "../utils";
 
-import Layer from './Layer';
+import Layer from "./Layer";
 
 import type {
   CanvasSourceSpecification,
   LayerSpecification,
-} from 'maplibre-gl';
+} from "maplibre-gl";
 
-import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
-import type { AnyCanvas, AnyMapGlMap } from '../../types';
+import type { RealtimeEngineOptions } from "../../common/utils/RealtimeEngine";
+import type { AnyCanvas, AnyMapGlMap } from "../../types";
 
-import type { LayerOptions } from './Layer';
+import type { LayerOptions } from "./Layer";
 
 export type RealtimeLayerOptions = LayerOptions & RealtimeEngineOptions;
 
@@ -89,7 +89,7 @@ class RealtimeLayer extends Layer {
    * @param {string} [options.url="wss://api.geops.io/tracker-ws/v1/"] The geOps Realtime API url.
    */
   constructor(options: RealtimeLayerOptions = {}) {
-    const id = options?.id || 'realtime';
+    const id = options?.id || "realtime";
     super({
       ...options,
       id: `realtime-custom-${id}`,
@@ -108,7 +108,7 @@ class RealtimeLayer extends Layer {
       // Set to true if the canvas source is animated. If the canvas is static, animate should be set to false to improve performance.
       animate: true,
       // @ts-expect-error bad type definition
-      attribution: (options.attribution as string[])?.join(', '),
+      attribution: (options.attribution as string[])?.join(", "),
       canvas: this.canvas as HTMLCanvasElement,
       // Set a default coordinates, it will be overrides on next data update
       coordinates: [
@@ -118,21 +118,21 @@ class RealtimeLayer extends Layer {
         [0, 0],
       ],
       loaded: true,
-      type: 'canvas',
+      type: "canvas",
     };
 
     this.layer = {
       id: this.#internalId,
       layout: {
-        visibility: 'visible',
+        visibility: "visible",
       },
       paint: {
-        'raster-fade-duration': 0,
-        'raster-opacity': 1,
-        'raster-resampling': 'nearest', // important otherwise it looks blurry
+        "raster-fade-duration": 0,
+        "raster-opacity": 1,
+        "raster-resampling": "nearest", // important otherwise it looks blurry
       },
       source: this.sourceId,
-      type: 'raster',
+      type: "raster",
     };
 
     this.onLoad = this.onLoad.bind(this);
@@ -219,7 +219,7 @@ class RealtimeLayer extends Layer {
       this.onLoad();
     }
 
-    map.on('load', this.onLoad);
+    map.on("load", this.onLoad);
   }
 
   onLoad() {
@@ -274,7 +274,7 @@ class RealtimeLayer extends Layer {
     this.engine.detachFromMap();
     this.stop();
 
-    map.off('load', this.onLoad);
+    map.off("load", this.onLoad);
 
     if (map.getLayer(this.layer.id)) {
       map.removeLayer(this.layer.id);
@@ -296,9 +296,9 @@ class RealtimeLayer extends Layer {
    */
   start() {
     this.engine.start();
-    this.map?.on('move', this.onMove);
-    this.map?.on('moveend', this.onMoveEnd);
-    this.map?.on('zoomend', this.onZoomEnd);
+    this.map?.on("move", this.onMove);
+    this.map?.on("moveend", this.onMoveEnd);
+    this.map?.on("zoomend", this.onZoomEnd);
   }
 
   /**
@@ -308,9 +308,9 @@ class RealtimeLayer extends Layer {
    */
   stop() {
     this.engine.stop();
-    this.map?.off('move', this.onMove);
-    this.map?.off('moveend', this.onMoveEnd);
-    this.map?.off('zoomend', this.onZoomEnd);
+    this.map?.off("move", this.onMove);
+    this.map?.off("moveend", this.onMoveEnd);
+    this.map?.off("zoomend", this.onZoomEnd);
   }
 }
 

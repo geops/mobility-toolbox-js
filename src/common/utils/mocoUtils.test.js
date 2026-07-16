@@ -3,42 +3,42 @@ import {
   getMocoReasonCategoryImageName,
   isMocoSituationAffected,
   isMocoSituationPublished,
-} from './mocoUtils';
+} from "./mocoUtils";
 
 // Category from moco
 const MOCO_REASONS_CATEGORY = {
-  DAS_PERSONAL_BETREFEND: 'Das Personal betreffend',
-  SICHERHEITSRELEVANT: 'Sicherheitsrelevant',
-  SPEZIELLE_ANLAESSE: 'Spezielle Anl\u00E4sse',
-  TECHNISCHE_PROBLEME: 'Technische Probleme',
-  UMWELTEINFLUESSE: 'Umwelteinflüsse',
-  UNDEFINIERT: 'Undefiniert',
-  UNFALL: 'Unfall',
-  VERKEHRLICHE_GRUENDE: 'Verkehrliche Gr\u00FCnde',
-  VERSCHIEDENES: 'Verschiedenes',
+  DAS_PERSONAL_BETREFEND: "Das Personal betreffend",
+  SICHERHEITSRELEVANT: "Sicherheitsrelevant",
+  SPEZIELLE_ANLAESSE: "Spezielle Anl\u00E4sse",
+  TECHNISCHE_PROBLEME: "Technische Probleme",
+  UMWELTEINFLUESSE: "Umwelteinflüsse",
+  UNDEFINIERT: "Undefiniert",
+  UNFALL: "Unfall",
+  VERKEHRLICHE_GRUENDE: "Verkehrliche Gr\u00FCnde",
+  VERSCHIEDENES: "Verschiedenes",
 };
 
 const MOCO_IMAGE_BY_CATEGORY = {
-  [MOCO_REASONS_CATEGORY.DAS_PERSONAL_BETREFEND]: 'das_personal_betreffend',
-  [MOCO_REASONS_CATEGORY.SICHERHEITSRELEVANT]: 'sicherheitsrelevant',
-  [MOCO_REASONS_CATEGORY.SPEZIELLE_ANLAESSE]: 'spezielle_anlaesse',
-  [MOCO_REASONS_CATEGORY.TECHNISCHE_PROBLEME]: 'technische_probleme',
-  [MOCO_REASONS_CATEGORY.UMWELTEINFLUESSE]: 'umwelteinfluesse',
-  [MOCO_REASONS_CATEGORY.UNDEFINIERT]: 'undefiniert',
-  [MOCO_REASONS_CATEGORY.UNFALL]: 'unfall',
-  [MOCO_REASONS_CATEGORY.VERKEHRLICHE_GRUENDE]: 'verkehrliche_gruende',
-  [MOCO_REASONS_CATEGORY.VERSCHIEDENES]: 'verschiedenes',
+  [MOCO_REASONS_CATEGORY.DAS_PERSONAL_BETREFEND]: "das_personal_betreffend",
+  [MOCO_REASONS_CATEGORY.SICHERHEITSRELEVANT]: "sicherheitsrelevant",
+  [MOCO_REASONS_CATEGORY.SPEZIELLE_ANLAESSE]: "spezielle_anlaesse",
+  [MOCO_REASONS_CATEGORY.TECHNISCHE_PROBLEME]: "technische_probleme",
+  [MOCO_REASONS_CATEGORY.UMWELTEINFLUESSE]: "umwelteinfluesse",
+  [MOCO_REASONS_CATEGORY.UNDEFINIERT]: "undefiniert",
+  [MOCO_REASONS_CATEGORY.UNFALL]: "unfall",
+  [MOCO_REASONS_CATEGORY.VERKEHRLICHE_GRUENDE]: "verkehrliche_gruende",
+  [MOCO_REASONS_CATEGORY.VERSCHIEDENES]: "verschiedenes",
 };
 
-describe('mocoUtils', () => {
-  test('getReasonsCategoryImageName', () => {
+describe("mocoUtils", () => {
+  test("getReasonsCategoryImageName", () => {
     Object.entries(MOCO_IMAGE_BY_CATEGORY).forEach(([key, value]) => {
       expect(getMocoReasonCategoryImageName(key)).toBe(value);
     });
   });
 
-  describe('isMocoSituationAffected', () => {
-    test('using start and end', () => {
+  describe("isMocoSituationAffected", () => {
+    test("using start and end", () => {
       expect(isMocoSituationAffected({ affectedTimeIntervals: [] })).toBe(
         false,
       );
@@ -54,12 +54,12 @@ describe('mocoUtils', () => {
           {
             affectedTimeIntervals: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('1999-01-01T00:00:00Z'),
+          new Date("1999-01-01T00:00:00Z"),
         ),
       ).toBe(false);
 
@@ -68,12 +68,12 @@ describe('mocoUtils', () => {
           {
             affectedTimeIntervals: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-01T00:00:00Z'),
+          new Date("2000-01-01T00:00:00Z"),
         ),
       ).toBe(true);
 
@@ -82,12 +82,12 @@ describe('mocoUtils', () => {
           {
             affectedTimeIntervals: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-10T10:00:00Z'),
+          new Date("2000-01-10T10:00:00Z"),
         ),
       ).toBe(true);
 
@@ -96,30 +96,30 @@ describe('mocoUtils', () => {
           {
             affectedTimeIntervals: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-10T11:00:00Z'),
+          new Date("2000-01-10T11:00:00Z"),
         ),
       ).toBe(false);
     });
 
-    test('using dailyStart and dailyEnd', () => {
+    test("using dailyStart and dailyEnd", () => {
       expect(
         isMocoSituationAffected(
           {
             affectedTimeIntervals: [
               {
-                dailyEndTime: '10:00:00',
-                dailyStartTime: '08:00:00',
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                dailyEndTime: "10:00:00",
+                dailyStartTime: "08:00:00",
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-02T06:00:00Z'),
+          new Date("2000-01-02T06:00:00Z"),
         ),
       ).toBe(false);
 
@@ -128,38 +128,38 @@ describe('mocoUtils', () => {
           {
             affectedTimeIntervals: [
               {
-                dailyEndTime: '10:00:00',
-                dailyStartTime: '08:00:00',
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                dailyEndTime: "10:00:00",
+                dailyStartTime: "08:00:00",
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-02T09:00:00Z'),
+          new Date("2000-01-02T09:00:00Z"),
         ),
       ).toBe(true);
     });
   });
 
-  describe('isMocoSituationPublished', () => {
-    test('using affectedTimeIntervals', () => {
+  describe("isMocoSituationPublished", () => {
+    test("using affectedTimeIntervals", () => {
       expect(
         isMocoSituationPublished(
           {
             affectedTimeIntervals: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
             publicationWindows: [],
           },
-          new Date('2000-01-02T00:00:00Z'),
+          new Date("2000-01-02T00:00:00Z"),
         ),
       ).toBe(true);
     });
 
-    test('using start and end', () => {
+    test("using start and end", () => {
       expect(isMocoSituationAffected({ publicationWindows: [] })).toBe(false);
       expect(isMocoSituationAffected({ publicationWindows: null })).toBe(false);
       expect(isMocoSituationAffected({ publicationWindows: undefined })).toBe(
@@ -171,12 +171,12 @@ describe('mocoUtils', () => {
           {
             publicationWindows: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('1999-01-01T00:00:00Z'),
+          new Date("1999-01-01T00:00:00Z"),
         ),
       ).toBe(false);
 
@@ -185,12 +185,12 @@ describe('mocoUtils', () => {
           {
             publicationWindows: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-01T00:00:00Z'),
+          new Date("2000-01-01T00:00:00Z"),
         ),
       ).toBe(true);
 
@@ -199,12 +199,12 @@ describe('mocoUtils', () => {
           {
             publicationWindows: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-10T10:00:00Z'),
+          new Date("2000-01-10T10:00:00Z"),
         ),
       ).toBe(true);
 
@@ -213,36 +213,36 @@ describe('mocoUtils', () => {
           {
             publicationWindows: [
               {
-                endTime: '2000-01-10T10:00:00Z',
-                startTime: '2000-01-01T00:00:00Z',
+                endTime: "2000-01-10T10:00:00Z",
+                startTime: "2000-01-01T00:00:00Z",
               },
             ],
           },
-          new Date('2000-01-10T11:00:00Z'),
+          new Date("2000-01-10T11:00:00Z"),
         ),
       ).toBe(false);
     });
   });
 
-  describe('getFeatureCollectionToRenderFromSituation', () => {
-    test('return a FeatureCollection with correct properties', () => {
+  describe("getFeatureCollectionToRenderFromSituation", () => {
+    test("return a FeatureCollection with correct properties", () => {
       const situation = {
         affectedTimeIntervals: [
           {
-            endTime: '2025-09-26T23:00:00+00:00',
-            startTime: '2025-05-14T03:00:00+00:00',
+            endTime: "2025-09-26T23:00:00+00:00",
+            startTime: "2025-05-14T03:00:00+00:00",
           },
         ],
-        affectedTimeIntervalsEnd: '2025-09-26T23:00:00+00:00',
-        affectedTimeIntervalsStart: '2025-05-14T03:00:00+00:00',
-        id: '374718',
-        publicationLineNames: ['11'],
+        affectedTimeIntervalsEnd: "2025-09-26T23:00:00+00:00",
+        affectedTimeIntervalsStart: "2025-05-14T03:00:00+00:00",
+        id: "374718",
+        publicationLineNames: ["11"],
         publications: [
           {
-            id: 'publication-1-374718',
+            id: "publication-1-374718",
             publicationLines: [
               {
-                category: 'DISRUPTION',
+                category: "DISRUPTION",
                 hasIcon: true,
                 lines: [
                   {
@@ -287,13 +287,13 @@ describe('mocoUtils', () => {
                               [869129, 6104019],
                             ],
                           ],
-                          type: 'MultiLineString',
+                          type: "MultiLineString",
                         },
-                        graph: 'osm',
+                        graph: "osm",
                       },
                     ],
-                    name: '11',
-                    operatorRef: '',
+                    name: "11",
+                    operatorRef: "",
                   },
                 ],
               },
@@ -304,30 +304,30 @@ describe('mocoUtils', () => {
                   {
                     geom: {
                       coordinates: [878885, 6103826],
-                      type: 'Point',
+                      type: "Point",
                     },
-                    graph: 'osm',
+                    graph: "osm",
                   },
                 ],
-                id: 'lala',
-                name: 'Freiburg-Littenweiler',
-                uid: 'a33509cdf7463912',
+                id: "lala",
+                name: "Freiburg-Littenweiler",
+                uid: "a33509cdf7463912",
               },
             ],
             publicationWindows: [
               {
-                endTime: '2500-12-31T00:10:00+00:00',
-                startTime: '2025-05-12T03:00:00+00:00',
+                endTime: "2500-12-31T00:10:00+00:00",
+                startTime: "2025-05-12T03:00:00+00:00",
               },
             ],
-            serviceCondition: 'DISCONTINUED_OPERATION',
-            serviceConditionGroup: 'DISRUPTION',
-            severity: 'VERY_SEVERE',
-            severityGroup: 'HIGH',
+            serviceCondition: "DISCONTINUED_OPERATION",
+            serviceConditionGroup: "DISRUPTION",
+            severity: "VERY_SEVERE",
+            severityGroup: "HIGH",
             textualContentLarge: {
               de: {
                 summary:
-                  'Haltestellen Oberried (Breisgau) Sternen/Post und Oberried (Breisgau) Adler: Haltestellenverlegung wegen einer Baumaßnahmexx',
+                  "Haltestellen Oberried (Breisgau) Sternen/Post und Oberried (Breisgau) Adler: Haltestellenverlegung wegen einer Baumaßnahmexx",
               },
             },
           },
@@ -335,48 +335,48 @@ describe('mocoUtils', () => {
         publicationStopNames: [],
         publicationWindows: [
           {
-            endTime: '2500-12-31T00:10:00+00:00',
-            startTime: '2025-05-12T03:00:00+00:00',
+            endTime: "2500-12-31T00:10:00+00:00",
+            startTime: "2025-05-12T03:00:00+00:00",
           },
         ],
-        publicationWindowsEnd: '2500-12-31T00:10:00+00:00',
-        publicationWindowsStart: '2025-05-12T03:00:00+00:00',
+        publicationWindowsEnd: "2500-12-31T00:10:00+00:00",
+        publicationWindowsStart: "2025-05-12T03:00:00+00:00",
         reasons: [
           {
-            categoryName: 'Unfall',
-            name: 'Aufprall eines Objekts',
-            tenant: 'rvf',
+            categoryName: "Unfall",
+            name: "Aufprall eines Objekts",
+            tenant: "rvf",
           },
         ],
         title:
-          'Haltestellen Oberried (Breisgau) Sternen/Post und Oberried (Breisgau) Adler: Haltestellenverlegung wegen einer Baumaßnahmexx',
+          "Haltestellen Oberried (Breisgau) Sternen/Post und Oberried (Breisgau) Adler: Haltestellenverlegung wegen einer Baumaßnahmexx",
       };
 
       const featureCollection = getFeatureCollectionToRenderFromSituation(
         situation,
-        new Date('2025-09-01T00:00:00+00:00'),
+        new Date("2025-09-01T00:00:00+00:00"),
       );
 
-      expect(featureCollection.type).toBe('FeatureCollection');
+      expect(featureCollection.type).toBe("FeatureCollection");
       expect(featureCollection.features.length).toBe(3);
 
       // We test the line properties
       const lineProps = featureCollection.features[0].properties;
-      expect(lineProps.publicationId).toBe('publication-1-374718');
-      expect(lineProps.graph).toBe('osm');
-      expect(lineProps.serviceConditionGroup).toBe('DISRUPTION');
-      expect(lineProps.severityGroup).toBe('HIGH');
+      expect(lineProps.publicationId).toBe("publication-1-374718");
+      expect(lineProps.graph).toBe("osm");
+      expect(lineProps.serviceConditionGroup).toBe("DISRUPTION");
+      expect(lineProps.severityGroup).toBe("HIGH");
       expect(lineProps.hasIcon).toBe(true);
-      expect(lineProps.situationId).toBe('374718');
-      expect(lineProps.reasons[0].name).toBe('Aufprall eines Objekts');
-      expect(lineProps.reasonCategoryImageName).toBe('unfall');
+      expect(lineProps.situationId).toBe("374718");
+      expect(lineProps.reasons[0].name).toBe("Aufprall eines Objekts");
+      expect(lineProps.reasonCategoryImageName).toBe("unfall");
       expect(lineProps.isAffected).toBe(true);
       expect(lineProps.isPublished).toBe(true);
 
       expect(lineProps.graph).toBeDefined();
       expect(lineProps.serviceConditionGroup).toBeDefined();
       expect(lineProps.severityGroup).toBeDefined();
-      expect(lineProps.situationId).toBe('374718');
+      expect(lineProps.situationId).toBe("374718");
       expect(lineProps.reasons[0].name).toBeDefined();
       expect(lineProps.reasonCategoryImageName).toBeDefined();
       expect(lineProps.isAffected).toBeDefined();

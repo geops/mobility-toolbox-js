@@ -1,24 +1,24 @@
-import GeoJSON from 'ol/format/GeoJSON';
-import { toLonLat } from 'ol/proj';
-import LayerRenderer from 'ol/renderer/Layer';
+import GeoJSON from "ol/format/GeoJSON";
+import { toLonLat } from "ol/proj";
+import LayerRenderer from "ol/renderer/Layer";
 
-import { VECTOR_TILE_FEATURE_PROPERTY } from '../../common';
+import { VECTOR_TILE_FEATURE_PROPERTY } from "../../common";
 
-import type { Feature } from 'ol';
-import type { Coordinate } from 'ol/coordinate';
-import type { Geometry } from 'ol/geom';
-import type { FrameState } from 'ol/Map';
-import type { Pixel } from 'ol/pixel';
-import type { FeatureCallback } from 'ol/renderer/vector';
+import type { Feature } from "ol";
+import type { Coordinate } from "ol/coordinate";
+import type { Geometry } from "ol/geom";
+import type { FrameState } from "ol/Map";
+import type { Pixel } from "ol/pixel";
+import type { FeatureCallback } from "ol/renderer/vector";
 
-import type { MaplibreStyleLayer } from '../layers';
+import type { MaplibreStyleLayer } from "../layers";
 
 /**
  * @private
  */
 const formats: Record<string, GeoJSON> = {
-  'EPSG:3857': new GeoJSON({
-    featureProjection: 'EPSG:3857',
+  "EPSG:3857": new GeoJSON({
+    featureProjection: "EPSG:3857",
   }),
 };
 
@@ -62,7 +62,7 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
     const mapLibreMap = layer.maplibreLayer?.mapLibreMap;
 
     const projection =
-      map?.getView()?.getProjection()?.getCode() || 'EPSG:3857';
+      map?.getView()?.getProjection()?.getCode() || "EPSG:3857";
     let features: Feature[] = [];
 
     if (!formats[projection]) {
@@ -139,6 +139,6 @@ export default class MaplibreStyleLayerRenderer extends LayerRenderer<MaplibreSt
     target: HTMLElement | null,
   ): HTMLElement {
     // Return an empty div as a placeholder since nothing is rendered
-    return target ?? document.createElement('div');
+    return target ?? document.createElement("div");
   }
 }

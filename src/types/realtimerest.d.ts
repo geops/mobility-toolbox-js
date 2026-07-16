@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-  '/calls/{train_id}/': {
+  "/calls/{train_id}/": {
     /**
      * Get the stop sequences for the current journeys of the given train
      *
@@ -14,9 +14,9 @@ export interface paths {
      *
      * on the websocket.
      */
-    get: operations['calls_calls__train_id___get'];
+    get: operations["calls_calls__train_id___get"];
   };
-  '/feeds/': {
+  "/feeds/": {
     /**
      * Get a list of all active feeds
      *
@@ -24,9 +24,9 @@ export interface paths {
      * is not needed normally (the `BBOX` command picks all the relevant data for
      * you).
      */
-    get: operations['feeds_feeds__get'];
+    get: operations["feeds_feeds__get"];
   };
-  '/journeys/{train_id}/': {
+  "/journeys/{train_id}/": {
     /**
      * Get geometries for the current journeys of the given train
      *
@@ -40,9 +40,9 @@ export interface paths {
      *
      * on the websocket with gen_level and graph as in the BBOX command.
      */
-    get: operations['full_trajectory_journeys__train_id___get'];
+    get: operations["full_trajectory_journeys__train_id___get"];
   };
-  '/lines/{tag}/': {
+  "/lines/{tag}/": {
     /**
      * Get all lines with the given tag
      *
@@ -52,9 +52,9 @@ export interface paths {
      * `operator_name` to be set. By default only ungenealized data is
      * returned. Set `graph` to select another line network.
      */
-    get: operations['get_lines_for_tag_lines__tag___get'];
+    get: operations["get_lines_for_tag_lines__tag___get"];
   };
-  '/lines/{tag}/vias/': {
+  "/lines/{tag}/vias/": {
     /**
      * Return matching lines with a list of stop lists for routing
      *
@@ -62,13 +62,13 @@ export interface paths {
      * The goal of this method is to compile an undirected, routable representation of the
      * line, values are meaningless apart from that.
      */
-    get: operations['get_via_stops_lines__tag__vias__get'];
+    get: operations["get_via_stops_lines__tag__vias__get"];
   };
-  '/trains_by_route_identifier/{feed_name}/': {
+  "/trains_by_route_identifier/{feed_name}/": {
     /** Search for active trains in a specific feed/tenant by route identifier. */
-    get: operations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get'];
+    get: operations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"];
   };
-  '/trajectories/{feed_name}/': {
+  "/trajectories/{feed_name}/": {
     /**
      * Get all current trajectories between two stops for the given feed
      *
@@ -80,7 +80,7 @@ export interface paths {
      * `feed_name` is not optional for the HTTP-API. Geometries are not simplified as
      * in the BBOX command.
      */
-    get: operations['trajectories_trajectories__feed_name___get'];
+    get: operations["trajectories_trajectories__feed_name___get"];
   };
 }
 
@@ -94,7 +94,7 @@ export interface components {
       color: string;
       /** Has Realtime Feed */
       has_realtime_feed: boolean;
-      license: components['schemas']['License'];
+      license: components["schemas"]["License"];
       /** Name */
       name: Partial<string> & Partial<unknown>;
       /** Short Name */
@@ -136,15 +136,15 @@ export interface components {
      */
     FullTrajectory: {
       /** Geometry */
-      geometry: Partial<components['schemas']['GeometryCollectionGeometry']> &
-        Partial<components['schemas']['LineStringGeometry']> &
-        Partial<components['schemas']['MultiLineStringGeometry']>;
-      properties: components['schemas']['FullTrajectoryProperties'];
+      geometry: Partial<components["schemas"]["GeometryCollectionGeometry"]> &
+        Partial<components["schemas"]["LineStringGeometry"]> &
+        Partial<components["schemas"]["MultiLineStringGeometry"]>;
+      properties: components["schemas"]["FullTrajectoryProperties"];
       /**
        * Type
        * @constant
        */
-      type: 'Feature';
+      type: "Feature";
     };
     /**
      * FullTrajectoryCollection
@@ -152,13 +152,13 @@ export interface components {
      */
     FullTrajectoryCollection: {
       /** Features */
-      features: components['schemas']['FullTrajectory'][];
-      properties: components['schemas']['FullTrajectoryCollectionProperties'];
+      features: components["schemas"]["FullTrajectory"][];
+      properties: components["schemas"]["FullTrajectoryCollectionProperties"];
       /**
        * Type
        * @constant
        */
-      type: 'FeatureCollection';
+      type: "FeatureCollection";
     };
     /** FullTrajectoryCollectionProperties */
     FullTrajectoryCollectionProperties: {
@@ -209,15 +209,15 @@ export interface components {
       train_id: string;
       /** Type */
       type?: Partial<
-        | 'bus'
-        | 'cablecar'
-        | 'coach'
-        | 'ferry'
-        | 'funicular'
-        | 'gondola'
-        | 'rail'
-        | 'subway'
-        | 'tram'
+        | "bus"
+        | "cablecar"
+        | "coach"
+        | "ferry"
+        | "funicular"
+        | "gondola"
+        | "rail"
+        | "subway"
+        | "tram"
       > &
         Partial<unknown>;
     };
@@ -230,24 +230,22 @@ export interface components {
      */
     GeometryCollectionGeometry: {
       /** Geometries */
-      geometries: (Partial<components['schemas']['LineStringGeometry']> &
-        Partial<components['schemas']['MultiLineStringGeometry']> &
-        Partial<components['schemas']['MultiPointGeometry']>)[];
+      geometries: (Partial<components["schemas"]["LineStringGeometry"]> &
+        Partial<components["schemas"]["MultiLineStringGeometry"]> &
+        Partial<components["schemas"]["MultiPointGeometry"]>)[];
       /**
        * Type
        * @constant
        */
-      type: 'GeometryCollection';
+      type: "GeometryCollection";
     };
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
-      detail?: components['schemas']['ValidationError'][];
+      detail?: components["schemas"]["ValidationError"][];
     };
     /** JourneyExtraData */
     JourneyExtraData: {
-      /** Event Location Name */
-      event_location_name?: Partial<string> & Partial<unknown>;
       /** Event Timestamp */
       event_timestamp?: Partial<string> & Partial<unknown>;
       /** Transport Code */
@@ -285,7 +283,7 @@ export interface components {
        * Type
        * @constant
        */
-      type: 'LineString';
+      type: "LineString";
     };
     /** LineViaStop */
     LineViaStop: {
@@ -304,7 +302,7 @@ export interface components {
        * Type
        * @constant
        */
-      type: 'MultiLineString';
+      type: "MultiLineString";
     };
     /** MultiPointGeometry */
     MultiPointGeometry: {
@@ -314,7 +312,7 @@ export interface components {
        * Type
        * @constant
        */
-      type: 'MultiPoint';
+      type: "MultiPoint";
     };
     /** RouteIdentifierMatch */
     RouteIdentifierMatch: {
@@ -324,7 +322,7 @@ export interface components {
       destination: Partial<string> & Partial<unknown>;
       /** Exact Match */
       exact_match: boolean;
-      line: components['schemas']['Line'];
+      line: components["schemas"]["Line"];
       /** Route Identifier */
       route_identifier: string;
       /** Train Id */
@@ -342,12 +340,12 @@ export interface components {
       old_to?: Partial<string> & Partial<unknown>;
       /** State */
       state?: Partial<
-        | 'BOARDING'
-        | 'JOURNEY_CANCELLED'
-        | 'LEAVING'
-        | 'PENDING'
-        | 'STOP_CANCELLED'
-        | 'TIME_BASED'
+        | "BOARDING"
+        | "JOURNEY_CANCELLED"
+        | "LEAVING"
+        | "PENDING"
+        | "STOP_CANCELLED"
+        | "TIME_BASED"
       > &
         Partial<unknown>;
     };
@@ -362,7 +360,7 @@ export interface components {
       color?: Partial<string> & Partial<unknown>;
       /** Destination */
       destination: Partial<string> & Partial<unknown>;
-      extra_data: components['schemas']['JourneyExtraData'];
+      extra_data: components["schemas"]["JourneyExtraData"];
       /** Has Realtime */
       has_realtime: boolean;
       /** Has Realtime Journey */
@@ -375,7 +373,7 @@ export interface components {
       licenseNote?: Partial<string> & Partial<unknown>;
       /** Licenseurl */
       licenseUrl?: Partial<string> & Partial<unknown>;
-      line: Partial<components['schemas']['Line']> & Partial<unknown>;
+      line: Partial<components["schemas"]["Line"]> & Partial<unknown>;
       /** Longname */
       longName?: Partial<string> & Partial<unknown>;
       /** New Destination */
@@ -386,7 +384,7 @@ export interface components {
        * Operator Provides Realtime Journey
        * @enum {string}
        */
-      operator_provides_realtime_journey: 'maybe' | 'no' | 'unknown' | 'yes';
+      operator_provides_realtime_journey: "maybe" | "no" | "unknown" | "yes";
       /** Operatorurl */
       operatorUrl?: Partial<string> & Partial<unknown>;
       /** Publisher */
@@ -398,9 +396,9 @@ export interface components {
       /** Shortname */
       shortName?: Partial<string> & Partial<unknown>;
       /** Situations */
-      situations: components['schemas']['Situation'][];
+      situations: components["schemas"]["Situation"][];
       /** Stations */
-      stations: components['schemas']['StopSequenceCall'][];
+      stations: components["schemas"]["StopSequenceCall"][];
       /** Stroke */
       stroke?: Partial<string> & Partial<unknown>;
       /** Tenant */
@@ -411,15 +409,15 @@ export interface components {
       train_number: Partial<number> & Partial<unknown>;
       /** Type */
       type: Partial<
-        | 'bus'
-        | 'cablecar'
-        | 'coach'
-        | 'ferry'
-        | 'funicular'
-        | 'gondola'
-        | 'rail'
-        | 'subway'
-        | 'tram'
+        | "bus"
+        | "cablecar"
+        | "coach"
+        | "ferry"
+        | "funicular"
+        | "gondola"
+        | "rail"
+        | "subway"
+        | "tram"
       > &
         Partial<unknown>;
       /** Vehicle Mode */
@@ -438,7 +436,7 @@ export interface components {
       /** Cancelled */
       cancelled: boolean;
       /** Changes */
-      changes?: components['schemas']['SerializedCancellationChange'][];
+      changes?: components["schemas"]["SerializedCancellationChange"][];
       /** Coordinate */
       coordinate: Partial<number>[];
       /** Departuredelay */
@@ -455,12 +453,12 @@ export interface components {
       platform: Partial<string> & Partial<unknown>;
       /** State */
       state?: Partial<
-        | 'BOARDING'
-        | 'JOURNEY_CANCELLED'
-        | 'LEAVING'
-        | 'PENDING'
-        | 'STOP_CANCELLED'
-        | 'TIME_BASED'
+        | "BOARDING"
+        | "JOURNEY_CANCELLED"
+        | "LEAVING"
+        | "PENDING"
+        | "STOP_CANCELLED"
+        | "TIME_BASED"
       > &
         Partial<unknown>;
       /** Stationid */
@@ -477,17 +475,17 @@ export interface components {
       /** Id */
       id: number;
       /** Mot */
-      mot: Partial<'unknown'> &
+      mot: Partial<"unknown"> &
         Partial<
-          | 'bus'
-          | 'cablecar'
-          | 'coach'
-          | 'ferry'
-          | 'funicular'
-          | 'gondola'
-          | 'rail'
-          | 'subway'
-          | 'tram'
+          | "bus"
+          | "cablecar"
+          | "coach"
+          | "ferry"
+          | "funicular"
+          | "gondola"
+          | "rail"
+          | "subway"
+          | "tram"
         >;
       /** Name */
       name: Partial<string> & Partial<unknown>;
@@ -509,17 +507,17 @@ export interface components {
       /** Id */
       id: number;
       /** Mot */
-      mot: Partial<'unknown'> &
+      mot: Partial<"unknown"> &
         Partial<
-          | 'bus'
-          | 'cablecar'
-          | 'coach'
-          | 'ferry'
-          | 'funicular'
-          | 'gondola'
-          | 'rail'
-          | 'subway'
-          | 'tram'
+          | "bus"
+          | "cablecar"
+          | "coach"
+          | "ferry"
+          | "funicular"
+          | "gondola"
+          | "rail"
+          | "subway"
+          | "tram"
         >;
       /** Name */
       name: Partial<string> & Partial<unknown>;
@@ -534,7 +532,7 @@ export interface components {
       /** Text Color */
       text_color: Partial<string> & Partial<unknown>;
       /** Vias */
-      vias: components['schemas']['LineViaStop'][][];
+      vias: components["schemas"]["LineViaStop"][][];
     };
     /**
      * TrackerTrajectory
@@ -559,13 +557,13 @@ export interface components {
      * client.
      */
     TrackerTrajectory: {
-      geometry: components['schemas']['LineStringGeometry'];
-      properties: components['schemas']['TrackerTrajectoryProperties'];
+      geometry: components["schemas"]["LineStringGeometry"];
+      properties: components["schemas"]["TrackerTrajectoryProperties"];
       /**
        * Type
        * @constant
        */
-      type: 'Feature';
+      type: "Feature";
     };
     /** TrackerTrajectoryProperties */
     TrackerTrajectoryProperties: {
@@ -587,16 +585,16 @@ export interface components {
       has_realtime: boolean;
       /** Has Realtime Journey */
       has_realtime_journey: boolean;
-      line?: Partial<components['schemas']['Line']> & Partial<unknown>;
+      line?: Partial<components["schemas"]["Line"]> & Partial<unknown>;
       /**
        * Operator Provides Realtime Journey
        * @enum {string}
        */
-      operator_provides_realtime_journey: 'maybe' | 'no' | 'unknown' | 'yes';
+      operator_provides_realtime_journey: "maybe" | "no" | "unknown" | "yes";
       /** Route Identifier */
       route_identifier?: Partial<string> & Partial<unknown>;
       /** State */
-      state?: Partial<'BOARDING' | 'DRIVING' | 'JOURNEY_CANCELLED'> &
+      state?: Partial<"BOARDING" | "DRIVING" | "JOURNEY_CANCELLED"> &
         Partial<unknown>;
       /** Tenant */
       tenant: string;
@@ -616,31 +614,31 @@ export interface components {
        * @enum {string}
        */
       type:
-        | 'bus'
-        | 'cablecar'
-        | 'coach'
-        | 'ferry'
-        | 'funicular'
-        | 'gondola'
-        | 'rail'
-        | 'subway'
-        | 'tram';
+        | "bus"
+        | "cablecar"
+        | "coach"
+        | "ferry"
+        | "funicular"
+        | "gondola"
+        | "rail"
+        | "subway"
+        | "tram";
     };
     /** TrainsByRouteIdentifierResult */
     TrainsByRouteIdentifierResult: {
       /** Matches */
-      matches: components['schemas']['RouteIdentifierMatch'][];
+      matches: components["schemas"]["RouteIdentifierMatch"][];
     };
     /** TrajectoryCollection */
     TrajectoryCollection: {
       /** Features */
-      features: components['schemas']['TrackerTrajectory'][];
+      features: components["schemas"]["TrackerTrajectory"][];
       /**
        * Type
        * @default FeatureCollection
        * @constant
        */
-      type?: 'FeatureCollection';
+      type?: "FeatureCollection";
     };
     /** ValidationError */
     ValidationError: {
@@ -674,13 +672,13 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['StopSequence'][];
+          "application/json": components["schemas"]["StopSequence"][];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -703,13 +701,13 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['FeedCollection'];
+          "application/json": components["schemas"]["FeedCollection"];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -742,13 +740,13 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['FullTrajectoryCollection'];
+          "application/json": components["schemas"]["FullTrajectoryCollection"];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -768,7 +766,7 @@ export interface operations {
         tag: string;
       };
       query: {
-        format?: 'geojson' | 'json';
+        format?: "geojson" | "json";
         graph?: Partial<string> & Partial<unknown>;
         name?: Partial<string> & Partial<unknown>;
         operator_name?: Partial<string> & Partial<unknown>;
@@ -778,13 +776,13 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['TagLineDetail'][];
+          "application/json": components["schemas"]["TagLineDetail"][];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -810,13 +808,13 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['TagLineDetailWithVias'][];
+          "application/json": components["schemas"]["TagLineDetailWithVias"][];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -841,13 +839,13 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['TrainsByRouteIdentifierResult'];
+          "application/json": components["schemas"]["TrainsByRouteIdentifierResult"];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };
@@ -881,13 +879,13 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          'application/json': components['schemas']['TrajectoryCollection'];
+          "application/json": components["schemas"]["TrajectoryCollection"];
         };
       };
       /** Validation Error */
       422: {
         content: {
-          'application/json': components['schemas']['HTTPValidationError'];
+          "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
     };

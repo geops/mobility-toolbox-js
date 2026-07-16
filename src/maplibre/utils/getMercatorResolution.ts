@@ -1,7 +1,7 @@
-import { getHeight, getWidth } from 'ol/extent';
-import { fromLonLat } from 'ol/proj';
+import { getHeight, getWidth } from "ol/extent";
+import { fromLonLat } from "ol/proj";
 
-import type { AnyMapGlMap } from '../../types';
+import type { AnyMapGlMap } from "../../types";
 
 /**
  * Get the current resolution of a Maplibre map.

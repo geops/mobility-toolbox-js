@@ -1,8 +1,8 @@
-import { Circle, Fill, Stroke } from 'ol/style';
-import Style from 'ol/style/Style';
+import { Circle, Fill, Stroke } from "ol/style";
+import Style from "ol/style/Style";
 
-import type { FeatureLike } from 'ol/Feature';
-import type { StyleFunction } from 'ol/style/Style';
+import type { FeatureLike } from "ol/Feature";
+import type { StyleFunction } from "ol/style/Style";
 
 const circleStyle = new Circle({
   fill: new Fill({
@@ -43,20 +43,20 @@ const routingStyle: StyleFunction = (
   feature: FeatureLike,
   resolution: number,
 ) => {
-  const minResolution = feature.get('minResolution');
-  const maxResolution = feature.get('maxResolution');
+  const minResolution = feature.get("minResolution");
+  const maxResolution = feature.get("maxResolution");
   const inRange = resolution <= minResolution && resolution > maxResolution;
 
   if (minResolution && maxResolution && !inRange) {
     return [];
   }
 
-  const zIndex = feature?.getGeometry()?.getType() === 'Point' ? 100 : 0;
+  const zIndex = feature?.getGeometry()?.getType() === "Point" ? 100 : 0;
 
   let styles = [blackBorder, redLine];
-  const mot = feature.get('mot');
+  const mot = feature.get("mot");
 
-  if (mot === 'foot') {
+  if (mot === "foot") {
     styles = [dashedRedLine];
   }
 

@@ -11,17 +11,17 @@ const getUrlWithPath = (url: string, path?: string): string => {
   let newPath = path;
 
   if (urlObj.searchParams.size > 0) {
-    newUrl = url.split('?')[0];
+    newUrl = url.split("?")[0];
   }
 
-  if (!newUrl.endsWith('/')) {
+  if (!newUrl.endsWith("/")) {
     newUrl = `${newUrl}/`;
   }
 
-  if (newPath?.startsWith('/')) {
+  if (newPath?.startsWith("/")) {
     newPath = newPath.substring(1);
   }
-  return newUrl + (newPath ?? '');
+  return newUrl + (newPath ?? "");
 };
 
 export default getUrlWithPath;

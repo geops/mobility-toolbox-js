@@ -1,20 +1,9 @@
 /* eslint-disable import/no-relative-packages */
-import makeStyles from '@mui/styles/makeStyles';
 import { Map } from 'maplibre-gl';
 import { CopyrightControl, RealtimeLayer } from 'mobility-toolbox-js/maplibre';
 import React, { useEffect } from 'react';
 
-const useStyles = makeStyles({
-  root: {
-    height: 300,
-    pointerEvents: 'none',
-    width: '100%',
-  },
-});
-
 function TrackerExample() {
-  const classes = useStyles();
-
   useEffect(() => {
     const map = new Map({
       attributionControl: false,
@@ -45,7 +34,16 @@ function TrackerExample() {
     };
   }, []);
 
-  return <div className={classes.root} id="map" />;
+  return (
+    <div
+      style={{
+        height: 300,
+        pointerEvents: 'none',
+        width: '100%',
+      }}
+      id="map"
+    />
+  );
 }
 
 export default React.memo(TrackerExample);
