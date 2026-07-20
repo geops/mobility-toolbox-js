@@ -10,6 +10,13 @@ import { get, transform } from "ol/proj";
 import { Circle, Fill, Icon, Stroke, Style, Text } from "ol/style";
 import { parse } from "ol/xml";
 
+import { asFloat, asFloatArray, asInteger, asIntegerArray } from "../../common";
+import {
+  asJson,
+  getNameFromString,
+  getTextArrayFromString,
+} from "../../common/utils/kmlUtils";
+
 import getPolygonPattern from "./getMapsetPolygonPattern";
 
 import type { Feature as FeatureType } from "ol";
@@ -133,7 +140,7 @@ const getLineIcon = (
       size: icon.size, // ie 11
       src: icon.url,
     }),
-    zIndex: parseInt(feature.get("zIndex") as string, 10),
+    zIndex: asInteger(feature.get("zIndex") as string),
   });
 };
 
@@ -142,6 +149,11 @@ export type MapsetKmlFormatReadOptions = {
   doNotRevert32pxScaling?: boolean;
   getResolutionForZoom?: (zoom: number) => number;
 } & ReadOptions;
+
+export interface PictureOptions {
+  defaultScale?: number;
+  resolution: number;
+}
 
 class MapsetKmlFormat {
   /**
@@ -217,17 +229,110 @@ class MapsetKmlFormat {
     const geom = feature.getGeometry();
     let styles: StyleLike | undefined = feature.getStyleFunction();
 
-    // Store maxZoom in properties
-    const maxZoom = parseFloat(feature.get("maxZoom") as string);
-    if (!Number.isNaN(maxZoom)) {
-      feature.set("maxZoom", maxZoom);
+    // Convert back feature properties used in writeFeatures
+    if (feature.get("name")) {
+      feature.set("name", getNameFromString(feature.get("name") as string));
+    }
+    if (feature.get("maxZoom") !== undefined) {
+      feature.set("maxZoom", asFloat(feature.get("maxZoom") as string));
     }
 
-    // Store minZoom in properties
-    const minZoom = parseFloat(feature.get("minZoom") as string);
-    if (!Number.isNaN(minZoom)) {
-      feature.set("minZoom", minZoom);
+    if (feature.get("minZoom") !== undefined) {
+      feature.set("minZoom", asFloat(feature.get("minZoom") as string));
     }
+
+    if (feature.get("zIndex") !== undefined) {
+      feature.set("zIndex", asInteger(feature.get("zIndex") as string));
+    }
+
+    if (feature.get("fillPattern")) {
+      feature.set(
+        "fillPattern",
+        asJson<PolygonFillPatternInput>(feature.get("fillPattern") as string),
+      );
+    }
+
+    if (feature.get("pictureOptions")) {
+      feature.set(
+        "pictureOptions",
+        asJson<PictureOptions>(feature.get("pictureOptions") as string),
+      );
+    }
+    // END convert back feature properties used in writeFeatures
+
+    // Start setting the correct types for the existing feature's properties
+    if (feature.get("textRotation") !== undefined) {
+      feature.set(
+        "textRotation",
+        asFloat(feature.get("textRotation") as string),
+      );
+    }
+
+    if (feature.get("textArray")) {
+      feature.set(
+        "textArray",
+        getTextArrayFromString(feature.get("textArray") as string),
+      );
+    }
+    if (feature.get("textStrokeWidth") !== undefined) {
+      feature.set(
+        "textStrokeWidth",
+        asFloat(feature.get("textStrokeWidth") as string),
+      );
+    }
+    if (feature.get("textOffsetX") !== undefined) {
+      feature.set("textOffsetX", asFloat(feature.get("textOffsetX") as string));
+    }
+
+    if (feature.get("textOffsetY") !== undefined) {
+      feature.set("textOffsetY", asFloat(feature.get("textOffsetY") as string));
+    }
+
+    //textStrokeColor is a string, no need to convert it
+    //textBackgroundFillColor is a string, no need to convert it
+
+    if (feature.get("textPadding")) {
+      feature.set(
+        "textPadding",
+        asFloatArray(feature.get("textPadding") as string),
+      );
+    }
+
+    if (feature.get("iconRotation") !== undefined) {
+      feature.set(
+        "iconRotation",
+        asFloat(feature.get("iconRotation") as string),
+      );
+    }
+
+    if (feature.get("iconScale") !== undefined) {
+      feature.set("iconScale", asFloat(feature.get("iconScale") as string));
+    }
+
+    // lineStartIcon
+    // lineEndIcon
+    if (feature.get("lineDash")) {
+      feature.set(
+        "lineDash",
+        asIntegerArray(feature.get("lineDash") as string),
+      );
+    }
+
+    if (feature.get("lineDashOffset")) {
+      feature.set(
+        "lineDashOffset",
+        asInteger(feature.get("lineDashOffset") as string),
+      );
+    }
+
+    if (feature.get("miterLimit")) {
+      feature.set("miterLimit", asInteger(feature.get("miterLimit") as string));
+    }
+    // END
+
+    // At this point the feature have correct properties types,
+    // we can now set the correct style function on the feature,
+    // depending on these properties.
 
     // The use of clone is part of the scale fix for OL > 6.7
     // If an IconStyle has no gx:w and gx:h defined, a scale factor is applied
@@ -239,6 +344,10 @@ class MapsetKmlFormat {
       Array.isArray(tmpStyles) ? tmpStyles[0] : tmpStyles
     )?.clone();
 
+    if (feature.get("zIndex") !== undefined) {
+      style?.setZIndex(feature.get("zIndex") as number);
+    }
+
     let stroke = style?.getStroke();
 
     if (feature.get("lineCap")) {
@@ -249,36 +358,22 @@ class MapsetKmlFormat {
       stroke?.setLineJoin(feature.get("lineJoin") as CanvasLineJoin);
     }
 
-    if (feature.get("lineDash")) {
-      stroke?.setLineDash(
-        (feature?.get("lineDash") as string).split(",").map((l) => {
-          return parseInt(l, 10);
-        }),
-      );
+    if (feature.get("lineDash") !== undefined) {
+      stroke?.setLineDash(feature?.get("lineDash") as number[]);
     }
 
-    if (feature.get("lineDashOffset")) {
-      stroke?.setLineDashOffset(
-        parseInt(feature.get("lineDashOffset") as string, 10),
-      );
+    if (feature.get("lineDashOffset") !== undefined) {
+      stroke?.setLineDashOffset(feature.get("lineDashOffset") as number);
     }
 
-    if (feature.get("miterLimit")) {
-      stroke?.setMiterLimit(parseInt(feature.get("miterLimit") as string, 10));
+    if (feature.get("miterLimit") !== undefined) {
+      stroke?.setMiterLimit(feature.get("miterLimit") as number);
     }
 
     // The canvas draws a stroke width=1 by default if width=0, so we
     // remove the stroke style in that case.
-    if (stroke && stroke.getWidth() === 0) {
+    if (stroke?.getWidth() === 0) {
       stroke = undefined;
-    }
-
-    if (feature.get("zIndex")) {
-      const zIndex = parseInt(feature.get("zIndex") as string, 10);
-      if (!Number.isNaN(zIndex)) {
-        feature.set("zIndex", zIndex);
-      }
-      style?.setZIndex(zIndex);
     }
 
     // if the feature is a Point and we are offline, we use default vector
@@ -298,7 +393,7 @@ class MapsetKmlFormat {
         style.getText() &&
         style.getText()?.getScale() !== 0
       ) {
-        if (image && image.getScale() === 0) {
+        if (image?.getScale() === 0) {
           // transparentCircle is used to allow selection
           image = new Circle({
             fill: new Fill({ color: [0, 0, 0, 0] }),
@@ -307,22 +402,17 @@ class MapsetKmlFormat {
           });
         }
 
-        // We replace empty white spaces used to keep normal spaces before and after the name.
-        let name: string | string[] = feature.get("name") as string;
-        if (/\u200B/g.test(name)) {
-          name = name.replace(/\u200B/g, "");
-          feature.set("name", name);
-        }
-
         // For backward compatibility we translate the bold and italic textFont property to a textArray prop
         const font = (feature.get("textFont") as string) || "normal 16px Arial";
 
         // Since we use rich text in mapset editor we use a text array instead,
         // it's only necessary when there is new lines in the text
         // Manage new lines
-        if (name.includes("\n")) {
+        // We replace empty white spaces used to keep normal spaces before and after the name.
+        let names: string | string[] = feature.get("name") as string;
+        if (names.includes("\n")) {
           const array: string[] = [];
-          const split = name.split("\n");
+          const split = names.split("\n");
           split.forEach((txt, idx) => {
             array.push(txt || "\u200B", txt ? font : "");
 
@@ -330,16 +420,16 @@ class MapsetKmlFormat {
               array.push("\n", "");
             }
           });
-          name = array;
+          names = array;
         } else {
-          name = [name, font];
+          names = [names, font];
         }
 
         text = new Text({
           fill: style.getText()!.getFill(),
           font: `${font.replace(/bold/g, "normal")}, Arial, sans-serif`, // We manage bold in textArray
           // rotation unsupported by KML, taken instead from custom field.
-          rotation: (feature.get("textRotation") as number) || 0,
+          rotation: (feature.get("textRotation") as number) ?? 0,
           // stroke: style.getText().getStroke(),
           scale: style.getText()?.getScale(),
           // since ol 6.3.1 : https://github.com/openlayers/openlayers/pull/10613/files#diff-1883da8b57e690db7ea0c35ce53c880aR925
@@ -347,33 +437,18 @@ class MapsetKmlFormat {
           // it was not the case before, the stroke was always null. So to keep
           // the same behavior we don't copy the stroke style.
           // TODO : maybe we should use this functionnality in the futur.
-          text: name,
+          text: names,
         });
 
         if (feature.get("textArray")) {
-          try {
-            const textArray = JSON.parse(
-              ((feature.get("textArray") || "") as string).replace(
-                /\r?\n/g,
-                "\\n",
-              ),
-            ) as string[];
-            text.setText(textArray);
-          } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error(
-              "Error parsing textArray",
-              feature.get("textArray"),
-              err,
-            );
-          }
+          text.setText(feature.get("textArray") as string[]);
         }
 
         if (feature.get("textStrokeColor") && feature.get("textStrokeWidth")) {
           text.setStroke(
             new Stroke({
               color: feature.get("textStrokeColor") as Color,
-              width: parseFloat(feature.get("textStrokeWidth") as string),
+              width: feature.get("textStrokeWidth") as number,
             }),
           );
         }
@@ -383,11 +458,11 @@ class MapsetKmlFormat {
         }
 
         if (feature.get("textOffsetX")) {
-          text.setOffsetX(parseFloat(feature.get("textOffsetX") as string));
+          text.setOffsetX(feature.get("textOffsetX") as number);
         }
 
         if (feature.get("textOffsetY")) {
-          text.setOffsetY(parseFloat(feature.get("textOffsetY") as string));
+          text.setOffsetY(feature.get("textOffsetY") as number);
         }
 
         if (feature.get("textBackgroundFillColor")) {
@@ -399,14 +474,9 @@ class MapsetKmlFormat {
         }
 
         if (feature.get("textPadding")) {
-          text.setPadding(
-            (feature.get("textPadding") as string)
-              ?.split(",")
-              .map((n: string) => {
-                return parseFloat(n);
-              }) as [number, number, number, number],
-          );
+          text.setPadding(feature.get("textPadding") as number[]);
         }
+
         if (image instanceof Icon) {
           applyTextStyleForIcon(image, text);
         }
@@ -416,12 +486,9 @@ class MapsetKmlFormat {
         /* Apply icon rotation if defined (by default only written as
          * <heading> tag, which is not read as rotation value by the ol KML module)
          */
-        image.setRotation(
-          parseFloat(feature.get("iconRotation") as string) || 0,
-        );
-
-        if (feature.get("iconScale")) {
-          image.setScale(parseFloat(feature.get("iconScale") as string) || 0);
+        image.setRotation((feature.get("iconRotation") as number) ?? 0);
+        if (feature.get("iconScale") !== undefined) {
+          image.setScale((feature.get("iconScale") as number) ?? 0);
 
           // We fix the 32px scaling introduced by OL 6.7 only if the image has a size defined.
         } else if (!doNotRevert32pxScaling && image.getSize()) {
@@ -433,30 +500,18 @@ class MapsetKmlFormat {
       fill = null;
       stroke = null;
 
-      styles = ((feat, resolution) => {
+      styles = (feat, resolution) => {
         /* Options to be used for picture scaling with map, should have at least
          * a resolution attribute (this is the map resolution at the zoom level when
          * the picture is created), can take an optional constant for further scale
          * adjustment.
          * e.g. { resolution: 0.123, defaultScale: 1 / 6 }
          */
-
-        interface PictureOptions {
-          defaultScale?: number;
-          resolution: number;
-        }
-
         if (feat.get("pictureOptions")) {
-          let pictureOptions = feat.get("pictureOptions") as
-            PictureOptions | string;
-          if (typeof pictureOptions === "string") {
-            pictureOptions = JSON.parse(pictureOptions) as PictureOptions;
-          }
-          (feat as FeatureType).set("pictureOptions", pictureOptions);
-          if (pictureOptions.resolution) {
+          const options = feat.get("pictureOptions") as PictureOptions;
+          if (options?.resolution) {
             image?.setScale(
-              (pictureOptions.resolution / resolution) *
-                (pictureOptions?.defaultScale ?? 1),
+              (options.resolution / resolution) * (options?.defaultScale ?? 1),
             );
           }
         }
@@ -466,9 +521,9 @@ class MapsetKmlFormat {
           image: image ?? undefined,
           stroke: stroke ?? undefined,
           text: text ?? undefined,
-          zIndex: style.getZIndex(),
+          zIndex: feat.get("zIndex") as number | undefined,
         });
-      }) as StyleFunction;
+      };
     }
 
     // Remove image and text styles for polygons and lines
@@ -488,13 +543,10 @@ class MapsetKmlFormat {
       ];
 
       // Parse the fillPattern json string and store parsed object
-      const fillPattern = feature.get("fillPattern") as string;
-      if (fillPattern) {
-        const fillPatternOptions = JSON.parse(
-          fillPattern,
-        ) as PolygonFillPatternInput;
-        feature.set("fillPattern", fillPatternOptions);
+      const fillPatternOptions = feature.get("fillPattern") as
+        PolygonFillPatternInput | undefined;
 
+      if (fillPatternOptions) {
         /* We set the fill pattern for polygons */
         if (!style?.getFill()) {
           styles[0].setFill(new Fill());
@@ -534,8 +586,7 @@ class MapsetKmlFormat {
     if (
       applyMinMaxZoom &&
       getResolutionForZoom &&
-      (!Number.isNaN(feature.get("minZoom") as number) ||
-        !Number.isNaN(feature.get("maxZoom") as number))
+      (feature.get("minZoom") || feature.get("maxZoom"))
     ) {
       styleFunction = (feat: FeatureLike, resolution: number) => {
         const minRes = getResolutionForZoom(
@@ -623,11 +674,7 @@ class MapsetKmlFormat {
       })
       .forEach((feature) => {
         const clone = feature.clone() as FeatureType;
-        const zIndex =
-          feature?.get("zIndex") !== undefined &&
-          feature?.get("zIndex") !== null
-            ? (parseInt(feature?.get("zIndex") as string, 10) ?? 0)
-            : undefined;
+        const zIndex = asInteger(feature?.get("zIndex") as number);
 
         if (clone.getGeometry()?.getType() === "Circle") {
           // We transform circle elements into polygons
@@ -680,13 +727,6 @@ class MapsetKmlFormat {
           zIndex: zIndex,
         };
 
-        // Persist zIndex as ExtendedData so it survives the KML roundtrip.
-        // KML has no native concept of zIndex, so we store it on the feature
-        // properties and re-apply it on read (see sanitizeFeature).
-        if (zIndex !== undefined) {
-          clone.set("zIndex", zIndex);
-        }
-
         const text = newStyle.text?.getText();
 
         if (text) {
@@ -718,6 +758,9 @@ class MapsetKmlFormat {
         }
 
         // Set custom properties to be converted in extendedData in KML.
+        if (zIndex !== undefined) {
+          clone.set("zIndex", zIndex);
+        }
         if (newStyle.text?.getRotation()) {
           clone.set("textRotation", newStyle.text.getRotation());
         }
