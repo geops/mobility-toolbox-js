@@ -331,9 +331,23 @@ class MapsetKmlFormat {
           name = [name, font];
         }
 
+        // We add fallback fonts and make sure they are not duplicated
+        const fonts = font.split(",");
+        const mainFont = fonts[0]?.trim();
+
+        let fallbackFonts = ["Arial", "sans-serif"];
+        if (fonts.length > 1) {
+          fallbackFonts = [
+            ...new Set([
+              ...fallbackFonts,
+              ...fonts.slice(1).map((f) => f.trim()),
+            ]),
+          ];
+        }
+
         text = new Text({
           fill: style.getText()!.getFill(),
-          font: `${font.replace(/bold/g, "normal")}, Arial, sans-serif`, // We manage bold in textArray
+          font: `${mainFont.replace(/bold/g, "normal")}, ${fallbackFonts.join(", ")}`, // We manage bold in textArray
           // rotation unsupported by KML, taken instead from custom field.
           rotation: (feature.get("textRotation") as number) || 0,
           // stroke: style.getText().getStroke(),
@@ -400,7 +414,7 @@ class MapsetKmlFormat {
               ?.split(",")
               .map((n: string) => {
                 return parseFloat(n);
-              }) as [number, number, number, number],
+              }),
           );
         }
         if (image instanceof Icon) {
@@ -429,7 +443,7 @@ class MapsetKmlFormat {
       fill = null;
       stroke = null;
 
-      styles = ((feat, resolution) => {
+      styles = (feat, resolution) => {
         /* Options to be used for picture scaling with map, should have at least
          * a resolution attribute (this is the map resolution at the zoom level when
          * the picture is created), can take an optional constant for further scale
@@ -449,7 +463,7 @@ class MapsetKmlFormat {
             pictureOptions = JSON.parse(pictureOptions) as PictureOptions;
           }
           (feat as FeatureType).set("pictureOptions", pictureOptions);
-          if (pictureOptions.resolution) {
+          if (resolution > 0 && pictureOptions.resolution) {
             image?.setScale(
               (pictureOptions.resolution / resolution) *
                 (pictureOptions?.defaultScale ?? 1),
@@ -464,7 +478,7 @@ class MapsetKmlFormat {
           text: text ?? undefined,
           zIndex: style.getZIndex(),
         });
-      }) as StyleFunction;
+      };
     }
 
     // Remove image and text styles for polygons and lines
