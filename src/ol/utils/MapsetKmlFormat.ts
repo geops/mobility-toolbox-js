@@ -15,6 +15,7 @@ import {
   asJson,
   getNameFromString,
   getTextArrayFromString,
+  getTextFontFromString,
 } from "../../common/utils/kmlUtils";
 
 import getPolygonPattern from "./getMapsetPolygonPattern";
@@ -306,11 +307,6 @@ class MapsetKmlFormat {
     }
 
     if (feature.get("iconScale") !== undefined) {
-      console.log(
-        "iconScale",
-        feature.get("iconScale"),
-        asFloat(feature.get("iconScale") as string),
-      );
       feature.set("iconScale", asFloat(feature.get("iconScale") as string));
     }
 
@@ -432,7 +428,7 @@ class MapsetKmlFormat {
 
         text = new Text({
           fill: style.getText()!.getFill(),
-          font: `${font.replace(/bold/g, "normal")}`, // We manage bold in textArray
+          font: getTextFontFromString(font), // We manage bold in textArray
           // rotation unsupported by KML, taken instead from custom field.
           rotation: (feature.get("textRotation") as number) ?? 0,
           // stroke: style.getText().getStroke(),
@@ -493,11 +489,6 @@ class MapsetKmlFormat {
          */
         image.setRotation((feature.get("iconRotation") as number) ?? 0);
         if (feature.get("iconScale") !== undefined) {
-          console.log(
-            "iconScale2",
-            feature.get("iconScale"),
-            asFloat(feature.get("iconScale") as string),
-          );
           image.setScale((feature.get("iconScale") as number) ?? 0);
 
           // We fix the 32px scaling introduced by OL 6.7 only if the image has a size defined.
@@ -684,7 +675,7 @@ class MapsetKmlFormat {
       })
       .forEach((feature) => {
         const clone = feature.clone() as FeatureType;
-        const zIndex = asInteger(feature?.get("zIndex") as number);
+        const zIndex = asInteger(feature?.get("zIndex") as string);
 
         if (clone.getGeometry()?.getType() === "Circle") {
           // We transform circle elements into polygons
@@ -840,7 +831,6 @@ class MapsetKmlFormat {
         }
 
         if (newStyle.image) {
-          console.log("write image", newStyle.image);
           const imgSource = (newStyle.image as Icon).getSrc();
           if (!/(http(s?)):\/\//gi.test(imgSource!)) {
             // eslint-disable-next-line no-console
@@ -856,7 +846,6 @@ class MapsetKmlFormat {
           }
 
           if (newStyle.image.getScale()) {
-            console.log("write", newStyle.image.getScale());
             // We set the scale as extended metadata because the <scale> in the KML is related to a 32px img, since ol >= 6.10.
             clone.set("iconScale", newStyle.image.getScale());
           }

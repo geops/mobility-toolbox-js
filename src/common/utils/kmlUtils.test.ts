@@ -1,4 +1,9 @@
-import { asJson, getNameFromString, getTextArrayFromString } from "./kmlUtils";
+import {
+  asJson,
+  getNameFromString,
+  getTextArrayFromString,
+  getTextFontFromString,
+} from "./kmlUtils";
 
 describe("kmlUtils", () => {
   describe("getTextArrayFromString", () => {
@@ -45,6 +50,32 @@ describe("kmlUtils", () => {
     it("should return undefined if the input is undefined", () => {
       const result = getNameFromString(undefined);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe("getTextFontFromString", () => {
+    it("should return the main font with fallbacks", () => {
+      const font = "14px ClientCustonFont";
+      const result = getTextFontFromString(font);
+      expect(result).toBe("14px ClientCustonFont, Arial, sans-serif");
+    });
+    it("should return the main font with other fallbacks", () => {
+      const font = "14px ClientCustonFont";
+      const result = getTextFontFromString(font, ["foo", "bar"]);
+      expect(result).toBe("14px ClientCustonFont, foo, bar");
+    });
+
+    it("should handle multiple fonts and remove duplicates", () => {
+      const font =
+        "normal 14px ClientCustonFont, sans-serif, Arial, Arial, sans-serif";
+      const result = getTextFontFromString(font);
+      expect(result).toBe("normal 14px ClientCustonFont, Arial, sans-serif");
+    });
+
+    it("should replace 'bold' with 'normal' in the main font", () => {
+      const font = "bold 14px ClientCustonFont, Arial, sans-serif";
+      const result = getTextFontFromString(font);
+      expect(result).toBe("normal 14px ClientCustonFont, Arial, sans-serif");
     });
   });
 });

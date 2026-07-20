@@ -28,3 +28,20 @@ export const getNameFromString = (text?: string): string | undefined => {
   }
   return name;
 };
+
+export const getTextFontFromString = (
+  font: string,
+  fallbackFonts = ["Arial", "sans-serif"],
+): string => {
+  const fonts = font.split(",");
+  const mainFont = fonts[0]?.trim();
+
+  let fallbacks = fallbackFonts;
+  if (fonts.length > 1) {
+    fallbacks = [
+      ...new Set([...fallbacks, ...fonts.slice(1).map((f) => f.trim())]),
+    ];
+  }
+
+  return `${mainFont.replace(/bold/g, "normal")}, ${fallbacks.join(", ")}`; // We manage bold in textArray
+};
