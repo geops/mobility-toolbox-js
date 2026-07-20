@@ -625,7 +625,7 @@ class MapsetKmlFormat {
    */
   writeDocumentCamera = (
     kmlString: string,
-    cameraAttributes: null | Record<string, string>,
+    cameraAttributes?: null | Record<string, string>,
   ) => {
     const kmlDoc = parse(this.removeDocumentCamera(kmlString));
 
@@ -654,7 +654,7 @@ class MapsetKmlFormat {
    */
   public writeFeatures(
     layer: Vector<VectorSource<FeatureLike>>,
-    featureProjection: string,
+    featureProjection: ProjectionLike,
     mapResolution: number,
   ) {
     let featString;
