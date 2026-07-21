@@ -59,6 +59,7 @@ describe("kmlUtils", () => {
       const result = getTextFontFromString(font);
       expect(result).toBe("14px ClientCustonFont, Arial, sans-serif");
     });
+
     it("should return the main font with other fallbacks", () => {
       const font = "14px ClientCustonFont";
       const result = getTextFontFromString(font, ["foo", "bar"]);
