@@ -1,17 +1,18 @@
-import flat from '@geops/eslint-config-react';
+import flat from "@geops/eslint-config-react";
+import globals from "globals";
 export default [
   {
     ignores: [
-      'build/*',
-      '__mocks__/*',
-      'src/types/stops.d.ts',
-      'src/types/routing.d.ts',
-      'src/types/moco.d.ts',
-      'dev.js',
-      'doc/**/*',
-      './eslint.config.mjs',
-      '*.test.js',
-      '*.d.ts',
+      "build/*",
+      "__mocks__/*",
+      "src/types/stops.d.ts",
+      "src/types/routing.d.ts",
+      "src/types/moco.d.ts",
+      "dev.js",
+      "doc/**/*",
+      "./eslint.config.mjs",
+      "*.test.js",
+      "*.d.ts",
     ],
   },
   ...flat,
@@ -19,18 +20,19 @@ export default [
     rules: {},
   },
   {
-    files: ['src/setupTests.js', '**/*.test.js'],
+    files: ["src/setupTests.js", "**/*.test.js", "**/*.test.ts"],
     languageOptions: {
       globals: {
-        global: 'readonly',
+        global: "readonly",
+        ...globals.jest, // Adds describe, test, expect, jest, etc.
       },
     },
     rules: {
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/unbound-method': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/unbound-method": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
     },
   },
 ];

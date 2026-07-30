@@ -15,7 +15,8 @@
     // "declarationMap": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["es2019", "dom"]
+    "lib": ["es2019", "dom"],
+    "types": ["jest"]
   },
   "allowSyntheticDefaultImports": true,
   "include": ["./src/**/*"],

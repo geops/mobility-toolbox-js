@@ -9,6 +9,7 @@ export { default as getMapGlCopyrights } from "./getMapGlCopyrights";
 export { default as getUrlWithParams } from "./getUrlWithParams";
 export { default as getVehiclePosition } from "./getVehiclePosition";
 export * from "./mocoUtils";
+export * from "./numberUtils";
 /* @deprecated use realtimeStyleUtils instead. */
 export * as realtimeConfig from "./realtimeStyleUtils";
 export * as realtimeStyleUtils from "./realtimeStyleUtils";
