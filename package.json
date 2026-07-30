@@ -124,7 +124,7 @@
     "types:moco:graphql": "graphql-codegen --config graphql-codegen-moco.ts && eslint --fix src/types/moco/graphql/*.ts",
     "types:realtime": "pnpm types:realtime:rest && pnpm types:realtime:asyncapi",
     "types:realtime:rest": "openapi-typescript  https://tralis-tracker-api.geops.io/api/openapi.json --output src/types/realtime/rest/index.ts && eslint --fix src/types/realtime/rest/*.ts",
-    "types:realtime:asyncapi": "asyncapi generate models typescript https://backend.developer.dev.geops.io/tralis-docs/asyncapi.json --output src/types/realtime/asyncapi --tsModelType=interface --tsRawPropertyNames --tsEnumType=enum && eslint --fix src/types/realtime/asyncapi/*.ts",
+    "types:realtime:asyncapi": "asyncapi generate models typescript https://backend.developer.dev.geops.io/tralis-docs/asyncapi.json --output src/types/realtime/asyncapi --tsModelType=interface --tsRawPropertyNames --tsEnumType=enum && node -e \"require('./scripts/generate-asyncapi-index.js')\" && eslint --fix src/types/realtime/asyncapi/*.ts",
     "types:routing": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts",
     "types:stops": "openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts",
     "updeps": "pnpm up -i --latest"

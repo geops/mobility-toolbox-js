@@ -1,10 +1,8 @@
-import TCallStateEnum from "../../types/realtime-asyncapi-types/TCallStateEnum";
+import { Realtime } from "../../types";
 
 import compareDepartures from "./compareDepartures";
 
 import type { RealtimeAPIDeparturesById } from "../../api/RealtimeAPI";
-import type { Realtime } from "../../types";
-
 /**
  * This function sort Departures by arrival time and filter out unwanted departures:
  *  - when dparture time is in the past
@@ -56,7 +54,7 @@ const sortAndfilterDepartures = (
     if (time > past && time < future) {
       // If 2 trains are boarding at the same platform,
       // remove the older one.
-      if (departure.state === TCallStateEnum.BOARDING) {
+      if (departure.state === Realtime.TCallStateEnum.BOARDING) {
         if (
           departure.platform &&
           !platformsBoarding.includes(departure.platform)
@@ -71,7 +69,7 @@ const sortAndfilterDepartures = (
       // If two trains with the same line number and destinatin
       // and a departure difference < 1 minute, hide the second one.
       if (
-        previousDeparture &&
+        !!previousDeparture &&
         departure.to[0] === previousDeparture.to[0] &&
         Math.abs(time - (previousDeparture.time || 0)) < 1000 &&
         departure.line.name === previousDeparture.line.name

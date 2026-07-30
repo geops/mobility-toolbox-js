@@ -52,13 +52,13 @@ class RealtimeRestAPI extends HttpAPI {
    */
   feeds(
     params: Partial<
-      Realtime.RestOperations["feeds_feeds__get"]["parameters"]["query"]
+      Realtime.operations["feeds_feeds__get"]["parameters"]["query"]
     > = {},
     config?: RequestInit,
   ): Promise<Realtime.FeedCollection> {
     return this.fetch<
       Realtime.FeedCollection,
-      Realtime.RestOperations["feeds_feeds__get"]["parameters"]["query"]
+      Realtime.operations["feeds_feeds__get"]["parameters"]["query"]
     >("feeds/", params, config);
   }
 
@@ -66,14 +66,14 @@ class RealtimeRestAPI extends HttpAPI {
    * Search for trains by route identifier.
    */
   trainsByRouteIdentifier(
-    params: Realtime.RestOperations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"]["parameters"]["query"] = {
+    params: Realtime.operations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"]["parameters"]["query"] = {
       exact_match: true,
     },
     config?: RequestInit,
   ): Promise<Realtime.TrainsByRouteIdentifierResult> {
     return this.fetch<
       Realtime.TrainsByRouteIdentifierResult,
-      Realtime.RestOperations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"]["parameters"]["query"]
+      Realtime.operations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"]["parameters"]["query"]
     >(`trains_by_route_identifier/${this.tenant}/`, params, config);
   }
 
@@ -82,13 +82,13 @@ class RealtimeRestAPI extends HttpAPI {
    */
   trajectories(
     params: Partial<
-      Realtime.RestOperations["trajectories_trajectories__feed_name___get"]["parameters"]["query"]
+      Realtime.operations["trajectories_trajectories__feed_name___get"]["parameters"]["query"]
     > = {},
     config?: RequestInit,
   ): Promise<Realtime.TrajectoryCollection> {
     return this.fetch<
       Realtime.TrajectoryCollection,
-      Realtime.RestOperations["trajectories_trajectories__feed_name___get"]["parameters"]["query"]
+      Realtime.operations["trajectories_trajectories__feed_name___get"]["parameters"]["query"]
     >(`trajectories/${this.tenant}/`, params, config);
   }
 }

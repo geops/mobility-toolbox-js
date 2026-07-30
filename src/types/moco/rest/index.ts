@@ -428,8 +428,7 @@ export interface components {
     FeatureCollectionProperties: {
       id: number;
       affected_time_intervals:
-        | components["schemas"]["AffectedTimeIntervals"][]
-        | null;
+        components["schemas"]["AffectedTimeIntervals"][] | null;
       publications: string;
       links?: components["schemas"]["Link"][];
       images?: components["schemas"]["Image"][];

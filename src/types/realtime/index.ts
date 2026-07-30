@@ -1,105 +1,69 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import type { Feature, Point } from "geojson";
-
+export * from "./asyncapi";
 import type BufferMessage from "./asyncapi/BufferMessage";
 import type DeletedVehicleMessage from "./asyncapi/DeletedVehicleMessage";
-import type FullTrajectory from "./asyncapi/FullTrajectory";
-import type FullTrajectoryCollection from "./asyncapi/FullTrajectoryCollection";
-import type FullTrajectoryCollectionProperties from "./asyncapi/FullTrajectoryCollectionProperties";
-import type FullTrajectoryMessage from "./asyncapi/FullTrajectoryMessage";
-import type FullTrajectoryProperties from "./asyncapi/FullTrajectoryProperties";
 import type Line from "./asyncapi/Line";
 import type PartialTrajectoryMessage from "./asyncapi/PartialTrajectoryMessage";
-import type StopSequence from "./asyncapi/StopSequence";
 import type StopSequenceCall from "./asyncapi/StopSequenceCall";
-import type StopSequenceMessage from "./asyncapi/StopSequenceMessage";
 import type TCallStateEnum from "./asyncapi/TCallStateEnum";
 import type TmotCode from "./asyncapi/TmotCode";
 import type TrackerTrajectory from "./asyncapi/TrackerTrajectory";
-import type TrackerTrajectoryProperties from "./asyncapi/TrackerTrajectoryProperties";
 import type TTrainStateEnum from "./asyncapi/TTrainStateEnum";
-import type { operations as RestOperations } from "./rest";
 import type { components } from "./rest";
+export * from "./rest";
 
-type ValueOf<T> = T[keyof T];
+export type ValueOf<T> = T[keyof T];
 
-enum VersionEnum {
+export enum VersionEnum {
   V1 = "1",
   V2 = "2",
 }
 
-type Version = ValueOf<typeof VersionEnum>;
+export type Version = ValueOf<typeof VersionEnum>;
 
-/**
- * @deprecated, use Realtime.Version instead
- */
-export type RealtimeVersion = "1" | "2";
-
-enum ChannelModeSuffixEnum {
+export enum ChannelModeSuffixEnum {
   SCHEMATIC = "_schematic",
   TOPOGRAPHIC = "",
 }
 
-type ChannelModeSuffix = ValueOf<typeof ChannelModeSuffixEnum>;
+export type ChannelModeSuffix = ValueOf<typeof ChannelModeSuffixEnum>;
 
 /**
  * @deprecated, use Realtime.ChannelModeSuffix instead
  */
 export declare type RealtimeChannelModeSuffix = ChannelModeSuffix;
 
-enum ModeEnum {
+export enum ModeEnum {
   RAW = "raw",
   SCHEMATIC = "schematic",
   TOPOGRAPHIC = "topographic",
 }
 
-type Mode = ValueOf<typeof ModeEnum>;
+export type Mode = ValueOf<typeof ModeEnum>;
 
-/**
- * @deprecated, use Realtime.Mode enum instead
- */
-export declare type RealtimeMode = Mode;
+export type TrajectoryCollection =
+  components["schemas"]["TrajectoryCollection"];
 
-type TrajectoryCollection = components["schemas"]["TrajectoryCollection"];
-
-type TrainsByRouteIdentifierResult =
+export type TrainsByRouteIdentifierResult =
   components["schemas"]["TrainsByRouteIdentifierResult"];
 
-/**
- * @deprecated, use Realtime.TrainsByRouteIdentifierResult instead
- */
-export type RealtimeTrainsByRouteIdentifierResult =
-  TrainsByRouteIdentifierResult;
-
-type RouteIdentifierMatch = components["schemas"]["RouteIdentifierMatch"];
-
-/**
- * @deprecated, use Realtime.IdentifierMatch instead
- */
-export type RealtimeIdentifierMatch = RouteIdentifierMatch;
+export type RouteIdentifierMatch =
+  components["schemas"]["RouteIdentifierMatch"];
 
 /**
  * @type RealtimeBbox
  */
-type Bbox = (number | string)[];
+export type Bbox = (number | string)[];
 
-/**
- * @deprecated, use Realtime.Bbox instead
- */
-export type RealtimeBbox = Bbox;
-
-type Buffer = [number, number];
-/**
- * @deprecated, use Realtime.Buffer instead
- */
-export type RealtimeBuffer = [number, number];
+export type Buffer = [number, number];
 
 /**
  * @deprecated, use Realtime.BufferMessage instead
  */
 export type RealtimeBufferResponse = BufferMessage;
 
-type ChannelName =
+export type ChannelName =
   | "buffer"
   | "extra_geoms"
   | "healthcheck"
@@ -112,14 +76,9 @@ type ChannelName =
   | `trajectory${ChannelModeSuffix}`;
 
 /**
- * @deprecated, use Realtime.ChannelName instead
- */
-export type RealtimeChannelName = ChannelName;
-
-/**
  * @deprecated, use Realtime.DeletedVehicleMessage instead
  */
-export type RealtimeDeletedVehiclesResponse = DeletedVehicleMessage;
+export type DeletedVehiclesResponse = DeletedVehicleMessage;
 
 export interface TimeTableCall {
   aimedArrivalTime?: number;
@@ -138,7 +97,7 @@ export interface TimeTableCall {
   has_fzo: boolean;
   has_realtime_journey: boolean;
   journey_start_time?: number;
-  line: RealtimeLine;
+  line: Line;
   min_arrival_time?: number;
   new_to?: boolean; // TODO Verify it still exists
   next_stoppoints: string[];
@@ -164,55 +123,32 @@ export interface TimeTableCall {
 /**
  * @deprecated use Realtime.TimeTableCall instead
  */
-export type RealtimeDeparture = TimeTableCall;
+export type Departure = TimeTableCall;
 
-enum ElevatorStateEnum {
+export enum ElevatorStateEnum {
   ALL_OPERABLE = "ALL_OPERABLE",
 }
 
-type ElevatorState = ValueOf<typeof ElevatorStateEnum>;
+export type ElevatorState = ValueOf<typeof ElevatorStateEnum>;
 
-/**
- * @deprecated, use Realtime.ElevatorState instead
- */
-export type RealtimeElevatorState = ElevatorState;
-
-interface ExtraGeom extends Feature {
+export interface ExtraGeom extends Feature {
   properties: ExtraGeomProperties;
 }
-/**
- * @deprecated, use Realtime.ExtraGeomDeleted instead
- */
-export interface RealtimeExtraGeom extends ExtraGeom {}
 
-interface ExtraGeomDeleted {
+export interface ExtraGeomDeleted {
   properties: ExtraGeomProperties;
   type: "Deleted";
 }
-/**
- * @deprecated, use Realtime.ExtraGeomDeleted instead
- */
-export interface RealtimeExtraGeomDeleted extends ExtraGeomDeleted {}
 
-interface ExtraGeomProperties {
+export interface ExtraGeomProperties {
   ref: number | string;
 }
 
-/**
- * @deprecated, use Realtime.ExtraGeomsProperties instead
- */
-export interface RealtimeExtraGeomProperties extends ExtraGeomProperties {}
+export type ExtraGeoms = Record<string, Feature[]>;
 
-type ExtraGeoms = Record<string, Feature[]>;
-
-/**
- * @deprecated, use Realtime.ExtraGeoms instead
- */
-export type RealtimeExtraGeoms = ExtraGeoms;
-
-interface ExtraGeomsMessage {
+export interface ExtraGeomsMessage {
   client_reference: null;
-  content: RealtimeExtraGeom | RealtimeExtraGeomDeleted;
+  content: ExtraGeom | ExtraGeomDeleted;
   source: `extra_geoms`;
   timestamp: number;
 }
@@ -220,98 +156,47 @@ interface ExtraGeomsMessage {
 /**
  * @deprecated, use Realtime.ExtraGeomsMessage instead
  */
-export interface RealtimeExtraGeomsResponse extends ExtraGeomsMessage {}
+export interface ExtraGeomsResponse extends ExtraGeomsMessage {}
 
-type FeedCollection = components["schemas"]["FeedCollection"];
+export type FeedCollection = components["schemas"]["FeedCollection"];
 
-/**
- * @deprecated, use Realtime.RealtimeFeedCollection instead
- */
-export type RealtimeFeedCollection = components["schemas"]["FeedCollection"];
+export type Feed = components["schemas"]["Feed"];
 
-type Feed = components["schemas"]["Feed"];
-
-/**
- * @deprecated, use Realtime.Feed instead
- */
-export type RealtimeFeed = Feed;
-
-/**
- * @deprecated, use Realtime.FullTrajectoryCollection instead
- */
-export type RealtimeFullTrajectoryCollection = FullTrajectoryCollection;
-
-/**
- * @deprecated, use Realtime.FullTrajectory instead
- */
-export type RealtimeFullTrajectory = FullTrajectory;
-
-/**
- * @deprecated, use Realtime.FullTrajectoryCollectionProperties instead
- */
-export type RealtimeFullTrajectoryCollectionProperties =
-  FullTrajectoryCollectionProperties;
-
-/**
- * @deprecated, use Realtime.FullTrajectoryProperties instead
- */
-export type RealtimeFullTrajectoryProperties = FullTrajectoryProperties;
-
-interface Health {
+export interface Health {
   heathly: boolean;
-  service: RealtimeService;
+  service: Service;
   tenant: null | string;
 }
 
-/**
- * @deprecated, use Realtime.Health instead
- */
-export type RealtimeHealth = Health;
-
-interface HealthCheckMessage {
+export interface HealthCheckMessage {
   client_reference: null;
-  content: RealtimeHealth;
+  content: Health;
   source: "healthcheck";
   timestamp: number;
 }
 /**
  * @deprecated, use Realtime.HealthCheckMessage instead
  */
-export type RealtimeHealthCheckResponse = HealthCheckMessage;
-
-/**
- * @deprecated, use Realtime.Line instead
- */
-export type RealtimeLine = Line;
+export type HealthCheckResponse = HealthCheckMessage;
 
 /**
  * @deprecated, use Realtime.TmotCode instead
  */
-export type RealtimeMot = TmotCode;
+export type Mot = TmotCode;
 
-interface News {
+export interface News {
   incident_program: boolean;
   messages: NewsMessage[];
 }
 
-/**
- * @deprecated, use Realtime.News instead
- */
-export interface RealtimeNews extends News {}
-
-interface NewsMessage {
+export interface NewsMessage {
   content: string;
   lines: Line[];
   title: string;
   updated: string; // TODO: ISO string
 }
 
-/**
- * @deprecated, use Realtime.NewsMessage instead
- */
-export interface RealtimeNewsMessage extends NewsMessage {}
-
-interface NewsTickerMessage {
+export interface NewsTickerMessage {
   client_reference: null;
   content: News;
   source: `${Tenant}_newsticker`;
@@ -321,16 +206,11 @@ interface NewsTickerMessage {
 /**
  * @deprecated, use Realtime.NewsTickerMessage instead
  */
-export interface RealtimeNewsTickerResponse extends NewsTickerMessage {}
+export interface NewsTickerResponse extends NewsTickerMessage {}
 
-type StationId = number;
+export type StationId = number;
 
-/**
- * @deprecated, use Realtime.StationId instead
- */
-export type RealtimeStationId = StationId;
-
-enum ServiceEnum {
+export enum ServiceEnum {
   REDIS_WEBSOCKET_API = "redis_websocket_api",
   TRALIS_FZO = "tralis_fzo",
   TRALIS_GEOFOX = "tralis_geofox",
@@ -340,24 +220,14 @@ enum ServiceEnum {
   TRALIS_WORKER = "tralis_worker",
 }
 
-type Service = ValueOf<typeof ServiceEnum>;
+export type Service = ValueOf<typeof ServiceEnum>;
 
-/**
- * @deprecated, use Realtime.Service instead
- */
-export type RealtimeService = Service;
-
-interface Station extends Feature {
+export interface Station extends Feature {
   geometry: Point;
   properties: StationProperties;
 }
 
-/**
- * @deprecated, use Realtime.Station instead
- */
-export interface RealtimeStation extends Station {}
-
-interface StationProperties extends Feature {
+export interface StationProperties extends Feature {
   elevatorOutOfOrder: boolean;
   elevators: object;
   elevatorState: ElevatorState;
@@ -372,19 +242,14 @@ interface StationProperties extends Feature {
   uic: StationId;
 }
 
-/**
- * @deprecated, use Realtime.StationProperties instead
- */
-export interface RealtimeStationproperties extends StationProperties {}
-
-interface StationMessage {
+export interface StationMessage {
   client_reference: null;
   content: News;
   source: `station_${StationId}`;
   timestamp: number;
 }
 
-interface TimetableMessage {
+export interface TimetableMessage {
   client_reference: null;
   content: TimeTableCall;
   source: `timetable_${StationId}`;
@@ -392,67 +257,41 @@ interface TimetableMessage {
 }
 
 /**
- * @deprecated, use Realtime.StationMessage instead
- */
-
-export interface RealtimeStationMessage extends StationMessage {}
-
-/**
  * @deprecated, use Realtime.StopSequenceCall instead
  */
-export type RealtimeStop = StopSequenceCall;
-
-/**
- * @deprecated, use Realtime.StopSequence instead
- */
-export type RealtimeStopSequence = StopSequence;
-
-/**
- * @deprecated, use Realtime.StopSequenceMessage instead
- */
-export type RealtimeStopSequenceMessage = StopSequenceMessage;
+export type Stop = StopSequenceCall;
 
 /**
  * @deprecated, use Realtime.TCallStateEnum instead
  */
-export type RealtimeStopState = TCallStateEnum;
+export type StopState = TCallStateEnum;
 
-enum TenantEnum {
+export enum TenantEnum {
   EMPTY = "",
   SBB = "sbb",
   SBH = "sbh",
   SBM = "sbm",
 }
 
-type Tenant = ValueOf<typeof TenantEnum>;
-
-/**
- * @deprecated, use Realtime.Tenant instead
- */
-export type RealtimeTenant = Tenant;
+export type Tenant = ValueOf<typeof TenantEnum>;
 
 /**
  * @deprecated, use Realtime.TimetableResponse instead
  */
 
-export interface RealtimeTimetableResponse extends TimetableMessage {}
+export interface TimetableResponse extends TimetableMessage {}
 
-type TrainId = string;
-
-/**
- * @deprecated, use Realtime.TimetableResponse instead
- */
-export type RealtimeTrainId = TrainId;
+export type TrainId = string;
 
 /**
  * @deprecated, use Realtime.PartialTrajectoryMessage instead
  */
-export type RealtimeTrajectoryResponse = PartialTrajectoryMessage;
+export type TrajectoryResponse = PartialTrajectoryMessage;
 
 /**
  * @deprecated, use Realtime.TTrainStateEnum instead
  */
-export type RealtimeTrajectoryState = TTrainStateEnum;
+export type TrajectoryState = TTrainStateEnum;
 
 // export type RealtimeTrajectoryProperties = {
 //   cancelled: boolean; // to chekc if it commes from backend or if it is generated by the RealtimeAPI class
@@ -463,73 +302,12 @@ export type RealtimeTrajectoryState = TTrainStateEnum;
 /**
  * @deprecated, use Realtime.TrackerTrajectory instead
  */
-export type RealtimeTrajectory = TrackerTrajectory;
+export type Trajectory = TrackerTrajectory;
 
-interface Transfer {
+export interface Transfer {
   lines: string[];
   mot: TmotCode;
 }
-export interface RealtimeTransfer extends Transfer {}
 
-type TCallState = ValueOf<typeof TCallStateEnum>;
-type TTrainState = ValueOf<typeof TTrainStateEnum>;
-
-export {
-  Bbox,
-  Buffer,
-  BufferMessage,
-  ChannelModeSuffix,
-  ChannelModeSuffixEnum,
-  ChannelName,
-  DeletedVehicleMessage,
-  ElevatorState,
-  ElevatorStateEnum,
-  ExtraGeom,
-  ExtraGeomDeleted,
-  ExtraGeomProperties,
-  ExtraGeoms,
-  ExtraGeomsMessage,
-  Feed,
-  FeedCollection,
-  FullTrajectory,
-  FullTrajectoryCollection,
-  FullTrajectoryCollectionProperties,
-  FullTrajectoryMessage,
-  FullTrajectoryProperties,
-  Health,
-  HealthCheckMessage,
-  Line,
-  Mode,
-  ModeEnum,
-  News,
-  NewsMessage,
-  NewsTickerMessage,
-  PartialTrajectoryMessage,
-  RestOperations,
-  RouteIdentifierMatch,
-  Service,
-  ServiceEnum,
-  Station,
-  StationId,
-  StationMessage,
-  StationProperties,
-  StopSequence,
-  StopSequenceCall,
-  StopSequenceMessage,
-  TCallState,
-  TCallStateEnum,
-  Tenant,
-  TenantEnum,
-  TimetableMessage,
-  TmotCode,
-  TrackerTrajectory,
-  TrackerTrajectoryProperties,
-  TrainId,
-  TrainsByRouteIdentifierResult,
-  TrajectoryCollection,
-  Transfer,
-  TTrainState,
-  TTrainStateEnum,
-  Version,
-  VersionEnum,
-};
+export type TCallState = ValueOf<typeof TCallStateEnum>;
+export type TTrainState = ValueOf<typeof TTrainStateEnum>;

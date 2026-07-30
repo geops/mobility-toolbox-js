@@ -617,7 +617,7 @@ class RealtimeAPI {
    */
   subscribeTrajectory(
     mode: Realtime.Mode,
-    onMessage: WebSocketAPIMessageCallback<Realtime.TrajectoryMessage>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.PartialTrajectoryMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
