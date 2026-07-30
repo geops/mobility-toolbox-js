@@ -1,4 +1,4 @@
-import HttpAPI from './HttpAPI';
+import HttpAPI from "./HttpAPI";
 
 /**
  * @typedef {Object} MapsetPlan
@@ -95,10 +95,10 @@ class MapsetAPI extends HttpAPI {
     super({
       ...options,
       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-      url: options.url || 'https://editor.mapset.io/api/v1/',
+      url: options.url || "https://editor.mapset.io/api/v1/",
     });
     this.tags = options.tags ?? [];
-    this.tenants = options.tenants ?? ['geopstest'];
+    this.tenants = options.tenants ?? ["geopstest"];
   }
 
   /**
@@ -113,7 +113,7 @@ class MapsetAPI extends HttpAPI {
     return await this.fetch<MapsetPlan, Record<string, string | undefined>>(
       `meta/kml/${id}/`,
       {},
-      { method: 'GET', ...config },
+      { method: "GET", ...config },
     );
   }
 
@@ -133,9 +133,9 @@ class MapsetAPI extends HttpAPI {
       MapsetGetPlansResponse,
       MapsetGetPlansParameters
     >(
-      'export/kml/',
+      "export/kml/",
       {
-        defaultplans: this.tags?.toString() ? 'false' : 'true',
+        defaultplans: this.tags?.toString() ? "false" : "true",
         key: this.apiKey,
         tags: this.tags?.toString(),
         tenants: this.tenants?.toString(),

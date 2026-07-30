@@ -1,18 +1,9 @@
 import { Button, SvgIcon } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
 import { getParameters } from 'codesandbox/lib/api/define';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const useStyles = makeStyles({
-  button: {
-    padding: '5px 15px',
-  },
-});
-
 function CodeSandboxButton({ extraFiles = {}, html, js, ...props }) {
-  const classes = useStyles();
-
   if (!html || !js) {
     return null;
   }
@@ -69,7 +60,7 @@ function CodeSandboxButton({ extraFiles = {}, html, js, ...props }) {
     >
       <input name="parameters" type="hidden" value={dataSBStr} />
       <Button
-        className={classes.button}
+        style={{ padding: '5px 15px' }}
         startIcon={
           <SvgIcon fontSize="large">
             <path

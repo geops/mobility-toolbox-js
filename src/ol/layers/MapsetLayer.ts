@@ -1,22 +1,22 @@
-import VectorLayer from 'ol/layer/Vector';
-import { unByKey } from 'ol/Observable';
-import { transformExtent } from 'ol/proj';
-import { Vector } from 'ol/source';
+import VectorLayer from "ol/layer/Vector";
+import { unByKey } from "ol/Observable";
+import { transformExtent } from "ol/proj";
+import { Vector } from "ol/source";
 
-import MapsetAPI from '../../api/MapsetAPI';
-import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
-import MapsetKmlFormat from '../utils/MapsetKmlFormat';
+import MapsetAPI from "../../api/MapsetAPI";
+import defineDeprecatedProperties from "../utils/defineDeprecatedProperties";
+import MapsetKmlFormat from "../utils/MapsetKmlFormat";
 
-import type { Map } from 'ol';
-import type { EventsKey } from 'ol/events';
-import type { FeatureLike } from 'ol/Feature';
-import type { Options } from 'ol/layer/Vector';
+import type { Map } from "ol";
+import type { EventsKey } from "ol/events";
+import type { FeatureLike } from "ol/Feature";
+import type { Options } from "ol/layer/Vector";
 
-import type { MapsetPlan } from '../../api/MapsetAPI';
-import type { MapsetAPIOptions } from '../../api/MapsetAPI';
-import type { MapsetKmlFormatReadOptions } from '../utils/MapsetKmlFormat';
+import type { MapsetPlan } from "../../api/MapsetAPI";
+import type { MapsetAPIOptions } from "../../api/MapsetAPI";
+import type { MapsetKmlFormatReadOptions } from "../utils/MapsetKmlFormat";
 
-import type { MobilityLayerOptions } from './Layer';
+import type { MobilityLayerOptions } from "./Layer";
 
 export type MapsetLayerOptions = {
   api?: MapsetAPI;
@@ -56,10 +56,10 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   olEventsKeys: EventsKey[] = [];
 
   get api(): MapsetAPI {
-    return this.get('api') as MapsetAPI;
+    return this.get("api") as MapsetAPI;
   }
   set api(value: MapsetAPI) {
-    this.set('api', value);
+    this.set("api", value);
     void this.fetchPlans();
   }
 
@@ -74,20 +74,20 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
 
   get planId(): string | undefined {
-    return this.get('planId') as string | undefined;
+    return this.get("planId") as string | undefined;
   }
   set planId(value: string | undefined) {
     if (this.planId !== value) {
-      this.set('planId', value);
+      this.set("planId", value);
       void this.fetchPlanById(value);
     }
   }
 
   get plans(): MapsetPlan[] {
-    return this.get('plans') as MapsetPlan[];
+    return this.get("plans") as MapsetPlan[];
   }
   set plans(value: MapsetPlan[]) {
-    this.set('plans', value);
+    this.set("plans", value);
     this.updateFeatures();
   }
 
@@ -112,11 +112,11 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
   }
 
   get timestamp(): string | undefined {
-    return this.get('timestamp') as string | undefined;
+    return this.get("timestamp") as string | undefined;
   }
   set timestamp(value: string | undefined) {
     if (this.timestamp !== value) {
-      this.set('timestamp', value);
+      this.set("timestamp", value);
       void this.fetchPlans();
     }
   }
@@ -175,22 +175,22 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     }
     let planById: MapsetPlan;
     try {
-      this.dispatchEvent('featuresloadstart');
+      this.dispatchEvent("featuresloadstart");
       planById = await this.api.getPlanById(planId, {
         signal: this.#abortController.signal,
       });
       this.plans = [planById];
-      this.dispatchEvent('featuresloadend');
+      this.dispatchEvent("featuresloadend");
     } catch (e) {
       // @ts-expect-error Abort errors are OK
-      if ((e?.name as string).includes('AbortError')) {
+      if ((e?.name as string).includes("AbortError")) {
         // Ignore abort error
         return;
       }
       // eslint-disable-next-line no-console
-      console.error('MapsetLayer: Error fetching plan by ID...', e);
+      console.error("MapsetLayer: Error fetching plan by ID...", e);
       this.plans = [];
-      this.dispatchEvent('featuresloaderror');
+      this.dispatchEvent("featuresloaderror");
       throw e;
     }
     return;
@@ -208,7 +208,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     const extent = transformExtent(
       view.calculateExtent(),
       view.getProjection(),
-      'EPSG:4326',
+      "EPSG:4326",
     );
     const zoom = view.getZoom();
 
@@ -222,7 +222,7 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
 
     let plans: MapsetPlan[] = [];
     try {
-      this.dispatchEvent('featuresloadstart');
+      this.dispatchEvent("featuresloadstart");
       plans = await this.api.getPlans(
         {
           bbox: extent?.toString(),
@@ -232,14 +232,14 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
         { signal: this.#abortController.signal },
       );
       this.plans = plans;
-      this.dispatchEvent('featuresloadend');
+      this.dispatchEvent("featuresloadend");
     } catch (e) {
       // @ts-expect-error Abort errors are OK
-      if ((e?.name as string).includes('AbortError')) {
+      if ((e?.name as string).includes("AbortError")) {
         // Ignore abort error
         return [];
       }
-      this.dispatchEvent('featuresloaderror');
+      this.dispatchEvent("featuresloaderror");
       throw e;
     }
   }
@@ -250,10 +250,10 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
     if (map && this.loadAll) {
       void this.fetchPlans();
       this.olEventsKeys.push(
-        map.on('moveend', () => {
+        map.on("moveend", () => {
           void this.fetchPlans();
         }),
-        this.on('change:visible', () => {
+        this.on("change:visible", () => {
           void this.fetchPlans();
         }),
       );
@@ -278,14 +278,14 @@ class MapsetLayer extends VectorLayer<Vector<FeatureLike>> {
             getResolutionForZoom: (zoom: number) => {
               return map.getView().getResolutionForZoom(zoom);
             },
-            ...((this.get('readOptions') ?? {}) as MapsetKmlFormatReadOptions),
+            ...((this.get("readOptions") ?? {}) as MapsetKmlFormatReadOptions),
           });
         }) ?? [];
 
       this.getSource()?.addFeatures(features);
     }
 
-    this.dispatchEvent('updatefeatures');
+    this.dispatchEvent("updatefeatures");
   }
 }
 

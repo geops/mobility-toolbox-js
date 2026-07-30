@@ -9,7 +9,7 @@ const arg = process.argv[2];
 
 if (arg === 'add') {
   console.log(
-    `yarn add ${packageKeys
+    `pnpm add ${packageKeys
       .map((p) => `${p}@${peerDependencies[p]}`)
       .join(' ')}`,
   );

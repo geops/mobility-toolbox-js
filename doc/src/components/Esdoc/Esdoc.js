@@ -1,61 +1,76 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable import/no-relative-packages */
-import React from 'react';
-import makeStyles from '@mui/styles/makeStyles';
-import Grid from '@mui/material/Grid';
-import Hidden from '@mui/material/Hidden';
-import { version } from '../../../../package.json';
-import EsdocContent from './EsdocContent';
-import EsdocNavigation from './EsdocNavigation';
-import EsdocSearch from './EsdocSearch';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-  },
-  content: {
-    padding: theme.spacing(1),
-    paddingBottom: 115,
-    margin: '0 auto',
-    maxWidth: '740px',
-  },
-  navWrapper: {
-    height: 'calc(100% - 32px)',
-    padding: theme.spacing(2),
-    backgroundColor: 'rgb(239, 239, 239)',
-  },
-}));
+import React from "react";
+import Grid from "@mui/material/Grid";
+import { version } from "../../../../package.json";
+import EsdocContent from "./EsdocContent";
+import EsdocNavigation from "./EsdocNavigation";
+import EsdocSearch from "./EsdocSearch";
+import { Box } from "@mui/material";
 
 function Esdoc({ path }) {
-  const classes = useStyles();
-
   if (!path) {
     return null;
   }
 
   return (
-    <div className={`esdoc ${classes.root}`}>
-      <Hidden smUp>
+    <div
+      className={`esdoc`}
+      style={{
+        width: "100%",
+      }}
+    >
+      <Box
+        sx={{
+          display: { xs: "block", sm: "none" },
+        }}
+      >
         <Grid container>
-          <Grid item xs={12} className={classes.content}>
+          <Grid
+            size={{ xs: 12 }}
+            style={{
+              padding: "12px",
+              paddingBottom: "115px",
+              margin: "0 auto",
+              maxWidth: "740px",
+            }}
+          >
             <EsdocContent path={path} />
           </Grid>
         </Grid>
-      </Hidden>
-      <Hidden only="xs">
+      </Box>
+      <Box
+        sx={{
+          display: { xs: "none", sm: "block" },
+        }}
+      >
         <Grid container wrap="nowrap">
-          <Grid item style={{ minWidth: 260, maxWidth: 300 }}>
-            <div className={classes.navWrapper}>
+          <Grid size={{ xs: 3 }} style={{ minWidth: 260, maxWidth: 300 }}>
+            <Box
+              style={{
+                height: "calc(100% - 32px)",
+                padding: "12px",
+                backgroundColor: "rgb(239, 239, 239)",
+              }}
+            >
               {version}
               <EsdocSearch />
               <EsdocNavigation />
-            </div>
+            </Box>
           </Grid>
-          <Grid item xs={9} className={classes.content}>
+          <Grid
+            size={{ xs: 9 }}
+            style={{
+              padding: "12px",
+              paddingBottom: "115px",
+              margin: "0 auto",
+              maxWidth: "740px",
+            }}
+          >
             <EsdocContent path={path} />
           </Grid>
         </Grid>
-      </Hidden>
+      </Box>
     </div>
   );
 }

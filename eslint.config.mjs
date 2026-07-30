@@ -1,4 +1,4 @@
-import flat from '@geops/eslint-config-react/flat';
+import flat from '@geops/eslint-config-react';
 export default [
   {
     ignores: [
@@ -16,17 +16,15 @@ export default [
   },
   ...flat,
   {
-    languageOptions: {
-      parserOptions: {
-        project: './tsconfig.json',
-      },
-    },
-  },
-  {
     rules: {},
   },
   {
     files: ['src/setupTests.js', '**/*.test.js'],
+    languageOptions: {
+      globals: {
+        global: 'readonly',
+      },
+    },
     rules: {
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/unbound-method': 'off',

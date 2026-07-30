@@ -1,6 +1,6 @@
-import { DEVICE_PIXEL_RATIO } from 'ol/has';
+import { DEVICE_PIXEL_RATIO } from "ol/has";
 
-import type { Color } from 'ol/color';
+import type { Color } from "ol/color";
 
 export interface PolygonFillPatternInput {
   canvas?: HTMLCanvasElement;
@@ -19,14 +19,14 @@ const getPolygonPattern = (
     return color;
   }
 
-  const canvasElement = document.createElement('canvas');
+  const canvasElement = document.createElement("canvas");
   const pixelRatio = DEVICE_PIXEL_RATIO;
 
   canvasElement.width = 20 * pixelRatio;
   canvasElement.height = 20 * pixelRatio;
 
   let pattern: PolygonFillPattern = {} as CanvasPattern;
-  const ctx = canvasElement.getContext('2d');
+  const ctx = canvasElement.getContext("2d");
   if (!ctx) {
     return undefined;
   }
@@ -63,7 +63,7 @@ const getPolygonPattern = (
 
       pattern = ctx.createPattern(
         canvasElement,
-        'repeat',
+        "repeat",
       ) as PolygonFillPattern;
       pattern.canvas = canvasElement;
       break;
@@ -99,7 +99,7 @@ const getPolygonPattern = (
 
       pattern = ctx.createPattern(
         canvasElement,
-        'repeat',
+        "repeat",
       ) as PolygonFillPattern;
       pattern.canvas = canvasElement;
       break;
@@ -135,7 +135,7 @@ const getPolygonPattern = (
 
       pattern = ctx.createPattern(
         canvasElement,
-        'repeat',
+        "repeat",
       ) as PolygonFillPattern;
       pattern.canvas = canvasElement;
       break;

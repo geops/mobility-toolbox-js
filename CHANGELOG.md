@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.7.0](https://github.com/geops/mobility-toolbox-js/compare/v3.6.13...v3.7.0) (2026-05-22)
+
+
+### Features
+
+* add some properties to update graph used when others layers visiblity changes ([#266](https://github.com/geops/mobility-toolbox-js/issues/266)) ([9340449](https://github.com/geops/mobility-toolbox-js/commit/934044974c0f6ab58917973a0980496c17d6dcab))
+
 ### [3.6.13](https://github.com/geops/mobility-toolbox-js/compare/v3.6.12...v3.6.13) (2026-05-08)
 
 

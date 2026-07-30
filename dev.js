@@ -1,30 +1,31 @@
-import View from 'ol/View';
-import Map from 'ol/Map';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import Feature from 'ol/Feature';
-import LineString from 'ol/geom/LineString';
-import Modify from 'ol/interaction/Modify';
+import View from "ol/View";
+import Map from "ol/Map";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import Feature from "ol/Feature";
+import LineString from "ol/geom/LineString";
+import Modify from "ol/interaction/Modify";
 import {
   MaplibreLayer,
+  MaplibreStyleLayer,
   MapsetAPI,
   MapsetLayer,
   MocoLayer,
   realtimeDefaultStyle,
   RealtimeLayer,
-} from './build/ol';
-import 'ol/ol.css';
-import { toLonLat, transformExtent } from 'ol/proj';
+} from "./build/ol";
+import "ol/ol.css";
+import { toLonLat, transformExtent } from "ol/proj";
 
-window.apiKey = '5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb';
+window.apiKey = "5cc87b12d7c5370001c1d6554840ecb89d2743d2b0aad0588b8ba7eb";
 
-const mocoUrl = 'https://moco.dev.geops.io/api/v2/';
-const mapsUrl = 'https://maps.geops.io';
+const mocoUrl = "https://moco.dev.geops.io/api/v2/";
+const mapsUrl = "https://maps.geops.io";
 
 const baseLayer = new MaplibreLayer({
   apiKey: window.apiKey,
   // style: 'tralis_munich_schematic_v3',
-  style: 'de.rvf_moco',
+  style: "de.rvf_moco",
   // url: 'https://maps.geops.io/styles/tralis_munich_schematic_v3/style.json?key=5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e',
 });
 
@@ -32,8 +33,17 @@ const mapsetLayer = new MapsetLayer({
   // apiKey: window.apiKey,
   // tenants: ['rvf'],
   apiKey: window.apiKey,
-  tags: ['mobility-portal-sob'],
-  tenants: ['geopsmarketing'],
+  tags: ["mobility-portal-sob"],
+  tenants: ["geopsmarketing"],
+});
+
+const lnpLayer = new MaplibreStyleLayer({
+  isQueryable: true,
+  // hideInLegend: true,
+  layersFilter: (l) => {
+    return l.source === "network_plans";
+  },
+  maplibreLayer: baseLayer,
 });
 
 const realtimeLayer = new RealtimeLayer({
@@ -41,36 +51,38 @@ const realtimeLayer = new RealtimeLayer({
   // apiKey: '5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e', // sbm
   // url: 'wss://api.geops.io/tracker-ws/v1/', // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
+  url: "https://api.geops.io/tracker-http/v1/", // rvf
   styleOptions: {
     // useHeadingStyle: true,
     // useDelayStyle: true,
   },
   // style: realtimeByMotStyle,
   // tenant: 'sbm',
-  // tenant: 'trenord',
-  // bboxParameters: {
-  //   line_tags: 'RVF',
-  // },
+  bboxParameters: {
+    line_tags: "RVF",
+  },
+  visible: true,
 });
 
 const mocoLayer = new MocoLayer({
   apiKey: window.apiKey,
-  tenant: 'rvf',
+  tenant: "rvf",
   maplibreLayer: baseLayer,
+  lnpLayer: lnpLayer,
   loadByZoom: true,
-  // useGraphs: false,
   // publicAt: new Date(),
   // url: mocoUrl,
 });
 
 const map = new Map({
   layers: [
-    // baseLayer,
-    realtimeLayer,
-    // mocoLayer,
+    baseLayer,
+    lnpLayer,
+    mocoLayer,
     // mapsetLayer,
+    realtimeLayer,
   ],
-  target: 'map',
+  target: "map",
   view: new View({
     center: [872814.6006106276, 6106276.43], // rvf
     // center: [1022769, 5698188], // trenord
@@ -80,7 +92,7 @@ const map = new Map({
   }),
 });
 
-map.on('pointermove', (evt) => {
+map.on("pointermove", (evt) => {
   if (evt.dragging) {
     return;
   }
@@ -94,10 +106,10 @@ map.on('pointermove', (evt) => {
 
   realtimeLayer.highlight(feature);
   console.log(feature?.getProperties());
-  map.getTargetElement().style.cursor = feature ? 'pointer' : '';
+  map.getTargetElement().style.cursor = feature ? "pointer" : "";
 });
 
-map.on('singleclick', (evt) => {
+map.on("singleclick", (evt) => {
   if (evt.dragging) {
     return;
   }
@@ -109,11 +121,22 @@ map.on('singleclick', (evt) => {
 
   realtimeLayer.select([feature]);
 });
-map.on('moveend', () => {
+map.on("moveend", () => {
   const zoom = map.getView().getZoom();
-  console.log('Current zoom level:', zoom);
+  console.log("Current zoom level:", zoom);
 });
-
+const toggleLayerVisibilityButton = document?.getElementById(
+  "toggle-visiblity-button",
+);
+toggleLayerVisibilityButton.addEventListener("click", () => {
+  if (lnpLayer.getVisible()) {
+    lnpLayer.setVisible(false);
+    toggleLayerVisibilityButton.textContent = "Show LNP Layer";
+  } else {
+    lnpLayer.setVisible(true);
+    toggleLayerVisibilityButton.textContent = "Hide LNP Layer";
+  }
+});
 // const urlInput = document?.getElementById('url-input');
 // const setUrlButton = document?.getElementById('set-url-button');
 // setUrlButton.addEventListener('click', () => {

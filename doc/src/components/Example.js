@@ -1,70 +1,42 @@
-import { Grid, Paper, Typography } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
-import React, { useEffect, useMemo, useState } from 'react';
-import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { Box, Grid, Paper, Typography } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
+import Markdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
-import CodeSandboxButton from './CodeSandboxButton';
+import CodeSandboxButton from "./CodeSandboxButton";
+const paperStyle = {
+  display: "block",
+  margin: "20px 0",
+  overflow: "hidden",
+  position: "relative",
+  resize: "horizontal",
+};
 
-const useStyles = makeStyles((theme) => {
-  return {
-    editButton: {
-      paddingRight: 10,
-      paddingTop: 5,
-      position: 'absolute',
-      right: 0,
-      top: 0,
-    },
-    fileName: {
-      padding: '10px 0 5px 15px',
-    },
-    htmlContainer: {
-      height: 500,
-    },
-    noPointer: {
-      // Remove pointer events for mobile devices on load
-      [theme.breakpoints.down('sm')]: {
-        pointerEvents: 'none',
-      },
-    },
-    paper: {
-      display: 'block',
-      margin: '20px 0',
-      overflow: 'hidden',
-      position: 'relative',
-      resize: 'horizontal',
-    },
-    readme: {
-      '& p': {
-        fontSize: 18,
-      },
-    },
-    root: {
-      padding: 12,
-    },
-  };
-});
-
+const editButtonStyle = {
+  paddingRight: 10,
+  paddingTop: 5,
+  position: "absolute",
+  right: 0,
+  top: 0,
+};
 function Example({ example }) {
-  const classes = useStyles();
   const [html, setHtml] = useState();
   const [js, setJs] = useState();
-  const [isNavigable, setIsNavigable] = useState(false);
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState("");
 
   const htmlFileName = useMemo(() => {
     const { files, key } = example || {};
-    return files?.html || (key && `${key}.html`) || '';
+    return files?.html || (key && `${key}.html`) || "";
   }, [example]);
 
   const jsFileName = useMemo(() => {
     const { files, key } = example || {};
-    return files?.js || (key && `${key}.js`) || '';
+    return files?.js || (key && `${key}.js`) || "";
   }, [example]);
 
   useEffect(() => {
     // Get the public api key
-    fetch('https://developer.geops.io/publickey')
+    fetch("https://developer.geops.io/publickey")
       .then((response) => {
         return response.json();
       })
@@ -134,9 +106,9 @@ function Example({ example }) {
               /'\.\.\/\.\.\/\.\.\/\.\.\/src\//gm,
               "'mobility-toolbox-js/",
             )
-            .replace('export default () => {\n', '')
-            .replace(/^};\n$/gm, '')
-            .replace(/^ {2}/gm, ''),
+            .replace("export default () => {\n", "")
+            .replace(/^};\n$/gm, "")
+            .replace(/^ {2}/gm, ""),
         );
       })
       .catch(() => {
@@ -154,59 +126,74 @@ function Example({ example }) {
   return (
     <div style={{ marginTop: 30 }}>
       <Grid container direction="column" spacing={3}>
-        <Grid item style={{ maxWidth: '100%' }} xs={12}>
+        <Grid style={{ maxWidth: "100%" }} size={{ xs: 12 }}>
           <Typography className="headline" variant="h1">
             {example.name}
           </Typography>
-          <div className={classes.readme}>
-            <Markdown>{example.description || ''}</Markdown>
-          </div>
-          <div className={classes.readme}>
-            <Markdown>{example.readme || ''}</Markdown>
-          </div>
-        </Grid>
-
-        <Grid item style={{ maxWidth: '100%' }} xs={12}>
-          <Paper
-            className={classes.paper}
-            onClick={() => {
-              return setIsNavigable(true);
+          <Box
+            sx={{
+              "& p": {
+                fontSize: "18px",
+              },
             }}
           >
+            <Markdown>{example.description || ""}</Markdown>
+          </Box>
+          <Box
+            sx={{
+              "& p": {
+                fontSize: "18px",
+              },
+            }}
+          >
+            <Markdown>{example.readme || ""}</Markdown>
+          </Box>
+        </Grid>
+
+        <Grid style={{ maxWidth: "100%" }} size={{ xs: 12 }}>
+          <Paper sx={paperStyle}>
             <div
-              className={`${classes.htmlContainer} ${
-                isNavigable ? '' : classes.noPointer
-              }`}
+              style={{
+                height: 500,
+              }}
               dangerouslySetInnerHTML={{ __html: html }}
             />
           </Paper>
         </Grid>
         {js && html && (
           <>
-            <Grid item style={{ maxWidth: '100%' }} xs={12}>
-              <Paper className={classes.paper}>
-                <Typography className={classes.fileName}>
+            <Grid style={{ maxWidth: "100%" }} size={{ xs: 12 }}>
+              <Paper sx={paperStyle}>
+                <Typography
+                  style={{
+                    padding: "10px 0 5px 15px",
+                  }}
+                >
                   {jsFileName}
                 </Typography>
                 <SyntaxHighlighter language="javascript">
                   {js}
                 </SyntaxHighlighter>
                 <CodeSandboxButton
-                  className={classes.editButton}
+                  style={editButtonStyle}
                   extraFiles={example.extraFiles || {}}
                   html={html}
                   js={js}
                 />
               </Paper>
             </Grid>
-            <Grid item style={{ maxWidth: '100%' }} xs={12}>
-              <Paper className={classes.paper}>
-                <Typography className={classes.fileName}>
+            <Grid style={{ maxWidth: "100%" }} size={{ xs: 12 }}>
+              <Paper sx={paperStyle}>
+                <Typography
+                  style={{
+                    padding: "10px 0 5px 15px",
+                  }}
+                >
                   {htmlFileName}
                 </Typography>
                 <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
                 <CodeSandboxButton
-                  className={classes.editButton}
+                  style={editButtonStyle}
                   extraFiles={{}}
                   html={html}
                   js={js}

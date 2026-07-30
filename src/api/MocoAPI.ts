@@ -1,10 +1,10 @@
-import HttpAPI from './HttpAPI';
+import HttpAPI from "./HttpAPI";
 
-import type { MocoExportByIdParameters, MocoExportParameters } from '../types';
+import type { MocoExportByIdParameters, MocoExportParameters } from "../types";
 import type {
   SituationType,
   SituationTypeExtendedOffsetPaginated,
-} from '../types';
+} from "../types";
 
 export interface MocoAPIOptions {
   apiKey: string;
@@ -31,7 +31,7 @@ export interface MocoAPIOptions {
  * @private
  */
 class MocoAPI extends HttpAPI {
-  tenant = 'geopstest';
+  tenant = "geopstest";
 
   /**
    * Constructor
@@ -45,7 +45,7 @@ class MocoAPI extends HttpAPI {
   constructor(options: MocoAPIOptions) {
     super({
       ...options,
-      url: options.url || 'https://moco.geops.io/api/v2/',
+      url: options.url || "https://moco.geops.io/api/v2/",
     });
 
     if (options.tenant) {

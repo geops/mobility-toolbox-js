@@ -1,14 +1,14 @@
-import Control from 'ol/control/Control';
-import { fromLonLat } from 'ol/proj';
+import Control from "ol/control/Control";
+import { fromLonLat } from "ol/proj";
 
-import StopFinderControlCommon from '../../common/controls/StopFinderControlCommon';
-import createDefaultStopFinderElement from '../../common/utils/createDefaultStopFinderElt';
+import StopFinderControlCommon from "../../common/controls/StopFinderControlCommon";
+import createDefaultStopFinderElement from "../../common/utils/createDefaultStopFinderElt";
 
-import type { Point } from 'geojson';
-import type { Options } from 'ol/control/Control';
+import type { Point } from "geojson";
+import type { Options } from "ol/control/Control";
 
-import type { ArrayElement } from '../../common/controls/StopFinderControlCommon';
-import type { StopsResponse } from '../../types';
+import type { ArrayElement } from "../../common/controls/StopFinderControlCommon";
+import type { StopsResponse } from "../../types";
 
 export type StopFinderControlOptions = {
   className?: string;
@@ -55,7 +55,7 @@ class StopFinderControl extends Control {
    */
   constructor(options: StopFinderControlOptions) {
     const element = createDefaultStopFinderElement();
-    element.className = options?.className || 'mbt-stop-finder';
+    element.className = options?.className || "mbt-stop-finder";
     const opt = { element, ...(options || {}) };
     super(opt);
     this.controller = new StopFinderControlCommon({
@@ -65,7 +65,7 @@ class StopFinderControl extends Control {
   }
 
   onSuggestionClick(
-    suggestion: ArrayElement<NonNullable<StopsResponse['features']>>,
+    suggestion: ArrayElement<NonNullable<StopsResponse["features"]>>,
   ) {
     const coord = fromLonLat((suggestion.geometry as Point).coordinates);
     this.getMap()?.getView().setCenter(coord);

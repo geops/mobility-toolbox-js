@@ -9,7 +9,7 @@ export const getUTCDateString = (now = new Date()): string => {
   let day = now.getUTCDate().toString();
   day = day.length === 1 ? `0${day}` : day;
 
-  return [now.getUTCFullYear(), month, day].join('');
+  return [now.getUTCFullYear(), month, day].join("");
 };
 
 /**
@@ -22,7 +22,7 @@ export const getUTCTimeString = (date: Date): string => {
     date.getUTCHours(),
     date.getUTCMinutes(),
     `${date.getUTCSeconds()}.${date.getUTCMilliseconds()}`,
-  ].join(':');
+  ].join(":");
 };
 
 /**
@@ -40,7 +40,7 @@ export const pad = (integer: number): string => {
  */
 export const getHoursAndMinutes = (timeInMs: number): string => {
   if (!timeInMs || timeInMs <= 0) {
-    return '';
+    return "";
   }
   const date = new Date(timeInMs);
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;

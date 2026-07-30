@@ -2,6 +2,7 @@ import 'react-app-polyfill/stable';
 import React, { useEffect } from 'react';
 import { ThemeProvider, StyledEngineProvider } from '@mui/material';
 import { geopsTheme, Header, Footer } from '@geops/geops-ui';
+import { AppCacheProvider } from '@mui/material-nextjs/v16-pagesRouter';
 
 import 'typeface-lato';
 import '../styles/App.scss';
@@ -44,7 +45,7 @@ function MyApp(props) {
   }, []);
 
   return (
-    <StyledEngineProvider injectFirst>
+    <AppCacheProvider {...props}>
       <ThemeProvider theme={geopsTheme}>
         <Header title="mobility-toolbox-js" tabs={tabs} />
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
@@ -54,7 +55,7 @@ function MyApp(props) {
         <Component {...pageProps} />
         <Footer />
       </ThemeProvider>
-    </StyledEngineProvider>
+    </AppCacheProvider>
   );
 }
 

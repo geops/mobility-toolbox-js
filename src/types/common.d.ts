@@ -1,19 +1,19 @@
-import type { Feature } from 'ol';
-import type { Coordinate } from 'ol/coordinate';
-import type { Pixel } from 'ol/pixel';
+import type { Feature } from "ol";
+import type { Coordinate } from "ol/coordinate";
+import type { Pixel } from "ol/pixel";
 
 import type {
   CopyrightControl as MbCopyrightControl,
   RealtimeLayer as MbRealtimeLayer,
-} from '../maplibre';
+} from "../maplibre";
 import type {
   CopyrightControl as OlCopyrightControl,
   RealtimeLayer as OlRealtimeLayer,
-} from '../ol';
+} from "../ol";
 
-import type { RealtimeTrainId, RealtimeTrajectory } from './realtime';
+import type { RealtimeTrainId, RealtimeTrajectory } from "./realtime";
 
-import type { RoutingParameters } from '.';
+import type { RoutingParameters } from ".";
 
 export type StyleCache = Record<string, AnyCanvas>;
 
@@ -145,6 +145,6 @@ export interface LayerGetFeatureInfoOptions {
   nb?: number;
 }
 
-export type RoutingGraph = ['osm' | RoutingParameters['graph'], number, number];
-export type RoutingMot = RoutingParameters['mot'];
+export type RoutingGraph = ["osm" | RoutingParameters["graph"], number, number];
+export type RoutingMot = RoutingParameters["mot"];
 export type RoutingViaPoint = Coordinate | string;

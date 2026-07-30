@@ -1,11 +1,11 @@
-import { getMapGlCopyrights } from '../../common/utils';
+import { getMapGlCopyrights } from "../../common/utils";
 
-import type { ControlPosition, IControl } from 'maplibre-gl';
+import type { ControlPosition, IControl } from "maplibre-gl";
 
 /**
  * @private
  */
-const DEFAULT_SEPARATOR = ' | ';
+const DEFAULT_SEPARATOR = " | ";
 
 /**
  * Display layer's attributions trying to remove duplicated ones.
@@ -46,18 +46,18 @@ class CopyrightControl implements IControl {
   }
 
   getDefaultPosition(): ControlPosition {
-    return 'bottom-right';
+    return "bottom-right";
   }
 
   onAdd(map: maplibregl.Map) {
     this.map = map;
     if (!this.container) {
-      this.container = document.createElement('div');
+      this.container = document.createElement("div");
     }
     this.render = this.render.bind(this);
-    this.map.on('idle', this.render);
-    this.map.on('sourcedata', this.render);
-    this.map.on('styledata', this.render);
+    this.map.on("idle", this.render);
+    this.map.on("sourcedata", this.render);
+    this.map.on("styledata", this.render);
     this.render();
     return this.container;
   }
@@ -68,9 +68,9 @@ class CopyrightControl implements IControl {
     }
 
     if (this.map) {
-      this.map.off('sourcedata', this.render);
-      this.map.off('styledata', this.render);
-      this.map.off('idle', this.render);
+      this.map.off("sourcedata", this.render);
+      this.map.off("styledata", this.render);
+      this.map.off("idle", this.render);
     }
     this.map = undefined;
 

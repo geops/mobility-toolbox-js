@@ -1,20 +1,20 @@
-import getMapGlCopyrights from './getMapGlCopyrights';
+import getMapGlCopyrights from "./getMapGlCopyrights";
 
-describe('getMapGlCopyrights()', () => {
-  test('returns an empty array if map is not defined', () => {
+describe("getMapGlCopyrights()", () => {
+  test("returns an empty array if map is not defined", () => {
     expect(getMapGlCopyrights().length).toBe(0);
   });
 
-  test('returns an empty array if map.style is not defined', () => {
+  test("returns an empty array if map.style is not defined", () => {
     expect(getMapGlCopyrights({}).length).toBe(0);
   });
 
-  test('returns non depluicated copyrights in an array', () => {
+  test("returns non depluicated copyrights in an array", () => {
     expect(
       getMapGlCopyrights({
         style: {
           sourceCaches: {
-            'also used': {
+            "also used": {
               getSource() {
                 return {
                   attribution:
@@ -23,7 +23,7 @@ describe('getMapGlCopyrights()', () => {
               },
               used: true,
             },
-            'not used': {
+            "not used": {
               used: false,
             },
             used: {

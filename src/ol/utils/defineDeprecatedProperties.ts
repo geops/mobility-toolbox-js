@@ -1,17 +1,17 @@
-import debounce from 'lodash.debounce';
+import debounce from "lodash.debounce";
 
-import type { Map, Object as OLObject } from 'ol';
-import type { EventsKey } from 'ol/events';
-import type { Layer } from 'ol/layer';
-import type BaseLayer from 'ol/layer/Base';
-import type { ObjectEvent } from 'ol/Object';
+import type { Map, Object as OLObject } from "ol";
+import type { EventsKey } from "ol/events";
+import type { Layer } from "ol/layer";
+import type BaseLayer from "ol/layer/Base";
+import type { ObjectEvent } from "ol/Object";
 
-import type { MobilityLayerOptions } from '../layers/Layer';
+import type { MobilityLayerOptions } from "../layers/Layer";
 
 let deprecated: (message: string) => void = () => {};
 if (
-  typeof window !== 'undefined' &&
-  new URLSearchParams(window.location.search).get('deprecated')
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("deprecated")
 ) {
   deprecated = debounce((message: string) => {
     // eslint-disable-next-line no-console
@@ -21,10 +21,10 @@ if (
 const onChildrenChange = (obj: OLObject, oldValue: OLObject[]) => {
   // Set the parent property
   (oldValue || []).forEach((child) => {
-    child.set('parent', undefined);
+    child.set("parent", undefined);
   });
-  ((obj.get('children') || []) as OLObject[]).forEach((child: OLObject) => {
-    child.set('parent', obj);
+  ((obj.get("children") || []) as OLObject[]).forEach((child: OLObject) => {
+    child.set("parent", obj);
   });
 };
 
@@ -46,22 +46,22 @@ const defineDeprecatedProperties = (
   }
 
   // Update parent property
-  obj.on('propertychange', (evt: ObjectEvent) => {
-    if (evt.key === 'children') {
+  obj.on("propertychange", (evt: ObjectEvent) => {
+    if (evt.key === "children") {
       onChildrenChange(evt.target as Layer, evt.oldValue as Layer[]);
     }
 
-    if (evt.key === 'map') {
+    if (evt.key === "map") {
       const map = (evt.target as OLObject).get(evt.key) as Map | null;
       if (map) {
         (
-          ((evt.target as BaseLayer).get('children') as BaseLayer[]) || []
+          ((evt.target as BaseLayer).get("children") as BaseLayer[]) || []
         ).forEach((child: BaseLayer) => {
           map.addLayer(child);
         });
       } else if (evt.oldValue) {
         (
-          ((evt.target as BaseLayer).get('children') as BaseLayer[]) || []
+          ((evt.target as BaseLayer).get("children") as BaseLayer[]) || []
         ).forEach((child: BaseLayer) => {
           (evt.oldValue as Map | null)?.removeLayer(child);
         });
@@ -70,10 +70,10 @@ const defineDeprecatedProperties = (
   });
 
   // Save options for cloning
-  obj.set('options', options);
+  obj.set("options", options);
 
   // Force triggering the on children property change event
-  obj.set('children', [...((options.children as Layer[]) || [])]);
+  obj.set("children", [...((options.children as Layer[]) || [])]);
 
   Object.defineProperties(obj, {
     children: {
@@ -82,7 +82,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.children is deprecated. Use the Layer.get('children') method instead.",
         );
-        return (obj.get('children') as Layer[]) || [];
+        return (obj.get("children") as Layer[]) || [];
       },
 
       /** @deprecated */
@@ -90,28 +90,28 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.children is deprecated. Use the Layer.set('children', children) method instead.",
         );
-        obj.set('children', newValue || []);
+        obj.set("children", newValue || []);
       },
     },
     copyrights: {
       /** @deprecated */
       get: (): string => {
         deprecated(
-          'Layer.copyrights is deprecated. Get the attributions from the source object',
+          "Layer.copyrights is deprecated. Get the attributions from the source object",
         );
-        return obj.get('copyrights') as string;
+        return obj.get("copyrights") as string;
       },
 
       /** @deprecated */
       set: (newCopyrights: string | string[]) => {
         deprecated(
-          'Layer.copyrights is deprecated. Set the attributions to the source object.',
+          "Layer.copyrights is deprecated. Set the attributions to the source object.",
         );
         const arrValue =
           newCopyrights && !Array.isArray(newCopyrights)
             ? [newCopyrights]
             : newCopyrights;
-        obj.set('copyrights', arrValue || []);
+        obj.set("copyrights", arrValue || []);
       },
     },
     disabled: {
@@ -120,7 +120,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.disabled is deprecated. Use the Layer.get('disabled') method instead.",
         );
-        return obj.get('disabled') as boolean;
+        return obj.get("disabled") as boolean;
       },
 
       /** @deprecated */
@@ -128,7 +128,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.disabled is deprecated. Use the Layer.set('disabled', newValue) method instead.",
         );
-        obj.set('disabled', newValue);
+        obj.set("disabled", newValue);
       },
     },
     group: {
@@ -137,24 +137,24 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.group is deprecated. Use the Layer.get('group') method instead.",
         );
-        return obj.get('group') as string;
+        return obj.get("group") as string;
       },
     },
     hitTolerance: {
       /** @deprecated */
       get(): number {
         deprecated(
-          'Layer.hitTolerance is deprecated. Pass the hitTolerance when you request the features.',
+          "Layer.hitTolerance is deprecated. Pass the hitTolerance when you request the features.",
         );
-        return (obj.get('hitTolerance') as number) || 5;
+        return (obj.get("hitTolerance") as number) || 5;
       },
 
       /** @deprecated */
       set(newValue: number) {
         deprecated(
-          'Layer.hitTolerance is deprecated. Pass the hitTolerance when you request the features.',
+          "Layer.hitTolerance is deprecated. Pass the hitTolerance when you request the features.",
         );
-        obj.set('hitTolerance', newValue);
+        obj.set("hitTolerance", newValue);
       },
     },
     key: {
@@ -163,7 +163,7 @@ const defineDeprecatedProperties = (
         deprecated(
           'Layer.key is deprecated. Use the Layer.get("key") method instead.',
         );
-        return (obj.get('key') as string) || (obj.get('name') as string);
+        return (obj.get("key") as string) || (obj.get("name") as string);
       },
     },
     map: {
@@ -181,7 +181,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.name is deprecated. Use the Layer.get('name') method instead.",
         );
-        return obj.get('name') as string;
+        return obj.get("name") as string;
       },
     },
     olLayer: {
@@ -196,7 +196,7 @@ const defineDeprecatedProperties = (
       /** @deprecated */
       set() {
         deprecated(
-          'Layer.olLayer is deprecated. mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. obj setter has no effect.',
+          "Layer.olLayer is deprecated. mobility-toolbox-js/ol layers inherits now from ol/layer/Layer class. obj setter has no effect.",
         );
       },
     },
@@ -204,14 +204,14 @@ const defineDeprecatedProperties = (
       /** @deprecated */
       get(): EventsKey[] {
         deprecated(
-          'Layer.olListenersKeys is deprecated. Use the Layer.olEventsKeys instead.',
+          "Layer.olListenersKeys is deprecated. Use the Layer.olEventsKeys instead.",
         );
         //@ts-expect-error Property just there for backward compatibility
         return (obj.olEventsKeys as EventsKey[]) || [];
       },
       set(newValue: string[]) {
         deprecated(
-          'Layer.olListenersKeys is deprecated. Use the Layer.olEventsKeys instead.',
+          "Layer.olListenersKeys is deprecated. Use the Layer.olEventsKeys instead.",
         );
 
         //@ts-expect-error Property just there for backward compatibility
@@ -224,13 +224,13 @@ const defineDeprecatedProperties = (
         deprecated(
           'Layer.options is deprecated. Use the Layer.get("options") method instead.',
         );
-        return obj.get('options') as MobilityLayerOptions;
+        return obj.get("options") as MobilityLayerOptions;
       },
       set(newValue: MobilityLayerOptions) {
         deprecated(
           'Layer.options is deprecated.  Use the Layer.set("options", newValue) method instead.',
         );
-        return obj.set('options', newValue);
+        return obj.set("options", newValue);
       },
     },
     parent: {
@@ -239,7 +239,7 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.parent is deprecated. Use the Layer.get('parent') method instead.",
         );
-        return obj.get('parent') as Layer;
+        return obj.get("parent") as Layer;
       },
 
       /** @deprecated */
@@ -247,21 +247,21 @@ const defineDeprecatedProperties = (
         deprecated(
           "Layer.parent is deprecated. Use the Layer.set('parent', parent) method instead.",
         );
-        obj.set('parent', newValue);
+        obj.set("parent", newValue);
       },
     },
     properties: {
       /** @deprecated */
       get(): Record<string, unknown> {
         deprecated(
-          'Layer.properties is deprecated. Use the Layer.getProperties() method instead.',
+          "Layer.properties is deprecated. Use the Layer.getProperties() method instead.",
         );
         return obj.getProperties();
       },
       /** @deprecated */
       set(newValue: Record<string, unknown>) {
         deprecated(
-          'Layer.properties is deprecated. Use the Layer.setProperties(newValue) method instead.',
+          "Layer.properties is deprecated. Use the Layer.setProperties(newValue) method instead.",
         );
         obj.setProperties(newValue);
       },
@@ -270,7 +270,7 @@ const defineDeprecatedProperties = (
       /** @deprecated */
       get(): boolean {
         deprecated(
-          'Layer.visible is deprecated. Use the Layer.getVisible() method instead.',
+          "Layer.visible is deprecated. Use the Layer.getVisible() method instead.",
         );
         return obj.getVisible();
       },
@@ -278,7 +278,7 @@ const defineDeprecatedProperties = (
       /** @deprecated */
       set(newValue: boolean) {
         deprecated(
-          'Layer.visible is deprecated. Use the Layer.setVisible(newValue) method instead.',
+          "Layer.visible is deprecated. Use the Layer.setVisible(newValue) method instead.",
         );
         obj.setVisible(newValue);
       },

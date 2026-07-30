@@ -1,16 +1,16 @@
-import { getUid } from 'ol';
-import GeoJSON from 'ol/format/GeoJSON';
+import { getUid } from "ol";
+import GeoJSON from "ol/format/GeoJSON";
 
-import { getLayersAsFlatArray } from '../../common';
-import { FeatureInfo } from '../../common/typedefs';
+import { getLayersAsFlatArray } from "../../common";
+import { FeatureInfo } from "../../common/typedefs";
 
-import type { Feature } from 'ol';
-import type { Coordinate } from 'ol/coordinate';
-import type { Layer } from 'ol/layer';
-import type BaseLayer from 'ol/layer/Base';
-import type { ImageWMS, TileWMS } from 'ol/source';
+import type { Feature } from "ol";
+import type { Coordinate } from "ol/coordinate";
+import type { Layer } from "ol/layer";
+import type BaseLayer from "ol/layer/Base";
+import type { ImageWMS, TileWMS } from "ol/source";
 
-import type { LayerGetFeatureInfoResponse } from '../../types';
+import type { LayerGetFeatureInfoResponse } from "../../types";
 
 /**
  * @private
@@ -29,7 +29,7 @@ const getFeaturesFromWMS = (
   const { coordinate, params, projection, resolution } = options;
   if (source && resolution && projection) {
     url = source.getFeatureInfoUrl(coordinate, resolution, projection, {
-      info_format: 'application/json',
+      info_format: "application/json",
       query_layers: source.getParams().layers,
       ...params,
     });
@@ -118,7 +118,7 @@ const getFeatureInfoAtCoordinate = async (
         {
           coordinate,
           params: {
-            info_format: 'application/json',
+            info_format: "application/json",
             query_layers: (source.getParams() as { layers: string }).layers,
           },
           projection,
@@ -144,7 +144,7 @@ const getFeatureInfoAtCoordinate = async (
     }
 
     const features = map?.getFeaturesAtPixel(pixel, {
-      hitTolerance: (layer.get('hitTolerance') as number) || hitTolerance || 5,
+      hitTolerance: (layer.get("hitTolerance") as number) || hitTolerance || 5,
       layerFilter: (l: Layer) => {
         return l === layer;
       },

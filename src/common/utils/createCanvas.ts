@@ -1,4 +1,4 @@
-import type { AnyCanvas } from '../../types';
+import type { AnyCanvas } from "../../types";
 
 /**
  * This function try to create a canvas element and return it.
@@ -11,12 +11,12 @@ const createCanvas = (width: number, height: number): AnyCanvas | null => {
   let canvas = null;
 
   // Prevent SSR errors
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 
-  if (typeof document !== 'undefined' && document?.createElement) {
-    canvas = document.createElement('canvas');
+  if (typeof document !== "undefined" && document?.createElement) {
+    canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
   } else if (OffscreenCanvas) {

@@ -1,15 +1,15 @@
-import GeoJSON from 'ol/format/GeoJSON';
-import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
-import { composeCssTransform } from 'ol/transform';
+import GeoJSON from "ol/format/GeoJSON";
+import CanvasLayerRenderer from "ol/renderer/canvas/Layer";
+import { composeCssTransform } from "ol/transform";
 
-import type { Feature } from 'ol';
-import type { Coordinate } from 'ol/coordinate';
-import type { Geometry } from 'ol/geom';
-import type { FrameState } from 'ol/Map';
-import type { Pixel } from 'ol/pixel';
-import type { FeatureCallback } from 'ol/renderer/vector';
+import type { Feature } from "ol";
+import type { Coordinate } from "ol/coordinate";
+import type { Geometry } from "ol/geom";
+import type { FrameState } from "ol/Map";
+import type { Pixel } from "ol/pixel";
+import type { FeatureCallback } from "ol/renderer/vector";
 
-import type RealtimeLayer from '../layers/RealtimeLayer';
+import type RealtimeLayer from "../layers/RealtimeLayer";
 
 const format = new GeoJSON();
 
@@ -41,7 +41,7 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
     let data;
     try {
       const { pixelRatio } = this.getLayer();
-      const context = this.canvas?.getContext('2d', {
+      const context = this.canvas?.getContext("2d", {
         willReadFrequently: true,
       });
       data =
@@ -53,7 +53,7 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
         ).data || null; // [3];
       return data;
     } catch (err) {
-      console.error('error getting data', err);
+      console.error("error getting data", err);
     }
     return null;
   }
@@ -89,16 +89,16 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
     this.getLayer().engine.pixelRatio = frameState.pixelRatio;
     this.ready = !!engine.renderState?.renderedTrajectories && engine.isIdle;
     if (!this.container) {
-      this.container = document.createElement('div');
+      this.container = document.createElement("div");
       this.container.className = this.getLayer().getClassName();
-      this.container.style.position = 'absolute';
-      this.container.style.width = '100%';
-      this.container.style.height = '100%';
+      this.container.style.position = "absolute";
+      this.container.style.width = "100%";
+      this.container.style.height = "100%";
       if (canvas instanceof HTMLCanvasElement) {
-        canvas.style.position = 'absolute';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.transformOrigin = 'top left';
+        canvas.style.position = "absolute";
+        canvas.style.top = "0";
+        canvas.style.left = "0";
+        canvas.style.transformOrigin = "top left";
         this.container.appendChild(canvas);
       }
     }
@@ -113,7 +113,7 @@ export default class RealtimeLayerRenderer extends CanvasLayerRenderer<RealtimeL
 
       if (renderedResolution / resolution >= 3) {
         // Avoid having really big points when zooming fast.
-        const context = canvas?.getContext('2d');
+        const context = canvas?.getContext("2d");
         if (canvas?.width && canvas?.height) {
           (context as CanvasRenderingContext2D)?.clearRect(
             0,

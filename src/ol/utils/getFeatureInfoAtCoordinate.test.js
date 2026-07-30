@@ -1,21 +1,21 @@
-import fetch from 'jest-fetch-mock';
-import { Feature } from 'ol';
-import { Point } from 'ol/geom';
-import ImageLayer from 'ol/layer/Image';
-import VectorLayer from 'ol/layer/Vector';
-import Map from 'ol/Map';
-import { Vector } from 'ol/source';
-import ImageWMS from 'ol/source/ImageWMS';
-import OLView from 'ol/View';
+import fetch from "jest-fetch-mock";
+import { Feature } from "ol";
+import { Point } from "ol/geom";
+import ImageLayer from "ol/layer/Image";
+import VectorLayer from "ol/layer/Vector";
+import Map from "ol/Map";
+import { Vector } from "ol/source";
+import ImageWMS from "ol/source/ImageWMS";
+import OLView from "ol/View";
 
-import getFeatureInfoAtCoordinate from './getFeatureInfoAtCoordinate';
+import getFeatureInfoAtCoordinate from "./getFeatureInfoAtCoordinate";
 
-describe('getFeatureInfoAtCoordinate', () => {
+describe("getFeatureInfoAtCoordinate", () => {
   let map;
 
   beforeEach(() => {
     map = new Map({
-      target: document.createElement('canvas'),
+      target: document.createElement("canvas"),
       view: new OLView({ resolution: 5 }),
     });
     map.setSize([100, 100]);
@@ -29,21 +29,21 @@ describe('getFeatureInfoAtCoordinate', () => {
     map.setTarget(null);
   });
 
-  describe('using a WMSLayer', () => {
+  describe("using a WMSLayer", () => {
     let layer;
 
     beforeEach(() => {
       layer = new ImageLayer({
         source: new ImageWMS({
-          params: { LAYERS: 'layers' },
-          url: 'http://dummy',
+          params: { LAYERS: "layers" },
+          url: "http://dummy",
         }),
       });
       map.addLayer(layer);
       fetch.mockResponseOnce(
         JSON.stringify({
           features: [],
-          type: 'FeatureCollection',
+          type: "FeatureCollection",
         }),
       );
       global.fetch = fetch;
@@ -53,13 +53,13 @@ describe('getFeatureInfoAtCoordinate', () => {
       map.removeLayer(layer);
     });
 
-    test('should return features info', async () => {
+    test("should return features info", async () => {
       const data = await getFeatureInfoAtCoordinate([50, 50], [layer], map);
       const params = new URL(fetch.mock.calls[0][0]).searchParams;
-      expect(params.get('I')).toBe('50');
-      expect(params.get('LAYERS')).toBe('layers');
-      expect(params.get('I')).toBe('50');
-      expect(params.get('J')).toBe('50');
+      expect(params.get("I")).toBe("50");
+      expect(params.get("LAYERS")).toBe("layers");
+      expect(params.get("I")).toBe("50");
+      expect(params.get("J")).toBe("50");
       expect(data.length).toEqual(1);
       expect(data[0].features).toEqual([]);
       expect(data[0].layer).toEqual(layer);
@@ -67,7 +67,7 @@ describe('getFeatureInfoAtCoordinate', () => {
     });
   });
 
-  describe('using a vector layer', () => {
+  describe("using a vector layer", () => {
     let layer;
     const feature = new Feature(new Point([50, 50]));
 
@@ -84,7 +84,7 @@ describe('getFeatureInfoAtCoordinate', () => {
       map.removeLayer(layer);
     });
 
-    test('should return features info', async () => {
+    test("should return features info", async () => {
       map.getFeaturesAtPixel = jest.fn(() => {
         return [feature];
       });

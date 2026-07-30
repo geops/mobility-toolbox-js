@@ -9,9 +9,9 @@ The original css from [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc
 
 ## How does it work
 
-The [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin) creates an `index.json` in `apidoc/index.json` when we run `yarn apidoc`.
+The [esdoc-publish-html-plugin](https://github.com/esdoc/esdoc-plugins/blob/2de5022baa569785a189056a99acd1d7ca8284b7/esdoc-publish-html-plugin) creates an `index.json` in `apidoc/index.json` when we run `pnpm apidoc`.
 
-The `yarn apidoc` task copy automatically this `index.json` in this folder.
+The `pnpm apidoc` task copy automatically this `index.json` in this folder.
 
 This json is loaded in `./DocBuilderUtils.js` then a in memory [taffy](http://taffydb.com/) database is loaded with its content.
 This database is only used to facilitate the retrievment of data from the `ìndex.json` content.
