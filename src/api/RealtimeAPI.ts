@@ -644,14 +644,8 @@ class RealtimeAPI {
     suffix = "",
     onMessage?: WebSocketAPIMessageCallback<T>,
   ) {
-    const suffixSchenatic = getModeSuffix(
-      Realtime.ModeEnum.SCHEMATIC,
-      Realtime.ModeEnum,
-    );
-    const suffixTopographic = getModeSuffix(
-      Realtime.ModeEnum.TOPOGRAPHIC,
-      Realtime.ModeEnum,
-    );
+    const suffixSchenatic = getModeSuffix(Realtime.ModeEnum.SCHEMATIC);
+    const suffixTopographic = getModeSuffix(Realtime.ModeEnum.TOPOGRAPHIC);
     this.wsApi.unsubscribe(
       `${channel}${suffixSchenatic}${suffix || ""}`,
       onMessage,

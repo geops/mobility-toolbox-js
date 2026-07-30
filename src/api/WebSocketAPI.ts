@@ -227,7 +227,7 @@ class WebSocketAPI {
    * @param {function} errorCb Callback on error and close event
    * @private
    */
-  get<T extends WebSocketAPIMessageEventData<unknown>>(
+  get<T extends WebSocketAPIMessageEventData<T>>(
     params: WebSocketAPIParameters,
     cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
@@ -291,9 +291,9 @@ class WebSocketAPI {
    * @return {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
    * @private
    */
-  listen<T extends WebSocketAPIMessageEventData<unknown>>(
+  listen<T extends WebSocketAPIMessageEventData<T>>(
     params: WebSocketAPIParameters,
-    cb: MessageEventListener,
+    cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
   ): {
     onErrorCb?: EventListener;
@@ -445,7 +445,10 @@ class WebSocketAPI {
    * @param {function} cb Callback used when listen.
    * @private
    */
-  unlisten(params: WebSocketAPIParameters, cb: MessageEventListener) {
+  unlisten<T>(
+    params: WebSocketAPIParameters,
+    cb: WebSocketAPIMessageCallback<T>,
+  ) {
     [...(this.subscriptions || []), ...(this.requests || [])]
       .filter((s) => {
         return s.params.channel === params.channel && (!cb || s.cb === cb);

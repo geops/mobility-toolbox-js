@@ -1,8 +1,7 @@
-import TmotCode from "../../types/realtime-asyncapi-types/TmotCode";
+import { Realtime } from "../../types";
 
 import type {
   AnyCanvasContext,
-  Realtime,
   RealtimeStyleOptions,
   ViewState,
 } from "../../types";
@@ -20,32 +19,32 @@ const radiusMapping: number[][] = [
   [0, 0, 0, 0, 0, 2, 2, 3, 7, 7, 7, 12, 15, 15, 15, 15, 15],
 ];
 
-export const MOTS_ONLY_RAIL: Realtime.TmotCode[] = [TmotCode.RAIL];
+export const MOTS_ONLY_RAIL: Realtime.TmotCode[] = [Realtime.TmotCode.RAIL];
 
 export const MOTS_WITH_CABLE: Realtime.TmotCode[] = [
-  TmotCode.CABLECAR,
-  TmotCode.GONDOLA,
-  TmotCode.FUNICULAR,
-  TmotCode.COACH,
+  Realtime.TmotCode.CABLECAR,
+  Realtime.TmotCode.GONDOLA,
+  Realtime.TmotCode.FUNICULAR,
+  Realtime.TmotCode.COACH,
 ];
 
 export const MOTS_WITHOUT_CABLE: Realtime.TmotCode[] = [
-  TmotCode.TRAM,
-  TmotCode.SUBWAY,
-  TmotCode.RAIL,
-  TmotCode.BUS,
+  Realtime.TmotCode.TRAM,
+  Realtime.TmotCode.SUBWAY,
+  Realtime.TmotCode.RAIL,
+  Realtime.TmotCode.BUS,
 ];
 
 export const MOTS_ALL: Realtime.TmotCode[] = [
-  TmotCode.TRAM,
-  TmotCode.SUBWAY,
-  TmotCode.RAIL,
-  TmotCode.BUS,
-  TmotCode.FERRY,
-  TmotCode.CABLECAR,
-  TmotCode.GONDOLA,
-  TmotCode.FUNICULAR,
-  TmotCode.COACH,
+  Realtime.TmotCode.TRAM,
+  Realtime.TmotCode.SUBWAY,
+  Realtime.TmotCode.RAIL,
+  Realtime.TmotCode.BUS,
+  Realtime.TmotCode.FERRY,
+  Realtime.TmotCode.CABLECAR,
+  Realtime.TmotCode.GONDOLA,
+  Realtime.TmotCode.FUNICULAR,
+  Realtime.TmotCode.COACH,
 ];
 
 /**

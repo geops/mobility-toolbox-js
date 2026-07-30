@@ -11,7 +11,7 @@ import type {
   RealtimeLayer as OlRealtimeLayer,
 } from "../ol";
 
-import type { RealtimeTrainId, RealtimeTrajectory } from "./realtime";
+import type { Realtime } from "./realtime";
 
 import type { RoutingParameters } from ".";
 
@@ -34,63 +34,69 @@ export interface RealtimeStyleOptions {
   delayOutlineColor: string;
   filter?: FilterFunction;
   getArrowSize: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     radius: number,
   ) => number[];
-  getColor: (trajectory?: RealtimeTrajectory, viewState?: ViewState) => string;
+  getColor: (
+    trajectory?: Realtime.TrackerTrajectory,
+    viewState?: ViewState,
+  ) => string;
   getDelayColor: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     delay?: null | number,
     cancelled?: boolean,
     isDelayText?: boolean,
   ) => string;
   getDelayFont: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     fontSize: number,
     text?: string,
   ) => string;
   getDelayText: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     delay?: number,
     cancelled?: boolean,
   ) => string;
   getDelayTextColor: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     delay?: null | number,
     cancelled?: boolean,
   ) => string;
   getImage: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     text: string,
     radius: number,
   ) => AnyCanvas | null;
   getMaxRadiusForStrokeAndDelay: () => number;
   getMaxRadiusForText: () => number;
-  getRadius: (trajectory?: RealtimeTrajectory, viewState?: ViewState) => number;
+  getRadius: (
+    trajectory?: Realtime.TrackerTrajectory,
+    viewState?: ViewState,
+  ) => number;
   getScreenPixel?: (pixel: Pixel, viewState?: ViewState) => Pixel;
   getText: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     text?: string,
   ) => string;
   getTextColor: (
-    trajectory: RealtimeTrajectory,
-    viewState: ViewState,
+    trajectory?: Realtime.TrackerTrajectory,
+    viewState?: ViewState,
   ) => string;
   getTextFont: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     fontSize: number,
     text?: string,
   ) => string;
   getTextSize: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     ctx: AnyCanvasContext,
     markerSize: number,
@@ -98,26 +104,29 @@ export interface RealtimeStyleOptions {
     fontSize: number,
     font: string,
   ) => number;
-  hoverVehicleId?: RealtimeTrainId;
+  hoverVehicleId?: Realtime.TrainId;
   noInterpolate?: boolean;
-  selectedVehicleId?: RealtimeTrainId;
+  selectedVehicleId?: Realtime.TrainId;
   showDelayBg: boolean;
   showDelayText: boolean;
   showHeading: boolean;
   useDelayStyle: boolean;
 }
 
-export type RealtimeTrajectories = Record<RealtimeTrainId, RealtimeTrajectory>;
+export type RealtimeTrajectories = Record<
+  Realtime.TrainId,
+  Realtime.TrackerTrajectory
+>;
 
 export type RealtimeStyleFunction = (
-  trajectory: RealtimeTrajectory,
+  trajectory: Realtime.TrackerTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => AnyCanvas | null;
 
 export interface RealtimeRenderState {
   center?: Coordinate;
-  renderedTrajectories?: RealtimeTrajectory[];
+  renderedTrajectories?: Realtime.TrackerTrajectory[];
   rotation?: number;
   zoom?: number;
 }

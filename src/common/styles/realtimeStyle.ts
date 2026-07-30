@@ -1,13 +1,12 @@
 import {
   type AnyCanvas,
   type AnyCanvasContext,
+  Realtime,
   type RealtimeStyleFunction,
   type RealtimeStyleOptions,
   type StyleCache,
   type ViewState,
 } from "../../types";
-import OperatorProvidesRealtimeJourney from "../../types/realtime-asyncapi-types/OperatorProvidesRealtimeJourney";
-import TTrainStateEnum from "../../types/realtime-asyncapi-types/TTrainStateEnum";
 import createCanvas from "../utils/createCanvas";
 
 import {
@@ -74,7 +73,7 @@ const realtimeStyle: RealtimeStyleFunction = (
 
   let color = getColor(trajectory, viewState);
   let textColor = getTextColor(trajectory, viewState);
-  const cancelled = state === TTrainStateEnum.JOURNEY_CANCELLED;
+  const cancelled = state === Realtime.TTrainStateEnum.JOURNEY_CANCELLED;
   const hover = !!(hoverVehicleId && hoverVehicleId === id);
   const selected = !!(selectedVehicleId && selectedVehicleId === id);
 
@@ -127,7 +126,7 @@ const realtimeStyle: RealtimeStyleFunction = (
       !!isDisplayStrokeAndDelay &&
       !!useDelayStyle &&
       delay === null &&
-      operatorProvidesRealtime === "yes";
+      operatorProvidesRealtime === Realtime.OperatorProvidesRealtimeJourney.YES;
 
     const hasDelayText =
       showDelayText &&
@@ -192,7 +191,8 @@ const realtimeStyle: RealtimeStyleFunction = (
         const hasStroke2 =
           !!useDelayStyle &&
           delay === null &&
-          operatorProvidesRealtime === OperatorProvidesRealtimeJourney.YES;
+          operatorProvidesRealtime ===
+            Realtime.OperatorProvidesRealtimeJourney.YES;
 
         circleText = getTextCanvas(
           name,

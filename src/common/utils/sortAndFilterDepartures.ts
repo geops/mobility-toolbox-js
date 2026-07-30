@@ -19,7 +19,7 @@ const sortAndfilterDepartures = (
   depObject: RealtimeAPIDeparturesById,
   sortByMinArrivalTime = false,
   maxDepartureAge = 30,
-): Realtime.TimeTableCall[] => {
+): ({ cancelled?: boolean } & Realtime.TimeTableCall)[] => {
   const departures = Object.keys(depObject).map((k) => {
     return depObject[k];
   });
@@ -40,7 +40,7 @@ const sortAndfilterDepartures = (
   let previousDeparture = null;
 
   for (let i = departures.length - 1; i >= 0; i -= 1) {
-    const departure: Realtime.TimeTableCall = {
+    const departure: { cancelled?: boolean } & Realtime.TimeTableCall = {
       ...departures[i],
     };
     if (!departure.time) {

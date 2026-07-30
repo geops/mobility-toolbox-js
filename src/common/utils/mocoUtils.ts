@@ -8,7 +8,7 @@ import type {
   MocoNotificationFeatureCollectionToRender,
   MocoNotificationFeatureToRender,
 } from "../../ol/layers/MocoLayer";
-import type { SituationType } from "../../types";
+import type { Moco } from "../../types";
 
 export const getTime = (str: string) => {
   return parseInt(str?.substr(0, 8).replace(/:/g, ""), 10);
@@ -19,7 +19,7 @@ const geojson = new GeoJSONFormat();
  * Determines if the current date is within an affected time intervals of a situation.
  */
 export const isMocoSituationAffected = (
-  situation: Partial<SituationType>,
+  situation: Partial<Moco.SituationType>,
   now: Date = new Date(),
 ) => {
   return !!situation.affectedTimeIntervals?.some((affectedTimeInterval) => {
@@ -48,7 +48,7 @@ export const isMocoSituationAffected = (
  * Determines if the current date is within a publication windows of a situation.
  */
 export const isMocoSituationPublished = (
-  situation: Partial<SituationType>,
+  situation: Partial<Moco.SituationType>,
   now: Date = new Date(),
 ) => {
   const publicationWindows =
@@ -160,7 +160,7 @@ export const getMocoReasonCategoryImageName = (
  * This also creates an icon for each affected line if hasIcon property is true.
  */
 export const getFeatureCollectionToRenderFromSituation = (
-  situation: Partial<SituationType>,
+  situation: Partial<Moco.SituationType>,
   date: Date = new Date(),
 ): MocoNotificationFeatureCollectionToRender => {
   const features: MocoNotificationFeatureToRender[] = [];
