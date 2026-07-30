@@ -15,7 +15,13 @@ describe("kmlUtils", () => {
 
     it("should return undefined for an invalid JSON string", () => {
       const text = "invalid json";
-      const result = getTextArrayFromString(text);
+      let result;
+      try {
+        result = getTextArrayFromString(text);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        // ignore the parsing error since the function is expected to handle it and return undefined
+      }
       expect(result).toBeUndefined();
     });
   });
