@@ -1,0 +1,643 @@
+input AffectedTimeIntervalInput {
+  startTime: DateTime
+  endTime: DateTime
+  dailyStartTime: Time
+  dailyEndTime: Time
+}
+
+type AffectedTimeIntervalType {
+  id: ID!
+  startTime: DateTime
+  endTime: DateTime
+  dailyStartTime: Time
+  dailyEndTime: Time
+}
+
+type AssetType {
+  label: String!
+  uuid: UUID!
+  absoluteUrl: String!
+}
+
+input BboxFilterInput {
+  bbox: [Float!] = null
+  graph: String! = "osm"
+  srid: Int! = 3857
+}
+
+input CreateSituationInput {
+  title: String
+  reasons: [String!]!
+  publicationWindows: [PublicationWindowInput!]!
+  affectedTimeIntervals: [AffectedTimeIntervalInput!]!
+  publications: [PublicationInput!]!
+  isActive: Boolean! = true
+}
+
+union CreateSituationPayload = SituationType | OperationInfo
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+input DeleteSituationInput {
+  id: ID!
+}
+
+union DeleteSituationPayload = SuccessType | OperationInfo
+
+type Feature {
+  geometry: GeoJSONDict!
+  properties: MultiRoutingProperties!
+  type: String!
+}
+
+"""Geometry object as descibed in RFC 7946 section 3.1 with SRID=3857."""
+scalar GeoJSONDict
+
+input ImageUploadInput {
+  file: Upload
+  label: String!
+}
+
+input IndexedImageInput {
+  imageUuid: String!
+}
+
+type IndexedImageType {
+  image: AssetType!
+  index: Int!
+}
+
+input InfoLinkInput {
+  uri: String!
+  label: MultiLingualLabelInput
+}
+
+type InfoLinkType {
+  id: ID!
+  uri: String!
+  index: Int!
+  label: MultiLingualLabelType
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+type LineGraphGeometryType {
+  graph: String!
+  geom(simplify: Int! = 0, precision: Int! = 0): GeoJSONDict!
+}
+
+input LineGroupInput {
+  hasIcon: Boolean!
+  category: PublicationLineStyleCategoryChoices
+  mot: MotChoices
+  lines: [LineInput!]! = []
+}
+
+input LineInput {
+  id: ID
+  name: String
+  viaStops: [StopInput!]!
+  operatorRef: String! = ""
+}
+
+type LineProbability {
+  name: String!
+  prob: Float!
+}
+
+type LineType {
+  id: ID!
+  name: String!
+  geometry(filters: PublicationLineGeomFilter): [LineGraphGeometryType!]!
+  viaStops: [StopType!]!
+  operatorRef: String!
+}
+
+enum MotChoices {
+  TRAM
+  SUBWAY
+  RAIL
+  BUS
+  FERRY
+  CABLECAR
+  GONDOLA
+  FUNICULAR
+  COACH
+}
+
+input MultiLingualLabelInput {
+  de: String
+  fr: String
+  it: String
+  en: String
+}
+
+type MultiLingualLabelType {
+  de: String
+  fr: String
+  it: String
+  en: String
+}
+
+input MultiRoutingParamsType {
+  graph: [String!]!
+  mot: MotChoices!
+  via: [String!]!
+  floorInfo: String!
+  resolveHops: Boolean! = false
+  elevation: Boolean! = false
+  coordRadius: Float! = 100
+  coordPunish: Float! = 1000
+  beelineFallback: Boolean! = false
+  maxSkipHopRatio: Int! = 0
+  hops: Boolean! = true
+  line: [String!]!
+}
+
+type MultiRoutingProperties {
+  beeline: Boolean!
+  graph: String!
+  line: String
+  lineProbabilities: [LineProbability!]!
+  nodeFrom: NodeProperties!
+  nodeTo: NodeProperties!
+  stationFrom: StationProperties!
+  stationTo: StationProperties!
+}
+
+type MultiRoutingResult {
+  features: [Feature!]!
+  type: String!
+}
+
+input MultilingualTextualContentFilter {
+  size: String
+  AND: MultilingualTextualContentFilter
+  OR: MultilingualTextualContentFilter
+  NOT: MultilingualTextualContentFilter
+  DISTINCT: Boolean
+}
+
+input MultilingualTextualContentInput {
+  de: TextualContentInput
+  fr: TextualContentInput
+  en: TextualContentInput
+  it: TextualContentInput
+}
+
+type MultilingualTextualContentType {
+  id: ID!
+  size: String!
+  de: TextualContentType
+  fr: TextualContentType
+  en: TextualContentType
+  it: TextualContentType
+}
+
+type Mutation {
+  updateSituation(data: UpdateSituationInput!): UpdateSituationPayload!
+  deleteSituation(data: DeleteSituationInput!): DeleteSituationPayload!
+  createSituation(tenant: String!, data: CreateSituationInput!): CreateSituationPayload!
+  uploadImage(data: ImageUploadInput!): UploadImagePayload!
+}
+
+type NodeProperties {
+  edgeFraction: Float!
+  externalId: String
+  id: String!
+  isVia: Boolean!
+  viaIndex: Int
+}
+
+type OffsetPaginationInfo {
+  offset: Int!
+  limit: Int
+}
+
+input OffsetPaginationInput {
+  offset: Int! = 0
+  limit: Int
+}
+
+type OperationInfo {
+  """List of messages returned by the operation."""
+  messages: [OperationMessage!]!
+}
+
+type OperationMessage {
+  """The kind of this message."""
+  kind: OperationMessageKind!
+
+  """The error message."""
+  message: String!
+
+  """
+  The field that caused the error, or `null` if it isn't associated with any particular field.
+  """
+  field: String
+
+  """The error code, or `null` if no error code was set."""
+  code: String
+}
+
+enum OperationMessageKind {
+  INFO
+  WARNING
+  ERROR
+  PERMISSION
+  VALIDATION
+}
+
+enum Ordering {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+type PaginationMeta {
+  pageCurrent: Int!
+  pageCount: Int!
+  pageSize: Int!
+  previousPage: OffsetPaginationInfo
+  nextPage: OffsetPaginationInfo
+}
+
+type PlatformType {
+  mot: MotChoices!
+  platforms: [String!]!
+}
+
+input PublicationInput {
+  textualContentSmall: MultilingualTextualContentInput
+  textualContentMedium: MultilingualTextualContentInput
+  textualContentLarge: MultilingualTextualContentInput
+  images: [IndexedImageInput!]!
+  infoLinks: [InfoLinkInput!]!
+  publicationWindows: [PublicationWindowInput!]!
+  perspectives: [String!]!
+  publicationStops: [StopInput!]!
+  publicationLines: [LineGroupInput!]!
+  severity: SeverityEnumeration! = UNDEFINED
+  serviceCondition: ServiceConditionEnumeration! = UNDEFINED_STATUS
+}
+
+input PublicationLineGeomFilter {
+  AND: PublicationLineGeomFilter
+  OR: PublicationLineGeomFilter
+  NOT: PublicationLineGeomFilter
+  DISTINCT: Boolean
+  graph: String
+}
+
+type PublicationLineGroupType {
+  hasIcon: Boolean!
+  category: PublicationLineStyleCategoryChoices!
+  mot: MotChoices
+  lines: [LineType!]!
+}
+
+enum PublicationLineStyleCategoryChoices {
+  RAIL_REPLACEMENT
+  CONSTRUCTION
+  INDUSTRIAL_ACTION
+  VEHICLE_FAULURE
+  SPECIAL_EVENT
+  LIFT_FAILURE
+  DISRUPTION
+  WARNING
+  OTHER
+}
+
+input PublicationStopGeomFilter {
+  AND: PublicationStopGeomFilter
+  OR: PublicationStopGeomFilter
+  NOT: PublicationStopGeomFilter
+  DISTINCT: Boolean
+  graph: String
+}
+
+type PublicationStopType {
+  id: ID!
+  stop: StopType!
+  publishedLineNames: [String!]!
+  geometry(filters: PublicationStopGeomFilter): [StopGraphGeometryType!]!
+  name: String!
+  uid: String!
+}
+
+type PublicationType {
+  id: ID!
+  publicationWindows: [PublicationWindowType!]!
+  effectivePublicationWindows: [TimeIntervalType!]!
+  publicationLines: [PublicationLineGroupType!]!
+  publicationStops: [PublicationStopType!]!
+  textualContents(filters: MultilingualTextualContentFilter): [MultilingualTextualContentType!]!
+  images: [IndexedImageType!]!
+  infoLinks: [InfoLinkType!]!
+  publicationLineNames: [String!]!
+  textualContentSmall: MultilingualTextualContentType @deprecated(reason: "Use textualContents field instead")
+  textualContentMedium: MultilingualTextualContentType @deprecated(reason: "Use textualContents field instead")
+  textualContentLarge: MultilingualTextualContentType @deprecated(reason: "Use textualContents field instead")
+  perspectives: [String!]!
+  severity: SeverityEnumeration!
+  severityGroup: SeverityGroupEnumeration!
+  serviceCondition: ServiceConditionEnumeration!
+  serviceConditionGroup: ServiceConditionGroupEnumeration!
+}
+
+input PublicationWindowInput {
+  startTime: DateTime!
+  endTime: DateTime!
+}
+
+type PublicationWindowType {
+  id: ID!
+  startTime: DateTime!
+  endTime: DateTime!
+}
+
+type Query {
+  sources(filters: SourceFilter): [SourceType!]!
+  currentUser: UserType!
+  reasons(filters: ReasonFilter): [ReasonType!]!
+  situation(tenant: String!, pk: ID!): SituationType!
+  paginatedSituations(tenant: String!, filters: SituationFilter, order: SituationOrder, pagination: OffsetPaginationInput): SituationTypeExtendedOffsetPaginated!
+  stops(tenant: String!, query: String!, mots: [MotChoices!]!, limit: Int! = 1): [StopResult!]!
+  multiRouting(params: MultiRoutingParamsType!): MultiRoutingResult!
+  stop(tenant: String!, id: ID!): StopType!
+  previewSituation(tenant: String!, data: CreateSituationInput!): SituationType!
+}
+
+input ReasonFilter {
+  tenant: String
+  categoryName: String
+  includeInDropdown: Boolean = true
+  AND: ReasonFilter
+  OR: ReasonFilter
+  NOT: ReasonFilter
+  DISTINCT: Boolean
+}
+
+type ReasonType {
+  name: String!
+  tenant: String!
+  categoryName: String!
+}
+
+enum ServiceConditionEnumeration {
+  UNKNOWN
+  DELAY
+  MINOR_DELAYS
+  MAJOR_DELAYS
+  OPERATION_TIME_EXTENSION
+  ON_TIME
+  DISTURBANCE_RECTIFIED
+  CHANGE_OF_PLATFORM
+  LINE_CANCELLATION
+  TRIP_CANCELLATION
+  BOARDING
+  GO_TO_GATE
+  STOP_CANCELLED
+  STOP_MOVED
+  STOP_ON_DEMAND
+  ADDITIONAL_STOP
+  SUBSTITUTED_STOP
+  DIVERTED
+  DISRUPTION
+  LIMITED_OPERATION
+  DISCONTINUED_OPERATION
+  IRREGULAR_TRAFFIC
+  WAGON_ORDER_CHANGED
+  TRAIN_SHORTENED
+  ADDITIONAL_RIDE
+  REPLACEMENT_RIDE
+  TEMPORARILY_NON_STOPPING
+  TEMPORARY_STOPPLACE
+  UNDEFINED_STATUS
+}
+
+enum ServiceConditionGroupEnumeration {
+  INFORMATION
+  CHANGES
+  DISRUPTION
+}
+
+enum SeverityEnumeration {
+  UNKNOWN
+  VERY_SLIGHT
+  SLIGHT
+  NORMAL
+  SEVERE
+  VERY_SEVERE
+  NO_IMPACT
+  UNDEFINED
+}
+
+enum SeverityGroupEnumeration {
+  UNDEFINED
+  LOW
+  NORMAL
+  HIGH
+}
+
+input SituationFilter {
+  id: ID
+  editedAt: DateTime
+  isActive: Boolean
+  AND: SituationFilter
+  OR: SituationFilter
+  NOT: SituationFilter
+  DISTINCT: Boolean
+  title: String
+  sourceIdent: String
+  stopName: String
+  lineName: String
+  reasons: [String!]
+  publicNow: Boolean
+  publicAt: DateTime
+  publicBefore: DateTime
+  publicAfter: DateTime
+  affectedAt: DateTime
+  affectedBefore: DateTime
+  affectedAfter: DateTime
+  sources: [String!]
+  isEdited: Boolean
+  hasGeoms: Boolean
+  bbox: BboxFilterInput
+}
+
+input SituationOrder {
+  title: Ordering
+  endDate: Ordering
+  startDate: Ordering
+}
+
+type SituationPublicationWindowType {
+  id: ID!
+  startTime: DateTime!
+  endTime: DateTime!
+}
+
+type SituationType {
+  id: ID!
+  publicationWindows: [SituationPublicationWindowType!]!
+  affectedTimeIntervals: [AffectedTimeIntervalType!]!
+  reasons(filters: ReasonFilter): [ReasonType!]!
+  source: SourceType
+  editedBy: UserType
+  isActive: Boolean!
+  affectedTimeIntervalsStart: DateTime
+  affectedTimeIntervalsEnd: DateTime
+  title: String!
+  description: String!
+  detailDe: String!
+  detailFr: String!
+  detailIt: String!
+  detailEn: String!
+  tenantSlug: String!
+  language: String!
+  editedAt: DateTime
+  createdAt: DateTime!
+  publications: [PublicationType!]!
+  publicationWindowsStart: DateTime!
+  publicationWindowsEnd: DateTime!
+  publicationLineNames: [String!]!
+  publicationStopNames: [String!]!
+}
+
+type SituationTypeExtendedOffsetPaginated {
+  pageInfo: OffsetPaginationInfo!
+
+  """Total count of existing results."""
+  totalCount: Int!
+
+  """List of paginated results."""
+  results: [SituationType!]!
+  meta: PaginationMeta!
+}
+
+input SourceFilter {
+  tenant: String
+  AND: SourceFilter
+  OR: SourceFilter
+  NOT: SourceFilter
+  DISTINCT: Boolean
+}
+
+type SourceType {
+  name: String!
+  tenant: String!
+}
+
+type StationProperties {
+  id: String!
+  latitude: Float!
+  longitude: Float!
+  name: String!
+  platform: String!
+  routedId: String!
+}
+
+type StopGraphGeometryType {
+  graph: String!
+  geom(simplify: Int! = 0, precision: Int! = 0): GeoJSONDict!
+}
+
+input StopInput {
+  id: ID!
+  publishedLineNames: [String!]! = []
+}
+
+type StopResult {
+  name: String
+  matchedName: String
+  countryCode: String
+  rank: Float!
+  translatedNames: [String!]!
+  mot: [MotChoices!]!
+  platforms: [PlatformType!]!
+  ifopt: String
+  municipalityName: String
+  identSource: String
+  externalId: String
+  code: String
+  uid: String!
+  stop: StopType!
+}
+
+type StopType {
+  id: ID!
+  name: String!
+  uid: String!
+  geom: GeoJSONDict!
+}
+
+type SuccessType {
+  ok: Boolean!
+}
+
+input TextualContentInput {
+  title: String = "" @deprecated(reason: "Use summary instead")
+  summary: String!
+  reason: String
+  description: String
+  consequence: String
+  remark: String
+  durationText: String
+  recommendation: String
+}
+
+type TextualContentType {
+  title: String @deprecated(reason: "Use summary instead")
+  summary: String!
+  reason: String
+  description: String
+  consequence: String
+  remark: String
+  durationText: String
+  recommendation: String
+}
+
+"""Time (isoformat)"""
+scalar Time
+
+type TimeIntervalType {
+  startTime: DateTime!
+  endTime: DateTime!
+}
+
+scalar UUID
+
+input UpdateSituationInput {
+  id: ID!
+  title: String
+  reasons: [String!]!
+  publicationWindows: [PublicationWindowInput!]!
+  affectedTimeIntervals: [AffectedTimeIntervalInput!]!
+  publications: [PublicationInput!]!
+  isActive: Boolean! = true
+}
+
+union UpdateSituationPayload = SituationType | OperationInfo
+
+"""Represents a file upload."""
+scalar Upload
+
+union UploadImagePayload = AssetType | OperationInfo
+
+type UserType {
+  username: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  displayName: String!
+  tags: [String!]!
+  configs: JSON!
+}
