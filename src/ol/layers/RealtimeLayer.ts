@@ -364,19 +364,22 @@ class RealtimeLayer extends Layer<Source> {
    */
   async getTrajectoryInfos(id: Realtime.TrainId): Promise<{
     fullTrajectory: Feature[];
-    stopSequences: Realtime.StopSequence[];
+    stopSequences: null | Realtime.StopSequence[];
   }> {
     // When a vehicle is selected, we request the complete stop sequence and the complete full trajectory.
     // Then we combine them in one response.
-    const promises = [this.getStopSequences(id), this.getFullTrajectory(id)];
+    const promises: [
+      Promise<null | Realtime.StopSequence[]>,
+      Promise<Feature[]>,
+    ] = [this.getStopSequences(id), this.getFullTrajectory(id)];
     const [stopSequences, fullTrajectory] = await Promise.all(promises);
     return {
-      fullTrajectory: fullTrajectory as Feature[],
-      stopSequences: stopSequences!,
+      fullTrajectory: fullTrajectory,
+      stopSequences: stopSequences,
     };
   }
 
-  getVehicles(filterFunc: FilterFunction) {
+  getVehicles(filterFunc: FilterFunction): Realtime.TrackerTrajectory[] {
     return this.engine.getVehicles(filterFunc);
   }
 

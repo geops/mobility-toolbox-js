@@ -21,22 +21,8 @@ import type { Layer } from "ol/layer";
 import type BaseLayer from "ol/layer/Base";
 
 import type { MocoAPIOptions } from "../../api/MocoAPI";
-import type {
-  LineType,
-  MapsStyleSpecification,
-  MocoExportParameters,
-  PublicationLineGroupType,
-  PublicationStopType,
-  PublicationType,
-  ReasonType,
-  ServiceConditionEnumeration,
-  SeverityEnumeration,
-} from "../../types";
-import type {
-  ServiceConditionGroupEnumeration,
-  SeverityGroupEnumeration,
-  SituationType,
-} from "../../types";
+import type { Moco } from "../../types";
+import type { MapsStyleSpecification } from "../../types";
 
 import type { MaplibreStyleLayerOptions } from "./MaplibreStyleLayer";
 
@@ -64,7 +50,7 @@ const getMocoLayersFilter = (lnpLayer?: BaseLayer) => {
 };
 
 export type MocoLayerOptions = {
-  apiParameters?: MocoExportParameters;
+  apiParameters?: Moco.ExportParameters;
   /**
    * TODO: Not used right now. But will be in the future.
    * @experimental
@@ -82,7 +68,7 @@ export type MocoLayerOptions = {
   loadAll?: boolean;
   loadByZoom?: boolean;
   publicAt?: Date;
-  situations?: Partial<SituationType>[];
+  situations?: Partial<Moco.SituationType>[];
   tenant?: string;
   url?: string;
   useGraphsFromStyle?: boolean;
@@ -91,18 +77,18 @@ export type MocoLayerOptions = {
 
 export interface MocoNotificationStopPropertiesToRender {
   name?: string;
-  publicationStopId?: PublicationStopType["id"];
+  publicationStopId?: Moco.PublicationStopType["id"];
 }
 
 export interface MocoNotificationLinePropertiesToRender {
-  hasIcon?: PublicationLineGroupType["hasIcon"];
-  line?: LineType;
-  mot?: PublicationLineGroupType["mot"];
+  hasIcon?: Moco.PublicationLineGroupType["hasIcon"];
+  line?: Moco.MotChoices;
+  mot?: Moco.PublicationLineGroupType["mot"];
   name?: string;
 }
 export interface MocoNotificationSituationPropertiesToRender {
-  publicationId?: PublicationType["id"];
-  situationId?: SituationType["id"];
+  publicationId?: Moco.PublicationType["id"];
+  situationId?: Moco.SituationType["id"];
 }
 
 /**
@@ -116,11 +102,11 @@ export type MocoNotificationFeaturePropertiesToRender = {
   isAffected: boolean;
   isPublished: boolean;
   reasonCategoryImageName: string;
-  reasons?: ReasonType[];
-  serviceCondition: ServiceConditionEnumeration;
-  serviceConditionGroup: ServiceConditionGroupEnumeration;
-  severity: SeverityEnumeration;
-  severityGroup: SeverityGroupEnumeration;
+  reasons?: Moco.ReasonType[];
+  serviceCondition: Moco.ServiceConditionEnumeration;
+  serviceConditionGroup: Moco.ServiceConditionGroupEnumeration;
+  severity: Moco.SeverityEnumeration;
+  severityGroup: Moco.SeverityGroupEnumeration;
 } & (
   | MocoNotificationLinePropertiesToRender
   | MocoNotificationStopPropertiesToRender
@@ -181,11 +167,11 @@ class MocoLayer extends MaplibreStyleLayer {
     void this.updateData();
   }
 
-  get apiParameters(): MocoExportParameters | undefined {
-    return this.get("apiParameters") as MocoExportParameters | undefined;
+  get apiParameters(): Moco.ExportParameters | undefined {
+    return this.get("apiParameters") as Moco.ExportParameters | undefined;
   }
 
-  set apiParameters(value: MocoExportParameters) {
+  set apiParameters(value: Moco.ExportParameters) {
     this.set("apiParameters", value);
     void this.updateData();
   }
@@ -238,15 +224,15 @@ class MocoLayer extends MaplibreStyleLayer {
     return this.get("publicAt") as Date;
   }
 
-  set situations(value: Partial<SituationType>[]) {
+  set situations(value: Partial<Moco.SituationType>[]) {
     // If we set situations we do not want to load data from backend
     this.loadAll = false;
     this.set("situations", value);
     void this.updateData();
   }
 
-  get situations(): Partial<SituationType>[] | undefined {
-    return this.get("situations") as Partial<SituationType>[] | undefined;
+  get situations(): Partial<Moco.SituationType>[] | undefined {
+    return this.get("situations") as Partial<Moco.SituationType>[] | undefined;
   }
 
   get tenant(): string | undefined {
@@ -280,7 +266,7 @@ class MocoLayer extends MaplibreStyleLayer {
   /**
    * Cache the request responses when loadByZoom is true
    */
-  #fetchCache: Record<string, SituationType[]> = {};
+  #fetchCache: Record<string, Moco.SituationType[]> = {};
 
   /**
    * Constructor.
@@ -361,9 +347,9 @@ class MocoLayer extends MaplibreStyleLayer {
   }
 
   async fetchData(
-    params: Partial<MocoExportParameters>,
+    params: Partial<Moco.ExportParameters>,
     config: RequestInit = {},
-  ): Promise<SituationType[] | undefined> {
+  ): Promise<Moco.SituationType[] | undefined> {
     const requestParameters = {
       hasGeoms: true,
       publicAt: this.publicAt?.toISOString(),
@@ -425,7 +411,7 @@ class MocoLayer extends MaplibreStyleLayer {
    * This functions load situations from backend depending on the current graph mapping in the style metadata.
    * @returns
    */
-  async loadData(): Promise<SituationType[] | undefined> {
+  async loadData(): Promise<Moco.SituationType[] | undefined> {
     if (this.#abortController) {
       this.#abortController.abort();
     }
@@ -456,7 +442,7 @@ class MocoLayer extends MaplibreStyleLayer {
    * This functions load situations from backend depending on the current graph mapping in the style metadata.
    * @returns
    */
-  async loadDataByZoom(): Promise<SituationType[] | undefined> {
+  async loadDataByZoom(): Promise<Moco.SituationType[] | undefined> {
     if (this.#abortController) {
       this.#abortController.abort();
     }

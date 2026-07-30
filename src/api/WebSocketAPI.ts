@@ -393,9 +393,9 @@ class WebSocketAPI {
    * @param {boolean} quiet if false, no GET or SUB requests are send, only the callback is registered.
    * @private
    */
-  subscribe<T extends WebSocketAPIMessageCallback<unknown>>(
+  subscribe<T>(
     params: WebSocketAPIParameters,
-    cb: MessageEventListener,
+    cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
     quiet = false,
   ) {
@@ -445,7 +445,7 @@ class WebSocketAPI {
    * @param {function} cb Callback used when listen.
    * @private
    */
-  unlisten<T>(params: WebSocketAPIParameters, cb: MessageEventListener) {
+  unlisten(params: WebSocketAPIParameters, cb: MessageEventListener) {
     [...(this.subscriptions || []), ...(this.requests || [])]
       .filter((s) => {
         return s.params.channel === params.channel && (!cb || s.cb === cb);

@@ -33,10 +33,12 @@
     "@commitlint/cli": "21.2.1",
     "@commitlint/config-conventional": "21.2.0",
     "@geops/eslint-config-react": "2.0.0-beta.5",
-    "@graphql-codegen/cli": "^6.1.1",
+    "@graphql-codegen/cli": "^7.2.0",
+    "@graphql-codegen/client-preset": "^6.1.0",
     "@graphql-codegen/typescript": "^6.1.0",
     "@graphql-codegen/typescript-operations": "^6.1.0",
     "@types/geojson": "7946.0.16",
+    "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.24",
     "@types/lodash.debounce": "4.0.9",
     "@types/lodash.throttle": "4.1.9",
@@ -117,9 +119,12 @@
     "test:watch": "pnpm test --watchAll",
     "tsc": "tsc",
     "types:backend": " pnpm types:stops && pnpm types:routing && pnpm types:moco && pnpm types:realtime && pnpm format",
-    "types:moco": "openapi-typescript https://moco.geops.io/api/schema/?format=json --output src/types/moco.d.ts && graphql-codegen --config graphql-codegen-moco.ts",
-    "types:realtime": "openapi-typescript  https://tralis-tracker-api.geops.io/api/openapi.json --output src/types/realtimerest.d.ts",
-    "types:realtime:asyncapi": "asyncapi generate models typescript https://backend.developer.dev.geops.io/tralis-docs/asyncapi.json --output src/types/realtime-asyncapi-types --tsModelType=interface --tsRawPropertyNames --tsEnumType=enum && eslint --fix src/types/realtime-asyncapi-types/*.ts",
+    "types:moco": "pnpm types:moco:rest && pnpm types:moco:graphql",
+    "types:moco:rest": "openapi-typescript https://moco.geops.io/api/schema/?format=json --output src/types/moco/rest/index.d.ts && eslint --fix src/types/moco/rest/*.ts",
+    "types:moco:graphql": "graphql-codegen --config graphql-codegen-moco.ts && eslint --fix src/types/moco/graphql/*.ts",
+    "types:realtime": "pnpm types:realtime:rest && pnpm types:realtime:asyncapi",
+    "types:realtime:rest": "openapi-typescript  https://tralis-tracker-api.geops.io/api/openapi.json --output src/types/realtime/rest/index.ts && eslint --fix src/types/realtime/rest/*.ts",
+    "types:realtime:asyncapi": "asyncapi generate models typescript https://backend.developer.dev.geops.io/tralis-docs/asyncapi.json --output src/types/realtime/asyncapi --tsModelType=interface --tsRawPropertyNames --tsEnumType=enum && eslint --fix src/types/realtime/asyncapi/*.ts",
     "types:routing": "openapi-typescript https://developer.geops.io/swagger/routing.json --output src/types/routing.d.ts",
     "types:stops": "openapi-typescript  https://developer.geops.io/swagger/stops.json --output src/types/stops.d.ts",
     "updeps": "pnpm up -i --latest"
@@ -138,7 +143,7 @@
     "stops",
     "toolbox"
   ],
-  "packageManager": "pnpm@11.13.0+sha512.88d94724d8f2e6c186744a5584c6e59ecac869ec7ba15e9cb4cd628e8dc7066820b2481d8ee3b51ea8da323a7378068aa58c556a3720d32b7c20a051d088363a",
+  "packageManager": "pnpm@11.18.0+sha512.33d83c77da82f49fba836925c6f1b841181ec3132b670639bd012f7075f5c7cf634c5f870147c19aae7478fac01df09d8892e880454896edd23ee9b33757563c",
   "repository": {
     "type": "git",
     "url": "https://github.com/geops/mobility-toolbox-js"

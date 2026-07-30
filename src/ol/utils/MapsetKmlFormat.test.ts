@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -6,18 +8,22 @@ import VectorLayer from "ol/layer/Vector";
 import { get } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import { Style } from "ol/style";
+// @ts-expect-error - no existing types
 import beautify from "xml-beautifier";
 
 import MapsetKmlFormat from "./MapsetKmlFormat";
+
+import type { Feature } from "ol";
+import type { ProjectionLike } from "ol/proj";
 
 const xmlns =
   'xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/kml/2.2 https://developers.google.com/kml/schema/kml22gx.xsd"';
 
 const expectWriteResult = (
-  feats,
+  feats: Feature[],
   str: string,
   writeOptions: {
-    featureProjection?: Projection;
+    featureProjection?: null | string;
     fixGx?: boolean;
     resolution?: number;
   },
@@ -27,15 +33,14 @@ const expectWriteResult = (
     beautify(
       format.writeFeatures(
         new VectorLayer({
+          // @ts-expect-error - wrong  type in ol
           name: "lala",
           source: new VectorSource({
             features: feats,
           }),
         }),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        writeOptions?.featureProjection ?? get("EPSG:4326"),
-        writeOptions?.resolution,
-        writeOptions?.fixGx ?? false,
+        writeOptions?.featureProjection ?? "EPSG:4326",
+        writeOptions?.resolution ?? 1,
       ),
     ),
   ).toEqual(beautify(str));
@@ -81,16 +86,16 @@ describe("MapsetKmlFormat", () => {
       expect(feats[1].get("name")).toBe("bar");
       const str2 = KML.writeFeatures(
         new VectorLayer({
+          // @ts-expect-error - wrong  type in ol
           name: "lala",
           source: new VectorSource({
             features: feats.reverse(), // We simulate the random order of getFeatures() from rbush
           }),
         }),
-        get("EPSG:4326"),
-        undefined,
-        false,
+        get("EPSG:4326") as ProjectionLike,
+        1,
       );
-      const feats2 = KML.readFeatures(str2);
+      const feats2 = KML.readFeatures(str2!);
       expect(feats2.length).toBe(2);
       expect(feats2[0].get("name")).toBe("foo");
       expect(feats2[1].get("name")).toBe("bar");
