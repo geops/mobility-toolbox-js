@@ -1,4 +1,4 @@
-import { Realtime } from '../../types';
+import { Realtime } from "../../types";
 
 /**
  * Get the websocket channel suffix, depending on the current mode.
@@ -6,7 +6,7 @@ import { Realtime } from '../../types';
  * @private
  */
 const getModeSuffix = (mode: Realtime.Mode): string => {
-  return mode === Realtime.ModeEnum.SCHEMATIC ? '_schematic' : '';
+  return mode === Realtime.ModeEnum.SCHEMATIC ? "_schematic" : "";
 };
 
 export default getModeSuffix;

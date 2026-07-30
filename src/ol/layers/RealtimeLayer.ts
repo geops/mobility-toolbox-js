@@ -1,41 +1,41 @@
-import debounce from 'lodash.debounce';
-import { getIntersection, isEmpty } from 'ol/extent';
-import GeoJSON from 'ol/format/GeoJSON';
-import Layer from 'ol/layer/Layer';
-import VectorLayer from 'ol/layer/Vector';
-import { unByKey } from 'ol/Observable';
-import { Vector as VectorSource } from 'ol/source';
-import Source from 'ol/source/Source';
+import debounce from "lodash.debounce";
+import { getIntersection, isEmpty } from "ol/extent";
+import GeoJSON from "ol/format/GeoJSON";
+import Layer from "ol/layer/Layer";
+import VectorLayer from "ol/layer/Vector";
+import { unByKey } from "ol/Observable";
+import { Vector as VectorSource } from "ol/source";
+import Source from "ol/source/Source";
 
-import { realtimeDefaultStyle } from '../../common/styles';
-import RealtimeEngine from '../../common/utils/RealtimeEngine';
-import { type ViewState } from '../../types';
-import RealtimeLayerRenderer from '../renderers/RealtimeLayerRenderer';
-import { fullTrajectoryStyle } from '../styles';
-import defineDeprecatedProperties from '../utils/defineDeprecatedProperties';
+import { realtimeDefaultStyle } from "../../common/styles";
+import RealtimeEngine from "../../common/utils/RealtimeEngine";
+import { type ViewState } from "../../types";
+import RealtimeLayerRenderer from "../renderers/RealtimeLayerRenderer";
+import { fullTrajectoryStyle } from "../styles";
+import defineDeprecatedProperties from "../utils/defineDeprecatedProperties";
 
-import { deprecated } from './MaplibreLayer';
+import { deprecated } from "./MaplibreLayer";
 
-import type { DebouncedFunc } from 'lodash';
-import type { Map, MapEvent } from 'ol';
-import type { EventsKey } from 'ol/events';
-import type { FeatureLike } from 'ol/Feature';
-import type Feature from 'ol/Feature';
-import type BaseLayer from 'ol/layer/Base';
-import type { ObjectEvent } from 'ol/Object';
-import type { State } from 'ol/View';
+import type { DebouncedFunc } from "lodash";
+import type { Map, MapEvent } from "ol";
+import type { EventsKey } from "ol/events";
+import type { FeatureLike } from "ol/Feature";
+import type Feature from "ol/Feature";
+import type BaseLayer from "ol/layer/Base";
+import type { ObjectEvent } from "ol/Object";
+import type { State } from "ol/View";
 
-import type { FilterFunction, SortFunction } from '../../common/typedefs';
-import type { RealtimeEngineOptions } from '../../common/utils/RealtimeEngine';
-import type { RealtimeAPI } from '../../maplibre';
+import type { FilterFunction, SortFunction } from "../../common/typedefs";
+import type { RealtimeEngineOptions } from "../../common/utils/RealtimeEngine";
+import type { RealtimeAPI } from "../../maplibre";
 import type {
   Realtime,
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
-} from '../../types';
+} from "../../types";
 
-import type { MobilityLayerOptions } from './Layer';
+import type { MobilityLayerOptions } from "./Layer";
 
 const format = new GeoJSON();
 
@@ -49,7 +49,7 @@ export type RealtimeLayerOptions = {
   maxNbFeaturesRequested?: number;
   styleOptions?: Partial<RealtimeStyleOptions>;
 } & MobilityLayerOptions &
-  Omit<RealtimeEngineOptions, 'styleOptions'>;
+  Omit<RealtimeEngineOptions, "styleOptions">;
 
 /**
  * An OpenLayers layer able to display data from the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
@@ -239,13 +239,13 @@ class RealtimeLayer extends Layer<Source> {
         this.engine.start();
       }
       this.olEventsKeys.push(
-        mapInternal.on('movestart', () => {
+        mapInternal.on("movestart", () => {
           if (this.engine.isUpdateBboxOnMoveEnd) {
             this.engine.updateIdleState();
           }
         }),
         ...mapInternal.on(
-          ['moveend', 'change:target'],
+          ["moveend", "change:target"],
           // @ts-expect-error  - bad ol definitions
           (evt: MapEvent | ObjectEvent) => {
             const view = (
@@ -265,14 +265,14 @@ class RealtimeLayer extends Layer<Source> {
             this.onMoveEndDebounced(evt);
           },
         ),
-        this.on('change:visible', (evt: ObjectEvent) => {
+        this.on("change:visible", (evt: ObjectEvent) => {
           if ((evt.target as BaseLayer).getVisible()) {
             this.engine.start();
           } else {
             this.engine.stop();
           }
         }),
-        this.on('propertychange', (evt: ObjectEvent) => {
+        this.on("propertychange", (evt: ObjectEvent) => {
           // We apply every property change event related to visiblity to the vectorlayer
           if (
             /(opacity|visible|zIndex|minResolution|maxResolution|minZoom|maxZoom)/.test(
@@ -303,7 +303,7 @@ class RealtimeLayer extends Layer<Source> {
    */
   clone(newOptions: RealtimeLayerOptions): RealtimeLayer {
     return new RealtimeLayer({
-      ...(this.get('options') as RealtimeLayerOptions),
+      ...(this.get("options") as RealtimeLayerOptions),
       ...newOptions,
     });
   }
@@ -411,7 +411,7 @@ class RealtimeLayer extends Layer<Source> {
 
   highlight(features: Feature | Feature[]) {
     const feat = Array.isArray(features) ? features[0] : features;
-    const id: null | string | undefined = feat?.get('train_id') as string;
+    const id: null | string | undefined = feat?.get("train_id") as string;
     if (this.hoverVehicleId !== id) {
       this.hoverVehicleId = id;
       this.engine.renderTrajectories(true);
@@ -465,7 +465,7 @@ class RealtimeLayer extends Layer<Source> {
     // @ts-expect-error  - we are in the same class
     const { container } = this.getRenderer()!;
     if (container) {
-      (container as HTMLDivElement).style.transform = '';
+      (container as HTMLDivElement).style.transform = "";
     }
   }
 
@@ -494,14 +494,14 @@ class RealtimeLayer extends Layer<Source> {
    */
   renderTrajectories(noInterpolate?: boolean) {
     deprecated(
-      'RealtimeLayer.renderTrajectories is deprecated. Use RealtimeLayer.engine.renderTrajectories instead.',
+      "RealtimeLayer.renderTrajectories is deprecated. Use RealtimeLayer.engine.renderTrajectories instead.",
     );
     this.engine.renderTrajectories(noInterpolate);
   }
 
   select(features: Feature | Feature[]) {
     const feat = Array.isArray(features) ? features[0] : features;
-    const id: null | string | undefined = feat?.get('train_id') as string;
+    const id: null | string | undefined = feat?.get("train_id") as string;
     if (this.selectedVehicleId !== id) {
       if (this.selectedVehicleId) {
         this.api.unsubscribeFullTrajectory(this.selectedVehicleId);

@@ -1,4 +1,4 @@
 enum Content {
-  PONG = 'PONG',
+  PONG = "PONG",
 }
 export default Content;

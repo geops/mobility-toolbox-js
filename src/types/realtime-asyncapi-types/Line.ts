@@ -1,5 +1,5 @@
 interface Line {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   color: null | string;
   id: number;
   name: null | string;

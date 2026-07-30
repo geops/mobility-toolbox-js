@@ -1,11 +1,11 @@
-import sortAndFilterDepartures from './sortAndFilterDepartures';
+import sortAndFilterDepartures from "./sortAndFilterDepartures";
 
-import type { RealtimeAPIDeparturesById } from '../../api/RealtimeAPI';
+import type { RealtimeAPIDeparturesById } from "../../api/RealtimeAPI";
 import type {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
-} from '../../api/WebSocketAPI';
-import type { Realtime } from '../../types';
+} from "../../api/WebSocketAPI";
+import type { Realtime } from "../../types";
 
 /**
  * This function returns a WebSocket api callback, and call the onDeparturesUpdate function with the list of current departures to display.

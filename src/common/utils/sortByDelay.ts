@@ -1,4 +1,4 @@
-import type { RenderedTrackerTrajectory } from './RealtimeEngine';
+import type { RenderedTrackerTrajectory } from "./RealtimeEngine";
 
 const sortByDelay = (
   traj1: RenderedTrackerTrajectory,

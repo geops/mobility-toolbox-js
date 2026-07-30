@@ -1,5 +1,5 @@
 interface Situation {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   description: null | string;
 }
 export default Situation;

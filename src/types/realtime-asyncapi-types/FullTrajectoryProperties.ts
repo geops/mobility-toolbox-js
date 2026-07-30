@@ -1,6 +1,6 @@
-import type TmotCode from './TmotCode';
+import type TmotCode from "./TmotCode";
 interface FullTrajectoryProperties {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   event_timestamp?: null | number;
   gen_level: null | number;
   gen_range: number[];

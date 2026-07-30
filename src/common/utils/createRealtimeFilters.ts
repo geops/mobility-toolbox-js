@@ -1,4 +1,4 @@
-import type { Realtime } from '../../types';
+import type { Realtime } from "../../types";
 /**
  * Return a filter functions based on some parameters of a vehicle.
  *
@@ -23,29 +23,29 @@ const createRealtimeFilters = (
 
   if (regexLine) {
     const regexLineList: string[] =
-      typeof regexLine === 'string' ? [regexLine] : regexLine;
+      typeof regexLine === "string" ? [regexLine] : regexLine;
     const lineFilter = (item: Realtime.TrackerTrajectory) => {
       const name =
         // @ts-expect-error - missing name in type definition
-        (item.properties.name as string) ?? item.properties.line?.name ?? '';
+        (item.properties.name as string) ?? item.properties.line?.name ?? "";
       if (!name) {
         return false;
       }
       return regexLineList.some((regexStr) => {
-        return new RegExp(regexStr, 'i').test(name);
+        return new RegExp(regexStr, "i").test(name);
       });
     };
     filterList.push(lineFilter);
   }
 
   if (line) {
-    const lineFiltersList = typeof line === 'string' ? line.split(',') : line;
+    const lineFiltersList = typeof line === "string" ? line.split(",") : line;
     const lineList = lineFiltersList.map((l) => {
-      return l.replace(/\s+/g, '').toUpperCase();
+      return l.replace(/\s+/g, "").toUpperCase();
     });
     const lineFilter = (item: Realtime.TrackerTrajectory) => {
       const { line: linee, name } = item.properties;
-      const lineName = (name || linee?.name || '').toUpperCase();
+      const lineName = (name || linee?.name || "").toUpperCase();
       if (!lineName) {
         return false;
       }
@@ -55,27 +55,27 @@ const createRealtimeFilters = (
   }
 
   if (route) {
-    const routes = typeof route === 'string' ? route.split(',') : route;
+    const routes = typeof route === "string" ? route.split(",") : route;
     const routeList = routes.map((item) => {
       return parseInt(item, 10);
     });
     const routeFilter = (item: Realtime.TrackerTrajectory) => {
-      const routeIdentifier = item.properties.route_identifier || '';
-      const routeId = parseInt(routeIdentifier.split('.')[0], 10);
+      const routeIdentifier = item.properties.route_identifier || "";
+      const routeId = parseInt(routeIdentifier.split(".")[0], 10);
       return routeList.includes(routeId);
     };
     filterList.push(routeFilter);
   }
 
   if (operator) {
-    const operatorList = typeof operator === 'string' ? [operator] : operator;
+    const operatorList = typeof operator === "string" ? [operator] : operator;
     const operatorFilter = (item: Realtime.TrackerTrajectory) => {
       return operatorList.some((op) => {
         // operaotr is the old property tenant is the new one
         const tenant =
           // @ts-expect-error - missing operator in type definition
-          (item.properties.operator as string) || item.properties.tenant || '';
-        return new RegExp(op, 'i').test(tenant);
+          (item.properties.operator as string) || item.properties.tenant || "";
+        return new RegExp(op, "i").test(tenant);
       });
     };
     filterList.push(operatorFilter);

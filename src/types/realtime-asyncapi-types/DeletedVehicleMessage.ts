@@ -1,7 +1,7 @@
-import type ClientReference from './ClientReference';
-import type Source from './Source';
+import type ClientReference from "./ClientReference";
+import type Source from "./Source";
 interface DeletedVehicleMessage {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   client_reference: ClientReference;
   content: string;
   source: Source.DELETED_VEHICLES;

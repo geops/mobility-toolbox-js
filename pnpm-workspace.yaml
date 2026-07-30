@@ -2,19 +2,19 @@ packages:
   - doc
 
 allowBuilds:
-  '@asyncapi/cli': set this to true or false
-  '@hyperjump/json-pointer': set this to true or false
-  '@hyperjump/json-schema': set this to true or false
-  '@hyperjump/json-schema-core': set this to true or false
-  '@hyperjump/pact': set this to true or false
+  '@asyncapi/cli': true
+  '@hyperjump/json-pointer': true
+  '@hyperjump/json-schema': true
+  '@hyperjump/json-schema-core': true
+  '@hyperjump/pact': true
   '@parcel/watcher': true
-  '@scarf/scarf': set this to true or false
+  '@scarf/scarf': true
   core-js: true
   cypress: true
   esbuild: true
   sharp: true
   unrs-resolver: true
-  yarn: set this to true or false
+  yarn: false
 
 onlyBuiltDependencies:
   - '@parcel/watcher'

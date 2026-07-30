@@ -1,9 +1,9 @@
-import type Line from './Line';
-import type OperatorProvidesRealtimeJourney from './OperatorProvidesRealtimeJourney';
-import type TmotCode from './TmotCode';
-import type TTrainStateEnum from './TTrainStateEnum';
+import type Line from "./Line";
+import type OperatorProvidesRealtimeJourney from "./OperatorProvidesRealtimeJourney";
+import type TmotCode from "./TmotCode";
+import type TTrainStateEnum from "./TTrainStateEnum";
 interface TrackerTrajectoryProperties {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   bounds: number[];
   delay?: null | number;
   event_timestamp?: null | number;

@@ -1,13 +1,11 @@
-import type GeometryType from './GeometryType';
-import type LineStringGeometry from './LineStringGeometry';
-import type MultiLineStringGeometry from './MultiLineStringGeometry';
-import type MultiPointGeometry from './MultiPointGeometry';
+import type GeometryType from "./GeometryType";
+import type LineStringGeometry from "./LineStringGeometry";
+import type MultiLineStringGeometry from "./MultiLineStringGeometry";
+import type MultiPointGeometry from "./MultiPointGeometry";
 interface GeometryCollectionGeometry {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   geometries: (
-    | LineStringGeometry
-    | MultiLineStringGeometry
-    | MultiPointGeometry
+    LineStringGeometry | MultiLineStringGeometry | MultiPointGeometry
   )[];
   type: GeometryType.GEOMETRY_COLLECTION;
 }

@@ -1,24 +1,24 @@
-import debounce from 'lodash.debounce';
-import throttle from 'lodash.throttle';
-import { buffer, containsCoordinate, intersects } from 'ol/extent';
-import GeoJSON from 'ol/format/GeoJSON';
-import { fromLonLat } from 'ol/proj';
+import debounce from "lodash.debounce";
+import throttle from "lodash.throttle";
+import { buffer, containsCoordinate, intersects } from "ol/extent";
+import GeoJSON from "ol/format/GeoJSON";
+import { fromLonLat } from "ol/proj";
 
-import { RealtimeAPI } from '../../api';
-import { Realtime } from '../../types';
-import realtimeStyle from '../styles/realtimeStyle';
+import { RealtimeAPI } from "../../api";
+import { Realtime } from "../../types";
+import realtimeStyle from "../styles/realtimeStyle";
 
 import {
   MOTS_ONLY_RAIL,
   MOTS_WITHOUT_CABLE,
   styleOptionsForMot,
-} from './realtimeStyleUtils';
-import renderTrajectories from './renderTrajectories';
+} from "./realtimeStyleUtils";
+import renderTrajectories from "./renderTrajectories";
 
-import type { FeatureCollection } from 'geojson';
-import type { Coordinate } from 'ol/coordinate';
+import type { FeatureCollection } from "geojson";
+import type { Coordinate } from "ol/coordinate";
 
-import type { WebSocketAPIMessageEventData } from '../../api/WebSocketAPI';
+import type { WebSocketAPIMessageEventData } from "../../api/WebSocketAPI";
 import type {
   AnyCanvas,
   LayerGetFeatureInfoOptions,
@@ -26,8 +26,8 @@ import type {
   RealtimeStyleFunction,
   RealtimeStyleOptions,
   ViewState,
-} from '../../types';
-import type { FilterFunction, SortFunction } from '../typedefs';
+} from "../../types";
+import type { FilterFunction, SortFunction } from "../typedefs";
 
 export interface RealtimeEngineOptions {
   api?: RealtimeAPI;
@@ -92,7 +92,7 @@ export interface RealtimeEngineOptions {
  */
 export const defaultStyleOptions: RealtimeStyleOptions = {
   delayDisplay: 300000,
-  delayOutlineColor: '#000',
+  delayOutlineColor: "#000",
   getArrowSize: (
     trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
@@ -101,10 +101,10 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return [(radius * 3) / 4, radius];
   },
   getColor: () => {
-    return '#000';
+    return "#000";
   },
   getDelayColor: () => {
-    return '#000';
+    return "#000";
   },
   getDelayFont: (
     traj?: Realtime.TrackerTrajectory,
@@ -114,10 +114,10 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return `bold ${fontSize}px arial, sans-serif`;
   },
   getDelayText: () => {
-    return '';
+    return "";
   },
   getDelayTextColor: () => {
-    return '#000';
+    return "#000";
   },
   getImage: () => {
     return null;
@@ -132,10 +132,10 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return 5;
   },
   getText: ((traj: Realtime.TrackerTrajectory) => {
-    return traj?.properties?.line?.name || 'U';
-  }) as RealtimeStyleOptions['getText'],
+    return traj?.properties?.line?.name || "U";
+  }) as RealtimeStyleOptions["getText"],
   getTextColor: () => {
-    return '#fff';
+    return "#fff";
   },
   getTextFont: (
     trajectory?: Realtime.TrackerTrajectory,
@@ -160,7 +160,7 @@ export interface RenderedTrackerTrajectory extends Realtime.TrackerTrajectory {
     cancelled?: boolean;
     coordinate?: Coordinate;
     rotation?: null | number;
-  } & Realtime.TrackerTrajectory['properties'];
+  } & Realtime.TrackerTrajectory["properties"];
 }
 
 /**
@@ -280,8 +280,8 @@ class RealtimeEngine {
     this.bboxParameters = options.bboxParameters;
     this.canvas =
       options.canvas ??
-      (typeof document !== 'undefined'
-        ? document.createElement('canvas')
+      (typeof document !== "undefined"
+        ? document.createElement("canvas")
         : undefined);
     this.debug = options.debug ?? false;
     this.filter = options.filter;
@@ -296,7 +296,7 @@ class RealtimeEngine {
     this.minZoomInterpolation = options.minZoomInterpolation ?? 8; // Min zoom level from which trains positions are not interpolated.
     this.pixelRatio =
       options.pixelRatio ??
-      (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
+      (typeof window !== "undefined" ? window.devicePixelRatio : 1);
     this.selectedVehicleId = options.selectedVehicleId;
     this.sort = options.sort;
 
@@ -453,21 +453,21 @@ class RealtimeEngine {
     // To avoid browser hanging when the tab is not visible for a certain amount of time,
     // We stop the rendering and the websocket when hide and start again when show.
     document.addEventListener(
-      'visibilitychange',
+      "visibilitychange",
       this.onDocumentVisibilityChange,
     );
   }
 
   detachFromMap() {
     document.removeEventListener(
-      'visibilitychange',
+      "visibilitychange",
       this.onDocumentVisibilityChange,
     );
 
     this.stop();
 
     if (this.canvas) {
-      const context = this.canvas.getContext('2d');
+      const context = this.canvas.getContext("2d");
       if (context) {
         (context as CanvasRenderingContext2D).clearRect(
           0,
@@ -565,7 +565,7 @@ class RealtimeEngine {
         break;
       }
     }
-    return { features: vehicles, type: 'FeatureCollection' };
+    return { features: vehicles, type: "FeatureCollection" };
   }
 
   getViewState: () => ViewState = () => {
@@ -648,7 +648,7 @@ class RealtimeEngine {
       // @ts-expect-error missing type definition
       trajectory.properties.olGeometry = this.format.readGeometry({
         coordinates: fromLonLat(rawCoordinates),
-        type: 'Point',
+        type: "Point",
       });
     } else {
       // @ts-expect-error missing type definition
@@ -717,7 +717,7 @@ class RealtimeEngine {
     trajectoryOrId: Realtime.TrackerTrajectory | Realtime.TrainId,
   ) {
     let id: string | undefined;
-    if (typeof trajectoryOrId !== 'string') {
+    if (typeof trajectoryOrId !== "string") {
       id = trajectoryOrId?.properties?.train_id;
     } else {
       id = trajectoryOrId;

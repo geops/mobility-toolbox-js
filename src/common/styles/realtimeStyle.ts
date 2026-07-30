@@ -5,10 +5,10 @@ import {
   type RealtimeStyleOptions,
   type StyleCache,
   type ViewState,
-} from '../../types';
-import OperatorProvidesRealtimeJourney from '../../types/realtime-asyncapi-types/OperatorProvidesRealtimeJourney';
-import TTrainStateEnum from '../../types/realtime-asyncapi-types/TTrainStateEnum';
-import createCanvas from '../utils/createCanvas';
+} from "../../types";
+import OperatorProvidesRealtimeJourney from "../../types/realtime-asyncapi-types/OperatorProvidesRealtimeJourney";
+import TTrainStateEnum from "../../types/realtime-asyncapi-types/TTrainStateEnum";
+import createCanvas from "../utils/createCanvas";
 
 import {
   getBufferArrowCanvas,
@@ -16,9 +16,9 @@ import {
   getDelayBgCanvas,
   getDelayTextCanvas,
   getTextCanvas,
-} from './realtimeDrawCanvasUtils';
+} from "./realtimeDrawCanvasUtils";
 
-import type { RenderedTrackerTrajectory } from '../utils/RealtimeEngine';
+import type { RenderedTrackerTrajectory } from "../utils/RealtimeEngine";
 
 const cache: StyleCache = {};
 
@@ -70,7 +70,7 @@ const realtimeStyle: RealtimeStyleFunction = (
     train_id: id,
   } = trajectory.properties;
 
-  const name = getText?.(trajectory, viewState) || '';
+  const name = getText?.(trajectory, viewState) || "";
 
   let color = getColor(trajectory, viewState);
   let textColor = getTextColor(trajectory, viewState);
@@ -97,7 +97,7 @@ const realtimeStyle: RealtimeStyleFunction = (
   const isDisplayText = radius > getMaxRadiusForText() * pixelRatio;
 
   // Optimize the cache key, very important in high zoom level
-  let key = `${radius}${hover || selected}${showHeading ? rotation : ''}`;
+  let key = `${radius}${hover || selected}${showHeading ? rotation : ""}`;
 
   if (useDelayStyle) {
     key += `${operatorProvidesRealtime}${delay}${cancelled}`;
@@ -127,7 +127,7 @@ const realtimeStyle: RealtimeStyleFunction = (
       !!isDisplayStrokeAndDelay &&
       !!useDelayStyle &&
       delay === null &&
-      operatorProvidesRealtime === 'yes';
+      operatorProvidesRealtime === "yes";
 
     const hasDelayText =
       showDelayText &&
@@ -181,7 +181,7 @@ const realtimeStyle: RealtimeStyleFunction = (
         const textSize = getTextSize(
           trajectory,
           viewState,
-          circle.getContext('2d') as AnyCanvasContext,
+          circle.getContext("2d") as AnyCanvasContext,
           radius * 2 - padding,
           name,
           toFontFixed,
@@ -266,7 +266,7 @@ const realtimeStyle: RealtimeStyleFunction = (
       bufferArrow?.height ?? delayBg?.height ?? circle?.height ?? 0;
     const canvas = createCanvas(width, height);
     if (canvas) {
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
       if (!ctx) {
         return null;
       }

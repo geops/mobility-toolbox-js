@@ -1,9 +1,9 @@
-import TCallStateEnum from '../../types/realtime-asyncapi-types/TCallStateEnum';
+import TCallStateEnum from "../../types/realtime-asyncapi-types/TCallStateEnum";
 
-import compareDepartures from './compareDepartures';
+import compareDepartures from "./compareDepartures";
 
-import type { RealtimeAPIDeparturesById } from '../../api/RealtimeAPI';
-import type { Realtime } from '../../types';
+import type { RealtimeAPIDeparturesById } from "../../api/RealtimeAPI";
+import type { Realtime } from "../../types";
 
 /**
  * This function sort Departures by arrival time and filter out unwanted departures:
@@ -47,7 +47,7 @@ const sortAndfilterDepartures = (
     };
     if (!departure.time) {
       // eslint-disable-next-line no-console
-      console.warn('Departure without time found, skipping it.', departure);
+      console.warn("Departure without time found, skipping it.", departure);
       continue;
     }
     const time = new Date(departure.time).getTime();
@@ -64,7 +64,7 @@ const sortAndfilterDepartures = (
           platformsBoarding.push(departure.platform);
         } else {
           // @ts-expect-error - Missing in backend types
-          departure.state = 'HIDDEN';
+          departure.state = "HIDDEN";
         }
       }
 
@@ -77,7 +77,7 @@ const sortAndfilterDepartures = (
         departure.line.name === previousDeparture.line.name
       ) {
         // @ts-expect-error - Missing in backend types
-        departure.state = 'HIDDEN';
+        departure.state = "HIDDEN";
       }
 
       if (/(STOP_CANCELLED|JOURNEY_CANCELLED)/.test(departure.state)) {

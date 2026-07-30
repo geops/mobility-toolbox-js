@@ -1,6 +1,6 @@
-import type GeometryType from './GeometryType';
+import type GeometryType from "./GeometryType";
 interface LineStringGeometry {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   coordinates: number[][];
   type: GeometryType.LINE_STRING;
 }

@@ -1,11 +1,11 @@
-import type JourneyExtraData from './JourneyExtraData';
-import type Line from './Line';
-import type OperatorProvidesRealtimeJourney from './OperatorProvidesRealtimeJourney';
-import type Situation from './Situation';
-import type StopSequenceCall from './StopSequenceCall';
-import type TmotCode from './TmotCode';
+import type JourneyExtraData from "./JourneyExtraData";
+import type Line from "./Line";
+import type OperatorProvidesRealtimeJourney from "./OperatorProvidesRealtimeJourney";
+import type Situation from "./Situation";
+import type StopSequenceCall from "./StopSequenceCall";
+import type TmotCode from "./TmotCode";
 interface StopSequence {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   color?: null | string;
   destination: null | string;
   extra_data: JourneyExtraData;

@@ -84,18 +84,18 @@ class WebSocketAPI {
    */
   static getRequestString(method: string, params: WebSocketAPIParameters = {}) {
     let reqStr = `${method} ${params.channel}`;
-    reqStr += params.args ? ` ${params.args}` : '';
-    reqStr += params.id ? ` ${params.id}` : '';
+    reqStr += params.args ? ` ${params.args}` : "";
+    reqStr += params.id ? ` ${params.id}` : "";
     return reqStr.trim();
   }
 
   addEvents(onMessage: MessageEventListener, onError?: EventListener) {
     if (this.websocket) {
-      this.websocket.addEventListener('message', onMessage);
+      this.websocket.addEventListener("message", onMessage);
 
       if (onError) {
-        this.websocket.addEventListener('error', onError);
-        this.websocket.addEventListener('close', onError);
+        this.websocket.addEventListener("error", onError);
+        this.websocket.addEventListener("close", onError);
       }
     }
   }
@@ -144,7 +144,7 @@ class WebSocketAPI {
     this.websocket = new WebSocket(url);
 
     if (!this.open) {
-      this.websocket.addEventListener('open', () => {
+      this.websocket.addEventListener("open", () => {
         onOpen?.();
         this.subscribePreviousSubscriptions();
       });
@@ -232,7 +232,7 @@ class WebSocketAPI {
     cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
   ) {
-    const requestString = WebSocketAPI.getRequestString('GET', params);
+    const requestString = WebSocketAPI.getRequestString("GET", params);
     this.send(requestString);
 
     // We wrap the callbacks to make sure they are called only once.
@@ -310,18 +310,18 @@ class WebSocketAPI {
         data = JSON.parse(evt.data as string);
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('WebSocket: unable to parse JSON data', err, evt.data);
+        console.error("WebSocket: unable to parse JSON data", err, evt.data);
         return;
       }
       let source = params.channel;
-      source += params.args ? ` ${params.args}` : '';
+      source += params.args ? ` ${params.args}` : "";
 
       // Buffer channel message return a list of other channels to propagate to proper callbacks.
       let contents: T[];
 
       // In buffer message case, we need to propagate the message to the proper callbacks,
       // because the buffer channel is used as an optimization to send multiple messages at once.
-      if (data.source === 'buffer') {
+      if (data.source === "buffer") {
         // @ts-expect-error - We know that the data is a WebSocketAPIBufferMessageEventData
         contents = data.content;
       } else {
@@ -345,11 +345,11 @@ class WebSocketAPI {
 
   removeEvents(onMessage: MessageEventListener, onError?: EventListener) {
     if (this.websocket) {
-      this.websocket.removeEventListener('message', onMessage);
+      this.websocket.removeEventListener("message", onMessage);
 
       if (onError) {
-        this.websocket.removeEventListener('error', onError);
-        this.websocket.removeEventListener('close', onError);
+        this.websocket.removeEventListener("error", onError);
+        this.websocket.removeEventListener("close", onError);
       }
     }
   }
@@ -371,11 +371,11 @@ class WebSocketAPI {
       // This 'if' avoid sending 2 identical BBOX message on open,
       if (!this.messagesOnOpen.includes(message)) {
         this.messagesOnOpen.push(message);
-        this.websocket.addEventListener('open', () => {
+        this.websocket.addEventListener("open", () => {
           this.messagesOnOpen = [];
           send();
         });
-        this.websocket.addEventListener('close', () => {
+        this.websocket.addEventListener("close", () => {
           this.messagesOnOpen = [];
         });
       }
@@ -400,7 +400,7 @@ class WebSocketAPI {
     quiet = false,
   ) {
     const { onErrorCb, onMessageCb } = this.listen(params, cb, errorCb);
-    const reqStr = WebSocketAPI.getRequestString('', params);
+    const reqStr = WebSocketAPI.getRequestString("", params);
 
     const index = this.subscriptions.findIndex((subcr) => {
       return params.channel === subcr.params.channel && cb === subcr.cb;

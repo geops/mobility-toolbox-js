@@ -1,4 +1,4 @@
 enum PingCommand {
-  PING = 'PING',
+  PING = "PING",
 }
 export default PingCommand;

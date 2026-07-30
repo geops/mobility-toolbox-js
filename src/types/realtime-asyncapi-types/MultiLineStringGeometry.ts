@@ -1,6 +1,6 @@
-import type GeometryType from './GeometryType';
+import type GeometryType from "./GeometryType";
 interface MultiLineStringGeometry {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   coordinates: number[][][];
   type: GeometryType.MULTI_LINE_STRING;
 }

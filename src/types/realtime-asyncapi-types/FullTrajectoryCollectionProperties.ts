@@ -1,5 +1,5 @@
 interface FullTrajectoryCollectionProperties {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   gen_level: null | number;
   gen_range: number[];
   graph: string;

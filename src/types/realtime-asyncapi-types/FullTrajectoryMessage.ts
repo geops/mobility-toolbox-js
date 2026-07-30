@@ -1,6 +1,6 @@
-import type FullTrajectoryCollection from './FullTrajectoryCollection';
+import type FullTrajectoryCollection from "./FullTrajectoryCollection";
 interface FullTrajectoryMessage {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   client_reference: string;
   content: FullTrajectoryCollection | null;
   source: string;

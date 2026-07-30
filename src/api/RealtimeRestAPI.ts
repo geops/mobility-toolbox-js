@@ -1,6 +1,6 @@
-import HttpAPI from './HttpAPI';
+import HttpAPI from "./HttpAPI";
 
-import type { Realtime } from '../types';
+import type { Realtime } from "../types";
 
 export interface RealtimeRestAPIOptions {
   apiKey?: string;
@@ -39,7 +39,7 @@ class RealtimeRestAPI extends HttpAPI {
   constructor(options: RealtimeRestAPIOptions = {}) {
     super({
       ...options,
-      url: options.url || 'https://api.geops.io/tracker-http/v1/',
+      url: options.url || "https://api.geops.io/tracker-http/v1/",
     });
 
     if (options.tenant) {
@@ -52,28 +52,28 @@ class RealtimeRestAPI extends HttpAPI {
    */
   feeds(
     params: Partial<
-      Realtime.RestOperations['feeds_feeds__get']['parameters']['query']
+      Realtime.RestOperations["feeds_feeds__get"]["parameters"]["query"]
     > = {},
     config?: RequestInit,
   ): Promise<Realtime.FeedCollection> {
     return this.fetch<
       Realtime.FeedCollection,
-      Realtime.RestOperations['feeds_feeds__get']['parameters']['query']
-    >('feeds/', params, config);
+      Realtime.RestOperations["feeds_feeds__get"]["parameters"]["query"]
+    >("feeds/", params, config);
   }
 
   /**
    * Search for trains by route identifier.
    */
   trainsByRouteIdentifier(
-    params: Realtime.RestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query'] = {
+    params: Realtime.RestOperations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"]["parameters"]["query"] = {
       exact_match: true,
     },
     config?: RequestInit,
   ): Promise<Realtime.TrainsByRouteIdentifierResult> {
     return this.fetch<
       Realtime.TrainsByRouteIdentifierResult,
-      Realtime.RestOperations['trains_by_route_identifier_trains_by_route_identifier__feed_name___get']['parameters']['query']
+      Realtime.RestOperations["trains_by_route_identifier_trains_by_route_identifier__feed_name___get"]["parameters"]["query"]
     >(`trains_by_route_identifier/${this.tenant}/`, params, config);
   }
 
@@ -82,13 +82,13 @@ class RealtimeRestAPI extends HttpAPI {
    */
   trajectories(
     params: Partial<
-      Realtime.RestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
+      Realtime.RestOperations["trajectories_trajectories__feed_name___get"]["parameters"]["query"]
     > = {},
     config?: RequestInit,
   ): Promise<Realtime.TrajectoryCollection> {
     return this.fetch<
       Realtime.TrajectoryCollection,
-      Realtime.RestOperations['trajectories_trajectories__feed_name___get']['parameters']['query']
+      Realtime.RestOperations["trajectories_trajectories__feed_name___get"]["parameters"]["query"]
     >(`trajectories/${this.tenant}/`, params, config);
   }
 }

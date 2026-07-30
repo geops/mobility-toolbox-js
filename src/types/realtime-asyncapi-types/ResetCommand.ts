@@ -1,4 +1,4 @@
 enum ResetCommand {
-  RESERVED_RESET = 'RESET',
+  RESERVED_RESET = "RESET",
 }
 export default ResetCommand;

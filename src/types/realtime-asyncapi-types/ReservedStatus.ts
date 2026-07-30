@@ -1,4 +1,4 @@
 enum ReservedStatus {
-  RESERVED_OPEN = 'open',
+  RESERVED_OPEN = "open",
 }
 export default ReservedStatus;

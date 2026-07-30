@@ -13,7 +13,7 @@ import type {
   ViewState,
 } from "../../types";
 
-import type { RenderedTrackerTrajectory } from './RealtimeEngine';
+import type { RenderedTrackerTrajectory } from "./RealtimeEngine";
 
 /**
  * Draw all the trajectories available in a canvas.

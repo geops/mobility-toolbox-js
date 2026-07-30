@@ -1,14 +1,14 @@
-import debounceWebsocketMessages from '../common/utils/debounceWebsocketMessages';
-import getModeSuffix from '../common/utils/getRealtimeModeSuffix';
-import { Realtime } from '../types';
+import debounceWebsocketMessages from "../common/utils/debounceWebsocketMessages";
+import getModeSuffix from "../common/utils/getRealtimeModeSuffix";
+import { Realtime } from "../types";
 
-import WebSocketAPI from './WebSocketAPI';
+import WebSocketAPI from "./WebSocketAPI";
 
 import type {
   WebSocketAPIMessageCallback,
   WebSocketAPIMessageEventData,
   WebSocketAPIParameters,
-} from './WebSocketAPI';
+} from "./WebSocketAPI";
 
 export type RealtimeAPIDeparturesById = Record<string, Realtime.TimeTableCall>;
 
@@ -108,7 +108,7 @@ class RealtimeAPI {
     if (JSON.stringify(newBbox) !== JSON.stringify(this._bbox)) {
       this._bbox = newBbox;
       if (this.wsApi && this._bbox) {
-        this.wsApi.send(`BBOX ${this._bbox.join(' ')}`);
+        this.wsApi.send(`BBOX ${this._bbox.join(" ")}`);
       }
     }
   }
@@ -121,7 +121,7 @@ class RealtimeAPI {
     if (JSON.stringify(newBuffer) !== JSON.stringify(this._buffer)) {
       this._buffer = newBuffer;
       if (this.wsApi && this._buffer) {
-        this.wsApi.send(`BUFFER ${this._buffer.join(' ')}`);
+        this.wsApi.send(`BUFFER ${this._buffer.join(" ")}`);
       }
     }
   }
@@ -161,20 +161,20 @@ class RealtimeAPI {
   constructor(options: RealtimeAPIOptions = {}) {
     let opt = options;
 
-    if (typeof options === 'string') {
+    if (typeof options === "string") {
       opt = { url: options };
     }
 
     const { apiKey } = opt;
     const { url } = opt;
     const wsApi = new WebSocketAPI();
-    let suffix = '';
+    let suffix = "";
 
-    if (apiKey && !url?.includes('key=')) {
+    if (apiKey && !url?.includes("key=")) {
       suffix = `?key=${apiKey}`;
     }
 
-    this._url = (url || 'wss://api.geops.io/tracker-ws/v1/') + suffix;
+    this._url = (url || "wss://api.geops.io/tracker-ws/v1/") + suffix;
 
     this._buffer = opt.buffer || [100, 100];
 
@@ -222,7 +222,7 @@ class RealtimeAPI {
   ): Promise<T> {
     let params = channelOrParams as WebSocketAPIParameters;
 
-    if (typeof channelOrParams === 'string') {
+    if (typeof channelOrParams === "string") {
       params = { channel: channelOrParams };
     }
 
@@ -245,7 +245,7 @@ class RealtimeAPI {
     mode: Realtime.Mode,
     generalizationLevel?: string,
   ): Promise<Realtime.FullTrajectoryMessage> {
-    let suffix = '';
+    let suffix = "";
     if (this.version === Realtime.VersionEnum.V1) {
       suffix = getModeSuffix(mode);
     }
@@ -262,7 +262,7 @@ class RealtimeAPI {
       channel.push(`gen${generalizationLevel}`);
     }
 
-    return this.get<Realtime.FullTrajectoryMessage>(channel.join('_'));
+    return this.get<Realtime.FullTrajectoryMessage>(channel.join("_"));
   }
 
   /**
@@ -355,11 +355,11 @@ class RealtimeAPI {
    */
   onOpen() {
     if (this.bbox) {
-      this.wsApi.send(`BBOX ${this.bbox.join(' ')}`);
+      this.wsApi.send(`BBOX ${this.bbox.join(" ")}`);
     }
 
     if (this.buffer) {
-      this.wsApi.send(`BUFFER ${this.buffer.join(' ')}`);
+      this.wsApi.send(`BUFFER ${this.buffer.join(" ")}`);
     }
 
     /**
@@ -369,7 +369,7 @@ class RealtimeAPI {
       window.clearInterval(this.pingInterval);
 
       this.pingInterval = window.setInterval(() => {
-        this.wsApi.send('PING');
+        this.wsApi.send("PING");
       }, this.pingIntervalMs);
     }
   }
@@ -394,7 +394,7 @@ class RealtimeAPI {
    * Unsubscribe trajectory and deleted_vehicles channels. To resubscribe you have to set a new BBOX.
    */
   reset() {
-    this.wsApi.send('RESET');
+    this.wsApi.send("RESET");
   }
 
   /**
@@ -435,7 +435,7 @@ class RealtimeAPI {
   ) {
     this.unsubscribeDeletedVehicles(onMessage);
 
-    let suffix = '';
+    let suffix = "";
     if (this.version === Realtime.VersionEnum.V1) {
       suffix = getModeSuffix(mode);
     }
@@ -491,7 +491,7 @@ class RealtimeAPI {
     onError: EventListener = () => {},
     quiet = false,
   ) {
-    this.subscribe('extra_geoms', onMessage, onError, quiet);
+    this.subscribe("extra_geoms", onMessage, onError, quiet);
   }
 
   /**
@@ -511,7 +511,7 @@ class RealtimeAPI {
     onError: EventListener = () => {},
     quiet = false,
   ) {
-    let suffix = '';
+    let suffix = "";
     if (this.version === Realtime.VersionEnum.V1) {
       suffix = getModeSuffix(mode);
     }
@@ -530,7 +530,7 @@ class RealtimeAPI {
     onError: EventListener = () => {},
     quiet = false,
   ) {
-    this.subscribe('healthcheck', onMessage, onError, quiet);
+    this.subscribe("healthcheck", onMessage, onError, quiet);
   }
 
   /**
@@ -623,7 +623,7 @@ class RealtimeAPI {
   ) {
     this.unsubscribeTrajectory(onMessage);
 
-    let suffix = '';
+    let suffix = "";
     if (this.version === Realtime.VersionEnum.V1) {
       suffix = getModeSuffix(mode);
     }
@@ -641,7 +641,7 @@ class RealtimeAPI {
    */
   unsubscribe<T>(
     channel: string,
-    suffix = '',
+    suffix = "",
     onMessage?: WebSocketAPIMessageCallback<T>,
   ) {
     const suffixSchenatic = getModeSuffix(
@@ -653,11 +653,11 @@ class RealtimeAPI {
       Realtime.ModeEnum,
     );
     this.wsApi.unsubscribe(
-      `${channel}${suffixSchenatic}${suffix || ''}`,
+      `${channel}${suffixSchenatic}${suffix || ""}`,
       onMessage,
     );
     this.wsApi.unsubscribe(
-      `${channel}${suffixTopographic}${suffix || ''}`,
+      `${channel}${suffixTopographic}${suffix || ""}`,
       onMessage,
     );
   }
@@ -670,7 +670,7 @@ class RealtimeAPI {
   unsubscribeDeletedVehicles(
     onMessage: WebSocketAPIMessageCallback<Realtime.DeletedVehicleMessage>,
   ) {
-    this.unsubscribe('deleted_vehicles', '', onMessage);
+    this.unsubscribe("deleted_vehicles", "", onMessage);
   }
 
   /**
@@ -706,7 +706,7 @@ class RealtimeAPI {
   unsubscribeExtraGeoms(
     onMessage: WebSocketAPIMessageCallback<Realtime.ExtraGeomsMessage>,
   ) {
-    this.unsubscribe('extra_geoms', '', onMessage);
+    this.unsubscribe("extra_geoms", "", onMessage);
   }
 
   /**
@@ -720,7 +720,7 @@ class RealtimeAPI {
     id: Realtime.TrainId,
     onMessage?: WebSocketAPIMessageCallback<Realtime.FullTrajectoryMessage>,
   ) {
-    this.unsubscribe('full_trajectory', `_${id}`, onMessage);
+    this.unsubscribe("full_trajectory", `_${id}`, onMessage);
   }
 
   /**
@@ -728,7 +728,7 @@ class RealtimeAPI {
    * @param {function(data: { content: string })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeHealthCheck(onMessage?: WebSocketAPIMessageCallback<string>) {
-    this.unsubscribe('healthcheck', '', onMessage);
+    this.unsubscribe("healthcheck", "", onMessage);
   }
 
   /**
@@ -741,7 +741,7 @@ class RealtimeAPI {
     tenant: Realtime.Tenant,
     onMessage?: WebSocketAPIMessageCallback<Realtime.NewsMessage>,
   ) {
-    this.unsubscribe(`${tenant}_newsticker`, '', onMessage);
+    this.unsubscribe(`${tenant}_newsticker`, "", onMessage);
   }
 
   /**
@@ -752,7 +752,7 @@ class RealtimeAPI {
   unsubscribeStations(
     onMessage?: WebSocketAPIMessageCallback<Realtime.StationMessage>,
   ) {
-    this.unsubscribe('station', '', onMessage);
+    this.unsubscribe("station", "", onMessage);
   }
 
   /**
@@ -779,7 +779,7 @@ class RealtimeAPI {
     stationId: Realtime.StationId,
     onMessage?: WebSocketAPIMessageCallback<Realtime.TimetableMessage>,
   ) {
-    this.unsubscribe(`timetable_${stationId}`, '', onMessage);
+    this.unsubscribe(`timetable_${stationId}`, "", onMessage);
   }
 
   /**
@@ -790,7 +790,7 @@ class RealtimeAPI {
   unsubscribeTrajectory(
     onMessage: WebSocketAPIMessageCallback<Realtime.PartialTrajectoryMessage>,
   ) {
-    this.unsubscribe(`trajectory`, '', onMessage);
+    this.unsubscribe(`trajectory`, "", onMessage);
   }
 }
 export default RealtimeAPI;

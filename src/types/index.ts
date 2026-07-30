@@ -1,26 +1,26 @@
-import type { operations as MocoOperations } from './moco';
-import type { paths as RoutingPaths } from './routing';
-import type { paths as StopsPaths } from './stops';
+import type { operations as MocoOperations } from "./moco";
+import type { paths as RoutingPaths } from "./routing";
+import type { paths as StopsPaths } from "./stops";
 
-export type * from '../ol';
-export type * from './common';
-export type * from './maps';
-export * from './moco/gql/graphql';
-export * as Realtime from './realtime';
+export type * from "../ol";
+export type * from "./common";
+export type * from "./maps";
+export * from "./moco/gql/graphql";
+export * as Realtime from "./realtime";
 
-export type RoutingParameters = RoutingPaths['/']['get']['parameters']['query'];
+export type RoutingParameters = RoutingPaths["/"]["get"]["parameters"]["query"];
 export type RoutingResponse =
-  RoutingPaths['/']['get']['responses']['200']['schema'];
+  RoutingPaths["/"]["get"]["responses"]["200"]["schema"];
 
 /** Stops definitions */
-export type StopsParameters = StopsPaths['/']['get']['parameters']['query'];
+export type StopsParameters = StopsPaths["/"]["get"]["parameters"]["query"];
 export type StopsResponse =
-  StopsPaths['/']['get']['responses']['200']['schema'];
+  StopsPaths["/"]["get"]["responses"]["200"]["schema"];
 
 export type MocoExportParameters = {
   apiKey?: string;
-} & MocoOperations['v2_export_retrieve']['parameters']['query'];
+} & MocoOperations["v2_export_retrieve"]["parameters"]["query"];
 
 export type MocoExportByIdParameters = {
   apiKey?: string;
-} & MocoOperations['v2_export_retrieve_2']['parameters']['query'];
+} & MocoOperations["v2_export_retrieve_2"]["parameters"]["query"];

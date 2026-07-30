@@ -1,5 +1,5 @@
 interface LogContent {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   info: null | string;
   warning: null | string;
 }

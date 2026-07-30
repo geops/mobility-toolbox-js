@@ -1,6 +1,6 @@
-import type ReservedStatus from './ReservedStatus';
+import type ReservedStatus from "./ReservedStatus";
 interface StatusContent {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   status: ReservedStatus.RESERVED_OPEN;
 }
 export default StatusContent;

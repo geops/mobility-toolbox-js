@@ -1,7 +1,7 @@
-import type SerializedCancellationChange from './SerializedCancellationChange';
-import type TCallStateEnum from './TCallStateEnum';
+import type SerializedCancellationChange from "./SerializedCancellationChange";
+import type TCallStateEnum from "./TCallStateEnum";
 interface StopSequenceCall {
-  additionalProperties?: Map<string, unknown>;
+  additionalProperties?: Map<string, any>;
   aimedArrivalTime: null | number;
   aimedDepartureTime: null | number;
   arrivalDelay: null | number;

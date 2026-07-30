@@ -1,31 +1,31 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import type { Feature, Point } from 'geojson';
+import type { Feature, Point } from "geojson";
 
-import type BufferMessage from './realtime-asyncapi-types/BufferMessage';
-import type DeletedVehicleMessage from './realtime-asyncapi-types/DeletedVehicleMessage';
-import type FullTrajectory from './realtime-asyncapi-types/FullTrajectory';
-import type FullTrajectoryCollection from './realtime-asyncapi-types/FullTrajectoryCollection';
-import type FullTrajectoryCollectionProperties from './realtime-asyncapi-types/FullTrajectoryCollectionProperties';
-import type FullTrajectoryMessage from './realtime-asyncapi-types/FullTrajectoryMessage';
-import type FullTrajectoryProperties from './realtime-asyncapi-types/FullTrajectoryProperties';
-import type Line from './realtime-asyncapi-types/Line';
-import type PartialTrajectoryMessage from './realtime-asyncapi-types/PartialTrajectoryMessage';
-import type StopSequence from './realtime-asyncapi-types/StopSequence';
-import type StopSequenceCall from './realtime-asyncapi-types/StopSequenceCall';
-import type StopSequenceMessage from './realtime-asyncapi-types/StopSequenceMessage';
-import type TCallStateEnum from './realtime-asyncapi-types/TCallStateEnum';
-import type TmotCode from './realtime-asyncapi-types/TmotCode';
-import type TrackerTrajectory from './realtime-asyncapi-types/TrackerTrajectory';
-import type TrackerTrajectoryProperties from './realtime-asyncapi-types/TrackerTrajectoryProperties';
-import type TTrainStateEnum from './realtime-asyncapi-types/TTrainStateEnum';
-import type { components } from './realtimerest';
-import type { operations as RestOperations } from './realtimerest';
+import type BufferMessage from "./realtime-asyncapi-types/BufferMessage";
+import type DeletedVehicleMessage from "./realtime-asyncapi-types/DeletedVehicleMessage";
+import type FullTrajectory from "./realtime-asyncapi-types/FullTrajectory";
+import type FullTrajectoryCollection from "./realtime-asyncapi-types/FullTrajectoryCollection";
+import type FullTrajectoryCollectionProperties from "./realtime-asyncapi-types/FullTrajectoryCollectionProperties";
+import type FullTrajectoryMessage from "./realtime-asyncapi-types/FullTrajectoryMessage";
+import type FullTrajectoryProperties from "./realtime-asyncapi-types/FullTrajectoryProperties";
+import type Line from "./realtime-asyncapi-types/Line";
+import type PartialTrajectoryMessage from "./realtime-asyncapi-types/PartialTrajectoryMessage";
+import type StopSequence from "./realtime-asyncapi-types/StopSequence";
+import type StopSequenceCall from "./realtime-asyncapi-types/StopSequenceCall";
+import type StopSequenceMessage from "./realtime-asyncapi-types/StopSequenceMessage";
+import type TCallStateEnum from "./realtime-asyncapi-types/TCallStateEnum";
+import type TmotCode from "./realtime-asyncapi-types/TmotCode";
+import type TrackerTrajectory from "./realtime-asyncapi-types/TrackerTrajectory";
+import type TrackerTrajectoryProperties from "./realtime-asyncapi-types/TrackerTrajectoryProperties";
+import type TTrainStateEnum from "./realtime-asyncapi-types/TTrainStateEnum";
+import type { components } from "./realtimerest";
+import type { operations as RestOperations } from "./realtimerest";
 
 type ValueOf<T> = T[keyof T];
 
 enum VersionEnum {
-  V1 = '1',
-  V2 = '2',
+  V1 = "1",
+  V2 = "2",
 }
 
 type Version = ValueOf<typeof VersionEnum>;
@@ -33,11 +33,11 @@ type Version = ValueOf<typeof VersionEnum>;
 /**
  * @deprecated, use Realtime.Version instead
  */
-export type RealtimeVersion = '1' | '2';
+export type RealtimeVersion = "1" | "2";
 
 enum ChannelModeSuffixEnum {
-  SCHEMATIC = '_schematic',
-  TOPOGRAPHIC = '',
+  SCHEMATIC = "_schematic",
+  TOPOGRAPHIC = "",
 }
 
 type ChannelModeSuffix = ValueOf<typeof ChannelModeSuffixEnum>;
@@ -48,9 +48,9 @@ type ChannelModeSuffix = ValueOf<typeof ChannelModeSuffixEnum>;
 export declare type RealtimeChannelModeSuffix = ChannelModeSuffix;
 
 enum ModeEnum {
-  RAW = 'raw',
-  SCHEMATIC = 'schematic',
-  TOPOGRAPHIC = 'topographic',
+  RAW = "raw",
+  SCHEMATIC = "schematic",
+  TOPOGRAPHIC = "topographic",
 }
 
 type Mode = ValueOf<typeof ModeEnum>;
@@ -60,10 +60,10 @@ type Mode = ValueOf<typeof ModeEnum>;
  */
 export declare type RealtimeMode = Mode;
 
-type TrajectoryCollection = components['schemas']['TrajectoryCollection'];
+type TrajectoryCollection = components["schemas"]["TrajectoryCollection"];
 
 type TrainsByRouteIdentifierResult =
-  components['schemas']['TrainsByRouteIdentifierResult'];
+  components["schemas"]["TrainsByRouteIdentifierResult"];
 
 /**
  * @deprecated, use Realtime.TrainsByRouteIdentifierResult instead
@@ -71,7 +71,7 @@ type TrainsByRouteIdentifierResult =
 export type RealtimeTrainsByRouteIdentifierResult =
   TrainsByRouteIdentifierResult;
 
-type RouteIdentifierMatch = components['schemas']['RouteIdentifierMatch'];
+type RouteIdentifierMatch = components["schemas"]["RouteIdentifierMatch"];
 
 /**
  * @deprecated, use Realtime.IdentifierMatch instead
@@ -100,11 +100,11 @@ export type RealtimeBuffer = [number, number];
 export type RealtimeBufferResponse = BufferMessage;
 
 type ChannelName =
-  | 'buffer'
-  | 'extra_geoms'
-  | 'healthcheck'
-  | 'line'
-  | 'websocket'
+  | "buffer"
+  | "extra_geoms"
+  | "healthcheck"
+  | "line"
+  | "websocket"
   | `deleted_vehicles${ChannelModeSuffix}`
   | `full_trajectory${ChannelModeSuffix}_${Tenant}_${TrainId}`
   | `stopsequence_${Tenant}_${TrainId}`
@@ -167,7 +167,7 @@ export interface TimeTableCall {
 export type RealtimeDeparture = TimeTableCall;
 
 enum ElevatorStateEnum {
-  ALL_OPERABLE = 'ALL_OPERABLE',
+  ALL_OPERABLE = "ALL_OPERABLE",
 }
 
 type ElevatorState = ValueOf<typeof ElevatorStateEnum>;
@@ -187,7 +187,7 @@ export interface RealtimeExtraGeom extends ExtraGeom {}
 
 interface ExtraGeomDeleted {
   properties: ExtraGeomProperties;
-  type: 'Deleted';
+  type: "Deleted";
 }
 /**
  * @deprecated, use Realtime.ExtraGeomDeleted instead
@@ -222,14 +222,14 @@ interface ExtraGeomsMessage {
  */
 export interface RealtimeExtraGeomsResponse extends ExtraGeomsMessage {}
 
-type FeedCollection = components['schemas']['FeedCollection'];
+type FeedCollection = components["schemas"]["FeedCollection"];
 
 /**
  * @deprecated, use Realtime.RealtimeFeedCollection instead
  */
-export type RealtimeFeedCollection = components['schemas']['FeedCollection'];
+export type RealtimeFeedCollection = components["schemas"]["FeedCollection"];
 
-type Feed = components['schemas']['Feed'];
+type Feed = components["schemas"]["Feed"];
 
 /**
  * @deprecated, use Realtime.Feed instead
@@ -271,7 +271,7 @@ export type RealtimeHealth = Health;
 interface HealthCheckMessage {
   client_reference: null;
   content: RealtimeHealth;
-  source: 'healthcheck';
+  source: "healthcheck";
   timestamp: number;
 }
 /**
@@ -331,13 +331,13 @@ type StationId = number;
 export type RealtimeStationId = StationId;
 
 enum ServiceEnum {
-  REDIS_WEBSOCKET_API = 'redis_websocket_api',
-  TRALIS_FZO = 'tralis_fzo',
-  TRALIS_GEOFOX = 'tralis_geofox',
-  TRALIS_NEWSTICKER = 'tralis_newsticker',
-  TRALIS_STATIONS = 'tralis_stations',
-  TRALIS_VDV = 'tralis_vdv',
-  TRALIS_WORKER = 'tralis_worker',
+  REDIS_WEBSOCKET_API = "redis_websocket_api",
+  TRALIS_FZO = "tralis_fzo",
+  TRALIS_GEOFOX = "tralis_geofox",
+  TRALIS_NEWSTICKER = "tralis_newsticker",
+  TRALIS_STATIONS = "tralis_stations",
+  TRALIS_VDV = "tralis_vdv",
+  TRALIS_WORKER = "tralis_worker",
 }
 
 type Service = ValueOf<typeof ServiceEnum>;
@@ -418,10 +418,10 @@ export type RealtimeStopSequenceMessage = StopSequenceMessage;
 export type RealtimeStopState = TCallStateEnum;
 
 enum TenantEnum {
-  EMPTY = '',
-  SBB = 'sbb',
-  SBH = 'sbh',
-  SBM = 'sbm',
+  EMPTY = "",
+  SBB = "sbb",
+  SBH = "sbh",
+  SBM = "sbm",
 }
 
 type Tenant = ValueOf<typeof TenantEnum>;
