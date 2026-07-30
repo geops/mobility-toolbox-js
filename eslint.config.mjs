@@ -1,4 +1,5 @@
 import flat from "@geops/eslint-config-react";
+import globals from "globals";
 export default [
   {
     ignores: [
@@ -23,6 +24,7 @@ export default [
     languageOptions: {
       globals: {
         global: "readonly",
+        ...globals.jest, // Adds describe, test, expect, jest, etc.
       },
     },
     rules: {
