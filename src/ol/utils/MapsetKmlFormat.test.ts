@@ -1,29 +1,35 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 /* eslint-disable no-irregular-whitespace */
+import { Feature } from "ol";
+import { Point } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
 import { get } from "ol/proj";
 import VectorSource from "ol/source/Vector";
-import { Style } from "ol/style";
+import { Fill, Stroke, Style } from "ol/style";
 // @ts-expect-error - no existing types
 import beautify from "xml-beautifier";
 
 import MapsetKmlFormat from "./MapsetKmlFormat";
 
-import type { Feature } from "ol";
-import type { ProjectionLike } from "ol/proj";
+import type { PatternDescriptor } from "ol/colorlike";
+import type { FeatureLike } from "ol/Feature";
+import type { Circle } from "ol/geom";
+import type { Projection } from "ol/proj";
+import type { Icon } from "ol/style";
+import type { GeometryFunction } from "ol/style/Style";
 
 const xmlns =
   'xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/kml/2.2 https://developers.google.com/kml/schema/kml22gx.xsd"';
 
 const expectWriteResult = (
-  feats: Feature[],
+  feats: FeatureLike[],
   str: string,
-  writeOptions: {
-    featureProjection?: null | string;
+  writeOptions?: {
+    featureProjection?: Projection;
     fixGx?: boolean;
     resolution?: number;
   },
@@ -33,13 +39,14 @@ const expectWriteResult = (
     beautify(
       format.writeFeatures(
         new VectorLayer({
-          // @ts-expect-error - wrong  type in ol
+          // @ts-expect-error - name is not in ts definition of VectorLayer
           name: "lala",
           source: new VectorSource({
             features: feats,
           }),
         }),
-        writeOptions?.featureProjection ?? "EPSG:4326",
+
+        writeOptions?.featureProjection ?? get("EPSG:4326") ?? undefined,
         writeOptions?.resolution ?? 1,
       ),
     ),
@@ -86,13 +93,13 @@ describe("MapsetKmlFormat", () => {
       expect(feats[1].get("name")).toBe("bar");
       const str2 = KML.writeFeatures(
         new VectorLayer({
-          // @ts-expect-error - wrong  type in ol
+          // @ts-expect-error - name is not in ts definition of VectorLayer
           name: "lala",
           source: new VectorSource({
             features: feats.reverse(), // We simulate the random order of getFeatures() from rbush
           }),
         }),
-        get("EPSG:4326") as ProjectionLike,
+        get("EPSG:4326") ?? undefined,
         1,
       );
       const feats2 = KML.readFeatures(str2!);
@@ -129,39 +136,49 @@ describe("MapsetKmlFormat", () => {
         </kml>
       `;
       const feats = KML.readFeatures(str);
-      const styles = feats[0].getStyle();
+      const styles = feats[0].getStyle() as Style[];
       expect(feats.length).toBe(1);
       expect(styles.length).toBe(3);
 
       // line stroke
-      const strokeStyle = styles[0].getStroke();
-      expect(strokeStyle.getColor()).toEqual([0, 102, 5, 1]);
-      expect(strokeStyle.getLineDash()).toEqual([40, 40]);
-      expect(styles[0].getZIndex()).toEqual(14);
+      const strokeStyle = styles[0]?.getStroke();
+      expect(strokeStyle?.getColor()).toEqual([0, 102, 5, 1]);
+      expect(strokeStyle?.getLineDash()).toEqual([40, 40]);
+      expect(styles[0]?.getZIndex()).toEqual(14);
 
       // line start icon
       const lineStartStyle = styles[1];
-      expect(lineStartStyle.getImage().getRotation()).toEqual(
+      expect(lineStartStyle?.getImage()?.getRotation()).toEqual(
         -0.9272952180016122,
       );
-      expect(lineStartStyle.getImage().getColor()).toEqual([0, 102, 5, 1]);
-      expect(lineStartStyle.getImage().getRotateWithView()).toBe(true);
-      expect(lineStartStyle.getGeometry()(feats[0]).getCoordinates()).toEqual([
-        0, 1, 0,
+      expect((lineStartStyle?.getImage() as Icon)?.getColor()).toEqual([
+        0, 102, 5, 1,
       ]);
-      expect(lineStartStyle.getZIndex()).toEqual(styles[0].getZIndex());
+      expect(lineStartStyle?.getImage()?.getRotateWithView()).toBe(true);
+      expect(
+        (
+          (lineStartStyle?.getGeometry() as GeometryFunction)?.(
+            feats[0],
+          ) as Point
+        )?.getCoordinates(),
+      ).toEqual([0, 1, 0]);
+      expect(lineStartStyle?.getZIndex()).toEqual(styles[0]?.getZIndex());
 
       // line end icon
       const lineEndStyle = styles[2];
-      expect(lineEndStyle.getImage().getRotation()).toEqual(
+      expect(lineEndStyle?.getImage()?.getRotation()).toEqual(
         -0.49555167348582857,
       );
-      expect(lineEndStyle.getImage().getRotateWithView()).toBe(true);
-      expect(lineEndStyle.getImage().getColor()).toEqual([0, 102, 5, 1]);
-      expect(lineEndStyle.getGeometry()(feats[0]).getCoordinates()).toEqual([
-        40, 25, 0,
+      expect(lineEndStyle?.getImage()?.getRotateWithView()).toBe(true);
+      expect((lineEndStyle?.getImage() as Icon)?.getColor()).toEqual([
+        0, 102, 5, 1,
       ]);
-      expect(lineEndStyle.getZIndex()).toEqual(styles[0].getZIndex());
+      expect(
+        (
+          (lineEndStyle?.getGeometry() as GeometryFunction)?.(feats[0]) as Point
+        )?.getCoordinates(),
+      ).toEqual([40, 25, 0]);
+      expect(lineEndStyle?.getZIndex()).toEqual(styles[0]?.getZIndex());
 
       expectWriteResult(feats, str);
     });
@@ -224,21 +241,21 @@ describe("MapsetKmlFormat", () => {
         </kml>
       `;
       const feats = KML.readFeatures(str);
-      const style = feats[0].getStyleFunction()(feats[0], 1);
+      const style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
       expect(feats.length).toBe(1);
       expect(style instanceof Style).toBe(true);
 
       // Text
-      const styleText = style.getText();
-      expect(styleText.getText()).toEqual(["bar", "normal 16px arial"]);
-      expect(styleText.getFont()).toEqual(
+      const styleText = style?.getText();
+      expect(styleText?.getText()).toEqual(["bar", "normal 16px arial"]);
+      expect(styleText?.getFont()).toEqual(
         "normal 16px arial, Arial, sans-serif",
       );
-      expect(styleText.getFill()).toEqual({
+      expect(styleText?.getFill()).toEqual({
         color_: [32, 52, 126, 1],
         patternImage_: null,
       });
-      expect(styleText.getStroke()).toEqual({
+      expect(styleText?.getStroke()).toEqual({
         color_: "rgba(100,255,255,0.2)",
         lineCap_: undefined,
         lineDash_: null,
@@ -247,16 +264,16 @@ describe("MapsetKmlFormat", () => {
         miterLimit_: undefined,
         width_: 3,
       });
-      expect(styleText.getScale()).toEqual(2);
-      expect(styleText.getRotation()).toEqual("2.303834612632515");
-      expect(styleText.getPadding()).toEqual([5, 6, 7, 8]);
-      expect(styleText.getBackgroundFill()).toEqual({
+      expect(styleText?.getScale()).toEqual(2);
+      expect(styleText?.getRotation()).toEqual(2.303834612632515);
+      expect(styleText?.getPadding()).toEqual([5, 6, 7, 8]);
+      expect(styleText?.getBackgroundFill()).toEqual({
         color_: "rgba(255,255,255,0.01)",
         patternImage_: null,
       });
-      expect(styleText.getTextAlign()).toEqual("right");
-      expect(styleText.getOffsetX()).toEqual(-90);
-      expect(styleText.getOffsetY()).toEqual(30);
+      expect(styleText?.getTextAlign()).toEqual("right");
+      expect(styleText?.getOffsetX()).toEqual(-90);
+      expect(styleText?.getOffsetY()).toEqual(30);
       expectWriteResult(feats, str);
     });
 
@@ -294,13 +311,13 @@ describe("MapsetKmlFormat", () => {
         </kml>
       `;
       const feats = KML.readFeatures(str);
-      const style = feats[0].getStyleFunction()(feats[0], 1);
+      const style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
       expect(feats.length).toBe(1);
       expect(style instanceof Style).toBe(true);
 
       // Text
       const styleText = style.getText();
-      expect(styleText.getText()).toEqual(["   bar  ", "normal 16px arial"]); // Avoid trim spaces using unicode \u200B
+      expect(styleText?.getText()).toEqual(["   bar  ", "normal 16px arial"]); // Avoid trim spaces using unicode \u200B
       expectWriteResult(feats, str);
     });
 
@@ -336,7 +353,7 @@ describe("MapsetKmlFormat", () => {
         </kml>
       `;
       const feats = KML.readFeatures(str);
-      const style = feats[0].getStyleFunction()(feats[0], 1);
+      const style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
       expect(feats.length).toBe(1);
       expect(style instanceof Style).toBe(true);
 
@@ -344,8 +361,8 @@ describe("MapsetKmlFormat", () => {
       const styleText = style.getText();
 
       // Make sure it is an array, the toEqual on nextline is not working properly because the array is converted to a string for comparaison.
-      expect(Array.isArray(styleText.getText())).toBe(true);
-      expect(styleText.getText()).toEqual([
+      expect(Array.isArray(styleText?.getText())).toBe(true);
+      expect(styleText?.getText()).toEqual([
         "\n",
         "",
         "   ",
@@ -357,7 +374,7 @@ describe("MapsetKmlFormat", () => {
         "\n",
         "",
       ]);
-      expect(styleText.getFont()).toEqual(
+      expect(styleText?.getFont()).toEqual(
         "normal 16px arial, Arial, sans-serif",
       );
       expectWriteResult(feats, str);
@@ -392,17 +409,17 @@ describe("MapsetKmlFormat", () => {
         </kml>
       `;
       const feats = KML.readFeatures(str);
-      const style = feats[0].getStyleFunction()(feats[0], 1);
+      const style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
       expect(feats.length).toBe(1);
       expect(style instanceof Style).toBe(true);
 
       // Text
-      const styleText = style.getText();
+      const styleText = style?.getText();
 
       // Make sure it is an array, the toEqual on nextline is not working properly because the array is converted to a string for comparaison.
-      expect(Array.isArray(styleText.getText())).toBe(true);
-      expect(styleText.getText()).toEqual(["   bar  ", "normal 16px arial"]);
-      expect(styleText.getFont()).toEqual(
+      expect(Array.isArray(styleText?.getText())).toBe(true);
+      expect(styleText?.getText()).toEqual(["   bar  ", "normal 16px arial"]);
+      expect(styleText?.getFont()).toEqual(
         "normal 16px arial, Arial, sans-serif",
       );
 
@@ -470,7 +487,7 @@ describe("MapsetKmlFormat", () => {
         </kml>
       `;
       const feats = KML.readFeatures(str);
-      const style: Style = feats[0].getStyleFunction()(feats[0], 1);
+      const style: Style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
       expect(feats.length).toBe(1);
       expect(style instanceof Style).toBe(true);
 
@@ -478,8 +495,8 @@ describe("MapsetKmlFormat", () => {
       const styleText = style.getText();
 
       // Make sure it is an array, the toEqual on nextline is not working properly because the array is converted to a string for comparaison.
-      expect(Array.isArray(styleText.getText())).toBe(true);
-      expect(styleText.getText()).toEqual([
+      expect(Array.isArray(styleText?.getText())).toBe(true);
+      expect(styleText?.getText()).toEqual([
         "\u200B",
         "",
         "\n",
@@ -499,7 +516,7 @@ describe("MapsetKmlFormat", () => {
         "\u200B",
         "",
       ]);
-      expect(styleText.getFont()).toEqual(
+      expect(styleText?.getFont()).toEqual(
         "normal 16px arial, Arial, sans-serif",
       );
 
@@ -574,23 +591,25 @@ describe("MapsetKmlFormat", () => {
       </kml>
       `;
       const feats = KML.readFeatures(str);
-      const styles = feats[0].getStyle();
+      const styles = feats[0].getStyle() as Style[];
       expect(feats.length).toBe(1);
       expect(styles.length).toBe(1);
 
       // Polygon
       const feature = feats[0];
-      const outlineStyle = styles[0].getStroke();
-      expect(outlineStyle.getColor()).toEqual([235, 0, 0, 1]);
-      expect(outlineStyle.getWidth()).toEqual(2);
-      const fillStyle = styles[0].getFill();
+      const outlineStyle = styles[0]?.getStroke();
+      expect(outlineStyle?.getColor()).toEqual([235, 0, 0, 1]);
+      expect(outlineStyle?.getWidth()).toEqual(2);
+      const fillStyle = styles[0]?.getFill();
       expect(feature.get("fillPattern")).toEqual({
         color: [235, 0, 0, 1],
         id: 3,
       });
-      const color = fillStyle.getColor();
-      expect(color.id).toBe(3);
-      expect(color.color).toEqual([235, 0, 0, 1]);
+      const color = fillStyle?.getColor() as {
+        id?: number;
+      } & PatternDescriptor;
+      expect(color?.id).toBe(3);
+      expect(color?.color).toEqual([235, 0, 0, 1]);
       expectWriteResult(feats, str);
     });
 
@@ -645,10 +664,10 @@ describe("MapsetKmlFormat", () => {
       </kml>
       `;
       const feats = KML.readFeatures(str);
-      const style = feats[0].getStyleFunction()(feats[0], 1);
+      const style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
       expect(style.getZIndex()).toBe(1);
-      expect(style.getImage().getScale()).toEqual(2);
-      expect(style.getImage().getRotation()).toBe(1.5707963267948966);
+      expect(style?.getImage()?.getScale()).toEqual(2);
+      expect(style?.getImage()?.getRotation()).toBe(1.5707963267948966);
       expect(feats[0].get("pictureOptions")).toEqual({
         defaultScale: 0.5,
         resolution: 4,
@@ -694,27 +713,27 @@ describe("MapsetKmlFormat", () => {
         </kml>
       `;
       const feats = KML.readFeatures(str, {
-        featureProjection: get("EPSG:3857"),
+        featureProjection: get("EPSG:3857") ?? undefined,
       });
-      const styles = feats[0].getStyle();
+      const styles = feats[0]?.getStyle() as Style[];
       expect(feats.length).toBe(1);
       expect(styles.length).toBe(1);
 
-      expect(feats[0].getGeometry().getCenter()).toEqual([
+      expect((feats[0]?.getGeometry() as Circle)?.getCenter()).toEqual([
         819103.972418, 6120013.078324001,
       ]);
-      expect(feats[0].getGeometry().getRadius()).toEqual(10000);
+      expect((feats[0]?.getGeometry() as Circle)?.getRadius()).toEqual(10000);
 
       // circle stroke
-      const strokeStyle = styles[0].getStroke();
-      expect(strokeStyle.getColor()).toEqual([51, 153, 204, 1]);
+      const strokeStyle = styles[0]?.getStroke();
+      expect(strokeStyle?.getColor()).toEqual([51, 153, 204, 1]);
 
       // circle fill
-      const fillStyle = styles[0].getFill();
-      expect(fillStyle.getColor()).toEqual([52, 153, 204, 1]);
+      const fillStyle = styles[0]?.getFill();
+      expect(fillStyle?.getColor()).toEqual([52, 153, 204, 1]);
 
       expectWriteResult(feats, str, {
-        featureProjection: get("EPSG:3857"),
+        featureProjection: get("EPSG:3857") ?? undefined,
         fixGx: false,
       });
     });
@@ -774,15 +793,171 @@ describe("MapsetKmlFormat", () => {
         </Document>
       </kml>`;
       let feats = KML.readFeatures(str);
-      let style = feats[0].getStyleFunction()(feats[0], 1);
-      expect(style.getImage().getScale()).toEqual(0.166666667);
+      let style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+      expect(style?.getImage()?.getScale()).toEqual(0.166666667);
       const strKmlCorrected = expectWriteResult(feats, strCorrected);
 
       // Next read/write should produce the same KML
       feats = KML.readFeatures(strKmlCorrected);
-      style = feats[0].getStyleFunction()(feats[0], 1);
-      expect(style.getImage().getScale()).toEqual(0.166666667);
+      style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+      expect(style?.getImage()?.getScale()).toEqual(0.166666667);
       expectWriteResult(feats, strKmlCorrected);
+    });
+    describe("zIndex roundtrip", () => {
+      const buildLayer = (zIndex: number | undefined) => {
+        const feature = new Feature({
+          geometry: new Point([0, 0]),
+          name: "test",
+        });
+        if (zIndex !== undefined) {
+          feature.set("zIndex", zIndex);
+        }
+        feature.setStyle(
+          new Style({
+            fill: new Fill({ color: [255, 0, 0, 1] }),
+            stroke: new Stroke({ color: [0, 0, 0, 1], width: 1 }),
+            zIndex: zIndex,
+          }),
+        );
+        return new VectorLayer({
+          source: new VectorSource({ features: [feature] }),
+        });
+      };
+
+      it("should persist zIndex as ExtendedData in the KML string", () => {
+        const format = new MapsetKmlFormat();
+        const kml = format.writeFeatures(buildLayer(5), "EPSG:3857", 1);
+        expect(kml).toBeDefined();
+        expect(kml).toMatch(
+          /<Data name="zIndex">\s*<value>5<\/value>\s*<\/Data>/,
+        );
+      });
+
+      it("should restore the feature zIndex property when reading back the KML", () => {
+        const format = new MapsetKmlFormat();
+        const kml = format.writeFeatures(buildLayer(7), "EPSG:3857", 1);
+        const features = format.readFeatures(kml!, {
+          featureProjection: "EPSG:3857",
+        });
+        expect(features.length).toBeGreaterThan(0);
+        expect(features[0].get("zIndex")).toBe(7);
+      });
+
+      it("should restore the style zIndex on the read feature", () => {
+        const format = new MapsetKmlFormat();
+        const kml = format.writeFeatures(buildLayer(3), "EPSG:3857", 1);
+        const features = format.readFeatures(kml!, {
+          featureProjection: "EPSG:3857",
+        });
+        const feature = features[0];
+        const styleFn = feature.getStyleFunction();
+        expect(styleFn).toBeDefined();
+        const styles = styleFn!(feature, 1);
+        const style = Array.isArray(styles) ? styles[0] : styles;
+        expect(style?.getZIndex()).toBe(3);
+      });
+
+      it("should not add a zIndex ExtendedData when the feature has no zIndex", () => {
+        const format = new MapsetKmlFormat();
+        const kml = format.writeFeatures(buildLayer(undefined), "EPSG:3857", 1);
+        expect(kml).toBeDefined();
+        expect(kml).not.toMatch(/<Data name="zIndex">/);
+      });
+    });
+
+    describe("readFeatures from a KML string", () => {
+      const kmlString = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Test document</name>
+    <Placemark>
+      <name>My point</name>
+      <ExtendedData>
+        <Data name="zIndex"><value>4</value></Data>
+        <Data name="minZoom"><value>10</value></Data>
+        <Data name="maxZoom"><value>18</value></Data>
+      </ExtendedData>
+      <Style>
+        <IconStyle>
+          <scale>1</scale>
+          <Icon>
+            <href>https://example.com/icon.png</href>
+          </Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>7.4474,46.9481</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>My line</name>
+      <Style>
+        <LineStyle>
+          <color>ff0000ff</color>
+          <width>3</width>
+        </LineStyle>
+      </Style>
+      <LineString>
+        <coordinates>7.4474,46.9481 8.5417,47.3769</coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>`;
+
+      it("should read all placemarks from the KML string", () => {
+        const format = new MapsetKmlFormat();
+        const features = format.readFeatures(kmlString, {
+          featureProjection: "EPSG:3857",
+        });
+        expect(features.length).toBe(2);
+      });
+
+      it("should read a Point feature with its name and projected geometry", () => {
+        const format = new MapsetKmlFormat();
+        const features = format.readFeatures(kmlString, {
+          featureProjection: "EPSG:3857",
+        });
+        const point = features[0];
+        expect(point.get("name")).toBe("My point");
+        const geom = point.getGeometry();
+        expect(geom?.getType()).toBe("Point");
+        const [x, y] = (geom as Point).getCoordinates();
+        // The KML coordinates (7.4474, 46.9481) should be reprojected
+        // from EPSG:4326 to EPSG:3857 (values in the millions of meters).
+        expect(x).toBeGreaterThan(800000);
+        expect(x).toBeLessThan(900000);
+        expect(y).toBeGreaterThan(5900000);
+        expect(y).toBeLessThan(6000000);
+      });
+
+      it("should apply ExtendedData zIndex, minZoom and maxZoom as feature properties", () => {
+        const format = new MapsetKmlFormat();
+        const features = format.readFeatures(kmlString, {
+          featureProjection: "EPSG:3857",
+        });
+        const point = features[0];
+        expect(point.get("zIndex")).toBe(4);
+        expect(point.get("minZoom")).toBe(10);
+        expect(point.get("maxZoom")).toBe(18);
+      });
+
+      it("should read a LineString feature with its stroke style", () => {
+        const format = new MapsetKmlFormat();
+        const features = format.readFeatures(kmlString, {
+          featureProjection: "EPSG:3857",
+        });
+        const line = features[1];
+        expect(line.get("name")).toBe("My line");
+        expect(line.getGeometry()?.getType()).toBe("LineString");
+
+        const styleFn = line.getStyleFunction();
+        expect(styleFn).toBeDefined();
+        const styles = styleFn!(line, 1);
+        const style = Array.isArray(styles) ? styles[0] : styles;
+        const stroke = style?.getStroke();
+        expect(stroke).toBeDefined();
+        expect(stroke?.getWidth()).toBe(3);
+      });
     });
   });
 
@@ -847,14 +1022,14 @@ describe("MapsetKmlFormat", () => {
     </kml>
     `;
     let feats = KML.readFeatures(str);
-    let style = feats[0].getStyleFunction()(feats[0], 1);
-    expect(style.getImage().getScale()).toEqual(2);
+    let style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+    expect(style?.getImage()?.getScale()).toEqual(2);
     const strKmlCorrected = expectWriteResult(feats, strCorrected);
 
     // Next read/write should produce the same KML
     feats = KML.readFeatures(strKmlCorrected);
-    style = feats[0].getStyleFunction()(feats[0], 1);
-    expect(style.getImage().getScale()).toEqual(2);
+    style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+    expect(style?.getImage()?.getScale()).toEqual(2);
     expectWriteResult(feats, strKmlCorrected);
   });
 
@@ -921,14 +1096,14 @@ describe("MapsetKmlFormat", () => {
       let feats = KML.readFeatures(str, {
         doNotRevert32pxScaling: true,
       });
-      let style = feats[0].getStyleFunction()(feats[0], 1);
-      expect(style.getImage().getScale()).toEqual(1);
+      let style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+      expect(style?.getImage()?.getScale()).toEqual(1);
       const strKmlCorrected = expectWriteResult(feats, strCorrected);
 
       // Next read/write should produce the same KML
       feats = KML.readFeatures(strKmlCorrected);
-      style = feats[0].getStyleFunction()(feats[0], 1);
-      expect(style.getImage().getScale()).toEqual(1);
+      style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+      expect(style?.getImage()?.getScale()).toEqual(1);
       expectWriteResult(feats, strKmlCorrected);
     });
   });
@@ -967,10 +1142,10 @@ describe("MapsetKmlFormat", () => {
 
     test("should insert the correct <Camera> tag.", () => {
       const kmlWithKamera = KML.writeDocumentCamera(str, {
-        altitude: 300,
-        heading: 270,
-        latitude: 41.6,
-        longitude: 5.8,
+        altitude: "300",
+        heading: "270",
+        latitude: "41.6",
+        longitude: "5.8",
       });
       expect(beautify(kmlWithKamera)).toEqual(beautify(strWithCam));
     });

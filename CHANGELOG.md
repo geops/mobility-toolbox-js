@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.8.1](https://github.com/geops/mobility-toolbox-js/compare/v3.7.0...v3.8.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* read/write properly the zIndex ([#273](https://github.com/geops/mobility-toolbox-js/issues/273)) ([6e9003c](https://github.com/geops/mobility-toolbox-js/commit/6e9003cba85cfe6a6cbedcc84e1caab87f6ff394))
+
+## [3.8.0](https://github.com/geops/mobility-toolbox-js/compare/v3.7.0...v3.8.0) (2026-07-30)
+
+
+### Bug Fixes
+
+* read/write properly the zIndex ([#273](https://github.com/geops/mobility-toolbox-js/issues/273)) ([6e9003c](https://github.com/geops/mobility-toolbox-js/commit/6e9003cba85cfe6a6cbedcc84e1caab87f6ff394))
+
 ## [3.7.0](https://github.com/geops/mobility-toolbox-js/compare/v3.6.13...v3.7.0) (2026-05-22)
 
 
