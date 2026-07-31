@@ -77,20 +77,14 @@ const getVehiclePosition = (
       // Interpolate position using time intervals.
       for (let j = 0; j < intervals.length - 1; j += 1) {
         // Rotation only available in realtime layer.
-        const [start, startFrac] = intervals[j];
-        const [end, endFrac] = intervals[j + 1];
+        const [start, startFrac = 0] = intervals[j];
+        const [end, endFrac = 0] = intervals[j + 1];
 
-        if (
-          start &&
-          end &&
-          startFrac &&
-          endFrac &&
-          start <= now &&
-          now <= end
-        ) {
+        if (start != null && end != null && start <= now && now <= end) {
           // interpolate position inside the time interval.
           const timeFrac = Math.min((now - start) / (end - start), 1);
-          const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;
+          const geomFrac =
+            timeFrac * ((endFrac ?? 0) - (startFrac ?? 0)) + (startFrac ?? 0);
           coord = (geometry as LineString)?.getCoordinateAt(geomFrac);
           [, , rotation] = intervals[j];
           break;
