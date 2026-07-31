@@ -82,7 +82,7 @@ export interface MocoNotificationStopPropertiesToRender {
 
 export interface MocoNotificationLinePropertiesToRender {
   hasIcon?: Moco.PublicationLineGroupType["hasIcon"];
-  line?: Moco.MotChoices;
+  line?: Moco.LineType;
   mot?: Moco.PublicationLineGroupType["mot"];
   name?: string;
 }

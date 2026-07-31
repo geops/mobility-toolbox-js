@@ -226,7 +226,7 @@ class RealtimeAPI {
       params = { channel: channelOrParams };
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       this.wsApi.get<T>(params, resolve, reject);
     });
   }
@@ -406,7 +406,7 @@ class RealtimeAPI {
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
    */
-  subscribe<T>(
+  subscribe<T extends WebSocketAPIMessageEventData<unknown>>(
     channel: string,
     onSuccess: WebSocketAPIMessageCallback<T>,
     onError: EventListener = () => {},
@@ -472,7 +472,7 @@ class RealtimeAPI {
    */
   subscribeDisruptions(
     tenant: Realtime.Tenant,
-    onMessage: WebSocketAPIMessageCallback<Realtime.NewsMessage>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.NewsTickerMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -544,7 +544,7 @@ class RealtimeAPI {
    */
   subscribeNewsticker(
     tenant: Realtime.Tenant,
-    onMessage: WebSocketAPIMessageCallback<Realtime.NewsMessage>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.NewsTickerMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {

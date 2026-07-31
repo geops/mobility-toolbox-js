@@ -1,10 +1,7 @@
 import sortAndFilterDepartures from "./sortAndFilterDepartures";
 
 import type { RealtimeAPIDeparturesById } from "../../api/RealtimeAPI";
-import type {
-  WebSocketAPIMessageCallback,
-  WebSocketAPIMessageEventData,
-} from "../../api/WebSocketAPI";
+import type { WebSocketAPIMessageCallback } from "../../api/WebSocketAPI";
 import type { Realtime } from "../../types";
 
 /**
@@ -20,12 +17,12 @@ const debounceDeparturesMessages = (
   sortByMinArrivalTime = false,
   maxDepartureAge = 30,
   timeout = 100,
-): WebSocketAPIMessageCallback<Realtime.TimeTableCall> => {
+): WebSocketAPIMessageCallback<Realtime.TimetableMessage> => {
   const departureUpdateTimeout: Record<string, number> = {};
 
   const departureObject: RealtimeAPIDeparturesById = {};
 
-  return (data: WebSocketAPIMessageEventData<Realtime.TimeTableCall>) => {
+  return (data: Realtime.TimetableMessage) => {
     const { content: departure, source } = data;
     if (departureUpdateTimeout[source]) {
       window.clearTimeout(departureUpdateTimeout[source]);

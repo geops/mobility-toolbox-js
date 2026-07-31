@@ -14,6 +14,8 @@ export default [
   {
     rules: {
       "@typescript-eslint/no-empty-object-type": "warn",
+      "arrow-body-style": ["error", "always"],
+      curly: ["error", "all"],
     },
   },
   {

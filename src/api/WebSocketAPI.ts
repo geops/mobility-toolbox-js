@@ -12,7 +12,9 @@ export declare interface WebSocketAPIParameters {
   id?: number | string;
 }
 
-export declare interface WebSocketAPIRequest<T> {
+export declare interface WebSocketAPIRequest<
+  T extends WebSocketAPIMessageEventData<unknown>,
+> {
   cb: WebSocketAPIMessageCallback<T>;
   errorCb?: EventListener;
   onErrorCb?: EventListener;
@@ -21,7 +23,9 @@ export declare interface WebSocketAPIRequest<T> {
   requestString: string;
 }
 
-export declare interface WebSocketAPISubscription<T> {
+export declare interface WebSocketAPISubscription<
+  T extends WebSocketAPIMessageEventData<unknown>,
+> {
   cb: WebSocketAPIMessageCallback<T>;
   errorCb?: EventListener;
   onErrorCb?: EventListener;
@@ -30,18 +34,12 @@ export declare interface WebSocketAPISubscription<T> {
   quiet: boolean;
 }
 
-/**
- * This type represents a function that has been call with each feature returned by the websocket.
- */
 export type WebSocketAPIMessageCallback<T> = (data: T) => void;
 
-// export type WebSocketAPIMessageEvent = {
-//   data: string;
-// } & Event;
-
-export type MessageEventListener = <T>(evt: MessageEvent<T>) => void;
+export type MessageEventListener = (evt: MessageEvent<unknown>) => void;
 
 export type WebSocketAPISubscribed = Record<string, boolean>;
+
 /**
  * Class used to facilitate connection to a WebSocketAPI and
  * also to manage properly messages send to the WebSocketAPI.
@@ -59,11 +57,13 @@ class WebSocketAPI {
 
   open?: boolean;
 
-  requests!: WebSocketAPIRequest<unknown>[];
+  requests!: WebSocketAPIRequest<WebSocketAPIMessageEventData<unknown>>[];
 
   subscribed!: WebSocketAPISubscribed;
 
-  subscriptions!: WebSocketAPISubscription<unknown>[];
+  subscriptions!: WebSocketAPISubscription<
+    WebSocketAPIMessageEventData<unknown>
+  >[];
 
   websocket?: WebSocket;
 
@@ -227,7 +227,7 @@ class WebSocketAPI {
    * @param {function} errorCb Callback on error and close event
    * @private
    */
-  get<T extends WebSocketAPIMessageEventData<T>>(
+  get<T extends WebSocketAPIMessageEventData<unknown>>(
     params: WebSocketAPIParameters,
     cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
@@ -238,10 +238,13 @@ class WebSocketAPI {
     // We wrap the callbacks to make sure they are called only once.
     const once = (callback: EventListener | WebSocketAPIMessageCallback<T>) => {
       return (...args: unknown[]) => {
-        // @ts-expect-error - We know that args is an array
-        callback(...args);
+        (callback as (...a: unknown[]) => void)(...args);
         const index = this.requests.findIndex((request) => {
-          return requestString === request.requestString && cb === request.cb;
+          return (
+            requestString === request.requestString &&
+            (cb as unknown as WebSocketAPIMessageCallback<unknown>) ===
+              request.cb
+          );
         });
         if (index === -1) {
           return;
@@ -263,7 +266,10 @@ class WebSocketAPI {
       this.requests = [];
     }
     const index = this.requests.findIndex((request) => {
-      return requestString === request.requestString && cb === request.cb;
+      return (
+        requestString === request.requestString &&
+        (cb as unknown as WebSocketAPIMessageCallback<unknown>) === request.cb
+      );
     });
     const newReq = {
       cb,
@@ -272,12 +278,10 @@ class WebSocketAPI {
       onMessageCb,
       params,
       requestString,
-    };
+    } as unknown as WebSocketAPIRequest<WebSocketAPIMessageEventData<unknown>>;
     if (index > -1) {
-      // @ts-expect-error - We know that the requests is an array of WebSocketAPIRequest
       this.requests[index] = newReq;
     } else {
-      // @ts-expect-error - We know that the requests is an array of WebSocketAPIRequest
       this.requests.push(newReq);
     }
   }
@@ -291,7 +295,7 @@ class WebSocketAPI {
    * @return {{onMessage: function, errorCb: function}} Object with onMessage and error callbacks
    * @private
    */
-  listen<T extends WebSocketAPIMessageEventData<T>>(
+  listen<T extends WebSocketAPIMessageEventData<unknown>>(
     params: WebSocketAPIParameters,
     cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
@@ -322,8 +326,7 @@ class WebSocketAPI {
       // In buffer message case, we need to propagate the message to the proper callbacks,
       // because the buffer channel is used as an optimization to send multiple messages at once.
       if (data.source === "buffer") {
-        // @ts-expect-error - We know that the data is a WebSocketAPIBufferMessageEventData
-        contents = data.content;
+        contents = data.content as T[];
       } else {
         contents = [data];
       }
@@ -393,7 +396,7 @@ class WebSocketAPI {
    * @param {boolean} quiet if false, no GET or SUB requests are send, only the callback is registered.
    * @private
    */
-  subscribe<T>(
+  subscribe<T extends WebSocketAPIMessageEventData<unknown>>(
     params: WebSocketAPIParameters,
     cb: WebSocketAPIMessageCallback<T>,
     errorCb?: EventListener,
@@ -405,7 +408,16 @@ class WebSocketAPI {
     const index = this.subscriptions.findIndex((subcr) => {
       return params.channel === subcr.params.channel && cb === subcr.cb;
     });
-    const newSubscr = { cb, errorCb, onErrorCb, onMessageCb, params, quiet };
+    const newSubscr = {
+      cb,
+      errorCb,
+      onErrorCb,
+      onMessageCb,
+      params,
+      quiet,
+    } as unknown as WebSocketAPISubscription<
+      WebSocketAPIMessageEventData<unknown>
+    >;
     if (index > -1) {
       this.subscriptions[index] = newSubscr;
     } else {
@@ -451,7 +463,11 @@ class WebSocketAPI {
   ) {
     [...(this.subscriptions || []), ...(this.requests || [])]
       .filter((s) => {
-        return s.params.channel === params.channel && (!cb || s.cb === cb);
+        return (
+          s.params.channel === params.channel &&
+          (!cb ||
+            s.cb === (cb as unknown as WebSocketAPIMessageCallback<unknown>))
+        );
       })
       .forEach(({ onErrorCb, onMessageCb }) => {
         this.removeEvents(onMessageCb, onErrorCb);
@@ -466,7 +482,11 @@ class WebSocketAPI {
    */
   unsubscribe<T>(source: string, cb?: WebSocketAPIMessageCallback<T>) {
     const toRemove = this.subscriptions.filter((s) => {
-      return s.params.channel === source && (!cb || s.cb === cb);
+      return (
+        s.params.channel === source &&
+        (!cb ||
+          s.cb === (cb as unknown as WebSocketAPIMessageCallback<unknown>))
+      );
     });
 
     toRemove.forEach(({ onErrorCb, onMessageCb }) => {
@@ -474,7 +494,10 @@ class WebSocketAPI {
     });
 
     this.subscriptions = this.subscriptions.filter((s) => {
-      return s.params.channel !== source || (cb && s.cb !== cb);
+      return (
+        s.params.channel !== source ||
+        (cb && s.cb !== (cb as unknown as WebSocketAPIMessageCallback<unknown>))
+      );
     });
 
     // If there is no more subscriptions to this channel, and the removed subscriptions didn't register quietly,

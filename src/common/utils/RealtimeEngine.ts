@@ -15,7 +15,6 @@ import {
 } from "./realtimeStyleUtils";
 import renderTrajectories from "./renderTrajectories";
 
-import type { FeatureCollection } from "geojson";
 import type { Coordinate } from "ol/coordinate";
 
 import type { WebSocketAPIMessageEventData } from "../../api/WebSocketAPI";
@@ -220,7 +219,15 @@ class RealtimeEngine {
     viewState: ViewState,
     noInterpolate?: boolean,
   ) => void;
-  trajectories?: Record<Realtime.TrainId, Realtime.TrackerTrajectory>;
+  trajectories?: Record<
+    Realtime.TrainId,
+    {
+      properties: {
+        coordinate?: Coordinate;
+        rotation?: null | number;
+      } & Realtime.TrackerTrajectory["properties"];
+    } & Realtime.TrackerTrajectory
+  >;
   updateTimeDelay?: number;
   updateTimeInterval?: number;
   useDebounce?: boolean;
@@ -454,6 +461,8 @@ class RealtimeEngine {
     // We stop the rendering and the websocket when hide and start again when show.
     document.addEventListener(
       "visibilitychange",
+      // function bound in constructor
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
   }
@@ -461,6 +470,8 @@ class RealtimeEngine {
   detachFromMap() {
     document.removeEventListener(
       "visibilitychange",
+      // function bound in constructor
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
 
@@ -538,7 +549,7 @@ class RealtimeEngine {
   getVehiclesAtCoordinate(
     coordinate: Coordinate,
     options?: LayerGetFeatureInfoOptions,
-  ): FeatureCollection {
+  ): GeoJSON.FeatureCollection {
     const { resolution } = this.getViewState();
     const { hitTolerance, nb } = options || {};
     const extent = buffer(
@@ -611,9 +622,7 @@ class RealtimeEngine {
    *
    * @private
    */
-  onTrajectoryMessage(
-    data: WebSocketAPIMessageEventData<Realtime.TrackerTrajectory>,
-  ) {
+  onTrajectoryMessage(data: Realtime.PartialTrajectoryMessage) {
     this.updateIdleState();
     if (!data.content) {
       return;
@@ -647,7 +656,7 @@ class RealtimeEngine {
     ) {
       // @ts-expect-error missing type definition
       trajectory.properties.olGeometry = this.format.readGeometry({
-        coordinates: fromLonLat(rawCoordinates),
+        coordinates: fromLonLat(rawCoordinates as Coordinate),
         type: "Point",
       });
     } else {

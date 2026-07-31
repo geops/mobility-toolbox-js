@@ -14,16 +14,16 @@ import type {
 const debounceWebsocketMessages = <
   T extends WebSocketAPIMessageEventData<unknown>,
 >(
-  onUpdate: (objects: T[]) => void,
-  getObjectId?: (object: T) => string,
+  onUpdate: (objects: T) => void,
+  getObjectId?: (object: unknown) => string,
   timeout = 100,
-): T => {
+): WebSocketAPIMessageCallback<T> => {
   const updateTimeout: Record<string, number> = {};
 
   const objectsById: Record<string, unknown> = {};
   const objects: unknown[] = [];
 
-  return (data: WebSocketAPIMessageEventData<unknown>) => {
+  return (data: T) => {
     const { content, source } = data;
     if (updateTimeout[source]) {
       window.clearTimeout(updateTimeout[source]);
@@ -37,7 +37,7 @@ const debounceWebsocketMessages = <
 
     updateTimeout[source] = window.setTimeout(() => {
       const objectToReturn = getObjectId ? Object.values(objectsById) : objects;
-      onUpdate({ ...data, content: objectToReturn } as T);
+      onUpdate({ ...data, content: objectToReturn });
     }, timeout);
   };
 };
