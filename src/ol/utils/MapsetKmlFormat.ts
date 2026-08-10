@@ -194,8 +194,8 @@ export type MapsetKmlFormatReadOptions = {
 } & ReadOptions;
 
 export type MapsetKmlFormatWriteOptions = {
-  allowedProperties?: string[]; /// Custom properties that can be written as KML ExtendedData.
-  mapResolution?: number;
+  allowedProperties?: RegExp[]; /// Custom properties that can be written as KML ExtendedData.
+  resolution?: number;
 } & WriteOptions;
 
 export interface PictureOptions {
@@ -698,18 +698,18 @@ class MapsetKmlFormat {
    * @param {VectorLayer} layer A openlayers VectorLayer.
    * @param {Object} formatOptions  used to writes features. It extends the ol KML format read options with some custom options.
    * @param {string[]} [formatOptions.allowedProperties=[]] List of allowed properties to be included in the KML ExtendedData.
-   * @param {number} [formatOptions.mapResolution=1] The resolution of the map when exporting features.
+   * @param {number} [formatOptions.resolution=1] The resolution of the map when exporting features.
    */
   public writeFeatures(
     layer: Vector<VectorSource<FeatureLike>>,
-    formatOptions: MapsetKmlFormatWriteOptions,
+    formatOptions: MapsetKmlFormatWriteOptions = {},
   ) {
     let featString;
     const exportFeatures = [];
     const {
       allowedProperties = [],
       featureProjection = EPSG_4326,
-      mapResolution = 1,
+      resolution = 1,
     } = formatOptions;
 
     [...(layer?.getSource()?.getFeatures() ?? [])]
@@ -749,7 +749,7 @@ class MapsetKmlFormat {
         Object.keys(feature.getProperties()).forEach((key) => {
           if (
             !NO_STYLE_PROPERTIES.includes(key) &&
-            !allowedProperties.includes(key)
+            !allowedProperties.some((regex) => regex.test(key))
           ) {
             clone.unset(key, true);
           }
@@ -758,10 +758,10 @@ class MapsetKmlFormat {
         let styles;
 
         if (feature.getStyleFunction()) {
-          styles = feature.getStyleFunction()?.(feature, mapResolution) as
+          styles = feature.getStyleFunction()?.(feature, resolution) as
             Style | Style[];
         } else if (layer?.getStyleFunction()) {
-          styles = layer.getStyleFunction()?.(feature, mapResolution) as
+          styles = layer.getStyleFunction()?.(feature, resolution) as
             Style | Style[];
         }
 
