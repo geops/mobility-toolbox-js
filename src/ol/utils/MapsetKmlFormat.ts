@@ -25,7 +25,7 @@ import type { Color } from "ol/color";
 import type { ColorLike } from "ol/colorlike";
 import type { Coordinate } from "ol/coordinate";
 import type { FeatureLike } from "ol/Feature";
-import type { ReadOptions } from "ol/format/Feature";
+import type { ReadOptions, WriteOptions } from "ol/format/Feature";
 import type { SimpleGeometry } from "ol/geom";
 import type { Vector } from "ol/layer";
 import type { ProjectionLike } from "ol/proj";
@@ -41,6 +41,48 @@ import type { PolygonFillPatternInput } from "./getMapsetPolygonPattern";
 
 const CIRCLE_GEOMETRY_CENTER = "circleGeometryCenter";
 const CIRCLE_GEOMETRY_RADIUS = "circleGeometryRadius";
+
+export const FeatureProperty = {
+  CircleGeometryCenter: CIRCLE_GEOMETRY_CENTER,
+  CircleGeometryRadius: CIRCLE_GEOMETRY_RADIUS,
+  Description: "description",
+  FillPattern: "fillPattern",
+  IconRotation: "iconRotation",
+  IconScale: "iconScale",
+  LineCap: "lineCap",
+  LineDash: "lineDash",
+  LineDashOffset: "lineDashOffset",
+  LineEndIcon: "lineEndIcon",
+  LineJoin: "lineJoin",
+  LineStartIcon: "lineStartIcon",
+  MaxZoom: "maxZoom",
+  MinZoom: "minZoom",
+  MiterLimit: "miterLimit",
+  Name: "name",
+  PictureOptions: "pictureOptions",
+  TextArray: "textArray",
+  TextBackgroundFillColor: "textBackgroundFillColor",
+  TextFont: "textFont",
+  TextOffsetX: "textOffsetX",
+  TextOffsetY: "textOffsetY",
+  TextPadding: "textPadding",
+  TextRotation: "textRotation",
+  TextStrokeColor: "textStrokeColor",
+  TextStrokeWidth: "textStrokeWidth",
+  ZIndex: "zIndex",
+};
+
+const NO_STYLE_PROPERTIES = [
+  FeatureProperty.CircleGeometryCenter,
+  FeatureProperty.CircleGeometryRadius,
+  FeatureProperty.Description,
+  "geometry",
+  FeatureProperty.Name,
+];
+
+export type FeatureProperty =
+  (typeof FeatureProperty)[keyof typeof FeatureProperty];
+
 const EPSG_4326 = get("EPSG:4326") as ProjectionLike;
 
 // Default style for KML layer
@@ -150,6 +192,11 @@ export type MapsetKmlFormatReadOptions = {
   doNotRevert32pxScaling?: boolean;
   getResolutionForZoom?: (zoom: number) => number;
 } & ReadOptions;
+
+export type MapsetKmlFormatWriteOptions = {
+  allowedProperties?: string[]; /// Custom properties that can be written as KML ExtendedData.
+  mapResolution?: number;
+} & WriteOptions;
 
 export interface PictureOptions {
   defaultScale?: number;
@@ -649,16 +696,21 @@ class MapsetKmlFormat {
   /**
    * Create a KML string.
    * @param {VectorLayer} layer A openlayers VectorLayer.
-   * @param {<ol.Projection|String>} featureProjection The current projection used by the features.
-   * @param {<boolean>} mapResolution The current map resolution.
+   * @param {Object} formatOptions  used to writes features. It extends the ol KML format read options with some custom options.
+   * @param {string[]} [formatOptions.allowedProperties=[]] List of allowed properties to be included in the KML ExtendedData.
+   * @param {number} [formatOptions.mapResolution=1] The resolution of the map when exporting features.
    */
   public writeFeatures(
     layer: Vector<VectorSource<FeatureLike>>,
-    featureProjection: ProjectionLike,
-    mapResolution: number,
+    formatOptions: MapsetKmlFormatWriteOptions,
   ) {
     let featString;
     const exportFeatures = [];
+    const {
+      allowedProperties = [],
+      featureProjection = EPSG_4326,
+      mapResolution = 1,
+    } = formatOptions;
 
     [...(layer?.getSource()?.getFeatures() ?? [])]
       .sort((a, b) => {
@@ -693,16 +745,11 @@ class MapsetKmlFormat {
         clone.setId(feature.getId());
         clone.getGeometry()?.transform(featureProjection, EPSG_4326);
 
-        // We remove all ExtendedData not related to style.
+        // We remove all ExtendedData not related to style or not allowed.
         Object.keys(feature.getProperties()).forEach((key) => {
           if (
-            ![
-              CIRCLE_GEOMETRY_CENTER,
-              CIRCLE_GEOMETRY_RADIUS,
-              "description",
-              "geometry",
-              "name",
-            ].includes(key)
+            !NO_STYLE_PROPERTIES.includes(key) &&
+            !allowedProperties.includes(key)
           ) {
             clone.unset(key, true);
           }
