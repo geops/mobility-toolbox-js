@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.8.2](https://github.com/geops/mobility-toolbox-js/compare/v3.8.1...v3.8.2) (2026-08-11)
+
+
+### Bug Fixes
+
+* add kml write options ([#276](https://github.com/geops/mobility-toolbox-js/issues/276)) ([c706077](https://github.com/geops/mobility-toolbox-js/commit/c706077e489c0255743efa9509134b2e66745e26))
+
 ### [3.8.1](https://github.com/geops/mobility-toolbox-js/compare/v3.7.0...v3.8.1) (2026-07-30)
 
 
