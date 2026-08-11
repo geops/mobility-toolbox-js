@@ -90,7 +90,7 @@ const getVehiclePosition = (
         ) {
           // interpolate position inside the time interval.
           const timeFrac = Math.min((now - start) / (end - start), 1);
-          const geomFrac = timeFrac * (endFrac - startFrac + startFrac);
+          const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;
           coord = (geometry as LineString)?.getCoordinateAt(geomFrac);
           [, , rotation] = intervals[j];
           break;

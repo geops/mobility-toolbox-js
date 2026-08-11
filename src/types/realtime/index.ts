@@ -244,7 +244,7 @@ export interface StationProperties extends Feature {
 
 export interface StationMessage {
   client_reference: null;
-  content: News;
+  content: Station;
   source: `station_${StationId}`;
   timestamp: number;
 }
