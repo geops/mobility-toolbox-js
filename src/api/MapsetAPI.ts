@@ -64,7 +64,7 @@ export interface MapsetGetPlansResponse {
  *
  * const api = new MapsetAPI({
  *   apiKey: 'yourApiKey',
- *   // tenants: ['geopstest'],
+ *   // tenants: ['geopsmarketing'],
  *   // url: 'https://editor.mapset.io/api/v1',
  * });
  *
@@ -88,7 +88,7 @@ class MapsetAPI extends HttpAPI {
    * @param {Object} options Options.
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string[]} [options.tags] Array of tags to filter plans.
-   * @param {string[]} [options.tenants=["geopstest"]] Array of tenants to filter plans.
+   * @param {string[]} [options.tenants=["geopsmarketing"]] Array of tenants to filter plans.
    * @param {string} [options.url='https://editor.mapset.io/api/v1/'] Url of the [geOps Mapset API](https://geops.com/de/solution/mapset).
    */
   constructor(options: MapsetAPIOptions) {
@@ -98,7 +98,7 @@ class MapsetAPI extends HttpAPI {
       url: options.url || "https://editor.mapset.io/api/v1/",
     });
     this.tags = options.tags ?? [];
-    this.tenants = options.tenants ?? ["geopstest"];
+    this.tenants = options.tenants ?? ["geopsmarketing"];
   }
 
   /**

@@ -1,7 +1,7 @@
-import View from 'ol/View';
-import Map from 'ol/Map';
-import { MapsetLayer, MaplibreLayer } from 'mobility-toolbox-js/ol';
-import 'ol/ol.css';
+import View from "ol/View";
+import Map from "ol/Map";
+import { MapsetLayer, MaplibreLayer } from "mobility-toolbox-js/ol";
+import "ol/ol.css";
 
 export default () => {
   const baseLayer = new MaplibreLayer({
@@ -14,10 +14,10 @@ export default () => {
 
   const map = new Map({
     layers: [baseLayer, mapsetLayer],
-    target: 'map',
+    target: "map",
     view: new View({
-      center: [872814.6006106276, 6106276.43],
-      zoom: 16,
+      center: [1099009.504901903, 5916622.273489362],
+      zoom: 15.3,
     }),
   });
 };

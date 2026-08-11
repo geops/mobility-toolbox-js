@@ -140,7 +140,7 @@ export type MocoNotificationFeatureCollectionToRender =
  *   // publicAt: new Date(),
  *   // loadAll: true,
  *   // notifications: undefined,
- *   // tenant: "geopstest",
+ *   // tenant: "geopsmarketing",
  *   // url: 'https://moco.geops.io'
  * });
  *
