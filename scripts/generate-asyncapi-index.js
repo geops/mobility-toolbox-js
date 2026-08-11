@@ -1,7 +1,8 @@
 const fs = require("fs");
 const files = fs
   .readdirSync("src/types/realtime/asyncapi")
-  .filter((f) => f.endsWith(".ts") && f !== "index.ts");
+  .filter((f) => f.endsWith(".ts") && f !== "index.ts")
+  .sort();
 const exportsContent = files
   .map(
     (f) =>
