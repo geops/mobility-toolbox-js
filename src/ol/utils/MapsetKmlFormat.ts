@@ -71,7 +71,7 @@ export const FeatureProperty = {
   TextStrokeColor: "textStrokeColor",
   TextStrokeWidth: "textStrokeWidth",
   ZIndex: "zIndex",
-};
+} as const;
 
 const NO_STYLE_PROPERTIES = [
   FeatureProperty.CircleGeometryCenter,
@@ -195,7 +195,9 @@ export type MapsetKmlFormatReadOptions = {
 } & ReadOptions;
 
 export type MapsetKmlFormatWriteOptions = {
-  allowedProperties?: RegExp[]; /// Custom properties that can be written as KML ExtendedData.
+  /** Property-name patterns that can be written as KML <ExtendedData>. */
+  allowedProperties?: RegExp[];
+  /** Map resolution used when evaluating style functions during export. */
   resolution?: number;
 } & WriteOptions;
 
