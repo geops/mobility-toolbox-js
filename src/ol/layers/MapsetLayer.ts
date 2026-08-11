@@ -38,7 +38,7 @@ const kmlFormatter = new MapsetKmlFormat();
  * const layer = new MapsetLayer({
  *   apiKey: 'yourApiKey',
  *   // tags: ['test'],
- *   // tenants: ['geopstest'],
+ *   // tenants: ['geopsmarketing'],
  *   // url: 'https://editor.mapset.io/api/v1',
  * });
  *

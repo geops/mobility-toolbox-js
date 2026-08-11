@@ -8,12 +8,13 @@ import { Fill, Stroke, Style } from "ol/style";
 // @ts-expect-error - no types defs
 import beautify from "xml-beautifier";
 
-import MapsetKmlFormat from "./MapsetKmlFormat";
+import MapsetKmlFormat, {
+  type MapsetKmlFormatWriteOptions,
+} from "./MapsetKmlFormat";
 
 import type { PatternDescriptor } from "ol/colorlike";
 import type { FeatureLike } from "ol/Feature";
 import type { Circle } from "ol/geom";
-import type { Projection } from "ol/proj";
 import type { Icon } from "ol/style";
 import type { GeometryFunction } from "ol/style/Style";
 
@@ -23,11 +24,7 @@ const xmlns =
 const expectWriteResult = (
   feats: FeatureLike[],
   str: string,
-  writeOptions?: {
-    featureProjection?: Projection;
-    fixGx?: boolean;
-    resolution?: number;
-  },
+  writeOptions?: MapsetKmlFormatWriteOptions,
 ) => {
   const format = new MapsetKmlFormat();
   expect(
@@ -40,9 +37,7 @@ const expectWriteResult = (
             features: feats,
           }),
         }),
-
-        writeOptions?.featureProjection ?? get("EPSG:4326") ?? undefined,
-        writeOptions?.resolution ?? 1,
+        writeOptions,
       ),
     ),
   ).toEqual(beautify(str));
@@ -94,8 +89,7 @@ describe("MapsetKmlFormat", () => {
             features: feats.reverse(), // We simulate the random order of getFeatures() from rbush
           }),
         }),
-        get("EPSG:4326") ?? undefined,
-        1,
+        { featureProjection: get("EPSG:4326") ?? undefined, resolution: 1 },
       );
       const feats2 = KML.readFeatures(str2!);
       expect(feats2.length).toBe(2);
@@ -729,7 +723,6 @@ describe("MapsetKmlFormat", () => {
 
       expectWriteResult(feats, str, {
         featureProjection: get("EPSG:3857") ?? undefined,
-        fixGx: false,
       });
     });
 
@@ -798,6 +791,89 @@ describe("MapsetKmlFormat", () => {
       expect(style?.getImage()?.getScale()).toEqual(0.166666667);
       expectWriteResult(feats, strKmlCorrected);
     });
+
+    test("should read/write custom properties when allowed", () => {
+      const str = `
+      <kml ${xmlns}>
+        <Document>
+            <name>lala</name>
+            <Placemark>
+                <description></description>
+                <Style>
+                    <IconStyle>
+                        <scale>
+                          0.166666667
+                        </scale>
+                        <Icon>
+                            <href><![CDATA[https://icon-generator.geops.io/pictogram?urlPrefix=https%3A%2F%2Feditor.mapset.ch%2Fstatic%2Fimages%2F&columns=2&color=%2C&fontsize=%2C&text=%2C&fill=inc%3Ach%2F02_Gleis-2_g_fr_v1.png%2Cinc%3ASBB%2F03_Gleis-3_g_fr_v1.png&iconMargin=26&iconSize=144&format=png&border=%2C]]></href>
+                        </Icon>
+                        <hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+                    </IconStyle>
+                </Style>
+                <Point>
+                    <coordinates>0,0,0</coordinates>
+                </Point>
+                <ExtendedData>
+                  <Data name="foo">
+                    <value>
+                    bar
+                    </value>
+                  </Data>
+                </ExtendedData>
+            </Placemark>
+        </Document>
+      </kml>
+      `;
+      const strCorrected = `
+      <kml ${xmlns}>
+        <Document>
+            <name>lala</name>
+            <Placemark>
+                <description></description>
+                <Style>
+                    <IconStyle>
+                        <scale>
+                        0.333333
+                        </scale>
+                        <Icon>
+                        <href><![CDATA[https://icon-generator.geops.io/pictogram?urlPrefix=https%3A%2F%2Feditor.mapset.ch%2Fstatic%2Fimages%2F&columns=2&color=%2C&fontsize=%2C&text=%2C&fill=inc%3Ach%2F02_Gleis-2_g_fr_v1.png%2Cinc%3ASBB%2F03_Gleis-3_g_fr_v1.png&iconMargin=26&iconSize=144&format=png&border=%2C]]></href>
+                        </Icon>
+                    </IconStyle>
+                </Style>
+                <ExtendedData>
+                  <Data name="foo">
+                    <value>
+                    bar
+                    </value>
+                  </Data>
+                  <Data name="iconScale">
+                    <value>
+                    0.166666667
+                    </value>
+                  </Data>
+                </ExtendedData>
+                <Point>
+                    <coordinates>0,0,0</coordinates>
+                </Point>
+            </Placemark>
+        </Document>
+      </kml>`;
+      let feats = KML.readFeatures(str);
+      let style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+      expect(style?.getImage()?.getScale()).toEqual(0.166666667);
+      const strKmlCorrected = expectWriteResult(feats, strCorrected, {
+        allowedProperties: [/^foo$/],
+      });
+
+      // Next read/write should produce the same KML
+      feats = KML.readFeatures(strKmlCorrected);
+      style = feats[0]?.getStyleFunction()?.(feats[0], 1) as Style;
+      expect(style?.getImage()?.getScale()).toEqual(0.166666667);
+      expectWriteResult(feats, strKmlCorrected, {
+        allowedProperties: [/^foo$/],
+      });
+    });
+
     describe("zIndex roundtrip", () => {
       const buildLayer = (zIndex: number | undefined) => {
         const feature = new Feature({
@@ -821,7 +897,10 @@ describe("MapsetKmlFormat", () => {
 
       it("should persist zIndex as ExtendedData in the KML string", () => {
         const format = new MapsetKmlFormat();
-        const kml = format.writeFeatures(buildLayer(5), "EPSG:3857", 1);
+        const kml = format.writeFeatures(buildLayer(5), {
+          featureProjection: "EPSG:3857",
+          resolution: 1,
+        });
         expect(kml).toBeDefined();
         expect(kml).toMatch(
           /<Data name="zIndex">\s*<value>5<\/value>\s*<\/Data>/,
@@ -830,7 +909,10 @@ describe("MapsetKmlFormat", () => {
 
       it("should restore the feature zIndex property when reading back the KML", () => {
         const format = new MapsetKmlFormat();
-        const kml = format.writeFeatures(buildLayer(7), "EPSG:3857", 1);
+        const kml = format.writeFeatures(buildLayer(7), {
+          featureProjection: "EPSG:3857",
+          resolution: 1,
+        });
         const features = format.readFeatures(kml!, {
           featureProjection: "EPSG:3857",
         });
@@ -840,7 +922,10 @@ describe("MapsetKmlFormat", () => {
 
       it("should restore the style zIndex on the read feature", () => {
         const format = new MapsetKmlFormat();
-        const kml = format.writeFeatures(buildLayer(3), "EPSG:3857", 1);
+        const kml = format.writeFeatures(buildLayer(3), {
+          featureProjection: "EPSG:3857",
+          resolution: 1,
+        });
         const features = format.readFeatures(kml!, {
           featureProjection: "EPSG:3857",
         });
@@ -854,7 +939,10 @@ describe("MapsetKmlFormat", () => {
 
       it("should not add a zIndex ExtendedData when the feature has no zIndex", () => {
         const format = new MapsetKmlFormat();
-        const kml = format.writeFeatures(buildLayer(undefined), "EPSG:3857", 1);
+        const kml = format.writeFeatures(buildLayer(undefined), {
+          featureProjection: "EPSG:3857",
+          resolution: 1,
+        });
         expect(kml).toBeDefined();
         expect(kml).not.toMatch(/<Data name="zIndex">/);
       });

@@ -25,7 +25,7 @@ import type { Color } from "ol/color";
 import type { ColorLike } from "ol/colorlike";
 import type { Coordinate } from "ol/coordinate";
 import type { FeatureLike } from "ol/Feature";
-import type { ReadOptions } from "ol/format/Feature";
+import type { ReadOptions, WriteOptions } from "ol/format/Feature";
 import type { SimpleGeometry } from "ol/geom";
 import type { Vector } from "ol/layer";
 import type { ProjectionLike } from "ol/proj";
@@ -41,6 +41,49 @@ import type { PolygonFillPatternInput } from "./getMapsetPolygonPattern";
 
 const CIRCLE_GEOMETRY_CENTER = "circleGeometryCenter";
 const CIRCLE_GEOMETRY_RADIUS = "circleGeometryRadius";
+
+export const FeatureProperty = {
+  CircleGeometryCenter: CIRCLE_GEOMETRY_CENTER,
+  CircleGeometryRadius: CIRCLE_GEOMETRY_RADIUS,
+  Description: "description",
+  FillPattern: "fillPattern",
+  IconRotation: "iconRotation",
+  IconScale: "iconScale",
+  LineCap: "lineCap",
+  LineDash: "lineDash",
+  LineDashOffset: "lineDashOffset",
+  LineEndIcon: "lineEndIcon",
+  LineJoin: "lineJoin",
+  LineStartIcon: "lineStartIcon",
+  MaxZoom: "maxZoom",
+  MinZoom: "minZoom",
+  MiterLimit: "miterLimit",
+  Name: "name",
+  PictureOptions: "pictureOptions",
+  TextAlign: "textAlign",
+  TextArray: "textArray",
+  TextBackgroundFillColor: "textBackgroundFillColor",
+  TextFont: "textFont",
+  TextOffsetX: "textOffsetX",
+  TextOffsetY: "textOffsetY",
+  TextPadding: "textPadding",
+  TextRotation: "textRotation",
+  TextStrokeColor: "textStrokeColor",
+  TextStrokeWidth: "textStrokeWidth",
+  ZIndex: "zIndex",
+} as const;
+
+const NO_STYLE_PROPERTIES = [
+  FeatureProperty.CircleGeometryCenter,
+  FeatureProperty.CircleGeometryRadius,
+  FeatureProperty.Description,
+  "geometry",
+  FeatureProperty.Name,
+];
+
+export type FeatureProperty =
+  (typeof FeatureProperty)[keyof typeof FeatureProperty];
+
 const EPSG_4326 = get("EPSG:4326") as ProjectionLike;
 
 // Default style for KML layer
@@ -141,7 +184,7 @@ const getLineIcon = (
       size: icon.size, // ie 11
       src: icon.url,
     }),
-    zIndex: asInteger(feature.get("zIndex") as string),
+    zIndex: asInteger(feature.get(FeatureProperty.ZIndex) as string),
   });
 };
 
@@ -150,6 +193,13 @@ export type MapsetKmlFormatReadOptions = {
   doNotRevert32pxScaling?: boolean;
   getResolutionForZoom?: (zoom: number) => number;
 } & ReadOptions;
+
+export type MapsetKmlFormatWriteOptions = {
+  /** Property-name patterns that can be written as KML <ExtendedData>. */
+  allowedProperties?: RegExp[];
+  /** Map resolution used when evaluating style functions during export. */
+  resolution?: number;
+} & WriteOptions;
 
 export interface PictureOptions {
   defaultScale?: number;
@@ -231,103 +281,133 @@ class MapsetKmlFormat {
     let styles: StyleLike | undefined = feature.getStyleFunction();
 
     // Convert back feature properties used in writeFeatures
-    if (feature.get("name")) {
-      feature.set("name", getNameFromString(feature.get("name") as string));
-    }
-    if (feature.get("maxZoom") !== undefined) {
-      feature.set("maxZoom", asFloat(feature.get("maxZoom") as string));
-    }
-
-    if (feature.get("minZoom") !== undefined) {
-      feature.set("minZoom", asFloat(feature.get("minZoom") as string));
-    }
-
-    if (feature.get("zIndex") !== undefined) {
-      feature.set("zIndex", asInteger(feature.get("zIndex") as string));
-    }
-
-    if (feature.get("fillPattern")) {
+    if (feature.get(FeatureProperty.Name)) {
       feature.set(
-        "fillPattern",
-        asJson<PolygonFillPatternInput>(feature.get("fillPattern") as string),
+        FeatureProperty.Name,
+        getNameFromString(feature.get(FeatureProperty.Name) as string),
+      );
+    }
+    if (feature.get(FeatureProperty.MaxZoom) !== undefined) {
+      feature.set(
+        FeatureProperty.MaxZoom,
+        asFloat(feature.get(FeatureProperty.MaxZoom) as string),
       );
     }
 
-    if (feature.get("pictureOptions")) {
+    if (feature.get(FeatureProperty.MinZoom) !== undefined) {
       feature.set(
-        "pictureOptions",
-        asJson<PictureOptions>(feature.get("pictureOptions") as string),
+        FeatureProperty.MinZoom,
+        asFloat(feature.get(FeatureProperty.MinZoom) as string),
+      );
+    }
+
+    if (feature.get(FeatureProperty.ZIndex) !== undefined) {
+      feature.set(
+        FeatureProperty.ZIndex,
+        asInteger(feature.get(FeatureProperty.ZIndex) as string),
+      );
+    }
+
+    if (feature.get(FeatureProperty.FillPattern)) {
+      feature.set(
+        FeatureProperty.FillPattern,
+        asJson<PolygonFillPatternInput>(
+          feature.get(FeatureProperty.FillPattern) as string,
+        ),
+      );
+    }
+
+    if (feature.get(FeatureProperty.PictureOptions)) {
+      feature.set(
+        FeatureProperty.PictureOptions,
+        asJson<PictureOptions>(
+          feature.get(FeatureProperty.PictureOptions) as string,
+        ),
       );
     }
     // END convert back feature properties used in writeFeatures
 
     // Start setting the correct types for the existing feature's properties
-    if (feature.get("textRotation") !== undefined) {
+    if (feature.get(FeatureProperty.TextRotation) !== undefined) {
       feature.set(
-        "textRotation",
-        asFloat(feature.get("textRotation") as string),
+        FeatureProperty.TextRotation,
+        asFloat(feature.get(FeatureProperty.TextRotation) as string),
       );
     }
 
-    if (feature.get("textArray")) {
+    if (feature.get(FeatureProperty.TextArray)) {
       feature.set(
-        "textArray",
-        getTextArrayFromString(feature.get("textArray") as string),
+        FeatureProperty.TextArray,
+        getTextArrayFromString(
+          feature.get(FeatureProperty.TextArray) as string,
+        ),
       );
     }
-    if (feature.get("textStrokeWidth") !== undefined) {
+    if (feature.get(FeatureProperty.TextStrokeWidth) !== undefined) {
       feature.set(
-        "textStrokeWidth",
-        asFloat(feature.get("textStrokeWidth") as string),
+        FeatureProperty.TextStrokeWidth,
+        asFloat(feature.get(FeatureProperty.TextStrokeWidth) as string),
       );
     }
-    if (feature.get("textOffsetX") !== undefined) {
-      feature.set("textOffsetX", asFloat(feature.get("textOffsetX") as string));
+    if (feature.get(FeatureProperty.TextOffsetX) !== undefined) {
+      feature.set(
+        FeatureProperty.TextOffsetX,
+        asFloat(feature.get(FeatureProperty.TextOffsetX) as string),
+      );
     }
 
-    if (feature.get("textOffsetY") !== undefined) {
-      feature.set("textOffsetY", asFloat(feature.get("textOffsetY") as string));
+    if (feature.get(FeatureProperty.TextOffsetY) !== undefined) {
+      feature.set(
+        FeatureProperty.TextOffsetY,
+        asFloat(feature.get(FeatureProperty.TextOffsetY) as string),
+      );
     }
 
     //textStrokeColor is a string, no need to convert it
     //textBackgroundFillColor is a string, no need to convert it
 
-    if (feature.get("textPadding")) {
+    if (feature.get(FeatureProperty.TextPadding)) {
       feature.set(
-        "textPadding",
-        asFloatArray(feature.get("textPadding") as string),
+        FeatureProperty.TextPadding,
+        asFloatArray(feature.get(FeatureProperty.TextPadding) as string),
       );
     }
 
-    if (feature.get("iconRotation") !== undefined) {
+    if (feature.get(FeatureProperty.IconRotation) !== undefined) {
       feature.set(
-        "iconRotation",
-        asFloat(feature.get("iconRotation") as string),
+        FeatureProperty.IconRotation,
+        asFloat(feature.get(FeatureProperty.IconRotation) as string),
       );
     }
 
-    if (feature.get("iconScale") !== undefined) {
-      feature.set("iconScale", asFloat(feature.get("iconScale") as string));
+    if (feature.get(FeatureProperty.IconScale) !== undefined) {
+      feature.set(
+        FeatureProperty.IconScale,
+        asFloat(feature.get(FeatureProperty.IconScale) as string),
+      );
     }
 
     // lineStartIcon
     // lineEndIcon
-    if (feature.get("lineDash")) {
+    if (feature.get(FeatureProperty.LineDash)) {
       feature.set(
-        "lineDash",
-        asIntegerArray(feature.get("lineDash") as string),
+        FeatureProperty.LineDash,
+        asIntegerArray(feature.get(FeatureProperty.LineDash) as string),
       );
     }
 
-    if (feature.get("lineDashOffset")) {
+    if (feature.get(FeatureProperty.LineDashOffset)) {
       feature.set(
-        "lineDashOffset",
-        asInteger(feature.get("lineDashOffset") as string),
+        FeatureProperty.LineDashOffset,
+        asInteger(feature.get(FeatureProperty.LineDashOffset) as string),
       );
     }
 
-    if (feature.get("miterLimit")) {
-      feature.set("miterLimit", asInteger(feature.get("miterLimit") as string));
+    if (feature.get(FeatureProperty.MiterLimit)) {
+      feature.set(
+        FeatureProperty.MiterLimit,
+        asInteger(feature.get(FeatureProperty.MiterLimit) as string),
+      );
     }
     // END
 
@@ -345,30 +425,34 @@ class MapsetKmlFormat {
       Array.isArray(tmpStyles) ? tmpStyles[0] : tmpStyles
     )?.clone();
 
-    if (feature.get("zIndex") !== undefined) {
-      style?.setZIndex(feature.get("zIndex") as number);
+    if (feature.get(FeatureProperty.ZIndex) !== undefined) {
+      style?.setZIndex(feature.get(FeatureProperty.ZIndex) as number);
     }
 
     let stroke = style?.getStroke();
 
-    if (feature.get("lineCap")) {
-      stroke?.setLineCap(feature.get("lineCap") as CanvasLineCap);
+    if (feature.get(FeatureProperty.LineCap)) {
+      stroke?.setLineCap(feature.get(FeatureProperty.LineCap) as CanvasLineCap);
     }
 
-    if (feature.get("lineJoin")) {
-      stroke?.setLineJoin(feature.get("lineJoin") as CanvasLineJoin);
+    if (feature.get(FeatureProperty.LineJoin)) {
+      stroke?.setLineJoin(
+        feature.get(FeatureProperty.LineJoin) as CanvasLineJoin,
+      );
     }
 
-    if (feature.get("lineDash") !== undefined) {
-      stroke?.setLineDash(feature?.get("lineDash") as number[]);
+    if (feature.get(FeatureProperty.LineDash) !== undefined) {
+      stroke?.setLineDash(feature?.get(FeatureProperty.LineDash) as number[]);
     }
 
-    if (feature.get("lineDashOffset") !== undefined) {
-      stroke?.setLineDashOffset(feature.get("lineDashOffset") as number);
+    if (feature.get(FeatureProperty.LineDashOffset) !== undefined) {
+      stroke?.setLineDashOffset(
+        feature.get(FeatureProperty.LineDashOffset) as number,
+      );
     }
 
-    if (feature.get("miterLimit") !== undefined) {
-      stroke?.setMiterLimit(feature.get("miterLimit") as number);
+    if (feature.get(FeatureProperty.MiterLimit) !== undefined) {
+      stroke?.setMiterLimit(feature.get(FeatureProperty.MiterLimit) as number);
     }
 
     // The canvas draws a stroke width=1 by default if width=0, so we
@@ -390,7 +474,7 @@ class MapsetKmlFormat {
 
       // If the feature has name we display it on the map as Google does
       if (
-        feature.get("name") &&
+        feature.get(FeatureProperty.Name) &&
         style.getText() &&
         style.getText()?.getScale() !== 0
       ) {
@@ -404,13 +488,17 @@ class MapsetKmlFormat {
         }
 
         // For backward compatibility we translate the bold and italic textFont property to a textArray prop
-        const font = (feature.get("textFont") as string) || "normal 16px Arial";
+        const font =
+          (feature.get(FeatureProperty.TextFont) as string) ||
+          "normal 16px Arial";
 
         // Since we use rich text in mapset editor we use a text array instead,
         // it's only necessary when there is new lines in the text
         // Manage new lines
         // We replace empty white spaces used to keep normal spaces before and after the name.
-        let names: string | string[] = feature.get("name") as string;
+        let names: string | string[] = feature.get(
+          FeatureProperty.Name,
+        ) as string;
         if (names.includes("\n")) {
           const array: string[] = [];
           const split = names.split("\n");
@@ -430,7 +518,7 @@ class MapsetKmlFormat {
           fill: style.getText()!.getFill(),
           font: getTextFontFromString(font), // We manage bold in textArray
           // rotation unsupported by KML, taken instead from custom field.
-          rotation: (feature.get("textRotation") as number) ?? 0,
+          rotation: (feature.get(FeatureProperty.TextRotation) as number) ?? 0,
           // stroke: style.getText().getStroke(),
           scale: style.getText()?.getScale(),
           // since ol 6.3.1 : https://github.com/openlayers/openlayers/pull/10613/files#diff-1883da8b57e690db7ea0c35ce53c880aR925
@@ -441,41 +529,48 @@ class MapsetKmlFormat {
           text: names,
         });
 
-        if (feature.get("textArray")) {
-          text.setText(feature.get("textArray") as string[]);
+        if (feature.get(FeatureProperty.TextArray)) {
+          text.setText(feature.get(FeatureProperty.TextArray) as string[]);
         }
 
-        if (feature.get("textStrokeColor") && feature.get("textStrokeWidth")) {
+        if (
+          feature.get(FeatureProperty.TextStrokeColor) &&
+          feature.get(FeatureProperty.TextStrokeWidth)
+        ) {
           text.setStroke(
             new Stroke({
-              color: feature.get("textStrokeColor") as Color,
-              width: feature.get("textStrokeWidth") as number,
+              color: feature.get(FeatureProperty.TextStrokeColor) as Color,
+              width: feature.get(FeatureProperty.TextStrokeWidth) as number,
             }),
           );
         }
 
-        if (feature.get("textAlign")) {
-          text.setTextAlign(feature.get("textAlign") as CanvasTextAlign);
+        if (feature.get(FeatureProperty.TextAlign)) {
+          text.setTextAlign(
+            feature.get(FeatureProperty.TextAlign) as CanvasTextAlign,
+          );
         }
 
-        if (feature.get("textOffsetX")) {
-          text.setOffsetX(feature.get("textOffsetX") as number);
+        if (feature.get(FeatureProperty.TextOffsetX)) {
+          text.setOffsetX(feature.get(FeatureProperty.TextOffsetX) as number);
         }
 
-        if (feature.get("textOffsetY")) {
-          text.setOffsetY(feature.get("textOffsetY") as number);
+        if (feature.get(FeatureProperty.TextOffsetY)) {
+          text.setOffsetY(feature.get(FeatureProperty.TextOffsetY) as number);
         }
 
-        if (feature.get("textBackgroundFillColor")) {
+        if (feature.get(FeatureProperty.TextBackgroundFillColor)) {
           text.setBackgroundFill(
             new Fill({
-              color: feature.get("textBackgroundFillColor") as Color,
+              color: feature.get(
+                FeatureProperty.TextBackgroundFillColor,
+              ) as Color,
             }),
           );
         }
 
-        if (feature.get("textPadding")) {
-          text.setPadding(feature.get("textPadding") as number[]);
+        if (feature.get(FeatureProperty.TextPadding)) {
+          text.setPadding(feature.get(FeatureProperty.TextPadding) as number[]);
         }
 
         if (image instanceof Icon) {
@@ -487,9 +582,13 @@ class MapsetKmlFormat {
         /* Apply icon rotation if defined (by default only written as
          * <heading> tag, which is not read as rotation value by the ol KML module)
          */
-        image.setRotation((feature.get("iconRotation") as number) ?? 0);
-        if (feature.get("iconScale") !== undefined) {
-          image.setScale((feature.get("iconScale") as number) ?? 0);
+        image.setRotation(
+          (feature.get(FeatureProperty.IconRotation) as number) ?? 0,
+        );
+        if (feature.get(FeatureProperty.IconScale) !== undefined) {
+          image.setScale(
+            (feature.get(FeatureProperty.IconScale) as number) ?? 0,
+          );
 
           // We fix the 32px scaling introduced by OL 6.7 only if the image has a size defined.
         } else if (!doNotRevert32pxScaling && image.getSize()) {
@@ -508,8 +607,10 @@ class MapsetKmlFormat {
          * adjustment.
          * e.g. { resolution: 0.123, defaultScale: 1 / 6 }
          */
-        if (feat.get("pictureOptions")) {
-          const options = feat.get("pictureOptions") as PictureOptions;
+        if (feat.get(FeatureProperty.PictureOptions)) {
+          const options = feat.get(
+            FeatureProperty.PictureOptions,
+          ) as PictureOptions;
           if (options?.resolution) {
             image?.setScale(
               (options.resolution / resolution) * (options?.defaultScale ?? 1),
@@ -522,7 +623,7 @@ class MapsetKmlFormat {
           image: image ?? undefined,
           stroke: stroke ?? undefined,
           text: text ?? undefined,
-          zIndex: feat.get("zIndex") as number | undefined,
+          zIndex: feat.get(FeatureProperty.ZIndex) as number | undefined,
         });
       };
     }
@@ -544,7 +645,7 @@ class MapsetKmlFormat {
       ];
 
       // Parse the fillPattern json string and store parsed object
-      const fillPatternOptions = feature.get("fillPattern") as
+      const fillPatternOptions = feature.get(FeatureProperty.FillPattern) as
         PolygonFillPatternInput | undefined;
 
       if (fillPatternOptions) {
@@ -559,21 +660,25 @@ class MapsetKmlFormat {
       }
 
       // Add line's icons styles
-      if (feature.get("lineStartIcon")) {
+      if (feature.get(FeatureProperty.LineStartIcon)) {
         styles.push(
           getLineIcon(
             feature,
-            JSON.parse(feature.get("lineStartIcon") as string) as IconOptions,
+            JSON.parse(
+              feature.get(FeatureProperty.LineStartIcon) as string,
+            ) as IconOptions,
             stroke?.getColor() as Color,
           ),
         );
       }
 
-      if (feature.get("lineEndIcon")) {
+      if (feature.get(FeatureProperty.LineEndIcon)) {
         styles.push(
           getLineIcon(
             feature,
-            JSON.parse(feature.get("lineEndIcon") as string) as IconOptions,
+            JSON.parse(
+              feature.get(FeatureProperty.LineEndIcon) as string,
+            ) as IconOptions,
             stroke?.getColor() as Color,
             false,
           ),
@@ -587,15 +692,16 @@ class MapsetKmlFormat {
     if (
       applyMinMaxZoom &&
       getResolutionForZoom &&
-      (feature.get("minZoom") || feature.get("maxZoom"))
+      (feature.get(FeatureProperty.MinZoom) ||
+        feature.get(FeatureProperty.MaxZoom))
     ) {
       styleFunction = (feat: FeatureLike, resolution: number) => {
         const minRes = getResolutionForZoom(
-          (feature.get("minZoom") as number) || -Infinity,
+          (feature.get(FeatureProperty.MinZoom) as number) || -Infinity,
         );
 
         const maxRes = getResolutionForZoom(
-          (feature.get("maxZoom") as number) || Infinity,
+          (feature.get(FeatureProperty.MaxZoom) as number) || Infinity,
         );
 
         // We test if the resolution exists because you could call the styleFuntion
@@ -649,16 +755,21 @@ class MapsetKmlFormat {
   /**
    * Create a KML string.
    * @param {VectorLayer} layer A openlayers VectorLayer.
-   * @param {<ol.Projection|String>} featureProjection The current projection used by the features.
-   * @param {<boolean>} mapResolution The current map resolution.
+   * @param {Object} formatOptions  used to writes features. It extends the ol KML format read options with some custom options.
+   * @param {string[]} [formatOptions.allowedProperties=[]] List of allowed properties to be included in the KML ExtendedData.
+   * @param {number} [formatOptions.resolution=1] The resolution of the map when exporting features.
    */
   public writeFeatures(
     layer: Vector<VectorSource<FeatureLike>>,
-    featureProjection: ProjectionLike,
-    mapResolution: number,
+    formatOptions: MapsetKmlFormatWriteOptions = {},
   ) {
     let featString;
     const exportFeatures = [];
+    const {
+      allowedProperties = [],
+      featureProjection = EPSG_4326,
+      resolution = 1,
+    } = formatOptions;
 
     [...(layer?.getSource()?.getFeatures() ?? [])]
       .sort((a, b) => {
@@ -675,7 +786,9 @@ class MapsetKmlFormat {
       })
       .forEach((feature) => {
         const clone = feature.clone() as FeatureType;
-        const zIndex = asInteger(feature?.get("zIndex") as string);
+        const zIndex = asInteger(
+          feature?.get(FeatureProperty.ZIndex) as string,
+        );
 
         if (clone.getGeometry()?.getType() === "Circle") {
           // We transform circle elements into polygons
@@ -691,18 +804,12 @@ class MapsetKmlFormat {
           clone.set(CIRCLE_GEOMETRY_RADIUS, circleGeom.getRadius());
         }
         clone.setId(feature.getId());
-        clone.getGeometry()?.transform(featureProjection, EPSG_4326);
 
-        // We remove all ExtendedData not related to style.
+        // We remove all ExtendedData not related to style or not allowed.
         Object.keys(feature.getProperties()).forEach((key) => {
           if (
-            ![
-              CIRCLE_GEOMETRY_CENTER,
-              CIRCLE_GEOMETRY_RADIUS,
-              "description",
-              "geometry",
-              "name",
-            ].includes(key)
+            !NO_STYLE_PROPERTIES.includes(key) &&
+            !allowedProperties.some((regex) => regex.test(key))
           ) {
             clone.unset(key, true);
           }
@@ -711,10 +818,10 @@ class MapsetKmlFormat {
         let styles;
 
         if (feature.getStyleFunction()) {
-          styles = feature.getStyleFunction()?.(feature, mapResolution) as
+          styles = feature.getStyleFunction()?.(feature, resolution) as
             Style | Style[];
         } else if (layer?.getStyleFunction()) {
-          styles = layer.getStyleFunction()?.(feature, mapResolution) as
+          styles = layer.getStyleFunction()?.(feature, resolution) as
             Style | Style[];
         }
 
@@ -735,7 +842,7 @@ class MapsetKmlFormat {
 
           if (Array.isArray(text)) {
             // text can be a string or an array of strings
-            clone.set("textArray", JSON.stringify(text));
+            clone.set(FeatureProperty.TextArray, JSON.stringify(text));
             const textArray = text;
             // in the KML we just add the text without the bold or italic information
             kmlText = textArray
@@ -751,79 +858,94 @@ class MapsetKmlFormat {
             // If we see spaces at the beginning or at the end we add a empty
             // white space at the beginning and at the end.
             if (/^(\s|\n)|(\n|\s)$/g.test(kmlText)) {
-              clone.set("name", `\u200B${kmlText}\u200B`);
+              clone.set(FeatureProperty.Name, `\u200B${kmlText}\u200B`);
             } else {
-              clone.set("name", kmlText);
+              clone.set(FeatureProperty.Name, kmlText);
             }
           }
         }
 
         // Set custom properties to be converted in extendedData in KML.
         if (zIndex !== undefined) {
-          clone.set("zIndex", zIndex);
+          clone.set(FeatureProperty.ZIndex, zIndex);
         }
         if (newStyle.text?.getRotation()) {
-          clone.set("textRotation", newStyle.text.getRotation());
+          clone.set(FeatureProperty.TextRotation, newStyle.text.getRotation());
         }
 
         if (newStyle.text?.getFont()) {
-          clone.set("textFont", newStyle.text.getFont());
+          clone.set(FeatureProperty.TextFont, newStyle.text.getFont());
         }
 
         if (newStyle.text?.getTextAlign()) {
-          clone.set("textAlign", newStyle.text.getTextAlign());
+          clone.set(FeatureProperty.TextAlign, newStyle.text.getTextAlign());
         }
 
         if (newStyle.text?.getOffsetX()) {
-          clone.set("textOffsetX", newStyle.text.getOffsetX());
+          clone.set(FeatureProperty.TextOffsetX, newStyle.text.getOffsetX());
         }
 
         if (newStyle.text?.getOffsetY()) {
-          clone.set("textOffsetY", newStyle.text.getOffsetY());
+          clone.set(FeatureProperty.TextOffsetY, newStyle.text.getOffsetY());
         }
 
         if (newStyle.text?.getStroke()) {
           if (newStyle.text.getStroke()?.getColor()) {
             clone.set(
-              "textStrokeColor",
+              FeatureProperty.TextStrokeColor,
               asString(newStyle.text.getStroke()?.getColor() as Color),
             );
           }
 
           if (newStyle.text.getStroke()?.getWidth()) {
-            clone.set("textStrokeWidth", newStyle.text.getStroke()?.getWidth());
+            clone.set(
+              FeatureProperty.TextStrokeWidth,
+              newStyle.text.getStroke()?.getWidth(),
+            );
           }
         }
 
         if (newStyle.text?.getBackgroundFill()) {
           clone.set(
-            "textBackgroundFillColor",
+            FeatureProperty.TextBackgroundFillColor,
             asString(newStyle.text.getBackgroundFill()?.getColor() as Color),
           );
         }
 
         if (newStyle.text?.getPadding()) {
-          clone.set("textPadding", newStyle.text.getPadding()?.join());
+          clone.set(
+            FeatureProperty.TextPadding,
+            newStyle.text.getPadding()?.join(),
+          );
         }
 
         if (newStyle.stroke?.getLineCap()) {
-          clone.set("lineCap", newStyle.stroke.getLineCap());
+          clone.set(FeatureProperty.LineCap, newStyle.stroke.getLineCap());
         }
 
         if (newStyle.stroke?.getLineJoin()) {
-          clone.set("lineJoin", newStyle.stroke.getLineJoin());
+          clone.set(FeatureProperty.LineJoin, newStyle.stroke.getLineJoin());
         }
 
         if (newStyle.stroke?.getLineDash()) {
-          clone.set("lineDash", newStyle.stroke.getLineDash()?.join(","));
+          clone.set(
+            FeatureProperty.LineDash,
+            newStyle.stroke.getLineDash()?.join(","),
+          );
         }
 
         if (newStyle.stroke?.getLineDashOffset()) {
-          clone.set("lineDashOffset", newStyle.stroke.getLineDashOffset());
+          clone.set(
+            FeatureProperty.LineDashOffset,
+            newStyle.stroke.getLineDashOffset(),
+          );
         }
 
         if (newStyle.stroke?.getMiterLimit()) {
-          clone.set("miterLimit", newStyle.stroke.getMiterLimit());
+          clone.set(
+            FeatureProperty.MiterLimit,
+            newStyle.stroke.getMiterLimit(),
+          );
         }
 
         if (newStyle.image instanceof Circle) {
@@ -842,39 +964,49 @@ class MapsetKmlFormat {
 
           if (newStyle.image.getRotation()) {
             // We set the icon rotation as extended data
-            clone.set("iconRotation", newStyle.image.getRotation());
+            clone.set(
+              FeatureProperty.IconRotation,
+              newStyle.image.getRotation(),
+            );
           }
 
           if (newStyle.image.getScale()) {
             // We set the scale as extended metadata because the <scale> in the KML is related to a 32px img, since ol >= 6.10.
-            clone.set("iconScale", newStyle.image.getScale());
+            clone.set(FeatureProperty.IconScale, newStyle.image.getScale());
           }
 
           // Set map resolution to use for icon-to-map proportional scaling
-          if (feature.get("pictureOptions")) {
+          if (feature.get(FeatureProperty.PictureOptions)) {
             clone.set(
-              "pictureOptions",
-              JSON.stringify(feature.get("pictureOptions")),
+              FeatureProperty.PictureOptions,
+              JSON.stringify(feature.get(FeatureProperty.PictureOptions)),
             );
           }
         }
 
         // In case a fill pattern should be applied (use fillPattern attribute to store pattern id, color etc)
-        if (feature.get("fillPattern")) {
-          clone.set("fillPattern", JSON.stringify(feature.get("fillPattern")));
+        if (feature.get(FeatureProperty.FillPattern)) {
+          clone.set(
+            FeatureProperty.FillPattern,
+            JSON.stringify(feature.get(FeatureProperty.FillPattern)),
+          );
           newStyle.fill = undefined;
         }
 
         // maxZoom: maximum zoom level at which the feature is displayed
-        const maxZoom = parseFloat(feature.get("maxZoom") as string);
+        const maxZoom = parseFloat(
+          feature.get(FeatureProperty.MaxZoom) as string,
+        );
         if (!Number.isNaN(maxZoom)) {
-          clone.set("maxZoom", maxZoom);
+          clone.set(FeatureProperty.MaxZoom, maxZoom);
         }
 
         // minZoom: minimum zoom level at which the feature is displayed
-        const minZoom = parseFloat(feature.get("minZoom") as string);
+        const minZoom = parseFloat(
+          feature.get(FeatureProperty.MinZoom) as string,
+        );
         if (!Number.isNaN(minZoom)) {
-          clone.set("minZoom", minZoom);
+          clone.set(FeatureProperty.MinZoom, minZoom);
         }
 
         // If only text is displayed we must specify an
@@ -910,7 +1042,7 @@ class MapsetKmlFormat {
               coord?.[1] === startCoord?.[1]
             ) {
               clone.set(
-                "lineStartIcon",
+                FeatureProperty.LineStartIcon,
                 JSON.stringify({
                   scale: extraLineStyle?.getImage()?.getScale(),
                   size: extraLineStyle?.getImage()?.getSize(),
@@ -920,7 +1052,7 @@ class MapsetKmlFormat {
               );
             } else {
               clone.set(
-                "lineEndIcon",
+                FeatureProperty.LineEndIcon,
                 JSON.stringify({
                   scale: extraLineStyle.getImage()?.getScale(),
                   size: extraLineStyle.getImage()?.getSize(),
@@ -953,7 +1085,7 @@ class MapsetKmlFormat {
       featString = new KML({
         defaultStyle: [kmlStyle],
         extractStyles: true,
-      }).writeFeatures(exportFeatures);
+      }).writeFeatures(exportFeatures, formatOptions);
 
       // Remove no image hack
       featString = featString.replace(
@@ -966,10 +1098,10 @@ class MapsetKmlFormat {
       featString = featString.replace(/<Placemark\/>/g, "");
 
       // Add KML document name
-      if (layer.get("name")) {
+      if (layer.get(FeatureProperty.Name)) {
         featString = featString.replace(
           /<Document>/,
-          `<Document><name>${layer.get("name")}</name>`,
+          `<Document><name>${layer.get(FeatureProperty.Name)}</name>`,
         );
       }
     }
