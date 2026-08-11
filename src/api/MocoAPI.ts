@@ -31,7 +31,7 @@ export interface MocoAPIOptions {
  * @private
  */
 class MocoAPI extends HttpAPI {
-  tenant = "geopstest";
+  tenant = "geopsmarketing";
 
   /**
    * Constructor
@@ -40,7 +40,7 @@ class MocoAPI extends HttpAPI {
    *
    * @param {string} options.apiKey Access key for [geOps APIs](https://developer.geops.io/).
    * @param {string} [options.url='https://moco.geops.io/api/v2/'] Service url.
-   * @param {string} [options.tenant='geopstest'] SSO config to get notifications from.
+   * @param {string} [options.tenant='geopsmarketing'] SSO config to get notifications from.
    */
   constructor(options: MocoAPIOptions) {
     super({
