@@ -802,7 +802,6 @@ class MapsetKmlFormat {
           clone.set(CIRCLE_GEOMETRY_RADIUS, circleGeom.getRadius());
         }
         clone.setId(feature.getId());
-        clone.getGeometry()?.transform(featureProjection, EPSG_4326);
 
         // We remove all ExtendedData not related to style or not allowed.
         Object.keys(feature.getProperties()).forEach((key) => {
@@ -1084,7 +1083,7 @@ class MapsetKmlFormat {
       featString = new KML({
         defaultStyle: [kmlStyle],
         extractStyles: true,
-      }).writeFeatures(exportFeatures);
+      }).writeFeatures(exportFeatures, formatOptions);
 
       // Remove no image hack
       featString = featString.replace(
