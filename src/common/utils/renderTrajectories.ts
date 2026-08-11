@@ -10,9 +10,10 @@ import type {
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
-  RealtimeTrajectory,
   ViewState,
 } from "../../types";
+
+import type { RenderedTrackerTrajectory } from "./RealtimeEngine";
 
 /**
  * Draw all the trajectories available in a canvas.
@@ -30,7 +31,7 @@ import type {
  */
 const renderTrajectories = (
   canvas: AnyCanvas,
-  trajectories: RealtimeTrajectory[],
+  trajectories: RenderedTrackerTrajectory[],
   style: RealtimeStyleFunction,
   viewState: ViewState,
   options: RealtimeStyleOptions,
@@ -103,7 +104,7 @@ const renderTrajectories = (
   let hoverVehiclePx;
   let selectedVehicleImg;
   let selectedVehiclePx;
-  const renderedTrajectories = [];
+  const renderedTrajectories: RenderedTrackerTrajectory[] = [];
 
   for (let i = trajectories.length - 1; i >= 0; i -= 1) {
     const trajectory = trajectories[i];

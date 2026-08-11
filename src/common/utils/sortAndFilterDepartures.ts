@@ -1,8 +1,8 @@
+import { Realtime } from "../../types";
+
 import compareDepartures from "./compareDepartures";
 
 import type { RealtimeAPIDeparturesById } from "../../api/RealtimeAPI";
-import type { RealtimeDepartureExtended } from "../../types";
-
 /**
  * This function sort Departures by arrival time and filter out unwanted departures:
  *  - when dparture time is in the past
@@ -19,7 +19,7 @@ const sortAndfilterDepartures = (
   depObject: RealtimeAPIDeparturesById,
   sortByMinArrivalTime = false,
   maxDepartureAge = 30,
-): RealtimeDepartureExtended[] => {
+): ({ cancelled?: boolean } & Realtime.TimeTableCall)[] => {
   const departures = Object.keys(depObject).map((k) => {
     return depObject[k];
   });
@@ -40,7 +40,7 @@ const sortAndfilterDepartures = (
   let previousDeparture = null;
 
   for (let i = departures.length - 1; i >= 0; i -= 1) {
-    const departure: RealtimeDepartureExtended = {
+    const departure: { cancelled?: boolean } & Realtime.TimeTableCall = {
       ...departures[i],
     };
     if (!departure.time) {
@@ -54,13 +54,14 @@ const sortAndfilterDepartures = (
     if (time > past && time < future) {
       // If 2 trains are boarding at the same platform,
       // remove the older one.
-      if (departure.state === "BOARDING") {
+      if (departure.state === Realtime.TCallStateEnum.BOARDING) {
         if (
           departure.platform &&
           !platformsBoarding.includes(departure.platform)
         ) {
           platformsBoarding.push(departure.platform);
         } else {
+          // @ts-expect-error - Missing in backend types
           departure.state = "HIDDEN";
         }
       }
@@ -68,11 +69,12 @@ const sortAndfilterDepartures = (
       // If two trains with the same line number and destinatin
       // and a departure difference < 1 minute, hide the second one.
       if (
-        previousDeparture &&
+        !!previousDeparture &&
         departure.to[0] === previousDeparture.to[0] &&
         Math.abs(time - (previousDeparture.time || 0)) < 1000 &&
         departure.line.name === previousDeparture.line.name
       ) {
+        // @ts-expect-error - Missing in backend types
         departure.state = "HIDDEN";
       }
 

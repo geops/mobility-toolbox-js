@@ -1,23 +1,8 @@
 import debounceWebsocketMessages from "../common/utils/debounceWebsocketMessages";
 import getModeSuffix from "../common/utils/getRealtimeModeSuffix";
+import { Realtime } from "../types";
 
 import WebSocketAPI from "./WebSocketAPI";
-
-import type {
-  RealtimeBbox,
-  RealtimeDeparture,
-  RealtimeExtraGeom,
-  RealtimeFullTrajectoryCollection,
-  RealtimeMode,
-  RealtimeNews,
-  RealtimeStation,
-  RealtimeStationId,
-  RealtimeStopSequence,
-  RealtimeTenant,
-  RealtimeTrainId,
-  RealtimeTrajectory,
-  RealtimeVersion,
-} from "../types";
 
 import type {
   WebSocketAPIMessageCallback,
@@ -25,44 +10,22 @@ import type {
   WebSocketAPIParameters,
 } from "./WebSocketAPI";
 
-export type RealtimeAPIDeparturesById = Record<string, RealtimeDeparture>;
+export type RealtimeAPIDeparturesById = Record<string, Realtime.TimeTableCall>;
 
-export type RealtimeAPIExtraGeomsById = Record<string, RealtimeExtraGeom>;
+export type RealtimeAPIExtraGeomsById = Record<string, Realtime.ExtraGeom>;
 
 /**
  * @typedef RealtimeAPIOptions
  */
 export interface RealtimeAPIOptions {
   apiKey?: string;
-  bbox?: RealtimeBbox;
+  bbox?: Realtime.Bbox;
   buffer?: number[];
   pingIntervalMs?: number;
   reconnectTimeoutMs?: number;
   url?: string;
-  version?: RealtimeVersion;
+  version?: Realtime.Version;
 }
-
-export interface RealtimeModesType {
-  RAW: RealtimeMode;
-  SCHEMATIC: RealtimeMode;
-  TOPOGRAPHIC: RealtimeMode;
-}
-
-/**
- * Enum for Realtime modes.
- * @readonly
- * @typedef {string} RealtimeMode
- * @property {string} RAW "raw"
- * @property {string} SCHEMATIC "schematic"
- * @property {string} TOPOGRAPHIC "topographic"
- * @enum {RealtimeMode}
- * @public
- */
-export const RealtimeModes = {
-  RAW: "raw" as RealtimeMode,
-  SCHEMATIC: "schematic" as RealtimeMode,
-  TOPOGRAPHIC: "topographic" as RealtimeMode,
-};
 
 /**
  * This class provides convenience methods to use to the [geOps Realtime API](https://developer.geops.io/apis/realtime/).
@@ -90,13 +53,13 @@ export const RealtimeModes = {
  * @public
  */
 class RealtimeAPI {
-  _bbox?: RealtimeBbox;
+  _bbox?: Realtime.Bbox;
 
   _buffer?: number[];
 
   _url!: string;
 
-  version: RealtimeVersion = "2";
+  version: Realtime.Version = Realtime.VersionEnum.V2;
 
   wsApi!: WebSocketAPI;
 
@@ -217,7 +180,7 @@ class RealtimeAPI {
 
     this._bbox = opt.bbox;
 
-    this.version = opt.version || "2";
+    this.version = opt.version || Realtime.VersionEnum.V2;
 
     /**
      * Interval between PING request in ms.
@@ -251,20 +214,20 @@ class RealtimeAPI {
    * Send GET to a channel.
    *
    * @param {string | WebSocketAPIParameters} channelOrParams Name of the websocket channel to send GET or an object representing parameters to send
-   * @return {Promise<WebSocketAPIMessageEventData<?>>} A websocket response.
+   * @return {Promise<WebSocketAPIMessageEventData<any>>} A websocket response.
    * @public
    */
-  get<T>(
+  get<T extends WebSocketAPIMessageEventData<unknown>>(
     channelOrParams: string | WebSocketAPIParameters,
-  ): Promise<WebSocketAPIMessageEventData<T>> {
+  ): Promise<T> {
     let params = channelOrParams as WebSocketAPIParameters;
 
     if (typeof channelOrParams === "string") {
       params = { channel: channelOrParams };
     }
 
-    return new Promise((resolve, reject) => {
-      this.wsApi.get(params, resolve, reject);
+    return new Promise<T>((resolve, reject) => {
+      this.wsApi.get<T>(params, resolve, reject);
     });
   }
 
@@ -274,17 +237,17 @@ class RealtimeAPI {
    * @param {string} id A vehicle id.
    * @param {RealtimeMode} mode Realtime mode.
    * @param {string} generalizationLevel The generalization level to request. Can be one of 5 (more generalized), 10, 30, 100, undefined (less generalized).
-   * @return {Promise<{data: { content: RealtimeFullTrajectoryCollection }}>} Return a full trajectory.
+   * @return {Promise<{ content: RealtimeFullTrajectoryCollection }>} Return a full trajectory.
    * @public
    */
   getFullTrajectory(
-    id: RealtimeTrainId,
-    mode: RealtimeMode,
+    id: Realtime.TrainId,
+    mode: Realtime.Mode,
     generalizationLevel?: string,
-  ): Promise<WebSocketAPIMessageEventData<RealtimeFullTrajectoryCollection>> {
+  ): Promise<Realtime.FullTrajectoryMessage> {
     let suffix = "";
-    if (this.version === "1") {
-      suffix = getModeSuffix(mode, RealtimeModes);
+    if (this.version === Realtime.VersionEnum.V1) {
+      suffix = getModeSuffix(mode);
     }
 
     const channel = [`full_trajectory${suffix}`];
@@ -292,11 +255,14 @@ class RealtimeAPI {
       channel.push(id);
     }
 
-    if ((!mode || mode === RealtimeModes.TOPOGRAPHIC) && generalizationLevel) {
+    if (
+      (!mode || mode === Realtime.ModeEnum.TOPOGRAPHIC) &&
+      generalizationLevel
+    ) {
       channel.push(`gen${generalizationLevel}`);
     }
 
-    return this.get<RealtimeFullTrajectoryCollection>(channel.join("_"));
+    return this.get<Realtime.FullTrajectoryMessage>(channel.join("_"));
   }
 
   /**
@@ -308,15 +274,15 @@ class RealtimeAPI {
    * @public
    */
   getStation(
-    uic: RealtimeStationId,
-    mode: RealtimeMode,
-  ): Promise<WebSocketAPIMessageEventData<RealtimeStation>> {
+    uic: Realtime.StationId,
+    mode: Realtime.Mode,
+  ): Promise<Realtime.StationMessage> {
     const params = {
       args: uic,
-      channel: `station${getModeSuffix(mode, RealtimeModes)}`,
+      channel: `station${getModeSuffix(mode)}`,
     };
 
-    return this.get<RealtimeStation>(params);
+    return this.get<Realtime.StationMessage>(params);
   }
 
   /**
@@ -326,11 +292,12 @@ class RealtimeAPI {
    * @return {Promise<RealtimeStation[]>} An array of stations.
    * @public
    */
-  getStations(mode: RealtimeMode, timeout = 100): Promise<RealtimeStation[]> {
+  getStations(
+    mode: Realtime.Mode,
+    timeout = 100,
+  ): Promise<Realtime.StationMessage[]> {
     return new Promise((resolve, reject) => {
-      this.get<RealtimeStation[]>(
-        `station${getModeSuffix(mode, RealtimeModes)}`,
-      )
+      this.get<Realtime.StationMessage>(`station${getModeSuffix(mode)}`)
         // @ts-expect-error check this
         .then(debounceWebsocketMessages(resolve, undefined, timeout))
         .catch(reject);
@@ -341,13 +308,11 @@ class RealtimeAPI {
    * Get the list of stops for this vehicle.
    *
    * @param {string} id A vehicle id.
-   * @return {Promise<{data: { content: RealtimeStopSequence[] }}>} Returns a stop sequence object.
+   * @return {Promise<{ content: RealtimeStopSequence[] }>} Returns a stop sequence object.
    * @public
    */
-  getStopSequence(
-    id: RealtimeTrainId,
-  ): Promise<WebSocketAPIMessageEventData<RealtimeStopSequence[]>> {
-    return this.get<RealtimeStopSequence[]>(`stopsequence_${id}`);
+  getStopSequence(id: Realtime.TrainId): Promise<Realtime.StopSequenceMessage> {
+    return this.get<Realtime.StopSequenceMessage>(`stopsequence_${id}`);
   }
 
   /**
@@ -359,11 +324,11 @@ class RealtimeAPI {
    * @public
    */
   getTrajectory(
-    id: RealtimeTrainId,
-    mode: RealtimeMode,
-  ): Promise<WebSocketAPIMessageEventData<RealtimeTrajectory>> {
-    return this.get<RealtimeTrajectory>(
-      `partial_trajectory${getModeSuffix(mode, RealtimeModes)}_${id}`,
+    id: Realtime.TrainId,
+    mode: Realtime.Mode,
+  ): Promise<Realtime.PartialTrajectoryMessage> {
+    return this.get<Realtime.PartialTrajectoryMessage>(
+      `partial_trajectory${getModeSuffix(mode)}_${id}`,
     );
   }
 
@@ -441,7 +406,7 @@ class RealtimeAPI {
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
    */
-  subscribe<T>(
+  subscribe<T extends WebSocketAPIMessageEventData<unknown>>(
     channel: string,
     onSuccess: WebSocketAPIMessageCallback<T>,
     onError: EventListener = () => {},
@@ -463,16 +428,16 @@ class RealtimeAPI {
    * @public
    */
   subscribeDeletedVehicles(
-    mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<RealtimeTrainId>,
+    mode: Realtime.Mode,
+    onMessage: WebSocketAPIMessageCallback<Realtime.DeletedVehicleMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
     this.unsubscribeDeletedVehicles(onMessage);
 
     let suffix = "";
-    if (this.version === "1") {
-      suffix = getModeSuffix(mode, RealtimeModes);
+    if (this.version === Realtime.VersionEnum.V1) {
+      suffix = getModeSuffix(mode);
     }
 
     this.subscribe(`deleted_vehicles${suffix}`, onMessage, onError, quiet);
@@ -489,7 +454,7 @@ class RealtimeAPI {
    */
   subscribeDepartures(
     stationId: number,
-    onMessage: WebSocketAPIMessageCallback<RealtimeDeparture>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.TimetableMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -506,8 +471,8 @@ class RealtimeAPI {
    * @deprecated Use subscribeNewsticker instead.
    */
   subscribeDisruptions(
-    tenant: RealtimeTenant,
-    onMessage: WebSocketAPIMessageCallback<RealtimeNews>,
+    tenant: Realtime.Tenant,
+    onMessage: WebSocketAPIMessageCallback<Realtime.NewsTickerMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -522,7 +487,7 @@ class RealtimeAPI {
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    */
   subscribeExtraGeoms(
-    onMessage: WebSocketAPIMessageCallback<RealtimeExtraGeom>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.ExtraGeomsMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -540,15 +505,15 @@ class RealtimeAPI {
    * @public
    */
   subscribeFullTrajectory(
-    id: RealtimeTrainId,
-    mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<RealtimeFullTrajectoryCollection>,
+    id: Realtime.TrainId,
+    mode: Realtime.Mode,
+    onMessage: WebSocketAPIMessageCallback<Realtime.FullTrajectoryMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
     let suffix = "";
-    if (this.version === "1") {
-      suffix = getModeSuffix(mode, RealtimeModes);
+    if (this.version === Realtime.VersionEnum.V1) {
+      suffix = getModeSuffix(mode);
     }
 
     this.subscribe(`full_trajectory${suffix}_${id}`, onMessage, onError, quiet);
@@ -561,7 +526,7 @@ class RealtimeAPI {
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    */
   subscribeHealthCheck(
-    onMessage: WebSocketAPIMessageCallback<string>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.HealthCheckMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -578,8 +543,8 @@ class RealtimeAPI {
    * @public
    */
   subscribeNewsticker(
-    tenant: RealtimeTenant,
-    onMessage: WebSocketAPIMessageCallback<RealtimeNews>,
+    tenant: Realtime.Tenant,
+    onMessage: WebSocketAPIMessageCallback<Realtime.NewsTickerMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -597,17 +562,12 @@ class RealtimeAPI {
    * @public
    */
   subscribeStations(
-    mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<RealtimeStation>,
+    mode: Realtime.Mode,
+    onMessage: WebSocketAPIMessageCallback<Realtime.StationMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
-    this.subscribe(
-      `station${getModeSuffix(mode, RealtimeModes)}`,
-      onMessage,
-      onError,
-      quiet,
-    );
+    this.subscribe(`station${getModeSuffix(mode)}`, onMessage, onError, quiet);
   }
 
   /**
@@ -620,8 +580,8 @@ class RealtimeAPI {
    * @public
    */
   subscribeStopSequence(
-    id: RealtimeTrainId,
-    onMessage: WebSocketAPIMessageCallback<RealtimeStopSequence[]>,
+    id: Realtime.TrainId,
+    onMessage: WebSocketAPIMessageCallback<Realtime.StopSequenceMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -632,14 +592,14 @@ class RealtimeAPI {
    * Subscribe to timetable channel of a given station.
    *
    * @param {number} stationId UIC of the station.
-   * @param {function(departures: RealtimeDeparture[])} onMessage Function called on each message of the channel.
+   * @param {function(data: {content: RealtimeDeparture})} onMessage Function called on each message of the channel.
    * @param {function} onError Callback when the subscription fails.
    * @param {boolean} [quiet=false] If true avoid to store the subscription in the subscriptions list.
    * @public
    */
   subscribeTimetable(
     stationId: number,
-    onMessage: WebSocketAPIMessageCallback<RealtimeDeparture>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.TimetableMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
@@ -656,16 +616,16 @@ class RealtimeAPI {
    * @public
    */
   subscribeTrajectory(
-    mode: RealtimeMode,
-    onMessage: WebSocketAPIMessageCallback<RealtimeTrajectory>,
+    mode: Realtime.Mode,
+    onMessage: WebSocketAPIMessageCallback<Realtime.PartialTrajectoryMessage>,
     onError: EventListener = () => {},
     quiet = false,
   ) {
     this.unsubscribeTrajectory(onMessage);
 
     let suffix = "";
-    if (this.version === "1") {
-      suffix = getModeSuffix(mode, RealtimeModes);
+    if (this.version === Realtime.VersionEnum.V1) {
+      suffix = getModeSuffix(mode);
     }
 
     this.subscribe(`trajectory${suffix}`, onMessage, onError, quiet);
@@ -684,14 +644,8 @@ class RealtimeAPI {
     suffix = "",
     onMessage?: WebSocketAPIMessageCallback<T>,
   ) {
-    const suffixSchenatic = getModeSuffix(
-      RealtimeModes.SCHEMATIC,
-      RealtimeModes,
-    );
-    const suffixTopographic = getModeSuffix(
-      RealtimeModes.TOPOGRAPHIC,
-      RealtimeModes,
-    );
+    const suffixSchenatic = getModeSuffix(Realtime.ModeEnum.SCHEMATIC);
+    const suffixTopographic = getModeSuffix(Realtime.ModeEnum.TOPOGRAPHIC);
     this.wsApi.unsubscribe(
       `${channel}${suffixSchenatic}${suffix || ""}`,
       onMessage,
@@ -708,7 +662,7 @@ class RealtimeAPI {
    * @public
    */
   unsubscribeDeletedVehicles(
-    onMessage: WebSocketAPIMessageCallback<RealtimeTrainId>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.DeletedVehicleMessage>,
   ) {
     this.unsubscribe("deleted_vehicles", "", onMessage);
   }
@@ -720,8 +674,8 @@ class RealtimeAPI {
    * @deprecated Use RealtimeAPI.unsubscribeTimetabe instead.
    */
   unsubscribeDepartures(
-    stationId: RealtimeStationId,
-    onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
+    stationId: Realtime.StationId,
+    onMessage?: WebSocketAPIMessageCallback<Realtime.TimetableMessage>,
   ) {
     this.unsubscribeTimetable(stationId, onMessage);
   }
@@ -733,8 +687,8 @@ class RealtimeAPI {
    * @deprecated Use unsubscribeNewsticker instead.
    */
   unsubscribeDisruptions(
-    tenant: RealtimeTenant,
-    onMessage?: WebSocketAPIMessageCallback<RealtimeNews>,
+    tenant: Realtime.Tenant,
+    onMessage?: WebSocketAPIMessageCallback<Realtime.NewsMessage>,
   ) {
     this.unsubscribeNewsticker(tenant, onMessage);
   }
@@ -744,7 +698,7 @@ class RealtimeAPI {
    * @param {function(data: { content: RealtimeExtraGeom })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
   unsubscribeExtraGeoms(
-    onMessage: WebSocketAPIMessageCallback<RealtimeExtraGeom>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.ExtraGeomsMessage>,
   ) {
     this.unsubscribe("extra_geoms", "", onMessage);
   }
@@ -757,8 +711,8 @@ class RealtimeAPI {
    * @public
    */
   unsubscribeFullTrajectory(
-    id: RealtimeTrainId,
-    onMessage?: WebSocketAPIMessageCallback<RealtimeFullTrajectoryCollection>,
+    id: Realtime.TrainId,
+    onMessage?: WebSocketAPIMessageCallback<Realtime.FullTrajectoryMessage>,
   ) {
     this.unsubscribe("full_trajectory", `_${id}`, onMessage);
   }
@@ -778,8 +732,8 @@ class RealtimeAPI {
    * @public
    */
   unsubscribeNewsticker(
-    tenant: RealtimeTenant,
-    onMessage?: WebSocketAPIMessageCallback<RealtimeNews>,
+    tenant: Realtime.Tenant,
+    onMessage?: WebSocketAPIMessageCallback<Realtime.NewsMessage>,
   ) {
     this.unsubscribe(`${tenant}_newsticker`, "", onMessage);
   }
@@ -790,7 +744,7 @@ class RealtimeAPI {
    * @public
    */
   unsubscribeStations(
-    onMessage?: WebSocketAPIMessageCallback<RealtimeStation>,
+    onMessage?: WebSocketAPIMessageCallback<Realtime.StationMessage>,
   ) {
     this.unsubscribe("station", "", onMessage);
   }
@@ -803,8 +757,8 @@ class RealtimeAPI {
    * @public
    */
   unsubscribeStopSequence(
-    id: RealtimeTrainId,
-    onMessage?: WebSocketAPIMessageCallback<RealtimeStopSequence[]>,
+    id: Realtime.TrainId,
+    onMessage?: WebSocketAPIMessageCallback<Realtime.StopSequenceMessage>,
   ) {
     this.unsubscribe(`stopsequence`, `_${id}`, onMessage);
   }
@@ -816,8 +770,8 @@ class RealtimeAPI {
    * @public
    */
   unsubscribeTimetable(
-    stationId: RealtimeStationId,
-    onMessage?: WebSocketAPIMessageCallback<RealtimeDeparture>,
+    stationId: Realtime.StationId,
+    onMessage?: WebSocketAPIMessageCallback<Realtime.TimetableMessage>,
   ) {
     this.unsubscribe(`timetable_${stationId}`, "", onMessage);
   }
@@ -828,7 +782,7 @@ class RealtimeAPI {
    * @public
    */
   unsubscribeTrajectory(
-    onMessage: WebSocketAPIMessageCallback<RealtimeTrajectory>,
+    onMessage: WebSocketAPIMessageCallback<Realtime.PartialTrajectoryMessage>,
   ) {
     this.unsubscribe(`trajectory`, "", onMessage);
   }

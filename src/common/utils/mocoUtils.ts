@@ -8,7 +8,7 @@ import type {
   MocoNotificationFeatureCollectionToRender,
   MocoNotificationFeatureToRender,
 } from "../../ol/layers/MocoLayer";
-import type { SituationType } from "../../types";
+import type { Moco } from "../../types";
 
 export const getTime = (str: string) => {
   return parseInt(str?.substr(0, 8).replace(/:/g, ""), 10);
@@ -19,7 +19,7 @@ const geojson = new GeoJSONFormat();
  * Determines if the current date is within an affected time intervals of a situation.
  */
 export const isMocoSituationAffected = (
-  situation: Partial<SituationType>,
+  situation: Partial<Moco.SituationType>,
   now: Date = new Date(),
 ) => {
   return !!situation.affectedTimeIntervals?.some((affectedTimeInterval) => {
@@ -48,7 +48,7 @@ export const isMocoSituationAffected = (
  * Determines if the current date is within a publication windows of a situation.
  */
 export const isMocoSituationPublished = (
-  situation: Partial<SituationType>,
+  situation: Partial<Moco.SituationType>,
   now: Date = new Date(),
 ) => {
   const publicationWindows =
@@ -131,15 +131,13 @@ export const getMocoIconRefFeature = (
   return icon;
 };
 
-const to4326 = (
-  geometry3857: GeoJSON.LineString | GeoJSON.Point,
-): GeoJSON.LineString | GeoJSON.Point => {
+const to4326 = (geometry3857: GeoJSON.Geometry): GeoJSON.Geometry => {
   return geojson.writeGeometryObject(
     geojson.readGeometry(geometry3857, {
       dataProjection: "EPSG:3857",
       featureProjection: "EPSG:4326",
     }),
-  ) as GeoJSON.LineString | GeoJSON.Point;
+  );
 };
 
 export const getMocoReasonCategoryImageName = (
@@ -160,7 +158,7 @@ export const getMocoReasonCategoryImageName = (
  * This also creates an icon for each affected line if hasIcon property is true.
  */
 export const getFeatureCollectionToRenderFromSituation = (
-  situation: Partial<SituationType>,
+  situation: Partial<Moco.SituationType>,
   date: Date = new Date(),
 ): MocoNotificationFeatureCollectionToRender => {
   const features: MocoNotificationFeatureToRender[] = [];
@@ -196,59 +194,17 @@ export const getFeatureCollectionToRenderFromSituation = (
 
     publication.publicationLines?.forEach((publicationLine) => {
       publicationLine.lines.forEach((line) => {
-        line.geometry.forEach(
-          ({
-            geom,
-            graph,
-          }: {
-            geom: GeoJSON.LineString | GeoJSON.Point;
-            graph: string;
-          }) => {
-            const feature: MocoNotificationFeatureToRender = {
-              geometry: to4326(geom),
-              id: uuid(),
-              properties: {
-                graph,
-                hasIcon: publicationLine.hasIcon,
-                line,
-                mot: publicationLine.mot,
-                // We pass the ids to be able to identify the publication and the situation related to
-                publicationId: publication.id,
-                situationId: situation.id!,
-                ...situationRenderProps,
-                ...publicationRenderProps,
-                geometry: undefined, // to avoid conflict with ol geometry property
-              },
-              type: "Feature",
-            };
-            features.push(feature);
-
-            if (publicationLine.hasIcon) {
-              const iconFeature = getMocoIconRefFeature(feature);
-              iconFeature.properties.situationId = situation.id!; // make the sure the situation is passed
-              features.push(iconFeature);
-            }
-          },
-        );
-      });
-    });
-    publication.publicationStops?.forEach((publicationStop) => {
-      publicationStop.geometry.forEach(
-        ({
-          geom,
-          graph,
-        }: {
-          geom: GeoJSON.LineString | GeoJSON.Point;
-          graph: string;
-        }) => {
+        line.geometry.forEach(({ geom, graph }) => {
           const feature: MocoNotificationFeatureToRender = {
-            geometry: to4326(geom),
+            geometry: to4326(geom) as GeoJSON.LineString | GeoJSON.Point,
             id: uuid(),
             properties: {
               graph,
-              name: publicationStop.name,
+              hasIcon: publicationLine.hasIcon,
+              line,
+              mot: publicationLine.mot,
+              // We pass the ids to be able to identify the publication and the situation related to
               publicationId: publication.id,
-              publicationStopId: publicationStop.id,
               situationId: situation.id!,
               ...situationRenderProps,
               ...publicationRenderProps,
@@ -257,8 +213,34 @@ export const getFeatureCollectionToRenderFromSituation = (
             type: "Feature",
           };
           features.push(feature);
-        },
-      );
+
+          if (publicationLine.hasIcon) {
+            const iconFeature = getMocoIconRefFeature(feature);
+            iconFeature.properties.situationId = situation.id!; // make the sure the situation is passed
+            features.push(iconFeature);
+          }
+        });
+      });
+    });
+    publication.publicationStops?.forEach((publicationStop) => {
+      publicationStop.geometry.forEach(({ geom, graph }) => {
+        const feature: MocoNotificationFeatureToRender = {
+          geometry: to4326(geom) as GeoJSON.LineString | GeoJSON.Point,
+          id: uuid(),
+          properties: {
+            graph,
+            name: publicationStop.name,
+            publicationId: publication.id,
+            publicationStopId: publicationStop.id,
+            situationId: situation.id!,
+            ...situationRenderProps,
+            ...publicationRenderProps,
+            geometry: undefined, // to avoid conflict with ol geometry property
+          },
+          type: "Feature",
+        };
+        features.push(feature);
+      });
     });
   });
   return {

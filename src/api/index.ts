@@ -7,7 +7,7 @@ export type * from "./MocoAPI";
 export { default as MocoAPI } from "./MocoAPI";
 
 export type * from "./RealtimeAPI";
-export { default as RealtimeAPI, RealtimeModes } from "./RealtimeAPI";
+export { default as RealtimeAPI } from "./RealtimeAPI";
 
 export type * from "./RealtimeRestAPI";
 export { default as RealtimeRestAPI } from "./RealtimeRestAPI";

@@ -4,8 +4,8 @@ import { buffer, containsCoordinate, intersects } from "ol/extent";
 import GeoJSON from "ol/format/GeoJSON";
 import { fromLonLat } from "ol/proj";
 
-import { RealtimeAPI, RealtimeModes } from "../../api";
-import getGraphByZoom from "../../ol/utils/getGraphByZoom";
+import { RealtimeAPI } from "../../api";
+import { Realtime } from "../../types";
 import realtimeStyle from "../styles/realtimeStyle";
 
 import {
@@ -15,22 +15,15 @@ import {
 } from "./realtimeStyleUtils";
 import renderTrajectories from "./renderTrajectories";
 
-import type { FeatureCollection } from "geojson";
 import type { Coordinate } from "ol/coordinate";
 
 import type { WebSocketAPIMessageEventData } from "../../api/WebSocketAPI";
 import type {
   AnyCanvas,
   LayerGetFeatureInfoOptions,
-  RealtimeBbox,
-  RealtimeMode,
-  RealtimeMot,
   RealtimeRenderState,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
-  RealtimeTenant,
-  RealtimeTrainId,
-  RealtimeTrajectory,
   ViewState,
 } from "../../types";
 import type { FilterFunction, SortFunction } from "../typedefs";
@@ -53,7 +46,10 @@ export interface RealtimeEngineOptions {
     generalizationLevelByZoom: string[],
   ) => string;
   getGraphByZoom?: (zoom: number, graphByZoom: string[]) => string | undefined;
-  getMotsByZoom?: (zoom: number, motsByZoom: RealtimeMot[][]) => RealtimeMot[];
+  getMotsByZoom?: (
+    zoom: number,
+    motsByZoom: Realtime.TmotCode[][],
+  ) => Realtime.TmotCode[];
   getRefreshTimeInMs?: () => number;
   getRenderTimeIntervalByZoom?: (
     zoom: number,
@@ -61,12 +57,13 @@ export interface RealtimeEngineOptions {
   ) => number;
   getViewState?: () => ViewState;
   graphByZoom?: string[];
-  hoverVehicleId?: RealtimeTrainId;
+  hoverVehicleId?: Realtime.TrainId;
   isUpdateBboxOnMoveEnd?: boolean;
   live?: boolean;
   minZoomInterpolation?: number;
-  mode?: RealtimeMode;
-  motsByZoom?: RealtimeMot[][];
+  mode?: Realtime.Mode;
+  motsByZoom?: Realtime.TmotCode[][];
+
   onIdle?: (realtimeEngine: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeEngine: RealtimeEngine) => void;
@@ -75,13 +72,13 @@ export interface RealtimeEngineOptions {
   pixelRatio?: number;
   prefix?: string;
   renderTimeIntervalByZoom?: number[];
-  selectedVehicleId?: RealtimeTrainId;
+  selectedVehicleId?: Realtime.TrainId;
   shouldRender?: () => boolean;
   sort?: SortFunction;
   speed?: number;
   style?: RealtimeStyleFunction;
   styleOptions?: Partial<RealtimeStyleOptions>;
-  tenant?: RealtimeTenant;
+  tenant?: Realtime.Tenant;
   time?: Date;
   url?: string;
   useDebounce?: boolean;
@@ -96,7 +93,7 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
   delayDisplay: 300000,
   delayOutlineColor: "#000",
   getArrowSize: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     radius = 0,
   ) => {
@@ -109,7 +106,7 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
     return "#000";
   },
   getDelayFont: (
-    traj?: RealtimeTrajectory,
+    traj?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     fontSize?: number,
   ) => {
@@ -133,14 +130,14 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
   getRadius: () => {
     return 5;
   },
-  getText: ((traj: RealtimeTrajectory) => {
+  getText: ((traj: Realtime.TrackerTrajectory) => {
     return traj?.properties?.line?.name || "U";
   }) as RealtimeStyleOptions["getText"],
   getTextColor: () => {
     return "#fff";
   },
   getTextFont: (
-    trajectory?: RealtimeTrajectory,
+    trajectory?: Realtime.TrackerTrajectory,
     viewState?: ViewState,
     fontSize?: number,
   ) => {
@@ -157,6 +154,13 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
   // We apply the style options for mot by default to have a usable style out of the box
   ...styleOptionsForMot,
 };
+export interface RenderedTrackerTrajectory extends Realtime.TrackerTrajectory {
+  properties: {
+    cancelled?: boolean;
+    coordinate?: Coordinate;
+    rotation?: null | number;
+  } & Realtime.TrackerTrajectory["properties"];
+}
 
 /**
  * This class is responsible for drawing trajectories from a realtime API in a canvas,
@@ -165,19 +169,17 @@ export const defaultStyleOptions: RealtimeStyleOptions = {
  * This class is totally agnostic from Maplibre or OpenLayers and must stay taht way.
  */
 class RealtimeEngine {
-  _generalizationLevelByZoom: string[] = [];
-  _graphByZoom: string[] = [];
   _idleTimeout?: number;
-  _mode: RealtimeMode;
+  _mode: Realtime.Mode;
   _speed: number;
   _style: RealtimeStyleFunction;
   _time: Date;
-
   api: RealtimeAPI;
   bboxParameters?: Record<
     string,
     boolean | boolean[] | number | number[] | string | string[]
   >;
+
   canvas?: AnyCanvas;
   debounceRenderTrajectories: (
     viewState: ViewState,
@@ -187,17 +189,19 @@ class RealtimeEngine {
   filter?: FilterFunction;
   format: GeoJSON;
   generalizationLevel?: string;
+  generalizationLevelByZoom: string[];
   getGeneralizationLevelByZoom: (zoom: number) => string;
   getGraphByZoom: (zoom: number) => string | undefined;
-  getMotsByZoom: (zoom: number) => RealtimeMot[];
+  getMotsByZoom: (zoom: number) => Realtime.TmotCode[];
   getRenderTimeIntervalByZoom: (zoom: number) => number;
-  hoverVehicleId?: RealtimeTrainId;
+  graphByZoom: string[];
+  hoverVehicleId?: Realtime.TrainId;
   isIdle = false;
   isUpdateBboxOnMoveEnd: boolean;
   live?: boolean;
   minZoomInterpolation: number;
-  mots?: RealtimeMot[];
-  motsByZoom: RealtimeMot[][];
+  mots?: Realtime.TmotCode[];
+  motsByZoom: Realtime.TmotCode[][];
   onIdle?: (realtimeLayer: RealtimeEngine) => void;
   onRender?: (renderState: RealtimeRenderState, viewState: ViewState) => void;
   onStart?: (realtimeLayer: RealtimeEngine) => void;
@@ -206,53 +210,34 @@ class RealtimeEngine {
   renderState?: RealtimeRenderState;
   renderTimeIntervalByZoom: number[];
   requestId?: number;
-  selectedVehicle!: RealtimeTrajectory;
-  selectedVehicleId?: RealtimeTrainId;
+  selectedVehicle!: Realtime.TrackerTrajectory;
+  selectedVehicleId?: Realtime.TrainId;
   sort?: SortFunction;
   styleOptions: RealtimeStyleOptions;
-  tenant: RealtimeTenant;
+  tenant: Realtime.Tenant;
   throttleRenderTrajectories: (
     viewState: ViewState,
     noInterpolate?: boolean,
   ) => void;
-  trajectories?: Record<RealtimeTrainId, RealtimeTrajectory>;
+  trajectories?: Record<
+    Realtime.TrainId,
+    {
+      properties: {
+        coordinate?: Coordinate;
+        rotation?: null | number;
+      } & Realtime.TrackerTrajectory["properties"];
+    } & Realtime.TrackerTrajectory
+  >;
   updateTimeDelay?: number;
   updateTimeInterval?: number;
   useDebounce?: boolean;
   useRequestAnimationFrame?: boolean;
   useThrottle?: boolean;
 
-  get generalizationLevelByZoom() {
-    return this._generalizationLevelByZoom;
-  }
-  set generalizationLevelByZoom(generalizationLevelByZoom: string[]) {
-    if (
-      JSON.stringify(this._generalizationLevelByZoom) ===
-      JSON.stringify(generalizationLevelByZoom)
-    ) {
-      return;
-    }
-    this._generalizationLevelByZoom = generalizationLevelByZoom;
-    this.setBbox();
-  }
-
-  get graphByZoom() {
-    return this._graphByZoom;
-  }
-
-  set graphByZoom(graphByZoom: string[]) {
-    if (JSON.stringify(this._graphByZoom) === JSON.stringify(graphByZoom)) {
-      return;
-    }
-    this._graphByZoom = graphByZoom;
-    this.setBbox();
-  }
-
   get mode() {
     return this._mode;
   }
-
-  set mode(newMode: RealtimeMode) {
+  set mode(newMode: Realtime.Mode) {
     if (newMode === this._mode) {
       return;
     }
@@ -293,8 +278,7 @@ class RealtimeEngine {
   }
 
   constructor(options: RealtimeEngineOptions) {
-    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-    this._mode = options.mode || RealtimeModes.TOPOGRAPHIC;
+    this._mode = options.mode || Realtime.ModeEnum.TOPOGRAPHIC;
     this._speed = options.speed ?? 1; // If live property is true. The speed is ignored.
     this._style = options.style ?? realtimeStyle;
     this._time = options.time ?? new Date();
@@ -330,7 +314,7 @@ class RealtimeEngine {
       ...defaultStyleOptions,
       ...(options.styleOptions ?? {}),
     };
-    this.tenant = options.tenant ?? ""; // sbb,sbh or sbm
+    this.tenant = options.tenant ?? Realtime.TenantEnum.EMPTY; // sbb,sbh or sbm
     this.trajectories = {};
     this.useDebounce = options.useDebounce ?? false;
     this.useRequestAnimationFrame = options.useRequestAnimationFrame ?? false;
@@ -384,33 +368,36 @@ class RealtimeEngine {
     };
 
     // Generalization levels by zoom
-    this._generalizationLevelByZoom = options.generalizationLevelByZoom ?? [];
+    this.generalizationLevelByZoom = options.generalizationLevelByZoom || [];
     this.getGeneralizationLevelByZoom = (zoom) => {
       if (options.getGeneralizationLevelByZoom) {
         return options.getGeneralizationLevelByZoom(
           zoom,
-          this._generalizationLevelByZoom,
+          this.generalizationLevelByZoom,
         );
       }
-      if (zoom > this._generalizationLevelByZoom.length - 1) {
-        return this._generalizationLevelByZoom[
-          this._generalizationLevelByZoom.length - 1
+      if (zoom > this.generalizationLevelByZoom.length - 1) {
+        return this.generalizationLevelByZoom[
+          this.generalizationLevelByZoom.length - 1
         ];
       }
-      return this._generalizationLevelByZoom[zoom];
+      return this.generalizationLevelByZoom[zoom];
     };
 
     // Graph by zoom
-    this._graphByZoom = options.graphByZoom ?? [];
+    this.graphByZoom = options.graphByZoom ?? [];
     this.getGraphByZoom = (zoom) => {
       if (options.getGraphByZoom) {
-        return options.getGraphByZoom(zoom, this._graphByZoom);
+        return options.getGraphByZoom(zoom, this.graphByZoom);
       }
-      return getGraphByZoom(zoom, this._graphByZoom);
+      if (zoom > this.graphByZoom.length - 1) {
+        return this.graphByZoom?.[this.graphByZoom.length - 1];
+      }
+      return this.graphByZoom?.[zoom];
     };
 
     // Render time interval by zoom
-    this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom ?? [
+    this.renderTimeIntervalByZoom = options.renderTimeIntervalByZoom || [
       100000, 50000, 40000, 30000, 20000, 15000, 10000, 5000, 2000, 1000, 400,
       300, 250, 180, 90, 60, 50, 50, 50, 50, 50,
     ];
@@ -458,8 +445,10 @@ class RealtimeEngine {
    * @param {RealtimeTrajectory} trajectory The trajectory to add.
    * @private
    */
-  addTrajectory(trajectory: RealtimeTrajectory) {
-    this.trajectories ??= {};
+  addTrajectory(trajectory: Realtime.TrackerTrajectory) {
+    if (!this.trajectories) {
+      this.trajectories = {};
+    }
     const id = trajectory.properties.train_id;
     if (id !== undefined) {
       this.trajectories[id] = trajectory;
@@ -472,6 +461,7 @@ class RealtimeEngine {
     // We stop the rendering and the websocket when hide and start again when show.
     document.addEventListener(
       "visibilitychange",
+      // function bound in constructor
       // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
@@ -480,6 +470,7 @@ class RealtimeEngine {
   detachFromMap() {
     document.removeEventListener(
       "visibilitychange",
+      // function bound in constructor
       // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDocumentVisibilityChange,
     );
@@ -541,7 +532,7 @@ class RealtimeEngine {
     return (
       (this.trajectories &&
         // @ts-expect-error good type must be defined
-        Object.values(this.trajectories).filter(filterFc)) ??
+        Object.values(this.trajectories).filter(filterFc)) ||
       []
     );
   }
@@ -558,14 +549,14 @@ class RealtimeEngine {
   getVehiclesAtCoordinate(
     coordinate: Coordinate,
     options?: LayerGetFeatureInfoOptions,
-  ): FeatureCollection {
+  ): GeoJSON.FeatureCollection {
     const { resolution } = this.getViewState();
-    const { hitTolerance, nb } = options ?? {};
+    const { hitTolerance, nb } = options || {};
     const extent = buffer(
       [...coordinate, ...coordinate],
       (hitTolerance ?? 5) * (resolution ?? 1),
     );
-    let trajectories = Object.values(this.trajectories ?? {});
+    let trajectories = Object.values(this.trajectories || {});
 
     if (this.sort) {
       // @ts-expect-error good type must be defined
@@ -600,7 +591,7 @@ class RealtimeEngine {
    * @override
    */
   onDeleteTrajectoryMessage(
-    data: WebSocketAPIMessageEventData<RealtimeTrainId>,
+    data: WebSocketAPIMessageEventData<Realtime.TrainId>,
   ) {
     if (!data.content) {
       return;
@@ -631,7 +622,7 @@ class RealtimeEngine {
    *
    * @private
    */
-  onTrajectoryMessage(data: WebSocketAPIMessageEventData<RealtimeTrajectory>) {
+  onTrajectoryMessage(data: Realtime.PartialTrajectoryMessage) {
     this.updateIdleState();
     if (!data.content) {
       return;
@@ -641,6 +632,7 @@ class RealtimeEngine {
     const {
       geometry,
       properties: {
+        // @ts-expect-error - missing type definition
         raw_coordinates: rawCoordinates,
         time_since_update: timeSinceUpdate,
       },
@@ -659,12 +651,12 @@ class RealtimeEngine {
 
     if (
       this.debug &&
-      this.mode === RealtimeModes.TOPOGRAPHIC &&
+      this.mode === Realtime.ModeEnum.TOPOGRAPHIC &&
       rawCoordinates
     ) {
       // @ts-expect-error missing type definition
       trajectory.properties.olGeometry = this.format.readGeometry({
-        coordinates: fromLonLat(rawCoordinates),
+        coordinates: fromLonLat(rawCoordinates as Coordinate),
         type: "Point",
       });
     } else {
@@ -691,11 +683,14 @@ class RealtimeEngine {
    * Remove all trajectories that are in the past.
    */
   purgeOutOfDateTrajectories() {
-    Object.entries(this.trajectories ?? {}).forEach(([key, trajectory]) => {
+    Object.entries(this.trajectories || {}).forEach(([key, trajectory]) => {
       const timeIntervals = trajectory?.properties?.time_intervals;
       if (this.time && timeIntervals?.length) {
         const lastTimeInterval = timeIntervals[timeIntervals.length - 1][0];
-        if (lastTimeInterval < this.time.getTime()) {
+        if (
+          lastTimeInterval !== null &&
+          lastTimeInterval < this.time.getTime()
+        ) {
           this.removeTrajectory(key);
         }
       }
@@ -712,7 +707,7 @@ class RealtimeEngine {
    * @return {boolean} if the trajectory must be displayed or not.
    * @private
    */
-  purgeTrajectory(trajectory: RealtimeTrajectory) {
+  purgeTrajectory(trajectory: Realtime.TrackerTrajectory) {
     const viewState = this.getViewState();
     const extent = viewState.extent;
     const { bounds, type } = trajectory.properties;
@@ -727,7 +722,9 @@ class RealtimeEngine {
     return false;
   }
 
-  removeTrajectory(trajectoryOrId: RealtimeTrainId | RealtimeTrajectory) {
+  removeTrajectory(
+    trajectoryOrId: Realtime.TrackerTrajectory | Realtime.TrainId,
+  ) {
     let id: string | undefined;
     if (typeof trajectoryOrId !== "string") {
       id = trajectoryOrId?.properties?.train_id;
@@ -818,7 +815,7 @@ class RealtimeEngine {
       this.style,
       {
         ...viewState,
-        pixelRatio: this.pixelRatio ?? 1,
+        pixelRatio: this.pixelRatio || 1,
         time: time.getTime(),
       },
       {
@@ -826,7 +823,7 @@ class RealtimeEngine {
         filter: this.filter,
         hoverVehicleId: this.hoverVehicleId,
         noInterpolate:
-          (viewState.zoom ?? 0) < this.minZoomInterpolation
+          (viewState.zoom || 0) < this.minZoomInterpolation
             ? true
             : noInterpolate,
         selectedVehicleId: this.selectedVehicleId,
@@ -870,7 +867,7 @@ class RealtimeEngine {
     // The extent does not need to be precise under meter, so we round floor/ceil the values.
     const [minX, minY, maxX, maxY] = extent;
 
-    const bbox: RealtimeBbox = [
+    const bbox: Realtime.Bbox = [
       Math.floor(minX),
       Math.floor(minY),
       Math.ceil(maxX),
@@ -894,7 +891,7 @@ class RealtimeEngine {
       bbox.push(`tenant=${this.tenant}`);
     }
 
-    if (this.mode !== "topographic") {
+    if (this.mode !== Realtime.ModeEnum.TOPOGRAPHIC) {
       bbox.push(`channel_prefix=${this.mode}`);
     }
 
@@ -933,14 +930,12 @@ class RealtimeEngine {
     this.api.open();
     this.api.subscribeTrajectory(
       this.mode,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onTrajectoryMessage,
       undefined,
       this.isUpdateBboxOnMoveEnd,
     );
     this.api.subscribeDeletedVehicles(
       this.mode,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       this.onDeleteTrajectoryMessage,
       undefined,
       this.isUpdateBboxOnMoveEnd,
@@ -976,9 +971,7 @@ class RealtimeEngine {
   }
 
   stop() {
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     this.api.unsubscribeTrajectory(this.onTrajectoryMessage);
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     this.api.unsubscribeDeletedVehicles(this.onDeleteTrajectoryMessage);
     this.api.close();
     if (this.onStop) {
