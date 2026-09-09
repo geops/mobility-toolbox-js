@@ -11,7 +11,7 @@
     "@mui/material": "^9.2.0",
     "@mui/material-nextjs": "^9.1.1",
     "codesandbox": "2.2.3",
-    "maplibre-gl": "5.24.0",
+    "maplibre-gl": "6.4.1",
     "mobility-toolbox-js": "./../build",
     "next": "16.2.12",
     "ol": "10.9.0",
