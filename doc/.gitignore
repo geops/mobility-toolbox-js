@@ -14,7 +14,11 @@
 
 # production
 /build
+
+# generated files
 /public/maplibre-gl*
+/AGENTS.md
+/CLAUDE.md
 
 # misc
 .DS_Store
