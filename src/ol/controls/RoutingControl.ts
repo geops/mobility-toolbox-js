@@ -556,13 +556,14 @@ class RoutingControl extends Control {
               // Create LineString features from segments with same unique value
               this.segments = uniqueVias.map((via) => {
                 const viaSegments = this.segments.filter((seg) => {
-                  const segTrg = seg.get("trg");
+                  const segTrg = seg.get("trg") as Coordinate;
                   return segTrg[0] === via[0] && segTrg[1] === via[1];
                 });
 
                 const coords = getFlatCoordinatesFromSegments(viaSegments);
                 return new Feature({
                   geometry: new LineString(coords),
+                  trg: viaSegments[0].get("trg") as Coordinate,
                 });
               });
             }
