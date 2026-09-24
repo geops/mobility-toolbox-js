@@ -56,4 +56,5 @@ class TextEncoder {
   decode() {}
 }
 
+global.TextEncoder = TextEncoder;
 global.TextDecoder = TextEncoder;

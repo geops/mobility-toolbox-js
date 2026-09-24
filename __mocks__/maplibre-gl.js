@@ -1,6 +1,27 @@
-import { Evented } from 'maplibre-gl';
-
 const callbacks = {};
+
+// maplibre-gl v6+ is ESM-only and can't be resolved by Jest, so Evented is reimplemented here.
+class Evented {
+  on() {
+    return this;
+  }
+
+  off() {
+    return this;
+  }
+
+  once() {
+    return this;
+  }
+
+  fire() {
+    return this;
+  }
+
+  listens() {
+    return false;
+  }
+}
 
 /* eslint-disable class-methods-use-this */
 class Map {
@@ -27,8 +48,8 @@ class Map {
 
   getCanvas() {
     return {
-      height: '100px',
-      width: '100px',
+      height: "100px",
+      width: "100px",
       setAttribute: () => {},
       removeAttribute: () => {},
     };
@@ -80,7 +101,9 @@ class Map {
 
   setStyle() {}
 }
-module.exports = {
+
+export { Evented, Map };
+export default {
   Map,
   Evented,
 };
