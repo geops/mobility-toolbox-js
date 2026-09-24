@@ -175,12 +175,12 @@ function Example({ example }) {
                 <SyntaxHighlighter language="javascript">
                   {js}
                 </SyntaxHighlighter>
-                {/* <CodeSandboxButton
+                <CodeSandboxButton
                   style={editButtonStyle}
                   extraFiles={example.extraFiles || {}}
                   html={html}
                   js={js}
-                /> */}
+                />
                 <StackBlitzButton
                   style={editButtonStyle}
                   extraFiles={example.extraFiles || {}}
