@@ -3,7 +3,7 @@
     "outDir": "./build",
     "rootDir": "./src",
     "allowJs": true,
-    "target": "es6",
+    "target": "ES2020",
     "strict": true,
     // Generate d.ts files
     "declaration": true,

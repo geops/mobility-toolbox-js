@@ -3,15 +3,22 @@ import { toDegrees } from "ol/math.js";
 import { toLonLat } from "ol/proj";
 
 import type { MapLibreLayerTranslateZoomFunction } from "@geoblocks/ol-maplibre-layer/lib/MapLibreLayer";
-import type { Map } from "maplibre-gl";
 import type { FrameState } from "ol/Map";
 
 import type { MaplibreLayer } from "../layers";
 
-function sameSize(map: Map, frameState: FrameState): boolean {
+// function sameSize(map: Map, frameState: FrameState): boolean {
+//   console.log(map, frameState);
+//   return (
+//     map.transform.width === Math.floor(frameState.size[0]) &&
+//     map.transform.height === Math.floor(frameState.size[1])
+//   );
+// }
+
+function sameSize(canvas: HTMLCanvasElement, frameState: FrameState): boolean {
   return (
-    map.transform.width === Math.floor(frameState.size[0]) &&
-    map.transform.height === Math.floor(frameState.size[1])
+    canvas.width === Math.floor(frameState.size[0] * frameState.pixelRatio) &&
+    canvas.height === Math.floor(frameState.size[1] * frameState.pixelRatio)
   );
 }
 
@@ -57,7 +64,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
     if (
       this.ready &&
       this.ignoreNextRender &&
-      sameSize(mapLibreMap, frameState)
+      sameSize(mapLibreMap.getCanvas(), frameState)
     ) {
       this.ignoreNextRender = false;
       return mapLibreMap.getContainer();
@@ -90,7 +97,7 @@ export default class MaplibreLayerRenderer extends MapLibreLayerRenderer {
       // The canvas is not connected to the DOM, request a map rendering at the next animation frame
       // to set the canvas size.
       map.render();
-    } else if (!sameSize(mapLibreMap, frameState)) {
+    } else if (!sameSize(mapLibreMap.getCanvas(), frameState)) {
       mapLibreMap.resize();
     }
 

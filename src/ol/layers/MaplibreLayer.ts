@@ -15,6 +15,7 @@ import type {
   MapLibreLayerOptions,
   MapLibreOptions,
 } from "@geoblocks/ol-maplibre-layer/lib/MapLibreLayer";
+import type * as maplibregl from "maplibre-gl";
 import type { QueryRenderedFeaturesOptions } from "maplibre-gl";
 import type { EventsKey } from "ol/events";
 import type Map from "ol/Map";
