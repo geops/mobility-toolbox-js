@@ -77,7 +77,7 @@ const mocoLayer = new MocoLayer({
 const map = new Map({
   layers: [
     baseLayer,
-    // lnpLayer,
+    lnpLayer,
     // mocoLayer,
     // mapsetLayer,
     realtimeLayer,
