@@ -289,13 +289,13 @@ class RealtimeAPI {
    * Get the list of ststions available for a specifc mode. The promise is resolved every 100ms
    * @param {RealtimeMode} mode Realtime mode.
    * @param {number} timeout = 100 Duration in ms between each promise resolve calls.
-   * @return {Promise<RealtimeStation[]>} An array of stations.
+   * @return {Promise<StationMessage[]>} An array of stations.
    * @public
    */
   getStations(
     mode: Realtime.Mode,
     timeout = 100,
-  ): Promise<Realtime.StationMessage[]> {
+  ): Promise<WebSocketAPIMessageEventData<Realtime.StationMessage[]>> {
     return new Promise((resolve, reject) => {
       this.get<Realtime.StationMessage>(`station${getModeSuffix(mode)}`)
         // @ts-expect-error check this
@@ -721,7 +721,9 @@ class RealtimeAPI {
    * Unsubscribe to healthcheck channel.
    * @param {function(data: { content: string })} onMessage Callback function to unsubscribe. If null all subscriptions for the channel will be unsubscribed.
    */
-  unsubscribeHealthCheck(onMessage?: WebSocketAPIMessageCallback<string>) {
+  unsubscribeHealthCheck(
+    onMessage?: WebSocketAPIMessageCallback<Realtime.HealthCheckMessage>,
+  ) {
     this.unsubscribe("healthcheck", "", onMessage);
   }
 

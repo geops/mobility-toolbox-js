@@ -162,7 +162,7 @@ class RoutingControl extends Control {
 
   routingLayer?: VectorLayer<VectorSource>;
 
-  segments: Feature<LineString>[] = [];
+  segments: Feature<LineString, { trg: Coordinate }>[] = [];
 
   snapToClosestStation = false;
 
@@ -537,7 +537,7 @@ class RoutingControl extends Control {
           .then((featureCollection) => {
             this.segments = this.format.readFeatures(
               featureCollection,
-            ) as Feature<LineString>[];
+            ) as Feature<LineString, { trg: Coordinate }>[];
 
             if (this.mot === "foot") {
               // Extract unique values from viaPoint target value
