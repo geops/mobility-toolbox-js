@@ -1,2 +1,2 @@
 type GetFullTrajectoryCommand = string;
-export default GetFullTrajectoryCommand;
+export type { GetFullTrajectoryCommand as default };

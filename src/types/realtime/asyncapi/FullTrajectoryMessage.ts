@@ -6,4 +6,4 @@ interface FullTrajectoryMessage {
   source: string;
   timestamp: number;
 }
-export default FullTrajectoryMessage;
+export type { FullTrajectoryMessage as default };

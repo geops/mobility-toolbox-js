@@ -1,2 +1,2 @@
 type BBoxCommand = string;
-export default BBoxCommand;
+export type { BBoxCommand as default };

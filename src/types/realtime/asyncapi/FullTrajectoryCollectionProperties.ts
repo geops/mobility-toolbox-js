@@ -13,4 +13,4 @@ interface FullTrajectoryCollectionProperties {
   tenant?: string;
   train_id: string;
 }
-export default FullTrajectoryCollectionProperties;
+export type { FullTrajectoryCollectionProperties as default };

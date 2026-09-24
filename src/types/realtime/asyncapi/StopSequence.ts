@@ -34,4 +34,4 @@ interface StopSequence {
   type: null | TmotCode;
   vehicle_mode: null | string;
 }
-export default StopSequence;
+export type { StopSequence as default };

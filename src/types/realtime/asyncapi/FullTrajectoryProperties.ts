@@ -12,4 +12,4 @@ interface FullTrajectoryProperties {
   train_id: string;
   type?: null | TmotCode;
 }
-export default FullTrajectoryProperties;
+export type { FullTrajectoryProperties as default };
