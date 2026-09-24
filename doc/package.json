@@ -33,8 +33,9 @@
     "sass": "1.105.0"
   },
   "scripts": {
-    "build": "next build --webpack",
-    "dev": "next dev --webpack",
+    "build": "pnpm copy:maplibre-worker && next build --webpack",
+    "copy:maplibre-worker": "cp node_modules/maplibre-gl/dist/maplibre-gl* public/",
+    "dev": "pnpm copy:maplibre-worker && next dev --webpack",
     "lint": "next lint  --webpack",
     "start": "next start",
     "updeps": "pnpm up -i --latest"
