@@ -1,4 +1,6 @@
-import { RealtimeAPI, RealtimeModes } from ".";
+import { Realtime } from "../types";
+
+import { RealtimeAPI } from ".";
 
 describe("RealtimeAPI", () => {
   let api;
@@ -26,7 +28,7 @@ describe("RealtimeAPI", () => {
         });
       });
 
-      [null, RealtimeModes.TOPOGRAPHIC].forEach((mode) => {
+      [null, Realtime.ModeEnum.TOPOGRAPHIC].forEach((mode) => {
         describe(`using mode ${mode}`, () => {
           test("using id", (done) => {
             api.getFullTrajectory("foo", mode).then(() => {
@@ -52,7 +54,7 @@ describe("RealtimeAPI", () => {
 
       describe("using schematic mode ", () => {
         test("using id", (done) => {
-          api.getFullTrajectory("foo", RealtimeModes.SCHEMATIC).then(() => {
+          api.getFullTrajectory("foo", Realtime.ModeEnum.SCHEMATIC).then(() => {
             expect(get.mock.calls.length).toBe(1);
             expect(get.mock.calls[0][0]).toEqual({
               channel: "full_trajectory_schematic_foo",
@@ -62,13 +64,15 @@ describe("RealtimeAPI", () => {
         });
 
         test("doesn't use generalizationLevel param", (done) => {
-          api.getFullTrajectory("foo", RealtimeModes.SCHEMATIC, 10).then(() => {
-            expect(get.mock.calls.length).toBe(1);
-            expect(get.mock.calls[0][0]).toEqual({
-              channel: "full_trajectory_schematic_foo",
+          api
+            .getFullTrajectory("foo", Realtime.ModeEnum.SCHEMATIC, 10)
+            .then(() => {
+              expect(get.mock.calls.length).toBe(1);
+              expect(get.mock.calls[0][0]).toEqual({
+                channel: "full_trajectory_schematic_foo",
+              });
+              done();
             });
-            done();
-          });
         });
       });
     });
@@ -96,7 +100,7 @@ describe("RealtimeAPI", () => {
         });
       });
 
-      [null, RealtimeModes.TOPOGRAPHIC].forEach((mode) => {
+      [null, Realtime.ModeEnum.TOPOGRAPHIC].forEach((mode) => {
         describe(`using mode ${mode}`, () => {
           test("using id", (done) => {
             api.getFullTrajectory("foo", mode).then(() => {
@@ -122,7 +126,7 @@ describe("RealtimeAPI", () => {
 
       describe("using schematic mode ", () => {
         test("using id", (done) => {
-          api.getFullTrajectory("foo", RealtimeModes.SCHEMATIC).then(() => {
+          api.getFullTrajectory("foo", Realtime.ModeEnum.SCHEMATIC).then(() => {
             expect(get.mock.calls.length).toBe(1);
             expect(get.mock.calls[0][0]).toEqual({
               channel: "full_trajectory_foo",
@@ -132,13 +136,15 @@ describe("RealtimeAPI", () => {
         });
 
         test("doesn't use generalizationLevel param", (done) => {
-          api.getFullTrajectory("foo", RealtimeModes.SCHEMATIC, 10).then(() => {
-            expect(get.mock.calls.length).toBe(1);
-            expect(get.mock.calls[0][0]).toEqual({
-              channel: "full_trajectory_foo",
+          api
+            .getFullTrajectory("foo", Realtime.ModeEnum.SCHEMATIC, 10)
+            .then(() => {
+              expect(get.mock.calls.length).toBe(1);
+              expect(get.mock.calls[0][0]).toEqual({
+                channel: "full_trajectory_foo",
+              });
+              done();
             });
-            done();
-          });
         });
       });
     });

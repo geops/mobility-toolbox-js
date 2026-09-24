@@ -4,7 +4,7 @@ import { getColorForType } from "../../common/utils/realtimeStyleUtils";
 
 import type Feature from "ol/Feature";
 
-import type { RealtimeFullTrajectoryProperties } from "../../types";
+import type { Realtime } from "../../types";
 
 const borderStyle = new Style({
   image: new Circle({
@@ -22,7 +22,7 @@ const borderStyle = new Style({
 
 const fullTrajectorystyle = (feature: Feature): Style[] => {
   const { stroke, type } =
-    feature.getProperties() as RealtimeFullTrajectoryProperties;
+    feature.getProperties() as Realtime.FullTrajectoryProperties;
 
   let lineColor = stroke || getColorForType(type) || "#000";
 

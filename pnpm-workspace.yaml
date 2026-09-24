@@ -2,12 +2,19 @@ packages:
   - doc
 
 allowBuilds:
+  '@asyncapi/cli': true
+  '@hyperjump/json-pointer': true
+  '@hyperjump/json-schema': true
+  '@hyperjump/json-schema-core': true
+  '@hyperjump/pact': true
   '@parcel/watcher': true
+  '@scarf/scarf': true
   core-js: true
   cypress: true
   esbuild: true
   sharp: true
   unrs-resolver: true
+  yarn: false
 
 onlyBuiltDependencies:
   - '@parcel/watcher'

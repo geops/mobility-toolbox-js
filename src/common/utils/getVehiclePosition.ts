@@ -4,11 +4,11 @@ import type { Position } from "geojson";
 import type { Coordinate } from "ol/coordinate";
 import type { SimpleGeometry } from "ol/geom";
 
-import type { RealtimeTrajectory } from "../../types";
+import type { RenderedTrackerTrajectory } from "./RealtimeEngine";
 
 export interface VehiclePosition {
   coord?: Coordinate;
-  rotation?: number;
+  rotation?: null | number;
 }
 
 /**
@@ -23,8 +23,11 @@ export interface VehiclePosition {
 const getVehiclePosition = (
   now: number,
   trajectory: {
-    properties: { olGeometry?: SimpleGeometry };
-  } & RealtimeTrajectory,
+    properties: {
+      coordinate?: Coordinate;
+      olGeometry?: SimpleGeometry;
+    };
+  } & RenderedTrackerTrajectory,
   noInterpolate: boolean,
 ): VehiclePosition => {
   const {
@@ -37,7 +40,7 @@ const getVehiclePosition = (
     GeoJSON.LineString | GeoJSON.Point;
   let geometry = olGeometry;
   let coord;
-  let rotation = oldRotation;
+  let rotation = oldRotation ?? null;
 
   // If an olGeometry exists we use it. It avoids to create one each time.
   if (geometry) {
@@ -62,11 +65,11 @@ const getVehiclePosition = (
     // So we make the choice here to display the last (or the first) position
     // of an trajectory event instead of removing them, if the current date is
     // outside the time intervals we display the vehicle at the last (or first) position known.
-    if (now < firstInterval[0]) {
+    if (firstInterval?.[0] && now < firstInterval[0]) {
       // Display first position known.
       [, , rotation] = firstInterval;
       coord = geometry.getFirstCoordinate();
-    } else if (now > lastInterval[0]) {
+    } else if (lastInterval?.[0] && now > lastInterval[0]) {
       // Display last position known.
       [, , rotation] = lastInterval;
       coord = geometry.getLastCoordinate();
@@ -74,10 +77,17 @@ const getVehiclePosition = (
       // Interpolate position using time intervals.
       for (let j = 0; j < intervals.length - 1; j += 1) {
         // Rotation only available in realtime layer.
-        const [start, startFrac] = intervals[j];
-        const [end, endFrac] = intervals[j + 1];
+        const [start, startFrac = 0] = intervals[j];
+        const [end, endFrac = 0] = intervals[j + 1];
 
-        if (start <= now && now <= end) {
+        if (
+          start != null &&
+          end != null &&
+          startFrac != null &&
+          endFrac != null &&
+          start <= now &&
+          now <= end
+        ) {
           // interpolate position inside the time interval.
           const timeFrac = Math.min((now - start) / (end - start), 1);
           const geomFrac = timeFrac * (endFrac - startFrac) + startFrac;

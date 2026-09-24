@@ -1,3 +1,12 @@
+import {
+  type AnyCanvas,
+  type AnyCanvasContext,
+  Realtime,
+  type RealtimeStyleFunction,
+  type RealtimeStyleOptions,
+  type StyleCache,
+  type ViewState,
+} from "../../types";
 import createCanvas from "../utils/createCanvas";
 
 import {
@@ -8,14 +17,7 @@ import {
   getTextCanvas,
 } from "./realtimeDrawCanvasUtils";
 
-import type {
-  AnyCanvas,
-  RealtimeStyleFunction,
-  RealtimeStyleOptions,
-  RealtimeTrajectory,
-  StyleCache,
-  ViewState,
-} from "../../types";
+import type { RenderedTrackerTrajectory } from "../utils/RealtimeEngine";
 
 const cache: StyleCache = {};
 
@@ -29,7 +31,7 @@ const cache: StyleCache = {};
  * @return a canvas
  */
 const realtimeStyle: RealtimeStyleFunction = (
-  trajectory: RealtimeTrajectory,
+  trajectory: RenderedTrackerTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => {
@@ -71,7 +73,7 @@ const realtimeStyle: RealtimeStyleFunction = (
 
   let color = getColor(trajectory, viewState);
   let textColor = getTextColor(trajectory, viewState);
-  const cancelled = state === "JOURNEY_CANCELLED";
+  const cancelled = state === Realtime.TTrainStateEnum.JOURNEY_CANCELLED;
   const hover = !!(hoverVehicleId && hoverVehicleId === id);
   const selected = !!(selectedVehicleId && selectedVehicleId === id);
 
@@ -124,7 +126,7 @@ const realtimeStyle: RealtimeStyleFunction = (
       !!isDisplayStrokeAndDelay &&
       !!useDelayStyle &&
       delay === null &&
-      operatorProvidesRealtime === "yes";
+      operatorProvidesRealtime === Realtime.OperatorProvidesRealtimeJourney.YES;
 
     const hasDelayText =
       showDelayText &&
@@ -178,7 +180,7 @@ const realtimeStyle: RealtimeStyleFunction = (
         const textSize = getTextSize(
           trajectory,
           viewState,
-          circle.getContext("2d") as CanvasRenderingContext2D,
+          circle.getContext("2d") as AnyCanvasContext,
           radius * 2 - padding,
           name,
           toFontFixed,
@@ -189,7 +191,8 @@ const realtimeStyle: RealtimeStyleFunction = (
         const hasStroke2 =
           !!useDelayStyle &&
           delay === null &&
-          operatorProvidesRealtime === "yes";
+          operatorProvidesRealtime ===
+            Realtime.OperatorProvidesRealtimeJourney.YES;
 
         circleText = getTextCanvas(
           name,

@@ -16,6 +16,148 @@ export interface paths {
       parameters: {
         query: {
           /**
+           * When enabled, every item in the `via` parameter must be a SLOID (Swiss Location ID) in the `!{sloid}` syntax (e.g. `!ch:1:sloid:7000:1:5`). Only supported with `mot=foot` or a public-transport mot.
+           * Each SLOID is looked up in our atlas dataset. For `mot=foot` a hit is routed directly from the atlas coordinates. For public transport the stop is resolved to a geOps stop UID and routed by public transport, falling back to the atlas coordinates when the exact stop or platform is unknown; pass `coord-fallback=false` to opt out of that fallback. SLOIDs that are not found in the atlas are resolved like a normal stop id.
+           * For every response station that came from one of these SLOIDs, the station `id` is set to the SLOID and `ident_source` to `"query"` (indicating the `id` came from your request input). Foot responses additionally get a synthesised `station_from` / `station_to` with the SLOID `id`, `ident_source` and `latitude` / `longitude`. Defaults to `false`.
+           */
+          atlas?: boolean;
+          /**
+           * Whether to use beelines (straight lines) as a fallback for public transport routing.
+           *
+           * When enabled, it works as follows:
+           *
+           * Each routing request is processed in two steps: First, all stop definitions passed in the `via` parameter are resolved into known stops for the specified mode of transport. Then these stops are passed to a routing backend to compute the route between the input stops and points.
+           *
+           * If a stop definition could not be resolved in the first step, resolving the stop definition is attempted a second time but without a specific mode of tranpsort. When this is not possible, the request will fail at this point.
+           *
+           * Otherwise, the stops will be sent to the routing backend. The routing backend will replace portions of the route between consecutive stops by beelines, if the stops are in different connected components of the routing graph for the given mode of transport.
+           *
+           * The routing backend might still be unable to find a route at all, e.g. when a stop was looked up allowing all modes of transport in the first step or when a route is not possible due to restrictions inside the same connected component of the routing graph. In this case, the whole route will be replaced by beelines between coordinates of the stops.
+           *
+           * When using `resolve-hops=false`, the first step is bypassed. In this case, a failure from the routing backend will always lead to a failing request.
+           *
+           * The parameter is ignored for pedestrian routing which always uses a backend-side beeline fallback.
+           */
+          "beeline-fallback"?: boolean;
+          /**
+           * When map matching stops that are referenced by coordinates in public transport routing (see `resolve-hops` parameter), enabling `coord-fallback` will employ a fallback to a pure point if an input stop has zero candidates in the network.
+           *
+           * The parameter is ignored for pedestrian routing.
+           */
+          "coord-fallback"?: boolean;
+          /**
+           * When selecting between multiple candidates for projected points (see `coord-radius`), the cost for traveling from the input point to the respective projected point is proportional to `coord-punish`. Therefore large values will prefer snapping to near edges and small values will prefer short routes in the network (measured from the projected point(s)).
+           *
+           * A negative value (the default) will apply a punishment that is equivalent to using a straight edge from the input point to the projected point with the slowest edge category of the graph for the given mode of transport.
+           *
+           * The parameter is ignored for pedestrian routing (see `coord-radius`).
+           */
+          "coord-punish"?: number;
+          /**
+           * Search radius for candidate edges for projecting points to the routing graph in public transport routing. A negative value (the default) means picking a suitable radius that depends on the given mode of transport. The shortest path between all combinations of different projected points of the different `via` items is picked. The distance to travel from the input points to the respective projected points on the candidate edges in the network is also accounted for (see `coord-punish` parameter).
+           *
+           * Note that this is specifically for pure point inputs (`via` items without `@` prefix) and it has nothing to do with via stops referenced by coordinates.
+           *
+           * The parameter is ignored for pedestrian routing which always uses only the nearest edge for projecting and does not try different candidate edges.
+           */
+          "coord-radius"?: number;
+          /** Whether to decorate the route with SRTM elevation data. If enabled, elevation data is stored in the z-component of the GeoJSON geometries. Units are meters above EPSG:4326 reference ellipsoid. Elevation data is not available everywhere. Missing data has elevation 0 by default. This fallback can be controlled using the `elevation_fallback` parameter. */
+          elevation?: boolean;
+          /** Fallback elevation value for missing data when `elevation` is enabled. */
+          elevation_fallback?: number;
+          /**
+           * The graph used for routing. Useful for obtaining different route geometries that match on different maps or zoom levels of our [Maps API](https://developer.geops.io/apis/maps). The default is `osm` which means the detailed network based on OpenStreetMap and is available for all modes of transport. `gen1` to `gen4` provide networks with increasing levels of generalization. They are available for the following modes of transport:
+           *   - `gen1`: `rail, subway, tram, gondola, funicular`
+           *   - `gen2`: `rail`
+           *   - `gen3`: `rail`
+           *   - `gen4`: `rail`
+           *
+           * The empty string is equivalent to not setting the parameter and will default to `osm`.
+           */
+          graph?: "" | "gen1" | "gen2" | "gen3" | "gen4" | "osm";
+          /** Whether to split the output features at stops along the route even when they were not part of the input in `via`. Ignored for pedestrian routing. */
+          hops?: boolean;
+          /**
+           * Whether to decorate the route with distance travelled at each vertex. The individual length of each feature is stored in the `line_length` feature property and the cumulative segment lengths at the vertices are stored in the `vertex_distances` feature property.
+           *
+           * In other words: `vertex_distances[i]` is the distance traveled along all `LineString`s from vertex `0` of the first feature to vertex `i` of the current feature.
+           *
+           * The distance between the last vertex of the previous feature and the first vertex of the current feature is also taken into account in case there is a gap between consecutive features for some reason. Values are in meters and rounded to 2 decimal places.
+           *
+           * Earth curvature is taken into accout using the EPSG:4326 reference ellipsoid.
+           *
+           * Elevation differences are taken into account if present (see `elevation`). Note that noise in the elevation data can deteriorate the results.
+           *
+           * Distances from input points to points projected onto the network of the selected mode of transport are not accounted for.
+           */
+          length?: boolean;
+          /**
+           * A pipe separated list of levels for pedestrian routing. Empty strings can be used if a level is unknown. The number of items in the list has to be either zero (empty string) or match the number of items in the `via` parameter. An empty string/list means that all levels are unknown.
+           *
+           * Examples:
+           *   - `1|-1|0`: level 1 for first via item, level -1 for second via item,
+           *     level 0 for third via item
+           *   - `1|2||0|`: level 1 for first via item, level 2 for second via item,
+           *     unknown level for third via item, level 0 for fourth via item, unknown
+           *     level for fifth via item
+           *   - `|-2`: unknown level for first via item, level -2 for second via item
+           *
+           *
+           * The parameter is ignored for public transport routing.
+           */
+          levels?: string;
+          /**
+           * A line name like `S1` or `RE 7` that should be preferred for public transport routing. Edges in the network that are not used by this line according to OpenStreetMap data receive a penalty in the shortest path search. Normalization and fuzzy string matching is used to compare the input to line names from OpenStreetMap.
+           *
+           * This parameter is ignored for generalized graphs and for pedestrian routing.
+           */
+          line?: string;
+          /** When using the `line` parameter, `line-from` can be used to prefer a specific branch of the given line by providing the name of the origin stop. Edges in the network that are not used by the line with the given origin according to OpenStreetMap data receive a penalty in the shortest path search. Normalization and fuzzy string matching is used to compare the input to origin names from OpenStreetMap. */
+          "line-from"?: string;
+          /** Same as `line-from` but for the destination stop of the line branch. */
+          "line-to"?: string;
+          /** Maximum allowed ratio of input stops/points to skip if not found. The first and last stop/point can never be skipped and does not count in the ratio numerator and denominator. Note that the number of output features will be reduced accordingly if stops/points are skipped. */
+          "max-skip-hop-ratio"?: number;
+          /** Mode of transport. `foot` selects pedestrian routing. Everything else selects public transport routing. */
+          mot:
+            | "bus"
+            | "coach"
+            | "ferry"
+            | "foot"
+            | "funicular"
+            | "gondola"
+            | "rail"
+            | "subway"
+            | "tram";
+          /** In our stations database which the [Stops API](https://developer.geops.io/apis/stops) is based upon, some entries are marked as not being a true stop/station (for example if the data source is not reliable or it cannot be used by regular passengers). By default, such entries are ignored. By disabling `only-stations`, those entries will also be considered when resolving stops. */
+          "only-stations"?: boolean;
+          /** If not empty, this parameter is forwarded to the [Stops API](https://developer.geops.io/apis/stops) when resolving stops. */
+          prefagencies?: string;
+          /**
+           * Whether to resolve stops in the `via` parameter to geOps stop UIDs using our [Stops API](https://developer.geops.io/apis/stops) for public transport routing. If disabled, the only supported IDs are geOps stop UIDs. So if you already have geOps stop UIDs at hand (for example if you resolve user input using our [Stops API](https://developer.geops.io/apis/stops) in your application, you can use `resolve-hops=false` to get slightly better latency.
+           *
+           * Another use case for `resolve-hops=false` is map matching of stops that are referenced by coordinates (with `@` prefix, see `via` parameter): By default, only the nearest stop of the selected mode of transport is picked within a radius of 10 kilometers. When using `resolve-hops=false`, multiple candidate stops of the given mode of transport are considered for each input within a significantly smaller radius suitable for the given mode of transport and the shortest path between all combinations of all candidates for different stops is computed (similar to routing by pure points). This is the best option for routing when no reliable IDs are available.
+           *
+           * Disabling this option is ignored for pedestrian routing. For pedestrian routing, stops are always resolved.
+           *
+           * The value of the parameter has no effect on pure points (without `@` prefix).
+           */
+          "resolve-hops"?: boolean;
+          /** Tolerance parameter in web mercator units for Douglas-Peucker simplification of output geometries. */
+          simplify?: number;
+          /**
+           * Whether to decorate the route with travel time properties. The constant speed can be set with the `travel-time-speed` parameter. Travel times are calculated based on length calculations (see `length` parameter). Enabling `travel-time` automatically enables `length`. The penalty for changing levels can be set with the `travel-time-floor-change-penalty` parameter.
+           *
+           * Each feature will have its travel time written to the `travel_time` property (in seconds). The total travel time is available in the `travel_time` property of the feature collection.
+           *
+           * Note: Travel times are currently only intended for pedestrian routing where the assumption of a constant speed makes sense.
+           */
+          "travel-time"?: boolean;
+          /** The penalty in seconds per floor level change for travel time calculation ( see `travel-time` parameter). */
+          "travel-time-floor-change-penalty"?: number;
+          /** Constant travel speed in meters per second for travel time calculation (see `travel-time` parameter). */
+          "travel-time-speed"?: number;
+          /**
            * A pipe separated list of stops or points to visit in the given order. A stop (railway station or bus stop, etc.) can be given as
            *   - a name like `Basel SBB` or `Bern, Bahnhof`
            *   - an ID prefixed with `!` like `!8507000` or `!FRBR` or `!de:08311:6508`
@@ -36,156 +178,12 @@ export interface paths {
            *   - `!8000107|basel sbb|Bern`
            */
           via: string;
-          /**
-           * A pipe separated list of levels for pedestrian routing. Empty strings can be used if a level is unknown. The number of items in the list has to be either zero (empty string) or match the number of items in the `via` parameter. An empty string/list means that all levels are unknown.
-           *
-           * Examples:
-           *   - `1|-1|0`: level 1 for first via item, level -1 for second via item,
-           *     level 0 for third via item
-           *   - `1|2||0|`: level 1 for first via item, level 2 for second via item,
-           *     unknown level for third via item, level 0 for fourth via item, unknown
-           *     level for fifth via item
-           *   - `|-2`: unknown level for first via item, level -2 for second via item
-           *
-           *
-           * The parameter is ignored for public transport routing.
-           */
-          levels?: string;
-          /** Mode of transport. `foot` selects pedestrian routing. Everything else selects public transport routing. */
-          mot:
-            | "rail"
-            | "subway"
-            | "tram"
-            | "bus"
-            | "coach"
-            | "gondola"
-            | "funicular"
-            | "ferry"
-            | "foot";
-          /**
-           * The graph used for routing. Useful for obtaining different route geometries that match on different maps or zoom levels of our [Maps API](https://developer.geops.io/apis/maps). The default is `osm` which means the detailed network based on OpenStreetMap and is available for all modes of transport. `gen1` to `gen4` provide networks with increasing levels of generalization. They are available for the following modes of transport:
-           *   - `gen1`: `rail, subway, tram, gondola, funicular`
-           *   - `gen2`: `rail`
-           *   - `gen3`: `rail`
-           *   - `gen4`: `rail`
-           *
-           * The empty string is equivalent to not setting the parameter and will default to `osm`.
-           */
-          graph?: "osm" | "gen1" | "gen2" | "gen3" | "gen4" | "";
-          /**
-           * A line name like `S1` or `RE 7` that should be preferred for public transport routing. Edges in the network that are not used by this line according to OpenStreetMap data receive a penalty in the shortest path search. Normalization and fuzzy string matching is used to compare the input to line names from OpenStreetMap.
-           *
-           * This parameter is ignored for generalized graphs and for pedestrian routing.
-           */
-          line?: string;
-          /** When using the `line` parameter, `line-from` can be used to prefer a specific branch of the given line by providing the name of the origin stop. Edges in the network that are not used by the line with the given origin according to OpenStreetMap data receive a penalty in the shortest path search. Normalization and fuzzy string matching is used to compare the input to origin names from OpenStreetMap. */
-          "line-from"?: string;
-          /** Same as `line-from` but for the destination stop of the line branch. */
-          "line-to"?: string;
-          /** Tolerance parameter in web mercator units for Douglas-Peucker simplification of output geometries. */
-          simplify?: number;
-          /** Maximum allowed ratio of input stops/points to skip if not found. The first and last stop/point can never be skipped and does not count in the ratio numerator and denominator. Note that the number of output features will be reduced accordingly if stops/points are skipped. */
-          "max-skip-hop-ratio"?: number;
-          /** Whether to split the output features at stops along the route even when they were not part of the input in `via`. Ignored for pedestrian routing. */
-          hops?: boolean;
-          /**
-           * Whether to use beelines (straight lines) as a fallback for public transport routing.
-           *
-           * When enabled, it works as follows:
-           *
-           * Each routing request is processed in two steps: First, all stop definitions passed in the `via` parameter are resolved into known stops for the specified mode of transport. Then these stops are passed to a routing backend to compute the route between the input stops and points.
-           *
-           * If a stop definition could not be resolved in the first step, resolving the stop definition is attempted a second time but without a specific mode of tranpsort. When this is not possible, the request will fail at this point.
-           *
-           * Otherwise, the stops will be sent to the routing backend. The routing backend will replace portions of the route between consecutive stops by beelines, if the stops are in different connected components of the routing graph for the given mode of transport.
-           *
-           * The routing backend might still be unable to find a route at all, e.g. when a stop was looked up allowing all modes of transport in the first step or when a route is not possible due to restrictions inside the same connected component of the routing graph. In this case, the whole route will be replaced by beelines between coordinates of the stops.
-           *
-           * When using `resolve-hops=false`, the first step is bypassed. In this case, a failure from the routing backend will always lead to a failing request.
-           *
-           * The parameter is ignored for pedestrian routing which always uses a backend-side beeline fallback.
-           */
-          "beeline-fallback"?: boolean;
-          /**
-           * Search radius for candidate edges for projecting points to the routing graph in public transport routing. A negative value (the default) means picking a suitable radius that depends on the given mode of transport. The shortest path between all combinations of different projected points of the different `via` items is picked. The distance to travel from the input points to the respective projected points on the candidate edges in the network is also accounted for (see `coord-punish` parameter).
-           *
-           * Note that this is specifically for pure point inputs (`via` items without `@` prefix) and it has nothing to do with via stops referenced by coordinates.
-           *
-           * The parameter is ignored for pedestrian routing which always uses only the nearest edge for projecting and does not try different candidate edges.
-           */
-          "coord-radius"?: number;
-          /**
-           * When selecting between multiple candidates for projected points (see `coord-radius`), the cost for traveling from the input point to the respective projected point is proportional to `coord-punish`. Therefore large values will prefer snapping to near edges and small values will prefer short routes in the network (measured from the projected point(s)).
-           *
-           * A negative value (the default) will apply a punishment that is equivalent to using a straight edge from the input point to the projected point with the slowest edge category of the graph for the given mode of transport.
-           *
-           * The parameter is ignored for pedestrian routing (see `coord-radius`).
-           */
-          "coord-punish"?: number;
-          /**
-           * When enabled, every item in the `via` parameter must be a SLOID (Swiss Location ID) in the `!{sloid}` syntax (e.g. `!ch:1:sloid:7000:1:5`). Only supported with `mot=foot` or a public-transport mot.
-           * Each SLOID is looked up in our atlas dataset. For `mot=foot` a hit is routed directly from the atlas coordinates. For public transport the stop is resolved to a geOps stop UID and routed by public transport, falling back to the atlas coordinates when the exact stop or platform is unknown; pass `coord-fallback=false` to opt out of that fallback. SLOIDs that are not found in the atlas are resolved like a normal stop id.
-           * For every response station that came from one of these SLOIDs, the station `id` is set to the SLOID and `ident_source` to `"query"` (indicating the `id` came from your request input). Foot responses additionally get a synthesised `station_from` / `station_to` with the SLOID `id`, `ident_source` and `latitude` / `longitude`. Defaults to `false`.
-           */
-          atlas?: boolean;
-          /**
-           * Whether to resolve stops in the `via` parameter to geOps stop UIDs using our [Stops API](https://developer.geops.io/apis/stops) for public transport routing. If disabled, the only supported IDs are geOps stop UIDs. So if you already have geOps stop UIDs at hand (for example if you resolve user input using our [Stops API](https://developer.geops.io/apis/stops) in your application, you can use `resolve-hops=false` to get slightly better latency.
-           *
-           * Another use case for `resolve-hops=false` is map matching of stops that are referenced by coordinates (with `@` prefix, see `via` parameter): By default, only the nearest stop of the selected mode of transport is picked within a radius of 10 kilometers. When using `resolve-hops=false`, multiple candidate stops of the given mode of transport are considered for each input within a significantly smaller radius suitable for the given mode of transport and the shortest path between all combinations of all candidates for different stops is computed (similar to routing by pure points). This is the best option for routing when no reliable IDs are available.
-           *
-           * Disabling this option is ignored for pedestrian routing. For pedestrian routing, stops are always resolved.
-           *
-           * The value of the parameter has no effect on pure points (without `@` prefix).
-           */
-          "resolve-hops"?: boolean;
-          /**
-           * When map matching stops that are referenced by coordinates in public transport routing (see `resolve-hops` parameter), enabling `coord-fallback` will employ a fallback to a pure point if an input stop has zero candidates in the network.
-           *
-           * The parameter is ignored for pedestrian routing.
-           */
-          "coord-fallback"?: boolean;
-          /** Whether to decorate the route with SRTM elevation data. If enabled, elevation data is stored in the z-component of the GeoJSON geometries. Units are meters above EPSG:4326 reference ellipsoid. Elevation data is not available everywhere. Missing data has elevation 0 by default. This fallback can be controlled using the `elevation_fallback` parameter. */
-          elevation?: boolean;
-          /** Fallback elevation value for missing data when `elevation` is enabled. */
-          elevation_fallback?: number;
-          /**
-           * Whether to decorate the route with distance travelled at each vertex. The individual length of each feature is stored in the `line_length` feature property and the cumulative segment lengths at the vertices are stored in the `vertex_distances` feature property.
-           *
-           * In other words: `vertex_distances[i]` is the distance traveled along all `LineString`s from vertex `0` of the first feature to vertex `i` of the current feature.
-           *
-           * The distance between the last vertex of the previous feature and the first vertex of the current feature is also taken into account in case there is a gap between consecutive features for some reason. Values are in meters and rounded to 2 decimal places.
-           *
-           * Earth curvature is taken into accout using the EPSG:4326 reference ellipsoid.
-           *
-           * Elevation differences are taken into account if present (see `elevation`). Note that noise in the elevation data can deteriorate the results.
-           *
-           * Distances from input points to points projected onto the network of the selected mode of transport are not accounted for.
-           */
-          length?: boolean;
-          /**
-           * Whether to decorate the route with travel time properties. The constant speed can be set with the `travel-time-speed` parameter. Travel times are calculated based on length calculations (see `length` parameter). Enabling `travel-time` automatically enables `length`. The penalty for changing levels can be set with the `travel-time-floor-change-penalty` parameter.
-           *
-           * Each feature will have its travel time written to the `travel_time` property (in seconds). The total travel time is available in the `travel_time` property of the feature collection.
-           *
-           * Note: Travel times are currently only intended for pedestrian routing where the assumption of a constant speed makes sense.
-           */
-          "travel-time"?: boolean;
-          /** Constant travel speed in meters per second for travel time calculation (see `travel-time` parameter). */
-          "travel-time-speed"?: number;
-          /** The penalty in seconds per floor level change for travel time calculation ( see `travel-time` parameter). */
-          "travel-time-floor-change-penalty"?: number;
-          /** In our stations database which the [Stops API](https://developer.geops.io/apis/stops) is based upon, some entries are marked as not being a true stop/station (for example if the data source is not reliable or it cannot be used by regular passengers). By default, such entries are ignored. By disabling `only-stations`, those entries will also be considered when resolving stops. */
-          "only-stations"?: boolean;
-          /** If not empty, this parameter is forwarded to the [Stops API](https://developer.geops.io/apis/stops) when resolving stops. */
-          prefagencies?: string;
         };
       };
       responses: {
         /** A successful response. */
         200: {
           schema: {
-            /** @enum {string} */
-            type: "FeatureCollection";
             features: {
               geometry: {
                 /**
@@ -207,82 +205,35 @@ export interface paths {
               properties: {
                 /** @description Whether this feature is a beeline fallback. Only available for public transport routing. Missing for pedestrian routing. For pedestrian routing, beelines can be identified by the `network` feature property. */
                 beeline?: boolean;
+                /**
+                 * @description The level of a pedestrian routing feature as a string. Note that levels are internally represented as floats in the pedestrian routing backend. The string is a representation of this float rounded to 1 digit.
+                 * Only available for pedestrian routing. Missing for public transport routing.
+                 *
+                 * @example -1.0
+                 */
+                floor?: string;
+                /**
+                 * @description Length of the LineString in meters. See `length` query parameter.
+                 *
+                 * @example 707.85
+                 */
+                line_length?: number;
                 lines?: {
                   /** @example ICE */
                   name: string;
                   /** @example 0.99 */
                   prob: number;
                 }[];
-                /** @description The stop at the start of the feature (if the feature starts at a stop). */
-                station_from?: {
-                  /**
-                   * @description Requested stop ID.
-                   * @example 8507000
-                   */
-                  id?: string;
-                  /**
-                   * @description Actual geOps stop UID from the routing result.
-                   *
-                   * @example 7e7dbbe3be4bc3a6
-                   */
-                  routed_id?: string;
-                  /**
-                   * @description The `ident_source` from the [Stops API](https://developer.geops.io/apis/stops) response used to resolve the stop.
-                   *
-                   * @example sbb
-                   */
-                  ident_source?: string;
-                  /**
-                   * @description Stop name (for `resolve-hops=false`, this is the normalized name from the routing backend).
-                   *
-                   * @example Bern
-                   */
-                  name?: string;
-                  /**
-                   * @description The platform code of the platform/track.
-                   * @example 1
-                   */
-                  platform?: string;
-                  /** @description Latitude of the stop, in EPSG:4326 */
-                  latitude?: number;
-                  /** @description Longitude of the stop, in EPSG:4326 */
-                  longitude?: number;
-                };
-                /** @description The stop at the end of the feature (if the feature ends at a stop). */
-                station_to?: {
-                  /**
-                   * @description Requested stop ID.
-                   * @example 8507000
-                   */
-                  id?: string;
-                  /**
-                   * @description Actual geOps stop UID from the routing result.
-                   *
-                   * @example 7e7dbbe3be4bc3a6
-                   */
-                  routed_id?: string;
-                  /**
-                   * @description The `ident_source` from the [Stops API](https://developer.geops.io/apis/stops) response used to resolve the stop.
-                   *
-                   * @example sbb
-                   */
-                  ident_source?: string;
-                  /**
-                   * @description Stop name (for `resolve-hops=false`, this is the normalized name from the routing backend).
-                   *
-                   * @example Bern
-                   */
-                  name?: string;
-                  /**
-                   * @description The platform code of the platform/track.
-                   * @example 1
-                   */
-                  platform?: string;
-                  /** @description Latitude of the stop, in EPSG:4326 */
-                  latitude?: number;
-                  /** @description Longitude of the stop, in EPSG:4326 */
-                  longitude?: number;
-                };
+                /**
+                 * @description Indicator for beeline-fallback for pedestrian routing.
+                 *
+                 * Usually, this property is missing. If it is set, the only possible value is `beeline-fallback` indicating that this pedestrian feature is a beeline.
+                 *
+                 * Always missing for public transport routing.
+                 *
+                 * @enum {string}
+                 */
+                network?: "beeline-fallback";
                 /**
                  * @description The node in the routing graph at the start of the feature.
                  * Only available for public transport routing. Missing for pedestrian routing.
@@ -332,48 +283,6 @@ export interface paths {
                   via_index?: number;
                 };
                 /**
-                 * @description Length of the LineString in meters. See `length` query parameter.
-                 *
-                 * @example 707.85
-                 */
-                line_length?: number;
-                /**
-                 * @description Total distance travelled at LineString vertices in meters. See `length` query parameter.
-                 *
-                 * @example [
-                 *   0,
-                 *   707.85
-                 * ]
-                 */
-                vertex_distances?: number[];
-                /** @description Travel time of this feature in seconds (see `travle-time` query parameter). */
-                travel_time?: number;
-                /**
-                 * @description The level of a pedestrian routing feature as a string. Note that levels are internally represented as floats in the pedestrian routing backend. The string is a representation of this float rounded to 1 digit.
-                 * Only available for pedestrian routing. Missing for public transport routing.
-                 *
-                 * @example -1.0
-                 */
-                floor?: string;
-                /**
-                 * @description The edge type of a pedestrian routing feature.
-                 * Only available for pedestrian routing. Missing for public transport routing.
-                 *
-                 * @example line_hpedestrian
-                 * @enum {string}
-                 */
-                type?: "line_hpedestrian";
-                /**
-                 * @description Indicator for beeline-fallback for pedestrian routing.
-                 *
-                 * Usually, this property is missing. If it is set, the only possible value is `beeline-fallback` indicating that this pedestrian feature is a beeline.
-                 *
-                 * Always missing for public transport routing.
-                 *
-                 * @enum {string}
-                 */
-                network?: "beeline-fallback";
-                /**
                  * @description The coordinates of the source node of the pedestrian routing feature.
                  *
                  * Coordinates are longitude, latitude in EPSG:4326.
@@ -386,6 +295,78 @@ export interface paths {
                  * ]
                  */
                 src?: number[];
+                /** @description The stop at the start of the feature (if the feature starts at a stop). */
+                station_from?: {
+                  /**
+                   * @description Requested stop ID.
+                   * @example 8507000
+                   */
+                  id?: string;
+                  /**
+                   * @description The `ident_source` from the [Stops API](https://developer.geops.io/apis/stops) response used to resolve the stop.
+                   *
+                   * @example sbb
+                   */
+                  ident_source?: string;
+                  /** @description Latitude of the stop, in EPSG:4326 */
+                  latitude?: number;
+                  /** @description Longitude of the stop, in EPSG:4326 */
+                  longitude?: number;
+                  /**
+                   * @description Stop name (for `resolve-hops=false`, this is the normalized name from the routing backend).
+                   *
+                   * @example Bern
+                   */
+                  name?: string;
+                  /**
+                   * @description The platform code of the platform/track.
+                   * @example 1
+                   */
+                  platform?: string;
+                  /**
+                   * @description Actual geOps stop UID from the routing result.
+                   *
+                   * @example 7e7dbbe3be4bc3a6
+                   */
+                  routed_id?: string;
+                };
+                /** @description The stop at the end of the feature (if the feature ends at a stop). */
+                station_to?: {
+                  /**
+                   * @description Requested stop ID.
+                   * @example 8507000
+                   */
+                  id?: string;
+                  /**
+                   * @description The `ident_source` from the [Stops API](https://developer.geops.io/apis/stops) response used to resolve the stop.
+                   *
+                   * @example sbb
+                   */
+                  ident_source?: string;
+                  /** @description Latitude of the stop, in EPSG:4326 */
+                  latitude?: number;
+                  /** @description Longitude of the stop, in EPSG:4326 */
+                  longitude?: number;
+                  /**
+                   * @description Stop name (for `resolve-hops=false`, this is the normalized name from the routing backend).
+                   *
+                   * @example Bern
+                   */
+                  name?: string;
+                  /**
+                   * @description The platform code of the platform/track.
+                   * @example 1
+                   */
+                  platform?: string;
+                  /**
+                   * @description Actual geOps stop UID from the routing result.
+                   *
+                   * @example 7e7dbbe3be4bc3a6
+                   */
+                  routed_id?: string;
+                };
+                /** @description Travel time of this feature in seconds (see `travle-time` query parameter). */
+                travel_time?: number;
                 /**
                  * @description The coordinates of the target node of the pedestrian routing feature.
                  *
@@ -399,6 +380,23 @@ export interface paths {
                  * ]
                  */
                 trg?: number[];
+                /**
+                 * @description The edge type of a pedestrian routing feature.
+                 * Only available for pedestrian routing. Missing for public transport routing.
+                 *
+                 * @example line_hpedestrian
+                 * @enum {string}
+                 */
+                type?: "line_hpedestrian";
+                /**
+                 * @description Total distance travelled at LineString vertices in meters. See `length` query parameter.
+                 *
+                 * @example [
+                 *   0,
+                 *   707.85
+                 * ]
+                 */
+                vertex_distances?: number[];
               };
               /** @enum {string} */
               type: "Feature";
@@ -428,6 +426,8 @@ export interface paths {
               /** @description Total travel time in seconds (see `travle-time` query parameter). */
               travel_time?: number;
             };
+            /** @enum {string} */
+            type: "FeatureCollection";
           };
         };
         /** Bad request. The request could not be understood. */

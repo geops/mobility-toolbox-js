@@ -1,10 +1,6 @@
 import HttpAPI from "./HttpAPI";
 
-import type { MocoExportByIdParameters, MocoExportParameters } from "../types";
-import type {
-  SituationType,
-  SituationTypeExtendedOffsetPaginated,
-} from "../types";
+import type { Moco } from "../types";
 
 export interface MocoAPIOptions {
   apiKey: string;
@@ -57,12 +53,14 @@ class MocoAPI extends HttpAPI {
    * Get paginated situations.
    */
   async export(
-    params: MocoExportParameters = {},
+    params: Moco.ExportParameters = {},
     config: RequestInit = {},
-  ): Promise<{ paginatedSituations: SituationTypeExtendedOffsetPaginated }> {
+  ): Promise<{
+    paginatedSituations: Moco.SituationTypeExtendedOffsetPaginated;
+  }> {
     const response = await this.fetch<
-      { paginatedSituations: SituationTypeExtendedOffsetPaginated },
-      MocoExportParameters
+      { paginatedSituations: Moco.SituationTypeExtendedOffsetPaginated },
+      Moco.ExportParameters
     >(
       `${this.tenant}/export/`,
       {
@@ -81,12 +79,12 @@ class MocoAPI extends HttpAPI {
    */
   async exportById(
     id: string,
-    params: MocoExportByIdParameters = {},
+    params: Moco.ExportByIdParameters = {},
     config: RequestInit = {},
-  ): Promise<SituationType> {
+  ): Promise<Moco.SituationType> {
     const response = await this.fetch<
-      { paginatedSituations: SituationTypeExtendedOffsetPaginated },
-      MocoExportByIdParameters
+      { paginatedSituations: Moco.SituationTypeExtendedOffsetPaginated },
+      Moco.ExportByIdParameters
     >(`${this.tenant}/export/${id}`, params, config);
     return response?.paginatedSituations?.results?.[0];
   }

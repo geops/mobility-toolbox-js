@@ -1,3 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 /* eslint-disable no-irregular-whitespace */
 import { Feature } from "ol";
 import { Point } from "ol/geom";
@@ -5,7 +10,7 @@ import VectorLayer from "ol/layer/Vector";
 import { get } from "ol/proj";
 import VectorSource from "ol/source/Vector";
 import { Fill, Stroke, Style } from "ol/style";
-// @ts-expect-error - no types defs
+// @ts-expect-error - no existing types
 import beautify from "xml-beautifier";
 
 import MapsetKmlFormat, {

@@ -1,9 +1,9 @@
 import realtimeStyle from "./realtimeStyle";
 
 import type {
+  Realtime,
   RealtimeStyleFunction,
   RealtimeStyleOptions,
-  RealtimeTrajectory,
   ViewState,
 } from "../../types";
 /**
@@ -16,7 +16,7 @@ import type {
  * @private
  */
 const realtimeDelayStyle: RealtimeStyleFunction = (
-  trajectory: RealtimeTrajectory,
+  trajectory: Realtime.TrackerTrajectory,
   viewState: ViewState,
   options: RealtimeStyleOptions,
 ) => {

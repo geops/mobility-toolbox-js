@@ -246,6 +246,8 @@ export interface components {
     };
     /** JourneyExtraData */
     JourneyExtraData: {
+      /** Event Location Name */
+      event_location_name?: Partial<string> & Partial<unknown>;
       /** Event Timestamp */
       event_timestamp?: Partial<string> & Partial<unknown>;
       /** Transport Code */
@@ -585,6 +587,8 @@ export interface components {
       has_realtime: boolean;
       /** Has Realtime Journey */
       has_realtime_journey: boolean;
+      /** Has Stopped Since */
+      has_stopped_since?: Partial<string> & Partial<unknown>;
       line?: Partial<components["schemas"]["Line"]> & Partial<unknown>;
       /**
        * Operator Provides Realtime Journey
@@ -642,6 +646,10 @@ export interface components {
     };
     /** ValidationError */
     ValidationError: {
+      /** Context */
+      ctx?: Record<string, unknown>;
+      /** Input */
+      input?: unknown;
       /** Location */
       loc: (Partial<number> & Partial<string>)[];
       /** Message */
@@ -892,5 +900,4 @@ export interface operations {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface external {}

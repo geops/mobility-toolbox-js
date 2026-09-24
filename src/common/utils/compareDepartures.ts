@@ -1,4 +1,4 @@
-import type { RealtimeDeparture } from "../../types";
+import type { Realtime } from "../../types";
 
 /**
  * Compare two given departures for sort alogithm,
@@ -8,8 +8,8 @@ import type { RealtimeDeparture } from "../../types";
  * @private
  */
 const compareDepartures = (
-  a: RealtimeDeparture,
-  b: RealtimeDeparture,
+  a: Realtime.TimeTableCall,
+  b: Realtime.TimeTableCall,
   sortByMinArrivalTime = false,
 ): number => {
   // First LEAVING and HIDDEN, then BOARDING and then sorted by time.

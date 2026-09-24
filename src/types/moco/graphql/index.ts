@@ -1,245 +1,239 @@
-/* eslint-disable */
-export type Maybe<T> = T | null;
-export type InputMaybe<T> = T | null | undefined;
-export type Exact<T extends { [key: string]: unknown }> = {
-  [K in keyof T]: T[K];
-};
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]?: Maybe<T[SubKey]>;
-};
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]: Maybe<T[SubKey]>;
-};
-export type MakeEmpty<
-  T extends { [key: string]: unknown },
-  K extends keyof T,
-> = { [_ in K]?: never };
+/** Internal type. DO NOT USE DIRECTLY. */
 export type Incremental<T> =
-  | T
   | {
-      [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
-    };
+      [P in keyof T]?: P extends "__typename" | " $fragmentName" ? T[P] : never;
+    }
+  | T;
+export type Maybe<T> = null | T;
+export type InputMaybe<T> = Maybe<T>;
+export type JsonValue =
+  boolean | JsonArray | JsonObject | null | number | string;
+export interface JsonArray extends Array<JsonValue> {}
+export interface JsonObject {
+  [key: string]: JsonValue;
+}
 /** All built-in and custom scalars, mapped to their actual values */
-export type Scalars = {
-  ID: { input: string; output: string };
-  String: { input: string; output: string };
+export interface Scalars {
   Boolean: { input: boolean; output: boolean };
-  Int: { input: number; output: number };
-  Float: { input: number; output: number };
   /** Date with time (isoformat) */
-  DateTime: { input: any; output: any };
+  DateTime: { input: string; output: string };
+  Float: { input: number; output: number };
   /** Geometry object as descibed in RFC 7946 section 3.1 with SRID=3857. */
-  GeoJSONDict: { input: any; output: any };
+  GeoJSONDict: { input: GeoJSON.Geometry; output: GeoJSON.Geometry };
+  ID: { input: string; output: string };
+  Int: { input: number; output: number };
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf). */
-  JSON: { input: any; output: any };
+  JSON: { input: JsonObject; output: JsonObject };
+  String: { input: string; output: string };
   /** Time (isoformat) */
-  Time: { input: any; output: any };
-  UUID: { input: any; output: any };
+  Time: { input: string; output: string };
   /** Represents a file upload. */
-  Upload: { input: any; output: any };
-};
+  Upload: { input: unknown; output: unknown };
+  UUID: { input: string; output: string };
+}
 
-export type AffectedTimeIntervalInput = {
+export interface AffectedTimeIntervalInput {
   dailyEndTime?: InputMaybe<Scalars["Time"]["input"]>;
   dailyStartTime?: InputMaybe<Scalars["Time"]["input"]>;
-  endTime: Scalars["DateTime"]["input"];
-  startTime: Scalars["DateTime"]["input"];
-};
+  endTime?: InputMaybe<Scalars["DateTime"]["input"]>;
+  startTime?: InputMaybe<Scalars["DateTime"]["input"]>;
+}
 
-export type AffectedTimeIntervalType = {
+export interface AffectedTimeIntervalType {
   __typename?: "AffectedTimeIntervalType";
   dailyEndTime?: Maybe<Scalars["Time"]["output"]>;
   dailyStartTime?: Maybe<Scalars["Time"]["output"]>;
-  endTime: Scalars["DateTime"]["output"];
+  endTime?: Maybe<Scalars["DateTime"]["output"]>;
   id: Scalars["ID"]["output"];
-  startTime: Scalars["DateTime"]["output"];
-};
+  startTime?: Maybe<Scalars["DateTime"]["output"]>;
+}
 
-export type AssetType = {
+export interface AssetType {
   __typename?: "AssetType";
   absoluteUrl: Scalars["String"]["output"];
   label: Scalars["String"]["output"];
   uuid: Scalars["UUID"]["output"];
-};
+}
 
-export type BboxFilterInput = {
-  bbox?: InputMaybe<Array<Scalars["Float"]["input"]>>;
+export interface BboxFilterInput {
+  bbox?: InputMaybe<Scalars["Float"]["input"][]>;
   graph?: Scalars["String"]["input"];
   srid?: Scalars["Int"]["input"];
-};
+}
 
-export type CreateSituationInput = {
-  affectedTimeIntervals: Array<AffectedTimeIntervalInput>;
+export interface CreateSituationInput {
+  affectedTimeIntervals: AffectedTimeIntervalInput[];
   isActive?: Scalars["Boolean"]["input"];
-  publicationWindows: Array<PublicationWindowInput>;
-  publications: Array<PublicationInput>;
-  reasons: Array<Scalars["String"]["input"]>;
+  publications: PublicationInput[];
+  publicationWindows: PublicationWindowInput[];
+  reasons: Scalars["String"]["input"][];
   title?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
 export type CreateSituationPayload = OperationInfo | SituationType;
 
-export type DeleteSituationInput = {
+export interface DeleteSituationInput {
   id: Scalars["ID"]["input"];
-};
+}
 
 export type DeleteSituationPayload = OperationInfo | SuccessType;
 
-export type Feature = {
+export interface Feature {
   __typename?: "Feature";
   geometry: Scalars["GeoJSONDict"]["output"];
   properties: MultiRoutingProperties;
   type: Scalars["String"]["output"];
-};
+}
 
-export type ImageUploadInput = {
+export interface ImageUploadInput {
   file?: InputMaybe<Scalars["Upload"]["input"]>;
   label: Scalars["String"]["input"];
-};
+}
 
-export type IndexedImageInput = {
+export interface IndexedImageInput {
   imageUuid: Scalars["String"]["input"];
-};
+}
 
-export type IndexedImageType = {
+export interface IndexedImageType {
   __typename?: "IndexedImageType";
   image: AssetType;
   index: Scalars["Int"]["output"];
-};
+}
 
-export type InfoLinkInput = {
+export interface InfoLinkInput {
   label?: InputMaybe<MultiLingualLabelInput>;
   uri: Scalars["String"]["input"];
-};
+}
 
-export type InfoLinkType = {
+export interface InfoLinkType {
   __typename?: "InfoLinkType";
   id: Scalars["ID"]["output"];
   index: Scalars["Int"]["output"];
   label?: Maybe<MultiLingualLabelType>;
   uri: Scalars["String"]["output"];
-};
+}
 
-export type LineGraphGeometryType = {
+export interface LineGraphGeometryType {
   __typename?: "LineGraphGeometryType";
   geom: Scalars["GeoJSONDict"]["output"];
   graph: Scalars["String"]["output"];
-};
+}
 
-export type LineGraphGeometryTypeGeomArgs = {
+export interface LineGraphGeometryTypeGeomArgs {
   precision?: Scalars["Int"]["input"];
   simplify?: Scalars["Int"]["input"];
-};
+}
 
-export type LineGroupInput = {
+export interface LineGroupInput {
   category?: InputMaybe<PublicationLineStyleCategoryChoices>;
   hasIcon: Scalars["Boolean"]["input"];
-  lines?: Array<LineInput>;
+  lines?: LineInput[];
   mot?: InputMaybe<MotChoices>;
-};
+}
 
-export type LineInput = {
+export interface LineInput {
   id?: InputMaybe<Scalars["ID"]["input"]>;
   name?: InputMaybe<Scalars["String"]["input"]>;
   operatorRef?: Scalars["String"]["input"];
-  viaStops: Array<StopInput>;
-};
+  viaStops: StopInput[];
+}
 
-export type LineProbability = {
+export interface LineProbability {
   __typename?: "LineProbability";
   name: Scalars["String"]["output"];
   prob: Scalars["Float"]["output"];
-};
+}
 
-export type LineType = {
+export interface LineType {
   __typename?: "LineType";
-  geometry: Array<LineGraphGeometryType>;
+  geometry: LineGraphGeometryType[];
   id: Scalars["ID"]["output"];
   name: Scalars["String"]["output"];
   operatorRef: Scalars["String"]["output"];
-  viaStops: Array<StopType>;
-};
-
-export type LineTypeGeometryArgs = {
-  filters?: InputMaybe<PublicationLineGeomFilter>;
-};
-
-export enum MotChoices {
-  Bus = "BUS",
-  Cablecar = "CABLECAR",
-  Coach = "COACH",
-  Ferry = "FERRY",
-  Funicular = "FUNICULAR",
-  Gondola = "GONDOLA",
-  Rail = "RAIL",
-  Subway = "SUBWAY",
-  Tram = "TRAM",
+  viaStops: StopType[];
 }
 
-export type MultiLingualLabelInput = {
+export interface LineTypeGeometryArgs {
+  filters?: InputMaybe<PublicationLineGeomFilter>;
+}
+
+export const MotChoices = {
+  Bus: "BUS",
+  Cablecar: "CABLECAR",
+  Coach: "COACH",
+  Ferry: "FERRY",
+  Funicular: "FUNICULAR",
+  Gondola: "GONDOLA",
+  Rail: "RAIL",
+  Subway: "SUBWAY",
+  Tram: "TRAM",
+} as const;
+
+export type MotChoices = (typeof MotChoices)[keyof typeof MotChoices];
+export interface MultiLingualLabelInput {
   de?: InputMaybe<Scalars["String"]["input"]>;
   en?: InputMaybe<Scalars["String"]["input"]>;
   fr?: InputMaybe<Scalars["String"]["input"]>;
   it?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type MultiLingualLabelType = {
+export interface MultiLingualLabelType {
   __typename?: "MultiLingualLabelType";
   de?: Maybe<Scalars["String"]["output"]>;
   en?: Maybe<Scalars["String"]["output"]>;
   fr?: Maybe<Scalars["String"]["output"]>;
   it?: Maybe<Scalars["String"]["output"]>;
-};
+}
 
-export type MultiRoutingParamsType = {
+export interface MultiRoutingParamsType {
   beelineFallback?: Scalars["Boolean"]["input"];
   coordPunish?: Scalars["Float"]["input"];
   coordRadius?: Scalars["Float"]["input"];
   elevation?: Scalars["Boolean"]["input"];
   floorInfo: Scalars["String"]["input"];
-  graph: Array<Scalars["String"]["input"]>;
+  graph: Scalars["String"]["input"][];
   hops?: Scalars["Boolean"]["input"];
-  line: Array<Scalars["String"]["input"]>;
+  line: Scalars["String"]["input"][];
   maxSkipHopRatio?: Scalars["Int"]["input"];
   mot: MotChoices;
   resolveHops?: Scalars["Boolean"]["input"];
-  via: Array<Scalars["String"]["input"]>;
-};
+  via: Scalars["String"]["input"][];
+}
 
-export type MultiRoutingProperties = {
+export interface MultiRoutingProperties {
   __typename?: "MultiRoutingProperties";
   beeline: Scalars["Boolean"]["output"];
   graph: Scalars["String"]["output"];
   line?: Maybe<Scalars["String"]["output"]>;
-  lineProbabilities: Array<LineProbability>;
+  lineProbabilities: LineProbability[];
   nodeFrom: NodeProperties;
   nodeTo: NodeProperties;
   stationFrom: StationProperties;
   stationTo: StationProperties;
-};
+}
 
-export type MultiRoutingResult = {
+export interface MultiRoutingResult {
   __typename?: "MultiRoutingResult";
-  features: Array<Feature>;
+  features: Feature[];
   type: Scalars["String"]["output"];
-};
+}
 
-export type MultilingualTextualContentFilter = {
+export interface MultilingualTextualContentFilter {
   AND?: InputMaybe<MultilingualTextualContentFilter>;
   DISTINCT?: InputMaybe<Scalars["Boolean"]["input"]>;
   NOT?: InputMaybe<MultilingualTextualContentFilter>;
   OR?: InputMaybe<MultilingualTextualContentFilter>;
   size?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type MultilingualTextualContentInput = {
+export interface MultilingualTextualContentInput {
   de?: InputMaybe<TextualContentInput>;
   en?: InputMaybe<TextualContentInput>;
   fr?: InputMaybe<TextualContentInput>;
   it?: InputMaybe<TextualContentInput>;
-};
+}
 
-export type MultilingualTextualContentType = {
+export interface MultilingualTextualContentType {
   __typename?: "MultilingualTextualContentType";
   de?: Maybe<TextualContentType>;
   en?: Maybe<TextualContentType>;
@@ -247,60 +241,60 @@ export type MultilingualTextualContentType = {
   id: Scalars["ID"]["output"];
   it?: Maybe<TextualContentType>;
   size: Scalars["String"]["output"];
-};
+}
 
-export type Mutation = {
+export interface Mutation {
   __typename?: "Mutation";
   createSituation: CreateSituationPayload;
   deleteSituation: DeleteSituationPayload;
   updateSituation: UpdateSituationPayload;
   uploadImage: UploadImagePayload;
-};
+}
 
-export type MutationCreateSituationArgs = {
+export interface MutationCreateSituationArgs {
   data: CreateSituationInput;
   tenant: Scalars["String"]["input"];
-};
+}
 
-export type MutationDeleteSituationArgs = {
+export interface MutationDeleteSituationArgs {
   data: DeleteSituationInput;
-};
+}
 
-export type MutationUpdateSituationArgs = {
+export interface MutationUpdateSituationArgs {
   data: UpdateSituationInput;
-};
+}
 
-export type MutationUploadImageArgs = {
+export interface MutationUploadImageArgs {
   data: ImageUploadInput;
-};
+}
 
-export type NodeProperties = {
+export interface NodeProperties {
   __typename?: "NodeProperties";
   edgeFraction: Scalars["Float"]["output"];
   externalId?: Maybe<Scalars["String"]["output"]>;
   id: Scalars["String"]["output"];
   isVia: Scalars["Boolean"]["output"];
   viaIndex?: Maybe<Scalars["Int"]["output"]>;
-};
+}
 
-export type OffsetPaginationInfo = {
+export interface OffsetPaginationInfo {
   __typename?: "OffsetPaginationInfo";
   limit?: Maybe<Scalars["Int"]["output"]>;
   offset: Scalars["Int"]["output"];
-};
+}
 
-export type OffsetPaginationInput = {
+export interface OffsetPaginationInput {
   limit?: InputMaybe<Scalars["Int"]["input"]>;
   offset?: Scalars["Int"]["input"];
-};
+}
 
-export type OperationInfo = {
+export interface OperationInfo {
   __typename?: "OperationInfo";
   /** List of messages returned by the operation. */
-  messages: Array<OperationMessage>;
-};
+  messages: OperationMessage[];
+}
 
-export type OperationMessage = {
+export interface OperationMessage {
   __typename?: "OperationMessage";
   /** The error code, or `null` if no error code was set. */
   code?: Maybe<Scalars["String"]["output"]>;
@@ -310,113 +304,120 @@ export type OperationMessage = {
   kind: OperationMessageKind;
   /** The error message. */
   message: Scalars["String"]["output"];
-};
-
-export enum OperationMessageKind {
-  Error = "ERROR",
-  Info = "INFO",
-  Permission = "PERMISSION",
-  Validation = "VALIDATION",
-  Warning = "WARNING",
 }
 
-export enum Ordering {
-  Asc = "ASC",
-  AscNullsFirst = "ASC_NULLS_FIRST",
-  AscNullsLast = "ASC_NULLS_LAST",
-  Desc = "DESC",
-  DescNullsFirst = "DESC_NULLS_FIRST",
-  DescNullsLast = "DESC_NULLS_LAST",
-}
+export const OperationMessageKind = {
+  Error: "ERROR",
+  Info: "INFO",
+  Permission: "PERMISSION",
+  Validation: "VALIDATION",
+  Warning: "WARNING",
+} as const;
 
-export type PaginationMeta = {
+export type OperationMessageKind =
+  (typeof OperationMessageKind)[keyof typeof OperationMessageKind];
+export const Ordering = {
+  Asc: "ASC",
+  AscNullsFirst: "ASC_NULLS_FIRST",
+  AscNullsLast: "ASC_NULLS_LAST",
+  Desc: "DESC",
+  DescNullsFirst: "DESC_NULLS_FIRST",
+  DescNullsLast: "DESC_NULLS_LAST",
+} as const;
+
+export type Ordering = (typeof Ordering)[keyof typeof Ordering];
+export interface PaginationMeta {
   __typename?: "PaginationMeta";
   nextPage?: Maybe<OffsetPaginationInfo>;
   pageCount: Scalars["Int"]["output"];
   pageCurrent: Scalars["Int"]["output"];
   pageSize: Scalars["Int"]["output"];
   previousPage?: Maybe<OffsetPaginationInfo>;
-};
+}
 
-export type PlatformType = {
+export interface PlatformType {
   __typename?: "PlatformType";
   mot: MotChoices;
-  platforms: Array<Scalars["String"]["output"]>;
-};
+  platforms: Scalars["String"]["output"][];
+}
 
-export type PublicationInput = {
-  images: Array<IndexedImageInput>;
-  infoLinks: Array<InfoLinkInput>;
-  perspectives: Array<Scalars["String"]["input"]>;
-  publicationLines: Array<LineGroupInput>;
-  publicationStops: Array<StopInput>;
-  publicationWindows: Array<PublicationWindowInput>;
+export interface PublicationInput {
+  images: IndexedImageInput[];
+  infoLinks: InfoLinkInput[];
+  perspectives: Scalars["String"]["input"][];
+  publicationLines: LineGroupInput[];
+  publicationStops: StopInput[];
+  publicationWindows: PublicationWindowInput[];
   serviceCondition?: ServiceConditionEnumeration;
   severity?: SeverityEnumeration;
   textualContentLarge?: InputMaybe<MultilingualTextualContentInput>;
   textualContentMedium?: InputMaybe<MultilingualTextualContentInput>;
   textualContentSmall?: InputMaybe<MultilingualTextualContentInput>;
-};
+}
 
-export type PublicationLineGeomFilter = {
+export interface PublicationLineGeomFilter {
   AND?: InputMaybe<PublicationLineGeomFilter>;
   DISTINCT?: InputMaybe<Scalars["Boolean"]["input"]>;
+  graph?: InputMaybe<Scalars["String"]["input"]>;
   NOT?: InputMaybe<PublicationLineGeomFilter>;
   OR?: InputMaybe<PublicationLineGeomFilter>;
-  graph?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type PublicationLineGroupType = {
+export interface PublicationLineGroupType {
   __typename?: "PublicationLineGroupType";
   category: PublicationLineStyleCategoryChoices;
   hasIcon: Scalars["Boolean"]["output"];
-  lines: Array<LineType>;
+  lines: LineType[];
   mot?: Maybe<MotChoices>;
-};
-
-export enum PublicationLineStyleCategoryChoices {
-  Construction = "CONSTRUCTION",
-  Disruption = "DISRUPTION",
-  IndustrialAction = "INDUSTRIAL_ACTION",
-  LiftFailure = "LIFT_FAILURE",
-  Other = "OTHER",
-  RailReplacement = "RAIL_REPLACEMENT",
-  SpecialEvent = "SPECIAL_EVENT",
-  VehicleFaulure = "VEHICLE_FAULURE",
-  Warning = "WARNING",
 }
 
-export type PublicationStopGeomFilter = {
+export const PublicationLineStyleCategoryChoices = {
+  Construction: "CONSTRUCTION",
+  Disruption: "DISRUPTION",
+  IndustrialAction: "INDUSTRIAL_ACTION",
+  LiftFailure: "LIFT_FAILURE",
+  Other: "OTHER",
+  RailReplacement: "RAIL_REPLACEMENT",
+  SpecialEvent: "SPECIAL_EVENT",
+  VehicleFaulure: "VEHICLE_FAULURE",
+  Warning: "WARNING",
+} as const;
+
+export type PublicationLineStyleCategoryChoices =
+  (typeof PublicationLineStyleCategoryChoices)[keyof typeof PublicationLineStyleCategoryChoices];
+export interface PublicationStopGeomFilter {
   AND?: InputMaybe<PublicationStopGeomFilter>;
   DISTINCT?: InputMaybe<Scalars["Boolean"]["input"]>;
+  graph?: InputMaybe<Scalars["String"]["input"]>;
   NOT?: InputMaybe<PublicationStopGeomFilter>;
   OR?: InputMaybe<PublicationStopGeomFilter>;
-  graph?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type PublicationStopType = {
+export interface PublicationStopType {
   __typename?: "PublicationStopType";
-  geometry: Array<StopGraphGeometryType>;
+  geometry: StopGraphGeometryType[];
   id: Scalars["ID"]["output"];
   name: Scalars["String"]["output"];
+  publishedLineNames: Scalars["String"]["output"][];
   stop: StopType;
   uid: Scalars["String"]["output"];
-};
+}
 
-export type PublicationStopTypeGeometryArgs = {
+export interface PublicationStopTypeGeometryArgs {
   filters?: InputMaybe<PublicationStopGeomFilter>;
-};
+}
 
-export type PublicationType = {
+export interface PublicationType {
   __typename?: "PublicationType";
-  effectivePublicationWindows: Array<TimeIntervalType>;
+  effectivePublicationWindows: TimeIntervalType[];
   id: Scalars["ID"]["output"];
-  images: Array<IndexedImageType>;
-  infoLinks: Array<InfoLinkType>;
-  perspectives: Array<Scalars["String"]["output"]>;
-  publicationLines: Array<PublicationLineGroupType>;
-  publicationStops: Array<PublicationStopType>;
-  publicationWindows: Array<PublicationWindowType>;
+  images: IndexedImageType[];
+  infoLinks: InfoLinkType[];
+  perspectives: Scalars["String"]["output"][];
+  publicationLineNames: Scalars["String"]["output"][];
+  publicationLines: PublicationLineGroupType[];
+  publicationStops: PublicationStopType[];
+  publicationWindows: PublicationWindowType[];
   serviceCondition: ServiceConditionEnumeration;
   serviceConditionGroup: ServiceConditionGroupEnumeration;
   severity: SeverityEnumeration;
@@ -425,193 +426,204 @@ export type PublicationType = {
   textualContentLarge?: Maybe<MultilingualTextualContentType>;
   /** @deprecated Use textualContents field instead */
   textualContentMedium?: Maybe<MultilingualTextualContentType>;
+  textualContents: MultilingualTextualContentType[];
   /** @deprecated Use textualContents field instead */
   textualContentSmall?: Maybe<MultilingualTextualContentType>;
-  textualContents: Array<MultilingualTextualContentType>;
-};
+}
 
-export type PublicationTypeTextualContentsArgs = {
+export interface PublicationTypeTextualContentsArgs {
   filters?: InputMaybe<MultilingualTextualContentFilter>;
-};
+}
 
-export type PublicationWindowInput = {
+export interface PublicationWindowInput {
   endTime: Scalars["DateTime"]["input"];
   startTime: Scalars["DateTime"]["input"];
-};
+}
 
-export type PublicationWindowType = {
+export interface PublicationWindowType {
   __typename?: "PublicationWindowType";
   endTime: Scalars["DateTime"]["output"];
   id: Scalars["ID"]["output"];
   startTime: Scalars["DateTime"]["output"];
-};
+}
 
-export type Query = {
+export interface Query {
   __typename?: "Query";
   currentUser: UserType;
   multiRouting: MultiRoutingResult;
   paginatedSituations: SituationTypeExtendedOffsetPaginated;
   previewSituation: SituationType;
-  reasons: Array<ReasonType>;
+  reasons: ReasonType[];
   situation: SituationType;
-  sources: Array<SourceType>;
+  sources: SourceType[];
   stop: StopType;
-  stops: Array<StopResult>;
-};
+  stops: StopResult[];
+}
 
-export type QueryMultiRoutingArgs = {
+export interface QueryMultiRoutingArgs {
   params: MultiRoutingParamsType;
-};
+}
 
-export type QueryPaginatedSituationsArgs = {
+export interface QueryPaginatedSituationsArgs {
   filters?: InputMaybe<SituationFilter>;
   order?: InputMaybe<SituationOrder>;
   pagination?: InputMaybe<OffsetPaginationInput>;
   tenant: Scalars["String"]["input"];
-};
+}
 
-export type QueryPreviewSituationArgs = {
+export interface QueryPreviewSituationArgs {
   data: CreateSituationInput;
   tenant: Scalars["String"]["input"];
-};
+}
 
-export type QueryReasonsArgs = {
+export interface QueryReasonsArgs {
   filters?: InputMaybe<ReasonFilter>;
-};
+}
 
-export type QuerySituationArgs = {
+export interface QuerySituationArgs {
   pk: Scalars["ID"]["input"];
   tenant: Scalars["String"]["input"];
-};
+}
 
-export type QuerySourcesArgs = {
+export interface QuerySourcesArgs {
   filters?: InputMaybe<SourceFilter>;
-};
+}
 
-export type QueryStopArgs = {
+export interface QueryStopArgs {
   id: Scalars["ID"]["input"];
   tenant: Scalars["String"]["input"];
-};
+}
 
-export type QueryStopsArgs = {
+export interface QueryStopsArgs {
   limit?: Scalars["Int"]["input"];
-  mots: Array<MotChoices>;
+  mots: MotChoices[];
   query: Scalars["String"]["input"];
   tenant: Scalars["String"]["input"];
-};
+}
 
-export type ReasonFilter = {
+export interface ReasonFilter {
   AND?: InputMaybe<ReasonFilter>;
+  categoryName?: InputMaybe<Scalars["String"]["input"]>;
   DISTINCT?: InputMaybe<Scalars["Boolean"]["input"]>;
+  includeInDropdown?: InputMaybe<Scalars["Boolean"]["input"]>;
   NOT?: InputMaybe<ReasonFilter>;
   OR?: InputMaybe<ReasonFilter>;
-  categoryName?: InputMaybe<Scalars["String"]["input"]>;
-  includeInDropdown?: InputMaybe<Scalars["Boolean"]["input"]>;
   tenant?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type ReasonType = {
+export interface ReasonType {
   __typename?: "ReasonType";
   categoryName: Scalars["String"]["output"];
   name: Scalars["String"]["output"];
   tenant: Scalars["String"]["output"];
-};
-
-export enum ServiceConditionEnumeration {
-  AdditionalRide = "ADDITIONAL_RIDE",
-  AdditionalStop = "ADDITIONAL_STOP",
-  Boarding = "BOARDING",
-  ChangeOfPlatform = "CHANGE_OF_PLATFORM",
-  Delay = "DELAY",
-  DiscontinuedOperation = "DISCONTINUED_OPERATION",
-  Disruption = "DISRUPTION",
-  DisturbanceRectified = "DISTURBANCE_RECTIFIED",
-  Diverted = "DIVERTED",
-  GoToGate = "GO_TO_GATE",
-  IrregularTraffic = "IRREGULAR_TRAFFIC",
-  LimitedOperation = "LIMITED_OPERATION",
-  LineCancellation = "LINE_CANCELLATION",
-  MajorDelays = "MAJOR_DELAYS",
-  MinorDelays = "MINOR_DELAYS",
-  OnTime = "ON_TIME",
-  OperationTimeExtension = "OPERATION_TIME_EXTENSION",
-  ReplacementRide = "REPLACEMENT_RIDE",
-  StopCancelled = "STOP_CANCELLED",
-  StopMoved = "STOP_MOVED",
-  StopOnDemand = "STOP_ON_DEMAND",
-  SubstitutedStop = "SUBSTITUTED_STOP",
-  TemporarilyNonStopping = "TEMPORARILY_NON_STOPPING",
-  TemporaryStopplace = "TEMPORARY_STOPPLACE",
-  TrainShortened = "TRAIN_SHORTENED",
-  TripCancellation = "TRIP_CANCELLATION",
-  UndefinedStatus = "UNDEFINED_STATUS",
-  Unknown = "UNKNOWN",
-  WagonOrderChanged = "WAGON_ORDER_CHANGED",
 }
 
-export enum ServiceConditionGroupEnumeration {
-  Changes = "CHANGES",
-  Disruption = "DISRUPTION",
-  Information = "INFORMATION",
-}
+export const ServiceConditionEnumeration = {
+  AdditionalRide: "ADDITIONAL_RIDE",
+  AdditionalStop: "ADDITIONAL_STOP",
+  Boarding: "BOARDING",
+  ChangeOfPlatform: "CHANGE_OF_PLATFORM",
+  Delay: "DELAY",
+  DiscontinuedOperation: "DISCONTINUED_OPERATION",
+  Disruption: "DISRUPTION",
+  DisturbanceRectified: "DISTURBANCE_RECTIFIED",
+  Diverted: "DIVERTED",
+  GoToGate: "GO_TO_GATE",
+  IrregularTraffic: "IRREGULAR_TRAFFIC",
+  LimitedOperation: "LIMITED_OPERATION",
+  LineCancellation: "LINE_CANCELLATION",
+  MajorDelays: "MAJOR_DELAYS",
+  MinorDelays: "MINOR_DELAYS",
+  OnTime: "ON_TIME",
+  OperationTimeExtension: "OPERATION_TIME_EXTENSION",
+  ReplacementRide: "REPLACEMENT_RIDE",
+  StopCancelled: "STOP_CANCELLED",
+  StopMoved: "STOP_MOVED",
+  StopOnDemand: "STOP_ON_DEMAND",
+  SubstitutedStop: "SUBSTITUTED_STOP",
+  TemporarilyNonStopping: "TEMPORARILY_NON_STOPPING",
+  TemporaryStopplace: "TEMPORARY_STOPPLACE",
+  TrainShortened: "TRAIN_SHORTENED",
+  TripCancellation: "TRIP_CANCELLATION",
+  UndefinedStatus: "UNDEFINED_STATUS",
+  Unknown: "UNKNOWN",
+  WagonOrderChanged: "WAGON_ORDER_CHANGED",
+} as const;
 
-export enum SeverityEnumeration {
-  Normal = "NORMAL",
-  NoImpact = "NO_IMPACT",
-  Severe = "SEVERE",
-  Slight = "SLIGHT",
-  Undefined = "UNDEFINED",
-  Unknown = "UNKNOWN",
-  VerySevere = "VERY_SEVERE",
-  VerySlight = "VERY_SLIGHT",
-}
+export type ServiceConditionEnumeration =
+  (typeof ServiceConditionEnumeration)[keyof typeof ServiceConditionEnumeration];
+export const ServiceConditionGroupEnumeration = {
+  Changes: "CHANGES",
+  Disruption: "DISRUPTION",
+  Information: "INFORMATION",
+} as const;
 
-export enum SeverityGroupEnumeration {
-  High = "HIGH",
-  Low = "LOW",
-  Normal = "NORMAL",
-  Undefined = "UNDEFINED",
-}
+export type ServiceConditionGroupEnumeration =
+  (typeof ServiceConditionGroupEnumeration)[keyof typeof ServiceConditionGroupEnumeration];
+export const SeverityEnumeration = {
+  NoImpact: "NO_IMPACT",
+  Normal: "NORMAL",
+  Severe: "SEVERE",
+  Slight: "SLIGHT",
+  Undefined: "UNDEFINED",
+  Unknown: "UNKNOWN",
+  VerySevere: "VERY_SEVERE",
+  VerySlight: "VERY_SLIGHT",
+} as const;
 
-export type SituationFilter = {
-  AND?: InputMaybe<SituationFilter>;
-  DISTINCT?: InputMaybe<Scalars["Boolean"]["input"]>;
-  NOT?: InputMaybe<SituationFilter>;
-  OR?: InputMaybe<SituationFilter>;
+export type SeverityEnumeration =
+  (typeof SeverityEnumeration)[keyof typeof SeverityEnumeration];
+export const SeverityGroupEnumeration = {
+  High: "HIGH",
+  Low: "LOW",
+  Normal: "NORMAL",
+  Undefined: "UNDEFINED",
+} as const;
+
+export type SeverityGroupEnumeration =
+  (typeof SeverityGroupEnumeration)[keyof typeof SeverityGroupEnumeration];
+export interface SituationFilter {
   affectedAfter?: InputMaybe<Scalars["DateTime"]["input"]>;
   affectedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   affectedBefore?: InputMaybe<Scalars["DateTime"]["input"]>;
+  AND?: InputMaybe<SituationFilter>;
   bbox?: InputMaybe<BboxFilterInput>;
+  DISTINCT?: InputMaybe<Scalars["Boolean"]["input"]>;
   editedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   hasGeoms?: InputMaybe<Scalars["Boolean"]["input"]>;
   id?: InputMaybe<Scalars["ID"]["input"]>;
   isActive?: InputMaybe<Scalars["Boolean"]["input"]>;
   isEdited?: InputMaybe<Scalars["Boolean"]["input"]>;
+  lineName?: InputMaybe<Scalars["String"]["input"]>;
+  NOT?: InputMaybe<SituationFilter>;
+  OR?: InputMaybe<SituationFilter>;
   publicAfter?: InputMaybe<Scalars["DateTime"]["input"]>;
   publicAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   publicBefore?: InputMaybe<Scalars["DateTime"]["input"]>;
   publicNow?: InputMaybe<Scalars["Boolean"]["input"]>;
-  reasons?: InputMaybe<Array<Scalars["String"]["input"]>>;
-  sources?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  reasons?: InputMaybe<Scalars["String"]["input"][]>;
+  sourceIdent?: InputMaybe<Scalars["String"]["input"]>;
+  sources?: InputMaybe<Scalars["String"]["input"][]>;
+  stopName?: InputMaybe<Scalars["String"]["input"]>;
   title?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type SituationOrder = {
+export interface SituationOrder {
   endDate?: InputMaybe<Ordering>;
   startDate?: InputMaybe<Ordering>;
   title?: InputMaybe<Ordering>;
-};
+}
 
-export type SituationPublicationWindowType = {
+export interface SituationPublicationWindowType {
   __typename?: "SituationPublicationWindowType";
   endTime: Scalars["DateTime"]["output"];
   id: Scalars["ID"]["output"];
   startTime: Scalars["DateTime"]["output"];
-};
+}
 
-export type SituationType = {
+export interface SituationType {
   __typename?: "SituationType";
-  affectedTimeIntervals: Array<AffectedTimeIntervalType>;
+  affectedTimeIntervals: AffectedTimeIntervalType[];
   affectedTimeIntervalsEnd?: Maybe<Scalars["DateTime"]["output"]>;
   affectedTimeIntervalsStart?: Maybe<Scalars["DateTime"]["output"]>;
   createdAt: Scalars["DateTime"]["output"];
@@ -622,51 +634,50 @@ export type SituationType = {
   detailIt: Scalars["String"]["output"];
   editedAt?: Maybe<Scalars["DateTime"]["output"]>;
   editedBy?: Maybe<UserType>;
-  effectivePublicationWindows: Array<TimeIntervalType>;
   id: Scalars["ID"]["output"];
   isActive: Scalars["Boolean"]["output"];
   language: Scalars["String"]["output"];
-  publicationLineNames: Array<Scalars["String"]["output"]>;
-  publicationStopNames: Array<Scalars["String"]["output"]>;
-  publicationWindows: Array<SituationPublicationWindowType>;
-  publicationWindowsEnd?: Maybe<Scalars["DateTime"]["output"]>;
-  publicationWindowsStart?: Maybe<Scalars["DateTime"]["output"]>;
-  publications: Array<PublicationType>;
-  reasons: Array<ReasonType>;
+  publicationLineNames: Scalars["String"]["output"][];
+  publications: PublicationType[];
+  publicationStopNames: Scalars["String"]["output"][];
+  publicationWindows: SituationPublicationWindowType[];
+  publicationWindowsEnd: Scalars["DateTime"]["output"];
+  publicationWindowsStart: Scalars["DateTime"]["output"];
+  reasons: ReasonType[];
   source?: Maybe<SourceType>;
   tenantSlug: Scalars["String"]["output"];
   title: Scalars["String"]["output"];
-};
+}
 
-export type SituationTypeReasonsArgs = {
+export interface SituationTypeReasonsArgs {
   filters?: InputMaybe<ReasonFilter>;
-};
+}
 
-export type SituationTypeExtendedOffsetPaginated = {
+export interface SituationTypeExtendedOffsetPaginated {
   __typename?: "SituationTypeExtendedOffsetPaginated";
   meta: PaginationMeta;
   pageInfo: OffsetPaginationInfo;
   /** List of paginated results. */
-  results: Array<SituationType>;
+  results: SituationType[];
   /** Total count of existing results. */
   totalCount: Scalars["Int"]["output"];
-};
+}
 
-export type SourceFilter = {
+export interface SourceFilter {
   AND?: InputMaybe<SourceFilter>;
   DISTINCT?: InputMaybe<Scalars["Boolean"]["input"]>;
   NOT?: InputMaybe<SourceFilter>;
   OR?: InputMaybe<SourceFilter>;
   tenant?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type SourceType = {
+export interface SourceType {
   __typename?: "SourceType";
   name: Scalars["String"]["output"];
   tenant: Scalars["String"]["output"];
-};
+}
 
-export type StationProperties = {
+export interface StationProperties {
   __typename?: "StationProperties";
   id: Scalars["String"]["output"];
   latitude: Scalars["Float"]["output"];
@@ -674,24 +685,25 @@ export type StationProperties = {
   name: Scalars["String"]["output"];
   platform: Scalars["String"]["output"];
   routedId: Scalars["String"]["output"];
-};
+}
 
-export type StopGraphGeometryType = {
+export interface StopGraphGeometryType {
   __typename?: "StopGraphGeometryType";
   geom: Scalars["GeoJSONDict"]["output"];
   graph: Scalars["String"]["output"];
-};
+}
 
-export type StopGraphGeometryTypeGeomArgs = {
+export interface StopGraphGeometryTypeGeomArgs {
   precision?: Scalars["Int"]["input"];
   simplify?: Scalars["Int"]["input"];
-};
+}
 
-export type StopInput = {
+export interface StopInput {
   id: Scalars["ID"]["input"];
-};
+  publishedLineNames?: Scalars["String"]["input"][];
+}
 
-export type StopResult = {
+export interface StopResult {
   __typename?: "StopResult";
   code?: Maybe<Scalars["String"]["output"]>;
   countryCode?: Maybe<Scalars["String"]["output"]>;
@@ -699,30 +711,30 @@ export type StopResult = {
   identSource?: Maybe<Scalars["String"]["output"]>;
   ifopt?: Maybe<Scalars["String"]["output"]>;
   matchedName?: Maybe<Scalars["String"]["output"]>;
-  mot: Array<MotChoices>;
+  mot: MotChoices[];
   municipalityName?: Maybe<Scalars["String"]["output"]>;
   name?: Maybe<Scalars["String"]["output"]>;
-  platforms: Array<PlatformType>;
+  platforms: PlatformType[];
   rank: Scalars["Float"]["output"];
   stop: StopType;
-  translatedNames: Array<Scalars["String"]["output"]>;
+  translatedNames: Scalars["String"]["output"][];
   uid: Scalars["String"]["output"];
-};
+}
 
-export type StopType = {
+export interface StopType {
   __typename?: "StopType";
   geom: Scalars["GeoJSONDict"]["output"];
   id: Scalars["ID"]["output"];
   name: Scalars["String"]["output"];
   uid: Scalars["String"]["output"];
-};
+}
 
-export type SuccessType = {
+export interface SuccessType {
   __typename?: "SuccessType";
   ok: Scalars["Boolean"]["output"];
-};
+}
 
-export type TextualContentInput = {
+export interface TextualContentInput {
   consequence?: InputMaybe<Scalars["String"]["input"]>;
   description?: InputMaybe<Scalars["String"]["input"]>;
   durationText?: InputMaybe<Scalars["String"]["input"]>;
@@ -732,9 +744,9 @@ export type TextualContentInput = {
   summary: Scalars["String"]["input"];
   /** @deprecated Use summary instead */
   title?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
-export type TextualContentType = {
+export interface TextualContentType {
   __typename?: "TextualContentType";
   consequence?: Maybe<Scalars["String"]["output"]>;
   description?: Maybe<Scalars["String"]["output"]>;
@@ -745,35 +757,35 @@ export type TextualContentType = {
   summary: Scalars["String"]["output"];
   /** @deprecated Use summary instead */
   title?: Maybe<Scalars["String"]["output"]>;
-};
+}
 
-export type TimeIntervalType = {
+export interface TimeIntervalType {
   __typename?: "TimeIntervalType";
   endTime: Scalars["DateTime"]["output"];
   startTime: Scalars["DateTime"]["output"];
-};
+}
 
-export type UpdateSituationInput = {
-  affectedTimeIntervals: Array<AffectedTimeIntervalInput>;
+export interface UpdateSituationInput {
+  affectedTimeIntervals: AffectedTimeIntervalInput[];
   id: Scalars["ID"]["input"];
   isActive?: Scalars["Boolean"]["input"];
-  publicationWindows: Array<PublicationWindowInput>;
-  publications: Array<PublicationInput>;
-  reasons: Array<Scalars["String"]["input"]>;
+  publications: PublicationInput[];
+  publicationWindows: PublicationWindowInput[];
+  reasons: Scalars["String"]["input"][];
   title?: InputMaybe<Scalars["String"]["input"]>;
-};
+}
 
 export type UpdateSituationPayload = OperationInfo | SituationType;
 
 export type UploadImagePayload = AssetType | OperationInfo;
 
-export type UserType = {
+export interface UserType {
   __typename?: "UserType";
   configs: Scalars["JSON"]["output"];
   displayName: Scalars["String"]["output"];
   email: Scalars["String"]["output"];
   firstName: Scalars["String"]["output"];
   lastName: Scalars["String"]["output"];
-  tags: Array<Scalars["String"]["output"]>;
+  tags: Scalars["String"]["output"][];
   username: Scalars["String"]["output"];
-};
+}
