@@ -1,4 +1,5 @@
-import maplibregl from "maplibre-gl";
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import * as maplibregl from "maplibre-gl";
 import * as ol from "ol";
 import * as control from "ol/control";
 import * as interaction from "ol/interaction";

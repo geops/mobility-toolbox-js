@@ -6,4 +6,4 @@ interface PartialTrajectoryMessage {
   source: string;
   timestamp: number;
 }
-export default PartialTrajectoryMessage;
+export type { PartialTrajectoryMessage as default };

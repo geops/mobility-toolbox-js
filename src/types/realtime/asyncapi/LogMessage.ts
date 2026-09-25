@@ -8,4 +8,4 @@ interface LogMessage {
   source: Source.WEBSOCKET;
   timestamp: number;
 }
-export default LogMessage;
+export type { LogMessage as default };

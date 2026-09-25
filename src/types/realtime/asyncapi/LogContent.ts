@@ -3,4 +3,4 @@ interface LogContent {
   info: null | string;
   warning: null | string;
 }
-export default LogContent;
+export type { LogContent as default };

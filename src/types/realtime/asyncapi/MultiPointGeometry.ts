@@ -4,4 +4,4 @@ interface MultiPointGeometry {
   coordinates: number[][];
   type: GeometryType.MULTI_POINT;
 }
-export default MultiPointGeometry;
+export type { MultiPointGeometry as default };

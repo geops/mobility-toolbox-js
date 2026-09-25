@@ -6,4 +6,4 @@ interface StopSequenceMessage {
   source: string;
   timestamp: number;
 }
-export default StopSequenceMessage;
+export type { StopSequenceMessage as default };

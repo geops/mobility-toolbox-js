@@ -20,4 +20,4 @@ interface StopSequenceCall {
   stationName: null | string;
   stopUID: null | string;
 }
-export default StopSequenceCall;
+export type { StopSequenceCall as default };

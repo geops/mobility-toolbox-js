@@ -1,35 +1,41 @@
-import 'react-app-polyfill/stable';
-import React, { useEffect } from 'react';
-import { ThemeProvider, StyledEngineProvider } from '@mui/material';
-import { geopsTheme, Header, Footer } from '@geops/geops-ui';
-import { AppCacheProvider } from '@mui/material-nextjs/v16-pagesRouter';
+import "react-app-polyfill/stable";
+import React, { useEffect } from "react";
+import { ThemeProvider, StyledEngineProvider } from "@mui/material";
+import { geopsTheme, Header, Footer } from "@geops/geops-ui";
+import { AppCacheProvider } from "@mui/material-nextjs/v16-pagesRouter";
+import { setWorkerUrl } from "maplibre-gl";
 
-import 'typeface-lato';
-import '../styles/App.scss';
-import '../styles/identifiers.css';
-import '../styles/search.css';
-import '../styles/style.css';
+import "typeface-lato";
+import "../styles/App.scss";
+import "../styles/identifiers.css";
+import "../styles/search.css";
+import "../styles/style.css";
+
+// Webpack can't statically resolve maplibre-gl's worker asset, so it's served from public/ instead.
+if (typeof window !== "undefined") {
+  setWorkerUrl("/maplibre-gl-worker.mjs");
+}
 
 const tabs = [
   {
-    label: 'Home',
-    href: '/',
-    component: 'a',
+    label: "Home",
+    href: "/",
+    component: "a",
   },
   {
-    label: 'API',
-    href: '/doc',
-    component: 'a',
+    label: "API",
+    href: "/doc",
+    component: "a",
   },
   {
-    label: 'Examples',
-    href: '/examples',
-    component: 'a',
+    label: "Examples",
+    href: "/examples",
+    component: "a",
   },
   {
-    label: 'Code',
-    href: 'https://github.com/geops/mobility-toolbox-js',
-    component: 'a',
+    label: "Code",
+    href: "https://github.com/geops/mobility-toolbox-js",
+    component: "a",
   },
 ];
 
@@ -38,7 +44,7 @@ function MyApp(props) {
 
   useEffect(() => {
     // Remove the server-side injected CSS.
-    const jssStyles = document.querySelector('#jss-server-side');
+    const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles) {
       jssStyles.parentElement.removeChild(jssStyles);
     }

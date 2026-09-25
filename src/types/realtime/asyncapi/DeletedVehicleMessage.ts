@@ -7,4 +7,4 @@ interface DeletedVehicleMessage {
   source: Source.DELETED_VEHICLES;
   timestamp: number;
 }
-export default DeletedVehicleMessage;
+export type { DeletedVehicleMessage as default };

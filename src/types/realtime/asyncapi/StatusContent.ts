@@ -3,4 +3,4 @@ interface StatusContent {
   additionalProperties?: Map<string, any>;
   status: ReservedStatus.RESERVED_OPEN;
 }
-export default StatusContent;
+export type { StatusContent as default };

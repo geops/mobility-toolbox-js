@@ -1,2 +1,2 @@
 type GetStopSequenceCommand = string;
-export default GetStopSequenceCommand;
+export type { GetStopSequenceCommand as default };

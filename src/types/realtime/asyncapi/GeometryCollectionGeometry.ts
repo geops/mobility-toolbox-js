@@ -9,4 +9,4 @@ interface GeometryCollectionGeometry {
   )[];
   type: GeometryType.GEOMETRY_COLLECTION;
 }
-export default GeometryCollectionGeometry;
+export type { GeometryCollectionGeometry as default };

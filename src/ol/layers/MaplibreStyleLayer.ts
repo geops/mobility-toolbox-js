@@ -8,6 +8,7 @@ import MaplibreStyleLayerRenderer from "../renderers/MaplibreStyleLayerRenderer"
 import defineDeprecatedProperties from "../utils/defineDeprecatedProperties";
 
 import type { AddLayerObject, FeatureState } from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 import type { Feature, Map } from "ol";
 import type { EventsKey } from "ol/events";
 import type { ObjectEvent } from "ol/Object";
@@ -256,9 +257,10 @@ class MaplibreStyleLayer extends Layer {
 
     if (mapLibreMap) {
       this.layers.forEach((layer) => {
-        // @ts-expect-error  source is optional but exists in TS definition
-        const { id, source }: { id: string; source?: string } = layer;
+        // @ts-expect-error - source is in type definition so why?
+        const { id, source } = layer;
         if (
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           (!source || (source && mapLibreMap.getSource(source))) &&
           id &&
           !mapLibreMap.getLayer(id)
@@ -353,6 +355,7 @@ class MaplibreStyleLayer extends Layer {
         if (mapLibreMap.isStyleLoaded()) {
           this.onLoad();
         } else {
+          // eslint-disable-next-line @typescript-eslint/unbound-method
           void mapLibreMap.once("load", this.onLoad);
         }
       }

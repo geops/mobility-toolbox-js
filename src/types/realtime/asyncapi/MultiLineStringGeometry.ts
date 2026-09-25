@@ -4,4 +4,4 @@ interface MultiLineStringGeometry {
   coordinates: number[][][];
   type: GeometryType.MULTI_LINE_STRING;
 }
-export default MultiLineStringGeometry;
+export type { MultiLineStringGeometry as default };

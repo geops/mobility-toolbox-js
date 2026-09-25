@@ -10,4 +10,4 @@ interface FullTrajectory {
   properties: FullTrajectoryProperties;
   type: GeometryType.FEATURE;
 }
-export default FullTrajectory;
+export type { FullTrajectory as default };
