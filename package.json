@@ -89,7 +89,7 @@
   },
   "scripts": {
     "analyze:all": "esbuild-visualizer --metadata build/all-meta.json --filename build/stats.html --open",
-    "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
+    "apidoc": "rm -rf build-apidoc && tsc -p tsconfig.apidoc.json && esdoc && rm -rf build-apidoc && cp apidoc/index.json doc/src/components/Esdoc",
     "build": "pnpm build:tsc && pnpm esbuild:iife",
     "build:tsc": "rm -rf build && pnpm tsc && cp package.json build/ && cp README.md build/ && cp LICENSE build/  && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
     "clean": "rm -rf .next && rm -rf doc/.next",

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./build-apidoc",
+    // ES2019 forces tsc to downlevel ?? and ?. so esdoc's parser can read the output
+    "target": "ES2019",
+    "declaration": false
+  }
+}

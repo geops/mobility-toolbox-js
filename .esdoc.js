@@ -1,5 +1,5 @@
 module.exports = {
-  source: './build',
+  source: './build-apidoc',
   destination: './apidoc',
   includes: ['\\.(js)$', 'typedefs\\.js$'],
   excludes: ['setupTests\\.*', '^iife', '^mbt\\.*', '\\.test\\.js$', 'doc/'],
