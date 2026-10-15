@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.9.0](https://github.com/geops/mobility-toolbox-js/compare/v3.8.2...v3.9.0) (2026-10-15)
+
+
+### Features
+
+* udpate  maplibre-gl v6 and other dependencies ([#280](https://github.com/geops/mobility-toolbox-js/issues/280)) ([08b1a78](https://github.com/geops/mobility-toolbox-js/commit/08b1a785a253efae709b4a4eb4dcc3ec2ab34677))
+
+
+### Bug Fixes
+
+* generate realtime types from asyncapi doc ([#226](https://github.com/geops/mobility-toolbox-js/issues/226)) ([005dae7](https://github.com/geops/mobility-toolbox-js/commit/005dae7c2c02f2b17614660ac694972e14d07705))
+
 ### [3.8.2](https://github.com/geops/mobility-toolbox-js/compare/v3.8.1...v3.8.2) (2026-08-11)
 
 
