@@ -7,4 +7,4 @@ interface TrackerTrajectory {
   properties: TrackerTrajectoryProperties;
   type: GeometryType.FEATURE;
 }
-export default TrackerTrajectory;
+export type { TrackerTrajectory as default };

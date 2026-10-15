@@ -1,2 +1,2 @@
 type GetPartialTrajectoryCommand = string;
-export default GetPartialTrajectoryCommand;
+export type { GetPartialTrajectoryCommand as default };

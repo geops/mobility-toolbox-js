@@ -1,6 +1,6 @@
 import removeDuplicate from "./removeDuplicate";
 
-import type { Style } from "maplibre-gl";
+import type { Map, Style } from "maplibre-gl";
 
 export interface Source {
   attribution: string;
@@ -19,7 +19,7 @@ export interface SourceCache {
  * @param {maplibregl.Map} map A Maplibre map
  * @private
  */
-const getMapGlCopyrights = (map: maplibregl.Map) => {
+const getMapGlCopyrights = (map: Map) => {
   if (!map) {
     return [];
   }
@@ -28,7 +28,7 @@ const getMapGlCopyrights = (map: maplibregl.Map) => {
     return [];
   }
 
-  // @ts-expect-error -  sourceCaches exists in maplibre-gl < 5.11.0
+  // @ts-expect-error - sourceCaches exists in maplibre-gl < 5.11.0
   const { sourceCaches, tileManagers } = style;
   let copyrights: string[] = [];
   const sourceCacheObj =

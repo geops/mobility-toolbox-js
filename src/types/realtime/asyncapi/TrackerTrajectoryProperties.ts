@@ -24,4 +24,4 @@ interface TrackerTrajectoryProperties {
   train_id: string;
   type: TmotCode;
 }
-export default TrackerTrajectoryProperties;
+export type { TrackerTrajectoryProperties as default };

@@ -38,6 +38,43 @@ pnpm dev
 This html file loads the `dev.js` file. Use this file to develop the library.
 Each time you modifiy the library code you have to run `pnpm build:tsc` to see the changes.
 
+## MapLibre worker issue
+
+Since `maplibre-gl` v6, the library ships as ES modules only and resolves its worker script via `import.meta.url`.
+Bundlers (Vite, webpack, esbuild, rspack, Rollup) can't always resolve this correctly inside their module graph, which can lead to the map failing to render or to worker-related errors in the browser console.
+
+See the [MapLibre v5 to v6 migration guide](https://maplibre.org/maplibre-gl-js/docs/guides/v5-to-v6-migration-guide/) for more details, notably the [`setWorkerUrl()` is bundler-only](https://maplibre.org/maplibre-gl-js/docs/guides/v5-to-v6-migration-guide/#setworkerurl-is-bundler-only) section.
+
+### Vite fix
+
+Exclude `maplibre-gl` from Vite's dependency pre-optimization so it keeps resolving the worker asset itself (see `doc/src/components/StackBlitzButton.js`):
+
+```js
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ["maplibre-gl"],
+  },
+});
+```
+
+### Next.js (webpack) fix
+
+Serve `maplibre-gl`'s worker file from `public/` and point to it explicitly with `setWorkerUrl()`, since webpack can't statically resolve the worker asset (see `doc/package.json` and `doc/pages/_app.js`):
+
+```bash
+cp node_modules/maplibre-gl/dist/maplibre-gl* public/
+```
+
+```js
+import { setWorkerUrl } from "maplibre-gl";
+
+if (typeof window !== "undefined") {
+  setWorkerUrl("/maplibre-gl-worker.mjs");
+}
+```
+
 ## Development documentation
 
 The documentations website is located in the `doc/`  folder.

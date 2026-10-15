@@ -1,2 +1,2 @@
 type DelStopSequenceCommand = string;
-export default DelStopSequenceCommand;
+export type { DelStopSequenceCommand as default };

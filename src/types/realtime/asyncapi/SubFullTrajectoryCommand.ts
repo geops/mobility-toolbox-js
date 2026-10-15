@@ -1,2 +1,2 @@
 type SubFullTrajectoryCommand = string;
-export default SubFullTrajectoryCommand;
+export type { SubFullTrajectoryCommand as default };

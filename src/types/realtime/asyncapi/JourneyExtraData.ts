@@ -4,4 +4,4 @@ interface JourneyExtraData {
   event_timestamp?: null | string;
   transport_code?: null | string;
 }
-export default JourneyExtraData;
+export type { JourneyExtraData as default };

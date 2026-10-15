@@ -7,4 +7,4 @@ interface FullTrajectoryCollection {
   properties: FullTrajectoryCollectionProperties;
   type: GeometryType.FEATURE_COLLECTION;
 }
-export default FullTrajectoryCollection;
+export type { FullTrajectoryCollection as default };
