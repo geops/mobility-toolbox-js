@@ -21,8 +21,8 @@
     "uuid": "14.0.1"
   },
   "peerDependencies": {
-    "maplibre-gl": ">=4",
-    "ol": ">=9"
+    "maplibre-gl": ">=6",
+    "ol": ">=10"
   },
   "devDependencies": {
     "@asyncapi/cli": "^6.0.0",
@@ -48,6 +48,7 @@
     "@typescript-eslint/parser": "8.64.0",
     "cypress": "15.19.0",
     "esbuild": "0.28.1",
+    "esbuild-visualizer": "0.7.0",
     "esdoc": "1.1.0",
     "esdoc-ecmascript-proposal-plugin": "1.0.0",
     "esdoc-publish-html-plugin": "1.1.2",
@@ -87,6 +88,7 @@
     "xml-beautifier": "^0.5.0"
   },
   "scripts": {
+    "analyze": "esbuild-visualizer --metadata build/meta.json --filename build/stats.html --open",
     "apidoc": "esdoc && cp apidoc/index.json doc/src/components/Esdoc",
     "build": "pnpm build:tsc && pnpm esbuild:iife",
     "build:tsc": "rm -rf build && pnpm tsc && cp package.json build/ && cp README.md build/ && cp LICENSE build/  && cp -R src/types build/ && find build -type f -name '*.test.*' -delete",
@@ -102,7 +104,7 @@
     "doc:dev": "pnpm clean && pnpm build && pnpm apidoc && pnpm doc:dev:examples",
     "doc:dev:examples": "pnpm clean && pnpm build && cd doc && rm -rf node_modules/mobility-toolbox-js && pnpm install --force && pnpm dev",
     "esbuild": "pnpm esbuild:all && pnpm esbuild:iife",
-    "esbuild:all": "esbuild src/index.js src/**/*.js src/**/*.ts src/**/**/*.js src/**/**/*.ts --target=chrome100 --outdir=build/ --loader:.js=jsx",
+    "esbuild:all": "esbuild $(find src -type f \\( -name '*.js' -o -name '*.ts' \\) ! -name '*.test.*' ! -name '.*') --target=chrome100 --outdir=build/ --loader:.js=jsx --metafile=build/meta.json",
     "esbuild:iife": "pnpm esbuild:iife:unminify && pnpm esbuild:iife:minify",
     "esbuild:iife:base": "esbuild src/iife.js --bundle --sourcemap --target=chrome100",
     "esbuild:iife:minify": "pnpm esbuild:iife:base --minify --outfile=build/mbt.min.js",
