@@ -9,4 +9,4 @@ interface BufferMessage {
   source: Source.BUFFER;
   timestamp: number;
 }
-export default BufferMessage;
+export type { BufferMessage as default };

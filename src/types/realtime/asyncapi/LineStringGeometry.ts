@@ -4,4 +4,4 @@ interface LineStringGeometry {
   coordinates: number[][];
   type: GeometryType.LINE_STRING;
 }
-export default LineStringGeometry;
+export type { LineStringGeometry as default };

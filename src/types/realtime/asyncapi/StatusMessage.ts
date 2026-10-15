@@ -8,4 +8,4 @@ interface StatusMessage {
   source: Source.WEBSOCKET;
   timestamp: number;
 }
-export default StatusMessage;
+export type { StatusMessage as default };

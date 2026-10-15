@@ -16,9 +16,14 @@ global.URL.createObjectURL = jest.fn(() => {
   return "fooblob";
 });
 
-window.OffscreenCanvas = () => {
-  return document.createElement("canvas");
-};
+// a proper class (not an arrow function) so `instanceof OffscreenCanvas` works
+class OffscreenCanvas {
+  constructor() {
+    return document.createElement("canvas");
+  }
+}
+
+window.OffscreenCanvas = OffscreenCanvas;
 
 /* eslint-disable */
 class ResizeObserver {
@@ -56,4 +61,5 @@ class TextEncoder {
   decode() {}
 }
 
+global.TextEncoder = TextEncoder;
 global.TextDecoder = TextEncoder;

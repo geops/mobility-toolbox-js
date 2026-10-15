@@ -1,6 +1,7 @@
 import { getMapGlCopyrights } from "../../common/utils";
 
 import type { ControlPosition, IControl } from "maplibre-gl";
+import type * as maplibregl from "maplibre-gl";
 
 /**
  * @private

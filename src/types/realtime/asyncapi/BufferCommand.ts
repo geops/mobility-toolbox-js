@@ -1,2 +1,2 @@
 type BufferCommand = string;
-export default BufferCommand;
+export type { BufferCommand as default };

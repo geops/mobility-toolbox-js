@@ -8,4 +8,4 @@ interface PongMessage {
   source: Source.WEBSOCKET;
   timestamp: number;
 }
-export default PongMessage;
+export type { PongMessage as default };

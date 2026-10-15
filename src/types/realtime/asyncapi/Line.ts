@@ -7,4 +7,4 @@ interface Line {
   tags: string[];
   text_color: null | string;
 }
-export default Line;
+export type { Line as default };

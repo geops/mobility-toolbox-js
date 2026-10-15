@@ -1,3 +1,4 @@
+import type * as maplibregl from "maplibre-gl";
 import type { Feature } from "ol";
 import type { Coordinate } from "ol/coordinate";
 import type { Pixel } from "ol/pixel";

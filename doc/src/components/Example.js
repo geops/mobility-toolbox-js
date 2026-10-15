@@ -4,6 +4,7 @@ import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
 import CodeSandboxButton from "./CodeSandboxButton";
+import StackBlitzButton from "./StackBlitzButton";
 const paperStyle = {
   display: "block",
   margin: "20px 0",
@@ -180,6 +181,12 @@ function Example({ example }) {
                   html={html}
                   js={js}
                 />
+                <StackBlitzButton
+                  style={editButtonStyle}
+                  extraFiles={example.extraFiles || {}}
+                  html={html}
+                  js={js}
+                />
               </Paper>
             </Grid>
             <Grid style={{ maxWidth: "100%" }} size={{ xs: 12 }}>
@@ -192,7 +199,13 @@ function Example({ example }) {
                   {htmlFileName}
                 </Typography>
                 <SyntaxHighlighter language="html">{html}</SyntaxHighlighter>
-                <CodeSandboxButton
+                {/* <CodeSandboxButton
+                  style={editButtonStyle}
+                  extraFiles={{}}
+                  html={html}
+                  js={js}
+                /> */}
+                <StackBlitzButton
                   style={editButtonStyle}
                   extraFiles={{}}
                   html={html}

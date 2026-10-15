@@ -7,4 +7,4 @@ interface SerializedCancellationChange {
   old_to?: null | string;
   state?: null | TCallStateEnum;
 }
-export default SerializedCancellationChange;
+export type { SerializedCancellationChange as default };

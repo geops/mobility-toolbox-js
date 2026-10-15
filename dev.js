@@ -48,7 +48,6 @@ const lnpLayer = new MaplibreStyleLayer({
 
 const realtimeLayer = new RealtimeLayer({
   apiKey: window.apiKey,
-  // apiKey: '5cc87b12d7c5370001c1d655112ec5c21e0f441792cfc2fafe3e7a1e', // sbm
   url: "wss://api.geops.io/tracker-ws/v1/", // prod
   // url: 'wss://api.geops.io/realtime-ws/v1/', // sbm
   // url: "https://api.geops.io/tracker-http/v1/", // rvf
@@ -62,6 +61,7 @@ const realtimeLayer = new RealtimeLayer({
     line_tags: "RVF",
   },
   visible: true,
+  // lnpLayer: lnpLayer,
 });
 
 const mocoLayer = new MocoLayer({

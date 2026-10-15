@@ -15,4 +15,4 @@ type Slash =
   | PongMessage
   | StatusMessage
   | StopSequenceMessage;
-export default Slash;
+export type { Slash as default };

@@ -1,2 +1,2 @@
 type SubStopSequenceCommand = string;
-export default SubStopSequenceCommand;
+export type { SubStopSequenceCommand as default };

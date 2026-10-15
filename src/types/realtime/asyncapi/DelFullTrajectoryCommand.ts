@@ -1,2 +1,2 @@
 type DelFullTrajectoryCommand = string;
-export default DelFullTrajectoryCommand;
+export type { DelFullTrajectoryCommand as default };
