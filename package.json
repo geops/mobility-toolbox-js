@@ -70,7 +70,7 @@
     "lint-staged": "17.5.1",
     "maplibre-gl": "6.11.0",
     "mock-socket": "9.3.1",
-    "next": "16.3.6",
+    "next": "16.4.1",
     "ol": "10.10.0",
     "openapi-typescript": "5",
     "prettier": "3.9.9",
